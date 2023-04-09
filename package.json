@@ -1,69 +1,82 @@
 {
-  "name": "bucket-list",
-  "version": "0.1.0",
-  "private": true,
-  "config": {
-    "commitizen": {
-      "path": "node_modules/cz-customizable"
-    },
-    "cz-customizable": {
-      "config": "commitizen.js"
-    }
-  },
-  "dependencies": {
-    "@types/node": "^16.18.22",
-    "@types/react": "^18.0.31",
-    "@types/react-dom": "^18.0.11",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.5"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.57.1",
-    "@typescript-eslint/parser": "^5.57.1",
-    "babel-eslint": "^10.1.0",
-    "cz-customizable": "^7.0.0",
-    "eslint": "^8.37.0",
-    "eslint-config-airbnb": "^19.0.4",
-    "eslint-config-airbnb-typescript": "^17.0.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-jsx-a11y": "^6.7.1",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "2.8.7"
-  },
-  "author": "Sergey Grivin",
-  "license": "ISC",
-  "lint-staged": {
-    "*.(ts|tsx|js|jsx)": [
-      "lint:es"
-    ],
-    "*.(css|scss|sass)": [
-      "lint:scss"
-    ]
-  },
-  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
-  "main": "commitizen.js",
-  "keywords": []
+	"name": "bucket-list",
+	"version": "0.1.0",
+	"private": true,
+	"config": {
+		"commitizen": {
+			"path": "node_modules/cz-customizable"
+		},
+		"cz-customizable": {
+			"config": "commitizen.js"
+		}
+	},
+	"dependencies": {
+		"@types/node": "^16.18.22",
+		"@types/react": "^18.0.31",
+		"@types/react-dom": "^18.0.11",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
+	},
+	"scripts": {
+		"start": "start",
+		"build": "build",
+		"test": "test",
+		"eject": "eject",
+		"stylelint": "stylelint '**/*{.css,.scss}'",
+		"stylelint:fix": "stylelint '**/*{.css,.scss}' --fix"
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"devDependencies": {
+		"@typescript-eslint/eslint-plugin": "^5.57.1",
+		"@typescript-eslint/parser": "^5.57.1",
+		"babel-eslint": "^10.1.0",
+		"cz-customizable": "^7.0.0",
+		"eslint": "^8.37.0",
+		"eslint-config-airbnb": "^19.0.4",
+		"eslint-config-airbnb-typescript": "^17.0.0",
+		"eslint-config-prettier": "^8.8.0",
+		"eslint-plugin-import": "^2.27.5",
+		"eslint-plugin-jsx-a11y": "^6.7.1",
+		"eslint-plugin-prettier": "^4.2.1",
+		"eslint-plugin-react": "^7.32.2",
+		"eslint-plugin-react-hooks": "^4.6.0",
+		"husky": "^8.0.3",
+		"lint-staged": "^13.2.1",
+		"prettier": "2.8.7",
+		"stylelint": "^15.4.0",
+		"stylelint-config-recommended-scss": "^9.0.1",
+		"stylelint-no-unsupported-browser-features": "^6.1.0",
+		"stylelint-order": "^6.0.3",
+		"stylelint-prettier": "^3.0.0",
+		"typescript": "^5.0.3"
+	},
+	"author": "Sergey Grivin",
+	"license": "ISC",
+	"lint-staged": {
+		"*.(ts|tsx|js|jsx)": [
+			"lint:es"
+		],
+		"*.(css|scss|sass)": [
+			"stylelint --fix"
+		]
+	},
+	"description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+	"main": "commitizen.js",
+	"keywords": []
 }
