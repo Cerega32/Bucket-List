@@ -1,8 +1,4 @@
 {
-	"env": {
-		"browser": true,
-		"es2021": true
-	},
 	"extends": [
 		"eslint:recommended",
 		"plugin:react/recommended",
@@ -27,6 +23,12 @@
 		"no-tabs": "off",
 		"@typescript-eslint/indent": "off",
 		"react/jsx-indent": "off",
-		"react/jsx-one-expression-per-line": "off"
+		"react/jsx-one-expression-per-line": "off",
+		"@typescript-eslint/object-curly-spacing": "off",
+		"@typescript-eslint/comma-dangle": "off",
+		"import/prefer-default-export": "off",
+		"react/function-component-definition": "off",
+		"react/react-in-jsx-scope": "off",
+		"operator-linebreak": "off"
 	}
 }

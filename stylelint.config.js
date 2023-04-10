@@ -10,12 +10,9 @@ module.exports = {
 	],
 	plugins: ['stylelint-no-unsupported-browser-features'],
 	rules: {
-		'max-empty-lines': 1,
-		'declaration-block-semicolon-newline-before': 'never-multi-line',
 		'no-unknown-animations': true,
 		'font-family-name-quotes': 'always-unless-keyword',
 		'font-weight-notation': 'numeric',
-		'selector-attribute-quotes': 'always',
 		'selector-nested-pattern': '(.*&(?![-_][^-_]).*)|(^[^&]*$)',
 		'value-no-vendor-prefix': [
 			true,
@@ -27,7 +24,6 @@ module.exports = {
 		'media-feature-name-no-vendor-prefix': true,
 		'at-rule-no-vendor-prefix': true,
 		'selector-max-id': 0,
-		'selector-pseudo-element-case': 'lower',
 		'declaration-block-single-line-max-declarations': 1,
 		'declaration-block-no-duplicate-properties': [
 			true,
@@ -35,12 +31,9 @@ module.exports = {
 				ignoreProperties: ['cursor', 'justify-content'],
 			},
 		],
-		'selector-max-empty-lines': 0,
 		'selector-pseudo-element-no-unknown': null,
 		'function-url-quotes': 'always',
 		'property-no-vendor-prefix': null,
-		'media-query-list-comma-newline-before': 'never-multi-line',
-		'at-rule-semicolon-space-before': 'never',
 		'no-descending-specificity': null,
 		'block-no-empty': null,
 		'color-no-hex': true,
