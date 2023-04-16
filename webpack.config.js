@@ -39,7 +39,7 @@ module.exports = {
 		rules: [
 			{test: /\.(html)$/, use: ['html-loader']}, // Добавляем загрузчик для html
 			{
-				test: /\.(s[ac]|c)ss$/i, // /\.(le|c)ss$/i если вы используете less
+				test: /\.(s[ac]|c)ss$/i,
 				use: [
 					isDevelopment
 						? 'style-loader'

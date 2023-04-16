@@ -1,0 +1,81 @@
+@charset "UTF-8";
+
+@import 'custom-properties';
+
+:root {
+	box-sizing: border-box;
+
+	color: var(--color-black);
+}
+
+/* Box-sizing rules */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+/* Remove default margin */
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+ul[class],
+ol[class],
+li,
+figure,
+figcaption,
+blockquote,
+dl,
+dd {
+	margin: 0;
+}
+
+/* Set core body defaults */
+body {
+	min-height: 100vh;
+
+	line-height: 1.5;
+	scroll-behavior: smooth;
+	text-rendering: optimizespeed;
+}
+
+/* Remove list styles on ul, ol elements */
+ul[class],
+ol[class] {
+	padding: 0;
+
+	list-style: none;
+}
+
+/* A elements that don't have a class get default styles */
+a:not([class]) {
+	text-decoration-skip-ink: auto;
+}
+
+/* Make images easier to work with */
+img {
+	display: block;
+
+	max-width: 100%;
+	height: auto;
+}
+
+/* Inherit fonts for inputs and buttons */
+input,
+button,
+textarea,
+select {
+	font: inherit;
+}
+
+button {
+	margin: 0;
+	padding: 0;
+
+	border: none;
+	background-color: transparent;
+	box-shadow: none;
+}

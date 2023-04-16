@@ -50,6 +50,6 @@
 		/* Completeness */
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */
 	},
-	"include": ["src/", "**/*.tsx", "webpack.config.js"],
+	"include": ["src/", "**/*.tsx"],
 	"exclude": ["node_modules"]
 }

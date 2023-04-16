@@ -1,4 +1,7 @@
 test/fixtures
 **/app/public
 node_modules
+
 /* название файла */
+weboack.config.js
+postcss.config.js

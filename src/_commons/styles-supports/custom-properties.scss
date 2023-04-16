@@ -1,0 +1,9 @@
+//  stylelint-disable function-disallowed-list
+
+:root {
+	--color-white-rgb: 255, 255, 255; // #FFFFFF
+	--color-white: rgb(var(--color-white-rgb)); // #FFFFFF
+
+	--color-black-rgb: 0, 0, 0; // #000000
+	--color-black: rgb(var(--black-white-rgb)); // #000000
+}
