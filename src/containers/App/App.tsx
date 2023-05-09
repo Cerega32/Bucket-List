@@ -3,7 +3,7 @@ import {ErrorBoundary} from '../ErrorBoundary/ErrorBoundary';
 import {AppProviders} from '../AppProviders/AppProviders';
 import {RoutesAuth} from '../RoutesAuth/RoutesAuth';
 
-import '@/_commons/styles-supports/scaffolding.scss';
+import '../../_commons/styles-supports/scaffolding.scss';
 
 const App: FC = () => {
 	return (
