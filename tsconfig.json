@@ -50,6 +50,6 @@
 		/* Completeness */
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */
 	},
-	"include": ["src/", "**/*.tsx"],
+	"include": ["src/", "**/*.tsx", "src/assets/svg/custom.d.ts"],
 	"exclude": ["node_modules"]
 }

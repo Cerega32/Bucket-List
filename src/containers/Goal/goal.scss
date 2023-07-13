@@ -1,0 +1,19 @@
+.goal {
+	margin: 0 auto;
+	max-width: 1440px;
+	display: flex;
+	align-items: flex-start;
+	gap: 24px;
+	background: var(--color-gray-12);
+
+	&__aside {
+		z-index: 2;
+		position: sticky;
+		top: 160px;
+		transform: translateY(-132px);
+	}
+
+	&__content {
+		width: 100%;
+	}
+}

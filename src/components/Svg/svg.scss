@@ -1,0 +1,10 @@
+.svg {
+
+	div {
+		display: flex;
+	}
+
+	&--direction-bottom {
+		transform: rotate(180deg);
+	}
+}

@@ -1,0 +1,28 @@
+.button {
+	padding: 8px 16px;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+
+	&__icon {
+		margin-right: 4px;
+	}
+
+	&--theme-blue {
+		background: var(--color-blue-3);
+		color: var(--color-white);
+	}
+
+	&--theme-blue-light {
+		background: var(--color-blue-4);
+		color: var(--color-text-primary);
+	}
+
+	&--small {
+		padding: 6px 16px;
+		width: auto;
+		border-radius: 20px;
+	}
+}

@@ -1,11 +1,12 @@
 @charset "UTF-8";
 
 @import 'custom-properties';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
 	box-sizing: border-box;
 
-	color: var(--color-black);
+	color: var(--color-text);
 }
 
 /* Box-sizing rules */
@@ -37,9 +38,12 @@ dd {
 body {
 	min-height: 100vh;
 
-	line-height: 1.5;
+	font-size: 14px;
+	line-height: var(--line-height-14);
 	scroll-behavior: smooth;
 	text-rendering: optimizespeed;
+
+	font-family: 'Inter', sans-serif;
 }
 
 /* Remove list styles on ul, ol elements */
@@ -48,6 +52,10 @@ ol[class] {
 	padding: 0;
 
 	list-style: none;
+}
+
+a {
+	text-decoration: none;
 }
 
 /* A elements that don't have a class get default styles */
@@ -78,4 +86,10 @@ button {
 	border: none;
 	background-color: transparent;
 	box-shadow: none;
+}
+
+h1 {
+	font-size: 40px;
+	line-height: var(--line-height-40);
+	color: var(--color-white);
 }

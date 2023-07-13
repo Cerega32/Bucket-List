@@ -1,0 +1,25 @@
+.aside-goal {
+	max-width: 336px;
+
+	&__image {
+		margin-bottom: 16px;
+		height: 336px;
+		object-fit: cover;
+		border-radius: 8px;
+	}
+
+	&__btn {
+		margin-bottom: 8px;
+	}
+
+	&__last-btn {
+		margin-bottom: 16px;
+	}
+
+	&__info {
+		padding: 16px;
+		border-radius: 8px;
+		border: 1px solid var(--color-gray-9);
+		background: var(--color-white);
+	}
+}

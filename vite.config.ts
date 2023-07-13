@@ -23,7 +23,7 @@ export default {
 				require('autoprefixer'),
 				require('postcss-sort-media-queries'),
 				require('postcss-normalize-charset'),
-				require('postcss-preset-env'),
+				// require('postcss-preset-env'),
 			],
 		},
 	},

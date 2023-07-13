@@ -11,12 +11,12 @@ const getMod = ([key, value]: InputObject): string => {
 export const useBem = (
 	blockName: string,
 	className?: string
-): [(mods: BemMods) => string, (elem: string, mods: BemMods) => string] => {
+): [(mods?: BemMods) => string, (elem: string, mods?: BemMods) => string] => {
 	const blockClass = useMemo(() => blockName.trim(), [blockName]);
 	const classClass = useMemo(() => (className || '').trim(), [className]);
 
 	const block = useCallback(
-		(mods: BemMods): string => {
+		(mods?: BemMods): string => {
 			if (!mods) {
 				return `${blockClass} ${classClass}`.trim();
 			}
@@ -30,7 +30,7 @@ export const useBem = (
 	);
 
 	const element = useCallback(
-		(elem: string, mods: BemMods): string => {
+		(elem: string, mods?: BemMods): string => {
 			const elemClass = `${blockClass}__${elem.trim()}`;
 
 			if (!mods) {

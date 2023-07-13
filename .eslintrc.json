@@ -17,7 +17,8 @@
 	"plugins": ["react", "@typescript-eslint"],
 	"rules": {
 		"indent": ["error", "tab", {"SwitchCase": 1}],
-		"linebreak-style": ["error", "unix"],
+		"react/jsx-indent-props": [1, "tab"],
+		"linebreak-style": "off",
 		"quotes": ["error", "single"],
 		"semi": ["error", "always"],
 		"no-tabs": "off",
@@ -31,6 +32,8 @@
 		"react/react-in-jsx-scope": "off",
 		"operator-linebreak": "off",
 		"arrow-body-style": "off",
-		"import/extensions": "off"
+		"import/extensions": "off",
+		"react/require-default-props": "off",
+		"object-curly-newline": "off"
 	}
 }

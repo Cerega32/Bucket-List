@@ -1,0 +1,60 @@
+.header {
+	z-index: 110;
+	position: absolute;
+	width: 100%;
+	padding: 16px 0;
+	border-bottom: 1px solid rgba(var(--color-white-rgb), 0.16);
+
+	&__wrapper {
+		margin: 0 auto;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		max-width: 1440px;
+	}
+
+	&__logo {
+		height: 27px;
+	}
+
+	&__nav {
+		display: flex;
+	}
+
+	&__list {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 4px;
+	}
+
+	&__item {
+		list-style: none;
+	}
+
+	&__item-link {
+		padding: 6px 16px;
+		display: inline-block;
+		border-radius: 16px;
+		color: var(--color-white);
+
+		&--active {
+			background: var(--color-white);
+			color: var(--color-text);
+		}
+	}
+
+	&__profile {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	&__avatar {
+		border-radius: 50%;
+	}
+
+	&__nickname {
+		color: var(--color-white);
+	}
+}
