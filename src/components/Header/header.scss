@@ -1,4 +1,5 @@
 .header {
+	$block: &;
 	z-index: 110;
 	position: absolute;
 	width: 100%;
@@ -41,6 +42,7 @@
 		&--active {
 			background: var(--color-white);
 			color: var(--color-text);
+			font-weight: 500;
 		}
 	}
 
@@ -56,5 +58,38 @@
 
 	&__nickname {
 		color: var(--color-white);
+	}
+
+	&--theme-white {
+		background: var(--color-white);
+		border-color: rgba(var(--color-black-rgb), 0.16);
+
+		#{$block} {
+
+			&__item-link {
+				color: var(--color-text);
+
+				&--active {
+					background: var(--color-blue-4);
+					color: var(--color-text-primary);
+				}
+			}
+
+			&__nickname {
+				color: var(--color-text);
+			}
+		}
+	}
+
+	&--theme-transparent {
+		#{$block} {
+
+			&__logo {
+
+				path {
+					fill: var(--color-white);
+				}
+			}
+		}
 	}
 }

@@ -1,6 +1,9 @@
 .header-goal {
 	position: relative;
 	padding: 188px 0 40px;
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
 
 	&::after {
 		content: '';
@@ -27,9 +30,5 @@
 		margin: 0 auto;
 		max-width: 1440px;
 		padding-left: 360px;
-	}
-
-	&__title {
-		margin-bottom: 16px;
 	}
 }

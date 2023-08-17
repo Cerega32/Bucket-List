@@ -1,6 +1,6 @@
 import {FC} from 'react';
-import {Goal} from '@/containers/Goal/Goal';
+import {ListGoalsContainer} from '@/containers/ListGoalsContainer/ListGoalsContainer';
 
 export const PageDetailList: FC = () => {
-	return <Goal />;
+	return <ListGoalsContainer />;
 };

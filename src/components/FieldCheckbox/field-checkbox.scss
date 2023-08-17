@@ -1,0 +1,35 @@
+.field-checkbox {
+	$block: &;
+
+	display: flex;
+	align-items: center;
+
+	&__input {
+		display: none;
+	}
+
+	&__checkbox {
+		margin-right: 8px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 16px;
+		height: 16px;
+		border: 1px solid var(--color-primary);
+		border-radius: 4px;
+	}
+
+	input:checked + {
+		#{$block}__checkbox {
+			background: var(--color-primary);
+		}
+	}
+
+	&__icon path {
+		fill: var(--color-white);
+	}
+
+	&__label {
+		font-weight: 500;
+	}
+}

@@ -4,7 +4,11 @@
 		display: flex;
 	}
 
-	&--direction-bottom {
+	&--transform-bottom {
 		transform: rotate(180deg);
+	}
+
+	&--transform-vertical {
+		transform: scale(1, -1);
 	}
 }

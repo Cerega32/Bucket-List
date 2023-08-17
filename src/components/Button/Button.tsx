@@ -6,13 +6,15 @@ import './button.scss';
 
 interface ButtonProps {
 	className?: string;
-	theme?: 'blue' | 'blue-light';
+	theme?: 'blue' | 'blue-light' | 'no-border';
+	size?: 'small';
 	children: ReactElement | string | number;
 	icon?: string;
 	onClick?: () => void;
 	type?: 'button' | 'Link';
 	href?: string;
 	small?: boolean;
+	method?: string;
 }
 
 export const Button: FC<ButtonProps> = (props) => {
@@ -25,6 +27,8 @@ export const Button: FC<ButtonProps> = (props) => {
 		href = '',
 		children,
 		small,
+		method,
+		size,
 	} = props;
 
 	const [block, element] = useBem('button', className);
@@ -47,7 +51,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		switch (type) {
 			case 'Link':
 				return (
-					<Link to={href} className={block({theme, small})}>
+					<Link to={href} className={block({theme, small, size})}>
 						{content}
 					</Link>
 				);
@@ -55,9 +59,10 @@ export const Button: FC<ButtonProps> = (props) => {
 			default:
 				return (
 					<button
-						className={block({theme, small})}
+						className={block({theme, small, size})}
 						onClick={onClick}
 						type="button"
+						method={method}
 					>
 						{content}
 					</button>

@@ -1,12 +1,15 @@
 import {FC} from 'react';
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
-import {PageMain} from '@/pages/PageDetailGoal/PageDetailGoal';
+import {PageDetailGoal} from '@/pages/PageDetailGoal/PageDetailGoal';
+import {PageDetailList} from '@/pages/PageDetailList/PageDetailList';
 
 export const RoutesAuth: FC = () => {
 	return (
 		<BrowserRouter>
 			<Routes>
-				<Route path="/" element={<PageMain />} />
+				<Route path="/" element={<PageDetailGoal />} />
+				<Route path="/list/:id" element={<PageDetailList />} />
+				<Route path="/goals/:id" element={<PageDetailGoal />} />
 			</Routes>
 		</BrowserRouter>
 	);

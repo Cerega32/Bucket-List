@@ -51,6 +51,13 @@
 		background: var(--color-gray-9);
 	}
 
+	&__horizontal-line {
+		margin-bottom: 16px;
+		border: none;
+		height: 1px;
+		background: var(--color-gray-9);
+	}
+
 	&__text {
 		margin-bottom: 16px;
 	}

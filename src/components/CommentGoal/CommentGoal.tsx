@@ -3,6 +3,7 @@ import {useBem} from '@/hooks/useBem';
 import './comment-goal.scss';
 import {pluralize} from '@/utils/text/pluralize';
 import {Button} from '../Button/Button';
+import {Tag} from '../Tag/Tag';
 
 interface IUser {
 	avatar: string;
@@ -55,9 +56,10 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 				<div className={element('comment-info')}>
 					<span className={element('date')}>{comment.date}</span>
 					<div className={element('vertical-line')} />
-					<span>Тяжесть</span>
+					<Tag text="hard" theme="integrate" icon="arrow-top" />
 				</div>
 			</div>
+			<hr className={element('horizontal-line')} />
 			<p className={element('text')}>{comment.text}</p>
 			{!!comment.images.length && (
 				<div className={element('comment-images')}>

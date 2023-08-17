@@ -1,0 +1,27 @@
+.field-input {
+	display: flex;
+	flex-direction: column;
+
+	&__label {
+		margin-bottom: 4px;
+		font-weight: 500;
+	}
+
+	&__wrapper {
+		position: relative;
+		width: 100%;
+	}
+
+	&__input {
+		width: 100%;
+		padding: 10px 50px 10px 16px;
+		border: 1px solid var(--color-gray-13);
+		border-radius: 8px;
+	}
+
+	&__show-password {
+		position: absolute;
+		right: 16px;
+		top: 10px;
+	}
+}

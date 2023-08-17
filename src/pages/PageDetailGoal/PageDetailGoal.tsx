@@ -1,6 +1,6 @@
 import {FC} from 'react';
 import {Goal} from '@/containers/Goal/Goal';
 
-export const PageMain: FC = () => {
+export const PageDetailGoal: FC = () => {
 	return <Goal />;
 };

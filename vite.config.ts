@@ -43,5 +43,15 @@ export default {
 		hmr: {
 			overlay: false,
 		},
+		proxy: {
+			'/api': {
+				target: 'http://localhost:8000', // Замените на адрес вашего Django-сервера
+				changeOrigin: true,
+			},
+			'/media': {
+				target: 'http://localhost:8000', // Замените на адрес вашего Django-сервера
+				changeOrigin: true,
+			},
+		},
 	},
 };

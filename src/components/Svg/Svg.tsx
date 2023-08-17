@@ -13,14 +13,16 @@ interface SvgProps {
 export const Svg: FC<SvgProps> = (props) => {
 	const {icon, className, width = 'auto', height = 'auto'} = props;
 
-	const iconAndDirection = icon.split('--');
+	const iconAndTransform = icon.split('--');
 
 	const [block] = useBem('svg', className);
 
 	return (
 		<ReactSVG
-			src={`src/assets/svg/${iconAndDirection[0]}.svg`}
-			className={block({direction: iconAndDirection[1]})}
+			src={`/src/assets/svg/${iconAndTransform[0]}.svg`}
+			className={block({
+				transform: iconAndTransform[1],
+			})}
 			width={width}
 			height={height}
 		/>

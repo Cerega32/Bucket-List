@@ -1,0 +1,47 @@
+.modal {
+	$block: &;
+
+	&__close {
+		position: absolute;
+		top: 24px;
+		right: 24px;
+		width: min-content;
+		padding: 8px;
+	}
+
+	&__window {
+		z-index: 10001;
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		margin: 0 auto;
+		padding: 24px;
+		width: 456px;
+		display: none;
+		background: var(--color-white);
+		border-radius: 8px;
+		border: 1px solid var(--color-gray-9);
+	}
+
+	&__base {
+		display: none;
+		z-index: 10000;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(var(--color-black-rgb), 0.4);
+	}
+
+	&--isOpen {
+		#{$block}__window {
+			display: block;
+		}
+
+		#{$block}__base {
+			display: block;
+		}
+	}
+}
