@@ -2,93 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="13b7f816-fe5b-4a52-9877-2e91d0b9bd81" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jsLinters/eslint.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/prettier.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/assets/index-730f40c5.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/assets/index-b612d156.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/assets/index-legacy-98da2625.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/assets/polyfills-legacy-c3aea350.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/favicon.ico" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/logo192.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/logo512.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/manifest.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/robots.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/svg/arrow-top.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/svg/cross.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/svg/done.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/svg/eye.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/svg/icon-logo.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/svg/logo.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/svg/medal.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/svg/rocket.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/svg/sign-in.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/ContentListGoals/ContentListGoals.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/ContentListGoals/content-list-goals.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/FieldCheckbox/FieldCheckbox.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/FieldCheckbox/field-checkbox.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/FieldInput/FieldInput.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/FieldInput/field-input.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/InfoGoal/InfoGoal.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/InfoGoal/info-goal.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/ItemGoal/ItemGoal.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/ItemGoal/item-goal.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Login/Login.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Login/login.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Modal/Modal.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Modal/modal.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Registration/Registration.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Registration/registration.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Tag/Tag.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Tag/tag.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Tags/Tags.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Tags/tags.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/TitleWithTags/TitleWithTags.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/TitleWithTags/title-with-tags.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/containers/Layout/Layout.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/containers/ListGoalsContainer/ListGoalsContainer.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/containers/ListGoalsContainer/list-goals-container.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/store/ModalStore.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/store/ThemeStore.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/store/UserStore.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/typings/goal.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/typings/list.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/api/get/getGoal.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/api/post/postLogin.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/api/post/postRegistration.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/fetch/requests.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/values/complexity.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/_commons/styles-supports/custom-properties.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/_commons/styles-supports/custom-properties.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/_commons/styles-supports/scaffolding.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/_commons/styles-supports/scaffolding.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/assets/svg/delting.svg" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/svg/delting.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Button/Button.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Button/Button.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Button/button.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Button/button.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CommentGoal/CommentGoal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CommentGoal/CommentGoal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CommentGoal/comment-goal.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CommentGoal/comment-goal.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ContentGoal/ContentGoal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ContentGoal/ContentGoal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ContentGoal/content-goal.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ContentGoal/content-goal.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Header/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header/Header.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Header/header.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header/header.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/HeaderGoal/HeaderGoal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/HeaderGoal/HeaderGoal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/HeaderGoal/header-goal.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/HeaderGoal/header-goal.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ListGoals/ListGoals.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ListGoals/ListGoals.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ListGoals/list-goals.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ListGoals/list-goals.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Svg/Svg.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Svg/Svg.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Svg/svg.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Svg/svg.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/containers/App/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/containers/App/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/containers/Goal/Goal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/containers/Goal/Goal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/containers/Goal/goal.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/containers/Goal/goal.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/containers/RoutesAuth/RoutesAuth.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/containers/RoutesAuth/RoutesAuth.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/PageDetailGoal/PageDetailGoal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/PageDetailGoal/PageDetailGoal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/PageDetailList/PageDetailList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/PageDetailList/PageDetailList.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.config.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -186,7 +101,7 @@
       <workItem from="1691821642726" duration="246000" />
       <workItem from="1691821900866" duration="6860000" />
       <workItem from="1692084276056" duration="2566000" />
-      <workItem from="1692254412742" duration="6531000" />
+      <workItem from="1692254412742" duration="7345000" />
     </task>
     <servers />
   </component>
