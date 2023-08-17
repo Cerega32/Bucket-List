@@ -32,7 +32,7 @@
 		"stylelint:fix": "stylelint '**/*{.css,.scss}' --fix",
 		"stylelint:report": "stylelint src/**/*.scss --output-file report.txt",
 		"pre-commit": "lint-staged",
-		"pre-push": "node --max_old_space_size=6144 ./node_modules/.bin/tsc --noEmit --locale ru",
+		"pre-push": "node --max_old_space_size=6144 ./node_modules/.bin/tsc --noEmit --locale ru --exclude=node_modules",
 		"prepare": "husky install"
 	},
 	"lint-staged": {

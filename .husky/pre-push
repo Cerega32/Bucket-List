@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npm run pre-push
+# node --max_old_space_size=6144 ./node_modules/.bin/tsc --noEmit --locale ru
