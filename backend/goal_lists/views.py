@@ -1,5 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from .models import GoalList
 from rest_framework import status
@@ -15,6 +15,9 @@ def get_goal_list_details(request, code):
         return Response({'error': 'Список целей не найден'}, status=status.HTTP_404_NOT_FOUND)
     
     user = request.user
+    
+    # Проверяем, добавил ли пользователь данный список к себе
+    added_by_user = goal_list.added_by_users.filter(id=user.id).exists()
     
     # Сериализация полей category и subcategory
     category_serializer = CategorySerializer(goal_list.category)
@@ -37,6 +40,7 @@ def get_goal_list_details(request, code):
         'shortDescription': goal_list.short_description,
         'completedUsersCount': completed_users_count,
         'addedUsersCount': added_users_count,
+        'addedByUser': added_by_user,  # Проверка, добавил ли пользователь данный список к себе
     }
     
     # Формируем массив со всеми целями в списке
@@ -64,3 +68,18 @@ def get_goal_list_details(request, code):
     }
     
     return Response(response_data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_goal_list(request, code):
+    try:
+        goal_list = GoalList.objects.get(code=code)
+    except GoalList.DoesNotExist:
+        return Response({'error': 'Список целей не найден'}, status=status.HTTP_404_NOT_FOUND)
+    
+    user = request.user
+    
+    # Добавляем пользователя к списку "added_by_users"
+    goal_list.added_by_users.add(user)
+    
+    return Response({'message': 'Список целей успешно добавлен'}, status=status.HTTP_200_OK)

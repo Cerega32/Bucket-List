@@ -8,10 +8,12 @@ interface AsideGoalProps {
 	title: string;
 	text: string;
 	image: string;
+	onAdded: () => void;
+	added: boolean;
 }
 
 export const AsideGoal: FC<AsideGoalProps> = (props) => {
-	const {className, title, text, image} = props;
+	const {className, title, text, image, onAdded, added} = props;
 
 	const [block, element] = useBem('aside-goal', className);
 
@@ -19,14 +21,25 @@ export const AsideGoal: FC<AsideGoalProps> = (props) => {
 		<aside className={block()}>
 			<img src={image} alt={title} className={element('image')} />
 			<div className={element('info')}>
-				<Button
-					theme="blue"
-					onClick={() => {}}
-					icon="plus"
-					className={element('btn')}
-				>
-					Добавить к себе
-				</Button>
+				{added ? (
+					<Button
+						theme="blue"
+						onClick={() => {}}
+						icon="plus"
+						className={element('btn')}
+					>
+						Добавлено
+					</Button>
+				) : (
+					<Button
+						theme="blue"
+						onClick={onAdded}
+						icon="plus"
+						className={element('btn')}
+					>
+						Добавить к себе
+					</Button>
+				)}
 				<Button
 					theme="blue-light"
 					type="Link"

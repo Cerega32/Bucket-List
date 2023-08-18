@@ -7,9 +7,11 @@ import {ThemeStore} from '@/store/ThemeStore';
 import {getGoal} from '@/utils/api/get/getGoal';
 import {IList} from '@/typings/list';
 import './list-goals-container.scss';
+import {GET, POST} from '@/utils/fetch/requests';
 
 export const ListGoalsContainer: FC = () => {
 	const [block, element] = useBem('list-goals-container');
+	const [list, setList] = useState<IList | null>(null);
 
 	const {setHeader} = ThemeStore;
 
@@ -19,17 +21,34 @@ export const ListGoalsContainer: FC = () => {
 	}, []);
 
 	const params = useParams();
-	const [list, setList] = useState<IList | null>(null);
 
 	useEffect(() => {
 		(async () => {
 			const res = await getGoal(`goal-lists/${params.id}`);
 			if (res.success) {
-				console.log(res.data.list);
 				setList(res.data.list);
 			}
 		})();
 	}, [params.id]);
+
+	useEffect(() => {
+		(async () => {
+			const res = await GET('self/added-goals', true);
+			console.log(res);
+		})();
+	}, [params.id]);
+
+	const addList = async () => {
+		const res = await POST(`goal-lists/${params.id}/add`, {}, true);
+		if (res.success && list) {
+			const newList: IList = {
+				...list,
+				addedByUser: true,
+				addedUsersCount: (list?.addedUsersCount || 0) + 1,
+			};
+			setList(newList);
+		}
+	};
 
 	if (!list) {
 		return null;
@@ -43,6 +62,8 @@ export const ListGoalsContainer: FC = () => {
 					title={list.title}
 					image={list.image}
 					text={list.shortDescription}
+					onAdded={addList}
+					added={list.addedByUser}
 				/>
 				<ContentListGoals className={element('content')} list={list} />
 			</article>

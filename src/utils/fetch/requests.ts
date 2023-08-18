@@ -8,13 +8,20 @@ interface IPostBody {
 	[key: string]: any;
 }
 
-export const POST = async (url: string, body: IPostBody): Promise<any> => {
+export const POST = async (
+	url: string,
+	body: IPostBody,
+	auth?: boolean
+): Promise<any> => {
+	const headers: Headers = {'Content-Type': 'application/json'};
+	if (auth) {
+		headers.Authorization = `Token ${Cookies.get('token')}`;
+	}
+
 	try {
-		const response = await fetch(`api/${url}/`, {
+		const response = await fetch(`/api/${url}/`, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json', // Set the Content-Type header to JSON
-			},
+			headers,
 			body: JSON.stringify(body), // Convert the object to JSON
 		});
 		const data = await response.json();

@@ -10,5 +10,6 @@ export interface IList {
 	shortDescription: string;
 	completedUsersCount: number;
 	addedUsersCount: number;
+	addedByUser: boolean;
 	goals: Array<IShortGoal>;
 }

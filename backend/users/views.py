@@ -9,8 +9,8 @@ from django.http import JsonResponse
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.utils.encoding import smart_text
-
-
+from goals.models import Goal
+from goals.serializers import GoalSerializer
 
 @api_view(['POST'])
 def login_user(request):
@@ -71,4 +71,30 @@ def register_user(request):
 def get_user_info(request):
     user = request.user
     serializer = CustomUserSerializer(user)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_added_goals(request):
+    user = request.user
+
+    # Получаем все цели, которые были добавлены пользователем
+    user_added_goals = Goal.objects.filter(added_by_users=user)
+
+    # Получение номера страницы из параметра запроса
+    page_number = request.GET.get('page', 1)
+
+    # Определите, сколько элементов на странице
+    page_size = 10
+
+    # Расчет начальной и конечной позиции элементов на странице
+    start_index = (page_number - 1) * page_size
+    end_index = page_number * page_size
+
+    # Получаем цели для текущей страницы
+    paginated_user_added_goals = user_added_goals[start_index:end_index]
+
+    # Сериализация результатов
+    serializer = GoalSerializer(paginated_user_added_goals, many=True)
+
     return Response(serializer.data)

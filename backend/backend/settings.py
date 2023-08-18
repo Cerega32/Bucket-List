@@ -95,7 +95,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'delting',  # Имя вашей базы данных PostgreSQL
         'USER': 'postgres',  # Имя пользователя PostgreSQL
-        'PASSWORD': '',  # Пароль пользователя PostgreSQL
+        'PASSWORD': 'Kaka7aN04!',  # Пароль пользователя PostgreSQL
         'HOST': '127.0.0.1',  # Хост PostgreSQL. Здесь используется локальный хост
         'PORT': '',  # Порт PostgreSQL. Оставьте пустым для использования порта по умолчанию
     }
