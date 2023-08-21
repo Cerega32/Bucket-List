@@ -30,17 +30,8 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		setIsOpen(true);
 		setWindow('registration');
 	};
-	//
-	// useEffect(() => {
-	// 	(async () => {
-	// 		const res = fetch('/api/self/', {
-	// 			headers: {
-	// 				Authorization: `Token ${Cookies.get('token') || ''}`,
-	// 			},
-	// 			// credentials: 'same-origin',
-	// 		});
-	// 	})();
-	// });
+
+	console.log(header);
 
 	return (
 		<header className={block({theme: header})}>
