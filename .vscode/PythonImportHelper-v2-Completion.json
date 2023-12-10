@@ -1,0 +1,2196 @@
+[
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "get_asgi_application",
+        "importPath": "django.core.asgi",
+        "description": "django.core.asgi",
+        "isExtraImport": true,
+        "detail": "django.core.asgi",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "django",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "django",
+        "description": "django",
+        "detail": "django",
+        "documentation": {}
+    },
+    {
+        "label": "forms",
+        "importPath": "django",
+        "description": "django",
+        "isExtraImport": true,
+        "detail": "django",
+        "documentation": {}
+    },
+    {
+        "label": "smart_str",
+        "importPath": "django.utils.encoding",
+        "description": "django.utils.encoding",
+        "isExtraImport": true,
+        "detail": "django.utils.encoding",
+        "documentation": {}
+    },
+    {
+        "label": "smart_text",
+        "importPath": "django.utils.encoding",
+        "description": "django.utils.encoding",
+        "isExtraImport": true,
+        "detail": "django.utils.encoding",
+        "documentation": {}
+    },
+    {
+        "label": "admin",
+        "importPath": "django.contrib",
+        "description": "django.contrib",
+        "isExtraImport": true,
+        "detail": "django.contrib",
+        "documentation": {}
+    },
+    {
+        "label": "admin",
+        "importPath": "django.contrib",
+        "description": "django.contrib",
+        "isExtraImport": true,
+        "detail": "django.contrib",
+        "documentation": {}
+    },
+    {
+        "label": "admin",
+        "importPath": "django.contrib",
+        "description": "django.contrib",
+        "isExtraImport": true,
+        "detail": "django.contrib",
+        "documentation": {}
+    },
+    {
+        "label": "admin",
+        "importPath": "django.contrib",
+        "description": "django.contrib",
+        "isExtraImport": true,
+        "detail": "django.contrib",
+        "documentation": {}
+    },
+    {
+        "label": "admin",
+        "importPath": "django.contrib",
+        "description": "django.contrib",
+        "isExtraImport": true,
+        "detail": "django.contrib",
+        "documentation": {}
+    },
+    {
+        "label": "admin",
+        "importPath": "django.contrib",
+        "description": "django.contrib",
+        "isExtraImport": true,
+        "detail": "django.contrib",
+        "documentation": {}
+    },
+    {
+        "label": "path",
+        "importPath": "django.urls",
+        "description": "django.urls",
+        "isExtraImport": true,
+        "detail": "django.urls",
+        "documentation": {}
+    },
+    {
+        "label": "include",
+        "importPath": "django.urls",
+        "description": "django.urls",
+        "isExtraImport": true,
+        "detail": "django.urls",
+        "documentation": {}
+    },
+    {
+        "label": "path",
+        "importPath": "django.urls",
+        "description": "django.urls",
+        "isExtraImport": true,
+        "detail": "django.urls",
+        "documentation": {}
+    },
+    {
+        "label": "path",
+        "importPath": "django.urls",
+        "description": "django.urls",
+        "isExtraImport": true,
+        "detail": "django.urls",
+        "documentation": {}
+    },
+    {
+        "label": "path",
+        "importPath": "django.urls",
+        "description": "django.urls",
+        "isExtraImport": true,
+        "detail": "django.urls",
+        "documentation": {}
+    },
+    {
+        "label": "path",
+        "importPath": "django.urls",
+        "description": "django.urls",
+        "isExtraImport": true,
+        "detail": "django.urls",
+        "documentation": {}
+    },
+    {
+        "label": "path",
+        "importPath": "django.urls",
+        "description": "django.urls",
+        "isExtraImport": true,
+        "detail": "django.urls",
+        "documentation": {}
+    },
+    {
+        "label": "settings",
+        "importPath": "django.conf",
+        "description": "django.conf",
+        "isExtraImport": true,
+        "detail": "django.conf",
+        "documentation": {}
+    },
+    {
+        "label": "settings",
+        "importPath": "django.conf",
+        "description": "django.conf",
+        "isExtraImport": true,
+        "detail": "django.conf",
+        "documentation": {}
+    },
+    {
+        "label": "settings",
+        "importPath": "django.conf",
+        "description": "django.conf",
+        "isExtraImport": true,
+        "detail": "django.conf",
+        "documentation": {}
+    },
+    {
+        "label": "settings",
+        "importPath": "django.conf",
+        "description": "django.conf",
+        "isExtraImport": true,
+        "detail": "django.conf",
+        "documentation": {}
+    },
+    {
+        "label": "settings",
+        "importPath": "django.conf",
+        "description": "django.conf",
+        "isExtraImport": true,
+        "detail": "django.conf",
+        "documentation": {}
+    },
+    {
+        "label": "settings",
+        "importPath": "django.conf",
+        "description": "django.conf",
+        "isExtraImport": true,
+        "detail": "django.conf",
+        "documentation": {}
+    },
+    {
+        "label": "static",
+        "importPath": "django.conf.urls.static",
+        "description": "django.conf.urls.static",
+        "isExtraImport": true,
+        "detail": "django.conf.urls.static",
+        "documentation": {}
+    },
+    {
+        "label": "get_wsgi_application",
+        "importPath": "django.core.wsgi",
+        "description": "django.core.wsgi",
+        "isExtraImport": true,
+        "detail": "django.core.wsgi",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "django.db.models.deletion",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "django.db.models.deletion",
+        "description": "django.db.models.deletion",
+        "detail": "django.db.models.deletion",
+        "documentation": {}
+    },
+    {
+        "label": "AppConfig",
+        "importPath": "django.apps",
+        "description": "django.apps",
+        "isExtraImport": true,
+        "detail": "django.apps",
+        "documentation": {}
+    },
+    {
+        "label": "AppConfig",
+        "importPath": "django.apps",
+        "description": "django.apps",
+        "isExtraImport": true,
+        "detail": "django.apps",
+        "documentation": {}
+    },
+    {
+        "label": "AppConfig",
+        "importPath": "django.apps",
+        "description": "django.apps",
+        "isExtraImport": true,
+        "detail": "django.apps",
+        "documentation": {}
+    },
+    {
+        "label": "AppConfig",
+        "importPath": "django.apps",
+        "description": "django.apps",
+        "isExtraImport": true,
+        "detail": "django.apps",
+        "documentation": {}
+    },
+    {
+        "label": "AppConfig",
+        "importPath": "django.apps",
+        "description": "django.apps",
+        "isExtraImport": true,
+        "detail": "django.apps",
+        "documentation": {}
+    },
+    {
+        "label": "serializers",
+        "importPath": "rest_framework",
+        "description": "rest_framework",
+        "isExtraImport": true,
+        "detail": "rest_framework",
+        "documentation": {}
+    },
+    {
+        "label": "serializers",
+        "importPath": "rest_framework",
+        "description": "rest_framework",
+        "isExtraImport": true,
+        "detail": "rest_framework",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "rest_framework",
+        "description": "rest_framework",
+        "isExtraImport": true,
+        "detail": "rest_framework",
+        "documentation": {}
+    },
+    {
+        "label": "serializers",
+        "importPath": "rest_framework",
+        "description": "rest_framework",
+        "isExtraImport": true,
+        "detail": "rest_framework",
+        "documentation": {}
+    },
+    {
+        "label": "serializers",
+        "importPath": "rest_framework",
+        "description": "rest_framework",
+        "isExtraImport": true,
+        "detail": "rest_framework",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "rest_framework",
+        "description": "rest_framework",
+        "isExtraImport": true,
+        "detail": "rest_framework",
+        "documentation": {}
+    },
+    {
+        "label": "serializers",
+        "importPath": "rest_framework",
+        "description": "rest_framework",
+        "isExtraImport": true,
+        "detail": "rest_framework",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "rest_framework",
+        "description": "rest_framework",
+        "isExtraImport": true,
+        "detail": "rest_framework",
+        "documentation": {}
+    },
+    {
+        "label": "serializers",
+        "importPath": "rest_framework",
+        "description": "rest_framework",
+        "isExtraImport": true,
+        "detail": "rest_framework",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "rest_framework",
+        "description": "rest_framework",
+        "isExtraImport": true,
+        "detail": "rest_framework",
+        "documentation": {}
+    },
+    {
+        "label": "TestCase",
+        "importPath": "django.test",
+        "description": "django.test",
+        "isExtraImport": true,
+        "detail": "django.test",
+        "documentation": {}
+    },
+    {
+        "label": "TestCase",
+        "importPath": "django.test",
+        "description": "django.test",
+        "isExtraImport": true,
+        "detail": "django.test",
+        "documentation": {}
+    },
+    {
+        "label": "TestCase",
+        "importPath": "django.test",
+        "description": "django.test",
+        "isExtraImport": true,
+        "detail": "django.test",
+        "documentation": {}
+    },
+    {
+        "label": "TestCase",
+        "importPath": "django.test",
+        "description": "django.test",
+        "isExtraImport": true,
+        "detail": "django.test",
+        "documentation": {}
+    },
+    {
+        "label": "TestCase",
+        "importPath": "django.test",
+        "description": "django.test",
+        "isExtraImport": true,
+        "detail": "django.test",
+        "documentation": {}
+    },
+    {
+        "label": "api_view",
+        "importPath": "rest_framework.decorators",
+        "description": "rest_framework.decorators",
+        "isExtraImport": true,
+        "detail": "rest_framework.decorators",
+        "documentation": {}
+    },
+    {
+        "label": "api_view",
+        "importPath": "rest_framework.decorators",
+        "description": "rest_framework.decorators",
+        "isExtraImport": true,
+        "detail": "rest_framework.decorators",
+        "documentation": {}
+    },
+    {
+        "label": "permission_classes",
+        "importPath": "rest_framework.decorators",
+        "description": "rest_framework.decorators",
+        "isExtraImport": true,
+        "detail": "rest_framework.decorators",
+        "documentation": {}
+    },
+    {
+        "label": "api_view",
+        "importPath": "rest_framework.decorators",
+        "description": "rest_framework.decorators",
+        "isExtraImport": true,
+        "detail": "rest_framework.decorators",
+        "documentation": {}
+    },
+    {
+        "label": "permission_classes",
+        "importPath": "rest_framework.decorators",
+        "description": "rest_framework.decorators",
+        "isExtraImport": true,
+        "detail": "rest_framework.decorators",
+        "documentation": {}
+    },
+    {
+        "label": "api_view",
+        "importPath": "rest_framework.decorators",
+        "description": "rest_framework.decorators",
+        "isExtraImport": true,
+        "detail": "rest_framework.decorators",
+        "documentation": {}
+    },
+    {
+        "label": "permission_classes",
+        "importPath": "rest_framework.decorators",
+        "description": "rest_framework.decorators",
+        "isExtraImport": true,
+        "detail": "rest_framework.decorators",
+        "documentation": {}
+    },
+    {
+        "label": "api_view",
+        "importPath": "rest_framework.decorators",
+        "description": "rest_framework.decorators",
+        "isExtraImport": true,
+        "detail": "rest_framework.decorators",
+        "documentation": {}
+    },
+    {
+        "label": "permission_classes",
+        "importPath": "rest_framework.decorators",
+        "description": "rest_framework.decorators",
+        "isExtraImport": true,
+        "detail": "rest_framework.decorators",
+        "documentation": {}
+    },
+    {
+        "label": "Response",
+        "importPath": "rest_framework.response",
+        "description": "rest_framework.response",
+        "isExtraImport": true,
+        "detail": "rest_framework.response",
+        "documentation": {}
+    },
+    {
+        "label": "Response",
+        "importPath": "rest_framework.response",
+        "description": "rest_framework.response",
+        "isExtraImport": true,
+        "detail": "rest_framework.response",
+        "documentation": {}
+    },
+    {
+        "label": "Response",
+        "importPath": "rest_framework.response",
+        "description": "rest_framework.response",
+        "isExtraImport": true,
+        "detail": "rest_framework.response",
+        "documentation": {}
+    },
+    {
+        "label": "Response",
+        "importPath": "rest_framework.response",
+        "description": "rest_framework.response",
+        "isExtraImport": true,
+        "detail": "rest_framework.response",
+        "documentation": {}
+    },
+    {
+        "label": "Response",
+        "importPath": "rest_framework.response",
+        "description": "rest_framework.response",
+        "isExtraImport": true,
+        "detail": "rest_framework.response",
+        "documentation": {}
+    },
+    {
+        "label": "django.utils.timezone",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "django.utils.timezone",
+        "description": "django.utils.timezone",
+        "detail": "django.utils.timezone",
+        "documentation": {}
+    },
+    {
+        "label": "django.contrib.auth.models",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "django.contrib.auth.models",
+        "description": "django.contrib.auth.models",
+        "detail": "django.contrib.auth.models",
+        "documentation": {}
+    },
+    {
+        "label": "User",
+        "importPath": "django.contrib.auth.models",
+        "description": "django.contrib.auth.models",
+        "isExtraImport": true,
+        "detail": "django.contrib.auth.models",
+        "documentation": {}
+    },
+    {
+        "label": "AbstractUser",
+        "importPath": "django.contrib.auth.models",
+        "description": "django.contrib.auth.models",
+        "isExtraImport": true,
+        "detail": "django.contrib.auth.models",
+        "documentation": {}
+    },
+    {
+        "label": "Group",
+        "importPath": "django.contrib.auth.models",
+        "description": "django.contrib.auth.models",
+        "isExtraImport": true,
+        "detail": "django.contrib.auth.models",
+        "documentation": {}
+    },
+    {
+        "label": "Permission",
+        "importPath": "django.contrib.auth.models",
+        "description": "django.contrib.auth.models",
+        "isExtraImport": true,
+        "detail": "django.contrib.auth.models",
+        "documentation": {}
+    },
+    {
+        "label": "CustomUser",
+        "importPath": "users.models",
+        "description": "users.models",
+        "isExtraImport": true,
+        "detail": "users.models",
+        "documentation": {}
+    },
+    {
+        "label": "IsAuthenticated",
+        "importPath": "rest_framework.permissions",
+        "description": "rest_framework.permissions",
+        "isExtraImport": true,
+        "detail": "rest_framework.permissions",
+        "documentation": {}
+    },
+    {
+        "label": "AllowAny",
+        "importPath": "rest_framework.permissions",
+        "description": "rest_framework.permissions",
+        "isExtraImport": true,
+        "detail": "rest_framework.permissions",
+        "documentation": {}
+    },
+    {
+        "label": "AllowAny",
+        "importPath": "rest_framework.permissions",
+        "description": "rest_framework.permissions",
+        "isExtraImport": true,
+        "detail": "rest_framework.permissions",
+        "documentation": {}
+    },
+    {
+        "label": "IsAuthenticated",
+        "importPath": "rest_framework.permissions",
+        "description": "rest_framework.permissions",
+        "isExtraImport": true,
+        "detail": "rest_framework.permissions",
+        "documentation": {}
+    },
+    {
+        "label": "IsAuthenticated",
+        "importPath": "rest_framework.permissions",
+        "description": "rest_framework.permissions",
+        "isExtraImport": true,
+        "detail": "rest_framework.permissions",
+        "documentation": {}
+    },
+    {
+        "label": "translit",
+        "importPath": "transliterate",
+        "description": "transliterate",
+        "isExtraImport": true,
+        "detail": "transliterate",
+        "documentation": {}
+    },
+    {
+        "label": "translit",
+        "importPath": "transliterate",
+        "description": "transliterate",
+        "isExtraImport": true,
+        "detail": "transliterate",
+        "documentation": {}
+    },
+    {
+        "label": "Category",
+        "importPath": "categories.models",
+        "description": "categories.models",
+        "isExtraImport": true,
+        "detail": "categories.models",
+        "documentation": {}
+    },
+    {
+        "label": "Category",
+        "importPath": "categories.models",
+        "description": "categories.models",
+        "isExtraImport": true,
+        "detail": "categories.models",
+        "documentation": {}
+    },
+    {
+        "label": "Goal",
+        "importPath": "goals.models",
+        "description": "goals.models",
+        "isExtraImport": true,
+        "detail": "goals.models",
+        "documentation": {}
+    },
+    {
+        "label": "Goal",
+        "importPath": "goals.models",
+        "description": "goals.models",
+        "isExtraImport": true,
+        "detail": "goals.models",
+        "documentation": {}
+    },
+    {
+        "label": "CategorySerializer",
+        "importPath": "categories.serializers",
+        "description": "categories.serializers",
+        "isExtraImport": true,
+        "detail": "categories.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "CategorySerializer",
+        "importPath": "categories.serializers",
+        "description": "categories.serializers",
+        "isExtraImport": true,
+        "detail": "categories.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "get_goal_list_details",
+        "importPath": "goal_lists.views",
+        "description": "goal_lists.views",
+        "isExtraImport": true,
+        "detail": "goal_lists.views",
+        "documentation": {}
+    },
+    {
+        "label": "add_goal_list",
+        "importPath": "goal_lists.views",
+        "description": "goal_lists.views",
+        "isExtraImport": true,
+        "detail": "goal_lists.views",
+        "documentation": {}
+    },
+    {
+        "label": "site",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "site",
+        "description": "site",
+        "detail": "site",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "django.contrib.auth.validators",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "django.contrib.auth.validators",
+        "description": "django.contrib.auth.validators",
+        "detail": "django.contrib.auth.validators",
+        "documentation": {}
+    },
+    {
+        "label": "gettext_lazy",
+        "importPath": "django.utils.translation",
+        "description": "django.utils.translation",
+        "isExtraImport": true,
+        "detail": "django.utils.translation",
+        "documentation": {}
+    },
+    {
+        "label": "is added",
+        "importPath": "django.contrib.auth import authenticate  # Make sure this",
+        "description": "django.contrib.auth import authenticate  # Make sure this",
+        "isExtraImport": true,
+        "detail": "django.contrib.auth import authenticate  # Make sure this",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_model",
+        "importPath": "django.contrib.auth",
+        "description": "django.contrib.auth",
+        "isExtraImport": true,
+        "detail": "django.contrib.auth",
+        "documentation": {}
+    },
+    {
+        "label": "authenticate",
+        "importPath": "django.contrib.auth",
+        "description": "django.contrib.auth",
+        "isExtraImport": true,
+        "detail": "django.contrib.auth",
+        "documentation": {}
+    },
+    {
+        "label": "validate_password",
+        "importPath": "django.contrib.auth.password_validation",
+        "description": "django.contrib.auth.password_validation",
+        "isExtraImport": true,
+        "detail": "django.contrib.auth.password_validation",
+        "documentation": {}
+    },
+    {
+        "label": "JsonResponse",
+        "importPath": "django.http",
+        "description": "django.http",
+        "isExtraImport": true,
+        "detail": "django.http",
+        "documentation": {}
+    },
+    {
+        "label": "Token",
+        "importPath": "rest_framework.authtoken.models",
+        "description": "rest_framework.authtoken.models",
+        "isExtraImport": true,
+        "detail": "rest_framework.authtoken.models",
+        "documentation": {}
+    },
+    {
+        "label": "GoalList",
+        "importPath": "goal_lists.models",
+        "description": "goal_lists.models",
+        "isExtraImport": true,
+        "detail": "goal_lists.models",
+        "documentation": {}
+    },
+    {
+        "label": "application",
+        "kind": 5,
+        "importPath": "backend.backend.asgi",
+        "description": "backend.backend.asgi",
+        "peekOfCode": "application = get_asgi_application()",
+        "detail": "backend.backend.asgi",
+        "documentation": {}
+    },
+    {
+        "label": "django.utils.encoding.smart_text",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "django.utils.encoding.smart_text = smart_str\n# Build paths inside the project like this: BASE_DIR / 'subdir'.\nBASE_DIR = Path(__file__).resolve().parent.parent\n# Quick-start development settings - unsuitable for production\n# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/\n# SECURITY WARNING: keep the secret key used in production secret!\nSECRET_KEY = 'django-insecure-_+fri1ez662xfxl4_w=u5tysu5rwaj#3vzx50_!e5b)4%sw&2a'\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\nALLOWED_HOSTS = []",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "BASE_DIR",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "BASE_DIR = Path(__file__).resolve().parent.parent\n# Quick-start development settings - unsuitable for production\n# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/\n# SECURITY WARNING: keep the secret key used in production secret!\nSECRET_KEY = 'django-insecure-_+fri1ez662xfxl4_w=u5tysu5rwaj#3vzx50_!e5b)4%sw&2a'\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\nALLOWED_HOSTS = []\n# Application definition\nINSTALLED_APPS = [",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "SECRET_KEY",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "SECRET_KEY = 'django-insecure-_+fri1ez662xfxl4_w=u5tysu5rwaj#3vzx50_!e5b)4%sw&2a'\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\nALLOWED_HOSTS = []\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "DEBUG",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "DEBUG = True\nALLOWED_HOSTS = []\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "ALLOWED_HOSTS",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "ALLOWED_HOSTS = []\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',\n    'users',",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "INSTALLED_APPS",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "INSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',\n    'users',\n    'goals',\n    'goal_lists',",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "MIDDLEWARE",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "MIDDLEWARE = [\n    'django.middleware.security.SecurityMiddleware',\n    'django.contrib.sessions.middleware.SessionMiddleware',\n    'django.middleware.common.CommonMiddleware',\n    'django.middleware.csrf.CsrfViewMiddleware',\n    'django.contrib.auth.middleware.AuthenticationMiddleware',\n    'django.contrib.messages.middleware.MessageMiddleware',\n    'django.middleware.clickjacking.XFrameOptionsMiddleware',\n    'django.middleware.csrf.CsrfViewMiddleware',\n]",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "ROOT_URLCONF",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "ROOT_URLCONF = 'backend.urls'\nTEMPLATES = [\n    {\n        'BACKEND': 'django.template.backends.django.DjangoTemplates',\n        'DIRS': [BASE_DIR / 'templates']\n        ,\n        'APP_DIRS': True,\n        'OPTIONS': {\n            'context_processors': [\n                'django.template.context_processors.debug',",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "TEMPLATES",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "TEMPLATES = [\n    {\n        'BACKEND': 'django.template.backends.django.DjangoTemplates',\n        'DIRS': [BASE_DIR / 'templates']\n        ,\n        'APP_DIRS': True,\n        'OPTIONS': {\n            'context_processors': [\n                'django.template.context_processors.debug',\n                'django.template.context_processors.request',",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "WSGI_APPLICATION",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "WSGI_APPLICATION = 'backend.wsgi.application'\n# Database\n# https://docs.djangoproject.com/en/4.2/ref/settings/#databases\nDATABASES = {\n    'default': {\n        'ENGINE': 'django.db.backends.postgresql',\n        'NAME': 'delting',  # Имя вашей базы данных PostgreSQL\n        'USER': 'postgres',  # Имя пользователя PostgreSQL\n        'PASSWORD': 'Kaka7aN04!',  # Пароль пользователя PostgreSQL\n        'HOST': '127.0.0.1',  # Хост PostgreSQL. Здесь используется локальный хост",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "DATABASES",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "DATABASES = {\n    'default': {\n        'ENGINE': 'django.db.backends.postgresql',\n        'NAME': 'delting',  # Имя вашей базы данных PostgreSQL\n        'USER': 'postgres',  # Имя пользователя PostgreSQL\n        'PASSWORD': 'Kaka7aN04!',  # Пароль пользователя PostgreSQL\n        'HOST': '127.0.0.1',  # Хост PostgreSQL. Здесь используется локальный хост\n        'PORT': '',  # Порт PostgreSQL. Оставьте пустым для использования порта по умолчанию\n    }\n}",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "AUTHENTICATION_BACKENDS",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "AUTHENTICATION_BACKENDS = [\n    'allauth.account.auth_backends.AuthenticationBackend',\n]\nREST_FRAMEWORK = {\n    'DEFAULT_AUTHENTICATION_CLASSES': [\n        'rest_framework.authentication.TokenAuthentication',\n    ],\n}\n# Password validation\n# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "REST_FRAMEWORK",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "REST_FRAMEWORK = {\n    'DEFAULT_AUTHENTICATION_CLASSES': [\n        'rest_framework.authentication.TokenAuthentication',\n    ],\n}\n# Password validation\n# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators\nAUTH_PASSWORD_VALIDATORS = [\n    {\n        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "AUTH_PASSWORD_VALIDATORS",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "AUTH_PASSWORD_VALIDATORS = [\n    {\n        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',\n    },\n    {\n        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',\n    },\n    {\n        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',\n    },",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "LANGUAGE_CODE",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "LANGUAGE_CODE = 'ru'\nTIME_ZONE = 'UTC'\nUSE_I18N = True\nUSE_TZ = True\nCORS_ORIGIN_ALLOW_ALL = True\nCORS_ALLOWED_ORIGINS = [\n    \"http://localhost:3000\",\n    # Добавьте сюда другие разрешенные домены, если это необходимо\n]\n# Static files (CSS, JavaScript, Images)",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "TIME_ZONE",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "TIME_ZONE = 'UTC'\nUSE_I18N = True\nUSE_TZ = True\nCORS_ORIGIN_ALLOW_ALL = True\nCORS_ALLOWED_ORIGINS = [\n    \"http://localhost:3000\",\n    # Добавьте сюда другие разрешенные домены, если это необходимо\n]\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/4.2/howto/static-files/",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "USE_I18N",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "USE_I18N = True\nUSE_TZ = True\nCORS_ORIGIN_ALLOW_ALL = True\nCORS_ALLOWED_ORIGINS = [\n    \"http://localhost:3000\",\n    # Добавьте сюда другие разрешенные домены, если это необходимо\n]\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/4.2/howto/static-files/\nSTATIC_URL = 'static/'",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "USE_TZ",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "USE_TZ = True\nCORS_ORIGIN_ALLOW_ALL = True\nCORS_ALLOWED_ORIGINS = [\n    \"http://localhost:3000\",\n    # Добавьте сюда другие разрешенные домены, если это необходимо\n]\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/4.2/howto/static-files/\nSTATIC_URL = 'static/'\n# Default primary key field type",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "CORS_ORIGIN_ALLOW_ALL",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "CORS_ORIGIN_ALLOW_ALL = True\nCORS_ALLOWED_ORIGINS = [\n    \"http://localhost:3000\",\n    # Добавьте сюда другие разрешенные домены, если это необходимо\n]\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/4.2/howto/static-files/\nSTATIC_URL = 'static/'\n# Default primary key field type\n# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "CORS_ALLOWED_ORIGINS",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "CORS_ALLOWED_ORIGINS = [\n    \"http://localhost:3000\",\n    # Добавьте сюда другие разрешенные домены, если это необходимо\n]\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/4.2/howto/static-files/\nSTATIC_URL = 'static/'\n# Default primary key field type\n# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field\nDEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "STATIC_URL",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "STATIC_URL = 'static/'\n# Default primary key field type\n# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field\nDEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'\nMEDIA_URL = '/media/'\nMEDIA_ROOT = os.path.join(BASE_DIR, 'media')",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_AUTO_FIELD",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'\nMEDIA_URL = '/media/'\nMEDIA_ROOT = os.path.join(BASE_DIR, 'media')",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "MEDIA_URL",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "MEDIA_URL = '/media/'\nMEDIA_ROOT = os.path.join(BASE_DIR, 'media')",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "MEDIA_ROOT",
+        "kind": 5,
+        "importPath": "backend.backend.settings",
+        "description": "backend.backend.settings",
+        "peekOfCode": "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')",
+        "detail": "backend.backend.settings",
+        "documentation": {}
+    },
+    {
+        "label": "urlpatterns",
+        "kind": 5,
+        "importPath": "backend.backend.urls",
+        "description": "backend.backend.urls",
+        "peekOfCode": "urlpatterns = [\n    path('admin/', admin.site.urls),\n    path('', include('users.urls')),  # Замените на имя вашего приложения\n    path('', include('goals.urls')),  # Замените на имя вашего приложения\n    path('', include('goal_lists.urls')),  # Замените на имя вашего приложения\n    path('', include('comments.urls')),  # Замените на имя вашего приложения\n]\nif settings.DEBUG:\n    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)",
+        "detail": "backend.backend.urls",
+        "documentation": {}
+    },
+    {
+        "label": "application",
+        "kind": 5,
+        "importPath": "backend.backend.wsgi",
+        "description": "backend.backend.wsgi",
+        "peekOfCode": "application = get_wsgi_application()",
+        "detail": "backend.backend.wsgi",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.categories.migrations.0001_initial",
+        "description": "backend.categories.migrations.0001_initial",
+        "peekOfCode": "class Migration(migrations.Migration):\n    initial = True\n    dependencies = []\n    operations = [\n        migrations.CreateModel(\n            name=\"Category\",\n            fields=[\n                (\n                    \"id\",\n                    models.BigAutoField(",
+        "detail": "backend.categories.migrations.0001_initial",
+        "documentation": {}
+    },
+    {
+        "label": "CategoriesConfig",
+        "kind": 6,
+        "importPath": "backend.categories.apps",
+        "description": "backend.categories.apps",
+        "peekOfCode": "class CategoriesConfig(AppConfig):\n    default_auto_field = 'django.db.models.BigAutoField'\n    name = 'categories'",
+        "detail": "backend.categories.apps",
+        "documentation": {}
+    },
+    {
+        "label": "Category",
+        "kind": 6,
+        "importPath": "backend.categories.models",
+        "description": "backend.categories.models",
+        "peekOfCode": "class Category(models.Model):\n    name = models.CharField(max_length=100)\n    name_en = models.CharField(max_length=100, verbose_name=\"English Name\", blank=True)\n    parent_category = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)\n    def __str__(self):\n        return self.name",
+        "detail": "backend.categories.models",
+        "documentation": {}
+    },
+    {
+        "label": "CategorySerializer",
+        "kind": 6,
+        "importPath": "backend.categories.serializers",
+        "description": "backend.categories.serializers",
+        "peekOfCode": "class CategorySerializer(serializers.ModelSerializer):\n    class Meta:\n        model = Category\n        fields = ('id', 'name', 'name_en', 'parent_category')",
+        "detail": "backend.categories.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "urlpatterns",
+        "kind": 5,
+        "importPath": "backend.categories.urls",
+        "description": "backend.categories.urls",
+        "peekOfCode": "urlpatterns = [\n    path('categories/', category_list),\n]",
+        "detail": "backend.categories.urls",
+        "documentation": {}
+    },
+    {
+        "label": "category_list",
+        "kind": 2,
+        "importPath": "backend.categories.views",
+        "description": "backend.categories.views",
+        "peekOfCode": "def category_list(request):\n    if request.method == 'GET':\n        categories = Category.objects.all()\n        serializer = CategorySerializer(categories, many=True)\n        return Response(serializer.data)\n    elif request.method == 'POST':\n        serializer = CategorySerializer(data=request.data)\n        if serializer.is_valid():\n            serializer.save()\n            return Response(serializer.data, status=201)",
+        "detail": "backend.categories.views",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.comments.migrations.0001_initial",
+        "description": "backend.comments.migrations.0001_initial",
+        "peekOfCode": "class Migration(migrations.Migration):\n    initial = True\n    dependencies = [\n    ]\n    operations = [\n        migrations.CreateModel(\n            name='Comment',\n            fields=[\n                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),\n                ('text', models.TextField()),",
+        "detail": "backend.comments.migrations.0001_initial",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.comments.migrations.0002_initial",
+        "description": "backend.comments.migrations.0002_initial",
+        "peekOfCode": "class Migration(migrations.Migration):\n    initial = True\n    dependencies = [\n        ('comments', '0001_initial'),\n        ('goals', '0001_initial'),\n    ]\n    operations = [\n        migrations.AddField(\n            model_name='comment',\n            name='goal',",
+        "detail": "backend.comments.migrations.0002_initial",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.comments.migrations.0003_initial",
+        "description": "backend.comments.migrations.0003_initial",
+        "peekOfCode": "class Migration(migrations.Migration):\n    initial = True\n    dependencies = [\n        ('comments', '0002_initial'),\n        ('users', '0001_initial'),\n    ]\n    operations = [\n        migrations.AddField(\n            model_name='comment',\n            name='user',",
+        "detail": "backend.comments.migrations.0003_initial",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.comments.migrations.0004_comment_date_created_comment_dislikes_comment_likes_and_more",
+        "description": "backend.comments.migrations.0004_comment_date_created_comment_dislikes_comment_likes_and_more",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        migrations.swappable_dependency(settings.AUTH_USER_MODEL),\n        (\"comments\", \"0003_initial\"),\n    ]\n    operations = [\n        migrations.AddField(\n            model_name=\"comment\",\n            name=\"date_created\",\n            field=models.DateTimeField(",
+        "detail": "backend.comments.migrations.0004_comment_date_created_comment_dislikes_comment_likes_and_more",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.comments.migrations.0005_remove_comment_dislikes_remove_comment_likes_and_more",
+        "description": "backend.comments.migrations.0005_remove_comment_dislikes_remove_comment_likes_and_more",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        migrations.swappable_dependency(settings.AUTH_USER_MODEL),\n        (\n            \"comments\",\n            \"0004_comment_date_created_comment_dislikes_comment_likes_and_more\",\n        ),\n    ]\n    operations = [\n        migrations.RemoveField(",
+        "detail": "backend.comments.migrations.0005_remove_comment_dislikes_remove_comment_likes_and_more",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.comments.migrations.0006_comment_complexity",
+        "description": "backend.comments.migrations.0006_comment_complexity",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        ('comments', '0005_remove_comment_dislikes_remove_comment_likes_and_more'),\n    ]\n    operations = [\n        migrations.AddField(\n            model_name='comment',\n            name='complexity',\n            field=models.CharField(choices=[('easy', 'Легко'), ('medium', 'Средне'), ('hard', 'Тяжело')], default=('easy', 'Легко'), max_length=20),\n            preserve_default=False,",
+        "detail": "backend.comments.migrations.0006_comment_complexity",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.comments.migrations.0007_userprofile_commentaction",
+        "description": "backend.comments.migrations.0007_userprofile_commentaction",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        migrations.swappable_dependency(settings.AUTH_USER_MODEL),\n        (\"comments\", \"0006_comment_complexity\"),\n    ]\n    operations = [\n        migrations.CreateModel(\n            name=\"UserProfile\",\n            fields=[\n                (",
+        "detail": "backend.comments.migrations.0007_userprofile_commentaction",
+        "documentation": {}
+    },
+    {
+        "label": "CommentsConfig",
+        "kind": 6,
+        "importPath": "backend.comments.apps",
+        "description": "backend.comments.apps",
+        "peekOfCode": "class CommentsConfig(AppConfig):\n    default_auto_field = 'django.db.models.BigAutoField'\n    name = 'comments'",
+        "detail": "backend.comments.apps",
+        "documentation": {}
+    },
+    {
+        "label": "Comment",
+        "kind": 6,
+        "importPath": "backend.comments.models",
+        "description": "backend.comments.models",
+        "peekOfCode": "class Comment(models.Model):\n    COMPLEXITY_CHOICES = [\n        ('easy', 'Легко'),\n        ('medium', 'Средне'),\n        ('hard', 'Тяжело'),\n    ]\n    goal = models.ForeignKey('goals.Goal', on_delete=models.CASCADE)\n    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)\n    text = models.TextField()\n    likes = models.ManyToManyField('auth.User', related_name='liked_comments', blank=True)",
+        "detail": "backend.comments.models",
+        "documentation": {}
+    },
+    {
+        "label": "CommentAction",
+        "kind": 6,
+        "importPath": "backend.comments.models",
+        "description": "backend.comments.models",
+        "peekOfCode": "class CommentAction(models.Model):\n    LIKE = 'like'\n    DISLIKE = 'dislike'\n    ACTION_CHOICES = [(LIKE, 'Like'), (DISLIKE, 'Dislike')]\n    user = models.ForeignKey(User, on_delete=models.CASCADE)\n    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)\n    action = models.CharField(max_length=10, choices=ACTION_CHOICES)\n    class Meta:\n        unique_together = ['user', 'comment']",
+        "detail": "backend.comments.models",
+        "documentation": {}
+    },
+    {
+        "label": "CommentPhotoSerializer",
+        "kind": 6,
+        "importPath": "backend.comments.serializers",
+        "description": "backend.comments.serializers",
+        "peekOfCode": "class CommentPhotoSerializer(serializers.Serializer):\n    image = serializers.ImageField()\nclass CommentSerializer(serializers.ModelSerializer):\n    user = serializers.SerializerMethodField()\n    def get_user(self, comment):\n        if comment.user and comment.user.is_authenticated:\n            return comment.user.id\n        else:\n            return None\n    user_avatar = serializers.ImageField(source='user.avatar', read_only=True)",
+        "detail": "backend.comments.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "CommentSerializer",
+        "kind": 6,
+        "importPath": "backend.comments.serializers",
+        "description": "backend.comments.serializers",
+        "peekOfCode": "class CommentSerializer(serializers.ModelSerializer):\n    user = serializers.SerializerMethodField()\n    def get_user(self, comment):\n        if comment.user and comment.user.is_authenticated:\n            return comment.user.id\n        else:\n            return None\n    user_avatar = serializers.ImageField(source='user.avatar', read_only=True)\n    user_name = serializers.CharField(source='user.first_name', read_only=True)\n    user_nickname = serializers.CharField(source='user.username', read_only=True)",
+        "detail": "backend.comments.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "urlpatterns",
+        "kind": 5,
+        "importPath": "backend.comments.urls",
+        "description": "backend.comments.urls",
+        "peekOfCode": "urlpatterns = [\n    path('api/goals/<slug:code>/comments/', get_comments_for_goal, name='get-comments-for-goal'),\n    path('api/goals/<slug:code>/comments/<int:comment_id>/like_or_dislike/', like_or_dislike_comment, name='like-or-dislike-comment'),\n]",
+        "detail": "backend.comments.urls",
+        "documentation": {}
+    },
+    {
+        "label": "like_or_dislike_comment",
+        "kind": 2,
+        "importPath": "backend.comments.views",
+        "description": "backend.comments.views",
+        "peekOfCode": "def like_or_dislike_comment(request, comment_id):\n    user = request.user\n    try:\n        comment = Comment.objects.get(id=comment_id)\n    except Comment.DoesNotExist:\n        return Response({'message': 'Комментарий не найден'}, status=status.HTTP_404_NOT_FOUND)\n    is_like = request.data.get('is_like')\n    if is_like is not None:\n        if is_like:\n            if user in comment.likes.all():",
+        "detail": "backend.comments.views",
+        "documentation": {}
+    },
+    {
+        "label": "get_comments_for_goal",
+        "kind": 2,
+        "importPath": "backend.comments.views",
+        "description": "backend.comments.views",
+        "peekOfCode": "def get_comments_for_goal(request, code):\n    user = request.user\n    user_id = None  # По умолчанию нет пользователя\n    # Проверка, аутентифицирован ли пользователь\n    if user.is_authenticated:\n        user_id = user.id  # Получение ID пользователя\n    try:\n        comments = Comment.objects.filter(goal__code=code)\n    except Comment.DoesNotExist:\n        return Response({'message': 'Комментарии не найдены'}, status=status.HTTP_404_NOT_FOUND)",
+        "detail": "backend.comments.views",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goals.migrations.0001_initial",
+        "description": "backend.goals.migrations.0001_initial",
+        "peekOfCode": "class Migration(migrations.Migration):\n    initial = True\n    dependencies = [\n    ]\n    operations = [\n        migrations.CreateModel(\n            name='Goal',\n            fields=[\n                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),\n                ('title', models.CharField(max_length=200)),",
+        "detail": "backend.goals.migrations.0001_initial",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goals.migrations.0002_initial",
+        "description": "backend.goals.migrations.0002_initial",
+        "peekOfCode": "class Migration(migrations.Migration):\n    initial = True\n    dependencies = [\n        ('comments', '0003_initial'),\n        ('goals', '0001_initial'),\n        ('users', '0001_initial'),\n    ]\n    operations = [\n        migrations.AddField(\n            model_name='goal',",
+        "detail": "backend.goals.migrations.0002_initial",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goals.migrations.0003_alter_goal_category_category_goal_subcategory",
+        "description": "backend.goals.migrations.0003_alter_goal_category_category_goal_subcategory",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"goals\", \"0002_initial\"),\n    ]\n    operations = [\n        migrations.AlterField(\n            model_name=\"goal\",\n            name=\"category\",\n            field=models.CharField(\n                choices=[",
+        "detail": "backend.goals.migrations.0003_alter_goal_category_category_goal_subcategory",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goals.migrations.0004_alter_category_name_alter_goal_category_and_more",
+        "description": "backend.goals.migrations.0004_alter_category_name_alter_goal_category_and_more",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"goals\", \"0003_alter_goal_category_category_goal_subcategory\"),\n    ]\n    operations = [\n        migrations.AlterField(\n            model_name=\"category\",\n            name=\"name\",\n            field=models.CharField(max_length=100),\n        ),",
+        "detail": "backend.goals.migrations.0004_alter_category_name_alter_goal_category_and_more",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goals.migrations.0005_alter_goal_complexity",
+        "description": "backend.goals.migrations.0005_alter_goal_complexity",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"goals\", \"0004_alter_category_name_alter_goal_category_and_more\"),\n    ]\n    operations = [\n        migrations.AlterField(\n            model_name=\"goal\",\n            name=\"complexity\",\n            field=models.CharField(\n                choices=[(\"easy\", \"Легко\"), (\"medium\", \"Средне\"), (\"hard\", \"Тяжело\")],",
+        "detail": "backend.goals.migrations.0005_alter_goal_complexity",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goals.migrations.0006_alter_goal_added_by_users_alter_goal_comments_and_more",
+        "description": "backend.goals.migrations.0006_alter_goal_added_by_users_alter_goal_comments_and_more",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        migrations.swappable_dependency(settings.AUTH_USER_MODEL),\n        (\"comments\", \"0003_initial\"),\n        (\"goals\", \"0005_alter_goal_complexity\"),\n    ]\n    operations = [\n        migrations.AlterField(\n            model_name=\"goal\",\n            name=\"added_by_users\",",
+        "detail": "backend.goals.migrations.0006_alter_goal_added_by_users_alter_goal_comments_and_more",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goals.migrations.0007_alter_goal_category_alter_goal_subcategory_and_more",
+        "description": "backend.goals.migrations.0007_alter_goal_category_alter_goal_subcategory_and_more",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"categories\", \"0001_initial\"),\n        (\"goals\", \"0006_alter_goal_added_by_users_alter_goal_comments_and_more\"),\n    ]\n    operations = [\n        migrations.AlterField(\n            model_name=\"goal\",\n            name=\"category\",\n            field=models.ForeignKey(",
+        "detail": "backend.goals.migrations.0007_alter_goal_category_alter_goal_subcategory_and_more",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goals.migrations.0008_goal_subgoals_alter_goal_subcategory",
+        "description": "backend.goals.migrations.0008_goal_subgoals_alter_goal_subcategory",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"categories\", \"0001_initial\"),\n        (\"goals\", \"0007_alter_goal_category_alter_goal_subcategory_and_more\"),\n    ]\n    operations = [\n        migrations.AddField(\n            model_name=\"goal\",\n            name=\"subgoals\",\n            field=models.ManyToManyField(",
+        "detail": "backend.goals.migrations.0008_goal_subgoals_alter_goal_subcategory",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goals.migrations.0009_goal_added_from_list",
+        "description": "backend.goals.migrations.0009_goal_added_from_list",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        ('goals', '0008_goal_subgoals_alter_goal_subcategory'),\n    ]\n    operations = [\n        migrations.AddField(\n            model_name='goal',\n            name='added_from_list',\n            field=models.BooleanField(default=False),\n        ),",
+        "detail": "backend.goals.migrations.0009_goal_added_from_list",
+        "documentation": {}
+    },
+    {
+        "label": "GoalsConfig",
+        "kind": 6,
+        "importPath": "backend.goals.apps",
+        "description": "backend.goals.apps",
+        "peekOfCode": "class GoalsConfig(AppConfig):\n    default_auto_field = 'django.db.models.BigAutoField'\n    name = 'goals'",
+        "detail": "backend.goals.apps",
+        "documentation": {}
+    },
+    {
+        "label": "Goal",
+        "kind": 6,
+        "importPath": "backend.goals.models",
+        "description": "backend.goals.models",
+        "peekOfCode": "class Goal(models.Model):\n    COMPLEXITY_CHOICES = [\n        ('easy', 'Легко'),\n        ('medium', 'Средне'),\n        ('hard', 'Тяжело'),\n    ]\n    title = models.CharField(max_length=200)\n    category = models.ForeignKey(Category, on_delete=models.CASCADE)\n    subcategory = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subgoals_goal', null=True, blank=True)\n    complexity = models.CharField(max_length=20, choices=COMPLEXITY_CHOICES)",
+        "detail": "backend.goals.models",
+        "documentation": {}
+    },
+    {
+        "label": "CategorySerializer",
+        "kind": 6,
+        "importPath": "backend.goals.serializers",
+        "description": "backend.goals.serializers",
+        "peekOfCode": "class CategorySerializer(serializers.ModelSerializer):\n    class Meta:\n        model = Category\n        fields = '__all__'\nclass GoalSerializer(serializers.ModelSerializer):\n    category = CategorySerializer()\n    subcategory = CategorySerializer()\n    totalAdded = serializers.SerializerMethodField()  # Новое поле для количества пользователей\n    totalCompleted = serializers.SerializerMethodField()  # Новое поле для количества пользователей\n    class Meta:",
+        "detail": "backend.goals.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "GoalSerializer",
+        "kind": 6,
+        "importPath": "backend.goals.serializers",
+        "description": "backend.goals.serializers",
+        "peekOfCode": "class GoalSerializer(serializers.ModelSerializer):\n    category = CategorySerializer()\n    subcategory = CategorySerializer()\n    totalAdded = serializers.SerializerMethodField()  # Новое поле для количества пользователей\n    totalCompleted = serializers.SerializerMethodField()  # Новое поле для количества пользователей\n    class Meta:\n        model = Goal\n        fields = ('id', 'title', 'category', 'subcategory', 'complexity', 'image', 'short_description', 'code', 'totalAdded', 'totalCompleted')\n    # Метод для получения количества пользователей, добавивших цель\n    def get_totalAdded(self, obj):",
+        "detail": "backend.goals.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "urlpatterns",
+        "kind": 5,
+        "importPath": "backend.goals.urls",
+        "description": "backend.goals.urls",
+        "peekOfCode": "urlpatterns = [\n    path('api/goals/<slug:code>/', get_goal_by_code, name='get-goal-by-code'),\n    path('api/goals/<slug:code>/add/', add_goal_to_user, name='add-goal-to-user'),\n    path('api/goals/<slug:code>/remove/', remove_goal_from_user, name='remove-goal-from-user'),\n    path('api/goals/<slug:code>/mark/', mark_goal, name='mark-goal'),\n]",
+        "detail": "backend.goals.urls",
+        "documentation": {}
+    },
+    {
+        "label": "get_goal_by_code",
+        "kind": 2,
+        "importPath": "backend.goals.views",
+        "description": "backend.goals.views",
+        "peekOfCode": "def get_goal_by_code(request, code):\n    try:\n        goal = Goal.objects.get(code=code)\n    except Goal.DoesNotExist:\n        return Response({'error': 'Goal not found'}, status=status.HTTP_404_NOT_FOUND)\n    user = request.user\n    done = goal.completed_by_users.filter(id=user.id).exists()\n    added = goal.added_by_users.filter(id=user.id).exists()\n    total_added = goal.added_by_users.count()\n    total_completed = goal.completed_by_users.count()",
+        "detail": "backend.goals.views",
+        "documentation": {}
+    },
+    {
+        "label": "add_goal_to_user",
+        "kind": 2,
+        "importPath": "backend.goals.views",
+        "description": "backend.goals.views",
+        "peekOfCode": "def add_goal_to_user(request, code):\n    try:\n        # Найдите цель по 'code' в URL.\n        goal = Goal.objects.get(code=code)\n    except Goal.DoesNotExist:\n        return Response({'error': 'Цель не найдена'}, status=status.HTTP_404_NOT_FOUND)\n    user = request.user  # Получите текущего пользователя.\n    # Проверьте, добавлена ли цель пользователю.\n    if user in goal.added_by_users.all():\n        return Response({'error': 'Цель уже у вас уже добавлена'}, status=status.HTTP_400_BAD_REQUEST)",
+        "detail": "backend.goals.views",
+        "documentation": {}
+    },
+    {
+        "label": "remove_goal_from_user",
+        "kind": 2,
+        "importPath": "backend.goals.views",
+        "description": "backend.goals.views",
+        "peekOfCode": "def remove_goal_from_user(request, code):\n    try:\n        # Найдите цель по 'code' в URL.\n        goal = Goal.objects.get(code=code)\n    except Goal.DoesNotExist:\n        return Response({'error': 'Цель не найдена'}, status=status.HTTP_404_NOT_FOUND)\n    user = request.user  # Получите текущего пользователя.\n    # Проверьте, добавлена ли цель пользователю.\n    if user not in goal.added_by_users.all():\n        return Response({'error': 'Цель не добавлена у вас'}, status=status.HTTP_400_BAD_REQUEST)",
+        "detail": "backend.goals.views",
+        "documentation": {}
+    },
+    {
+        "label": "mark_goal",
+        "kind": 2,
+        "importPath": "backend.goals.views",
+        "description": "backend.goals.views",
+        "peekOfCode": "def mark_goal(request, code):\n    try:\n        # Найдите цель по 'code' в URL.\n        goal = Goal.objects.get(code=code)\n    except Goal.DoesNotExist:\n        return Response({'error': 'Цель не найдена'}, status=status.HTTP_404_NOT_FOUND)\n    user = request.user  # Получите текущего пользователя.\n    # Проверьте, добавлена ли цель пользователю.\n    if user not in goal.added_by_users.all():\n        return Response({'error': 'Цель не добавлена у вас'}, status=status.HTTP_400_BAD_REQUEST)",
+        "detail": "backend.goals.views",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goal_lists.migrations.0001_initial",
+        "description": "backend.goal_lists.migrations.0001_initial",
+        "peekOfCode": "class Migration(migrations.Migration):\n    initial = True\n    dependencies = [\n    ]\n    operations = [\n        migrations.CreateModel(\n            name='GoalList',\n            fields=[\n                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),\n                ('title', models.CharField(max_length=200)),",
+        "detail": "backend.goal_lists.migrations.0001_initial",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goal_lists.migrations.0002_initial",
+        "description": "backend.goal_lists.migrations.0002_initial",
+        "peekOfCode": "class Migration(migrations.Migration):\n    initial = True\n    dependencies = [\n        ('goal_lists', '0001_initial'),\n        ('goals', '0001_initial'),\n        ('users', '0001_initial'),\n    ]\n    operations = [\n        migrations.AddField(\n            model_name='goallist',",
+        "detail": "backend.goal_lists.migrations.0002_initial",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goal_lists.migrations.0003_goalinlist",
+        "description": "backend.goal_lists.migrations.0003_goalinlist",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"goals\", \"0002_initial\"),\n        (\"goal_lists\", \"0002_initial\"),\n    ]\n    operations = [\n        migrations.CreateModel(\n            name=\"GoalInList\",\n            fields=[\n                (",
+        "detail": "backend.goal_lists.migrations.0003_goalinlist",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goal_lists.migrations.0004_alter_goallist_category",
+        "description": "backend.goal_lists.migrations.0004_alter_goallist_category",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"goal_lists\", \"0003_goalinlist\"),\n    ]\n    operations = [\n        migrations.AlterField(\n            model_name=\"goallist\",\n            name=\"category\",\n            field=models.CharField(\n                choices=[",
+        "detail": "backend.goal_lists.migrations.0004_alter_goallist_category",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goal_lists.migrations.0005_goallist_comments_goallist_subcategory_and_more",
+        "description": "backend.goal_lists.migrations.0005_goallist_comments_goallist_subcategory_and_more",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"categories\", \"0001_initial\"),\n        migrations.swappable_dependency(settings.AUTH_USER_MODEL),\n        (\"comments\", \"0003_initial\"),\n        (\"goal_lists\", \"0004_alter_goallist_category\"),\n    ]\n    operations = [\n        migrations.AddField(\n            model_name=\"goallist\",",
+        "detail": "backend.goal_lists.migrations.0005_goallist_comments_goallist_subcategory_and_more",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.goal_lists.migrations.0006_remove_goallist_comments",
+        "description": "backend.goal_lists.migrations.0006_remove_goallist_comments",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"goal_lists\", \"0005_goallist_comments_goallist_subcategory_and_more\"),\n    ]\n    operations = [\n        migrations.RemoveField(\n            model_name=\"goallist\",\n            name=\"comments\",\n        ),\n    ]",
+        "detail": "backend.goal_lists.migrations.0006_remove_goallist_comments",
+        "documentation": {}
+    },
+    {
+        "label": "GoalListsConfig",
+        "kind": 6,
+        "importPath": "backend.goal_lists.apps",
+        "description": "backend.goal_lists.apps",
+        "peekOfCode": "class GoalListsConfig(AppConfig):\n    default_auto_field = 'django.db.models.BigAutoField'\n    name = 'goal_lists'",
+        "detail": "backend.goal_lists.apps",
+        "documentation": {}
+    },
+    {
+        "label": "GoalForm",
+        "kind": 6,
+        "importPath": "backend.goal_lists.forms",
+        "description": "backend.goal_lists.forms",
+        "peekOfCode": "class GoalForm(forms.ModelForm):\n    class Meta:\n        model = Goal\n        fields = ['title', 'category', 'description']\nclass GoalInListForm(forms.ModelForm):\n    class Meta:\n        model = GoalList\n        fields = ['title', 'category', 'description']\n    def __init__(self, *args, **kwargs):\n        super().__init__(*args, **kwargs)",
+        "detail": "backend.goal_lists.forms",
+        "documentation": {}
+    },
+    {
+        "label": "GoalInListForm",
+        "kind": 6,
+        "importPath": "backend.goal_lists.forms",
+        "description": "backend.goal_lists.forms",
+        "peekOfCode": "class GoalInListForm(forms.ModelForm):\n    class Meta:\n        model = GoalList\n        fields = ['title', 'category', 'description']\n    def __init__(self, *args, **kwargs):\n        super().__init__(*args, **kwargs)\n        # Ограничьте выбор целей только тех, которые соответствуют выбранной категории GoalList\n        if 'instance' in kwargs:\n            instance = kwargs['instance']\n            self.fields['goals'] = forms.ModelMultipleChoiceField(",
+        "detail": "backend.goal_lists.forms",
+        "documentation": {}
+    },
+    {
+        "label": "GoalList",
+        "kind": 6,
+        "importPath": "backend.goal_lists.models",
+        "description": "backend.goal_lists.models",
+        "peekOfCode": "class GoalList(models.Model):\n    COMPLEXITY_CHOICES = [\n        ('easy', 'Легко'),\n        ('medium', 'Средне'),\n        ('hard', 'Тяжело'),\n    ]\n    title = models.CharField(max_length=200)\n    category = models.ForeignKey(Category, on_delete=models.CASCADE)\n    subcategory = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='goal_lists_subcategory', null=True, blank=True)\n    complexity = models.CharField(max_length=20, choices=COMPLEXITY_CHOICES)",
+        "detail": "backend.goal_lists.models",
+        "documentation": {}
+    },
+    {
+        "label": "GoalInList",
+        "kind": 6,
+        "importPath": "backend.goal_lists.models",
+        "description": "backend.goal_lists.models",
+        "peekOfCode": "class GoalInList(models.Model):\n    goal = models.ForeignKey(Goal, on_delete=models.CASCADE)\n    goal_list = models.ForeignKey(GoalList, on_delete=models.CASCADE)\n    class Meta:\n        unique_together = ('goal', 'goal_list')",
+        "detail": "backend.goal_lists.models",
+        "documentation": {}
+    },
+    {
+        "label": "GoalListSerializer",
+        "kind": 6,
+        "importPath": "backend.goal_lists.serializers",
+        "description": "backend.goal_lists.serializers",
+        "peekOfCode": "class GoalListSerializer(serializers.ModelSerializer):\n    category = CategorySerializer()\n    subcategory = CategorySerializer()\n    class Meta:\n        model = GoalList\n        fields = '__all__'",
+        "detail": "backend.goal_lists.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "urlpatterns",
+        "kind": 5,
+        "importPath": "backend.goal_lists.urls",
+        "description": "backend.goal_lists.urls",
+        "peekOfCode": "urlpatterns = [\n    # Другие URL-пути\n    path('api/goal-lists/<slug:code>/', get_goal_list_details, name='get-goal-list-details'),\n    path('api/goal-lists/<str:code>/add/', add_goal_list, name='add_goal_list'),\n]",
+        "detail": "backend.goal_lists.urls",
+        "documentation": {}
+    },
+    {
+        "label": "get_goal_list_details",
+        "kind": 2,
+        "importPath": "backend.goal_lists.views",
+        "description": "backend.goal_lists.views",
+        "peekOfCode": "def get_goal_list_details(request, code):\n    try:\n        goal_list = GoalList.objects.get(code=code)\n    except GoalList.DoesNotExist:\n        return Response({'error': 'Список целей не найден'}, status=status.HTTP_404_NOT_FOUND)\n    user = request.user\n    # Проверяем, добавил ли пользователь данный список к себе\n    added_by_user = goal_list.added_by_users.filter(id=user.id).exists()\n    # Сериализация полей category и subcategory\n    category_serializer = CategorySerializer(goal_list.category)",
+        "detail": "backend.goal_lists.views",
+        "documentation": {}
+    },
+    {
+        "label": "add_goal_list",
+        "kind": 2,
+        "importPath": "backend.goal_lists.views",
+        "description": "backend.goal_lists.views",
+        "peekOfCode": "def add_goal_list(request, code):\n    try:\n        goal_list = GoalList.objects.get(code=code)\n    except GoalList.DoesNotExist:\n        return Response({'error': 'Список целей не найден'}, status=status.HTTP_404_NOT_FOUND)\n    user = request.user\n    # Добавляем пользователя к списку \"added_by_users\"\n    goal_list.added_by_users.add(user)\n    return Response({'message': 'Список целей успешно добавлен'}, status=status.HTTP_200_OK)",
+        "detail": "backend.goal_lists.views",
+        "documentation": {}
+    },
+    {
+        "label": "bin_dir",
+        "kind": 5,
+        "importPath": "backend.Scripts.activate_this",
+        "description": "backend.Scripts.activate_this",
+        "peekOfCode": "bin_dir = os.path.dirname(abs_file)\nbase = bin_dir[: -len(\"Scripts\") - 1]  # strip away the bin part from the __file__, plus the path separator\n# prepend bin to PATH (this file is inside the bin directory)\nos.environ[\"PATH\"] = os.pathsep.join([bin_dir] + os.environ.get(\"PATH\", \"\").split(os.pathsep))\nos.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\Lib\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path.decode(\"utf-8\") if \"\" else path)",
+        "detail": "backend.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "base",
+        "kind": 5,
+        "importPath": "backend.Scripts.activate_this",
+        "description": "backend.Scripts.activate_this",
+        "peekOfCode": "base = bin_dir[: -len(\"Scripts\") - 1]  # strip away the bin part from the __file__, plus the path separator\n# prepend bin to PATH (this file is inside the bin directory)\nos.environ[\"PATH\"] = os.pathsep.join([bin_dir] + os.environ.get(\"PATH\", \"\").split(os.pathsep))\nos.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\Lib\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path.decode(\"utf-8\") if \"\" else path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]",
+        "detail": "backend.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "os.environ[\"PATH\"]",
+        "kind": 5,
+        "importPath": "backend.Scripts.activate_this",
+        "description": "backend.Scripts.activate_this",
+        "peekOfCode": "os.environ[\"PATH\"] = os.pathsep.join([bin_dir] + os.environ.get(\"PATH\", \"\").split(os.pathsep))\nos.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\Lib\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path.decode(\"utf-8\") if \"\" else path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "backend.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "os.environ[\"VIRTUAL_ENV\"]",
+        "kind": 5,
+        "importPath": "backend.Scripts.activate_this",
+        "description": "backend.Scripts.activate_this",
+        "peekOfCode": "os.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\Lib\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path.decode(\"utf-8\") if \"\" else path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "backend.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "prev_length",
+        "kind": 5,
+        "importPath": "backend.Scripts.activate_this",
+        "description": "backend.Scripts.activate_this",
+        "peekOfCode": "prev_length = len(sys.path)\nfor lib in \"..\\Lib\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path.decode(\"utf-8\") if \"\" else path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "backend.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "sys.path[:]",
+        "kind": 5,
+        "importPath": "backend.Scripts.activate_this",
+        "description": "backend.Scripts.activate_this",
+        "peekOfCode": "sys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "backend.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "sys.real_prefix",
+        "kind": 5,
+        "importPath": "backend.Scripts.activate_this",
+        "description": "backend.Scripts.activate_this",
+        "peekOfCode": "sys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "backend.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "sys.prefix",
+        "kind": 5,
+        "importPath": "backend.Scripts.activate_this",
+        "description": "backend.Scripts.activate_this",
+        "peekOfCode": "sys.prefix = base",
+        "detail": "backend.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.users.migrations.0001_initial",
+        "description": "backend.users.migrations.0001_initial",
+        "peekOfCode": "class Migration(migrations.Migration):\n    initial = True\n    dependencies = [\n        ('auth', '0012_alter_user_first_name_max_length'),\n    ]\n    operations = [\n        migrations.CreateModel(\n            name='CustomUser',\n            fields=[\n                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),",
+        "detail": "backend.users.migrations.0001_initial",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.users.migrations.0002_alter_customuser_groups_and_more",
+        "description": "backend.users.migrations.0002_alter_customuser_groups_and_more",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"auth\", \"0012_alter_user_first_name_max_length\"),\n        (\"users\", \"0001_initial\"),\n    ]\n    operations = [\n        migrations.AlterField(\n            model_name=\"customuser\",\n            name=\"groups\",\n            field=models.ManyToManyField(",
+        "detail": "backend.users.migrations.0002_alter_customuser_groups_and_more",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.users.migrations.0003_alter_customuser_first_name_and_more",
+        "description": "backend.users.migrations.0003_alter_customuser_first_name_and_more",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"users\", \"0002_alter_customuser_groups_and_more\"),\n    ]\n    operations = [\n        migrations.AlterField(\n            model_name=\"customuser\",\n            name=\"first_name\",\n            field=models.CharField(blank=True, max_length=50, verbose_name=\"Имя\"),\n        ),",
+        "detail": "backend.users.migrations.0003_alter_customuser_first_name_and_more",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "backend.users.migrations.0004_alter_customuser_first_name_and_more",
+        "description": "backend.users.migrations.0004_alter_customuser_first_name_and_more",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"users\", \"0003_alter_customuser_first_name_and_more\"),\n    ]\n    operations = [\n        migrations.AlterField(\n            model_name=\"customuser\",\n            name=\"first_name\",\n            field=models.CharField(blank=True, max_length=100, verbose_name=\"Имя\"),\n        ),",
+        "detail": "backend.users.migrations.0004_alter_customuser_first_name_and_more",
+        "documentation": {}
+    },
+    {
+        "label": "UsersConfig",
+        "kind": 6,
+        "importPath": "backend.users.apps",
+        "description": "backend.users.apps",
+        "peekOfCode": "class UsersConfig(AppConfig):\n    default_auto_field = 'django.db.models.BigAutoField'\n    name = 'users'",
+        "detail": "backend.users.apps",
+        "documentation": {}
+    },
+    {
+        "label": "CustomUser",
+        "kind": 6,
+        "importPath": "backend.users.models",
+        "description": "backend.users.models",
+        "peekOfCode": "class CustomUser(AbstractUser):\n    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)\n    first_name = models.CharField(max_length=100, blank=True, verbose_name=_('Имя'))\n    last_name = models.CharField(max_length=100, blank=True, verbose_name=_('Фамилия'))\n    groups = models.ManyToManyField(Group, related_name='custom_users', blank=True)\n    user_permissions = models.ManyToManyField(Permission, related_name='custom_users', blank=True)",
+        "detail": "backend.users.models",
+        "documentation": {}
+    },
+    {
+        "label": "UserRegistrationSerializer",
+        "kind": 6,
+        "importPath": "backend.users.serializers",
+        "description": "backend.users.serializers",
+        "peekOfCode": "class UserRegistrationSerializer(serializers.ModelSerializer):\n    password = serializers.CharField(write_only=True, validators=[validate_password])\n    name = serializers.CharField(write_only=True)  # Поле для передачи name с фронтенда\n    class Meta:\n        model = User\n        fields = ('name', 'email', 'password')\n    def create(self, validated_data):\n        name = validated_data.pop('name')  # Извлекаем name из validated_data\n        validated_data['first_name'] = name  # Присваиваем first_name значение name\n        # Use the email as the username",
+        "detail": "backend.users.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "UserLoginSerializer",
+        "kind": 6,
+        "importPath": "backend.users.serializers",
+        "description": "backend.users.serializers",
+        "peekOfCode": "class UserLoginSerializer(serializers.Serializer):\n    email = serializers.EmailField()\n    password = serializers.CharField()\n    def validate(self, data):\n        email = data.get('email')\n        password = data.get('password')\n        user = authenticate(username=email, password=password)\n        if not user:\n            raise serializers.ValidationError('Неверные учетные данные')\n        data['user'] = user",
+        "detail": "backend.users.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "CustomUserSerializer",
+        "kind": 6,
+        "importPath": "backend.users.serializers",
+        "description": "backend.users.serializers",
+        "peekOfCode": "class CustomUserSerializer(serializers.ModelSerializer):\n    class Meta:\n        model = CustomUser\n        fields = ('id', 'username', 'email', 'totalCompletedGoals', 'totalAddedGoals')\n    totalCompletedGoals = serializers.SerializerMethodField()\n    totalAddedGoals = serializers.SerializerMethodField()\n    def get_totalCompletedGoals(self, user):\n        return user.completed_goal_lists.count()\n    def get_totalAddedGoals(self, user):\n        return user.added_goal_lists.count()",
+        "detail": "backend.users.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "User",
+        "kind": 5,
+        "importPath": "backend.users.serializers",
+        "description": "backend.users.serializers",
+        "peekOfCode": "User = get_user_model()\nclass UserRegistrationSerializer(serializers.ModelSerializer):\n    password = serializers.CharField(write_only=True, validators=[validate_password])\n    name = serializers.CharField(write_only=True)  # Поле для передачи name с фронтенда\n    class Meta:\n        model = User\n        fields = ('name', 'email', 'password')\n    def create(self, validated_data):\n        name = validated_data.pop('name')  # Извлекаем name из validated_data\n        validated_data['first_name'] = name  # Присваиваем first_name значение name",
+        "detail": "backend.users.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "urlpatterns",
+        "kind": 5,
+        "importPath": "backend.users.urls",
+        "description": "backend.users.urls",
+        "peekOfCode": "urlpatterns = [\n    path('api/register/', register_user, name='register'),\n    path('api/login/', login_user, name='login'),\n    path('api/self/', get_user_info, name='get_user_info'),\n    path('api/self/added-goals/', get_user_added_goals, name='user-added-goals'),\n    path('api/self/added-lists/', get_user_added_lists, name='user-added-lists'),\n]",
+        "detail": "backend.users.urls",
+        "documentation": {}
+    },
+    {
+        "label": "login_user",
+        "kind": 2,
+        "importPath": "backend.users.views",
+        "description": "backend.users.views",
+        "peekOfCode": "def login_user(request):\n    serializer = UserLoginSerializer(data=request.data)\n    if serializer.is_valid():\n        user = serializer.validated_data['user']\n        token, created = Token.objects.get_or_create(user=user)\n        response_data = {\n            'name': smart_text(user.first_name.encode()),\n            # 'avatar': user.avatar if user.avatar else None,  # If you have the avatar_url field in your CustomUser model\n        }\n        response = JsonResponse(response_data)",
+        "detail": "backend.users.views",
+        "documentation": {}
+    },
+    {
+        "label": "register_user",
+        "kind": 2,
+        "importPath": "backend.users.views",
+        "description": "backend.users.views",
+        "peekOfCode": "def register_user(request):\n    serializer = UserRegistrationSerializer(data=request.data)\n    if serializer.is_valid():\n        user = serializer.save()\n        # Создаем токен для зарегистрированного пользователя\n        token, created = Token.objects.get_or_create(user=user)\n        response_data = {\n            'name': user.first_name,\n        }\n        response = JsonResponse(response_data)",
+        "detail": "backend.users.views",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_info",
+        "kind": 2,
+        "importPath": "backend.users.views",
+        "description": "backend.users.views",
+        "peekOfCode": "def get_user_info(request):\n    user = request.user\n    serializer = CustomUserSerializer(user)\n    response_data = {\n        **serializer.data,\n        'name': user.first_name,\n    }\n    return Response(response_data)\n@api_view(['GET'])\n@permission_classes([IsAuthenticated])",
+        "detail": "backend.users.views",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_added_goals",
+        "kind": 2,
+        "importPath": "backend.users.views",
+        "description": "backend.users.views",
+        "peekOfCode": "def get_user_added_goals(request):\n    user = request.user\n    # Получаем все цели, которые были добавлены пользователем\n    user_added_goals = Goal.objects.filter(added_by_users=user)\n    # Получение параметра фильтрации по выполненным целям (completed=true) или невыполненным (completed=false)\n    completed_filter = request.GET.get('completed', None)\n    # Если параметр фильтрации указан и равен 'true', фильтруем выполненные цели\n    if completed_filter == 'true':\n        user_added_goals = user_added_goals.filter(completed_by_users=user)\n    # Если параметр фильтрации указан и равен 'false', фильтруем невыполненные цели",
+        "detail": "backend.users.views",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_added_lists",
+        "kind": 2,
+        "importPath": "backend.users.views",
+        "description": "backend.users.views",
+        "peekOfCode": "def get_user_added_lists(request):\n    user = request.user\n    # Получаем все списки, которые были добавлены пользователем\n    user_added_lists = GoalList.objects.filter(added_by_users=user)\n    # Получение параметра фильтрации по выполненным целям (completed=true) или невыполненным (completed=false)\n    completed_filter = request.GET.get('completed', None)\n    # Если параметр фильтрации указан и равен 'true', фильтруем выполненные цели\n    if completed_filter == 'true':\n        user_added_lists = user_added_lists.filter(completed_by_users=user)\n    # Если параметр фильтрации указан и равен 'false', фильтруем невыполненные цели",
+        "detail": "backend.users.views",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "backend.manage",
+        "description": "backend.manage",
+        "peekOfCode": "def main():\n    \"\"\"Run administrative tasks.\"\"\"\n    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')\n    try:\n        from django.core.management import execute_from_command_line\n    except ImportError as exc:\n        raise ImportError(\n            \"Couldn't import Django. Are you sure it's installed and \"\n            \"available on your PYTHONPATH environment variable? Did you \"\n            \"forget to activate a virtual environment?\"",
+        "detail": "backend.manage",
+        "documentation": {}
+    }
+]

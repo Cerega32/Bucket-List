@@ -15,6 +15,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		gap: 8px;
 	}
 
 	&__user-img {
@@ -27,7 +28,7 @@
 	&__user-level {
 		font-size: 12px;
 		line-height: var(--line-height-12);
-		color: var(--color-gray-10);
+		color: var(--color-gray-1);
 	}
 
 	&__user-wrapper {

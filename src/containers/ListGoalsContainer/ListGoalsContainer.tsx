@@ -4,10 +4,17 @@ import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {useBem} from '@/hooks/useBem';
 import {ContentListGoals} from '@/components/ContentListGoals/ContentListGoals';
 import {ThemeStore} from '@/store/ThemeStore';
-import {getGoal} from '@/utils/api/get/getGoal';
+import {getGoal} from '@/utils/api/get/getCategories';
 import {IList} from '@/typings/list';
 import './list-goals-container.scss';
 import {GET, POST} from '@/utils/fetch/requests';
+import {getList} from '@/utils/api/get/getList';
+import {addGoal} from '@/utils/api/post/addGoal';
+import {removeGoal} from '@/utils/api/post/removeGoal';
+import {markGoal} from '@/utils/api/post/markGoal';
+import {addListGoal} from '@/utils/api/post/addListGoal';
+import {removeListGoal} from '@/utils/api/post/removeListGoal';
+import {markAllGoalsFromList} from '@/utils/api/post/markAllGoalsFromList';
 
 export const ListGoalsContainer: FC = () => {
 	const [block, element] = useBem('list-goals-container');
@@ -24,29 +31,67 @@ export const ListGoalsContainer: FC = () => {
 
 	useEffect(() => {
 		(async () => {
-			const res = await getGoal(`goal-lists/${params.id}`);
+			const res = await getList(`goal-lists/${params['id']}`);
 			if (res.success) {
 				setList(res.data.list);
 			}
 		})();
-	}, [params.id]);
+	}, [params['id']]);
 
-	useEffect(() => {
-		(async () => {
-			const res = await GET('self/added-goals', true);
-			console.log(res);
-		})();
-	}, [params.id]);
+	const updateList = async (
+		code: string,
+		operation: 'add' | 'delete' | 'mark-all'
+	): Promise<void> => {
+		const res = await (operation === 'add'
+			? addListGoal(code)
+			: operation === 'delete'
+			? removeListGoal(code)
+			: markAllGoalsFromList(code));
 
-	const addList = async () => {
-		const res = await POST(`goal-lists/${params.id}/add`, {}, true);
-		if (res.success && list) {
-			const newList: IList = {
+		if (res.success) {
+			setList({
 				...list,
-				addedByUser: true,
-				addedUsersCount: (list?.addedUsersCount || 0) + 1,
+				...res.data,
+				goals: list?.goals.map((goal) => {
+					return {
+						...goal,
+						completedByUser:
+							operation === 'mark-all'
+								? true
+								: goal.completedByUser,
+					};
+				}),
+			});
+		}
+	};
+
+	const updateGoal = async (
+		code: string,
+		i: number,
+		operation: 'add' | 'delete' | 'mark',
+		done?: boolean
+	): Promise<void> => {
+		const res = await (operation === 'add'
+			? addGoal(code)
+			: operation === 'delete'
+			? removeGoal(code)
+			: markGoal(code, !done));
+
+		if (res.success && list) {
+			const updatedGoal = {
+				...list.goals[i],
+				addedByUser: operation !== 'delete',
+				completedByUser:
+					operation === 'mark'
+						? !done
+						: list.goals[i].completedByUser,
+				totalAdded: res.data.users_added_count,
 			};
-			setList(newList);
+
+			const newGoals = [...list.goals];
+			newGoals[i] = updatedGoal;
+
+			setList({...list, goals: newGoals});
 		}
 	};
 
@@ -61,11 +106,16 @@ export const ListGoalsContainer: FC = () => {
 					className={element('aside')}
 					title={list.title}
 					image={list.image}
-					text={list.shortDescription}
-					onAdded={addList}
+					updateGoal={updateList}
 					added={list.addedByUser}
+					code={list.code}
+					isList
 				/>
-				<ContentListGoals className={element('content')} list={list} />
+				<ContentListGoals
+					className={element('content')}
+					list={list}
+					updateGoal={updateGoal}
+				/>
 			</article>
 		</main>
 	);

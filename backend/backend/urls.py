@@ -24,6 +24,8 @@ urlpatterns = [
     path('', include('users.urls')),  # Замените на имя вашего приложения
     path('', include('goals.urls')),  # Замените на имя вашего приложения
     path('', include('goal_lists.urls')),  # Замените на имя вашего приложения
+    path('', include('comments.urls')),  # Замените на имя вашего приложения
+    path('', include('categories.urls')),  # Замените на имя вашего приложения
 ]
 
 if settings.DEBUG:

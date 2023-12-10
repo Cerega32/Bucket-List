@@ -8,13 +8,25 @@ interface IPostBody {
 	[key: string]: any;
 }
 
+interface IFetchParams {
+	auth?: boolean;
+	get?: {[key: string]: string};
+}
+
+type IFetchPostParams = IFetchParams & {
+	body?: IPostBody;
+};
+
+type Headers = HeadersInit & {
+	Authorization?: string;
+};
+
 export const POST = async (
 	url: string,
-	body: IPostBody,
-	auth?: boolean
+	params: IFetchPostParams
 ): Promise<any> => {
 	const headers: Headers = {'Content-Type': 'application/json'};
-	if (auth) {
+	if (params.auth && Cookies.get('token')) {
 		headers.Authorization = `Token ${Cookies.get('token')}`;
 	}
 
@@ -22,7 +34,7 @@ export const POST = async (
 		const response = await fetch(`/api/${url}/`, {
 			method: 'POST',
 			headers,
-			body: JSON.stringify(body), // Convert the object to JSON
+			body: JSON.stringify(params.body), // Convert the object to JSON
 		});
 		const data = await response.json();
 		if (data.error) {
@@ -40,10 +52,13 @@ export const POST = async (
 	}
 };
 
-export const GET = async (url: string, auth?: boolean): Promise<any> => {
+export const GET = async (url: string, params?: IFetchParams): Promise<any> => {
 	const headers: Headers = {};
-	if (auth) {
+	if (params?.auth && Cookies.get('token')) {
 		headers.Authorization = `Token ${Cookies.get('token')}`;
+	}
+	let get = '';
+	if (params?.get) {
 	}
 
 	try {

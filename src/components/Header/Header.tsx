@@ -7,6 +7,7 @@ import {Button} from '@/components/Button/Button';
 import './header.scss';
 import {UserStore} from '@/store/UserStore';
 import {ModalStore} from '@/store/ModalStore';
+import {Svg} from '../Svg/Svg';
 
 interface HeaderProps {
 	className?: string;
@@ -16,12 +17,13 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const {className} = props;
 
 	const {header} = ThemeStore;
-	const {setIsOpen, setWindow} = ModalStore;
+	const {setIsOpen, setWindow, isOpen} = ModalStore;
 	const {isAuth, name} = UserStore;
 
 	const [block, element] = useBem('header', className);
 
 	const openLogin = () => {
+		console.log('open', isOpen);
 		setIsOpen(true);
 		setWindow('login');
 	};
@@ -31,13 +33,11 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		setWindow('registration');
 	};
 
-	console.log(header);
-
 	return (
 		<header className={block({theme: header})}>
 			<div className={element('wrapper')}>
 				<a className={element('logo')} href="/">
-					<ReactSVG src="src/assets/svg/delting.svg" />
+					<Svg icon="delting" />
 				</a>
 				<nav className={element('nav')}>
 					<ul className={element('list')}>

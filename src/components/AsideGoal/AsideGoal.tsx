@@ -2,18 +2,37 @@ import {FC} from 'react';
 import {useBem} from '@/hooks/useBem';
 import './aside-goal.scss';
 import {Button} from '../Button/Button';
+import {Line} from '../Line/Line';
 
-interface AsideGoalProps {
+interface AsideProps {
 	className?: string;
 	title: string;
-	text: string;
 	image: string;
-	onAdded: () => void;
 	added: boolean;
+	code: string;
+	done: boolean;
 }
 
-export const AsideGoal: FC<AsideGoalProps> = (props) => {
-	const {className, title, text, image, onAdded, added} = props;
+interface AsideGoalProps extends AsideProps {
+	updateGoal: (
+		code: string,
+		operation: 'add' | 'delete' | 'mark',
+		done?: boolean
+	) => Promise<void>;
+	isList?: never;
+}
+
+interface AsideListsProps extends AsideProps {
+	updateGoal: (
+		code: string,
+		operation: 'add' | 'delete' | 'mark-all'
+	) => Promise<void>;
+	isList: true;
+}
+
+export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
+	const {className, title, image, added, updateGoal, code, done, isList} =
+		props;
 
 	const [block, element] = useBem('aside-goal', className);
 
@@ -21,35 +40,74 @@ export const AsideGoal: FC<AsideGoalProps> = (props) => {
 		<aside className={block()}>
 			<img src={image} alt={title} className={element('image')} />
 			<div className={element('info')}>
-				{added ? (
+				{!isList && added && (
 					<Button
-						theme="blue"
-						onClick={() => {}}
+						theme={done ? 'green' : 'blue'}
+						onClick={() => updateGoal(code, 'mark', done)}
 						icon="plus"
+						className={element('btn', {done: true})}
+						hoverContent={done ? 'Отменить выполнение' : ''}
+						hoverIcon={done ? 'cross' : ''}
+					>
+						{done ? 'Выполнено' : 'Выполнить'}
+					</Button>
+				)}
+				{isList && added && (
+					<Button
+						theme={'blue'}
+						onClick={() => updateGoal(code, 'mark-all')}
+						icon="done"
 						className={element('btn')}
 					>
-						Добавлено
+						Выполнить все цели
 					</Button>
-				) : (
+				)}
+				{!added && (
 					<Button
-						theme="blue"
-						onClick={onAdded}
+						onClick={() => updateGoal(code, 'add')}
 						icon="plus"
 						className={element('btn')}
+						theme="blue"
 					>
 						Добавить к себе
 					</Button>
 				)}
+				{!isList && done && (
+					<Button
+						theme="blue-light"
+						onClick={() => {}}
+						icon="comment"
+						className={element('btn')}
+					>
+						Написать отзыв
+					</Button>
+				)}
+				{added && (
+					<Button
+						theme="blue-light"
+						onClick={() => updateGoal(code, 'delete')}
+						icon="trash"
+						className={element('btn')}
+					>
+						Удалить
+					</Button>
+				)}
+				<Line className={element('line')} />
 				<Button
 					theme="blue-light"
-					type="Link"
 					icon="mount"
-					onClick={() => {}}
-					className={element('last-btn')}
+					onClick={() =>
+						window.open(
+							`https://telegram.me/share/url?url=${window.location.href}`,
+							'sharer',
+							'status=0,toolbar=0,width=650,height=500'
+						)
+					}
+					// TODO Добавить действие
+					className={element('btn')}
 				>
-					Подробнее
+					Поделиться
 				</Button>
-				<p>{text}</p>
 			</div>
 		</aside>
 	);

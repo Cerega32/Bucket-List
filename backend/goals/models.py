@@ -18,6 +18,7 @@ class Goal(models.Model):
     short_description = models.CharField(max_length=200, blank=True)
     code = models.SlugField(max_length=255, unique=True, blank=True)
     added_by_users = models.ManyToManyField('auth.User', related_name='added_goals', blank=True)
+    added_from_list = models.BooleanField(default=False)  # Новое поле для отметки, что цель добавлена из списка
     completed_by_users = models.ManyToManyField('auth.User', related_name='completed_goals', blank=True)
     comments = models.ManyToManyField('comments.Comment', related_name='goal_comments', blank=True)
     subgoals = models.ManyToManyField('Goal', related_name='category_subgoals', blank=True)

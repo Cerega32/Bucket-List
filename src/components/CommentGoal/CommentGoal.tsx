@@ -4,31 +4,20 @@ import './comment-goal.scss';
 import {pluralize} from '@/utils/text/pluralize';
 import {Button} from '../Button/Button';
 import {Tag} from '../Tag/Tag';
-
-interface IUser {
-	avatar: string;
-	name: string;
-	level: number;
-	countGoals: number;
-}
-
-interface IComment {
-	text: string;
-	images: Array<string>;
-	likes: number;
-	dislikes: number;
-	date: string;
-	complexity: string;
-}
+import {IComment} from '@/typings/comments';
+import {Avatar} from '../Avatar/Avatar';
+import {getDate} from '@/utils/date/getDate';
+import {postLikeComment} from '@/utils/api/post/postLikeComment';
 
 interface CommentGoalProps {
 	className?: string;
-	user: IUser;
 	comment: IComment;
+	code: string;
+	onClickScore: (id: number, like: boolean) => Promise<void>;
 }
 
 export const CommentGoal: FC<CommentGoalProps> = (props) => {
-	const {className, user, comment} = props;
+	const {className, comment, code, onClickScore} = props;
 
 	const [block, element] = useBem('comment-goal', className);
 
@@ -36,16 +25,12 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 		<article className={block()}>
 			<div className={element('info')}>
 				<div className={element('user-info')}>
-					<img
-						src={user.avatar}
-						alt={user.name}
-						className={element('user-img')}
-					/>
+					<Avatar avatar={comment.userAvatar} size="medium" />
 					<div className={element('user-wrapper')}>
-						<h4>{user.name}</h4>
+						<h4>{comment.userName}</h4>
 						<p className={element('user-level')}>
-							{user.level} уровень&nbsp;
-							{pluralize(user.countGoals, [
+							{/* {comment.level} уровень&nbsp; */}
+							{pluralize(comment.userTotalCompletedGoals, [
 								'цель выполнена',
 								'цели выполнено',
 								'целей выполнено',
@@ -54,18 +39,20 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 					</div>
 				</div>
 				<div className={element('comment-info')}>
-					<span className={element('date')}>{comment.date}</span>
+					<span className={element('date')}>
+						{getDate(comment.dateCreated)}
+					</span>
 					<div className={element('vertical-line')} />
-					<Tag text="hard" theme="integrate" icon="arrow-top" />
+					<Tag complexity={comment.complexity} theme="integrate" />
 				</div>
 			</div>
 			<hr className={element('horizontal-line')} />
 			<p className={element('text')}>{comment.text}</p>
-			{!!comment.images.length && (
+			{comment.photos && !!comment.photos.length && (
 				<div className={element('comment-images')}>
-					{comment.images.map((el) => (
+					{comment.photos.map((el) => (
 						<img
-							src={el}
+							src={el.image}
 							alt="Изображения комментария"
 							className={element('comment-img')}
 						/>
@@ -73,16 +60,22 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 				</div>
 			)}
 			<div className={element('score')}>
-				<Button icon="like" small theme="blue-light" onClick={() => {}}>
-					{comment.likes}
+				<Button
+					icon="like"
+					small
+					theme={comment.hasLiked ? 'green' : 'blue-light'}
+					onClick={() => onClickScore(comment.id, true)}
+					className={element('like')}
+				>
+					{comment.likesCount}
 				</Button>
 				<Button
 					icon="like--bottom"
 					small
-					theme="blue-light"
-					onClick={() => {}}
+					theme={comment.hasDisliked ? 'red' : 'blue-light'}
+					onClick={() => onClickScore(comment.id, false)}
 				>
-					{comment.dislikes}
+					{comment.dislikesCount}
 				</Button>
 			</div>
 		</article>

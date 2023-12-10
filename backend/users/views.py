@@ -10,7 +10,8 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.utils.encoding import smart_text
 from goals.models import Goal
-from goals.serializers import GoalSerializer
+from goal_lists.models import GoalList
+from categories.serializers import CategorySerializer
 
 @api_view(['POST'])
 def login_user(request):
@@ -71,7 +72,13 @@ def register_user(request):
 def get_user_info(request):
     user = request.user
     serializer = CustomUserSerializer(user)
-    return Response(serializer.data)
+
+    response_data = {
+        **serializer.data,
+        'name': user.first_name,
+    }
+
+    return Response(response_data)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -80,6 +87,18 @@ def get_user_added_goals(request):
 
     # Получаем все цели, которые были добавлены пользователем
     user_added_goals = Goal.objects.filter(added_by_users=user)
+
+    # Получение параметра фильтрации по выполненным целям (completed=true) или невыполненным (completed=false)
+    completed_filter = request.GET.get('completed', None)
+
+    # Если параметр фильтрации указан и равен 'true', фильтруем выполненные цели
+    if completed_filter == 'true':
+        user_added_goals = user_added_goals.filter(completed_by_users=user)
+
+    # Если параметр фильтрации указан и равен 'false', фильтруем невыполненные цели
+    elif completed_filter == 'false':
+        user_added_goals = user_added_goals.exclude(completed_by_users=user)
+
 
     # Получение номера страницы из параметра запроса
     page_number = request.GET.get('page', 1)
@@ -94,7 +113,88 @@ def get_user_added_goals(request):
     # Получаем цели для текущей страницы
     paginated_user_added_goals = user_added_goals[start_index:end_index]
 
-    # Сериализация результатов
-    serializer = GoalSerializer(paginated_user_added_goals, many=True)
+    # Инициализируем массив целей и общее количество добавленных целей
+    goals_data = []
+    total_added = user_added_goals.count()
 
-    return Response(serializer.data)
+    # Сериализация результатов
+    for goal in paginated_user_added_goals:
+        goal_data = {
+            'category': CategorySerializer(goal.category).data,
+            'code': goal.code,
+            'complexity': goal.complexity,
+            'description': goal.description,
+            'image': goal.image.url if goal.image else None,
+            'shortDescription': goal.short_description,
+            'subcategory': CategorySerializer(goal.subcategory).data if goal.subcategory else None,
+            'title': goal.title,
+            'completedByUser': goal.completed_by_users.filter(id=user.id).exists(),
+            'totalCompleted': goal.completed_by_users.count(),
+        }
+        goals_data.append(goal_data)
+
+    response_data = {
+        'goals': goals_data,
+        'totalAdded': total_added,
+    }
+
+    return Response(response_data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_added_lists(request):
+    user = request.user
+
+    # Получаем все списки, которые были добавлены пользователем
+    user_added_lists = GoalList.objects.filter(added_by_users=user)
+
+    # Получение параметра фильтрации по выполненным целям (completed=true) или невыполненным (completed=false)
+    completed_filter = request.GET.get('completed', None)
+
+    # Если параметр фильтрации указан и равен 'true', фильтруем выполненные цели
+    if completed_filter == 'true':
+        user_added_lists = user_added_lists.filter(completed_by_users=user)
+
+    # Если параметр фильтрации указан и равен 'false', фильтруем невыполненные цели
+    elif completed_filter == 'false':
+        user_added_lists = user_added_lists.exclude(completed_by_users=user)
+
+    # Получение номера страницы из параметра запроса
+    page_number = request.GET.get('page', 1)
+
+    # Определите, сколько элементов на странице
+    page_size = 10
+
+    # Расчет начальной и конечной позиции элементов на странице
+    start_index = (page_number - 1) * page_size
+    end_index = page_number * page_size
+
+    # Получаем списки для текущей страницы
+    paginated_user_added_lists = user_added_lists[start_index:end_index]
+
+    # Инициализируем массив списков и общее количество добавленных списков
+    lists_data = []
+    total_added = user_added_lists.count()
+
+    # Сериализация результатов
+    for goal_list in paginated_user_added_lists:
+        list_data = {
+            'title': goal_list.title,
+            'category': CategorySerializer(goal_list.category).data,
+            'subcategory': CategorySerializer(goal_list.subcategory).data if goal_list.subcategory else None,
+            'complexity': goal_list.complexity,
+            'image': goal_list.image.url if goal_list.image else None,
+            'description': goal_list.description,
+            'shortDescription': goal_list.short_description,
+            'completedUsersCount': goal_list.completed_by_users.count(),
+        }
+        lists_data.append(list_data)
+
+    response_data = {
+        'lists': lists_data,
+        'totalAdded': total_added,
+    }
+
+    return Response(response_data)
+

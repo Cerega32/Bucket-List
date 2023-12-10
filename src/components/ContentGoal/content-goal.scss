@@ -1,28 +1,32 @@
 .content-goal {
+	&__info-all {
+		display: flex;
+		gap: 24px;
+		align-self: flex-start;
+	}
+
+	&__description {
+		flex-basis: 67%;
+	}
+
+	&__comments {
+		margin-top: 24px;
+	}
+
+	&__btn-more {
+		width: initial;
+	}
+
+	&__short-text {
+		margin-bottom: 16px;
+	}
 
 	&__info {
 		margin-bottom: 40px;
+		flex-basis: 33%;
 	}
 
 	&__section {
 		margin-bottom: 40px;
-	}
-
-	&__title-section {
-		margin-bottom: 24px;
-	}
-
-	&__title-counter {
-		color: var(--color-gray-11);
-	}
-
-	&__list-goals {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 24px;
-	}
-
-	&__item-list-goals {
-		width: calc(50% - 12px);
 	}
 }

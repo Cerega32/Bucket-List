@@ -3,17 +3,32 @@ export type IComplexity = 'hard' | 'normal' | 'easy';
 export interface ICategory {
 	id: number;
 	name: string;
-	name_en: string;
-	parent_category: number | null;
+	nameEn: string;
+	parentCategory: number | null;
+}
+
+export interface ICategoryDetailed {
+	id: number;
+	name: string;
+	nameEn: string;
+	parentCategory: number | null;
+	image: string;
+	goalCount: number;
 }
 
 export interface IShortList {
+	code: string;
 	image: string;
 	shortDescription: string;
 	category: ICategory;
 	complexity: IComplexity;
 	totalCompleted: number;
 	title: string;
+	addedByUser: boolean;
+	completedByUser: boolean;
+	totalAdded: number;
+	userCompletedGoals: number;
+	goalsCount: number;
 }
 
 export interface IGoal {
@@ -26,12 +41,14 @@ export interface IGoal {
 	shortDescription: string;
 	subcategory: ICategory;
 	title: string;
-	added: boolean;
-	done: boolean;
 	totalAdded: number;
 	totalCompleted: number;
 	lists: Array<IShortList>;
 	listsCount: number;
+	completedByUser: boolean;
+	addedByUser: boolean;
+	totalLists: number;
+	totalComments: number;
 }
 
 export interface IShortGoal {
@@ -45,4 +62,6 @@ export interface IShortGoal {
 	title: string;
 	completedByUser: boolean;
 	totalCompleted: number;
+	totalAdded: number;
+	addedByUser: boolean;
 }

@@ -1,23 +1,63 @@
 .button {
+	$block: &;
 	padding: 8px 16px;
 	width: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	gap: 4px;
 	border-radius: 4px;
-
-	&__icon {
-		margin-right: 4px;
-	}
 
 	&--theme-blue {
 		background: var(--color-primary);
 		color: var(--color-white);
+
+		&:hover,
+		&:active {
+			background: var(--color-primary-hover);
+		}
+
+		&:focus {
+			box-shadow: 0px 0px 0px 2px rgba(var(--color-primary-rgb), 0.4);
+		}
 	}
 
 	&--theme-blue-light {
-		background: var(--color-blue-4);
+		background: var(--color-secondary);
 		color: var(--color-text-primary);
+
+		&:hover,
+		&:active {
+			background: var(--color-secondary-hover);
+		}
+	}
+
+	&--theme-green {
+		background: var(--color-sentiment-positive);
+		color: var(--color-white);
+
+		&:hover,
+		&:active {
+			background: var(--color-sentiment-positive-hover);
+		}
+
+		#{$block}__icon * {
+			fill: var(--color-white);
+		}
+	}
+
+	&--theme-red {
+		background: var(--color-sentiment-negative);
+		color: var(--color-white);
+
+		&:hover,
+		&:active {
+			background: var(--color-sentiment-negative-hover);
+		}
+
+		#{$block}__icon * {
+			fill: var(--color-white);
+		}
 	}
 
 	&--small {
@@ -33,7 +73,8 @@
 	}
 
 	&--size-small {
-		padding: 8px 16px;
+		padding: 6px 8px;
 		width: auto;
+		height: 32px;
 	}
 }
