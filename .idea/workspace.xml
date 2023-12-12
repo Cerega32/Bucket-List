@@ -1,19 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="13b7f816-fe5b-4a52-9877-2e91d0b9bd81" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/backend/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/backend/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/backend/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/goal_lists/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/goal_lists/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/goal_lists/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/goal_lists/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/users/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/users/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/users/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/users/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/AsideGoal/AsideGoal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/AsideGoal/AsideGoal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/containers/ListGoalsContainer/ListGoalsContainer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/containers/ListGoalsContainer/ListGoalsContainer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/typings/list.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/typings/list.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/fetch/requests.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/fetch/requests.ts" afterDir="false" />
-    </list>
+    <list default="true" id="13b7f816-fe5b-4a52-9877-2e91d0b9bd81" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -112,6 +100,7 @@
       <workItem from="1692084276056" duration="2566000" />
       <workItem from="1692254412742" duration="9023000" />
       <workItem from="1692290828936" duration="4436000" />
+      <workItem from="1692772883843" duration="401000" />
     </task>
     <servers />
   </component>

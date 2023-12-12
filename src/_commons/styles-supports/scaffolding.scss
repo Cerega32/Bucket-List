@@ -1,6 +1,6 @@
 @charset "UTF-8";
-
 @import 'custom-properties';
+@import 'mixins';
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
@@ -87,12 +87,6 @@ button {
 	background-color: transparent;
 	box-shadow: none;
 	cursor: pointer;
-}
-
-h1 {
-	font-size: 40px;
-	line-height: var(--line-height-40);
-	color: var(--color-white);
 }
 
 .test {

@@ -1,0 +1,36 @@
+.categories {
+	position: relative;
+	background: var(--color-gray-3);
+	padding: calc(var(--height-header) + 56px) 0 0;
+	max-width: var(--max-width);
+	margin: 0 auto;
+
+	&::before {
+		content: '';
+		display: block;
+		position: absolute;
+		top: 318px;
+		width: 100%;
+		height: 416px;
+		background: linear-gradient(
+			180deg,
+			rgba(var(--color-green-rgb), 0.04) 0%,
+			rgba(var(--color-gray-rgb-12), 0) 100%
+		);
+	}
+
+	&__title {
+		margin-bottom: 56px;
+	}
+
+	&__list {
+		width: 100%;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 24px;
+	}
+
+	&__item {
+		width: calc(100% / 4 - (72px / 3));
+	}
+}

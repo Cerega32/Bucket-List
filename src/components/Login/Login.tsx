@@ -6,6 +6,7 @@ import './login.scss';
 import {Svg} from '@/components/Svg/Svg';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {postLogin} from '@/utils/api/post/postLogin';
+import {Title} from '../Title/Title';
 
 interface LoginProps {
 	className?: string;
@@ -31,7 +32,9 @@ export const Login: FC<LoginProps> = (props) => {
 	return (
 		<form className={block()} onSubmit={(e) => signIn(e)}>
 			<Svg icon="icon-logo" className={element('logo')} />
-			<h3 className={element('title')}>Вход в лучшую жизнь</h3>
+			<Title tag="h3" className={element('title')}>
+				Вход в лучшую жизнь
+			</Title>
 			<FieldInput
 				placeholder="E-mail"
 				id="email"

@@ -1,24 +1,13 @@
 .content-list-goals {
-
-	&__section {
-		margin-bottom: 40px;
+	&__title {
+		margin-bottom: 24px;
 	}
 
-	&__title-section {
+	&__description {
 		margin-bottom: 24px;
 	}
 
 	&__info {
-		margin-bottom: 40px;
-	}
-
-	&__list-goals {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 24px;
-	}
-
-	&__item-list-goals {
-		width: calc(33.33% - 16px);
+		margin-bottom: 24px;
 	}
 }

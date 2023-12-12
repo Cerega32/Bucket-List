@@ -1,6 +1,7 @@
 import {FC} from 'react';
 import {useBem} from '@/hooks/useBem';
 import './item-goal.scss';
+import {Title} from '../Title/Title';
 
 interface ItemGoalProps {
 	className?: string;
@@ -19,7 +20,9 @@ export const ItemGoal: FC<ItemGoalProps> = (props) => {
 		<section className={block({vertical})}>
 			<img src={img} alt={title} className={element('img')} />
 			<div className={element('info')}>
-				<h3 className={element('title')}>{title}</h3>
+				<Title tag="h3" className={element('title')}>
+					{title}
+				</Title>
 				Теги
 				<p className={element('text')}>{text}</p>
 			</div>

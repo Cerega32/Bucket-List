@@ -3,13 +3,15 @@
 	display: flex;
 	align-items: center;
 	gap: 4px;
+	width: max-content;
 	color: var(--color-white);
 	background: rgba(var(--color-white-rgb), 0.08);
 	border: 1px solid rgba(var(--color-white-rgb), 0.16);
 	border-radius: 4px;
 	backdrop-filter: blur(4px);
-	font-size: 12px;
-	line-height: var(--line-height-12);
+	font-size: 14px;
+	font-weight: var(--weight-medium);
+	line-height: var(--line-height-14);
 
 	&--theme-light {
 		background: var(--color-white);
@@ -18,7 +20,14 @@
 	}
 
 	&--theme-integrate {
+		padding: 0;
 		border: none;
 		color: var(--color-text);
+	}
+
+	&--category-travel {
+		background: var(--color-travel);
+		color: var(--color-white);
+		border: none;
 	}
 }

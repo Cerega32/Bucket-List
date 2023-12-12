@@ -1,0 +1,52 @@
+.progress {
+	$block: &;
+	padding: 4px 8px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	border-radius: 16px;
+	border: 1px solid var(--color-border);
+	font-size: 12px;
+	line-height: var(--line-height-12);
+
+	&__line {
+		position: relative;
+		width: 56px;
+		height: 4px;
+		border-radius: 2px;
+		background: var(--color-secondary);
+	}
+
+	&__line-done {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 4px;
+		border-radius: 2px;
+		background: var(--color-primary);
+
+		&--all {
+			background: var(--color-sentiment-positive);
+		}
+	}
+
+	&--goal {
+		padding: 0;
+		width: 100%;
+		border: none;
+		gap: 8px;
+
+		#{$block} {
+			&__line {
+				width: 100%;
+			}
+
+			&__count {
+				padding: 2px 8px;
+				border: 1px solid var(--color-border);
+				background: var(--color-gray-3);
+				border-radius: 4px;
+			}
+		}
+	}
+}

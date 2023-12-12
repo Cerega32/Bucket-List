@@ -1,0 +1,7 @@
+
+src/components/Card/card.scss
+ 36:12  ✖  Unexpected vendor-prefix "-webkit-box"  value-no-vendor-prefix
+ 98:14  ✖  Unexpected vendor-prefix "-webkit-box"  value-no-vendor-prefix
+
+2 problems (2 errors, 0 warnings)
+

@@ -46,4 +46,13 @@ class UserLoginSerializer(serializers.Serializer):
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'avatar')
+        fields = ('id', 'username', 'email', 'totalCompletedGoals', 'totalAddedGoals')
+
+    totalCompletedGoals = serializers.SerializerMethodField()
+    totalAddedGoals = serializers.SerializerMethodField()
+
+    def get_totalCompletedGoals(self, user):
+        return user.completed_goal_lists.count()
+
+    def get_totalAddedGoals(self, user):
+        return user.added_goal_lists.count()

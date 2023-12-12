@@ -1,34 +1,47 @@
 import {FC} from 'react';
 import {useBem} from '@/hooks/useBem';
-import {Tags} from '../Tags/Tags';
 import {IShortGoal} from '@/typings/goal';
 import './list-goals.scss';
+import {Title} from '../Title/Title';
+import {Card} from '../Card/Card';
 
 interface ListGoalsProps {
 	className?: string;
-	goal: IShortGoal;
-	vertical?: boolean;
+	horizontal?: boolean;
+	list: Array<IShortGoal>;
+	columns?: 'two' | 'three' | 'four';
+	updateGoal: (
+		code: string,
+		i: number,
+		operation: 'add' | 'delete' | 'mark',
+		done?: boolean
+	) => Promise<void>;
 }
 
 export const ListGoals: FC<ListGoalsProps> = (props) => {
-	const {className, goal, vertical} = props;
+	const {className, list, horizontal, columns = 'three', updateGoal} = props;
 
-	const [block, element] = useBem('list-goals', className);
+	const [block, element] = useBem('list', className);
 
 	return (
-		<section className={block({vertical})}>
-			<img src={goal.image} alt={goal.title} className={element('img')} />
-			<div className={element('info')}>
-				<h3 className={element('title')}>{goal.title}</h3>
-				<Tags
-					category={goal.category}
-					complexity={goal.complexity}
-					done={goal.totalCompleted}
-					theme="light"
-					className={element('tags')}
+		<section className={block()}>
+			{list.map((goal, i) => (
+				<Card
+					goal={goal}
+					className={element('goal', {columns})}
+					horizontal={horizontal}
+					onClickAdd={() => updateGoal(goal.code, i, 'add')}
+					onClickDelete={() => updateGoal(goal.code, i, 'delete')}
+					onClickMark={() => {
+						return updateGoal(
+							goal.code,
+							i,
+							'mark',
+							goal.completedByUser
+						);
+					}}
 				/>
-				<p className={element('text')}>{goal.shortDescription}</p>
-			</div>
+			))}
 		</section>
 	);
 };

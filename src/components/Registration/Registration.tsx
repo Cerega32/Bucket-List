@@ -5,6 +5,7 @@ import {Button} from '@/components/Button/Button';
 import './registration.scss';
 import {Svg} from '@/components/Svg/Svg';
 import {postRegistration} from '@/utils/api/post/postRegistration';
+import {Title} from '../Title/Title';
 
 interface RegistrationProps {
 	className?: string;
@@ -32,7 +33,9 @@ export const Registration: FC<RegistrationProps> = (props) => {
 	return (
 		<form className={block()}>
 			<Svg icon="icon-logo" className={element('logo')} />
-			<h3 className={element('title')}>Вступить в лучшую жизнь</h3>
+			<Title tag="h3" className={element('title')}>
+				Вступить в лучшую жизнь
+			</Title>
 			<FieldInput
 				placeholder="E-mail"
 				id="email"

@@ -1,4 +1,5 @@
 .aside-goal {
+	$block: &;
 	max-width: 336px;
 
 	&__image {
@@ -10,10 +11,18 @@
 
 	&__btn {
 		margin-bottom: 8px;
-	}
 
-	&__last-btn {
-		margin-bottom: 16px;
+		&:has(+ :not(#{$block}__btn)) {
+			margin-bottom: 0;
+		}
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+
+		&--done * {
+			fill: var(--color-white);
+		}
 	}
 
 	&__info {

@@ -7,6 +7,10 @@
 	"less.validate": false,
 
 	"editor.codeActionsOnSave": {
-		"source.fixAll.stylelint": "explicit"
-	}
+		"source.fixAll.stylelint": true
+	},
+	"[python]": {
+		"editor.defaultFormatter": "ms-python.black-formatter"
+	},
+	"python.formatting.provider": "none"
 }

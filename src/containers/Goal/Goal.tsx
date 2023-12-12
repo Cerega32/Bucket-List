@@ -7,10 +7,15 @@ import {useBem} from '@/hooks/useBem';
 import {ThemeStore} from '@/store/ThemeStore';
 import {Modal} from '@/components/Modal/Modal';
 import {IGoal} from '@/typings/goal';
-import {getGoal} from '@/utils/api/get/getGoal';
 import './goal.scss';
+import {addGoal} from '@/utils/api/post/addGoal';
+import {removeGoal} from '@/utils/api/post/removeGoal';
+import {markGoal} from '@/utils/api/post/markGoal';
+import {IPage} from '@/typings/page';
+import {getCategories} from '@/utils/api/get/getCategories';
+import {getGoal} from '@/utils/api/get/getGoal';
 
-export const Goal: FC = () => {
+export const Goal: FC<IPage> = ({page}) => {
 	const [block, element] = useBem('goal');
 
 	const {setHeader} = ThemeStore;
@@ -36,11 +41,35 @@ export const Goal: FC = () => {
 		return null;
 	}
 
+	const updateGoal = async (
+		code: string,
+		operation: 'add' | 'delete' | 'mark',
+		done?: boolean
+	): Promise<void> => {
+		const res = await (operation === 'add'
+			? addGoal(code)
+			: operation === 'delete'
+			? removeGoal(code)
+			: markGoal(code, !done));
+
+		if (res.success) {
+			const updatedGoal = {
+				addedByUser: operation !== 'delete',
+				completedByUser: operation === 'mark' ? !done : false,
+				totalAdded: res.data.totalAdded,
+				totalCompleted: res.data.totalCompleted,
+			};
+
+			setGoal({...goal, ...updatedGoal});
+			console.log({...goal, ...updatedGoal});
+		}
+	};
+
 	return (
 		<main className={block()}>
 			<HeaderGoal
 				title={goal.title}
-				category="goal.category.name"
+				category={goal.category}
 				image={goal.image}
 				goal={goal}
 			/>
@@ -49,11 +78,17 @@ export const Goal: FC = () => {
 					className={element('aside')}
 					title={goal.title}
 					image={goal.image}
-					text={goal.shortDescription}
+					updateGoal={updateGoal}
+					code={goal.code}
+					done={goal.completedByUser}
+					added={goal.addedByUser}
 				/>
-				<ContentGoal goal={goal} className={element('content')} />
+				<ContentGoal
+					page={page}
+					goal={goal}
+					className={element('content')}
+				/>
 			</section>
-			<Modal />
 		</main>
 	);
 };

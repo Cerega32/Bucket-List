@@ -1,0 +1,32 @@
+.description-with-links {
+	padding: 16px 24px 0;
+	background: var(--color-white);
+	border: 1px solid var(--color-border);
+	border-radius: 8px;
+
+	&--list {
+		padding-bottom: 16px;
+	}
+
+	&__wrapper {
+		display: flex;
+		gap: 24px;
+		align-self: flex-start;
+	}
+
+	&__text {
+		flex-basis: 67%;
+	}
+
+	&__btn-more {
+		width: initial;
+	}
+
+	&__short-text {
+		margin-bottom: 16px;
+	}
+
+	&__info {
+		flex-basis: 33%;
+	}
+}

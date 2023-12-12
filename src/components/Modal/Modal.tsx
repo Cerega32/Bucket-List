@@ -21,6 +21,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 
 	const {isOpen, setIsOpen, window, setWindow} = ModalStore;
 	const {setIsAuth, setName} = UserStore;
+	console.log('isOpen', isOpen);
 
 	const closeWindow = () => {
 		setIsOpen(false);
@@ -57,7 +58,6 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			document.removeEventListener('keyup', handleKeyUp);
 		}; // eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isOpen, setIsOpen]);
-
 	if (!isOpen) return null;
 
 	return (
