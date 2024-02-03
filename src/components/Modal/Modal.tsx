@@ -1,11 +1,13 @@
-import {FC, useEffect} from 'react';
-import {observer} from 'mobx-react';
 import Cookies from 'js-cookie';
-import {useBem} from '@/hooks/useBem';
+import {observer} from 'mobx-react';
+import {FC, useEffect} from 'react';
+
 import {Svg} from '../Svg/Svg';
-import {Login} from '@/components/Login/Login';
+
 import {Button} from '@/components/Button/Button';
+import {Login} from '@/components/Login/Login';
 import {Registration} from '@/components/Registration/Registration';
+import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
 import './modal.scss';
@@ -21,7 +23,6 @@ export const Modal: FC<ModalProps> = observer((props) => {
 
 	const {isOpen, setIsOpen, window, setWindow} = ModalStore;
 	const {setIsAuth, setName} = UserStore;
-	console.log('isOpen', isOpen);
 
 	const closeWindow = () => {
 		setIsOpen(false);
@@ -63,32 +64,13 @@ export const Modal: FC<ModalProps> = observer((props) => {
 	return (
 		<section className={block({isOpen})}>
 			<div className={element('window')}>
-				{window === 'login' && (
-					<Login
-						openRegistration={openRegistration}
-						successLogin={successAuth}
-					/>
-				)}
-				{window === 'registration' && (
-					<Registration
-						openLogin={openLogin}
-						successRegistration={successAuth}
-					/>
-				)}
-				<Button
-					theme="blue-light"
-					className={element('close')}
-					onClick={closeWindow}
-				>
+				{window === 'login' && <Login openRegistration={openRegistration} successLogin={successAuth} />}
+				{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
+				<Button theme="blue-light" className={element('close')} onClick={closeWindow}>
 					<Svg icon="cross" />
 				</Button>
 			</div>
-			<button
-				aria-label="Закрыть окно"
-				type="button"
-				className={element('base')}
-				onClick={closeWindow}
-			/>
+			<button aria-label="Закрыть окно" type="button" className={element('base')} onClick={closeWindow} />
 		</section>
 	);
 });

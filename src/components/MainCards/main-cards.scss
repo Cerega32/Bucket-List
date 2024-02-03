@@ -1,0 +1,22 @@
+.main-cards {
+	&__title {
+		margin-bottom: 24px;
+		display: flex;
+		align-items: center;
+		gap: 16px;
+	}
+
+	&__cards {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 24px;
+	}
+
+	&__card {
+		width: calc(25% - 24px * 3 / 4);
+
+		&--big {
+			width: calc(33.33% - 24px * 2 / 3);
+		}
+	}
+}

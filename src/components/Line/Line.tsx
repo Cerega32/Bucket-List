@@ -1,4 +1,5 @@
 import {FC} from 'react';
+
 import {useBem} from '@/hooks/useBem';
 import './line.scss';
 
@@ -15,11 +16,8 @@ export const Line: FC<LineProps> = (props) => {
 	const [block] = useBem('line', className);
 
 	return vertical ? (
-		<div>
-			<div
-				className={block({vertical})}
-				style={{margin, height: `calc(100% + ${height}px)`}}
-			/>
+		<div style={{display: 'flex', alignItems: 'center'}}>
+			<div className={block({vertical})} style={{margin, height: `calc(100% + ${height}px)`}} />
 		</div>
 	) : (
 		<hr className={block()} style={{margin}} />

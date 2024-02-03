@@ -14,18 +14,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('users.urls')),  # Замените на имя вашего приложения
-    path('', include('goals.urls')),  # Замените на имя вашего приложения
-    path('', include('goal_lists.urls')),  # Замените на имя вашего приложения
-    path('', include('comments.urls')),  # Замените на имя вашего приложения
-    path('', include('categories.urls')),  # Замените на имя вашего приложения
+    path("admin/", admin.site.urls),
+    path("", include("users.urls")),  # Замените на имя вашего приложения
+    path("", include("goals.urls")),  # Замените на имя вашего приложения
+    path("", include("goal_lists.urls")),  # Замените на имя вашего приложения
+    path("", include("comments.urls")),  # Замените на имя вашего приложения
+    path("", include("categories.urls")),  # Замените на имя вашего приложения
+    path("", include("achievements.urls")),  # Замените на имя вашего приложения
 ]
 
 if settings.DEBUG:

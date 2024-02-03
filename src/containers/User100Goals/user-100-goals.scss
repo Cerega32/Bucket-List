@@ -1,0 +1,16 @@
+.user-100-goals {
+	max-width: var(--max-width);
+	margin: 24px auto 0;
+
+	&__stats {
+		margin-bottom: 56px;
+	}
+
+	&__goals {
+		margin-bottom: 56px;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+}

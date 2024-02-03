@@ -1,9 +1,10 @@
 .aside-goal {
 	$block: &;
-	max-width: 336px;
+	min-width: 336px;
 
 	&__image {
 		margin-bottom: 16px;
+		width: 100%;
 		height: 336px;
 		object-fit: cover;
 		border-radius: 8px;

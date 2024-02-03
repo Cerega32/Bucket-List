@@ -1,5 +1,6 @@
 import {FC} from 'react';
 import {ReactSVG} from 'react-svg';
+
 import './svg.scss';
 import {useBem} from '@/hooks/useBem';
 
@@ -23,8 +24,9 @@ export const Svg: FC<SvgProps> = (props) => {
 			className={block({
 				transform: iconAndTransform[1],
 			})}
-			width={width}
-			height={height}
+			beforeInjection={(svg) => {
+				svg.setAttribute('style', `width: ${width}; height: ${height}`);
+			}}
 		/>
 	);
 };

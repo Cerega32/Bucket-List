@@ -1,10 +1,12 @@
 import {FC} from 'react';
-import {useBem} from '@/hooks/useBem';
-import './info-goal.scss';
-import {getComplexity} from '@/utils/values/complexity';
-import {IComplexity} from '@/typings/goal';
+
 import {Line} from '../Line/Line';
 import {Progress} from '../Progress/Progress';
+
+import {useBem} from '@/hooks/useBem';
+import './info-goal.scss';
+import {IComplexity} from '@/typings/goal';
+import {getComplexity} from '@/utils/values/complexity';
 
 interface InfoGoalProps {
 	className?: string;
@@ -17,15 +19,7 @@ interface InfoGoalProps {
 }
 
 export const InfoGoal: FC<InfoGoalProps> = (props) => {
-	const {
-		className,
-		totalCompleted,
-		totalAdded,
-		complexity,
-		isUser,
-		progress,
-		horizontal,
-	} = props;
+	const {className, totalCompleted, totalAdded, complexity, isUser, progress, horizontal} = props;
 
 	const [block, element] = useBem('info-goal', className);
 
@@ -36,9 +30,7 @@ export const InfoGoal: FC<InfoGoalProps> = (props) => {
 					<>
 						<div className={element('item')}>
 							<span className={element('title')}>Сложность</span>
-							<span className={element('text')}>
-								{getComplexity[complexity]}
-							</span>
+							<span className={element('text')}>{getComplexity[complexity]}</span>
 						</div>
 						<div className={element('vertical-line')} />
 					</>
@@ -46,21 +38,13 @@ export const InfoGoal: FC<InfoGoalProps> = (props) => {
 				{!horizontal && (
 					<>
 						<div className={element('item')}>
-							<span className={element('title')}>
-								{isUser ? 'Всего целей' : 'Добавили к себе'}
-							</span>
-							<span className={element('text')}>
-								{totalAdded}
-							</span>
+							<span className={element('title')}>{isUser ? 'Всего целей' : 'Добавили к себе'}</span>
+							<span className={element('text')}>{totalAdded}</span>
 						</div>
 						<div className={element('vertical-line')} />
 						<div className={element('item')}>
-							<span className={element('title')}>
-								{isUser ? 'Выполнено' : 'Выполнили'}
-							</span>
-							<span className={element('text')}>
-								{totalCompleted}
-							</span>
+							<span className={element('title')}>{isUser ? 'Выполнено' : 'Выполнили'}</span>
+							<span className={element('text')}>{totalCompleted}</span>
 						</div>
 					</>
 				)}
@@ -68,36 +52,21 @@ export const InfoGoal: FC<InfoGoalProps> = (props) => {
 					<>
 						<div className={element('vertical-line')} />
 						<div className={element('item')}>
-							<span className={element('title')}>
-								Процент выполнения
-							</span>
-							<span className={element('text')}>
-								{Math.round(
-									(totalCompleted / totalAdded) * 100
-								)}
-								%
-							</span>
+							<span className={element('title')}>Процент выполнения</span>
+							<span className={element('text')}>{Math.round((totalCompleted / totalAdded) * 100)}%</span>
 						</div>
 					</>
 				)}
 				{horizontal && (
 					<div className={element('wrapper-horizontal')}>
-						<span className={element('title')}>
-							Мой прогресс выполнения
-						</span>
-						<span className={element('text')}>
-							{`${totalCompleted}/${totalAdded}`}
-						</span>
+						<span className={element('title')}>Мой прогресс выполнения</span>
+						<span className={element('text')}>{`${totalCompleted}/${totalAdded}`}</span>
 					</div>
 				)}
 			</div>
 			{progress && totalAdded > 0 && (
 				<>
-					<Line
-						vertical={horizontal}
-						margin="5px 24px"
-						height={-10}
-					/>
+					<Line vertical={horizontal} margin="5px 24px" height={-10} />
 					<Progress done={totalCompleted} all={totalAdded} goal />
 				</>
 			)}

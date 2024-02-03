@@ -1,4 +1,4 @@
-export type IComplexity = 'hard' | 'normal' | 'easy';
+export type IComplexity = 'hard' | 'medium' | 'easy';
 
 export interface ICategory {
 	id: number;
@@ -11,9 +11,15 @@ export interface ICategoryDetailed {
 	id: number;
 	name: string;
 	nameEn: string;
-	parentCategory: number | null;
+	parentCategory: ICategory | null;
 	image: string;
 	goalCount: number;
+	icon: string | null;
+}
+
+export interface ICategoryWithSubcategories {
+	category: ICategoryDetailed;
+	subcategories: Array<ICategoryDetailed>;
 }
 
 export interface IShortList {

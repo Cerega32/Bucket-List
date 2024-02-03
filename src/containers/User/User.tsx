@@ -1,20 +1,31 @@
 import {observer} from 'mobx-react';
 import {FC, useEffect} from 'react';
+
+import {useParams} from 'react-router-dom';
+
+import {User100Goals} from '../User100Goals/User100Goals';
+import {UserAchievements} from '../UserAchievements/UserAchievements';
+import {UserActiveGoals, UserGoals} from '../UserGoals/UserGoals';
+
+import {UserShowcase} from '../UserShowcase/UserShowcase';
+
+import {UserInfo} from '@/components/UserInfo/UserInfo';
 import {useBem} from '@/hooks/useBem';
 import {ThemeStore} from '@/store/ThemeStore';
-import {UserInfo} from '@/components/UserInfo/UserInfo';
 import './user.scss';
-import {GET} from '@/utils/fetch/requests';
 import {UserStore} from '@/store/UserStore';
-import {getUser} from '@/utils/api/get/getUser';
 import {IPage} from '@/typings/page';
-import {UserActiveGoals} from '../UserActiveGoals/UserActiveGoals';
+import {getUser} from '@/utils/api/get/getUser';
 
-export const User: FC<IPage> = observer(({page}) => {
-	const [block, element] = useBem('user');
+export const User: FC<IPage> = observer(({page, subPage}) => {
+	const [block] = useBem('user');
 
 	const {setHeader} = ThemeStore;
 	const {userInfo} = UserStore;
+	const {id} = useParams();
+	if (!id) {
+		return null;
+	}
 
 	useEffect(() => {
 		setHeader('white');
@@ -23,16 +34,24 @@ export const User: FC<IPage> = observer(({page}) => {
 
 	useEffect(() => {
 		(async () => {
-			await getUser();
-			const res = await GET('self/added-goals', {auth: true});
+			const res = await getUser(id);
 			console.log(res);
+			// const res = await GET(`user/${id}/added-goals`, {auth: true});
 		})();
-	}, []);
+	}, [id]);
 
 	const getUserContent = () => {
 		switch (page) {
+			case 'isUserShowcase':
+				return <UserShowcase id={id} />;
+			case 'isUser100Goals':
+				return <User100Goals id={id} />;
 			case 'isUserActiveGoals':
-				return <UserActiveGoals />;
+				return <UserGoals id={id} subPage={subPage} />;
+			case 'isUserDoneGoals':
+				return <UserGoals id={id} subPage={subPage} completed />;
+			case 'isUserAchievements':
+				return <UserAchievements id={id} />;
 			default:
 				return null;
 		}
@@ -46,6 +65,7 @@ export const User: FC<IPage> = observer(({page}) => {
 				totalAdded={userInfo.totalAddedGoals}
 				totalCompleted={userInfo.totalCompletedGoals}
 				page={page}
+				id={id}
 			/>
 			{getUserContent()}
 		</main>

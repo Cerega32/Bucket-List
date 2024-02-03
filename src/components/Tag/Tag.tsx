@@ -1,9 +1,11 @@
 import {FC} from 'react';
-import {useBem} from '@/hooks/useBem';
+
 import {Svg} from '../Svg/Svg';
+
+import {useBem} from '@/hooks/useBem';
 import './tag.scss';
-import {getComplexity} from '@/utils/values/complexity';
 import {IComplexity} from '@/typings/goal';
+import {getComplexity} from '@/utils/values/complexity';
 
 interface TagProps {
 	icon?: string;
@@ -16,8 +18,7 @@ interface TagProps {
 }
 
 export const Tag: FC<TagProps> = (props) => {
-	const {icon, className, text, category, theme, classNameIcon, complexity} =
-		props;
+	const {icon, className, text, category, theme, classNameIcon, complexity} = props;
 
 	const [block] = useBem('tag', className);
 

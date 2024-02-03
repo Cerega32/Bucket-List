@@ -7,23 +7,20 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 
 
-User = get_user_model()
-
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, validators=[validate_password])
-    name = serializers.CharField(write_only=True)  # Поле для передачи name с фронтенда
+    password = serializers.CharField(
+        write_only=True, required=True, style={"input_type": "password"}
+    )
 
     class Meta:
-        model = User
-        fields = ('name', 'email', 'password')
+        model = CustomUser
+        fields = ("email", "password", "first_name")
 
     def create(self, validated_data):
-        name = validated_data.pop('name')  # Извлекаем name из validated_data
-        validated_data['first_name'] = name  # Присваиваем first_name значение name
+        # Ensure a unique username is set, for example, using the email
+        validated_data["username"] = validated_data["email"]
 
-        # Use the email as the username
-        validated_data['username'] = validated_data['email']
-        user = User.objects.create_user(**validated_data)
+        user = CustomUser.objects.create_user(**validated_data)
         return user
 
 
@@ -32,27 +29,48 @@ class UserLoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def validate(self, data):
-        email = data.get('email')
-        password = data.get('password')
+        email = data.get("email")
+        password = data.get("password")
 
         user = authenticate(username=email, password=password)
         if not user:
-            raise serializers.ValidationError('Неверные учетные данные')
+            raise serializers.ValidationError("Invalid credentials")
 
-        data['user'] = user
+        data["user"] = user
         return data
-    
+
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'username', 'email', 'totalCompletedGoals', 'totalAddedGoals')
+        fields = (
+            "id",
+            "username",
+            "email",
+            "avatar",
+            "totalCompletedGoals",
+            "totalAddedGoals",
+            "totalCompletedLists",
+            "totalAddedLists",
+        )
 
     totalCompletedGoals = serializers.SerializerMethodField()
     totalAddedGoals = serializers.SerializerMethodField()
+    totalCompletedLists = serializers.SerializerMethodField()
+    totalAddedLists = serializers.SerializerMethodField()
+    # totalComments = serializers.SerializerMethodField()
 
     def get_totalCompletedGoals(self, user):
-        return user.completed_goal_lists.count()
+        return user.completed_goals.count()
 
     def get_totalAddedGoals(self, user):
+        return user.added_goals.count()
+
+    def get_totalCompletedLists(self, user):
+        return user.completed_goal_lists.count()
+
+    def get_totalAddedLists(self, user):
         return user.added_goal_lists.count()
+
+    # def get_totalComments(self, user):
+    #     return user.added_goal_lists.count()

@@ -1,0 +1,51 @@
+.notification {
+	$block: &;
+	top: 200px;
+	z-index: 100000;
+	position: fixed;
+	display: flex;
+	gap: 8px;
+	padding: 8px 16px;
+	border-radius: 8px;
+	background: var(--color-white);
+	transition: width 0.5s ease;
+	width: 52px;
+
+	&--visible {
+		width: 456px;
+	}
+
+	&__icon {
+		flex-shrink: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 20px;
+		height: 20px;
+		color: var(--color-white);
+		border-radius: 50%;
+		background: var(--color-sentiment-warning);
+	}
+
+	&__text {
+		display: flex;
+		align-items: center;
+	}
+
+	&__char {
+		opacity: 0;
+		animation: fadeIn 0.5s forwards;
+	}
+
+	&__close {
+		margin-left: auto;
+		opacity: 0;
+		animation: fadeIn 0.5s forwards;
+	}
+}
+
+@keyframes fadeIn {
+	to {
+		opacity: 1;
+	}
+}

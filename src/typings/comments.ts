@@ -1,4 +1,4 @@
-import {IComplexity} from './goal';
+import {ICategory, IComplexity} from './goal';
 
 export interface IPhotoComment {
 	id: number;
@@ -19,7 +19,8 @@ export interface IComment {
 	userName: string;
 	userNickname: string;
 	userTotalCompletedGoals: number;
-	userAvatar?: string;
+	userAvatar: string | null;
+	goalCategory: ICategory;
 }
 
 export interface IComments {

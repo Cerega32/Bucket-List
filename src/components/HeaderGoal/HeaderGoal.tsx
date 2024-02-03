@@ -16,7 +16,7 @@ export const HeaderGoal: FC<HeaderGoalProps> = (props) => {
 	const {className, title, category, image, goal} = props;
 
 	const [block, element] = useBem('header-goal', className);
-	console.log(category);
+
 	return (
 		<header
 			className={block({category: category.nameEn})}

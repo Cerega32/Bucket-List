@@ -1,19 +1,21 @@
 import {FC} from 'react';
+
 import {Svg} from '../Svg/Svg';
+
 import {useBem} from '@/hooks/useBem';
 import './field-checkbox.scss';
 
 interface FieldCheckboxProps {
 	className?: string;
-	placeholder: string;
 	id: string;
 	text: string;
 	value: string;
-	setValue: (value: string) => void;
+	setChecked: (value: boolean) => void;
+	checked: boolean;
 }
 
 export const FieldCheckbox: FC<FieldCheckboxProps> = (props) => {
-	const {className, placeholder, id, text, value, setValue} = props;
+	const {className, id, text, value, checked, setChecked} = props;
 
 	const [block, element] = useBem('field-checkbox', className);
 
@@ -23,9 +25,9 @@ export const FieldCheckbox: FC<FieldCheckboxProps> = (props) => {
 				className={element('input')}
 				id={id}
 				type="checkbox"
-				placeholder={placeholder}
 				value={value}
-				onChange={(e) => setValue(e.target.value)}
+				onChange={() => setChecked(!checked)}
+				checked={checked}
 			/>
 			<span className={element('checkbox')}>
 				<Svg icon="done" className={element('icon')} />

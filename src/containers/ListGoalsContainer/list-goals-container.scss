@@ -2,6 +2,7 @@
 	background: var(--color-gray-3);
 
 	&::before {
+		z-index: -1;
 		content: '';
 		display: block;
 		position: absolute;

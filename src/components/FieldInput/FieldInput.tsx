@@ -8,9 +8,10 @@ interface FieldInputProps {
 	type?: string;
 	placeholder: string;
 	id: string;
-	text: string;
+	text?: string;
 	value: string;
 	setValue: (value: string) => void;
+	iconBegin?: string;
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -22,6 +23,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		text,
 		value,
 		setValue,
+		iconBegin,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -37,12 +39,17 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 
 	return (
 		<div className={block()}>
-			<label className={element('label')} htmlFor={id}>
-				{text}
-			</label>
+			{text && (
+				<label className={element('label')} htmlFor={id}>
+					{text}
+				</label>
+			)}
 			<div className={element('wrapper')}>
+				{iconBegin && (
+					<Svg icon={iconBegin} className={element('icon-begin')} />
+				)}
 				<input
-					className={element('input')}
+					className={element('input', {iconBegin: !!iconBegin})}
 					id={id}
 					type={typeState}
 					placeholder={placeholder}
@@ -54,6 +61,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						type="button"
 						className={element('show-password')}
 						onClick={toggleTypePassword}
+						aria-label="Показать пароль"
 					>
 						<Svg icon="eye" />
 					</button>

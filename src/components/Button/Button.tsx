@@ -1,6 +1,8 @@
 import {FC, ReactElement, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
+
 import {Svg} from '../Svg/Svg';
+
 import {useBem} from '@/hooks/useBem';
 import './button.scss';
 
@@ -18,6 +20,8 @@ interface ButtonProps {
 	small?: boolean;
 	hoverContent?: ReactElement | string | number;
 	hoverIcon?: string;
+	active?: boolean;
+	loading?: boolean;
 }
 
 export const Button: FC<ButtonProps> = (props) => {
@@ -34,6 +38,8 @@ export const Button: FC<ButtonProps> = (props) => {
 		typeBtn = 'button',
 		hoverContent,
 		hoverIcon,
+		active,
+		loading,
 	} = props;
 
 	const [block, element] = useBem('button', className);
@@ -59,15 +65,9 @@ export const Button: FC<ButtonProps> = (props) => {
 
 	const content = (
 		<>
-			{iconState && (
-				<Svg
-					width="16px"
-					height="16px"
-					icon={iconState}
-					className={element('icon')}
-				/>
-			)}
-			{text}
+			{!loading && iconState && <Svg width="16px" height="16px" icon={iconState} className={element('icon')} />}
+			{loading && <span className={element('loading')} />}
+			{loading ? !iconState : text}
 		</>
 	);
 
@@ -75,7 +75,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		switch (type) {
 			case 'Link':
 				return (
-					<Link to={href} className={block({theme, small, size})}>
+					<Link to={href} className={block({theme, small, size, active})}>
 						{content}
 					</Link>
 				);
@@ -83,11 +83,12 @@ export const Button: FC<ButtonProps> = (props) => {
 			default:
 				return (
 					<button
-						className={block({theme, small, size})}
+						className={block({theme, small, size, active})}
 						onClick={onClick}
 						type={typeBtn === 'button' ? 'button' : 'submit'}
 						onMouseEnter={() => onHover(true)}
 						onMouseLeave={() => onHover(false)}
+						disabled={active}
 					>
 						{content}
 					</button>

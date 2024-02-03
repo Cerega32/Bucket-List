@@ -1,0 +1,37 @@
+.pagination {
+	display: flex;
+	justify-content: center;
+	gap: 12px;
+
+	&__pages {
+		padding: 2px;
+		display: flex;
+		background: var(--color-gray-5);
+		border-radius: 4px;
+	}
+
+	&__page {
+		width: 48px;
+	}
+
+	&__arrow {
+		width: auto;
+		transition: all 0.2s linear;
+
+		&--notShow {
+			cursor: initial;
+			background: transparent;
+			color: transparent;
+			transition: all 0.2s linear;
+
+			* {
+				fill: transparent;
+				transition: all 0.2s linear;
+			}
+
+			&:hover {
+				background: transparent;
+			}
+		}
+	}
+}

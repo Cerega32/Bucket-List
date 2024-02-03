@@ -1,8 +1,10 @@
 import {FC} from 'react';
-import {useBem} from '@/hooks/useBem';
+
 import './aside-goal.scss';
 import {Button} from '../Button/Button';
 import {Line} from '../Line/Line';
+
+import {useBem} from '@/hooks/useBem';
 
 interface AsideProps {
 	className?: string;
@@ -14,25 +16,17 @@ interface AsideProps {
 }
 
 interface AsideGoalProps extends AsideProps {
-	updateGoal: (
-		code: string,
-		operation: 'add' | 'delete' | 'mark',
-		done?: boolean
-	) => Promise<void>;
+	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void>;
 	isList?: never;
 }
 
 interface AsideListsProps extends AsideProps {
-	updateGoal: (
-		code: string,
-		operation: 'add' | 'delete' | 'mark-all'
-	) => Promise<void>;
+	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark-all') => Promise<void>;
 	isList: true;
 }
 
 export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
-	const {className, title, image, added, updateGoal, code, done, isList} =
-		props;
+	const {className, title, image, added, updateGoal, code, done, isList} = props;
 
 	const [block, element] = useBem('aside-goal', className);
 
@@ -53,42 +47,22 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					</Button>
 				)}
 				{isList && added && (
-					<Button
-						theme={'blue'}
-						onClick={() => updateGoal(code, 'mark-all')}
-						icon="done"
-						className={element('btn')}
-					>
+					<Button theme="blue" onClick={() => updateGoal(code, 'mark-all')} icon="done" className={element('btn')}>
 						Выполнить все цели
 					</Button>
 				)}
 				{!added && (
-					<Button
-						onClick={() => updateGoal(code, 'add')}
-						icon="plus"
-						className={element('btn')}
-						theme="blue"
-					>
+					<Button onClick={() => updateGoal(code, 'add')} icon="plus" className={element('btn')} theme="blue">
 						Добавить к себе
 					</Button>
 				)}
 				{!isList && done && (
-					<Button
-						theme="blue-light"
-						onClick={() => {}}
-						icon="comment"
-						className={element('btn')}
-					>
+					<Button theme="blue-light" onClick={() => {}} icon="comment" className={element('btn')}>
 						Написать отзыв
 					</Button>
 				)}
 				{added && (
-					<Button
-						theme="blue-light"
-						onClick={() => updateGoal(code, 'delete')}
-						icon="trash"
-						className={element('btn')}
-					>
+					<Button theme="blue-light" onClick={() => updateGoal(code, 'delete')} icon="trash" className={element('btn')}>
 						Удалить
 					</Button>
 				)}

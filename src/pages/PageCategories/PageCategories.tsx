@@ -1,7 +1,15 @@
-import {FC} from 'react';
-import {IPage} from '@/typings/page';
-import {Categories} from '@/containers/Categories/categories';
+import {FC, useEffect} from 'react';
 
-export const PageCategories: FC<IPage> = (props) => {
-	return <Categories page={props.page} />;
+import {Categories} from '@/containers/Categories/Categories';
+import {ThemeStore} from '@/store/ThemeStore';
+import {IPage} from '@/typings/page';
+
+export const PageCategories: FC<IPage> = ({page}) => {
+	const {setPage} = ThemeStore;
+
+	useEffect(() => {
+		setPage(page);
+	}, [page, setPage]);
+
+	return <Categories page={page} />;
 };

@@ -1,16 +1,18 @@
 import {FC, useState} from 'react';
-import {useBem} from '@/hooks/useBem';
-import {FieldInput} from '@/components/FieldInput/FieldInput';
-import {Button} from '@/components/Button/Button';
-import './registration.scss';
-import {Svg} from '@/components/Svg/Svg';
-import {postRegistration} from '@/utils/api/post/postRegistration';
+
 import {Title} from '../Title/Title';
+
+import {Button} from '@/components/Button/Button';
+import {FieldInput} from '@/components/FieldInput/FieldInput';
+import {Svg} from '@/components/Svg/Svg';
+import {useBem} from '@/hooks/useBem';
+import './registration.scss';
+import {postRegistration} from '@/utils/api/post/postRegistration';
 
 interface RegistrationProps {
 	className?: string;
 	openLogin: () => void;
-	successRegistration: () => void;
+	successRegistration: (data: {name: string}) => void;
 }
 
 export const Registration: FC<RegistrationProps> = (props) => {
@@ -25,9 +27,8 @@ export const Registration: FC<RegistrationProps> = (props) => {
 	const signUp = async () => {
 		const res = await postRegistration(email, password);
 		if (res.success) {
-			successRegistration();
+			successRegistration(res);
 		}
-		console.log(res);
 	};
 
 	return (
@@ -36,14 +37,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 			<Title tag="h3" className={element('title')}>
 				Вступить в лучшую жизнь
 			</Title>
-			<FieldInput
-				placeholder="E-mail"
-				id="email"
-				text="E-mail"
-				value={email}
-				setValue={setEmail}
-				className={element('field')}
-			/>
+			<FieldInput placeholder="E-mail" id="email" text="E-mail" value={email} setValue={setEmail} className={element('field')} />
 			<FieldInput
 				placeholder="Пароль для входа"
 				id="password"
@@ -62,30 +56,12 @@ export const Registration: FC<RegistrationProps> = (props) => {
 				className={element('field')}
 				type="password"
 			/>
-			<FieldInput
-				placeholder="Имя пользователя"
-				id="name"
-				text="Имя"
-				value={name}
-				setValue={setName}
-				className={element('field')}
-			/>
-			<Button
-				icon="rocket"
-				theme="blue"
-				className={element('btn')}
-				onClick={signUp}
-				type="submit"
-			>
+			<Button icon="rocket" theme="blue" className={element('btn')} onClick={signUp} type="submit">
 				Зарегистрироваться
 			</Button>
 			<p className={element('sign-in')}>
 				У вас уже есть аккаунт?
-				<Button
-					theme="no-border"
-					className={element('btn-sign-in')}
-					onClick={openLogin}
-				>
+				<Button theme="no-border" className={element('btn-sign-in')} onClick={openLogin}>
 					Вход
 				</Button>
 			</p>

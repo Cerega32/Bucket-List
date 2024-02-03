@@ -1,8 +1,9 @@
-import {makeAutoObservable} from 'mobx';
 import Cookies from 'js-cookie';
-import {IUserInfo} from '@/typings/user';
-import {IShortGoal} from '@/typings/goal';
+import {makeAutoObservable} from 'mobx';
+
+import {IGoal, IShortGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
+import {IUserInfo} from '@/typings/user';
 
 interface IAddedGoals {
 	goals: Array<IShortGoal>;
@@ -14,12 +15,24 @@ interface IAddedLists {
 	totalAdded: number;
 }
 
+interface ICategoryGoals {
+	data: Array<IGoal>;
+	countCompleted: number;
+}
+
+interface IMainGoals {
+	easyGoals: ICategoryGoals;
+	mediumGoals: ICategoryGoals;
+	hardGoals: ICategoryGoals;
+}
+
 interface IUserStore {
 	isAuth: boolean;
 	name: string;
 	userInfo: IUserInfo;
 	addedGoals: IAddedGoals;
 	addedLists: IAddedLists;
+	mainGoals: IMainGoals;
 }
 
 class Store implements IUserStore {
@@ -40,6 +53,12 @@ class Store implements IUserStore {
 	addedGoals: IAddedGoals = {goals: [], totalAdded: 0};
 
 	addedLists: IAddedLists = {lists: [], totalAdded: 0};
+
+	mainGoals: IMainGoals = {
+		easyGoals: {data: [], countCompleted: 0},
+		mediumGoals: {data: [], countCompleted: 0},
+		hardGoals: {data: [], countCompleted: 0},
+	};
 
 	constructor() {
 		makeAutoObservable(this);
@@ -63,6 +82,10 @@ class Store implements IUserStore {
 
 	setAddedLists = (addedLists: IAddedLists) => {
 		this.addedLists = addedLists;
+	};
+
+	setMainGoals = (mainGoals: IMainGoals) => {
+		this.mainGoals = mainGoals;
 	};
 }
 

@@ -6,6 +6,7 @@
 	margin: 0 auto;
 
 	&::before {
+		z-index: -1;
 		content: '';
 		display: block;
 		position: absolute;

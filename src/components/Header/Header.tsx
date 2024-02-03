@@ -1,12 +1,15 @@
-import {FC} from 'react';
 import {observer} from 'mobx-react';
+import {FC} from 'react';
 import {ReactSVG} from 'react-svg';
-import {useBem} from '@/hooks/useBem';
+
 import {ThemeStore} from '../../store/ThemeStore';
+
 import {Button} from '@/components/Button/Button';
+import {useBem} from '@/hooks/useBem';
 import './header.scss';
-import {UserStore} from '@/store/UserStore';
 import {ModalStore} from '@/store/ModalStore';
+import {UserStore} from '@/store/UserStore';
+
 import {Svg} from '../Svg/Svg';
 
 interface HeaderProps {
@@ -16,14 +19,13 @@ interface HeaderProps {
 export const Header: FC<HeaderProps> = observer((props) => {
 	const {className} = props;
 
-	const {header} = ThemeStore;
+	const {header, page} = ThemeStore;
 	const {setIsOpen, setWindow, isOpen} = ModalStore;
 	const {isAuth, name} = UserStore;
 
 	const [block, element] = useBem('header', className);
 
 	const openLogin = () => {
-		console.log('open', isOpen);
 		setIsOpen(true);
 		setWindow('login');
 	};
@@ -36,7 +38,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	return (
 		<header className={block({theme: header})}>
 			<div className={element('wrapper')}>
-				<a className={element('logo')} href="/">
+				<a className={element('logo')} href="/" aria-label="Главная">
 					<Svg icon="delting" />
 				</a>
 				<nav className={element('nav')}>
@@ -47,30 +49,23 @@ export const Header: FC<HeaderProps> = observer((props) => {
 							</a>
 						</li>
 						<li className={element('item')}>
-							<a className={element('item-link')} href="/">
+							<a className={element('item-link')} href="/goals/100-goal">
 								100 целей
 							</a>
 						</li>
 						<li className={element('item')}>
-							<a className={element('item-link')} href="/">
+							<a className={element('item-link', {active: page === 'isCategories'})} href="/categories">
 								Категории
 							</a>
 						</li>
 						<li className={element('item')}>
-							<span
-								className={element('item-link', {active: true})}
-							>
-								Цели
-							</span>
-						</li>
-						<li className={element('item')}>
 							<a className={element('item-link')} href="/">
-								Списки
+								Цели и списки
 							</a>
 						</li>
 						<li className={element('item')}>
 							<a className={element('item-link')} href="/">
-								Лента
+								Лидеры
 							</a>
 						</li>
 					</ul>
@@ -86,21 +81,10 @@ export const Header: FC<HeaderProps> = observer((props) => {
 					</a>
 				) : (
 					<div className={element('profile')}>
-						<Button
-							className={element('sign-in')}
-							theme="blue-light"
-							size="small"
-							onClick={openLogin}
-						>
+						<Button className={element('sign-in')} theme="blue-light" size="small" onClick={openLogin}>
 							Войти
 						</Button>
-						<Button
-							className={element('registration')}
-							theme="blue"
-							size="small"
-							icon="rocket"
-							onClick={openRegistration}
-						>
+						<Button className={element('registration')} theme="blue" size="small" icon="rocket" onClick={openRegistration}>
 							Регистрация
 						</Button>
 					</div>

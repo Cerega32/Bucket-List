@@ -12,7 +12,7 @@ interface TitleWithTagsProps {
 	category: ICategory;
 	complexity: IComplexity;
 	totalCompleted: number;
-	isList: boolean;
+	isList?: boolean;
 }
 
 export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {

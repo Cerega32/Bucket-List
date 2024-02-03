@@ -3,12 +3,12 @@ import {useBem} from '@/hooks/useBem';
 import {ThemeStore} from '@/store/ThemeStore';
 import {getCategories} from '@/utils/api/get/getCategories';
 import {IPage} from '@/typings/page';
-import {ICategory, ICategoryDetailed} from '@/typings/goal';
+import {ICategoryDetailed} from '@/typings/goal';
 import {CardCategory} from '@/components/CardCategory/CardCategory';
 import {Title} from '@/components/Title/Title';
 import './categories.scss';
 
-export const Categories: FC<IPage> = ({page}) => {
+export const Categories: FC<IPage> = () => {
 	const [block, element] = useBem('categories');
 
 	const [categories, setCategories] = useState<Array<ICategoryDetailed>>([]);
@@ -18,7 +18,6 @@ export const Categories: FC<IPage> = ({page}) => {
 	useEffect(() => {
 		(async () => {
 			const res = await getCategories();
-			console.log(res);
 			if (res.success) {
 				setCategories(res.data);
 			}

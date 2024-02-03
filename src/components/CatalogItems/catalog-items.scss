@@ -1,0 +1,35 @@
+.catalog-items {
+	$block: &;
+
+	&__filters {
+		margin-bottom: 24px;
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		gap: 8px;
+	}
+
+	&__switch {
+		margin-right: auto;
+	}
+
+	&__search {
+		width: 100%;
+		max-width: 336px;
+	}
+
+	&__goals {
+		margin-bottom: 24px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 24px;
+	}
+
+	&__goal {
+		width: calc(100% / 4 - (24px * 3 / 4));
+	}
+
+	&__list {
+		width: calc(100% / 2 - (24px * 1 / 2));
+	}
+}

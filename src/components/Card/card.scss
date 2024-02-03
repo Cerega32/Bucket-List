@@ -1,15 +1,17 @@
 .card {
 	$block: &;
-	display: block;
-	gap: auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 	background: var(--color-white);
 	border-radius: 8px;
 	border: 1px solid var(--color-gray-9);
-	overflow: hidden;
 
 	&__gradient {
-		display: block;
-		height: 100%;
+		display: flex;
+		max-height: 192px;
+		// height: 100%;
+		// overflow: hidden;
 	}
 
 	&__img-tags {
@@ -30,6 +32,10 @@
 	&__info {
 		padding: 16px 24px;
 		border-top: none;
+	}
+
+	&__info-link {
+		display: block;
 	}
 
 	&__title {
@@ -79,11 +85,13 @@
 	}
 
 	&--horizontal {
-		display: flex;
+		flex-direction: row;
+		justify-content: flex-start;
 
 		#{$block} {
 			&__gradient {
 				width: 37%;
+				max-height: 169px;
 			}
 
 			&__img-tags {

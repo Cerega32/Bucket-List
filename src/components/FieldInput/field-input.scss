@@ -12,11 +12,21 @@
 		width: 100%;
 	}
 
+	&__icon-begin {
+		position: absolute;
+		top: 12px;
+		left: 16px;
+	}
+
 	&__input {
 		width: 100%;
 		padding: 10px 50px 10px 16px;
 		border: 1px solid var(--color-gray-4);
 		border-radius: 8px;
+
+		&--iconBegin {
+			padding-left: 40px;
+		}
 	}
 
 	&__show-password {

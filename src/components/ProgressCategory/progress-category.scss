@@ -1,0 +1,53 @@
+.progress-category {
+	$block: &;
+	display: flex;
+	gap: 16px;
+
+	&__bar {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+	}
+
+	&__svg-container {
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+
+	&__outer-circle {
+		stroke: var(--color-gray-9);
+	}
+
+	&__progress-indicator {
+		&--complexity-easy {
+			stroke: var(--color-sentiment-positive);
+		}
+
+		&--complexity-medium {
+			stroke: var(--color-sentiment-warning);
+		}
+
+		&--complexity-hard {
+			stroke: var(--color-sentiment-negative);
+		}
+	}
+
+	&__wrapper {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 4px;
+		color: var(--color-text-secondary);
+		font-size: 12px;
+		line-height: var(--line-height-12);
+	}
+
+	&__account {
+		font-weight: var(--weight-bold);
+		color: var(--color-text-primary);
+	}
+}

@@ -1,4 +1,4 @@
-.card {
+.card-category {
 	$block: &;
 	display: block;
 	gap: auto;
@@ -10,7 +10,7 @@
 	height: 216px;
 
 	&__gradient {
-		display: block;
+		display: flex;
 		height: 100%;
 	}
 

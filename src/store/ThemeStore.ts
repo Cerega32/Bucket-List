@@ -9,12 +9,18 @@ interface IThemeStore {
 class Store implements IThemeStore {
 	header: IHeaderTheme = 'transparent';
 
+	page = 'isMainPage';
+
 	constructor() {
 		makeAutoObservable(this);
 	}
 
 	setHeader = (theme: IHeaderTheme) => {
 		this.header = theme;
+	};
+
+	setPage = (page: string) => {
+		this.page = page;
 	};
 }
 

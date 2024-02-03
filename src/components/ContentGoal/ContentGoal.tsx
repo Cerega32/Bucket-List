@@ -1,20 +1,16 @@
-import {FC, useEffect, useState} from 'react';
-import {useBem} from '@/hooks/useBem';
-import './content-goal.scss';
-import {CommentGoal} from '../CommentGoal/CommentGoal';
-import {InfoGoal} from '../InfoGoal/InfoGoal';
-import {IGoal} from '@/typings/goal';
-import {ListGoals} from '../ListGoals/ListGoals';
-import {Title} from '../Title/Title';
-import {Button} from '../Button/Button';
-import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
-import {getComments} from '@/utils/api/get/getComments';
-import {postLikeComment} from '@/utils/api/post/postLikeComment';
-import {IComment} from '@/typings/comments';
-import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
-import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
 import {observer} from 'mobx-react';
+import {FC, useEffect, useState} from 'react';
+
+import './content-goal.scss';
+import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
+import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
+
+import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
+
+import {useBem} from '@/hooks/useBem';
 import {GoalStore} from '@/store/GoalStore';
+import {IGoal} from '@/typings/goal';
+import {getComments} from '@/utils/api/get/getComments';
 
 interface ContentGoalProps {
 	className?: string;
@@ -27,10 +23,26 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 
 	const [block, element] = useBem('content-goal', className);
 
+	const {comments, setComments, setInfoPaginationComments} = GoalStore;
+
+	useEffect(() => {
+		if (page === 'isGoal') {
+			(async () => {
+				const res = await getComments(goal.code);
+
+				if (res.success) {
+					setComments(res.data.data);
+					setInfoPaginationComments(res.data.pagination);
+				}
+			})();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [goal.code, page]);
+
 	const getGoalContent = () => {
 		switch (page) {
 			case 'isGoal':
-				return <CommentsGoal code={goal.code} />;
+				return <CommentsGoal comments={comments} />;
 			case 'isGoalLists':
 				return <ListsWithGoal code={goal.code} />;
 			default:

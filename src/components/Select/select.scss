@@ -1,0 +1,47 @@
+.select {
+	position: relative;
+	width: 200px;
+
+	&__option {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		padding: 10px;
+		cursor: pointer;
+		background: var(--color-secondary);
+		border-radius: 4px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		position: absolute;
+		z-index: 101;
+		top: 100%;
+		right: 0;
+		width: max-content;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		display: block;
+		background: #fff;
+		border-radius: 4px;
+	}
+
+	&__item {
+		padding: 10px;
+		cursor: pointer;
+
+		&--active {
+			color: var(--color-primary);
+		}
+	}
+
+	li:hover {
+		background-color: #f0f0f0;
+	}
+
+	li.active {
+		background-color: #e0e0e0;
+	}
+}

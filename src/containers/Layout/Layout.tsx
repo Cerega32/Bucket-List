@@ -1,4 +1,5 @@
 import {FC} from 'react';
+
 import {RoutesAuth} from '../RoutesAuth/RoutesAuth';
 
 import '../../_commons/styles-supports/scaffolding.scss';

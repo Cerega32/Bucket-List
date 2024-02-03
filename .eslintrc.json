@@ -14,8 +14,14 @@
 		"sourceType": "module",
 		"project": "./tsconfig.json"
 	},
-	"plugins": ["react", "@typescript-eslint"],
+	"settings": {
+		"import/resolver": {
+			"typescript": {}
+		}
+	},
+	"plugins": ["react", "@typescript-eslint", "prettier"],
 	"rules": {
+		"prettier/prettier": 2,
 		"indent": ["error", "tab", {"SwitchCase": 1}],
 		"react/jsx-indent-props": [1, "tab"],
 		"linebreak-style": "off",
@@ -34,6 +40,20 @@
 		"arrow-body-style": "off",
 		"import/extensions": "off",
 		"react/require-default-props": "off",
-		"object-curly-newline": "off"
+		"object-curly-newline": "off",
+		"no-nested-ternary": "off",
+		"max-len": ["error", 140, 2],
+		"@typescript-eslint/no-unused-vars": ["error", {"destructuredArrayIgnorePattern": "^_"}],
+		"import/order": [
+			2,
+			{
+				"groups": ["external", "builtin", "index", "sibling", "parent", "internal", "type"],
+				"alphabetize": {
+					"order": "asc",
+					"caseInsensitive": true
+				},
+				"newlines-between": "always-and-inside-groups"
+			}
+		]
 	}
 }

@@ -49,6 +49,8 @@
 
 	--color-orange-rgb: 255, 107, 0; // #FF6B00
 	--color-orange: rgb(var(--color-orange-rgb)); // #FF6B00
+	--color-orange-rgb-2: 247, 144, 9; // #F79009
+	--color-orange-2: rgb(var(--color-orange-rgb-2)); // #F79009
 
 	--color-purple-rgb: 135, 0, 198; // #8700C6
 	--color-purple: rgb(var(--color-purple-rgb)); // #8700C6
@@ -72,6 +74,7 @@
 
 	--color-primary-rgb: var(--color-blue-rgb-3);
 	--color-primary: var(--color-blue-3);
+	--color-primary-hover-rgb: var(--color-blue-rgb-4);
 	--color-primary-hover: var(--color-blue-4);
 
 	--color-secondary: var(--color-gray-5);
@@ -79,6 +82,7 @@
 
 	--color-text: var(--color-gray-7);
 	--color-text-primary: var(--color-gray-8);
+	--color-text-primary-rgb: var(--color-gray-rgb-8);
 	--color-text-secondary: var(--color-gray-1);
 
 	--color-border: var(--color-gray-9);
@@ -90,6 +94,7 @@
 	--color-sentiment-positive-hover: var(--color-green-4);
 	--color-sentiment-negative: var(--color-red-1);
 	--color-sentiment-negative-hover: var(--color-red-2);
+	--color-sentiment-warning: var(--color-orange-2);
 
 	--weight-regular: 400;
 	--weight-medium: 500;
