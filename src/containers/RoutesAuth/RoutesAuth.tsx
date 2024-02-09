@@ -5,6 +5,7 @@ import {PageCategories} from '@/pages/PageCategories/PageCategories';
 import {PageCategory} from '@/pages/PageCategory/PageCategory';
 import {PageDetailGoal} from '@/pages/PageDetailGoal/PageDetailGoal';
 import {PageDetailList} from '@/pages/PageDetailList/PageDetailList';
+import {PageMainGoals} from '@/pages/PageMainGoals/PageMainGoals';
 import {PageNotFound} from '@/pages/PageNotFound/PageNotFound';
 import {PageUser} from '@/pages/PageUser/PageUser';
 
@@ -20,6 +21,7 @@ export const RoutesAuth: FC = () => {
 				<Route path="/categories/:id/lists" element={<PageCategory page="isCategories" subPage="lists" />} />
 				<Route path="/categories/:categories/:id/lists" element={<PageCategory page="isSubCategories" subPage="lists" />} />
 				<Route path="/goals/:id/lists" element={<PageDetailGoal page="isGoalLists" />} />
+				<Route path="/goals/100-goals" element={<PageMainGoals page="isMainGoals" />} />
 				<Route path="/goals/:id" element={<PageDetailGoal page="isGoal" />} />
 				<Route path="/user/:id/showcase" element={<PageUser page="isUserShowcase" />} />
 				<Route path="/user/:id/100-goal" element={<PageUser page="isUser100Goals" />} />

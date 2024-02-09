@@ -1,15 +1,14 @@
-import {FC, ReactElement} from 'react';
+import {FC} from 'react';
 
-import {Card} from '../Card/Card';
+import {CardMain} from '../CardMain/CardMain';
+import {Svg} from '../Svg/Svg';
+import {Title} from '../Title/Title';
 
 import {useBem} from '@/hooks/useBem';
 
 import {IComplexity, IGoal} from '@/typings/goal';
 
 import './main-cards.scss';
-import {CardMain} from '../CardMain/CardMain';
-import {Title} from '../Title/Title';
-import {Svg} from '../Svg/Svg';
 
 import {getComplexityCategory} from '@/utils/values/complexity';
 
@@ -17,10 +16,12 @@ interface MainCardsProps {
 	className?: string;
 	goals: Array<IGoal>;
 	complexity: IComplexity;
+	withBtn?: boolean;
+	updateGoal?: (i: number, complexity: IComplexity, code: string, done: boolean) => void;
 }
 
 export const MainCards: FC<MainCardsProps> = (props) => {
-	const {className, goals, complexity} = props;
+	const {className, goals, complexity, withBtn, updateGoal} = props;
 
 	const [block, element] = useBem('main-cards', className);
 
@@ -32,7 +33,14 @@ export const MainCards: FC<MainCardsProps> = (props) => {
 			</Title>
 			<section className={element('cards')}>
 				{goals?.map((goal, i) => (
-					<CardMain goal={goal} className={element('card', {big: i < 3})} big={i < 3} />
+					<CardMain
+						key={goal.code}
+						goal={goal}
+						className={element('card', {big: i < 3})}
+						big={i < 3}
+						withBtn={withBtn}
+						updateGoal={() => updateGoal && updateGoal(i, complexity, goal.code, goal.completedByUser)}
+					/>
 				))}
 			</section>
 		</section>

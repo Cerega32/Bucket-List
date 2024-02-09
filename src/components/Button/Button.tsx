@@ -13,7 +13,7 @@ interface ButtonProps {
 	size?: 'small';
 	children?: ReactElement | string | number;
 	icon?: string;
-	onClick?: () => void;
+	onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 	type?: 'button' | 'Link';
 	typeBtn?: 'button' | 'submit';
 	href?: string;

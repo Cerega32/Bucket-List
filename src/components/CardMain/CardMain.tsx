@@ -1,9 +1,10 @@
 import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
+import {Button} from '../Button/Button';
 import {Gradient} from '../Gradient/Gradient';
+import {Line} from '../Line/Line';
 import {Tag} from '../Tag/Tag';
-
 import {Title} from '../Title/Title';
 
 import {useBem} from '@/hooks/useBem';
@@ -15,15 +16,23 @@ interface CardMainProps {
 	className?: string;
 	goal: IShortGoal;
 	big?: boolean;
+	withBtn?: boolean;
+	updateGoal?: () => void;
 }
-
 export const CardMain: FC<CardMainProps> = (props) => {
-	const {className, goal, big} = props;
+	const {className, goal, big, withBtn, updateGoal} = props;
 
 	const [block, element] = useBem('card-main', className);
 
+	const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		event.preventDefault();
+		if (updateGoal) {
+			updateGoal();
+		}
+	};
+
 	return (
-		<section className={block({big})}>
+		<section className={block({big, withBtn})}>
 			<Link to={`/goals/${goal.code}`} className={element('gradient')}>
 				<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} blacked={!goal.completedByUser}>
 					<div className={element('info')}>
@@ -36,31 +45,24 @@ export const CardMain: FC<CardMainProps> = (props) => {
 								{goal.title}
 							</Title>
 							<p className={element('text')}>{goal.shortDescription}</p>
+							{withBtn && (
+								<>
+									<Line className={element('line')} />
+									{/* Заменил onClick на handleButtonClick */}
+									<Button
+										className={element('btn')}
+										icon="done"
+										theme={goal.completedByUser ? 'green' : 'blue'}
+										onClick={handleButtonClick}
+									>
+										Выполнено
+									</Button>
+								</>
+							)}
 						</div>
 					</div>
 				</Gradient>
 			</Link>
-			{/* <div className={element('info')}>
-				<Line />
-				<div className={element('tags-wrapper')}>
-					<div className={element('buttons')}>
-						{!goal.addedByUser && <Button theme="blue" icon="plus" size="small" onClick={onClickAdd} />}
-						{goal.addedByUser && <Button theme="blue-light" icon="trash" size="small" onClick={onClickDelete} />}
-						{(goal.addedByUser || goal.completedByUser) && !isList && (
-							<Button theme={goal.completedByUser ? 'green' : 'blue-light'} size="small" onClick={onClickMark}>
-								<Svg
-									icon="done"
-									width="16px"
-									height="16px"
-									className={element('btn-done', {
-										active: goal.completedByUser,
-									})}
-								/>
-							</Button>
-						)}
-					</div>
-				</div>
-			</div> */}
 		</section>
 	);
 };

@@ -5,6 +5,7 @@ from .models import CustomUser
 from django.contrib.auth import authenticate  # Make sure this import is added
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from achievements.models import Achievement
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -52,12 +53,14 @@ class CustomUserSerializer(serializers.ModelSerializer):
             "totalAddedGoals",
             "totalCompletedLists",
             "totalAddedLists",
+            "totalAchievements",
         )
 
     totalCompletedGoals = serializers.SerializerMethodField()
     totalAddedGoals = serializers.SerializerMethodField()
     totalCompletedLists = serializers.SerializerMethodField()
     totalAddedLists = serializers.SerializerMethodField()
+    totalAchievements = serializers.SerializerMethodField()
     # totalComments = serializers.SerializerMethodField()
 
     def get_totalCompletedGoals(self, user):
@@ -71,6 +74,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     def get_totalAddedLists(self, user):
         return user.added_goal_lists.count()
+
+    def get_totalAchievements(self, user):
+        return user.achievements.count()
 
     # def get_totalComments(self, user):
     #     return user.added_goal_lists.count()

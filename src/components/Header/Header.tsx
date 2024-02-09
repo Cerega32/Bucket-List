@@ -49,7 +49,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 							</a>
 						</li>
 						<li className={element('item')}>
-							<a className={element('item-link')} href="/goals/100-goal">
+							<a className={element('item-link', {active: page === 'isMainGoals'})} href="/goals/100-goals">
 								100 целей
 							</a>
 						</li>

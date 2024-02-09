@@ -6,6 +6,11 @@
 	&__wrapper {
 		display: flex;
 		gap: 24px;
+
+		&--column {
+			flex-direction: column;
+			gap: 16px;
+		}
 	}
 
 	&__score {

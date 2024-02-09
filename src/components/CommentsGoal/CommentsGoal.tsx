@@ -1,15 +1,12 @@
-import {FC, useEffect, useState} from 'react';
+import {observer} from 'mobx-react';
+import {FC} from 'react';
 
 import {CommentGoal} from '../CommentGoal/CommentGoal';
 
 import {useBem} from '@/hooks/useBem';
 import {IComment} from '@/typings/comments';
-import {getComments} from '@/utils/api/get/getComments';
 import {postLikeComment} from '@/utils/api/post/postLikeComment';
 import './comments-goal.scss';
-import {GoalStore} from '@/store/GoalStore';
-
-import {observer} from 'mobx-react';
 
 interface CommentsGoalProps {
 	className?: string;
@@ -40,7 +37,9 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 			<section className={element('items')}>
 				{comments &&
 					!!comments.length &&
-					comments.map((comment, i) => <CommentGoal isUser={isUser} comment={comment} onClickScore={putScore(i)} />)}
+					comments.map((comment, i) => (
+						<CommentGoal key={comment.id} isUser={isUser} comment={comment} onClickScore={putScore(i)} />
+					))}
 			</section>
 		</div>
 	);

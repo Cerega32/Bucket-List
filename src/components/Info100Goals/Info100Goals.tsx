@@ -15,21 +15,30 @@ interface Info100GoalsProps {
 	totalCompletedEasy: number;
 	totalCompletedMedium: number;
 	totalCompletedHard: number;
+	column?: boolean;
 }
 
 export const Info100Goals: FC<Info100GoalsProps> = (props) => {
-	const {className, totalCompletedEasy, totalAddedEasy, totalAddedHard, totalAddedMedium, totalCompletedHard, totalCompletedMedium} =
-		props;
+	const {
+		className,
+		totalCompletedEasy,
+		totalAddedEasy,
+		totalAddedHard,
+		totalAddedMedium,
+		totalCompletedHard,
+		totalCompletedMedium,
+		column,
+	} = props;
 
 	const [block, element] = useBem('info-100-goals', className);
 
 	return (
 		<section className={block()}>
-			<div className={element('wrapper')}>
+			<div className={element('wrapper', {column})}>
 				<ProgressCategory complexity="easy" done={totalCompletedEasy} all={totalAddedEasy} />
-				<Line vertical height={-16} />
+				<Line vertical={!column} height={-16} margin={column ? '0' : '16px 0'} />
 				<ProgressCategory complexity="medium" done={totalCompletedMedium} all={totalAddedMedium} />
-				<Line vertical height={-16} />
+				<Line vertical={!column} height={-16} margin={column ? '0' : '16px 0'} />
 				<ProgressCategory complexity="hard" done={totalCompletedHard} all={totalAddedHard} />
 			</div>
 			{totalAddedEasy + totalAddedHard + totalAddedMedium > 0 && (

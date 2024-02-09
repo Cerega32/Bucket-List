@@ -15,5 +15,8 @@ class CustomUser(AbstractUser):
         Permission, related_name="custom_users", blank=True
     )
     username = models.CharField(max_length=150, unique=True)
+    achievements_received = models.ManyToManyField(
+        "achievements.Achievement", related_name="received_by_users", blank=True
+    )
 
     objects = CustomUserManager()

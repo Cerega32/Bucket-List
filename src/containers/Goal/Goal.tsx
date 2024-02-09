@@ -1,19 +1,20 @@
 import {FC, useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
+
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
-import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
 import {ContentGoal} from '@/components/ContentGoal/ContentGoal';
+import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
+import {Modal} from '@/components/Modal/Modal';
 import {useBem} from '@/hooks/useBem';
 import {ThemeStore} from '@/store/ThemeStore';
-import {Modal} from '@/components/Modal/Modal';
 import {IGoal} from '@/typings/goal';
 import './goal.scss';
-import {addGoal} from '@/utils/api/post/addGoal';
-import {removeGoal} from '@/utils/api/post/removeGoal';
-import {markGoal} from '@/utils/api/post/markGoal';
 import {IPage} from '@/typings/page';
 import {getCategories} from '@/utils/api/get/getCategories';
 import {getGoal} from '@/utils/api/get/getGoal';
+import {addGoal} from '@/utils/api/post/addGoal';
+import {markGoal} from '@/utils/api/post/markGoal';
+import {removeGoal} from '@/utils/api/post/removeGoal';
 
 export const Goal: FC<IPage> = ({page}) => {
 	const [block, element] = useBem('goal');
@@ -25,7 +26,7 @@ export const Goal: FC<IPage> = ({page}) => {
 
 	useEffect(() => {
 		(async () => {
-			const res = await getGoal(`goals/${params.id}`);
+			const res = await getGoal(params.id);
 			if (res.success) {
 				setGoal(res.data.goal);
 			}
@@ -41,16 +42,8 @@ export const Goal: FC<IPage> = ({page}) => {
 		return null;
 	}
 
-	const updateGoal = async (
-		code: string,
-		operation: 'add' | 'delete' | 'mark',
-		done?: boolean
-	): Promise<void> => {
-		const res = await (operation === 'add'
-			? addGoal(code)
-			: operation === 'delete'
-			? removeGoal(code)
-			: markGoal(code, !done));
+	const updateGoal = async (code: string, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
+		const res = await (operation === 'add' ? addGoal(code) : operation === 'delete' ? removeGoal(code) : markGoal(code, !done));
 
 		if (res.success) {
 			const updatedGoal = {
@@ -67,12 +60,7 @@ export const Goal: FC<IPage> = ({page}) => {
 
 	return (
 		<main className={block()}>
-			<HeaderGoal
-				title={goal.title}
-				category={goal.category}
-				image={goal.image}
-				goal={goal}
-			/>
+			<HeaderGoal title={goal.title} category={goal.category} image={goal.image} goal={goal} />
 			<section className={element('wrapper')}>
 				<AsideGoal
 					className={element('aside')}
@@ -83,11 +71,7 @@ export const Goal: FC<IPage> = ({page}) => {
 					done={goal.completedByUser}
 					added={goal.addedByUser}
 				/>
-				<ContentGoal
-					page={page}
-					goal={goal}
-					className={element('content')}
-				/>
+				<ContentGoal page={page} goal={goal} className={element('content')} />
 			</section>
 		</main>
 	);

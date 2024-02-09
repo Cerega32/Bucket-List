@@ -15,12 +15,12 @@ interface IAddedLists {
 	totalAdded: number;
 }
 
-interface ICategoryGoals {
+export interface ICategoryGoals {
 	data: Array<IGoal>;
 	countCompleted: number;
 }
 
-interface IMainGoals {
+export interface IMainGoals {
 	easyGoals: ICategoryGoals;
 	mediumGoals: ICategoryGoals;
 	hardGoals: ICategoryGoals;
@@ -48,6 +48,9 @@ class Store implements IUserStore {
 		username: '',
 		totalAddedGoals: 0,
 		totalCompletedGoals: 0,
+		totalCompletedLists: 0,
+		totalAddedLists: 0,
+		totalAchievements: 0,
 	};
 
 	addedGoals: IAddedGoals = {goals: [], totalAdded: 0};

@@ -1,8 +1,11 @@
-.user-goals {
+.user-achievements {
 	max-width: var(--max-width);
 	margin: 40px auto 0;
+	display: flex;
+	gap: 24px;
+	flex-wrap: wrap;
 
-	&__lists {
-		margin-bottom: 40px;
+	&__achievement {
+		width: calc(25% - 24px * 3 / 4);
 	}
 }

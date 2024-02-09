@@ -6,4 +6,7 @@ export interface IUserInfo {
 	username: string;
 	totalAddedGoals: number;
 	totalCompletedGoals: number;
+	totalAddedLists: number;
+	totalCompletedLists: number;
+	totalAchievements: number;
 }

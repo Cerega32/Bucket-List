@@ -19,4 +19,9 @@ def get_achievements(request):
 
     achievements = Achievement.objects.filter(achieved_users=user)
     serializer = AchievementSerializer(achievements, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+
+    response_data = {
+        "data": serializer.data,
+    }
+
+    return Response(response_data, status=status.HTTP_200_OK)

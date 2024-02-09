@@ -1,15 +1,10 @@
 import {observer} from 'mobx-react';
 import {FC, useEffect, useState} from 'react';
 
-import {CommentsGoal} from '@/components/CommentsGoal/CommentsGoal';
+import {Achievement} from '@/components/Achievement/Achievement';
 import {useBem} from '@/hooks/useBem';
-import {UserStore} from '@/store/UserStore';
-import {IComment} from '@/typings/comments';
-import {IPage} from '@/typings/page';
-import {getAddedGoals} from '@/utils/api/get/getAddedGoals';
+import {IAchievement} from '@/typings/achievements';
 import './user-achievements.scss';
-import {ListGoals} from '@/components/ListGoals/ListGoals';
-import {getAddedLists} from '@/utils/api/get/getAddedLists';
 import {GET} from '@/utils/fetch/requests';
 
 interface UserAchievementsProps {
@@ -20,17 +15,23 @@ export const UserAchievements: FC<UserAchievementsProps> = observer((props) => {
 	const {id} = props;
 	const [block, element] = useBem('user-achievements');
 
-	// const [comments, setComments] = useState<Array<IComment>>([]);
+	const [achievements, setAchievements] = useState<Array<IAchievement>>([]);
 
 	useEffect(() => {
 		(async () => {
-			const res = await GET('achievements', {auth: true});
+			const res = await GET('achievements', {get: {user_id: id}});
 			if (res.success) {
-				// setComments(res.data.data);
+				setAchievements(res.data.data);
 			}
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	return <section className={block()}>{/* <CommentsGoal comments={comments} setComments={setComments} isUser /> */}</section>;
+	return (
+		<section className={block()}>
+			{achievements.map((achievement) => (
+				<Achievement key={achievement.id} className={element('achievement')} achievement={achievement} />
+			))}
+		</section>
+	);
 });

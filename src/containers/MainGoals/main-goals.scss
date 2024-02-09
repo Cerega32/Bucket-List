@@ -1,0 +1,28 @@
+@import '../../_commons/styles-supports/mixins.scss';
+
+.main-goals {
+	@include max-width;
+	margin-top: calc(56px + var(--height-header));
+
+	&__info {
+		margin-bottom: 56px;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	&__title {
+		margin-bottom: 16px;
+	}
+
+	&__description {
+		max-width: 576px;
+	}
+
+	&__goals {
+		margin-bottom: 56px;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+}

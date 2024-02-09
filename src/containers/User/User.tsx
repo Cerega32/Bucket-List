@@ -34,11 +34,11 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 
 	useEffect(() => {
 		(async () => {
-			const res = await getUser(id);
-			console.log(res);
-			// const res = await GET(`user/${id}/added-goals`, {auth: true});
+			await getUser(id);
 		})();
 	}, [id]);
+
+	console.log(userInfo);
 
 	const getUserContent = () => {
 		switch (page) {
@@ -66,6 +66,9 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 				totalCompleted={userInfo.totalCompletedGoals}
 				page={page}
 				id={id}
+				totalAddedLists={userInfo.totalAddedLists}
+				totalCompletedLists={userInfo.totalCompletedLists}
+				totalAchievements={userInfo.totalAchievements}
 			/>
 			{getUserContent()}
 		</main>

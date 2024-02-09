@@ -47,14 +47,14 @@ class GoalSerializer(serializers.ModelSerializer):
         return obj.completed_by_users.count()
 
     def get_added_by_user(self, goal):
-        user = self.context["request"].user
-        if user.is_authenticated:
+        user = self.context.get("user")
+        if user and user.is_authenticated:
             return goal.added_by_users.filter(id=user.id).exists()
         return False
 
     def get_completed_by_user(self, goal):
-        user = self.context["request"].user
-        if user.is_authenticated:
+        user = self.context.get("user")
+        if user and user.is_authenticated:
             return goal.completed_by_users.filter(id=user.id).exists()
         return False
 

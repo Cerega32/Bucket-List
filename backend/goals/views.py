@@ -26,7 +26,7 @@ def get_goal_by_code(request, code):
     total_comments = Comment.objects.filter(goal=goal).count()
     total_lists = GoalList.objects.filter(goals=goal).count()
 
-    serializer = GoalSerializer(goal, context={"request": request})
+    serializer = GoalSerializer(goal, context={"user": request.user})
 
     response_data = {
         "goal": {
@@ -61,7 +61,7 @@ def add_goal_to_user(request, code):
     goal.added_from_list = True
     goal.save()
 
-    serializer = GoalSerializer(goal, context={"request": request})
+    serializer = GoalSerializer(goal, context={"user": user})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -86,7 +86,7 @@ def remove_goal_from_user(request, code):
     if user in goal.completed_by_users.all():
         goal.completed_by_users.remove(user)
 
-    serializer = GoalSerializer(goal, context={"request": request})
+    serializer = GoalSerializer(goal, context={"user": user})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -138,7 +138,7 @@ def mark_goal(request, code):
                 # Если не все цели выполнены, удалите отметку о выполнении списка.
                 goal_list.completed_by_users.remove(user)
 
-        serializer = GoalSerializer(goal, context={"request": request})
+        serializer = GoalSerializer(goal, context={"user": request.user})
         return Response(serializer.data, status=status.HTTP_200_OK)
     else:
         return Response(
@@ -228,7 +228,9 @@ def popular_goals(request, code):
         popular_goals = list(popular_goals) + list(latest_goals)
 
     # Используйте ваш сериализатор для сериализации данных
-    serializer = GoalSerializer(popular_goals, many=True, context={"request": request})
+    serializer = GoalSerializer(
+        popular_goals, many=True, context={"user": request.user}
+    )
 
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -306,7 +308,7 @@ def goals_by_category(request, code):
         goals_page = paginator.page(paginator.num_pages)
 
     # Используйте ваш сериализатор для сериализации данных
-    serializer = GoalSerializer(goals_page, many=True, context={"request": request})
+    serializer = GoalSerializer(goals_page, many=True, context={"user": request.user})
 
     # Дополнительная информация о пагинации
     pagination_info = {

@@ -17,10 +17,24 @@ interface UserInfoProps {
 	totalCompleted: number;
 	page: string;
 	id: string;
+	totalCompletedLists: number;
+	totalAddedLists: number;
+	totalAchievements: number;
 }
 
 export const UserInfo: FC<UserInfoProps> = (props) => {
-	const {background = '/src/assets/jpg/Background.jpg', avatar, name, totalAdded, totalCompleted, page, id} = props;
+	const {
+		background = '/src/assets/jpg/Background.jpg',
+		avatar,
+		name,
+		totalAdded,
+		totalCompleted,
+		page,
+		id,
+		totalAddedLists,
+		totalCompletedLists,
+		totalAchievements,
+	} = props;
 	const [block, element] = useBem('user-info');
 
 	const tabs: Array<ITabs> = useMemo(() => {
@@ -39,19 +53,22 @@ export const UserInfo: FC<UserInfoProps> = (props) => {
 				url: `/user/${id}/active-goals`,
 				name: 'Активные цели и списки',
 				page: 'isUserActiveGoals',
+				count: totalAddedLists + totalAdded - (totalCompletedLists + totalCompleted),
 			},
 			{
 				url: `/user/${id}/done-goals`,
 				name: 'Выполненные',
 				page: 'isUserDoneGoals',
+				count: totalCompletedLists + totalCompleted,
 			},
 			{
 				url: `/user/${id}/achievements`,
 				name: 'Достижения',
 				page: 'isUserAchievements',
+				count: totalAchievements,
 			},
 		];
-	}, [id]);
+	}, [id, totalAchievements, totalAdded, totalAddedLists, totalCompleted, totalCompletedLists]);
 
 	return (
 		<article className={block()}>

@@ -58,7 +58,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 			{comment.photos && !!comment.photos.length && (
 				<div className={element('comment-images')}>
 					{comment.photos.map((el) => (
-						<img src={el.image} alt="Изображения комментария" className={element('comment-img')} />
+						<img key={el.id} src={el.image} alt="Изображения комментария" className={element('comment-img')} />
 					))}
 				</div>
 			)}

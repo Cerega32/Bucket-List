@@ -28,7 +28,7 @@ def get_goal_list_details(request, code):
 
     goals_data = []
     for goal in goal_list.goals.all():
-        serializer_goal = GoalSerializer(goal, context={"request": request})
+        serializer_goal = GoalSerializer(goal, context={"user": request.user})
         goals_data.append(serializer_goal.data)
 
     response_data = {
@@ -42,7 +42,6 @@ def get_goal_list_details(request, code):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
 def get_user_goal_list_details(request):
     try:
         goal_list = GoalList.objects.get(code="100-goals")
@@ -52,13 +51,15 @@ def get_user_goal_list_details(request):
         )
 
     user_id = request.query_params.get("user_id", None)
-
     # Проверяем наличие user_id в параметрах запроса
     if user_id:
         user = get_object_or_404(CustomUser, id=user_id)
-    else:
+    elif request.user.is_authenticated:
         # Если user_id не предоставлен в параметрах, проверяем куки
         user = request.user
+    else:
+        user = None
+
     # Получаем все цели в списке
     goals_in_list = goal_list.goals.all()
 
@@ -78,24 +79,11 @@ def get_user_goal_list_details(request):
     count_user_completed_hard_goals = user_completed_hard_goals.count()
 
     # Сериализуем данные
-    easy_goals_data = GoalSerializer(
-        easy_goals, many=True, context={"request": request}
-    ).data
+    easy_goals_data = GoalSerializer(easy_goals, many=True, context={"user": user}).data
     medium_goals_data = GoalSerializer(
-        medium_goals, many=True, context={"request": request}
+        medium_goals, many=True, context={"user": user}
     ).data
-    hard_goals_data = GoalSerializer(
-        hard_goals, many=True, context={"request": request}
-    ).data
-    user_completed_easy_goals_data = GoalSerializer(
-        user_completed_easy_goals, many=True, context={"request": request}
-    ).data
-    user_completed_medium_goals_data = GoalSerializer(
-        user_completed_medium_goals, many=True, context={"request": request}
-    ).data
-    user_completed_hard_goals_data = GoalSerializer(
-        user_completed_hard_goals, many=True, context={"request": request}
-    ).data
+    hard_goals_data = GoalSerializer(hard_goals, many=True, context={"user": user}).data
 
     response_data = {
         "easy_goals": {

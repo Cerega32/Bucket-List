@@ -73,7 +73,7 @@ export const GET = async (url: string, params?: IFetchParams): Promise<any> => {
 		queryString = urlSearchParams.toString();
 
 		if (queryString) {
-			url += `?${queryString}`;
+			url += `/?${queryString}`;
 		}
 	} else {
 		url += '/';

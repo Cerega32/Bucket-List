@@ -1,5 +1,6 @@
 import {FC} from 'react';
 import {Link} from 'react-router-dom';
+
 import {useBem} from '@/hooks/useBem';
 
 import './tabs.scss';
@@ -26,10 +27,7 @@ export const Tabs: FC<TabsProps> = (props) => {
 	return (
 		<section className={block()}>
 			{tabs.map((tab) => (
-				<Link
-					to={`${base}${tab.url}`}
-					className={element('link', {active: active === tab.page})}
-				>
+				<Link key={tab.name} to={`${base}${tab.url}`} className={element('link', {active: active === tab.page})}>
 					{tab.name}
 					{!!tab.count && <span className={element('count')}>{tab.count}</span>}
 				</Link>
