@@ -22,26 +22,24 @@
 		top: 100%;
 		right: 0;
 		width: max-content;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 2px 4px rgba(var(--color-black), 0.1);
 		display: block;
-		background: #fff;
+		background: var(--color-white);
 		border-radius: 4px;
 	}
 
 	&__item {
 		padding: 10px;
 		cursor: pointer;
+		border-radius: 4px;
 
 		&--active {
 			color: var(--color-primary);
+			background-color: var(--color-white);
 		}
-	}
 
-	li:hover {
-		background-color: #f0f0f0;
-	}
-
-	li.active {
-		background-color: #e0e0e0;
+		&:hover {
+			background-color: var(--color-secondary-hover);
+		}
 	}
 }

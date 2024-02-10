@@ -47,7 +47,7 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect}) => {
 
 	return (
 		<div className={block()} ref={selectRef}>
-			<div className={element('option')} onClick={toggleDropdown}>
+			<div className={element('option')} onClick={toggleDropdown} onKeyUp={toggleDropdown} role="button" tabIndex={0}>
 				<Svg icon="sort" />
 				{typeof activeOption === 'number' ? options[activeOption].name : 'Сделайте выбор'}
 			</div>
@@ -58,6 +58,9 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect}) => {
 							key={option.value}
 							className={element('item', {active: activeOption === i})}
 							onClick={() => handleOptionClick(i)}
+							onKeyUp={toggleDropdown}
+							role="row"
+							tabIndex={0}
 						>
 							{option.name}
 						</li>

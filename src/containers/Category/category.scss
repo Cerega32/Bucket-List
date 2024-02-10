@@ -5,6 +5,10 @@
 		padding: calc(230px + 56px) 0 0;
 	}
 
+	&--empty {
+		padding: calc(230px + 56px) 0 0;
+	}
+
 	&__title {
 		margin: 0 auto 24px;
 		max-width: var(--max-width);

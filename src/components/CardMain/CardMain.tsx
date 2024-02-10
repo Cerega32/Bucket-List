@@ -48,7 +48,6 @@ export const CardMain: FC<CardMainProps> = (props) => {
 							{withBtn && (
 								<>
 									<Line className={element('line')} />
-									{/* Заменил onClick на handleButtonClick */}
 									<Button
 										className={element('btn')}
 										icon="done"

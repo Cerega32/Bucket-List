@@ -44,7 +44,6 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 
 	useEffect(() => {
 		(async () => {
-			console.log(id, '!!!!!!');
 			const res = await getPopularGoals(id);
 
 			if (res.success) {
@@ -67,6 +66,10 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 		setHeader('transparent');
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	if (!id) {
+		return null;
+	}
 
 	const updateGoal = async (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
 		const res = await (operation === 'add' ? addGoal(code) : operation === 'delete' ? removeGoal(code) : markGoal(code, !done));
@@ -108,9 +111,9 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 	}
 
 	return (
-		<main className={block({sub: page === 'isSubCategories'})}>
+		<main className={block({sub: page === 'isSubCategories', empty: !category.subcategories.length})}>
 			<HeaderCategory category={category} className={element('header')} isSub={page === 'isSubCategories'} ref={refTitle} />
-			{popularGoals.length && (
+			{!!popularGoals.length && (
 				<>
 					<Title className={element('title')} tag="h2">
 						Популярные цели этой недели
@@ -129,7 +132,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 					</section>
 				</>
 			)}
-			{popularLists.length && (
+			{!!popularLists.length && (
 				<>
 					<Title className={element('title')} tag="h2">
 						Популярные списки этой недели
