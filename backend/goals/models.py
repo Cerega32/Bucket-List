@@ -2,6 +2,7 @@ from django.db import models
 from transliterate import translit
 from categories.models import Category
 from users.models import CustomUser
+from django.utils.translation import gettext_lazy as _
 
 
 class Goal(models.Model):
@@ -39,6 +40,7 @@ class Goal(models.Model):
         "Goal", related_name="category_subgoals", blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    deadline = models.DateTimeField(_("Deadline"), blank=True, null=True)
 
     def save(self, *args, **kwargs):
         self.short_description = self.description[:200]

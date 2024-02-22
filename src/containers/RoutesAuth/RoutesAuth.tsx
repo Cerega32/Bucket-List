@@ -8,6 +8,7 @@ import {PageDetailList} from '@/pages/PageDetailList/PageDetailList';
 import {PageMainGoals} from '@/pages/PageMainGoals/PageMainGoals';
 import {PageNotFound} from '@/pages/PageNotFound/PageNotFound';
 import {PageUser} from '@/pages/PageUser/PageUser';
+import {PageUserSelf} from '@/pages/PageUserSelf/PageUserSelf';
 
 export const RoutesAuth: FC = () => {
 	return (
@@ -34,6 +35,7 @@ export const RoutesAuth: FC = () => {
 				<Route path="/user/100-goal" element={<PageUser page="isUserMainGoals" />} />
 				<Route path="/user/active-goals" element={<PageUser page="isUserActiveGoals" />} />
 				<Route path="/user/done-goals" element={<PageUser page="isUserDoneGoals" />} />
+				<Route path="/user/self" element={<PageUserSelf page="isUserSelf" />} />
 				<Route path="*" element={<PageNotFound page="NotFound" />} />
 			</Routes>
 		</BrowserRouter>

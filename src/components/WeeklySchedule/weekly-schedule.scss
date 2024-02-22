@@ -1,0 +1,25 @@
+@import '../../_commons/styles-supports/mixins.scss';
+
+.info-100-goals {
+	@include block-radius;
+
+	&__wrapper {
+		display: flex;
+		gap: 24px;
+
+		&--column {
+			flex-direction: column;
+			gap: 16px;
+		}
+	}
+
+	&__score {
+		display: flex;
+		gap: 16px;
+	}
+
+	&__text {
+		flex-shrink: 0;
+		color: var(--color-text-secondary);
+	}
+}

@@ -80,7 +80,7 @@ export const MainGoals: FC<IPage> = () => {
 						свои мечты в цели, и скоро вы заметите, как ваша жизнь изменилась. Мы уже сделали это за вас - дерзайте!
 					</p>
 				</div>
-				<Info100Goals
+				<Info100Goals // TODO проверить кнопку
 					className={element('stats')}
 					totalAddedEasy={mainGoals.easyGoals.data.length}
 					totalAddedMedium={mainGoals.mediumGoals.data.length}
@@ -90,7 +90,18 @@ export const MainGoals: FC<IPage> = () => {
 					totalCompletedHard={mainGoals.hardGoals.countCompleted}
 				/>
 			</div>
-			<MainCards className={element('goals')} goals={mainGoals.easyGoals.data} complexity="easy" withBtn updateGoal={updateGoal} />
+			<MainCards
+				className={element('goals')}
+				goals={mainGoals.easyGoals.data.concat(
+					mainGoals.easyGoals.data,
+					mainGoals.easyGoals.data,
+					mainGoals.easyGoals.data,
+					mainGoals.easyGoals.data
+				)}
+				complexity="easy"
+				withBtn
+				updateGoal={updateGoal}
+			/>
 			<MainCards
 				className={element('goals')}
 				goals={mainGoals.mediumGoals.data}
