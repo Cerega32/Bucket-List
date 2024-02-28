@@ -2,4 +2,11 @@
 	max-width: var(--max-width);
 	margin: 104px auto 102px;
 	background: var(--color-gray-3);
+	display: flex;
+	gap: 24px;
+	align-items: flex-start;
+
+	&__sidebar {
+		width: 336px;
+	}
 }

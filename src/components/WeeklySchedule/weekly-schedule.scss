@@ -1,25 +1,88 @@
 @import '../../_commons/styles-supports/mixins.scss';
 
-.info-100-goals {
+.weekly-schedule {
+	$block: &;
 	@include block-radius;
 
-	&__wrapper {
+	&__info-title {
+		margin-bottom: 4px;
+		font-size: 14px;
+		line-height: var(--line-height-14);
+		color: var(--color-text-secondary);
+		font-weight: var(--weight-regular);
+	}
+
+	&__info-count-wrapper {
 		display: flex;
 		gap: 24px;
+	}
 
-		&--column {
-			flex-direction: column;
-			gap: 16px;
+	&__info-count {
+		margin-bottom: 4px;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 22px;
+		line-height: var(--line-height-22);
+		font-weight: var(--weight-semi-bold);
+	}
+
+	&__weeks {
+		display: flex;
+		gap: 16px;
+		height: 195px;
+	}
+
+	&__week {
+		position: relative;
+		flex-shrink: 0;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		align-items: center;
+		font-size: 12px;
+		line-height: var(--line-height-12);
+		height: 100%;
+
+		&:last-child {
+			#{$block}__column-active {
+				background: var(--color-primary);
+			}
 		}
 	}
 
-	&__score {
+	&__column {
 		display: flex;
-		gap: 16px;
+		flex-direction: column;
+		justify-content: flex-end;
+		height: 155px;
+		width: 35px;
+
+		&:hover {
+			& + #{$block}__count {
+				visibility: visible;
+				opacity: 1;
+				transition: all 0.3s linear;
+			}
+		}
 	}
 
-	&__text {
-		flex-shrink: 0;
+	&__column-active {
+		border-radius: 8px;
+		background: var(--color-border);
+	}
+
+	&__count {
+		visibility: hidden;
+		position: absolute;
+		top: 0;
+		left: 0;
+		opacity: 0;
+		transition: all 0.3s linear;
+	}
+
+	&__count-week {
+		margin-top: 8px;
 		color: var(--color-text-secondary);
 	}
 }

@@ -1,3 +1,5 @@
+@import '../../_commons/styles-supports/mixins.scss';
+
 .tabs {
 	$block: &;
 	display: flex;
@@ -50,6 +52,7 @@
 		padding: 16px 24px;
 		flex-direction: column;
 		gap: 8px;
+		@include block-radius;
 
 		#{$block} {
 			&__link {

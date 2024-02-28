@@ -20,7 +20,7 @@ import {IPage} from '@/typings/page';
 import {getUser} from '@/utils/api/get/getUser';
 
 export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
-	const [block] = useBem('user');
+	const [block, element] = useBem('user');
 
 	const {setHeader} = ThemeStore;
 	const {userInfo} = UserStore;
@@ -79,7 +79,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 
 	return (
 		<main className={block()}>
-			<aside>
+			<aside className={element('sidebar')}>
 				<Tabs tabs={tabs} active={page} vertical />
 			</aside>
 			{getUserContent()}

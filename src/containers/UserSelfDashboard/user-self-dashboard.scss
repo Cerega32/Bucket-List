@@ -2,13 +2,17 @@
 
 .user-self-dashboard {
 	@include max-width;
-	margin: 40px auto 0;
-	display: flex;
-	flex-wrap: wrap;
-	gap: 24px;
+
+	&__info-wrapper {
+		margin-bottom: 56px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 24px;
+	}
 
 	&__info {
 		@include block-radius;
+		width: calc(100% / 3 - 24px * 2 / 3);
 	}
 
 	&__info-title {
@@ -31,5 +35,17 @@
 		font-size: 22px;
 		line-height: var(--line-height-22);
 		font-weight: var(--weight-semi-bold);
+	}
+
+	&__info-100-goals,
+	&__weekly {
+		width: calc(100% / 3 - 24px * 2 / 3);
+	}
+
+	&__title-wrapper {
+		margin-bottom: 24px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 	}
 }
