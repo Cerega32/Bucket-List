@@ -16,6 +16,115 @@ from django.utils.encoding import smart_text
 from goals.models import Goal
 from goal_lists.models import GoalList
 from categories.serializers import CategorySerializer
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.contrib.auth.hashers import make_password
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    user = request.user
+    data = request.data
+
+    # Проверяем, если в запросе присутствуют новый и текущий пароли
+    if "old_password" not in data or "new_password" not in data:
+        return Response(
+            {"error": "Требуется предоставить текущий и новый пароли."}, status=400
+        )
+
+    # Проверяем, соответствует ли текущий пароль пользователю
+    if not user.check_password(data["old_password"]):
+        return Response({"error": "Текущий пароль введен неправильно."}, status=400)
+
+    # Устанавливаем новый пароль и сохраняем его хэш
+    user.password = make_password(data["new_password"])
+    user.save()
+
+    return Response({"message": "Пароль успешно изменен."})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def upload_avatar(request):
+    if "avatar" in request.FILES:
+        avatar = request.FILES["avatar"]
+        user = request.user
+        user.avatar = avatar
+        user.save()
+        response_data = {"success": True, "message": "Аватар успешно загружен"}
+        response = JsonResponse(response_data)
+        response.set_cookie(key="avatar", value=user.avatar.url)
+        return response
+    else:
+        return JsonResponse(
+            {"success": False, "error": "Файл аватара не был предоставлен"}, status=400
+        )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def upload_cover(request):
+    if "cover" in request.FILES:
+        cover = request.FILES["cover"]
+        user = request.user
+        user.cover_image = cover
+        user.save()
+        response_data = {"success": True, "message": "Обложка успешно загружена"}
+        response = JsonResponse(response_data)
+        response.set_cookie(key="cover", value=user.cover_image.url)
+        return response
+    else:
+        return JsonResponse(
+            {"success": False, "error": "Файл обложки не был предоставлен"}, status=400
+        )
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_avatar(request):
+    user = request.user
+    # Удаляем текущий аватар пользователя
+    if user.avatar:
+        # Удаляем файл из хранилища
+        default_storage.delete(user.avatar.name)
+        # Удаляем ссылку на аватар из модели пользователя
+        user.avatar = None
+        user.save()
+        response_data = {"message": "Аватар успешно удален"}
+        response = JsonResponse(response_data)
+        response.delete_cookie("avatar")
+        return response
+    else:
+        return Response(
+            {"error": "У пользователя нет текущего аватара"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_user_profile(request):
+    user = request.user
+    data = request.data
+
+    # Обновление данных пользователя, если они предоставлены в запросе
+    if "first_name" in data:
+        user.first_name = data["first_name"]
+    if "last_name" in data:
+        user.last_name = data["last_name"]
+    if "country" in data:
+        user.country = data["country"]
+    if "about_me" in data:
+        user.about_me = data["about_me"]
+
+    # Сохранение изменений
+    user.save()
+
+    # Сериализация обновленного пользователя
+    serializer = CustomUserSerializer(user)
+
+    return Response(serializer.data)
 
 
 @api_view(["POST"])
@@ -32,6 +141,7 @@ def login_user(request):
         response = JsonResponse(response_data)
 
         response.set_cookie(key="token", value=token.key)
+        response.set_cookie(key="user-id", value=user.id)
 
         return response
 
@@ -53,6 +163,7 @@ def register_user(request):
 
         response = JsonResponse(response_data)
         response.set_cookie(key="token", value=token.key)
+        response.set_cookie(key="user-id", value=user.id)
 
         return response
 
@@ -117,9 +228,13 @@ def register_user(request):
 
 
 @api_view(["GET"])
-def get_user_info(request, code):
-    user = CustomUser.objects.get(id=code)
-    serializer = CustomUserSerializer(user)
+def get_user_info(request, code=None):
+    if code:
+        user = CustomUser.objects.get(id=code)
+        serializer = CustomUserSerializer(user)
+    else:
+        user = request.user
+        serializer = CustomUserSerializer(user)
 
     response_data = {
         **serializer.data,
@@ -174,9 +289,9 @@ def get_user_added_goals(request):
             "description": goal.description,
             "image": goal.image.url if goal.image else None,
             "shortDescription": goal.short_description,
-            "subcategory": CategorySerializer(goal.subcategory).data
-            if goal.subcategory
-            else None,
+            "subcategory": (
+                CategorySerializer(goal.subcategory).data if goal.subcategory else None
+            ),
             "title": goal.title,
             "completedByUser": goal.completed_by_users.filter(id=user.id).exists(),
             "totalCompleted": goal.completed_by_users.count(),
@@ -232,9 +347,11 @@ def get_user_added_lists(request):
         list_data = {
             "title": goal_list.title,
             "category": CategorySerializer(goal_list.category).data,
-            "subcategory": CategorySerializer(goal_list.subcategory).data
-            if goal_list.subcategory
-            else None,
+            "subcategory": (
+                CategorySerializer(goal_list.subcategory).data
+                if goal_list.subcategory
+                else None
+            ),
             "complexity": goal_list.complexity,
             "image": goal_list.image.url if goal_list.image else None,
             "description": goal_list.description,

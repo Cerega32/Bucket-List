@@ -23,6 +23,14 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 24px;
+
+		&--columns-3 {
+			#{$block} {
+				&__goal {
+					width: calc(100% / 3 - (24px * 2 / 3));
+				}
+			}
+		}
 	}
 
 	&__goal {

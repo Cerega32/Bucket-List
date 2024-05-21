@@ -37,15 +37,24 @@ export const Registration: FC<RegistrationProps> = (props) => {
 			<Title tag="h3" className={element('title')}>
 				Вступить в лучшую жизнь
 			</Title>
-			<FieldInput placeholder="E-mail" id="email" text="E-mail" value={email} setValue={setEmail} className={element('field')} />
+			<FieldInput
+				placeholder="E-mail"
+				id="password"
+				text="E-mail"
+				value={email}
+				setValue={setEmail}
+				className={element('field')}
+				autoComplete="email"
+			/>
 			<FieldInput
 				placeholder="Пароль для входа"
-				id="password"
+				id="new-password"
 				text="Пароль"
 				value={password}
 				setValue={setPassword}
 				className={element('field')}
 				type="password"
+				autoComplete="new-password"
 			/>
 			<FieldInput
 				placeholder="Повтор ввода пароля"
@@ -55,8 +64,9 @@ export const Registration: FC<RegistrationProps> = (props) => {
 				setValue={setRepeatPassword}
 				className={element('field')}
 				type="password"
+				autoComplete="new-password"
 			/>
-			<Button icon="rocket" theme="blue" className={element('btn')} onClick={signUp} type="submit">
+			<Button icon="rocket" theme="blue" className={element('btn')} onClick={signUp} typeBtn="submit">
 				Зарегистрироваться
 			</Button>
 			<p className={element('sign-in')}>

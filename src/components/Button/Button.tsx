@@ -10,7 +10,7 @@ interface ButtonProps {
 	className?: string;
 	theme?: 'blue' | 'blue-light' | 'no-border' | 'green' | 'red';
 	width?: 'auto';
-	size?: 'small';
+	size?: 'small' | 'medium';
 	children?: ReactElement | string | number;
 	icon?: string;
 	onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;

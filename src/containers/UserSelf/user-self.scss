@@ -1,4 +1,4 @@
-.user {
+.user-self {
 	max-width: var(--max-width);
 	margin: 104px auto 102px;
 	background: var(--color-gray-3);
@@ -8,5 +8,6 @@
 
 	&__sidebar {
 		width: 336px;
+		flex-shrink: 0;
 	}
 }

@@ -2,6 +2,11 @@
 	position: relative;
 	width: 200px;
 
+	&__text {
+		margin-bottom: 4px;
+		font-weight: 500;
+	}
+
 	&__option {
 		display: flex;
 		align-items: center;
@@ -26,6 +31,8 @@
 		display: block;
 		background: var(--color-white);
 		border-radius: 4px;
+		max-height: 200px;
+		overflow-y: scroll;
 	}
 
 	&__item {

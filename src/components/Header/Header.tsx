@@ -1,16 +1,21 @@
+import Cookies from 'js-cookie';
 import {observer} from 'mobx-react';
 import {FC} from 'react';
+import {Link} from 'react-router-dom';
 import {ReactSVG} from 'react-svg';
 
 import {ThemeStore} from '../../store/ThemeStore';
 
+import {Avatar} from '../Avatar/Avatar';
+
+import {Svg} from '../Svg/Svg';
+
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
-import './header.scss';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
 
-import {Svg} from '../Svg/Svg';
+import './header.scss';
 
 interface HeaderProps {
 	className?: string;
@@ -38,47 +43,43 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	return (
 		<header className={block({theme: header})}>
 			<div className={element('wrapper')}>
-				<a className={element('logo')} href="/" aria-label="Главная">
+				<Link className={element('logo')} to="/" aria-label="Главная">
 					<Svg icon="delting" />
-				</a>
+				</Link>
 				<nav className={element('nav')}>
 					<ul className={element('list')}>
 						<li className={element('item')}>
-							<a className={element('item-link')} href="/">
+							<Link className={element('item-link')} to="/">
 								Моя доска
-							</a>
+							</Link>
 						</li>
 						<li className={element('item')}>
-							<a className={element('item-link', {active: page === 'isMainGoals'})} href="/goals/100-goals">
+							<Link className={element('item-link', {active: page === 'isMainGoals'})} to="/goals/100-goals">
 								100 целей
-							</a>
+							</Link>
 						</li>
 						<li className={element('item')}>
-							<a className={element('item-link', {active: page === 'isCategories'})} href="/categories">
+							<Link className={element('item-link', {active: page === 'isCategories'})} to="/categories">
 								Категории
-							</a>
+							</Link>
 						</li>
 						<li className={element('item')}>
-							<a className={element('item-link')} href="/">
+							<Link className={element('item-link')} to="/">
 								Цели и списки
-							</a>
+							</Link>
 						</li>
 						<li className={element('item')}>
-							<a className={element('item-link')} href="/">
+							<Link className={element('item-link')} to="/">
 								Лидеры
-							</a>
+							</Link>
 						</li>
 					</ul>
 				</nav>
 				{isAuth ? (
-					<a className={element('profile')} href="/">
-						<img
-							className={element('avatar')}
-							src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAICAgICAQICAgIDAgIDAwYEAwMDAwcFBQQGCAcJCAgHCAgJCg0LCQoMCggICw8LDA0ODg8OCQsQERAOEQ0ODg7/2wBDAQIDAwMDAwcEBAcOCQgJDg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg7/wAARCAAYABgDASIAAhEBAxEB/8QAGQABAAIDAAAAAAAAAAAAAAAAAAYIBQkK/8QALhAAAAQFAgQFBAMAAAAAAAAAAQIFEQMEBgcSABMIFSEiFBcxM0EZQlJhQ2KS/8QAGAEAAgMAAAAAAAAAAAAAAAAABggEBQf/xAAnEQABAwMDBAEFAAAAAAAAAAABAgQRAwUhABIxBiJBURMUI0Jhkf/aAAwDAQACEQMRAD8An3CRT1i7h1tPW8unSMObqKcAYqCrArzcuMUQL3QBJDilJkABkUcerGAfQHx5uEusB4/D2hIWYBD3PG882+0E3L3X9M/sb8/htVdp6ItQq7RolNmmC1CE7C5aMr7u/mG3h/bJm10KxfMCJwwxAhijQb1npb46wgmsP9Ybj/rLTzdaXi69JXX6hpX3IdpKdi1EiksQBVSDMJz3AYnnxC+2FkzvLP4q1ODRM7kgArSfwJEScYPMa1L8WKBYu31ZyNu7V0pDgVDIAB19YMrTcwaGbHtgAQ8U0PIXyOIF6OAA3VmqnLZVYlZq5F/f56E7F5j4oRGLv5juZv1yyd/3pra7KwXbbZSb1KyqygMrUoqKickyScehwBoCfuEuna6qaYpgnCQAAB6x59n3q73B0iWopabUbxXMrmnE6eSyRCoSHNq8uWbAxQ75jYE+YmZywys4uIg/bqEBxaVb9QHzeE0xyHc8EKIEQMeWv7Temf8AI/5/LaaaBmdlY3e83By+Bqk/ZAVEJp5kJEYnknmeCNENd+4ZMW1JudgHfjkqxk+48DjU54x0O1FTz6feC2ld02pTymSGRdRJNXlzTZjGDsmNgDZgZmLEAQcGARZjaaaauejkLoWUNisrFJRQkqgnaIgEgCYmB+o1Avik1HxqhISVgKMcSef7r//Z"
-							alt="Аватар"
-						/>
+					<Link className={element('profile')} to="/user/self">
+						<Avatar avatar={Cookies.get('avatar')} size="medium" />
 						<span className={element('nickname')}>{name}</span>
-					</a>
+					</Link>
 				) : (
 					<div className={element('profile')}>
 						<Button className={element('sign-in')} theme="blue-light" size="small" onClick={openLogin}>

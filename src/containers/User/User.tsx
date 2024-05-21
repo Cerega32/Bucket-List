@@ -5,7 +5,7 @@ import {useParams} from 'react-router-dom';
 
 import {User100Goals} from '../User100Goals/User100Goals';
 import {UserAchievements} from '../UserAchievements/UserAchievements';
-import {UserActiveGoals, UserGoals} from '../UserGoals/UserGoals';
+import {UserGoals} from '../UserGoals/UserGoals';
 
 import {UserShowcase} from '../UserShowcase/UserShowcase';
 
@@ -37,8 +37,6 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 			await getUser(id);
 		})();
 	}, [id]);
-
-	console.log(userInfo);
 
 	const getUserContent = () => {
 		switch (page) {

@@ -1,6 +1,8 @@
 import {FC} from 'react';
-import {useBem} from '@/hooks/useBem';
+
 import {Svg} from '../Svg/Svg';
+
+import {useBem} from '@/hooks/useBem';
 import './avatar.scss';
 
 interface AvatarProps {
@@ -28,18 +30,9 @@ export const Avatar: FC<AvatarProps> = (props) => {
 	return (
 		<div className={block({size})}>
 			{avatar ? (
-				<img
-					className={element('image')}
-					src={avatar || ''}
-					alt="Аватар"
-				/>
+				<img className={element('image')} src={avatar || ''} alt="Аватар" />
 			) : (
-				<Svg
-					icon="avatar"
-					className={element('icon')}
-					width={getSize()}
-					height={getSize()}
-				/>
+				<Svg icon="avatar" className={element('icon')} width={getSize()} height={getSize()} />
 			)}
 		</div>
 	);

@@ -1,4 +1,3 @@
-# users/admin.py
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
@@ -19,7 +18,18 @@ class CustomUserAdmin(UserAdmin):
         (None, {"fields": ("username", "email", "password")}),
         (
             "Personal Info",
-            {"fields": ("first_name", "last_name", "avatar", "achievements_received")},
+            {
+                "fields": (
+                    "first_name",
+                    "last_name",
+                    "avatar",
+                    "cover_image",  # Добавляем поле обложки
+                    "country",  # Добавляем поле страны
+                    "city",  # Добавляем поле города
+                    "about_me",  # Добавляем поле обо мне
+                    "achievements_received",
+                )
+            },
         ),
         (
             "Permissions",
@@ -41,7 +51,17 @@ class CustomUserAdmin(UserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("username", "email", "password1", "password2", "avatar"),
+                "fields": (
+                    "username",
+                    "email",
+                    "password1",
+                    "password2",
+                    "avatar",
+                    "cover_image",  # Добавляем поле обложки
+                    "country",  # Добавляем поле страны
+                    "city",  # Добавляем поле города
+                    "about_me",  # Добавляем поле обо мне
+                ),
             },
         ),
     )

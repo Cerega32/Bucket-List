@@ -7,7 +7,10 @@ import {User100Goals} from '../User100Goals/User100Goals';
 import {UserAchievements} from '../UserAchievements/UserAchievements';
 import {UserActiveGoals, UserGoals} from '../UserGoals/UserGoals';
 
+import {UserSelfAchievements} from '../UserSelfAchievements/UserAchievements';
 import {UserSelfDashboard} from '../UserSelfDashboard/UserSelfDashboard';
+import {UserSelfGoals} from '../UserSelfGoals/UserSelfGoals';
+import UserSelfSettings from '../UserSelfSettings/UserSelfSettings';
 import {UserShowcase} from '../UserShowcase/UserShowcase';
 
 import {ITabs, Tabs} from '@/components/Tabs/Tabs';
@@ -20,7 +23,7 @@ import {IPage} from '@/typings/page';
 import {getUser} from '@/utils/api/get/getUser';
 
 export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
-	const [block, element] = useBem('user');
+	const [block, element] = useBem('user-self');
 
 	const {setHeader} = ThemeStore;
 	const {userInfo} = UserStore;
@@ -30,18 +33,26 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
+	useEffect(() => {
+		(async () => {
+			await getUser();
+		})();
+	}, []);
+
 	const getUserContent = () => {
 		switch (page) {
 			// case 'isUserShowcase':
 			// 	return <UserShowcase id={id} />;
 			// case 'isUser100Goals':
 			// 	return <User100Goals id={id} />;
-			// case 'isUserActiveGoals':
-			// 	return <UserGoals id={id} subPage={subPage} />;
-			// case 'isUserDoneGoals':
-			// 	return <UserGoals id={id} subPage={subPage} completed />;
-			// case 'isUserAchievements':
-			// 	return <UserAchievements id={id} />;
+			case 'isUserSelfActive':
+				return <UserSelfGoals subPage={subPage as string} completed={false} />;
+			case 'isUserSelfDone':
+				return <UserSelfGoals subPage={subPage as string} completed />;
+			case 'isUserSelfSettings':
+				return <UserSelfSettings />;
+			case 'isUserSelfAchievements':
+				return <UserSelfAchievements />;
 			default:
 				return <UserSelfDashboard />;
 		}
@@ -50,29 +61,29 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 	const tabs: Array<ITabs> = useMemo(() => {
 		return [
 			{
-				url: '/user/showcase',
-				name: 'Витрина',
-				page: 'isUserShowcase',
+				url: '/user/self',
+				name: 'Дашборд',
+				page: 'isUserSelf',
 			},
 			{
-				url: '/user/100-goal',
-				name: '100 целей',
-				page: 'isUser100Goals',
-			},
-			{
-				url: '/user/active-goals',
-				name: 'Активные цели и списки',
-				page: 'isUserActiveGoals',
-			},
-			{
-				url: '/user/done-goals',
-				name: 'Выполненные',
-				page: 'isUserDoneGoals',
-			},
-			{
-				url: '/user/achievements',
+				url: '/user/self/achievements',
 				name: 'Достижения',
-				page: 'isUserAchievements',
+				page: 'isUserSelfAchievements',
+			},
+			{
+				url: '/user/self/active-goals',
+				name: 'Активные цели и списки',
+				page: 'isUserSelfActive',
+			},
+			{
+				url: '/user/self/done-goals',
+				name: 'Выполненные',
+				page: 'isUserSelfDone',
+			},
+			{
+				url: '/user/self/settings',
+				name: 'Настройки',
+				page: 'isUserSelfSettings',
 			},
 		];
 	}, []);

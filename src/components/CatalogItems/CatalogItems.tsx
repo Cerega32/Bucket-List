@@ -28,6 +28,7 @@ interface CatalogItemsProps {
 	className?: string;
 	subPage?: string;
 	beginUrl: string;
+	columns?: string;
 }
 
 interface CatalogItemsCategoriesProps extends CatalogItemsProps {
@@ -64,7 +65,7 @@ const sortBy: Array<OptionSelect> = [
 ];
 
 export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersProps> = (props) => {
-	const {className, code, subPage, category, userId, completed, beginUrl} = props;
+	const {className, code, subPage, category, userId, completed, beginUrl, columns} = props;
 
 	const [block, element] = useBem('catalog-items', className);
 
@@ -258,6 +259,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			setLists({...goals, data: newLists});
 		}
 	};
+	console.log('columns', columns);
 
 	return (
 		<section className={block()}>
@@ -285,7 +287,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 				<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} />
 			</div>
 			{subPage === 'goals' ? (
-				<section className={element('goals')}>
+				<section className={element('goals', {columns})}>
 					{goals.data.map((goal, i) => (
 						<Card
 							className={element('goal')}
@@ -298,7 +300,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					))}
 				</section>
 			) : (
-				<section className={element('goals')}>
+				<section className={element('goals', {columns})}>
 					{lists.data.map((goal, i) => (
 						<Card
 							className={element('list')}

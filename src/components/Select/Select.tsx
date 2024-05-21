@@ -14,13 +14,15 @@ interface SelectProps {
 	options: OptionSelect[];
 	activeOption: number | null;
 	onSelect: (active: number) => void;
+	text?: string;
+	className?: string;
 }
 
-const Select: FC<SelectProps> = ({options, activeOption, onSelect}) => {
+const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, className}) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const selectRef = useRef<HTMLDivElement | null>(null);
 
-	const [block, element] = useBem('select');
+	const [block, element] = useBem('select', className);
 
 	const toggleDropdown = () => {
 		setIsOpen(!isOpen);
@@ -47,6 +49,7 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect}) => {
 
 	return (
 		<div className={block()} ref={selectRef}>
+			{text && <p className={element('text')}>{text}</p>}
 			<div className={element('option')} onClick={toggleDropdown} onKeyUp={toggleDropdown} role="button" tabIndex={0}>
 				<Svg icon="sort" />
 				{typeof activeOption === 'number' ? options[activeOption].name : 'Сделайте выбор'}

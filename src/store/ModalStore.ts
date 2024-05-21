@@ -1,6 +1,6 @@
 import {makeAutoObservable} from 'mobx';
 
-type IWindow = 'login' | 'registration';
+type IWindow = 'login' | 'registration' | 'change-password';
 
 interface IModalStore {
 	isOpen: boolean;
@@ -20,7 +20,7 @@ class Store implements IModalStore {
 		this.isOpen = value;
 	};
 
-	setWindow = (value: 'login' | 'registration') => {
+	setWindow = (value: IWindow) => {
 		this.window = value;
 	};
 }

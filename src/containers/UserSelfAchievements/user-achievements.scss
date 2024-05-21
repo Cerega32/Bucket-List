@@ -1,0 +1,12 @@
+.user-self-achievements {
+	width: 100%;
+	max-width: var(--max-width);
+	margin: 0 auto;
+	display: flex;
+	gap: 24px;
+	flex-wrap: wrap;
+
+	&__achievement {
+		width: calc(33% - 24px * 2 / 3);
+	}
+}

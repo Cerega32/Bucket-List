@@ -1,8 +1,13 @@
 export interface IUserInfo {
-	avatar: string | null;
+	aboutMe: string;
+	avatar: string | null | undefined;
+	country: string;
+	coverImage: string | null | undefined;
 	email: string;
-	name: string;
+	firstName: string;
 	id: number;
+	name: string;
+	lastName: string;
 	username: string;
 	totalAddedGoals: number;
 	totalCompletedGoals: number;

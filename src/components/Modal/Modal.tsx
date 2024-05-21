@@ -2,6 +2,7 @@ import Cookies from 'js-cookie';
 import {observer} from 'mobx-react';
 import {FC, useEffect} from 'react';
 
+import {ChangePassword} from '../ChangePassword/ChangePassword';
 import {Svg} from '../Svg/Svg';
 
 import {Button} from '@/components/Button/Button';
@@ -66,6 +67,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			<div className={element('window')}>
 				{window === 'login' && <Login openRegistration={openRegistration} successLogin={successAuth} />}
 				{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
+				{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
 				<Button theme="blue-light" className={element('close')} onClick={closeWindow}>
 					<Svg icon="cross" />
 				</Button>
