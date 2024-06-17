@@ -5,6 +5,7 @@ import {Button} from '../Button/Button';
 import {Line} from '../Line/Line';
 
 import {useBem} from '@/hooks/useBem';
+import {ModalStore} from '@/store/ModalStore';
 
 interface AsideProps {
 	className?: string;
@@ -29,6 +30,13 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const {className, title, image, added, updateGoal, code, done, isList} = props;
 
 	const [block, element] = useBem('aside-goal', className);
+
+	const {setIsOpen, setWindow} = ModalStore;
+
+	const openAddReview = () => {
+		setWindow('add-review');
+		setIsOpen(true);
+	};
 
 	return (
 		<aside className={block()}>
@@ -57,7 +65,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					</Button>
 				)}
 				{!isList && done && (
-					<Button theme="blue-light" onClick={() => {}} icon="comment" className={element('btn')}>
+					<Button theme="blue-light" onClick={openAddReview} icon="comment" className={element('btn')}>
 						Написать отзыв
 					</Button>
 				)}

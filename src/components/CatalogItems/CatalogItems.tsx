@@ -284,7 +284,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						]}
 					/>
 				)}
-				<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} />
+				<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} filter />
 			</div>
 			{subPage === 'goals' ? (
 				<section className={element('goals', {columns})}>
@@ -319,7 +319,6 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			) : (
 				<Pagination currentPage={goals.pagination.page} totalPages={goals.pagination.totalPages} goToPage={goToPage} />
 			)}
-			{/* <Notification text="FDKLFKSL:DF dfk ;lskdff; kfs;fkld" /> */}
 		</section>
 	);
 };

@@ -16,9 +16,11 @@ interface SelectProps {
 	onSelect: (active: number) => void;
 	text?: string;
 	className?: string;
+	filter?: boolean;
+	placeholder?: string;
 }
 
-const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, className}) => {
+const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, className, filter, placeholder = 'Сделайте выбор'}) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const selectRef = useRef<HTMLDivElement | null>(null);
 
@@ -48,11 +50,17 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, classNa
 	}, []);
 
 	return (
-		<div className={block()} ref={selectRef}>
+		<div className={block({filter})} ref={selectRef}>
 			{text && <p className={element('text')}>{text}</p>}
-			<div className={element('option')} onClick={toggleDropdown} onKeyUp={toggleDropdown} role="button" tabIndex={0}>
-				<Svg icon="sort" />
-				{typeof activeOption === 'number' ? options[activeOption].name : 'Сделайте выбор'}
+			<div
+				className={element('option', {isOpen, placeholder: typeof activeOption !== 'number'})}
+				onClick={toggleDropdown}
+				onKeyUp={toggleDropdown}
+				role="button"
+				tabIndex={0}
+			>
+				<Svg icon={filter ? 'sort' : 'arrow--right'} />
+				{typeof activeOption === 'number' ? options[activeOption].name : placeholder}
 			</div>
 			{isOpen && (
 				<ul className={element('list')}>

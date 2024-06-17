@@ -12,25 +12,15 @@ class CommentPhotoSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
-
-    def get_user(self, comment):
-        if comment.user and comment.user.is_authenticated:
-            return comment.user.id
-        else:
-            return None
-
     user_avatar = serializers.ImageField(source="user.avatar", read_only=True)
     user_name = serializers.CharField(source="user.first_name", read_only=True)
     user_nickname = serializers.CharField(source="user.username", read_only=True)
-    # photos = CommentPhotoSerializer(many=True, source='commentphoto_set', read_only=True)
     user_total_completed_goals = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     dislikes_count = serializers.SerializerMethodField()
     has_liked = serializers.SerializerMethodField()
     has_disliked = serializers.SerializerMethodField()
-    photos = CommentPhotoSerializer(
-        many=True, source="commentphoto_set", read_only=True
-    )
+    photos = CommentPhotoSerializer(many=True, read_only=True)
     goal_category = CategorySerializer(source="goal.category", read_only=True)
 
     class Meta:
@@ -53,12 +43,14 @@ class CommentSerializer(serializers.ModelSerializer):
             "goal_category",
         )
 
+    def get_user(self, comment):
+        return (
+            comment.user.id if comment.user and comment.user.is_authenticated else None
+        )
+
     def get_user_total_completed_goals(self, comment):
-        # Здесь вы можете получить количество выполненных целей пользователя и вернуть его
-        if comment.user:
-            print(comment.user.completed_goals)
-            return comment.user.completed_goals.count()
-        return 0
+        # Получаем количество выполненных целей пользователя
+        return comment.user.completed_goals.count() if comment.user else 0
 
     def get_likes_count(self, comment):
         return comment.likes.count()
@@ -73,6 +65,13 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_has_disliked(self, comment):
         user = self.context["request"].user
         return comment.dislikes.filter(id=user.id).exists()
+
+    def create(self, validated_data):
+        photos_data = self.context["request"].FILES.getlist("photo")
+        comment = Comment.objects.create(**validated_data)
+        for photo_data in photos_data:
+            CommentPhoto.objects.create(comment=comment, image=photo_data)
+        return comment
 
 
 class CommentScoreSerializer(serializers.ModelSerializer):

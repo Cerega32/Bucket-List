@@ -1,6 +1,6 @@
 import {makeAutoObservable} from 'mobx';
 
-type IWindow = 'login' | 'registration' | 'change-password';
+type IWindow = 'login' | 'registration' | 'change-password' | 'add-review';
 
 interface IModalStore {
 	isOpen: boolean;

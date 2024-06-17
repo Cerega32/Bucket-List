@@ -1,7 +1,13 @@
 from django.urls import path
-from .views import get_comments_for_goal, like_or_dislike_comment, get_comments_by_user
+from .views import (
+    get_comments_for_goal,
+    like_or_dislike_comment,
+    get_comments_by_user,
+    add_comment,
+)
 
 urlpatterns = [
+    path("api/comments/add/", add_comment, name="add_comment"),
     path(
         "api/goals/<slug:code>/comments/",
         get_comments_for_goal,

@@ -9,3 +9,9 @@ export const getComplexityCategory = {
 	medium: 'Средняя категория',
 	easy: 'Легкая категория',
 };
+
+export const selectComplexity = [
+	{name: 'Легко', value: 'easy'},
+	{name: 'Средне', value: 'medium'},
+	{name: 'Тяжело', value: 'hard'},
+];

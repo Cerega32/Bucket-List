@@ -1,46 +1,40 @@
-import {FC, useState, useEffect} from 'react';
+import {FC, useEffect, useState} from 'react';
 
 import {Svg} from '../Svg/Svg';
 
 import {useBem} from '@/hooks/useBem';
+
 import './notification.scss';
 
 interface NotificationProps {
 	className?: string;
 	text: string;
+	isError?: boolean;
+	onClose: () => void;
 }
 
-export const Notification: FC<NotificationProps> = (props) => {
-	const {className, text} = props;
+export const Notification: FC<NotificationProps> = ({className, text, isError, onClose}) => {
 	const [isVisible, setIsVisible] = useState(false);
-
 	const [block, element] = useBem('notification', className);
 
 	useEffect(() => {
-		let timeoutId: NodeJS.Timeout;
+		const showTimeout = setTimeout(() => setIsVisible(true), 500);
+		const hideTimeout = setTimeout(onClose, 5000);
 
-		// После полсекундной задержки устанавливаем isVisible в true
-		const timeout = setTimeout(() => {
-			setIsVisible(true);
-		}, 500);
-
-		// Очищаем таймер при размонтировании компонента
 		return () => {
-			clearTimeout(timeout);
-			clearTimeout(timeoutId);
+			clearTimeout(showTimeout);
+			clearTimeout(hideTimeout);
 		};
-	}, []);
-
-	const characters = text.split('');
+	}, [onClose]);
 
 	return (
 		<div className={block({visible: isVisible})}>
-			<span className={element('icon')}>i</span>
+			<span className={element('icon', {error: isError})}>i</span>
 			{isVisible && (
 				<>
 					<div className={element('text')}>
-						{characters.map((char, index) => (
-							<span key={index} style={{animationDelay: `${index * 0.01}s`}} className={element('char')}>
+						{text.split('').map((char, index) => (
+							<span key={index} style={{animationDelay: `${index * 0.05}s`}} className={element('char')}>
 								{char}
 							</span>
 						))}
@@ -48,9 +42,9 @@ export const Notification: FC<NotificationProps> = (props) => {
 					<button
 						className={element('close')}
 						type="button"
-						onClick={() => {}}
+						onClick={onClose}
 						aria-label="Закрыть"
-						style={{animationDelay: `${characters.length * 0.01}s`}}
+						style={{animationDelay: `${text.length * 0.05}s`}}
 					>
 						<Svg icon="cross" />
 					</button>

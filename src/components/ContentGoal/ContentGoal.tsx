@@ -7,8 +7,11 @@ import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks
 
 import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
 
+import {Notifications} from '../Notifications/Notifications';
+
 import {useBem} from '@/hooks/useBem';
 import {GoalStore} from '@/store/GoalStore';
+import {NotificationStore} from '@/store/NotificationStore';
 import {IGoal} from '@/typings/goal';
 import {getComments} from '@/utils/api/get/getComments';
 
@@ -17,6 +20,9 @@ interface ContentGoalProps {
 	goal: IGoal;
 	page: string;
 }
+
+NotificationStore.addNotification({text: 'This is a test notification', isError: false});
+NotificationStore.addNotification({text: 'This is an error notification', isError: true});
 
 export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 	const {className, goal, page} = props;
@@ -72,6 +78,7 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 				</Title> */}
 				{getGoalContent()}
 			</section>
+			<Notifications />
 		</article>
 	);
 });

@@ -1,19 +1,17 @@
 .notification {
 	$block: &;
-	top: 200px;
-	z-index: 100000;
-	position: fixed;
+
 	display: flex;
+	flex-wrap: wrap;
 	gap: 8px;
 	padding: 8px 16px;
 	border-radius: 8px;
 	background: var(--color-white);
-	transition: width 0.5s ease;
-	width: 52px;
+	width: 456px;
 
-	&--visible {
-		width: 456px;
-	}
+	// &--visible {
+
+	// }
 
 	&__icon {
 		flex-shrink: 0;
@@ -42,9 +40,23 @@
 		opacity: 0;
 		animation: fadeIn 0.5s forwards;
 	}
-}
 
-@keyframes fadeIn {
+	&__text {
+		display: inline-block;
+		overflow: hidden;
+	}
+
+	&__char {
+		display: inline-block;
+		opacity: 0;
+		animation: fadeInUp 0.3s forwards;
+	}
+
+	&--visible {
+		// ваши стили для видимого уведомления
+	}
+}
+@keyframes fadeInUp {
 	to {
 		opacity: 1;
 	}

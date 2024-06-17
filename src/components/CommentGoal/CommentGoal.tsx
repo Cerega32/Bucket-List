@@ -50,7 +50,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 				<div className={element('comment-info')}>
 					<span className={element('date')}>{getDate(comment.dateCreated)}</span>
 					<div className={element('vertical-line')} />
-					<Tag complexity={comment.complexity} theme="integrate" />
+					<Tag complexity={comment.complexity} theme="integrate" icon={comment.complexity} />
 				</div>
 			</div>
 			<hr className={element('horizontal-line')} />

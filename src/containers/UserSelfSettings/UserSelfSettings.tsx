@@ -50,9 +50,6 @@ export const UserSelfSettings: FC<UserSelfSettingsProps> = observer(() => {
 	const [name, setName] = useState(user.name);
 	const [surname, setSurname] = useState(user.lastName);
 	const [about, setAbout] = useState(user.aboutMe);
-	const [currentPassword, setCurrentPassword] = useState('');
-	const [newPassword, setNewPassword] = useState('');
-	const [confirmPassword, setConfirmPassword] = useState('');
 	const [activeCountry, setActiveCountry] = useState<number | null>(null);
 
 	const [block, element] = useBem('user-self-settings');
@@ -78,14 +75,6 @@ export const UserSelfSettings: FC<UserSelfSettingsProps> = observer(() => {
 			case 'about':
 				setAbout(value);
 				break;
-			case 'currentPassword':
-				setCurrentPassword(value);
-				break;
-			case 'newPassword':
-				setNewPassword(value);
-				break;
-			case 'confirmPassword':
-				setConfirmPassword(value);
 				break;
 			default:
 				break;

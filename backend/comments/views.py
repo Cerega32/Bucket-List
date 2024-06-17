@@ -2,8 +2,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from django.db import transaction
+from goals.models import Goal  # Предполагаем, что у вас есть модель Goal
 
-from .models import Comment, CommentAction
+
+from .models import Comment, CommentAction, CommentPhoto
 from .serializers import (
     CommentSerializer,
     CommentScoreSerializer,
@@ -262,3 +265,41 @@ def get_comments_by_user(request, user_id):
         }
 
         return Response(response_data)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def add_comment(request):
+    user = request.user
+    text = request.data.get("text")
+    complexity = request.data.get("complexity")
+    goal_id = request.data.get("goal_id")
+
+    if not text or not complexity or not goal_id:
+        return Response(
+            {"message": "Все поля (text, complexity, goal_id) обязательны."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        goal = Goal.objects.get(id=goal_id)
+        with transaction.atomic():
+            comment = Comment.objects.create(
+                user=user, text=text, complexity=complexity, goal=goal
+            )
+
+            photos = request.FILES.getlist("photo")
+            if photos:
+                photo_instances = [
+                    CommentPhoto(comment=comment, image=photo) for photo in photos[:10]
+                ]
+                CommentPhoto.objects.bulk_create(photo_instances)
+
+            serializer = CommentSerializer(comment, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    except Goal.DoesNotExist:
+        return Response({"message": "Goal not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response(
+            {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

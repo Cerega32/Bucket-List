@@ -42,6 +42,7 @@
 		"react/require-default-props": "off",
 		"object-curly-newline": "off",
 		"no-nested-ternary": "off",
+		"react/jsx-props-no-spreading": "off",
 		"max-len": ["error", 140, 2],
 		"@typescript-eslint/no-unused-vars": ["error", {"destructuredArrayIgnorePattern": "^_"}],
 		"import/order": [

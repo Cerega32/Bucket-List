@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 from users.models import CustomUser  # Import your CustomUser model
 from django.contrib.postgres.fields import ArrayField
 
@@ -22,16 +21,15 @@ class Comment(models.Model):
     )
     date_created = models.DateTimeField(auto_now_add=True)
     complexity = models.CharField(max_length=20, choices=COMPLEXITY_CHOICES)
-    photos = models.ManyToManyField(
-        "CommentPhoto", related_name="comment_photos", blank=True
-    )
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.goal.title}"
 
 
 class CommentPhoto(models.Model):
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    comment = models.ForeignKey(
+        Comment, on_delete=models.CASCADE, related_name="photos"
+    )
     image = models.ImageField(upload_to="comment_photos/")
 
     class Meta:

@@ -38,7 +38,13 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 				{comments &&
 					!!comments.length &&
 					comments.map((comment, i) => (
-						<CommentGoal key={comment.id} isUser={isUser} comment={comment} onClickScore={putScore(i)} />
+						<CommentGoal
+							className={element('comment')}
+							key={comment.id}
+							isUser={isUser}
+							comment={comment}
+							onClickScore={putScore(i)}
+						/>
 					))}
 			</section>
 		</div>
