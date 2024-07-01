@@ -1,4 +1,4 @@
-import {FC, useState} from 'react';
+import {FC, FormEvent, useState} from 'react';
 
 import {Title} from '../Title/Title';
 
@@ -24,7 +24,8 @@ export const Registration: FC<RegistrationProps> = (props) => {
 	const [repeatPassword, setRepeatPassword] = useState('');
 	const [name, setName] = useState('');
 
-	const signUp = async () => {
+	const signUp = async (e: FormEvent) => {
+		e.preventDefault();
 		const res = await postRegistration(email, password);
 		if (res.success) {
 			successRegistration(res);
@@ -32,7 +33,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 	};
 
 	return (
-		<form className={block()}>
+		<form className={block()} onSubmit={signUp}>
 			<Svg icon="icon-logo" className={element('logo')} />
 			<Title tag="h3" className={element('title')}>
 				Вступить в лучшую жизнь
@@ -66,7 +67,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 				type="password"
 				autoComplete="new-password"
 			/>
-			<Button icon="rocket" theme="blue" className={element('btn')} onClick={signUp} typeBtn="submit">
+			<Button icon="rocket" theme="blue" className={element('btn')} typeBtn="submit">
 				Зарегистрироваться
 			</Button>
 			<p className={element('sign-in')}>

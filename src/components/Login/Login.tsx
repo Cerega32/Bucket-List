@@ -35,14 +35,7 @@ export const Login: FC<LoginProps> = (props) => {
 			<Title tag="h3" className={element('title')}>
 				Вход в лучшую жизнь
 			</Title>
-			<FieldInput
-				placeholder="E-mail"
-				id="email"
-				text="E-mail"
-				value={email}
-				setValue={setEmail}
-				className={element('field')}
-			/>
+			<FieldInput placeholder="E-mail" id="email" text="E-mail" value={email} setValue={setEmail} className={element('field')} />
 			<FieldInput
 				placeholder="Пароль для входа"
 				id="password"
@@ -56,22 +49,12 @@ export const Login: FC<LoginProps> = (props) => {
 				<FieldCheckbox id="remember" text="Запомнить меня" />
 				<Button theme="no-border">Забыли пароль</Button>
 			</div>
-			<Button
-				type="submit"
-				icon="sign-in"
-				theme="blue"
-				className={element('btn')}
-				onClick={signIn}
-			>
+			<Button type="submit" icon="sign-in" theme="blue" className={element('btn')} onClick={signIn}>
 				Войти
 			</Button>
 			<p className={element('registration')}>
 				У вас нет аккаунта?{' '}
-				<Button
-					theme="no-border"
-					className={element('btn-registration')}
-					onClick={openRegistration}
-				>
+				<Button theme="no-border" className={element('btn-registration')} onClick={openRegistration}>
 					Регистрация
 				</Button>
 			</p>
