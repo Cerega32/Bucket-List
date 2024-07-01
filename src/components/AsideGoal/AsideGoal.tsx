@@ -21,7 +21,7 @@ interface AsideGoalProps extends AsideProps {
 	isList?: never;
 }
 
-interface AsideListsProps extends AsideProps {
+export interface AsideListsProps extends AsideProps {
 	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark-all') => Promise<void>;
 	isList: true;
 }
@@ -78,13 +78,13 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				<Button
 					theme="blue-light"
 					icon="mount"
-					onClick={() =>
+					onClick={() => {
 						window.open(
 							`https://telegram.me/share/url?url=${window.location.href}`,
 							'sharer',
 							'status=0,toolbar=0,width=650,height=500'
-						)
-					}
+						);
+					}}
 					// TODO Добавить действие
 					className={element('btn')}
 				>

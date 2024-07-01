@@ -4,6 +4,8 @@ import {FC, useEffect} from 'react';
 
 import {AddReview} from '../AddReview/AddReview';
 import {ChangePassword} from '../ChangePassword/ChangePassword';
+import {ConfirmExecutionAllGoal} from '../ConfirmExecutionAllGoal/ConfirmExecutionAllGoal';
+import {DeleteGoal} from '../DeleteGoal/DeleteGoal';
 import {Svg} from '../Svg/Svg';
 
 import {Button} from '@/components/Button/Button';
@@ -70,6 +72,8 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
 				{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
 				{window === 'add-review' && <AddReview closeModal={closeWindow} />}
+				{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} />}
+				{window === 'confirm-execution-all-goal' && <ConfirmExecutionAllGoal closeModal={closeWindow} code="mark" />}
 				<Button theme="blue-light" className={element('close')} onClick={closeWindow}>
 					<Svg icon="cross" />
 				</Button>
