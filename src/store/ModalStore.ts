@@ -1,6 +1,6 @@
 import {makeAutoObservable} from 'mobx';
 
-type IWindow = 'login' | 'registration' | 'change-password' | 'add-review';
+type IWindow = 'login' | 'registration' | 'change-password' | 'add-review' | 'delete-goal' | 'confirm-execution-all-goal';
 
 interface IModalStore {
 	isOpen: boolean;
@@ -8,9 +8,9 @@ interface IModalStore {
 }
 
 class Store implements IModalStore {
-	isOpen = false;
+	isOpen = true;
 
-	window: IWindow = 'login';
+	window: IWindow = 'confirm-execution-all-goal';
 
 	constructor() {
 		makeAutoObservable(this);
