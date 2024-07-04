@@ -5,24 +5,26 @@ import {Title} from '../Title/Title';
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
 import './delete-goal.scss';
+import {IFuncModal} from '@/store/ModalStore';
 
 interface DeleteGoalProps {
 	className?: string;
 	closeModal: () => void;
+	funcModal: IFuncModal;
 }
 
 export const DeleteGoal: FC<DeleteGoalProps> = (props) => {
-	const {className, closeModal} = props;
+	const {className, closeModal, funcModal} = props;
 
 	const [block, element] = useBem('delete-goal', className);
 
 	const handleDeleteGoal = async () => {
-		// const res = await(); // TODO
-		// if (res.success) {
-		// 	closeModal();
-		// } else {
-		// 	alert('Ошибка при удалении списка целей');
-		// }
+		const res = funcModal(); // TODO
+		if (res) {
+			closeModal();
+		} else {
+			alert('Ошибка при удалении списка целей');
+		}
 	};
 
 	return (

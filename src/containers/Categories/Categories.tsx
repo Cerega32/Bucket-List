@@ -13,8 +13,6 @@ export const Categories: FC<IPage> = () => {
 
 	const [categories, setCategories] = useState<Array<ICategoryDetailed>>([]);
 
-	const {setHeader} = ThemeStore;
-
 	useEffect(() => {
 		(async () => {
 			const res = await getCategories();
@@ -24,24 +22,13 @@ export const Categories: FC<IPage> = () => {
 		})();
 	}, []);
 
-	useEffect(() => {
-		setHeader('white');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
 	return (
 		<main className={block()}>
 			<Title className={element('title')} tag="h1">
 				Категории
 			</Title>
 			<section className={element('list')}>
-				{!!categories.length &&
-					categories.map((category) => (
-						<CardCategory
-							category={category}
-							className={element('item')}
-						/>
-					))}
+				{!!categories.length && categories.map((category) => <CardCategory category={category} className={element('item')} />)}
 			</section>
 		</main>
 	);

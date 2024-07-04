@@ -11,13 +11,6 @@ import './not-found.scss';
 export const NotFound: FC = observer(() => {
 	const [block, element] = useBem('not-found');
 
-	const {setHeader} = ThemeStore;
-
-	useEffect(() => {
-		setHeader('white');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
 	return (
 		<main className={block()}>
 			<Title tag="h1">404</Title>

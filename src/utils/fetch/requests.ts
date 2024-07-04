@@ -162,7 +162,7 @@ type Headers = HeadersInit & {
 
 const setHeaders = (params: IFetchParams): Headers => {
 	const headers: Headers = {};
-	if (params.auth && Cookies.get('token')) {
+	if (params?.auth && Cookies.get('token')) {
 		headers.Authorization = `Token ${Cookies.get('token')}`;
 	}
 

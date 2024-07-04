@@ -19,8 +19,6 @@ import {removeGoal} from '@/utils/api/post/removeGoal';
 export const Goal: FC<IPage> = ({page}) => {
 	const [block, element] = useBem('goal');
 
-	const {setHeader} = ThemeStore;
-
 	const params = useParams();
 	const [goal, setGoal] = useState<IGoal | null>(null);
 
@@ -32,11 +30,6 @@ export const Goal: FC<IPage> = ({page}) => {
 			}
 		})();
 	}, [params.id]);
-
-	useEffect(() => {
-		setHeader('transparent');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	if (!goal) {
 		return null;

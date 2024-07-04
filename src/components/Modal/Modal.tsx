@@ -25,7 +25,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 
 	const [block, element] = useBem('modal', className);
 
-	const {isOpen, setIsOpen, window, setWindow} = ModalStore;
+	const {isOpen, setIsOpen, window, setWindow, funcModal} = ModalStore;
 	const {setIsAuth, setName} = UserStore;
 
 	const closeWindow = () => {
@@ -72,8 +72,8 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
 				{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
 				{window === 'add-review' && <AddReview closeModal={closeWindow} />}
-				{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} />}
-				{window === 'confirm-execution-all-goal' && <ConfirmExecutionAllGoal closeModal={closeWindow} code="mark" />}
+				{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
+				{window === 'confirm-execution-all-goal' && <ConfirmExecutionAllGoal closeModal={closeWindow} funcModal={funcModal} />}
 				<Button theme="blue-light" className={element('close')} onClick={closeWindow}>
 					<Svg icon="cross" />
 				</Button>

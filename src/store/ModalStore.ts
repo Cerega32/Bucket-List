@@ -2,15 +2,20 @@ import {makeAutoObservable} from 'mobx';
 
 type IWindow = 'login' | 'registration' | 'change-password' | 'add-review' | 'delete-goal' | 'confirm-execution-all-goal';
 
+export type IFuncModal = () => boolean | void | Promise<boolean | void>;
+
 interface IModalStore {
 	isOpen: boolean;
 	window: IWindow;
+	funcModal: IFuncModal;
 }
 
 class Store implements IModalStore {
 	isOpen = true;
 
-	window: IWindow = 'confirm-execution-all-goal';
+	window: IWindow = 'delete-goal';
+
+	funcModal: () => void = () => {};
 
 	constructor() {
 		makeAutoObservable(this);
@@ -22,6 +27,10 @@ class Store implements IModalStore {
 
 	setWindow = (value: IWindow) => {
 		this.window = value;
+	};
+
+	setFuncModal = (func: IFuncModal) => {
+		this.funcModal = func;
 	};
 }
 

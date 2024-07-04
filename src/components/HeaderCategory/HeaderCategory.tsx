@@ -60,7 +60,9 @@ export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
 				<section className={element('subcategories')}>
 					{category.subcategories.map((subcategory) => (
 						<Link className={element('subcategory')} to={`/categories/${category.category.nameEn}/${subcategory.nameEn}`}>
-							{subcategory.icon && <img src={subcategory.icon} alt={subcategory.name} />}
+							{subcategory.icon && (
+								<img className={element('subcategory-icon')} src={subcategory.icon} alt={subcategory.name} />
+							)}
 							{subcategory.name}
 						</Link>
 					))}

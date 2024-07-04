@@ -25,13 +25,7 @@ import {getUser} from '@/utils/api/get/getUser';
 export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 	const [block, element] = useBem('user-self');
 
-	const {setHeader} = ThemeStore;
 	const {userInfo} = UserStore;
-
-	useEffect(() => {
-		setHeader('white');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	useEffect(() => {
 		(async () => {

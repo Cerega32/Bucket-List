@@ -17,12 +17,12 @@ interface AsideProps {
 }
 
 interface AsideGoalProps extends AsideProps {
-	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void>;
+	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void | boolean>;
 	isList?: never;
 }
 
 export interface AsideListsProps extends AsideProps {
-	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark-all') => Promise<void>;
+	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark-all') => Promise<void | boolean>;
 	isList: true;
 }
 
@@ -31,11 +31,29 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 
 	const [block, element] = useBem('aside-goal', className);
 
-	const {setIsOpen, setWindow} = ModalStore;
+	const {setIsOpen, setWindow, setFuncModal} = ModalStore;
 
 	const openAddReview = () => {
 		setWindow('add-review');
 		setIsOpen(true);
+	};
+
+	const openMarkAll = () => {
+		setWindow('confirm-execution-all-goal');
+		setIsOpen(true);
+		if (isList) {
+			setFuncModal(() => updateGoal(code, 'mark-all'));
+		}
+	};
+
+	const deleteGoal = () => {
+		if (isList) {
+			setWindow('delete-goal');
+			setIsOpen(true);
+			setFuncModal(() => updateGoal(code, 'delete'));
+		} else {
+			updateGoal(code, 'delete');
+		}
 	};
 
 	return (
@@ -55,7 +73,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					</Button>
 				)}
 				{isList && added && (
-					<Button theme="blue" onClick={() => updateGoal(code, 'mark-all')} icon="done" className={element('btn')}>
+					<Button theme="blue" onClick={openMarkAll} icon="done" className={element('btn')}>
 						Выполнить все цели
 					</Button>
 				)}
@@ -70,7 +88,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					</Button>
 				)}
 				{added && (
-					<Button theme="blue-light" onClick={() => updateGoal(code, 'delete')} icon="trash" className={element('btn')}>
+					<Button theme="blue-light" onClick={deleteGoal} icon="trash" className={element('btn')}>
 						Удалить
 					</Button>
 				)}

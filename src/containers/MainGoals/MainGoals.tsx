@@ -90,18 +90,7 @@ export const MainGoals: FC<IPage> = () => {
 					totalCompletedHard={mainGoals.hardGoals.countCompleted}
 				/>
 			</div>
-			<MainCards
-				className={element('goals')}
-				goals={mainGoals.easyGoals.data.concat(
-					mainGoals.easyGoals.data,
-					mainGoals.easyGoals.data,
-					mainGoals.easyGoals.data,
-					mainGoals.easyGoals.data
-				)}
-				complexity="easy"
-				withBtn
-				updateGoal={updateGoal}
-			/>
+			<MainCards className={element('goals')} goals={mainGoals.easyGoals.data} complexity="easy" withBtn updateGoal={updateGoal} />
 			<MainCards
 				className={element('goals')}
 				goals={mainGoals.mediumGoals.data}

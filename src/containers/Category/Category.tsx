@@ -30,7 +30,6 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 	const refTitle = useRef<HTMLElement>(null);
 
 	const {id} = useParams();
-	const {setHeader} = ThemeStore;
 
 	useEffect(() => {
 		(async () => {
@@ -61,11 +60,6 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 			}
 		})();
 	}, [id]);
-
-	useEffect(() => {
-		setHeader('transparent');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	if (!id) {
 		return null;

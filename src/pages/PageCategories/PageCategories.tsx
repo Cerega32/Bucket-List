@@ -5,10 +5,11 @@ import {ThemeStore} from '@/store/ThemeStore';
 import {IPage} from '@/typings/page';
 
 export const PageCategories: FC<IPage> = ({page}) => {
-	const {setPage} = ThemeStore;
+	const {setPage, setHeader} = ThemeStore;
 
 	useEffect(() => {
 		setPage(page);
+		setHeader('white');
 	}, [page, setPage]);
 
 	return <Categories page={page} />;

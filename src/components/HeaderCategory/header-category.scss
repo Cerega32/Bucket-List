@@ -78,4 +78,9 @@
 			background: rgba(var(--color-primary-hover-rgb), 0.08);
 		}
 	}
+
+	&__subcategory-icon {
+		max-width: 24px;
+		max-height: 24px;
+	}
 }

@@ -20,13 +20,6 @@ export const ListGoalsContainer: FC = () => {
 	const [block, element] = useBem('list-goals-container');
 	const [list, setList] = useState<IList | null>(null);
 
-	const {setHeader} = ThemeStore;
-
-	useEffect(() => {
-		setHeader('white');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
 	const params = useParams();
 
 	useEffect(() => {
@@ -38,10 +31,7 @@ export const ListGoalsContainer: FC = () => {
 		})();
 	}, [params['id']]);
 
-	const updateList = async (
-		code: string,
-		operation: 'add' | 'delete' | 'mark-all'
-	): Promise<void> => {
+	const updateList = async (code: string, operation: 'add' | 'delete' | 'mark-all'): Promise<void | boolean> => {
 		const res = await (operation === 'add'
 			? addListGoal(code)
 			: operation === 'delete'
@@ -55,36 +45,22 @@ export const ListGoalsContainer: FC = () => {
 				goals: list?.goals.map((goal) => {
 					return {
 						...goal,
-						completedByUser:
-							operation === 'mark-all'
-								? true
-								: goal.completedByUser,
+						completedByUser: operation === 'mark-all' ? true : goal.completedByUser,
 					};
 				}),
 			});
+			return true;
 		}
 	};
 
-	const updateGoal = async (
-		code: string,
-		i: number,
-		operation: 'add' | 'delete' | 'mark',
-		done?: boolean
-	): Promise<void> => {
-		const res = await (operation === 'add'
-			? addGoal(code)
-			: operation === 'delete'
-			? removeGoal(code)
-			: markGoal(code, !done));
+	const updateGoal = async (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
+		const res = await (operation === 'add' ? addGoal(code) : operation === 'delete' ? removeGoal(code) : markGoal(code, !done));
 
 		if (res.success && list) {
 			const updatedGoal = {
 				...list.goals[i],
 				addedByUser: operation !== 'delete',
-				completedByUser:
-					operation === 'mark'
-						? !done
-						: list.goals[i].completedByUser,
+				completedByUser: operation === 'mark' ? !done : list.goals[i].completedByUser,
 				totalAdded: res.data.users_added_count,
 			};
 
@@ -111,11 +87,7 @@ export const ListGoalsContainer: FC = () => {
 					code={list.code}
 					isList
 				/>
-				<ContentListGoals
-					className={element('content')}
-					list={list}
-					updateGoal={updateGoal}
-				/>
+				<ContentListGoals className={element('content')} list={list} updateGoal={updateGoal} />
 			</article>
 		</main>
 	);
