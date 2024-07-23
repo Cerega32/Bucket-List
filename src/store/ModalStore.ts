@@ -11,9 +11,9 @@ interface IModalStore {
 }
 
 class Store implements IModalStore {
-	isOpen = true;
+	isOpen = false;
 
-	window: IWindow = 'delete-goal';
+	window: IWindow = 'login';
 
 	funcModal: () => void = () => {};
 
