@@ -1,0 +1,20 @@
+.layout {
+	padding-top: var(--height-header);
+	min-height: 100vh;
+	background: var(--color-gray-3);
+	position: relative;
+
+	&--full {
+		padding-top: 0;
+	}
+
+	&::before {
+		content: '';
+		display: block;
+		position: absolute;
+		top: 64px;
+		width: 100%;
+		height: 600px;
+		background: linear-gradient(180deg, rgba(var(--color-green-rgb), 0.04) 0%, rgba(var(--color-gray-rgb-12), 0) 100%);
+	}
+}

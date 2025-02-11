@@ -4,11 +4,12 @@ import {IPage} from '@/typings/page';
 import {ThemeStore} from '@/store/ThemeStore';
 
 export const PageDetailGoal: FC<IPage> = ({page}) => {
-	const {setHeader, setPage} = ThemeStore;
+	const {setHeader, setPage, setFull} = ThemeStore;
 
 	useEffect(() => {
 		setHeader('transparent');
 		setPage(page);
+		setFull(true);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 

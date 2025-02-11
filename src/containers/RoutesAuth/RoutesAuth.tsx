@@ -15,13 +15,13 @@ export const RoutesAuth: FC = () => {
 		<Routes>
 			{/* <Route path="/" element={<PageDetailGoal />} /> */}
 			<Route path="/list/:id" element={<PageDetailList />} />
+			<Route path="/list/100-goals" element={<PageMainGoals page="isMainGoals" />} />
 			<Route path="/categories" element={<PageCategories page="isCategories" />} />
 			<Route path="/categories/:id" element={<PageCategory page="isCategories" subPage="goals" />} />
 			<Route path="/categories/:categories/:id/" element={<PageCategory page="isSubCategories" subPage="goals" />} />
 			<Route path="/categories/:id/lists" element={<PageCategory page="isCategories" subPage="lists" />} />
 			<Route path="/categories/:categories/:id/lists" element={<PageCategory page="isSubCategories" subPage="lists" />} />
 			<Route path="/goals/:id/lists" element={<PageDetailGoal page="isGoalLists" />} />
-			<Route path="/goals/100-goals" element={<PageMainGoals page="isMainGoals" />} />
 			<Route path="/goals/:id" element={<PageDetailGoal page="isGoal" />} />
 			<Route path="/user/:id/showcase" element={<PageUser page="isUserShowcase" />} />
 			<Route path="/user/:id/100-goal" element={<PageUser page="isUser100Goals" />} />

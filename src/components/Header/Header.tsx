@@ -77,7 +77,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				</nav>
 				{isAuth ? (
 					<Link className={element('profile')} to="/user/self">
-						<Avatar avatar={Cookies.get('avatar')} size="medium" />
+						<Avatar avatar={Cookies.get('avatar')} size="small" />
 						<span className={element('nickname')}>{name}</span>
 					</Link>
 				) : (

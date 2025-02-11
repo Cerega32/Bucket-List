@@ -73,6 +73,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
 				{window === 'add-review' && <AddReview closeModal={closeWindow} />}
 				{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
+				{window === 'delete-list' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
 				{window === 'confirm-execution-all-goal' && <ConfirmExecutionAllGoal closeModal={closeWindow} funcModal={funcModal} />}
 				<Button theme="blue-light" className={element('close')} onClick={closeWindow}>
 					<Svg icon="cross" />

@@ -1,6 +1,6 @@
 import {makeAutoObservable} from 'mobx';
 
-type IWindow = 'login' | 'registration' | 'change-password' | 'add-review' | 'delete-goal' | 'confirm-execution-all-goal';
+type IWindow = 'login' | 'registration' | 'change-password' | 'add-review' | 'delete-goal' | 'delete-list' | 'confirm-execution-all-goal';
 
 export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 

@@ -3,6 +3,12 @@
 
 	&__title {
 		margin-bottom: 16px;
+
+		&--short {
+			font-size: 22px;
+			line-height: var(--line-height-22);
+			font-weight: var(--weight-semi-bold);
+		}
 	}
 
 	&--theme-light {

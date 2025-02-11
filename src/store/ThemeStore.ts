@@ -11,6 +11,8 @@ class Store implements IThemeStore {
 
 	page = 'isMainPage';
 
+	full = true;
+
 	constructor() {
 		makeAutoObservable(this);
 	}
@@ -21,6 +23,10 @@ class Store implements IThemeStore {
 
 	setPage = (page: string) => {
 		this.page = page;
+	};
+
+	setFull = (full: boolean) => {
+		this.full = full;
 	};
 }
 

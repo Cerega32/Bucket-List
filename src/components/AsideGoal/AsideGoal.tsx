@@ -49,11 +49,11 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const deleteGoal = () => {
 		if (isList) {
 			setWindow('delete-goal');
-			setIsOpen(true);
-			setFuncModal(() => updateGoal(code, 'delete'));
 		} else {
-			updateGoal(code, 'delete');
+			setWindow('delete-goal');
 		}
+		setIsOpen(true);
+		setFuncModal(() => updateGoal(code, 'delete'));
 	};
 
 	return (
@@ -72,7 +72,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						{done ? 'Выполнено' : 'Выполнить'}
 					</Button>
 				)}
-				{isList && added && (
+				{isList && added && !done && (
 					<Button theme="blue" onClick={openMarkAll} icon="done" className={element('btn')}>
 						Выполнить все цели
 					</Button>

@@ -1,26 +1,45 @@
 import {makeAutoObservable} from 'mobx';
 
-interface Notification {
-	text: string;
-	isError: boolean;
-	isSuccess: boolean;
+type NotificationType = 'success' | 'error' | 'warning';
+
+export interface INotification {
+	id: string;
+	type: NotificationType;
+	title: string;
+	message?: string;
+	actionText?: string;
+	action?: () => void;
 }
 
 class Store {
-	notifications: Array<Notification> = [];
+	private queue: INotification[] = []; // Очередь всех уведомлений
+	visibleNotifications: INotification[] = []; // Отображаемые уведомления (макс. 3)
 
 	constructor() {
 		makeAutoObservable(this);
 	}
 
-	addNotification(notification: Notification) {
-		if (this.notifications.length < 10) {
-			this.notifications.push(notification);
+	addNotification(notification: Omit<INotification, 'id'>) {
+		const id = Math.random().toString(36).substr(2, 9);
+		this.queue.push({id, ...notification});
+
+		this.showNextNotification();
+	}
+
+	private showNextNotification() {
+		while (this.visibleNotifications.length < 3 && this.queue.length > 0) {
+			const nextNotification = this.queue.shift();
+			if (nextNotification) {
+				this.visibleNotifications.push(nextNotification);
+
+				setTimeout(() => this.removeNotification(nextNotification.id), 7000);
+			}
 		}
 	}
 
-	removeNotification(index: number) {
-		this.notifications.splice(index, 1);
+	removeNotification(id: string) {
+		this.visibleNotifications = this.visibleNotifications.filter((n) => n.id !== id);
+		this.showNextNotification(); // Показываем следующее уведомление
 	}
 }
 

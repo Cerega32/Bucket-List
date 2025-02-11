@@ -10,11 +10,11 @@ import {ThemeStore} from '@/store/ThemeStore';
 import {IGoal} from '@/typings/goal';
 import './goal.scss';
 import {IPage} from '@/typings/page';
-import {getCategories} from '@/utils/api/get/getCategories';
 import {getGoal} from '@/utils/api/get/getGoal';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
+import {NotificationStore} from '@/store/NotificationStore';
 
 export const Goal: FC<IPage> = ({page}) => {
 	const [block, element] = useBem('goal');
@@ -24,12 +24,12 @@ export const Goal: FC<IPage> = ({page}) => {
 
 	useEffect(() => {
 		(async () => {
-			const res = await getGoal(params.id);
+			const res = await getGoal(params?.['id'] as string);
 			if (res.success) {
 				setGoal(res.data.goal);
 			}
 		})();
-	}, [params.id]);
+	}, [params?.['id']]);
 
 	if (!goal) {
 		return null;
@@ -47,7 +47,6 @@ export const Goal: FC<IPage> = ({page}) => {
 			};
 
 			setGoal({...goal, ...updatedGoal});
-			console.log({...goal, ...updatedGoal});
 		}
 	};
 

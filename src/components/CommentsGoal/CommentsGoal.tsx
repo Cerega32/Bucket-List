@@ -26,7 +26,6 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 		if (res.success) {
 			const startComments = comments.slice(0, i);
 			const endComments = comments.slice(i + 1);
-
 			setComments([...startComments, {...comments[i], ...res.data}, ...endComments]);
 		}
 	};
