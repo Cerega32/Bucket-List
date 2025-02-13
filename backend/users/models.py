@@ -24,5 +24,6 @@ class CustomUser(AbstractUser):
     achievements_received = models.ManyToManyField(
         "achievements.Achievement", related_name="received_by_users", blank=True
     )
+    experience = models.IntegerField(default=0, verbose_name=_("Опыт"))
 
     objects = CustomUserManager()

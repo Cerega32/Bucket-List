@@ -14,6 +14,7 @@ from .serializers import (
 from rest_framework import serializers
 
 from django.db.models import Count
+from users.experience import add_experience
 
 
 @api_view(["POST"])
@@ -283,10 +284,22 @@ def add_comment(request):
 
     try:
         goal = Goal.objects.get(id=goal_id)
+
+        # Проверяем, есть ли уже комментарий от этого пользователя к этой цели
+        existing_comment = Comment.objects.filter(user=user, goal=goal).first()
+        if existing_comment:
+            return Response(
+                {"message": "Вы уже оставили комментарий к этой цели"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         with transaction.atomic():
             comment = Comment.objects.create(
                 user=user, text=text, complexity=complexity, goal=goal
             )
+
+            # Добавляем опыт за написание комментария
+            add_experience(user, "ADD_COMMENT")
 
             photos = request.FILES.getlist("photo")
             if photos:

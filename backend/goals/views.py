@@ -14,6 +14,7 @@ from django.utils import timezone
 from datetime import timedelta
 from functools import reduce
 import operator
+from users.experience import add_experience, delete_experience
 
 
 @api_view(["GET"])
@@ -115,10 +116,15 @@ def mark_goal(request, code):
         if done:
             # Пометьте цель как выполненную.
             goal.completed_by_users.add(user)
+            # Добавляем опыт за выполнение цели
+            if (
+                not goal_previously_completed
+            ):  # Начисляем опыт только если цель не была выполнена ранее
+                add_experience(user, "COMPLETE_GOAL")
             check = check_achievements(user)
             print(check)
         else:
-            # Снимите отметку о выполнении цели.
+            delete_experience(user, "COMPLETE_GOAL")
             goal.completed_by_users.remove(user)
 
         # Обновите информацию о пользователях, которые выполнили цель.

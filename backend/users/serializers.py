@@ -59,6 +59,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
             "totalCompletedLists",
             "totalAddedLists",
             "totalAchievements",
+            "experience",
         )
 
     totalCompletedGoals = serializers.SerializerMethodField()
