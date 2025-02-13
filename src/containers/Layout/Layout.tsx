@@ -23,21 +23,6 @@ const Layout: FC = observer(() => {
 			<div className={block({full})}>
 				<RoutesAuth />
 				<Modal />
-				<button
-					onClick={() => NotificationStore.addNotification({type: 'success', title: 'Успешно!', message: 'Операция выполнена'})}
-				>
-					Добавить успех
-				</button>
-				<button
-					onClick={() => NotificationStore.addNotification({type: 'error', title: 'Ошибка!', message: 'Что-то пошло не так'})}
-				>
-					Добавить ошибку
-				</button>
-				<button
-					onClick={() => NotificationStore.addNotification({type: 'warning', title: 'Внимание!', message: 'Будьте осторожны'})}
-				>
-					Добавить предупреждение
-				</button>
 				<NotificationContainer />
 			</div>
 		</BrowserRouter>

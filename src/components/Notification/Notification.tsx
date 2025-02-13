@@ -10,7 +10,7 @@ interface NotificationProps {
 	id: string;
 	type: 'success' | 'error' | 'warning';
 	title: string;
-	message?: string;
+	message?: string | {[key: string]: Array<string>};
 	actionText?: string;
 	action?: () => void;
 }
@@ -29,7 +29,7 @@ const Notification: React.FC<NotificationProps> = observer(({id, type, title, me
 			<span className={element('icon')}>{type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️'}</span>
 			<div className={element('content')}>
 				<strong>{title}</strong>
-				{message && <p>{message}</p>}
+				{typeof message === 'string' && <p>{message}</p>}
 				{actionText && (
 					<button type="button" onClick={action}>
 						{actionText}

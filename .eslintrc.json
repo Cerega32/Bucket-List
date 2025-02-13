@@ -19,7 +19,7 @@
 			"typescript": {}
 		}
 	},
-	"plugins": ["react", "@typescript-eslint", "prettier"],
+	"plugins": ["react", "@typescript-eslint", "prettier", "import"],
 	"rules": {
 		"prettier/prettier": 2,
 		"indent": ["error", "tab", {"SwitchCase": 1}],
@@ -45,15 +45,33 @@
 		"react/jsx-props-no-spreading": "off",
 		"max-len": ["error", 140, 2],
 		"@typescript-eslint/no-unused-vars": ["error", {"destructuredArrayIgnorePattern": "^_"}],
+		// "import/order": [
+		// 	2,
+		// 	{
+		// 		"groups": ["external", "builtin", "index", "sibling", "parent", "internal", "type"],
+		// 		"alphabetize": {
+		// 			"order": "asc",
+		// 			"caseInsensitive": true
+		// 		},
+		// 		"newlines-between": "always-and-inside-groups"
+		// 	}
+		// ]
 		"import/order": [
-			2,
+			"error",
 			{
-				"groups": ["external", "builtin", "index", "sibling", "parent", "internal", "type"],
+				"groups": [
+					"builtin", // Встроенные импорты (например, 'react')
+					"external", // Внешние пакеты
+					"internal", // Внутренние импорты
+					["parent", "sibling"], // Импорты из родительской и текущей директории
+					"index", // Импорты ./index
+					"type" // Импорты типов
+				],
+				"newlines-between": "always",
 				"alphabetize": {
 					"order": "asc",
 					"caseInsensitive": true
-				},
-				"newlines-between": "always-and-inside-groups"
+				}
 			}
 		]
 	}

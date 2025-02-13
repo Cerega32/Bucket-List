@@ -6,7 +6,7 @@ export interface INotification {
 	id: string;
 	type: NotificationType;
 	title: string;
-	message?: string;
+	message?: string | {[key: string]: Array<string>};
 	actionText?: string;
 	action?: () => void;
 }

@@ -16,10 +16,25 @@ interface FieldInputProps {
 	setValueTarget?: (value: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 	iconBegin?: string;
 	autoComplete?: string;
+	error?: Array<string>;
+	required?: boolean;
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
-	const {className, type = 'text', placeholder, id, text, value, setValue, setValueTarget, iconBegin, autoComplete = 'off'} = props;
+	const {
+		className,
+		type = 'text',
+		placeholder,
+		id,
+		text,
+		value,
+		setValue,
+		setValueTarget,
+		iconBegin,
+		autoComplete = 'off',
+		error,
+		required,
+	} = props;
 
 	const [block, element] = useBem('field-input', className);
 	const [typeState, setTypeState] = useState(type);
@@ -42,6 +57,9 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 
 	return (
 		<div className={block()}>
+			{error?.map((er) => (
+				<p className={element('error')}>{er}</p>
+			))}
 			{text && (
 				<label className={element('label')} htmlFor={id}>
 					{text}
@@ -66,6 +84,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						value={value}
 						onChange={handleChange}
 						autoComplete={autoComplete}
+						required={required}
 					/>
 				)}
 				{type === 'password' && (
