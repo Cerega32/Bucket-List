@@ -19,6 +19,20 @@ from categories.serializers import CategorySerializer
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.contrib.auth.hashers import make_password
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import (
+    Sum,
+    F,
+    Count,
+    Q,
+    When,
+    Value,
+    IntegerField,
+    Case,
+    BooleanField,
+)
+from users.experience import EXPERIENCE_REWARDS
 
 
 @api_view(["PUT"])
@@ -191,9 +205,6 @@ def register_user(request):
 
 #         return response
 
-#     response_data = {"error": serializer.errors}
-#     return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
-
 
 # @api_view(["POST"])
 # def register_user(request):
@@ -248,41 +259,37 @@ def get_user_info(request, code=None):
 @permission_classes([IsAuthenticated])
 def get_user_added_goals(request):
     user = request.user
-
-    # Получаем все цели, которые были добавлены пользователем
-    user_added_goals = Goal.objects.filter(added_by_users=user)
-
-    # Получение параметра фильтрации по выполненным целям (completed=true) или невыполненным (completed=false)
-    completed_filter = request.GET.get("completed", None)
-
-    # Если параметр фильтрации указан и равен 'true', фильтруем выполненные цели
-    if completed_filter == "true":
-        user_added_goals = user_added_goals.filter(completed_by_users=user)
-
-    # Если параметр фильтрации указан и равен 'false', фильтруем невыполненные цели
-    elif completed_filter == "false":
-        user_added_goals = user_added_goals.exclude(completed_by_users=user)
-
-    # Получение номера страницы из параметра запроса
-    page_number = request.GET.get("page", 1)
-
-    # Определите, сколько элементов на странице
+    page_number = int(request.GET.get("page", 1))
     page_size = 10
 
-    # Расчет начальной и конечной позиции элементов на странице
+    # Базовый запрос для целей пользователя
+    base_query = Goal.objects.filter(added_by_users=user).annotate(
+        is_completed=Case(
+            When(completed_by_users=user, then=True),
+            default=False,
+            output_field=BooleanField(),
+        ),
+        total_completed=Count("completed_by_users"),
+    )
+
+    # Фильтрация по статусу выполнения
+    completed_filter = request.GET.get("completed")
+    if completed_filter == "true":
+        base_query = base_query.filter(completed_by_users=user)
+    elif completed_filter == "false":
+        base_query = base_query.exclude(completed_by_users=user)
+
+    # Подсчет общего количества
+    total_added = base_query.count()
+
+    # Пагинация
     start_index = (page_number - 1) * page_size
     end_index = page_number * page_size
-
-    # Получаем цели для текущей страницы
-    paginated_user_added_goals = user_added_goals[start_index:end_index]
-
-    # Инициализируем массив целей и общее количество добавленных целей
-    goals_data = []
-    total_added = user_added_goals.count()
+    paginated_goals = base_query[start_index:end_index]
 
     # Сериализация результатов
-    for goal in paginated_user_added_goals:
-        goal_data = {
+    goals_data = [
+        {
             "category": CategorySerializer(goal.category).data,
             "code": goal.code,
             "complexity": goal.complexity,
@@ -293,17 +300,18 @@ def get_user_added_goals(request):
                 CategorySerializer(goal.subcategory).data if goal.subcategory else None
             ),
             "title": goal.title,
-            "completedByUser": goal.completed_by_users.filter(id=user.id).exists(),
-            "totalCompleted": goal.completed_by_users.count(),
+            "completedByUser": goal.is_completed,
+            "totalCompleted": goal.total_completed,
         }
-        goals_data.append(goal_data)
+        for goal in paginated_goals
+    ]
 
-    response_data = {
-        "goals": goals_data,
-        "totalAdded": total_added,
-    }
-
-    return Response(response_data)
+    return Response(
+        {
+            "goals": goals_data,
+            "totalAdded": total_added,
+        }
+    )
 
 
 @api_view(["GET"])
@@ -366,3 +374,86 @@ def get_user_added_lists(request):
     }
 
     return Response(response_data)
+
+
+@api_view(["GET"])
+def get_weekly_leaders(request):
+    """
+    Получает список лидеров за последнюю неделю
+    """
+    try:
+        # Получаем количество лидеров из параметров запроса или используем значение по умолчанию
+        leaders_count = int(request.GET.get("limit", 10))
+
+        # Определяем временной период (последняя неделя)
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=7)
+
+        # Получаем пользователей с их статистикой за неделю
+        leaders = (
+            CustomUser.objects.annotate(
+                goals_completed_week=Count(
+                    "completed_goals",
+                    filter=Q(
+                        completed_goals__completed_by_users__date_joined__range=[
+                            start_date,
+                            end_date,
+                        ]
+                    ),
+                ),
+                reviews_added_week=Count(
+                    "comment",
+                    filter=Q(comment__date_created__range=[start_date, end_date]),
+                ),
+                experience_earned_week=Sum(
+                    Case(
+                        # Опыт за выполненные цели
+                        When(
+                            completed_goals__completed_by_users__date_joined__range=[
+                                start_date,
+                                end_date,
+                            ],
+                            then=Value(EXPERIENCE_REWARDS["COMPLETE_GOAL"]),
+                        ),
+                        # Опыт за комментарии
+                        When(
+                            comment__date_created__range=[start_date, end_date],
+                            then=Value(EXPERIENCE_REWARDS["ADD_COMMENT"]),
+                        ),
+                        default=Value(0),
+                        output_field=IntegerField(),
+                    )
+                ),
+            )
+            .filter(
+                Q(goals_completed_week__gt=0)
+                | Q(reviews_added_week__gt=0)
+                | Q(experience_earned_week__gt=0)
+            )
+            .order_by("-experience_earned_week")[:leaders_count]
+        )
+
+        # Подготавливаем данные для ответа
+        leaders_data = []
+        for index, user in enumerate(leaders, 1):
+            leaders_data.append(
+                {
+                    "id": user.id,
+                    "name": f"{user.first_name} {user.last_name}".strip()
+                    or user.username,
+                    "avatar": user.avatar.url if user.avatar else None,
+                    "level": user.level,
+                    "place": index,
+                    "week_completed_goals": user.goals_completed_week,
+                    "total_completed_goals": user.completed_goals.count(),
+                    "reviews_added_week": user.reviews_added_week,
+                    "experience_earned_week": user.experience_earned_week or 0,
+                }
+            )
+
+        return Response(
+            {"leaders": leaders_data, "period": {"start": start_date, "end": end_date}}
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

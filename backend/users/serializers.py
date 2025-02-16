@@ -42,6 +42,9 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
+    level = serializers.IntegerField(read_only=True)
+    next_level_experience = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = CustomUser
         fields = (
@@ -60,6 +63,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
             "totalAddedLists",
             "totalAchievements",
             "experience",
+            "level",
+            "next_level_experience",
         )
 
     totalCompletedGoals = serializers.SerializerMethodField()

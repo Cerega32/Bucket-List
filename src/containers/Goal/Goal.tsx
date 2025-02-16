@@ -4,17 +4,14 @@ import {useParams} from 'react-router-dom';
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {ContentGoal} from '@/components/ContentGoal/ContentGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
-import {Modal} from '@/components/Modal/Modal';
 import {useBem} from '@/hooks/useBem';
-import {ThemeStore} from '@/store/ThemeStore';
 import {IGoal} from '@/typings/goal';
-import './goal.scss';
 import {IPage} from '@/typings/page';
 import {getGoal} from '@/utils/api/get/getGoal';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
-import {NotificationStore} from '@/store/NotificationStore';
+import './goal.scss';
 
 export const Goal: FC<IPage> = ({page}) => {
 	const [block, element] = useBem('goal');

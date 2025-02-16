@@ -1,16 +1,16 @@
 import {observer} from 'mobx-react';
-import {FC, useEffect, useState} from 'react';
+import {FC, useEffect} from 'react';
 
 import './content-goal.scss';
-import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
-import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
-
-import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
 
 import {useBem} from '@/hooks/useBem';
 import {GoalStore} from '@/store/GoalStore';
 import {IGoal} from '@/typings/goal';
 import {getComments} from '@/utils/api/get/getComments';
+
+import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
+import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
+import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
 
 interface ContentGoalProps {
 	className?: string;
@@ -42,21 +42,9 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 	const getGoalContent = () => {
 		switch (page) {
 			case 'isGoal':
-				return (
-					<>
-						<CommentsGoal comments={comments} setComments={setComments} />
-					</>
-				);
+				return <CommentsGoal comments={comments} setComments={setComments} />;
 			case 'isGoalLists':
-				return (
-					<>
-						<ListsWithGoal code={goal.code} />
-						<ListsWithGoal code={goal.code} />
-						<ListsWithGoal code={goal.code} />
-						<ListsWithGoal code={goal.code} />
-						<ListsWithGoal code={goal.code} />
-					</>
-				);
+				return <ListsWithGoal code={goal.code} />;
 			default:
 				return null;
 		}

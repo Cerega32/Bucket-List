@@ -21,7 +21,7 @@ type Headers = HeadersInit & {
 	Authorization?: string;
 };
 
-const setHeaders = (params: IFetchParams): Headers => {
+const setHeaders = (params: IFetchParams = {}): Headers => {
 	const headers: Headers = {};
 	if (params?.auth && Cookies.get('token')) {
 		headers.Authorization = `Token ${Cookies.get('token')}`;
@@ -106,9 +106,9 @@ export const GET = async (url: string, params?: IFetchParams): Promise<any> => {
 			.reduce(
 				(result, [key, value]) => ({
 					...result,
-					[key]: value,
+					[key]: String(value),
 				}),
-				{} as Record<string, string | number | boolean>
+				{} as Record<string, string>
 			);
 
 		const urlSearchParams = new URLSearchParams(filteredParams);

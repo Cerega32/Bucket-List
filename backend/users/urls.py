@@ -12,6 +12,7 @@ from .views import (
     update_user_profile,
     upload_cover,
     change_password,
+    get_weekly_leaders,
 )
 
 urlpatterns = [
@@ -26,4 +27,5 @@ urlpatterns = [
     path("api/users/avatar/delete/", delete_avatar, name="delete_avatar"),
     path("api/users/update-profile/", update_user_profile, name="update_user_profile"),
     path("api/users/change-password/", change_password, name="change_password"),
+    path("api/leaders/weekly/", get_weekly_leaders, name="weekly-leaders"),
 ]

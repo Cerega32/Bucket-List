@@ -15,3 +15,15 @@ export interface IUserInfo {
 	totalCompletedLists: number;
 	totalAchievements: number;
 }
+
+export interface IWeeklyLeader {
+	avatar: string;
+	experienceEarnedWeek: number;
+	totalCompletedGoals: number;
+	weekCompletedGoals: number;
+	id: number;
+	level: number;
+	name: string;
+	place: number;
+	reviewsAddedWeek: number;
+}

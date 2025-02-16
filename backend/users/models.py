@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from .managers import CustomUserManager
+from .levels import calculate_level, experience_to_next_level
 
 
 class CustomUser(AbstractUser):
@@ -27,3 +28,17 @@ class CustomUser(AbstractUser):
     experience = models.IntegerField(default=0, verbose_name=_("Опыт"))
 
     objects = CustomUserManager()
+
+    @property
+    def level(self):
+        """
+        Возвращает текущий уровень пользователя
+        """
+        return calculate_level(self.experience)
+
+    @property
+    def next_level_experience(self):
+        """
+        Возвращает количество опыта, необходимое для следующего уровня
+        """
+        return experience_to_next_level(self.experience)

@@ -11,6 +11,10 @@
 	flex-shrink: 0;
 	overflow: hidden;
 
+	&--noBorder {
+		border: none;
+	}
+
 	&--size-large {
 		width: 196px;
 		height: 196px;

@@ -72,6 +72,13 @@
 	--color-red-rgb-2: 248, 53, 37; // #F83525
 	--color-red-2: rgb(var(--color-red-rgb-2)); // #F83525
 
+	--color-gold-rgb: 255, 208, 44; // #FFD02C
+	--color-gold: rgb(var(--color-gold-rgb)); // #FFD02C
+	--color-silver-rgb: 193, 199, 220; // #C1C7DC
+	--color-silver: rgb(var(--color-silver-rgb)); // #C1C7DC
+	--color-bronze-rgb: 225, 171, 141; // #E1AB8D
+	--color-bronze: rgb(var(--color-bronze-rgb)); // #E1AB8D
+
 	--color-primary-rgb: var(--color-blue-rgb-3);
 	--color-primary: var(--color-blue-3);
 	--color-primary-hover-rgb: var(--color-blue-rgb-4);
