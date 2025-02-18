@@ -1,14 +1,14 @@
 .comment-goal {
 	padding: 16px;
+	background: var(--color-white);
 	border: 1px solid var(--color-gray-9);
 	border-radius: 16px;
-	background: var(--color-white);
 
 	&__info {
-		margin-bottom: 16px;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		margin-bottom: 16px;
 	}
 
 	&__user-info {
@@ -19,16 +19,16 @@
 	}
 
 	&__user-img {
-		margin-right: 8px;
 		width: 48px;
 		height: 48px;
+		margin-right: 8px;
 		border-radius: 50%;
 	}
 
 	&__user-level {
+		color: var(--color-gray-1);
 		font-size: 12px;
 		line-height: var(--line-height-12);
-		color: var(--color-gray-1);
 	}
 
 	&__user-wrapper {
@@ -53,10 +53,10 @@
 	}
 
 	&__horizontal-line {
-		margin-bottom: 16px;
-		border: none;
 		height: 1px;
+		margin-bottom: 16px;
 		background: var(--color-gray-9);
+		border: none;
 	}
 
 	&__text {
@@ -64,15 +64,15 @@
 	}
 
 	&__comment-images {
-		margin-bottom: 16px;
 		display: flex;
 		gap: 8px;
+		margin-bottom: 16px;
 	}
 
 	&__comment-img {
-		border-radius: 8px;
 		width: 72px;
 		height: 72px;
+		border-radius: 8px;
 	}
 
 	&__score {

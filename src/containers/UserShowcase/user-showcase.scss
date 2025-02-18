@@ -1,23 +1,23 @@
 .user-showcase {
-	max-width: var(--max-width);
-	margin: 40px auto 0;
 	display: flex;
 	gap: 24px;
+	max-width: var(--max-width);
+	margin: 40px auto 0;
 
 	&__lists {
 		margin-bottom: 40px;
 	}
 
 	&__sidebar {
-		width: 336px;
 		flex-shrink: 0;
+		width: 336px;
 	}
 
 	&__title {
-		margin-bottom: 24px;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		margin-bottom: 24px;
 	}
 
 	&__stats {

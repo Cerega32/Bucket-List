@@ -1,9 +1,9 @@
 .user-achievements {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 24px;
 	max-width: var(--max-width);
 	margin: 40px auto 0;
-	display: flex;
-	gap: 24px;
-	flex-wrap: wrap;
 
 	&__achievement {
 		width: calc(25% - 24px * 3 / 4);

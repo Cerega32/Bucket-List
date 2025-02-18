@@ -1,4 +1,4 @@
-@import '../../_commons/styles-supports/mixins.scss';
+@import '../../_commons/styles-supports/mixins';
 
 .user-self-settings {
 	width: 100%;
@@ -9,6 +9,7 @@
 
 	&__edit-fields {
 		@include block-radius(24px);
+
 		overflow: hidden;
 	}
 
@@ -28,10 +29,10 @@
 
 	&__avatar-wrapper {
 		position: relative;
-		margin-top: calc(-192px + 56px);
 		display: flex;
-		align-items: flex-end;
 		justify-content: flex-start;
+		align-items: flex-end;
+		margin-top: calc(-192px + 56px);
 	}
 
 	&__avatar {
@@ -47,10 +48,10 @@
 	}
 
 	&__input-group {
-		margin-bottom: 24px;
 		display: grid;
-		grid-template-columns: 1fr 1fr;
 		gap: 24px;
+		margin-bottom: 24px;
+		grid-template-columns: 1fr 1fr;
 	}
 
 	&__country {

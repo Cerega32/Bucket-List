@@ -1,11 +1,10 @@
 @charset "UTF-8";
 @import 'custom-properties';
 @import 'mixins';
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
 
 :root {
 	box-sizing: border-box;
-
 	color: var(--color-text);
 }
 
@@ -37,20 +36,17 @@ dd {
 /* Set core body defaults */
 body {
 	min-height: 100vh;
-
+	font-family: Inter, sans-serif;
 	font-size: 14px;
 	line-height: var(--line-height-14);
 	scroll-behavior: smooth;
 	text-rendering: optimizespeed;
-
-	font-family: 'Inter', sans-serif;
 }
 
 /* Remove list styles on ul, ol elements */
 ul,
 ol {
 	padding: 0;
-
 	list-style: none;
 }
 
@@ -66,7 +62,6 @@ a:not([class]) {
 /* Make images easier to work with */
 img {
 	display: block;
-
 	max-width: 100%;
 	height: auto;
 }
@@ -80,13 +75,12 @@ select {
 }
 
 button {
-	margin: 0;
 	padding: 0;
-
-	border: none;
+	margin: 0;
 	background-color: transparent;
-	box-shadow: none;
+	border: none;
 	cursor: pointer;
+	box-shadow: none;
 }
 
 .test {

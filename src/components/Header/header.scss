@@ -1,19 +1,20 @@
 .header {
 	$block: &;
+
+	position: fixed;
 	z-index: 110;
 	top: 0;
-	position: fixed;
 	width: 100%;
 	height: var(--height-header);
 	padding: 16px 0;
-	border-bottom: 1px solid rgba(var(--color-white-rgb), 0.16);
+	border-bottom: 1px solid rgb(var(--color-white-rgb) 0.16);
 
 	&__wrapper {
-		margin: 0 auto;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		max-width: 1440px;
+		margin: 0 auto;
 	}
 
 	&__logo {
@@ -26,8 +27,8 @@
 
 	&__list {
 		display: flex;
-		align-items: center;
 		justify-content: center;
+		align-items: center;
 		gap: 4px;
 	}
 
@@ -36,8 +37,8 @@
 	}
 
 	&__item-link {
-		padding: 6px 16px;
 		display: inline-block;
+		padding: 6px 16px;
 		border-radius: 16px;
 		color: var(--color-white);
 
@@ -64,7 +65,7 @@
 
 	&--theme-white {
 		background: var(--color-white);
-		border-color: rgba(var(--color-black-rgb), 0.16);
+		border-color: rgb(var(--color-black-rgb) 0.16);
 
 		#{$block} {
 			&__item-link {

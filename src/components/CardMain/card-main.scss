@@ -1,12 +1,13 @@
 .card-main {
 	$block: &;
+
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	background: var(--color-white);
+	border: 1px solid var(--color-gray-9);
 	border-radius: 8px;
 	overflow: hidden;
-	border: 1px solid var(--color-gray-9);
 
 	&__gradient {
 		display: flex;
@@ -21,8 +22,8 @@
 	}
 
 	&__img-tags {
-		width: 100%;
 		display: flex;
+		width: 100%;
 	}
 
 	&__img-tag-icon-done {

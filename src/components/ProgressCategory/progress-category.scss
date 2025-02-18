@@ -1,13 +1,14 @@
 .progress-category {
 	$block: &;
+
 	display: flex;
 	gap: 16px;
 
 	&__bar {
 		position: relative;
 		display: flex;
-		align-items: center;
 		justify-content: center;
+		align-items: center;
 		width: 40px;
 		height: 40px;
 	}
@@ -47,7 +48,7 @@
 	}
 
 	&__account {
-		font-weight: var(--weight-bold);
 		color: var(--color-text-primary);
+		font-weight: var(--weight-bold);
 	}
 }

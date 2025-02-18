@@ -1,26 +1,27 @@
-@import '../../_commons/styles-supports/mixins.scss';
+@import '../../_commons/styles-supports/mixins';
 
 .user-self-dashboard {
 	@include max-width;
 
 	&__info-wrapper {
-		margin-bottom: 56px;
 		display: flex;
 		flex-wrap: wrap;
 		gap: 24px;
+		margin-bottom: 56px;
 	}
 
 	&__info {
 		@include block-radius;
+
 		width: calc(100% / 3 - 24px * 2 / 3);
 	}
 
 	&__info-title {
 		margin-bottom: 4px;
-		font-size: 14px;
-		line-height: var(--line-height-14);
 		color: var(--color-text-secondary);
+		font-size: 14px;
 		font-weight: var(--weight-regular);
+		line-height: var(--line-height-14);
 	}
 
 	&__info-count-wrapper {
@@ -33,8 +34,8 @@
 		align-items: center;
 		gap: 8px;
 		font-size: 22px;
-		line-height: var(--line-height-22);
 		font-weight: var(--weight-semi-bold);
+		line-height: var(--line-height-22);
 	}
 
 	&__info-100-goals,
@@ -43,9 +44,9 @@
 	}
 
 	&__title-wrapper {
-		margin-bottom: 24px;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		margin-bottom: 24px;
 	}
 }

@@ -9,7 +9,7 @@ import './avatar.scss';
 interface AvatarProps {
 	avatar: string | null | undefined;
 	className?: string;
-	size?: 'small' | 'medium' | 'medium-40' | 'large';
+	size?: 'small' | 'medium' | 'medium-56' | 'large' | 'large-96';
 	noBorder?: boolean;
 }
 
@@ -22,8 +22,10 @@ export const Avatar: FC<AvatarProps> = (props) => {
 		switch (size) {
 			case 'medium':
 				return '24px';
-			case 'medium-40':
+			case 'medium-56':
 				return '32px';
+			case 'large-96':
+				return '48px';
 			case 'large':
 				return '96px';
 			default:

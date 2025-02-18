@@ -1,15 +1,16 @@
 .info-goal {
 	$block: &;
-	padding: 16px 24px;
+
 	width: 100%;
+	padding: 16px 24px;
 	background: var(--color-white);
-	border-radius: 8px;
 	border: 1px solid var(--color-gray-9);
+	border-radius: 8px;
 
 	&__wrapper {
 		display: flex;
-		align-items: center;
 		flex-shrink: 0;
+		align-items: center;
 	}
 
 	&__item {
@@ -19,22 +20,22 @@
 	}
 
 	&__title {
+		color: var(--color-gray-1);
 		font-size: 12px;
 		line-height: var(--line-height-12);
-		color: var(--color-gray-1);
 	}
 
 	&__text {
-		font-size: 16px;
-		line-height: var(--line-height-16);
-		font-weight: var(--weight-bold);
 		color: (--color-text-primary);
+		font-size: 16px;
+		font-weight: var(--weight-bold);
+		line-height: var(--line-height-16);
 	}
 
 	&__vertical-line {
-		margin: 0 24px;
-		height: 32px;
 		width: 1px;
+		height: 32px;
+		margin: 0 24px;
 		background: var(--color-gray-9);
 	}
 
@@ -43,9 +44,9 @@
 
 		#{$block} {
 			&__wrapper-horizontal {
-				flex-shrink: 0;
 				display: flex;
 				flex-direction: column;
+				flex-shrink: 0;
 				gap: 4px;
 			}
 		}

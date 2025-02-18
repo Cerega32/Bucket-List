@@ -27,6 +27,4 @@ yarn-error.log*
 /node_modules
 package-lock.json
 
-/backend/Lib
-/backend/**/__pycache__
-/backend/media/**
+/backend

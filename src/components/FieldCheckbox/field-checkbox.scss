@@ -9,12 +9,12 @@
 	}
 
 	&__checkbox {
-		margin-right: 8px;
 		display: flex;
-		align-items: center;
 		justify-content: center;
+		align-items: center;
 		width: 16px;
 		height: 16px;
+		margin-right: 8px;
 		border: 1px solid var(--color-primary);
 		border-radius: 4px;
 	}

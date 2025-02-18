@@ -1,23 +1,25 @@
 .card {
 	$block: &;
+
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	background: var(--color-white);
-	border-radius: 8px;
 	border: 1px solid var(--color-gray-9);
+	border-radius: 8px;
 	overflow: hidden;
 
 	&__gradient {
 		display: flex;
 		max-height: 192px;
+
 		// height: 100%;
 		// overflow: hidden;
 	}
 
 	&__img-tags {
-		width: 100%;
 		display: flex;
+		width: 100%;
 	}
 
 	&__img-tag-icon-done {

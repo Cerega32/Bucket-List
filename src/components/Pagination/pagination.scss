@@ -4,8 +4,8 @@
 	gap: 12px;
 
 	&__pages {
-		padding: 2px;
 		display: flex;
+		padding: 2px;
 		background: var(--color-gray-5);
 		border-radius: 4px;
 	}
@@ -19,9 +19,9 @@
 		transition: all 0.2s linear;
 
 		&--notShow {
-			cursor: initial;
 			background: transparent;
 			color: transparent;
+			cursor: initial;
 			transition: all 0.2s linear;
 
 			* {

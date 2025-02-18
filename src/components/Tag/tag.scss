@@ -1,17 +1,17 @@
 .tag {
-	padding: 2px 8px;
 	display: flex;
 	align-items: center;
 	gap: 4px;
 	width: max-content;
-	color: var(--color-white);
-	background: rgba(var(--color-white-rgb), 0.08);
-	border: 1px solid rgba(var(--color-white-rgb), 0.16);
+	padding: 2px 8px;
+	background: rgb(var(--color-white-rgb) 0.08);
+	border: 1px solid rgb(var(--color-white-rgb) 0.16);
 	border-radius: 4px;
-	backdrop-filter: blur(4px);
+	color: var(--color-white);
 	font-size: 14px;
 	font-weight: var(--weight-medium);
 	line-height: var(--line-height-14);
+	backdrop-filter: blur(4px);
 
 	&--theme-light {
 		background: var(--color-white);
@@ -27,7 +27,7 @@
 
 	&--category-travel {
 		background: var(--color-travel);
-		color: var(--color-white);
 		border: none;
+		color: var(--color-white);
 	}
 }

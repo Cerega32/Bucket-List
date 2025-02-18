@@ -7,10 +7,12 @@
 	"less.validate": false,
 
 	"editor.codeActionsOnSave": {
-		"source.organizeImports": "explicit"
+		"source.organizeImports": "explicit",
+		"source.fixAll.stylelint": true
 	},
 	"[python]": {
 		"editor.defaultFormatter": "ms-python.black-formatter"
 	},
-	"python.formatting.provider": "none"
+	"python.formatting.provider": "none",
+	"stylelint.validate": ["css", "scss"]
 }

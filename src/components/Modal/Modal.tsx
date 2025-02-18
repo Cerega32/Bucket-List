@@ -2,18 +2,18 @@ import Cookies from 'js-cookie';
 import {observer} from 'mobx-react';
 import {FC, useEffect} from 'react';
 
-import {AddReview} from '../AddReview/AddReview';
-import {ChangePassword} from '../ChangePassword/ChangePassword';
-import {ConfirmExecutionAllGoal} from '../ConfirmExecutionAllGoal/ConfirmExecutionAllGoal';
-import {DeleteGoal} from '../DeleteGoal/DeleteGoal';
-import {Svg} from '../Svg/Svg';
-
 import {Button} from '@/components/Button/Button';
 import {Login} from '@/components/Login/Login';
 import {Registration} from '@/components/Registration/Registration';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
+
+import {AddReview} from '../AddReview/AddReview';
+import {ChangePassword} from '../ChangePassword/ChangePassword';
+import {ConfirmExecutionAllGoal} from '../ConfirmExecutionAllGoal/ConfirmExecutionAllGoal';
+import {DeleteGoal} from '../DeleteGoal/DeleteGoal';
+import {Svg} from '../Svg/Svg';
 import './modal.scss';
 
 interface ModalProps {
@@ -63,6 +63,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			document.removeEventListener('keyup', handleKeyUp);
 		}; // eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isOpen, setIsOpen]);
+
 	if (!isOpen) return null;
 
 	return (

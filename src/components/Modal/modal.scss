@@ -10,18 +10,18 @@
 	}
 
 	&__window {
-		z-index: 10001;
 		position: fixed;
+		z-index: 10001;
 		top: 50%;
 		left: 50%;
-		transform: translate(-50%, -50%);
-		margin: 0 auto;
-		padding: 24px;
-		width: 456px;
 		display: none;
+		width: 456px;
+		padding: 24px;
+		margin: 0 auto;
 		background: var(--color-white);
-		border-radius: 8px;
 		border: 1px solid var(--color-gray-9);
+		border-radius: 8px;
+		transform: translate(-50%, -50%);
 
 		&--type-add-review {
 			width: 696px;
@@ -29,14 +29,14 @@
 	}
 
 	&__base {
-		display: none;
-		z-index: 10000;
 		position: fixed;
+		z-index: 10000;
 		top: 0;
 		left: 0;
+		display: none;
 		width: 100%;
 		height: 100%;
-		background: rgba(var(--color-black-rgb), 0.4);
+		background: rgb(var(--color-black-rgb) 0.4);
 	}
 
 	&--isOpen {

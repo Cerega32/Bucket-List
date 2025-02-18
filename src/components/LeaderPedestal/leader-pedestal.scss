@@ -1,0 +1,37 @@
+.leader-pedestal {
+	$block: &;
+	$avatar: '.leader-board__avatar';
+
+	display: flex;
+	width: 100%;
+	padding: 16px 24px;
+	background: var(--color-white);
+	border: 1px solid var(--color-gray-9);
+	border-radius: 8px;
+
+	&__user {
+		border-bottom: 1px solid var(--color-gray-9);
+
+		&:first-child {
+			& #{$avatar} {
+				outline: 2px solid var(--color-gold);
+			}
+		}
+
+		&:nth-child(2) {
+			& #{$avatar} {
+				outline: 2px solid var(--color-silver);
+			}
+		}
+
+		&:nth-child(3) {
+			& #{$avatar} {
+				outline: 2px solid var(--color-bronze);
+			}
+		}
+
+		&:last-child {
+			border: none;
+		}
+	}
+}

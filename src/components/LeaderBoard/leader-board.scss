@@ -1,11 +1,12 @@
 .leader-board {
 	$block: &;
 	$avatar: '.leader-board__avatar';
+
+	width: 100%;
 	padding: 16px 24px;
 	background: var(--color-white);
-	border-radius: 8px;
 	border: 1px solid var(--color-gray-9);
-	width: 100%;
+	border-radius: 8px;
 
 	&__table {
 		width: 100%;
@@ -17,10 +18,10 @@
 	}
 
 	&__head-item {
-		font-weight: var(--weight-medium);
-		padding: 8px 16px;
-		text-align: left;
 		width: 1%;
+		padding: 8px 16px;
+		font-weight: var(--weight-medium);
+		text-align: left;
 		white-space: nowrap;
 
 		&:first-child {
@@ -60,19 +61,19 @@
 	}
 
 	&__item {
+		width: 1%;
 		padding: 8px 16px;
 		text-align: left;
-		width: 1%;
 
 		&:first-child {
 			padding: 8px 21px;
 		}
 
 		&:nth-child(2) {
-			width: 100%;
 			display: grid;
 			align-items: center;
 			gap: 4px 8px;
+			width: 100%;
 			grid-template-columns: 44px 1fr;
 		}
 
@@ -86,8 +87,8 @@
 	}
 
 	&__info {
+		color: var(--color-text-secondary);
 		font-size: 12px;
 		line-height: var(--line-height-12);
-		color: var(--color-text-secondary);
 	}
 }

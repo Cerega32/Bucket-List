@@ -1,33 +1,33 @@
 .user-info {
 	padding: 16px 16px 0;
-	border-radius: 8px;
-	border: 1px solid var(--color-gray-9);
 	background: var(--color-white);
+	border: 1px solid var(--color-gray-9);
+	border-radius: 8px;
 	overflow: hidden;
 
 	&__bg {
-		margin: -16px -16px 16px;
 		height: 256px;
+		margin: -16px -16px 16px;
 		background-size: cover;
 	}
 
 	&__about {
-		transform: translateY(-64px);
-		margin-bottom: -40px;
 		display: flex;
 		gap: 16px;
+		margin-bottom: -40px;
+		transform: translateY(-64px);
 	}
 
 	&__wrapper {
-		padding-top: 64px;
-		flex-grow: 1;
 		display: flex;
+		flex-grow: 1;
 		justify-content: space-between;
 		align-items: center;
+		padding-top: 64px;
 	}
 
 	&__goals {
-		margin-left: auto;
 		width: auto;
+		margin-left: auto;
 	}
 }

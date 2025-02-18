@@ -1,6 +1,7 @@
 import {FC, useEffect, useState} from 'react';
 
 import {LeaderBoard} from '@/components/LeaderBoard/LeaderBoard';
+import {LeaderPedestal} from '@/components/LeaderPedestal/LeaderPedestal';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {IWeeklyLeader} from '@/typings/user';
@@ -32,6 +33,7 @@ export const Leaders: FC = () => {
 				</p>
 			</div>
 			<div>Анастасия Волочкова</div>
+			<LeaderPedestal users={[...leaders, ...leaders, ...leaders, ...leaders, ...leaders, ...leaders, ...leaders].slice(0, 3)} />
 			<LeaderBoard users={[...leaders, ...leaders, ...leaders, ...leaders, ...leaders, ...leaders, ...leaders]} />
 		</main>
 	);

@@ -4,30 +4,30 @@
 	background: var(--color-gray-3);
 
 	&::before {
-		z-index: -1;
-		content: '';
-		display: block;
 		position: absolute;
+		z-index: -1;
 		top: 318px;
+		display: block;
 		width: 100%;
 		height: 416px;
-		background: linear-gradient(180deg, rgba(var(--color-green-rgb), 0.04) 0%, rgba(var(--color-gray-rgb-12), 0) 100%);
+		background: linear-gradient(180deg, rgb(var(--color-green-rgb) 0.04) 0%, rgb(var(--color-gray-rgb-12) 0) 100%);
+		content: '';
 	}
 
 	&__wrapper {
-		margin: 0 auto;
 		position: relative;
-		max-width: 1440px;
 		display: flex;
 		align-items: flex-start;
 		gap: 24px;
+		max-width: 1440px;
+		margin: 0 auto;
 	}
 
 	&__aside {
-		margin-bottom: -93px;
-		z-index: 13;
 		position: sticky;
+		z-index: 13;
 		top: 284px;
+		margin-bottom: -93px;
 		transform: translateY(-132px);
 	}
 

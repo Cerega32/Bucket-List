@@ -1,13 +1,14 @@
-@import '../../_commons/styles-supports/mixins.scss';
+@import '../../_commons/styles-supports/mixins';
 
 .main-goals {
 	@include max-width;
+
 	margin-top: calc(56px + var(--height-header));
 
 	&__info {
-		margin-bottom: 56px;
 		display: flex;
 		justify-content: space-between;
+		margin-bottom: 56px;
 	}
 
 	&__title {

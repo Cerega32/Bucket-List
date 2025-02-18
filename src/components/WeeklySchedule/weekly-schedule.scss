@@ -1,15 +1,16 @@
-@import '../../_commons/styles-supports/mixins.scss';
+@import '../../_commons/styles-supports/mixins';
 
 .weekly-schedule {
 	$block: &;
+
 	@include block-radius;
 
 	&__info-title {
 		margin-bottom: 4px;
-		font-size: 14px;
-		line-height: var(--line-height-14);
 		color: var(--color-text-secondary);
+		font-size: 14px;
 		font-weight: var(--weight-regular);
+		line-height: var(--line-height-14);
 	}
 
 	&__info-count-wrapper {
@@ -18,13 +19,13 @@
 	}
 
 	&__info-count {
-		margin-bottom: 4px;
 		display: flex;
 		align-items: center;
 		gap: 8px;
+		margin-bottom: 4px;
 		font-size: 22px;
-		line-height: var(--line-height-22);
 		font-weight: var(--weight-semi-bold);
+		line-height: var(--line-height-22);
 	}
 
 	&__weeks {
@@ -35,14 +36,14 @@
 
 	&__week {
 		position: relative;
-		flex-shrink: 0;
 		display: flex;
 		flex-direction: column;
+		flex-shrink: 0;
 		justify-content: flex-end;
 		align-items: center;
+		height: 100%;
 		font-size: 12px;
 		line-height: var(--line-height-12);
-		height: 100%;
 
 		&:last-child {
 			#{$block}__column-active {
@@ -55,8 +56,8 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-end;
-		height: 155px;
 		width: 35px;
+		height: 155px;
 
 		&:hover {
 			& + #{$block}__count {
@@ -68,8 +69,8 @@
 	}
 
 	&__column-active {
-		border-radius: 8px;
 		background: var(--color-border);
+		border-radius: 8px;
 	}
 
 	&__count {
