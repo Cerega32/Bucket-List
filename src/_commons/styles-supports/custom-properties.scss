@@ -5,19 +5,8 @@
 	--color-white: rgb(var(--color-white-rgb)); // #FFFFFF
 	--color-black-rgb: 0, 0, 0; // #000000
 	--color-black: rgb(var(--color-black-rgb)); // #000000
-
-	// --color-gray-rgb-1: 40, 45, 47; // #282D2F
-	// --color-gray-1: rgb(var(--color-gray-rgb-1)); // #282D2F
-	// --color-gray-rgb-2: 84, 94, 99; // #545E63
-	// --color-gray-2: rgb(var(--color-gray-rgb-2)); // #545E63
-	// --color-gray-rgb-3: 127, 139, 144; // #7F8B90
-	// --color-gray-3: rgb(var(--color-gray-rgb-3)); // #7F8B90
-	// --color-gray-rgb-4: 200, 200, 200; // #C8C8C8
-	// --color-gray-4: rgb(var(--color-gray-rgb-4)); // #C8C8C8
-	// --color-gray-rgb-5: 226, 226, 239; // #E2E2EF
-	// --color-gray-5: rgb(var(--color-gray-rgb-5)); // #E2E2EF
-	// --color-gray-rgb-6: 235, 235, 245; // #EBEBF5
-	// --color-gray-6: rgb(var(--color-gray-rgb-6)); // #EBEBF5
+	//////
+	//////
 	--color-gray-rgb-1: 113, 131, 149; // #718395
 	--color-gray-1: rgb(var(--color-gray-rgb-1)); // #718395
 	--color-gray-rgb-2: 115, 118, 126; // #73767E
@@ -36,6 +25,10 @@
 	--color-gray-8: rgb(var(--color-gray-rgb-8)); // #384149
 	--color-gray-rgb-9: 231, 238, 244; // #E7EEF4
 	--color-gray-9: rgb(var(--color-gray-rgb-9)); // #E7EEF4
+	--color-gray-rgb-10: 241, 244, 255; // #F1F4FF
+	--color-gray-10: rgb(var(--color-gray-rgb-10)); // #F1F4FF
+	//////
+	//////
 	--color-blue-rgb-1: 0, 70, 207; // #0046CF
 	--color-blue-1: rgb(var(--color-blue-rgb-1)); // #0046CF
 	--color-blue-rgb-2: 0, 179, 255; // #00B3FF
@@ -44,12 +37,22 @@
 	--color-blue-3: rgb(var(--color-blue-rgb-3)); // #3A89D8
 	--color-blue-rgb-4: 71, 152, 232; // #4798E8
 	--color-blue-4: rgb(var(--color-blue-rgb-4)); // #4798E8
+	//////
+	//////
 	--color-orange-rgb: 255, 107, 0; // #FF6B00
 	--color-orange: rgb(var(--color-orange-rgb)); // #FF6B00
 	--color-orange-rgb-2: 247, 144, 9; // #F79009
 	--color-orange-2: rgb(var(--color-orange-rgb-2)); // #F79009
+	//////
+	//////
 	--color-purple-rgb: 135, 0, 198; // #8700C6
 	--color-purple: rgb(var(--color-purple-rgb)); // #8700C6
+	//////
+	//////
+	--color-brown-rgb: 255, 234, 222; // #FFEAD6
+	--color-brown: rgb(var(--color-brown-rgb)); // #FFEAD6
+	//////
+	//////
 	--color-green-rgb-1: 25, 177, 22; // #0DA300
 	--color-green-1: rgb(var(--color-green-rgb-1)); // #0DA300
 	--color-green-rgb-2: 33, 171, 30; // #21AB1E
@@ -58,18 +61,28 @@
 	--color-green-3: rgb(var(--color-green-rgb-3)); // #039824
 	--color-green-rgb-4: 4, 177, 42; // #04B12A
 	--color-green-4: rgb(var(--color-green-rgb-4)); // #04B12A
+	//////
+	//////
 	--color-yellow-rgb: 255, 184, 0; // #FFB800
 	--color-yellow: rgb(var(--color-yellow-rgb)); // #FFB800
+	--color-yellow-rgb-2: 255, 251, 211; // #FFFBD3
+	--color-yellow-2: rgb(var(--color-yellow-rgb-2)); // #FFFBD3
+	//////
+	//////
 	--color-red-rgb-1: 227, 66, 53; // #E34235
 	--color-red-1: rgb(var(--color-red-rgb-1)); // #E34235
 	--color-red-rgb-2: 248, 53, 37; // #F83525
 	--color-red-2: rgb(var(--color-red-rgb-2)); // #F83525
+	//////
+	//////
 	--color-gold-rgb: 255, 208, 44; // #FFD02C
 	--color-gold: rgb(var(--color-gold-rgb)); // #FFD02C
 	--color-silver-rgb: 193, 199, 220; // #C1C7DC
 	--color-silver: rgb(var(--color-silver-rgb)); // #C1C7DC
 	--color-bronze-rgb: 225, 171, 141; // #E1AB8D
 	--color-bronze: rgb(var(--color-bronze-rgb)); // #E1AB8D
+	//////
+	//////
 	--color-primary-rgb: var(--color-blue-rgb-3);
 	--color-primary: var(--color-blue-3);
 	--color-primary-hover-rgb: var(--color-blue-rgb-4);
@@ -80,6 +93,8 @@
 	--color-text-primary: var(--color-gray-8);
 	--color-text-primary-rgb: var(--color-gray-rgb-8);
 	--color-text-secondary: var(--color-gray-1);
+	//////
+	//////
 	--color-border: var(--color-gray-9);
 	--color-travel: var(--color-green-2);
 	--color-travel-rgb: var(--color-green-rgb-2);
@@ -88,15 +103,21 @@
 	--color-sentiment-negative: var(--color-red-1);
 	--color-sentiment-negative-hover: var(--color-red-2);
 	--color-sentiment-warning: var(--color-orange-2);
+	//////
+	//////
 	--weight-regular: 400;
 	--weight-medium: 500;
 	--weight-semi-bold: 600;
 	--weight-bold: 700;
+	//////
+	//////
 	--line-height-12: 16px;
 	--line-height-14: 20px;
 	--line-height-16: 24px;
 	--line-height-22: 32px;
 	--line-height-40: 52px;
+	//////
+	//////
 	--height-header: 65px;
 	--height-header-goal: 340px;
 	--max-width: 1416px;

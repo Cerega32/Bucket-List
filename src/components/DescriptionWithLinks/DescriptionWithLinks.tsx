@@ -1,15 +1,14 @@
 import {FC, useMemo, useState} from 'react';
+
 import {useBem} from '@/hooks/useBem';
-import './description-with-links.scss';
-import {CommentGoal} from '../CommentGoal/CommentGoal';
-import {InfoGoal} from '../InfoGoal/InfoGoal';
 import {IGoal} from '@/typings/goal';
-import {ListGoals} from '../ListGoals/ListGoals';
-import {Title} from '../Title/Title';
-import {Button} from '../Button/Button';
-import {ITabs, Tabs} from '../Tabs/Tabs';
-import {Line} from '../Line/Line';
 import {IList} from '@/typings/list';
+import './description-with-links.scss';
+
+import {Button} from '../Button/Button';
+import {InfoGoal} from '../InfoGoal/InfoGoal';
+import {Line} from '../Line/Line';
+import {ITabs, Tabs} from '../Tabs/Tabs';
 
 interface DescriptionWithLinksProps {
 	className?: string;
@@ -31,9 +30,7 @@ interface DescriptionGoalProps extends DescriptionWithLinksProps {
 	isList?: never;
 }
 
-export const DescriptionWithLinks: FC<
-	DescriptionListProps | DescriptionGoalProps
-> = (props) => {
+export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProps> = (props) => {
 	const {className, goal, page, isList} = props;
 
 	const [block, element] = useBem('description-with-links', className);
@@ -74,35 +71,30 @@ export const DescriptionWithLinks: FC<
 		<div className={block({list: isList})}>
 			<div className={element('wrapper')}>
 				<div className={element('text')}>
-					<p className={element('short-text')}>
-						{isShortDesc ? goal.shortDescription : goal.description}
-					</p>
+					<p className={element('short-text')}>{isShortDesc ? goal.shortDescription : goal.description}</p>
 					{goal.shortDescription !== goal.description && (
-						<Button
-							icon="download"
-							theme="blue-light"
-							className={element('btn-more')}
-							onClick={handleToggleMore}
-						>
+						<Button icon="download" theme="blue-light" className={element('btn-more')} onClick={handleToggleMore}>
 							{isShortDesc ? 'Читать подробнее' : 'Скрыть'}
 						</Button>
 					)}
 				</div>
 				<InfoGoal
 					className={element('info')}
-					totalAdded={goal.totalAdded}
-					totalCompleted={goal.totalCompleted}
+					items={[
+						{title: 'Добавили к себе', value: goal.totalAdded},
+						{title: 'Выполнили', value: goal.totalCompleted},
+					]}
 					progress
+					progressData={{
+						completed: goal.totalCompleted,
+						total: goal.totalAdded,
+					}}
 				/>
 			</div>
 			{!isList && (
 				<>
 					<Line margin="16px 0 0" />
-					<Tabs
-						base={`/goals/${goal.code}`}
-						tabs={tabs}
-						active={page}
-					/>
+					<Tabs base={`/goals/${goal.code}`} tabs={tabs} active={page} />
 				</>
 			)}
 		</div>

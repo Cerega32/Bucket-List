@@ -1,6 +1,5 @@
-import react from '@vitejs/plugin-react';
 import legacy from '@vitejs/plugin-legacy';
-import {fileURLToPath, URL} from 'url';
+import react from '@vitejs/plugin-react';
 
 const path = require('path');
 
@@ -14,6 +13,11 @@ export default {
 		},
 	},
 	css: {
+		preprocessorOptions: {
+			scss: {
+				additionalData: `@use "@/_commons/styles-supports/mixins" as *;`,
+			},
+		},
 		postcss: {
 			plugins: [
 				require('postcss-normalize'),

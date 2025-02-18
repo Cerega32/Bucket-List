@@ -27,3 +27,9 @@ export interface IWeeklyLeader {
 	place: number;
 	reviewsAddedWeek: number;
 }
+
+export interface IInfoStats {
+	experienceEarned: number;
+	goalsCompleted: number;
+	reviewsAdded: number;
+}

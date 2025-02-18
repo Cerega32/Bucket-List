@@ -10,11 +10,12 @@ import './leader-board.scss';
 
 interface LeaderBoardProps {
 	users: Array<IWeeklyLeader>;
+	className?: string;
 }
 
 export const LeaderBoard: FC<LeaderBoardProps> = (props) => {
-	const {users} = props;
-	const [block, element] = useBem('leader-board');
+	const {users, className} = props;
+	const [block, element] = useBem('leader-board', className);
 
 	return (
 		<section className={block()}>

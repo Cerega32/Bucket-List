@@ -5,11 +5,12 @@ import {ThemeStore} from '@/store/ThemeStore';
 import {IPage} from '@/typings/page';
 
 export const PageLeaders: FC<IPage> = ({page}) => {
-	const {setPage, setHeader} = ThemeStore;
+	const {setPage, setHeader, setFull} = ThemeStore;
 
 	useEffect(() => {
 		setPage(page);
-		setHeader('transparent');
+		setHeader('white');
+		setFull(false);
 	}, []);
 
 	return <Leaders />;

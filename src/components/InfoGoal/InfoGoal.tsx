@@ -1,73 +1,57 @@
-import {FC} from 'react';
+import {FC, Fragment} from 'react';
+
+import {useBem} from '@/hooks/useBem';
 
 import {Line} from '../Line/Line';
 import {Progress} from '../Progress/Progress';
-
-import {useBem} from '@/hooks/useBem';
 import './info-goal.scss';
-import {IComplexity} from '@/typings/goal';
-import {getComplexity} from '@/utils/values/complexity';
+
+interface InfoItem {
+	title: string;
+	value: string | number;
+}
 
 interface InfoGoalProps {
 	className?: string;
-	complexity?: IComplexity;
-	totalAdded: number;
-	totalCompleted: number;
-	isUser?: boolean;
+	items: InfoItem[];
 	progress?: boolean;
 	horizontal?: boolean;
+	progressData?: {
+		completed: number;
+		total: number;
+	};
+	backgroundOff?: boolean;
 }
 
 export const InfoGoal: FC<InfoGoalProps> = (props) => {
-	const {className, totalCompleted, totalAdded, complexity, isUser, progress, horizontal} = props;
+	const {className, items, progressData, progress, horizontal, backgroundOff} = props;
 
 	const [block, element] = useBem('info-goal', className);
 
 	return (
-		<section className={block({horizontal})}>
+		<section className={block({horizontal, backgroundOff})}>
 			<div className={element('wrapper')}>
-				{complexity && (
-					<>
+				{items.map((item, index) => (
+					// eslint-disable-next-line react/no-array-index-key
+					<Fragment key={index}>
 						<div className={element('item')}>
-							<span className={element('title')}>Сложность</span>
-							<span className={element('text')}>{getComplexity[complexity]}</span>
+							<span className={element('title')}>{item.title}</span>
+							<span className={element('text')}>{item.value}</span>
 						</div>
-						<div className={element('vertical-line')} />
-					</>
-				)}
-				{!horizontal && (
-					<>
-						<div className={element('item')}>
-							<span className={element('title')}>{isUser ? 'Всего целей' : 'Добавили к себе'}</span>
-							<span className={element('text')}>{totalAdded}</span>
-						</div>
-						<div className={element('vertical-line')} />
-						<div className={element('item')}>
-							<span className={element('title')}>{isUser ? 'Выполнено' : 'Выполнили'}</span>
-							<span className={element('text')}>{totalCompleted}</span>
-						</div>
-					</>
-				)}
-				{!progress && (
-					<>
-						<div className={element('vertical-line')} />
-						<div className={element('item')}>
-							<span className={element('title')}>Процент выполнения</span>
-							<span className={element('text')}>{Math.round((totalCompleted / totalAdded) * 100)}%</span>
-						</div>
-					</>
-				)}
-				{horizontal && (
+						{index !== items.length - 1 && <div className={element('vertical-line')} />}
+					</Fragment>
+				))}
+				{horizontal && progressData && (
 					<div className={element('wrapper-horizontal')}>
 						<span className={element('title')}>Мой прогресс выполнения</span>
-						<span className={element('text')}>{`${totalCompleted}/${totalAdded}`}</span>
+						<span className={element('text')}>{`${progressData.completed}/${progressData.total}`}</span>
 					</div>
 				)}
 			</div>
-			{progress && totalAdded > 0 && (
+			{progress && progressData && progressData.total > 0 && (
 				<>
 					<Line vertical={horizontal} margin="5px 24px" height={-10} />
-					<Progress done={totalCompleted} all={totalAdded} goal />
+					<Progress done={progressData.completed} all={progressData.total} goal />
 				</>
 			)}
 		</section>

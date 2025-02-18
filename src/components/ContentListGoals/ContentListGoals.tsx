@@ -1,21 +1,20 @@
 import {FC} from 'react';
+
 import {useBem} from '@/hooks/useBem';
+
 import {TitleWithTags} from '../TitleWithTags/TitleWithTags';
-import './content-list-goals.scss';
-import {InfoGoal} from '../InfoGoal/InfoGoal';
+
 import {IList} from '@/typings/list';
-import {ListGoals} from '../ListGoals/ListGoals';
+import './content-list-goals.scss';
+
 import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
+import {InfoGoal} from '../InfoGoal/InfoGoal';
+import {ListGoals} from '../ListGoals/ListGoals';
 
 interface ContentListGoalsProps {
 	className?: string;
 	list: IList;
-	updateGoal: (
-		code: string,
-		i: number,
-		operation: 'add' | 'delete' | 'mark',
-		done?: boolean
-	) => Promise<void>;
+	updateGoal: (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void>;
 }
 
 export const ContentListGoals: FC<ContentListGoalsProps> = (props) => {
@@ -34,25 +33,23 @@ export const ContentListGoals: FC<ContentListGoalsProps> = (props) => {
 				isList
 				theme="light"
 			/>
-			<DescriptionWithLinks
-				isList
-				goal={list}
-				className={element('description')}
-			/>
+			<DescriptionWithLinks isList goal={list} className={element('description')} />
 			{list.addedByUser && (
 				<InfoGoal
 					className={element('info')}
-					totalAdded={list.goalsCount}
-					totalCompleted={list.userCompletedGoals}
+					items={[
+						{title: 'Всего целей', value: list.goalsCount},
+						{title: 'Выполнено', value: list.userCompletedGoals},
+					]}
 					progress
 					horizontal
+					progressData={{
+						completed: list.userCompletedGoals,
+						total: list.goalsCount,
+					}}
 				/>
 			)}
-			<ListGoals
-				list={list.goals}
-				updateGoal={updateGoal}
-				columns="three"
-			/>
+			<ListGoals list={list.goals} updateGoal={updateGoal} columns="three" />
 		</article>
 	);
 };

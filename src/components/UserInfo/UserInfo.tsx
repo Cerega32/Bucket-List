@@ -2,12 +2,11 @@ import {FC, useMemo} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 
-import './user-info.scss';
 import {Avatar} from '../Avatar/Avatar';
 import {InfoGoal} from '../InfoGoal/InfoGoal';
-import ProgressBar, {ProgressCategory} from '../ProgressCategory/ProgressCategory';
 import {ITabs, Tabs} from '../Tabs/Tabs';
 import {Title} from '../Title/Title';
+import './user-info.scss';
 
 interface UserInfoProps {
 	background?: string;
@@ -79,7 +78,13 @@ export const UserInfo: FC<UserInfoProps> = (props) => {
 					<Title tag="h2" className={element('name')}>
 						{name}
 					</Title>
-					<InfoGoal totalAdded={totalAdded} totalCompleted={totalCompleted} isUser className={element('goals')} />
+					<InfoGoal
+						items={[
+							{title: 'Всего целей', value: totalAdded},
+							{title: 'Выполнено', value: totalCompleted},
+						]}
+						className={element('goals')}
+					/>
 				</div>
 			</section>
 			<Tabs tabs={tabs} active={page} />

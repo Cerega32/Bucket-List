@@ -2,18 +2,15 @@ import Cookies from 'js-cookie';
 import {observer} from 'mobx-react';
 import {FC} from 'react';
 import {Link} from 'react-router-dom';
-import {ReactSVG} from 'react-svg';
-
-import {ThemeStore} from '../../store/ThemeStore';
-
-import {Avatar} from '../Avatar/Avatar';
-
-import {Svg} from '../Svg/Svg';
 
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
+
+import {ThemeStore} from '../../store/ThemeStore';
+import {Avatar} from '../Avatar/Avatar';
+import {Svg} from '../Svg/Svg';
 
 import './header.scss';
 
@@ -54,7 +51,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 							</Link>
 						</li>
 						<li className={element('item')}>
-							<Link className={element('item-link', {active: page === 'isMainGoals'})} to="/goals/100-goals">
+							<Link className={element('item-link', {active: page === 'isMainGoals'})} to="/list/100-goals">
 								100 целей
 							</Link>
 						</li>
@@ -69,7 +66,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 							</Link>
 						</li>
 						<li className={element('item')}>
-							<Link className={element('item-link')} to="/">
+							<Link className={element('item-link', {active: page === 'isLeaders'})} to="/leaders">
 								Лидеры
 							</Link>
 						</li>

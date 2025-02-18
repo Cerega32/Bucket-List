@@ -1,8 +1,8 @@
 import {FC} from 'react';
 import {ReactSVG} from 'react-svg';
 
-import './svg.scss';
 import {useBem} from '@/hooks/useBem';
+import './svg.scss';
 
 interface SvgProps {
 	icon: string;
@@ -20,6 +20,7 @@ export const Svg: FC<SvgProps> = (props) => {
 
 	return (
 		<ReactSVG
+			wrapper="span"
 			src={`/src/assets/svg/${iconAndTransform[0]}.svg`}
 			className={block({
 				transform: iconAndTransform[1],
