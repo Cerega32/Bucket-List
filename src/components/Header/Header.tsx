@@ -46,7 +46,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				<nav className={element('nav')}>
 					<ul className={element('list')}>
 						<li className={element('item')}>
-							<Link className={element('item-link')} to="/">
+							<Link className={element('item-link', {active: page === 'isUserSelf'})} to="/user/self">
 								Моя доска
 							</Link>
 						</li>

@@ -33,3 +33,33 @@ export interface IInfoStats {
 	goalsCompleted: number;
 	reviewsAdded: number;
 }
+
+export interface ICurrentStats {
+	weeklyRank: number;
+	activeGoals: number;
+	activeLists: number;
+	level: number;
+	currentExperience: number;
+	nextLevelExperience: number;
+}
+
+export interface ITotalStats {
+	reviewsCount: number;
+	completedGoals: number;
+	completedLists: number;
+	achievementsCount: number;
+}
+
+export interface IWeeklyProgressItem {
+	weekNumber: number;
+	month: number;
+	completedGoals: number;
+	startDate: string;
+	endDate: string;
+}
+
+export interface IUserStatistics {
+	currentStats: ICurrentStats;
+	totalStats: ITotalStats;
+	weeklyProgress: Array<IWeeklyProgressItem>;
+}

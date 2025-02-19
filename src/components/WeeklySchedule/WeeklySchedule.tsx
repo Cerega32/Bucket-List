@@ -1,18 +1,15 @@
 import {FC, useEffect, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
-import './weekly-schedule.scss';
-import {Svg} from '../Svg/Svg';
+import {IWeeklyProgressItem} from '@/typings/user';
+import {getMonthShortName} from '@/utils/date/getDate';
 
-interface IWeeks {
-	week: number;
-	month: string;
-	count: number;
-}
+import {Svg} from '../Svg/Svg';
+import './weekly-schedule.scss';
 
 interface WeeklyScheduleProps {
 	className?: string;
-	weeks: Array<IWeeks>;
+	weeks: Array<IWeeklyProgressItem>;
 }
 
 export const WeeklySchedule: FC<WeeklyScheduleProps> = (props) => {
@@ -23,9 +20,9 @@ export const WeeklySchedule: FC<WeeklyScheduleProps> = (props) => {
 
 	useEffect(() => {
 		let newMax = 0;
-		weeks.forEach(({count}) => {
-			if (count > newMax) {
-				newMax = count;
+		weeks.forEach(({completedGoals}) => {
+			if (completedGoals > newMax) {
+				newMax = completedGoals;
 			}
 		});
 		setMax(newMax);
@@ -36,17 +33,17 @@ export const WeeklySchedule: FC<WeeklyScheduleProps> = (props) => {
 			<h3 className={element('info-title')}>Выполнено целей за неделю</h3>
 			<span className={element('info-count')}>
 				<Svg icon="rocket" />
-				{weeks[weeks.length - 1].count}
+				{weeks[weeks.length - 1].completedGoals}
 			</span>
 			<div className={element('weeks')}>
 				{weeks.map((week) => (
-					<div className={element('week')}>
+					<div className={element('week')} key={week.weekNumber}>
 						<div className={element('column')}>
-							<div className={element('column-active')} style={{height: `${(week.count / max) * 100}%`}} />
+							<div className={element('column-active')} style={{height: `${(week.completedGoals / max) * 100}%`}} />
 						</div>
-						<p className={element('count')}>{week.count}</p>
-						<p className={element('count-week')}>{week.week}</p>
-						<p className={element('month')}>{week.month}</p>
+						<p className={element('count')}>{week.completedGoals}</p>
+						<p className={element('count-week')}>{week.weekNumber}</p>
+						<p className={element('month')}>{getMonthShortName(week.startDate)}</p>
 					</div>
 				))}
 			</div>

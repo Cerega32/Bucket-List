@@ -1,19 +1,15 @@
-@import '../../_commons/styles-supports/mixins';
-
 .user-self-dashboard {
 	@include max-width;
 
 	&__info-wrapper {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr;
 		gap: 24px;
 		margin-bottom: 56px;
 	}
 
 	&__info {
 		@include block-radius;
-
-		width: calc(100% / 3 - 24px * 2 / 3);
 	}
 
 	&__info-title {
@@ -36,11 +32,6 @@
 		font-size: 22px;
 		font-weight: var(--weight-semi-bold);
 		line-height: var(--line-height-22);
-	}
-
-	&__info-100-goals,
-	&__weekly {
-		width: calc(100% / 3 - 24px * 2 / 3);
 	}
 
 	&__title-wrapper {

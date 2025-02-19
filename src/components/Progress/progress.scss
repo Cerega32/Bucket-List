@@ -50,4 +50,24 @@
 			}
 		}
 	}
+
+	&--text {
+		gap: 8px;
+		width: 100%;
+		padding: 0;
+		border: none;
+
+		#{$block} {
+			&__line {
+				width: 100%;
+			}
+
+			&__count {
+				padding: 2px 8px;
+				background: var(--color-white);
+				border: 1px solid var(--color-border);
+				border-radius: 4px;
+			}
+		}
+	}
 }

@@ -2,7 +2,7 @@ import {FC, useEffect, useState} from 'react';
 
 import {InfoGoal} from '@/components/InfoGoal/InfoGoal';
 import {LeaderBoard} from '@/components/LeaderBoard/LeaderBoard';
-import {LeaderPedestal} from '@/components/LeaderPedestal/LeaderPedestal';
+import {LeaderPedestal} from '@/components/Leaders/LeaderPedestal';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {IInfoStats, IWeeklyLeader} from '@/typings/user';
