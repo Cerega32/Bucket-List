@@ -58,8 +58,20 @@ export interface IWeeklyProgressItem {
 	endDate: string;
 }
 
+export interface IStatGoal {
+	completed: number;
+	total: number;
+}
+
+export interface IHundredGoals {
+	easy: IStatGoal;
+	medium: IStatGoal;
+	hard: IStatGoal;
+}
+
 export interface IUserStatistics {
 	currentStats: ICurrentStats;
 	totalStats: ITotalStats;
 	weeklyProgress: Array<IWeeklyProgressItem>;
+	hundredGoals: IHundredGoals;
 }

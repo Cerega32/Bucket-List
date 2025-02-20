@@ -1,10 +1,8 @@
 import {observer} from 'mobx-react';
 import {FC, useEffect, useState} from 'react';
 
-import {Button} from '@/components/Button/Button';
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
 import {Svg} from '@/components/Svg/Svg';
-import {Title} from '@/components/Title/Title';
 import {UserStatistics} from '@/components/UserStatictics/UserStatistics';
 import {WeeklySchedule} from '@/components/WeeklySchedule/WeeklySchedule';
 import {useBem} from '@/hooks/useBem';
@@ -35,10 +33,16 @@ export const UserSelfDashboard: FC<UserSelfDashboardProps> = observer(() => {
 		<section className={block()}>
 			<div className={element('info-wrapper')}>
 				<div className={element('info')}>
-					<h3 className={element('info-title')}>Активных целей в “100 целей”</h3>
+					<h3 className={element('info-title')}>Невыполненных целей в “100 целей”</h3>
 					<span className={element('info-count')}>
 						<Svg icon="star" />
-						86
+						{userStatistics &&
+							userStatistics.hundredGoals.easy.total +
+								userStatistics.hundredGoals.medium.total +
+								userStatistics.hundredGoals.hard.total -
+								userStatistics.hundredGoals.easy.completed -
+								userStatistics.hundredGoals.medium.completed -
+								userStatistics.hundredGoals.hard.completed}
 					</span>
 				</div>
 				<div className={element('info')}>
@@ -61,27 +65,30 @@ export const UserSelfDashboard: FC<UserSelfDashboardProps> = observer(() => {
 						</span>
 					</p>
 				</div>
-				<Info100Goals
-					totalAddedEasy={4}
-					totalAddedHard={5}
-					totalAddedMedium={5}
-					totalCompletedEasy={2}
-					totalCompletedHard={2}
-					totalCompletedMedium={2}
-					column
-					className={element('info-100-goals')}
-				/>
+				{userStatistics && (
+					<Info100Goals
+						totalAddedEasy={userStatistics.hundredGoals.easy.total}
+						totalAddedHard={userStatistics.hundredGoals.hard.total}
+						totalAddedMedium={userStatistics.hundredGoals.medium.total}
+						totalCompletedEasy={userStatistics.hundredGoals.easy.completed}
+						totalCompletedHard={userStatistics.hundredGoals.hard.completed}
+						totalCompletedMedium={userStatistics.hundredGoals.medium.completed}
+						column
+						className={element('info-100-goals')}
+					/>
+				)}
+
 				{userStatistics?.weeklyProgress && <WeeklySchedule weeks={userStatistics?.weeklyProgress} className={element('weekly')} />}
 				{userStatistics && <UserStatistics statistics={userStatistics} />}
 			</div>
-			<div className={element('title-wrapper')}>
+			{/* <div className={element('title-wrapper')}>
 				<Title className={element('title')} tag="h2">
 					Можно выполнить сегодня
 				</Title>
 				<Button size="small" theme="blue-light" onClick={() => {}}>
 					Показать другие
 				</Button>
-			</div>
+			</div> */}
 			{/* {goals.map((goal) => {
 				<Card goal={goal} />;
 			})} */}
