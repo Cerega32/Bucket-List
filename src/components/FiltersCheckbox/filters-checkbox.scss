@@ -46,7 +46,7 @@
 		border-radius: 4px;
 		color: var(--color-text-primary);
 		list-style: none;
-		box-shadow: 0 0 20px -2px rgb(var(--color-text-primary-rgb) 0.08);
+		box-shadow: 0 0 20px -2px rgb(var(--color-text-primary-rgb) / 8%);
 	}
 
 	&__item {

@@ -10,6 +10,7 @@ import {UserStore} from '@/store/UserStore';
 
 import {ThemeStore} from '../../store/ThemeStore';
 import {Avatar} from '../Avatar/Avatar';
+import {Line} from '../Line/Line';
 import {Svg} from '../Svg/Svg';
 
 import './header.scss';
@@ -73,10 +74,36 @@ export const Header: FC<HeaderProps> = observer((props) => {
 					</ul>
 				</nav>
 				{isAuth ? (
-					<Link className={element('profile')} to="/user/self">
-						<Avatar avatar={Cookies.get('avatar')} size="small" />
-						<span className={element('nickname')}>{name}</span>
-					</Link>
+					<div className={element('profile-wrapper')}>
+						<div className={element('profile')}>
+							<Avatar avatar={Cookies.get('avatar')} size="small" noBorder />
+							<span className={element('nickname')}>{name}</span>
+						</div>
+						<div className={element('profile-menu')}>
+							<Link className={element('menu-item')} to="/user/self">
+								Мой профиль
+							</Link>
+							<Link className={element('menu-item')} to="/user/self">
+								Дашборд
+							</Link>
+							<Link className={element('menu-item')} to="/user/self/achievements">
+								Достижения
+							</Link>
+							<Link className={element('menu-item')} to="/user/self/active-goals">
+								Активные цели и списки
+							</Link>
+							<Link className={element('menu-item')} to="/user/self/done-goals">
+								Выполненные
+							</Link>
+							<Link className={element('menu-item')} to="/user/self/settings">
+								Настройки
+							</Link>
+							<Line margin="8px 0" />
+							<button type="button" className={element('menu-item')} onClick={() => {}}>
+								Выход
+							</button>
+						</div>
+					</div>
 				) : (
 					<div className={element('profile')}>
 						<Button className={element('sign-in')} theme="blue-light" size="small" onClick={openLogin}>

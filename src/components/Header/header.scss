@@ -7,12 +7,13 @@
 	width: 100%;
 	height: var(--height-header);
 	padding: 16px 0;
-	border-bottom: 1px solid rgb(var(--color-white-rgb) 0.16);
+	border-bottom: 1px solid rgb(var(--color-white-rgb) / 16%);
 
 	&__wrapper {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+
 		@include max-width;
 	}
 
@@ -48,6 +49,21 @@
 		}
 	}
 
+	&__profile-wrapper {
+		position: relative;
+		padding: 4px 0;
+
+		&:hover {
+			#{$block} {
+				&__profile-menu {
+					opacity: 1;
+					visibility: visible;
+					transform: translateY(0);
+				}
+			}
+		}
+	}
+
 	&__profile {
 		display: flex;
 		align-items: center;
@@ -60,6 +76,29 @@
 
 	&__nickname {
 		color: var(--color-white);
+	}
+
+	&__profile-menu {
+		position: absolute;
+		top: 100%;
+		right: 0;
+		display: flex;
+		flex-direction: column;
+		width: max-content;
+		padding: 8px;
+		background: var(--color-white);
+		border-radius: 8px;
+		opacity: 0;
+		transition: all 0.2s ease;
+		transform: translateY(-10px);
+		visibility: hidden;
+		box-shadow: 0 0 20px -2px rgb(var(--color-gray-rgb-8) / 8%);
+	}
+
+	&__menu-item {
+		display: flex;
+		padding: 8px;
+		color: var(--color-text-primary);
 	}
 
 	&--theme-white {

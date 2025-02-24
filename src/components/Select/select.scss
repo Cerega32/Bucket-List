@@ -46,7 +46,7 @@
 		border-radius: 8px;
 		list-style: none;
 		overflow-y: scroll;
-		box-shadow: 0 0 20px -2px rgb(var(--color-gray-rgb-8) 0.08);
+		box-shadow: 0 0 20px -2px rgb(var(--color-gray-rgb-8) / 8%);
 	}
 
 	&__item {
@@ -80,7 +80,7 @@
 			&__list {
 				width: max-content;
 				border-radius: 4px;
-				box-shadow: 0 2px 4px rgb(var(--color-black) 0.1);
+				box-shadow: 0 2px 4px rgb(var(--color-black) / 10%);
 			}
 		}
 	}

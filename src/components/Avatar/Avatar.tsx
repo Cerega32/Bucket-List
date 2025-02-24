@@ -35,7 +35,7 @@ export const Avatar: FC<AvatarProps> = (props) => {
 
 	return (
 		<div className={block({size, noBorder})}>
-			{avatar ? (
+			{avatar && avatar !== 'undefined' ? (
 				<img className={element('image')} src={avatar || ''} alt="Аватар" />
 			) : (
 				<Svg icon="avatar" className={element('icon')} width={getSize()} height={getSize()} />

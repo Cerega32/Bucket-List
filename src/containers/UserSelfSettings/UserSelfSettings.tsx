@@ -1,28 +1,24 @@
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react';
-import React, {useState, useEffect, FC, useCallback} from 'react';
-
+import React, {FC, useEffect, useState} from 'react';
 import {useDropzone} from 'react-dropzone';
-
-import {userInfo} from 'os';
 
 import {Avatar} from '@/components/Avatar/Avatar';
 import {Button} from '@/components/Button/Button';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Line} from '@/components/Line/Line';
-import {Modal} from '@/components/Modal/Modal';
 import Select from '@/components/Select/Select';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
+import {IUserInfo} from '@/typings/user';
 import {deleteAvatar} from '@/utils/api/delete/deleteAvatar';
 import {postAvatar} from '@/utils/api/post/postAvatar';
 import {postCover} from '@/utils/api/post/postCover';
 import {putUserInfo} from '@/utils/api/put/putUserInfo';
 import {countriesArr} from '@/utils/data/countries';
 import './user-self-settings.scss';
-import {ModalStore} from '@/store/ModalStore';
-import {IUserInfo} from '@/typings/user';
 
 interface UserSelfSettingsProps {
 	user: {
@@ -74,7 +70,6 @@ export const UserSelfSettings: FC<UserSelfSettingsProps> = observer(() => {
 				break;
 			case 'about':
 				setAbout(value);
-				break;
 				break;
 			default:
 				break;

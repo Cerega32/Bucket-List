@@ -31,10 +31,10 @@
 		&--category-travel {
 			background: linear-gradient(
 				180deg,
-				rgb(var(--color-travel-rgb) 0) 0%,
-				rgb(var(--color-travel-rgb) 0.1) 10%,
-				rgb(var(--color-travel-rgb) 0.2) 20%,
-				rgb(var(--color-travel-rgb) 0.3) 30%,
+				rgb(var(--color-travel-rgb) / 0%) 0%,
+				rgb(var(--color-travel-rgb) / 10%) 10%,
+				rgb(var(--color-travel-rgb) / 20%) 20%,
+				rgb(var(--color-travel-rgb) / 30%) 30%,
 				var(--color-black) 100%
 			);
 		}
@@ -42,9 +42,9 @@
 		&--blacked {
 			background: linear-gradient(
 				180deg,
-				rgb(var(--color-black-rgb) 0.1) 0%,
-				rgb(var(--color-black-rgb) 0.2) 20%,
-				rgb(var(--color-black-rgb) 0.3) 30%,
+				rgb(var(--color-black-rgb) / 10%) 0%,
+				rgb(var(--color-black-rgb) / 20%) 20%,
+				rgb(var(--color-black-rgb) / 30%) 30%,
 				var(--color-black) 100%
 			);
 		}

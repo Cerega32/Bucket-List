@@ -3,20 +3,16 @@ import {FC, useEffect, useState} from 'react';
 
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
 import {Svg} from '@/components/Svg/Svg';
-import {UserStatistics} from '@/components/UserStatictics/UserStatistics';
+import {UserStatistics} from '@/components/UserStatistics/UserStatistics';
 import {WeeklySchedule} from '@/components/WeeklySchedule/WeeklySchedule';
 import {useBem} from '@/hooks/useBem';
-import {IGoal} from '@/typings/goal';
 import {IUserStatistics} from '@/typings/user';
 import {getStatistics} from '@/utils/api/get/getUserStatistics';
 import './user-self-dashboard.scss';
 
-interface UserSelfDashboardProps {}
-
-export const UserSelfDashboard: FC<UserSelfDashboardProps> = observer(() => {
+export const UserSelfDashboard: FC = observer(() => {
 	const [block, element] = useBem('user-self-dashboard');
 
-	const [goals, setGoals] = useState<Array<IGoal>>([]);
 	const [userStatistics, setUserStatistics] = useState<IUserStatistics | null>(null);
 
 	useEffect(() => {
@@ -24,7 +20,6 @@ export const UserSelfDashboard: FC<UserSelfDashboardProps> = observer(() => {
 			const res = await getStatistics();
 			if (res.success) {
 				setUserStatistics(res.data);
-				console.log(res);
 			}
 		})();
 	}, []);

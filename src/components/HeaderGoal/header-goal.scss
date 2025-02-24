@@ -27,10 +27,10 @@
 	&--category-travel::after {
 		background: linear-gradient(
 			180deg,
-			rgb(var(--color-travel-rgb) 0.5) 0%,
-			rgb(var(--color-travel-rgb) 0.55) 10%,
-			rgb(var(--color-travel-rgb) 0.6) 20%,
-			rgb(var(--color-travel-rgb) 0.65) 30%,
+			rgb(var(--color-travel-rgb) / 50%) 0%,
+			rgb(var(--color-travel-rgb) / 55%) 10%,
+			rgb(var(--color-travel-rgb) / 60%) 20%,
+			rgb(var(--color-travel-rgb) / 65%) 30%,
 			var(--color-black) 100%
 		);
 	}

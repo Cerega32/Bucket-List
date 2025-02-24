@@ -1,9 +1,10 @@
-import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {NotificationStore} from '@/store/NotificationStore';
 import {motion} from 'framer-motion';
+import {observer} from 'mobx-react';
+import React from 'react';
 
 import {useBem} from '@/hooks/useBem';
+import {NotificationStore} from '@/store/NotificationStore';
+
 import './notification.scss';
 
 interface NotificationProps {
@@ -36,7 +37,7 @@ const Notification: React.FC<NotificationProps> = observer(({id, type, title, me
 					</button>
 				)}
 			</div>
-			<button className={element('button')} onClick={() => NotificationStore.removeNotification(id)}>
+			<button type="button" className={element('button')} onClick={() => NotificationStore.removeNotification(id)}>
 				✖
 			</button>
 		</motion.div>

@@ -3,7 +3,7 @@
 .main-goals {
 	@include max-width;
 
-	margin-top: calc(56px + var(--height-header));
+	margin-top: 56px;
 
 	&__info {
 		display: flex;
