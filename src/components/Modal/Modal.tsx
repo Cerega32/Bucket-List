@@ -26,7 +26,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 	const [block, element] = useBem('modal', className);
 
 	const {isOpen, setIsOpen, window, setWindow, funcModal} = ModalStore;
-	const {setIsAuth, setName} = UserStore;
+	const {setIsAuth, setName, setAvatar} = UserStore;
 
 	const closeWindow = () => {
 		setIsOpen(false);
@@ -45,6 +45,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		closeWindow();
 		setName(data.name);
 		setIsAuth(true);
+		setAvatar(Cookies.get('avatar') || '');
 	};
 
 	const handleKeyUp = (e) => {

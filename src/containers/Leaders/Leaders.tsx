@@ -47,13 +47,8 @@ export const Leaders: FC = () => {
 			</div>
 			{leaders.length > 0 ? (
 				<>
-					<LeaderPedestal
-						users={[...leaders, ...leaders, ...leaders, ...leaders, ...leaders, ...leaders, ...leaders].slice(0, 3)}
-					/>
-					<LeaderBoard
-						className={element('board')}
-						users={[...leaders, ...leaders, ...leaders, ...leaders, ...leaders, ...leaders, ...leaders]}
-					/>
+					<LeaderPedestal users={leaders.slice(0, 3)} />
+					<LeaderBoard className={element('board')} users={leaders} />
 				</>
 			) : (
 				<div className={element('empty')}>Никто еще не стал лидером недели. Но вы можете стать им!</div>

@@ -1,26 +1,18 @@
 import {FC, useEffect, useState} from 'react';
-import {useParams} from 'react-router-dom';
 
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
 import {MainCards} from '@/components/MainCards/MainCards';
-
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
-import {ThemeStore} from '@/store/ThemeStore';
-import {ICategoryGoals, IMainGoals} from '@/store/UserStore';
-import {IComplexity, IGoal} from '@/typings/goal';
-import './main-goals.scss';
+import {IMainGoals} from '@/store/UserStore';
+import {IComplexity} from '@/typings/goal';
 import {IPage} from '@/typings/page';
 import {get100Goals} from '@/utils/api/get/get100Goals';
-import {getGoal} from '@/utils/api/get/getGoal';
-import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
-import {removeGoal} from '@/utils/api/post/removeGoal';
+import './main-goals.scss';
 
 export const MainGoals: FC<IPage> = () => {
 	const [block, element] = useBem('main-goals');
-
-	const {setHeader} = ThemeStore;
 
 	const [mainGoals, setMainGoals] = useState<IMainGoals>({
 		easyGoals: {data: [], countCompleted: 0},
@@ -35,11 +27,6 @@ export const MainGoals: FC<IPage> = () => {
 				setMainGoals(res.data);
 			}
 		})();
-	}, []);
-
-	useEffect(() => {
-		setHeader('white');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	if (!mainGoals) {

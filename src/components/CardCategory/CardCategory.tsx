@@ -1,22 +1,13 @@
 import {FC} from 'react';
-
-import {Tags} from '../Tags/Tags';
-
-import {useBem} from '@/hooks/useBem';
-import {ICategory, ICategoryDetailed, IShortGoal, IShortList} from '@/typings/goal';
-
-import './card-category.scss';
-import {Title} from '../Title/Title';
-import {Tag} from '../Tag/Tag';
-import {Gradient} from '../Gradient/Gradient';
-import {Line} from '../Line/Line';
-import {Button} from '../Button/Button';
-import {Svg} from '../Svg/Svg';
-import {Progress} from '../Progress/Progress';
-
 import {Link} from 'react-router-dom';
 
+import {useBem} from '@/hooks/useBem';
+import {ICategoryDetailed} from '@/typings/goal';
 import {pluralize} from '@/utils/text/pluralize';
+
+import {Gradient} from '../Gradient/Gradient';
+import {Title} from '../Title/Title';
+import './card-category.scss';
 
 interface CardCategoryProps {
 	className?: string;

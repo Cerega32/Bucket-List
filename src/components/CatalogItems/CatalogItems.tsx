@@ -2,17 +2,8 @@ import {FC, useEffect, useMemo, useState} from 'react';
 
 import './catalog-items.scss';
 
-import {Card} from '../Card/Card';
-import {FieldInput} from '../FieldInput/FieldInput';
-
-import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
-import {Notification} from '../Notification/Notification';
-import {Pagination} from '../Pagination/Pagination';
-import Select, {OptionSelect} from '../Select/Select';
-import {Switch} from '../Switch/Switch';
-
 import {useBem} from '@/hooks/useBem';
-import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
+import {ICategoryWithSubcategories, IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import {IPaginationPage} from '@/typings/request';
 import {getAllGoals} from '@/utils/api/get/getAllGoals';
@@ -23,6 +14,13 @@ import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
 import {defaultPagination} from '@/utils/data/default';
+
+import {Card} from '../Card/Card';
+import {FieldInput} from '../FieldInput/FieldInput';
+import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
+import {Pagination} from '../Pagination/Pagination';
+import Select, {OptionSelect} from '../Select/Select';
+import {Switch} from '../Switch/Switch';
 
 interface CatalogItemsProps {
 	className?: string;
@@ -65,7 +63,7 @@ const sortBy: Array<OptionSelect> = [
 ];
 
 export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersProps> = (props) => {
-	const {className, code, subPage, category, userId, completed, beginUrl, columns} = props;
+	const {className, code = 'all', subPage, category, userId, completed, beginUrl, columns} = props;
 
 	const [block, element] = useBem('catalog-items', className);
 
@@ -81,7 +79,6 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	const [search, setSearch] = useState('');
 	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 	const [get, setGet] = useState(userId ? {user_id: userId, completed} : {});
-	const [codeUrl] = useState(code || 'all');
 
 	const buttonsSwitch = useMemo(() => {
 		let url = '';
@@ -110,23 +107,23 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		(async () => {
 			const tempGet = userId ? {user_id: userId, completed} : {};
 			setGet(tempGet);
-			const res = await getAllGoals(codeUrl, tempGet);
+			const res = await getAllGoals(code, tempGet);
 			if (res.success) {
 				setGoals(res.data);
 			}
 		})();
-	}, [subPage, codeUrl, completed, userId]);
+	}, [subPage, code, completed, userId]);
 
 	useEffect(() => {
 		(async () => {
 			const tempGet = userId ? {user_id: userId, completed} : {};
 			setGet(tempGet);
-			const res = await getAllLists(codeUrl, tempGet);
+			const res = await getAllLists(code, tempGet);
 			if (res.success) {
 				setLists(res.data);
 			}
 		})();
-	}, [subPage, codeUrl, completed, userId]);
+	}, [subPage, code, completed, userId]);
 
 	useEffect(() => {
 		setActiveSort(0);
@@ -138,9 +135,9 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			let res;
 
 			if (subPage === 'goals') {
-				res = await getAllGoals(codeUrl, {...get, sort_by: sortValue, page});
+				res = await getAllGoals(code, {...get, sort_by: sortValue, page});
 			} else {
-				res = await getAllLists(codeUrl, {...get, sort_by: sortValue, page});
+				res = await getAllLists(code, {...get, sort_by: sortValue, page});
 			}
 
 			if (res.success) {
@@ -182,7 +179,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 				// Выполняем поиск только если длина запроса больше или равна 3
 				if (subPage === 'goals') {
 					if (query.length >= 3) {
-						const res = await getAllGoals(codeUrl, {
+						const res = await getAllGoals(code, {
 							sort_by: sortBy[activeSort].value,
 							search: query,
 						});
@@ -191,7 +188,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						}
 					} else {
 						// Если длина запроса меньше 3, делаем запрос с пустым значением
-						const res = await getAllGoals(codeUrl, {
+						const res = await getAllGoals(code, {
 							sort_by: sortBy[activeSort].value,
 							search: '',
 						});
@@ -200,7 +197,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						}
 					}
 				} else if (query.length >= 3) {
-					const res = await getAllLists(codeUrl, {
+					const res = await getAllLists(code, {
 						sort_by: sortBy[activeSort].value,
 						search: query,
 					});
@@ -209,7 +206,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					}
 				} else {
 					// Если длина запроса меньше 3, делаем запрос с пустым значением
-					const res = await getAllLists(codeUrl, {
+					const res = await getAllLists(code, {
 						sort_by: sortBy[activeSort].value,
 						search: '',
 					});
@@ -259,10 +256,9 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			setLists({...goals, data: newLists});
 		}
 	};
-	console.log('columns', columns);
 
 	return (
-		<section className={block()}>
+		<section className={block()} key={code}>
 			<div className={element('filters')}>
 				<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage} />
 				<FieldInput

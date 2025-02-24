@@ -1,11 +1,11 @@
 import {FC, useEffect, useState} from 'react';
-import {useBem} from '@/hooks/useBem';
-import {ThemeStore} from '@/store/ThemeStore';
-import {getCategories} from '@/utils/api/get/getCategories';
-import {IPage} from '@/typings/page';
-import {ICategoryDetailed} from '@/typings/goal';
+
 import {CardCategory} from '@/components/CardCategory/CardCategory';
 import {Title} from '@/components/Title/Title';
+import {useBem} from '@/hooks/useBem';
+import {ICategoryDetailed} from '@/typings/goal';
+import {IPage} from '@/typings/page';
+import {getCategories} from '@/utils/api/get/getCategories';
 import './categories.scss';
 
 export const Categories: FC<IPage> = () => {
@@ -28,7 +28,8 @@ export const Categories: FC<IPage> = () => {
 				Категории
 			</Title>
 			<section className={element('list')}>
-				{!!categories.length && categories.map((category) => <CardCategory category={category} className={element('item')} />)}
+				{!!categories.length &&
+					categories.map((category) => <CardCategory category={category} className={element('item')} key={category.id} />)}
 			</section>
 		</main>
 	);

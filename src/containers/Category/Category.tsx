@@ -6,12 +6,9 @@ import {CatalogItems} from '@/components/CatalogItems/CatalogItems';
 import {HeaderCategory} from '@/components/HeaderCategory/HeaderCategory';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
-import {ThemeStore} from '@/store/ThemeStore';
 import {ICategoryWithSubcategories, IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import {IPage} from '@/typings/page';
-
-import './category.scss';
 import {getCategory} from '@/utils/api/get/getCategory';
 import {getPopularGoals} from '@/utils/api/get/getPopularGoals';
 import {getPopularLists} from '@/utils/api/get/getPopularLists';
@@ -20,6 +17,7 @@ import {addListGoal} from '@/utils/api/post/addListGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
+import './category.scss';
 
 export const Category: FC<IPage> = ({subPage, page}) => {
 	const [block, element] = useBem('category');
@@ -106,7 +104,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 
 	return (
 		<main className={block({sub: page === 'isSubCategories', empty: !category.subcategories.length})}>
-			<HeaderCategory category={category} className={element('header')} isSub={page === 'isSubCategories'} ref={refTitle} />
+			<HeaderCategory category={category} className={element('header')} isSub={page === 'isSubCategories'} refHeader={refTitle} />
 			{!!popularGoals.length && (
 				<>
 					<Title className={element('title')} tag="h2">

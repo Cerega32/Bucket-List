@@ -40,7 +40,7 @@ interface City {
 }
 
 export const UserSelfSettings: FC<UserSelfSettingsProps> = observer(() => {
-	const {userInfo: user, setUserInfo} = UserStore;
+	const {userInfo: user, setUserInfo, setAvatar} = UserStore;
 	const {setWindow, setIsOpen} = ModalStore;
 
 	const [name, setName] = useState(user.name);
@@ -89,6 +89,7 @@ export const UserSelfSettings: FC<UserSelfSettingsProps> = observer(() => {
 				const res = await postAvatar(formData);
 				if (res.success) {
 					setUserInfo({...user, avatar: Cookies.get('avatar')});
+					setAvatar(Cookies.get('avatar') || '');
 				}
 			})();
 		},

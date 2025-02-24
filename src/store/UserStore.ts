@@ -40,6 +40,8 @@ class Store implements IUserStore {
 
 	name = Cookies.get('name') || '';
 
+	avatar = Cookies.get('avatar') || '';
+
 	userInfo: IUserInfo = {
 		avatar: Cookies.get('avatar') || '',
 		email: '',
@@ -94,6 +96,10 @@ class Store implements IUserStore {
 
 	setMainGoals = (mainGoals: IMainGoals) => {
 		this.mainGoals = mainGoals;
+	};
+
+	setAvatar = (avatar: string) => {
+		this.avatar = avatar;
 	};
 }
 

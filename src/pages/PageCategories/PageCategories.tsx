@@ -5,12 +5,14 @@ import {ThemeStore} from '@/store/ThemeStore';
 import {IPage} from '@/typings/page';
 
 export const PageCategories: FC<IPage> = ({page}) => {
-	const {setPage, setHeader} = ThemeStore;
+	const {setPage, setHeader, setFull} = ThemeStore;
 
 	useEffect(() => {
 		setPage(page);
 		setHeader('white');
-	}, [page, setPage]);
+		setFull(false);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	return <Categories page={page} />;
 };

@@ -10,6 +10,8 @@
 
 	&__info {
 		@include block-radius;
+
+		color: var(--color-text);
 	}
 
 	&__info-title {

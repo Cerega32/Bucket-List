@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react';
 import {FC} from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
@@ -23,10 +23,12 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const {className} = props;
 
 	const {header, page} = ThemeStore;
-	const {setIsOpen, setWindow, isOpen} = ModalStore;
-	const {isAuth, name} = UserStore;
+	const {setIsOpen, setWindow} = ModalStore;
+	const {isAuth, name, avatar, setAvatar, setIsAuth, setName} = UserStore;
 
 	const [block, element] = useBem('header', className);
+
+	const navigate = useNavigate();
 
 	const openLogin = () => {
 		setIsOpen(true);
@@ -36,6 +38,17 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const openRegistration = () => {
 		setIsOpen(true);
 		setWindow('registration');
+	};
+
+	const handleLogout = () => {
+		Cookies.remove('token');
+		Cookies.remove('avatar');
+		Cookies.remove('name');
+		Cookies.remove('user-id');
+		setAvatar('');
+		setIsAuth(false);
+		setName('');
+		navigate('/');
 	};
 
 	return (
@@ -76,7 +89,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				{isAuth ? (
 					<div className={element('profile-wrapper')}>
 						<div className={element('profile')}>
-							<Avatar avatar={Cookies.get('avatar')} size="small" noBorder />
+							<Avatar avatar={avatar} size="small" noBorder />
 							<span className={element('nickname')}>{name}</span>
 						</div>
 						<div className={element('profile-menu')}>
@@ -99,7 +112,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 								Настройки
 							</Link>
 							<Line margin="8px 0" />
-							<button type="button" className={element('menu-item')} onClick={() => {}}>
+							<button type="button" className={element('menu-item')} onClick={handleLogout}>
 								Выход
 							</button>
 						</div>

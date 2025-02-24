@@ -1,5 +1,6 @@
 import {observer} from 'mobx-react';
 import {FC, useEffect, useState} from 'react';
+import {Link} from 'react-router-dom';
 
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
 import {Svg} from '@/components/Svg/Svg';
@@ -27,7 +28,7 @@ export const UserSelfDashboard: FC = observer(() => {
 	return (
 		<section className={block()}>
 			<div className={element('info-wrapper')}>
-				<div className={element('info')}>
+				<Link to="/list/100-goals" className={element('info')}>
 					<h3 className={element('info-title')}>Невыполненных целей в “100 целей”</h3>
 					<span className={element('info-count')}>
 						<Svg icon="star" />
@@ -39,15 +40,15 @@ export const UserSelfDashboard: FC = observer(() => {
 								userStatistics.hundredGoals.medium.completed -
 								userStatistics.hundredGoals.hard.completed}
 					</span>
-				</div>
-				<div className={element('info')}>
+				</Link>
+				<Link to="/leaders" className={element('info')}>
 					<h3 className={element('info-title')}>Место в рейтинге недели</h3>
 					<span className={element('info-count')}>
 						<Svg icon="award" />
 						{userStatistics?.currentStats.weeklyRank}
 					</span>
-				</div>
-				<div className={element('info')}>
+				</Link>
+				<Link to="/user/self/active-goals" className={element('info')}>
 					<h3 className={element('info-title')}>Активные цели и списки</h3>
 					<p className={element('info-count-wrapper')}>
 						<span className={element('info-count')}>
@@ -59,7 +60,7 @@ export const UserSelfDashboard: FC = observer(() => {
 							{userStatistics?.currentStats.activeLists}
 						</span>
 					</p>
-				</div>
+				</Link>
 				{userStatistics && (
 					<Info100Goals
 						totalAddedEasy={userStatistics.hundredGoals.easy.total}

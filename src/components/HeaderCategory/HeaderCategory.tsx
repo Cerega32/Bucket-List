@@ -1,21 +1,22 @@
-import {FC, MutableRefObject, RefObject, useEffect, useState} from 'react';
+import {FC, RefObject, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import './header-category.scss';
-import {Title} from '../Title/Title';
 
 import {useBem} from '@/hooks/useBem';
 import {ICategoryWithSubcategories} from '@/typings/goal';
+
+import {Title} from '../Title/Title';
 
 interface HeaderCategoryProps {
 	className?: string;
 	category: ICategoryWithSubcategories;
 	isSub?: boolean;
-	ref: RefObject<HTMLElement>;
+	refHeader: RefObject<HTMLElement>;
 }
 
 export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
-	const {className, category, isSub, ref} = props;
+	const {className, category, isSub, refHeader} = props;
 
 	const [block, element] = useBem('header-category', className);
 	const [isFixed, setIsFixed] = useState(false);
@@ -42,7 +43,7 @@ export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
 				fixed: isFixed,
 			})}
 			style={{backgroundImage: `url(${category.category.image})`}}
-			ref={ref}
+			ref={refHeader}
 		>
 			<div className={element('title-wrapper')}>
 				{isSub && category.category.parentCategory && (
@@ -59,7 +60,11 @@ export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
 			{!!category.subcategories.length && !isFixed && (
 				<section className={element('subcategories')}>
 					{category.subcategories.map((subcategory) => (
-						<Link className={element('subcategory')} to={`/categories/${category.category.nameEn}/${subcategory.nameEn}`}>
+						<Link
+							className={element('subcategory')}
+							to={`/categories/${category.category.nameEn}/${subcategory.nameEn}`}
+							key={subcategory.nameEn}
+						>
 							{subcategory.icon && (
 								<img className={element('subcategory-icon')} src={subcategory.icon} alt={subcategory.name} />
 							)}
