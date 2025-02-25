@@ -9,6 +9,10 @@
 		padding: calc(230px + 56px) 0 0;
 	}
 
+	&--all {
+		padding: 56px;
+	}
+
 	&__title {
 		max-width: var(--max-width);
 		margin: 0 auto 24px;

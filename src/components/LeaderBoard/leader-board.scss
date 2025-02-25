@@ -60,6 +60,15 @@
 		}
 	}
 
+	&__row-link {
+		display: grid;
+		align-items: center;
+		gap: 4px 8px;
+		width: 100%;
+		grid-template-columns: 44px 1fr;
+		color: var(--color-text);
+	}
+
 	&__item {
 		width: 1%;
 		padding: 8px 16px;
@@ -67,14 +76,6 @@
 
 		&:first-child {
 			padding: 8px 21px;
-		}
-
-		&:nth-child(2) {
-			display: grid;
-			align-items: center;
-			gap: 4px 8px;
-			width: 100%;
-			grid-template-columns: 44px 1fr;
 		}
 
 		&:nth-child(1n + 3) {

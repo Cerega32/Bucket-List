@@ -16,6 +16,7 @@ import Select from '../Select/Select';
 import {selectComplexity} from '@/utils/values/complexity';
 
 import {useDropzone} from 'react-dropzone';
+import {NotificationStore} from '@/store/NotificationStore';
 
 interface AddReviewProps {
 	className?: string;
@@ -34,7 +35,11 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	const onDrop = useCallback(
 		(acceptedFiles: File[]) => {
 			if (acceptedFiles.length + photos.length > 10) {
-				alert('Можно загрузить не более 10 фотографий.');
+				NotificationStore.addNotification({
+					type: 'error',
+					title: 'Слишком много фотографий',
+					message: 'Можно загрузить не более 10 фотографий.',
+				});
 				return;
 			}
 			setPhotos((prevPhotos) => [...prevPhotos, ...acceptedFiles]);
@@ -63,8 +68,6 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 		if (res.success) {
 			closeModal();
 			setComments([res.data, ...comments]);
-		} else {
-			alert('Ошибка при отправке формы');
 		}
 	};
 

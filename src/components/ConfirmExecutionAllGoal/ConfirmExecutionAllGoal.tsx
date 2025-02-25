@@ -1,9 +1,10 @@
 import {FC} from 'react';
 
-import {Title} from '../Title/Title';
-
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
+import {NotificationStore} from '@/store/NotificationStore';
+
+import {Title} from '../Title/Title';
 import './confirm-execution-all-goal.scss';
 // import {markAllGoalsFromList} from '@/utils/api/post/markAllGoalsFromList';
 
@@ -25,7 +26,11 @@ export const ConfirmExecutionAllGoal: FC<ConfirmExecutionAllGoalProps> = (props)
 				closeModal();
 			}
 		} catch (error) {
-			alert('Что-то пошло не так');
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Упс',
+				message: 'Что-то пошло не так',
+			});
 		}
 	};
 

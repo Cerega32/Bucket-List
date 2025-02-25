@@ -1,8 +1,9 @@
 .leaders {
 	@include max-width;
-	padding: 56px 0 0;
+
 	display: grid;
 	gap: 56px 24px;
+	padding: 56px 0 0;
 	grid-template-columns: 1fr 1fr;
 
 	&__title {
@@ -10,18 +11,19 @@
 	}
 
 	&__description {
-		margin-bottom: 40px;
 		max-width: 576px;
+		margin-bottom: 40px;
 	}
 
 	&__board {
 		grid-column: 1 / 3;
 	}
+
 	&__empty {
-		grid-column: 1 / 3;
-		text-align: center;
 		font-size: 24px;
-		line-height: 1.5;
 		font-weight: var(--weight-medium);
+		line-height: 1.5;
+		text-align: center;
+		grid-column: 1 / 3;
 	}
 }

@@ -1,11 +1,11 @@
 import {FC} from 'react';
 
-import {Title} from '../Title/Title';
-
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
-import './delete-goal.scss';
 import {IFuncModal} from '@/store/ModalStore';
+
+import {Title} from '../Title/Title';
+import './delete-goal.scss';
 
 interface DeleteGoalProps {
 	className?: string;
@@ -22,8 +22,6 @@ export const DeleteGoal: FC<DeleteGoalProps> = (props) => {
 		const res = funcModal(); // TODO
 		if (res) {
 			closeModal();
-		} else {
-			alert('Ошибка при удалении цели');
 		}
 	};
 

@@ -17,6 +17,8 @@ import {addListGoal} from '@/utils/api/post/addListGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
+
+import {Categories} from '../Categories/Categories';
 import './category.scss';
 
 export const Category: FC<IPage> = ({subPage, page}) => {
@@ -30,18 +32,20 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 	const {id} = useParams();
 
 	useEffect(() => {
-		(async () => {
-			const res = await getCategory(id);
+		if (id) {
+			(async () => {
+				const res = await getCategory(id);
 
-			if (res.success) {
-				setCategory(res.data);
-			}
-		})();
+				if (res.success) {
+					setCategory(res.data);
+				}
+			})();
+		}
 	}, [id]);
 
 	useEffect(() => {
 		(async () => {
-			const res = await getPopularGoals(id);
+			const res = await getPopularGoals(id || 'all');
 
 			if (res.success) {
 				setPopularGoals(res.data);
@@ -51,17 +55,13 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 
 	useEffect(() => {
 		(async () => {
-			const res = await getPopularLists(id);
+			const res = await getPopularLists(id || 'all');
 
 			if (res.success) {
 				setPopularLists(res.data);
 			}
 		})();
 	}, [id]);
-
-	if (!id) {
-		return null;
-	}
 
 	const updateGoal = async (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
 		const res = await (operation === 'add' ? addGoal(code) : operation === 'delete' ? removeGoal(code) : markGoal(code, !done));
@@ -98,13 +98,11 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 		}
 	};
 
-	if (!category) {
-		return null;
-	}
-
 	return (
-		<main className={block({sub: page === 'isSubCategories', empty: !category.subcategories.length})}>
-			<HeaderCategory category={category} className={element('header')} isSub={page === 'isSubCategories'} refHeader={refTitle} />
+		<main className={block({sub: page === 'isSubCategories', empty: !category?.subcategories.length, all: !id})}>
+			{id !== 'all' && category && (
+				<HeaderCategory category={category} className={element('header')} isSub={page === 'isSubCategories'} refHeader={refTitle} />
+			)}
 			{!!popularGoals.length && (
 				<>
 					<Title className={element('title')} tag="h2">
@@ -148,7 +146,14 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 			<Title className={element('title')} tag="h2">
 				Все цели и списки
 			</Title>
-			<CatalogItems code={id} className={element('all-goals')} subPage={subPage} category={category} beginUrl="/categories/" />
+			<CatalogItems
+				code={id || 'all'}
+				className={element('all-goals')}
+				subPage={subPage}
+				category={category}
+				beginUrl={id ? '/categories/' : '/categories/all'}
+			/>
+			{!id && <Categories page="isCategories" />}
 		</main>
 	);
 };

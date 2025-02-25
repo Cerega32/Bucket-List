@@ -9,10 +9,15 @@ export const PageCategory: FC<IPage> = ({page, subPage}) => {
 
 	useEffect(() => {
 		setPage(page);
-		setHeader('transparent');
-		setFull(true);
+		if (page === 'isCategoriesAll') {
+			setHeader('white');
+			setFull(false);
+		} else {
+			setHeader('transparent');
+			setFull(true);
+		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [page]);
 
 	return <Category page={page} subPage={subPage} />;
 };

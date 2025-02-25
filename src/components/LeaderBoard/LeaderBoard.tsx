@@ -1,4 +1,5 @@
 import {FC} from 'react';
+import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
 import {IWeeklyLeader} from '@/typings/user';
@@ -34,12 +35,14 @@ export const LeaderBoard: FC<LeaderBoardProps> = (props) => {
 						<tr className={element('row')} key={user.id}>
 							<td className={element('item')}>{user.place}</td>
 							<td className={element('item')}>
-								<Avatar noBorder className={element('avatar')} size="medium" avatar={user.avatar} />
-								<p>{user.name}</p>
-								<p className={element('info')}>
-									{pluralize(user.level, ['уровень'])}&nbsp;
-									{pluralize(user.totalCompletedGoals, ['цель выполнена', 'цели выполнено', 'целей выполнено'])}
-								</p>
+								<Link to={`/user/${user.id}/showcase`} className={element('row-link')}>
+									<Avatar noBorder className={element('avatar')} size="medium" avatar={user.avatar} />
+									<p>{user.name}</p>
+									<p className={element('info')}>
+										{pluralize(user.level, ['уровень'])}&nbsp;
+										{pluralize(user.totalCompletedGoals, ['цель выполнена', 'цели выполнено', 'целей выполнено'])}
+									</p>
+								</Link>
 							</td>
 							<td className={element('item')}>{user.weekCompletedGoals}</td>
 							<td className={element('item')}>{user.reviewsAddedWeek}</td>

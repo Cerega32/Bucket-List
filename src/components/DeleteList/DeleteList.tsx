@@ -1,11 +1,11 @@
 import {FC} from 'react';
 
-import {Title} from '../Title/Title';
-
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
-import './delete-list.scss';
 import {IFuncModal} from '@/store/ModalStore';
+
+import {Title} from '../Title/Title';
+import './delete-list.scss';
 
 interface DeleteListProps {
 	className?: string;
@@ -22,8 +22,6 @@ export const DeleteList: FC<DeleteListProps> = (props) => {
 		const res = funcModal(); // TODO
 		if (res) {
 			closeModal();
-		} else {
-			alert('Ошибка при удалении списка целей');
 		}
 	};
 
