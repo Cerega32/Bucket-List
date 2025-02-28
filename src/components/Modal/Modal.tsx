@@ -48,7 +48,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		setAvatar(Cookies.get('avatar') || '');
 	};
 
-	const handleKeyUp = (e) => {
+	const handleKeyUp = (e: KeyboardEvent) => {
 		if (e.key === 'Escape') {
 			closeWindow();
 		}

@@ -13,6 +13,7 @@ export default defineConfig(({mode}) => {
 
 	return {
 		plugins: [react(), legacy()],
+		base: './',
 		resolve: {
 			alias: {
 				'@': path.resolve(__dirname, './src'),

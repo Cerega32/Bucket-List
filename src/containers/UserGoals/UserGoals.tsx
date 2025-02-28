@@ -1,15 +1,14 @@
 import {observer} from 'mobx-react';
 import {FC} from 'react';
 
-import './user-goals.scss';
 import {CatalogItems} from '@/components/CatalogItems/CatalogItems';
-
 import {useBem} from '@/hooks/useBem';
+import './user-goals.scss';
 
 interface UserGoalsProps {
 	id: string;
 	subPage: string;
-	completed: boolean;
+	completed?: boolean;
 }
 
 export const UserGoals: FC<UserGoalsProps> = observer((props) => {

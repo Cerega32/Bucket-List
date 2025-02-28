@@ -17,7 +17,6 @@ import {defaultPagination} from '@/utils/data/default';
 
 import {Card} from '../Card/Card';
 import {FieldInput} from '../FieldInput/FieldInput';
-import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
 import {Pagination} from '../Pagination/Pagination';
 import Select, {OptionSelect} from '../Select/Select';
 import {Switch} from '../Switch/Switch';
@@ -31,7 +30,7 @@ interface CatalogItemsProps {
 
 interface CatalogItemsCategoriesProps extends CatalogItemsProps {
 	code: string;
-	category: ICategoryWithSubcategories;
+	category: ICategoryWithSubcategories | null;
 	userId?: never;
 	completed?: never;
 }
@@ -260,7 +259,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	return (
 		<section className={block()} key={code}>
 			<div className={element('filters')}>
-				<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage} />
+				<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage || ''} />
 				<FieldInput
 					className={element('search')}
 					placeholder="Поисковой запрос"
@@ -269,7 +268,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					setValue={onSearch}
 					iconBegin="search"
 				/>
-				{!!userId && (
+				{/* {!!userId && (
 					<FiltersCheckbox
 						head={{name: 'Все категории', code: 'all'}}
 						items={[
@@ -279,7 +278,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 							{name: 'Путешествия', code: 'tra'},
 						]}
 					/>
-				)}
+				)} */}
 				<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} filter />
 			</div>
 			{subPage === 'goals' ? (

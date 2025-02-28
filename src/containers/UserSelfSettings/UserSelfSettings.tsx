@@ -20,26 +20,7 @@ import {putUserInfo} from '@/utils/api/put/putUserInfo';
 import {countriesArr} from '@/utils/data/countries';
 import './user-self-settings.scss';
 
-interface UserSelfSettingsProps {
-	user: {
-		name: string;
-		surname: string;
-		country: string;
-		city: string;
-		about: string;
-		avatar: string;
-	};
-}
-
-interface Country {
-	name: string;
-}
-
-interface City {
-	name: string;
-}
-
-export const UserSelfSettings: FC<UserSelfSettingsProps> = observer(() => {
+export const UserSelfSettings: FC = observer(() => {
 	const {userInfo: user, setUserInfo, setAvatar} = UserStore;
 	const {setWindow, setIsOpen} = ModalStore;
 
@@ -221,5 +202,3 @@ export const UserSelfSettings: FC<UserSelfSettingsProps> = observer(() => {
 		</section>
 	);
 });
-
-export default UserSelfSettings;
