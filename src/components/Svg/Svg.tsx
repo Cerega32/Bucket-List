@@ -21,7 +21,7 @@ export const Svg: FC<SvgProps> = (props) => {
 	return (
 		<ReactSVG
 			wrapper="span"
-			src={`@/assets/svg/${iconAndTransform[0]}.svg`}
+			src={`./svg/${iconAndTransform[0]}.svg`}
 			className={block({
 				transform: iconAndTransform[1],
 			})}
