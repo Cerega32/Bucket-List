@@ -40,6 +40,8 @@ export default defineConfig(({mode}) => {
 		},
 		build: {
 			outDir: 'dist',
+			assetsDir: 'assets',
+			assetsInlineLimit: 4096, // Файлы меньше 4kb будут инлайниться
 			cleanCssOptions: {
 				level: {
 					1: {

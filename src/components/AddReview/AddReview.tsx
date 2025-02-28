@@ -1,22 +1,20 @@
 import {FC, FormEvent, useCallback, useState} from 'react';
 
-import {Title} from '../Title/Title';
+import './add-review.scss';
+
+import {useDropzone} from 'react-dropzone';
 
 import {Button} from '@/components/Button/Button';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
-import './add-review.scss';
 import {GoalStore} from '@/store/GoalStore';
+import {NotificationStore} from '@/store/NotificationStore';
 import {postAddReview} from '@/utils/api/post/postAddReview';
-import {putChangePassword} from '@/utils/api/put/putChangePassword';
-
-import Select from '../Select/Select';
-
 import {selectComplexity} from '@/utils/values/complexity';
 
-import {useDropzone} from 'react-dropzone';
-import {NotificationStore} from '@/store/NotificationStore';
+import Select from '../Select/Select';
+import {Title} from '../Title/Title';
 
 interface AddReviewProps {
 	className?: string;

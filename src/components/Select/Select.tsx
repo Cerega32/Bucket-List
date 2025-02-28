@@ -1,9 +1,9 @@
-import React, {useState, useRef, useEffect, FC} from 'react';
-
-import './select.scss';
-import {Svg} from '../Svg/Svg';
+import {FC, useEffect, useRef, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
+import './select.scss';
+
+import {Svg} from '../Svg/Svg';
 
 export interface OptionSelect {
 	name: string;
