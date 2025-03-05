@@ -1,9 +1,10 @@
 import {FC, ReactElement, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 
+import {useBem} from '@/hooks/useBem';
+
 import {Svg} from '../Svg/Svg';
 
-import {useBem} from '@/hooks/useBem';
 import './button.scss';
 
 interface ButtonProps {
@@ -14,7 +15,7 @@ interface ButtonProps {
 	children?: ReactElement | string | number;
 	icon?: string;
 	onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-	type?: 'button' | 'Link';
+	type?: 'button' | 'button-close' | 'Link';
 	typeBtn?: 'button' | 'submit';
 	href?: string;
 	small?: boolean;
@@ -80,6 +81,19 @@ export const Button: FC<ButtonProps> = (props) => {
 					<Link to={href} className={block({theme, small, size, active})}>
 						{content}
 					</Link>
+				);
+			case 'button-close':
+				return (
+					<button
+						className={block({close: true})}
+						onClick={onClick}
+						type="button"
+						disabled={active}
+						ref={refInner}
+						aria-label="закрыть"
+					>
+						<Svg icon="cross" width="20px" height="20px" />
+					</button>
 				);
 			case 'button':
 			default:

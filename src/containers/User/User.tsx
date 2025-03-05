@@ -1,4 +1,4 @@
-import {observer} from 'mobx-react';
+import {observer} from 'mobx-react-lite';
 import {FC, useEffect} from 'react';
 import {useParams} from 'react-router-dom';
 

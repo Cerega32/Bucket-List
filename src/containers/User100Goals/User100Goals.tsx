@@ -1,4 +1,4 @@
-import {observer} from 'mobx-react';
+import {observer} from 'mobx-react-lite';
 import {FC, useEffect} from 'react';
 
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';

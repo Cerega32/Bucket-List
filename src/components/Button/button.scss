@@ -9,6 +9,26 @@
 	padding: 8px 16px;
 	border-radius: 4px;
 
+	&--close {
+		width: 24px;
+		height: 24px;
+		padding: 2px;
+		border: none;
+
+		* {
+			fill: var(--color-text);
+		}
+
+		&:hover {
+			background: var(--color-secondary-hover);
+		}
+
+		&:focus {
+			background: var(--color-secondary-hover);
+			outline: 2px solid rgb(var(--color-primary-rgb) / 40%);
+		}
+	}
+
 	&--theme-blue {
 		background: var(--color-primary);
 		color: var(--color-white);

@@ -1,4 +1,4 @@
-import {observer} from 'mobx-react';
+import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useMemo} from 'react';
 
 import {ITabs, Tabs} from '@/components/Tabs/Tabs';

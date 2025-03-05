@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import {observer} from 'mobx-react';
+import {observer} from 'mobx-react-lite';
 import {FC} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 

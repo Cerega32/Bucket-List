@@ -1,11 +1,11 @@
-import {observer} from 'mobx-react';
+import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
 import {Achievement} from '@/components/Achievement/Achievement';
 import {useBem} from '@/hooks/useBem';
 import {IAchievement} from '@/typings/achievements';
-import './user-achievements.scss';
 import {GET} from '@/utils/fetch/requests';
+import './user-achievements.scss';
 
 interface UserAchievementsProps {
 	id: string;

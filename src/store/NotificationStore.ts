@@ -13,6 +13,7 @@ export interface INotification {
 
 class Store {
 	private queue: INotification[] = []; // Очередь всех уведомлений
+
 	visibleNotifications: INotification[] = []; // Отображаемые уведомления (макс. 3)
 
 	constructor() {

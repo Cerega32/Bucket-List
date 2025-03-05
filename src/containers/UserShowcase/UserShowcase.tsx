@@ -1,22 +1,18 @@
-import {observer} from 'mobx-react';
+import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
 import {Achievement} from '@/components/Achievement/Achievement';
 import {Button} from '@/components/Button/Button';
 import {CommentsGoal} from '@/components/CommentsGoal/CommentsGoal';
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
-import {ListGoals} from '@/components/ListGoals/ListGoals';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {UserStore} from '@/store/UserStore';
 import {IAchievement} from '@/typings/achievements';
 import {IComment} from '@/typings/comments';
-import {IPage} from '@/typings/page';
-import {getAddedGoals} from '@/utils/api/get/getAddedGoals';
-import './user-showcase.scss';
-import {getAddedLists} from '@/utils/api/get/getAddedLists';
-import {GET} from '@/utils/fetch/requests';
 import {get100Goals} from '@/utils/api/get/get100Goals';
+import {GET} from '@/utils/fetch/requests';
+import './user-showcase.scss';
 
 interface UserShowcaseProps {
 	id: string;

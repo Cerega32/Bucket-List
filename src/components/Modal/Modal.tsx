@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import {observer} from 'mobx-react';
+import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useRef} from 'react';
 
 import {Button} from '@/components/Button/Button';

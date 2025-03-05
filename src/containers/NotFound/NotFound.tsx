@@ -1,11 +1,9 @@
-import {observer} from 'mobx-react';
-import {FC, useEffect} from 'react';
+import {observer} from 'mobx-react-lite';
+import {FC} from 'react';
 
 import {Button} from '@/components/Button/Button';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
 import './not-found.scss';
 
 export const NotFound: FC = observer(() => {

@@ -1,10 +1,10 @@
-import React from 'react';
-import {observer} from 'mobx-react-lite';
-import Notification from '@/components/Notification/Notification';
 import {AnimatePresence} from 'framer-motion';
+import {observer} from 'mobx-react-lite';
+import React from 'react';
 
-import {NotificationStore} from '@/store/NotificationStore';
+import Notification from '@/components/Notification/Notification';
 import {useBem} from '@/hooks/useBem';
+import {NotificationStore} from '@/store/NotificationStore';
 import './notification-container.scss';
 
 const NotificationContainer: React.FC = observer(() => {

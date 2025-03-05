@@ -1,13 +1,12 @@
-import {FC, useEffect, useState} from 'react';
-import {observer} from 'mobx-react';
 import {useBem} from '@/hooks/useBem';
-import {getListsWithGoals} from '@/utils/api/get/getListsWithGoal';
-import {Card} from '../Card/Card';
-import {IShortList} from '@/typings/goal';
-import './lists-with-goal.scss';
 import {GoalStore} from '@/store/GoalStore';
+import {getListsWithGoals} from '@/utils/api/get/getListsWithGoal';
 import {addListGoal} from '@/utils/api/post/addListGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
+import {observer} from 'mobx-react-lite';
+import {FC, useEffect} from 'react';
+import {Card} from '../Card/Card';
+import './lists-with-goal.scss';
 
 interface ListsWithGoalProps {
 	className?: string;
@@ -32,14 +31,8 @@ export const ListsWithGoal: FC<ListsWithGoalProps> = observer((props) => {
 		})();
 	}, []);
 
-	const updateListGoal = async (
-		code: string,
-		i: number,
-		operation: 'add' | 'delete'
-	): Promise<void> => {
-		const res = await (operation === 'add'
-			? addListGoal(code)
-			: removeListGoal(code));
+	const updateListGoal = async (code: string, i: number, operation: 'add' | 'delete'): Promise<void> => {
+		const res = await (operation === 'add' ? addListGoal(code) : removeListGoal(code));
 
 		if (res.success && lists) {
 			const startLists = lists.slice(0, i);
