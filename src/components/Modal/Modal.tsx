@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react';
-import {FC, useEffect} from 'react';
+import {FC, useEffect, useRef} from 'react';
 
 import {Button} from '@/components/Button/Button';
 import {Login} from '@/components/Login/Login';
@@ -22,11 +22,13 @@ interface ModalProps {
 
 export const Modal: FC<ModalProps> = observer((props) => {
 	const {className} = props;
-
 	const [block, element] = useBem('modal', className);
-
 	const {isOpen, setIsOpen, window, setWindow, funcModal} = ModalStore;
 	const {setIsAuth, setName, setAvatar} = UserStore;
+
+	// Ссылки на первый и последний фокусируемые элементы
+	const modalRef = useRef<HTMLDivElement>(null);
+	const closeButtonRef = useRef<HTMLButtonElement>(null);
 
 	const closeWindow = () => {
 		setIsOpen(false);
@@ -54,14 +56,59 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		}
 	};
 
+	// Обработчик для ловушки фокуса
+	const handleTabKey = (e: KeyboardEvent) => {
+		if (e.key !== 'Tab') return;
+
+		if (!modalRef.current) return;
+
+		// Получаем все фокусируемые элементы внутри модалки
+		const focusableElements = modalRef.current.querySelectorAll(
+			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+		);
+
+		if (focusableElements.length === 0) return;
+
+		const firstElement = focusableElements[0] as HTMLElement;
+		const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+		// Если нажат Shift+Tab и фокус на первом элементе - переходим к последнему
+		if (e.shiftKey && document.activeElement === firstElement) {
+			e.preventDefault();
+			lastElement.focus();
+		}
+		// Если нажат Tab и фокус на последнем элементе - переходим к первому
+		else if (!e.shiftKey && document.activeElement === lastElement) {
+			e.preventDefault();
+			firstElement.focus();
+		}
+	};
+
 	useEffect(() => {
 		if (isOpen) {
 			document.addEventListener('keyup', handleKeyUp);
+			document.addEventListener('keydown', handleTabKey);
+
+			// Устанавливаем начальный фокус на первый элемент
+			setTimeout(() => {
+				if (modalRef.current) {
+					const focusableElements = modalRef.current.querySelectorAll(
+						'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+					);
+					if (focusableElements.length > 0) {
+						(focusableElements[0] as HTMLElement).focus();
+					} else if (closeButtonRef.current) {
+						closeButtonRef.current.focus();
+					}
+				}
+			}, 50);
 		} else {
 			document.removeEventListener('keyup', handleKeyUp);
+			document.removeEventListener('keydown', handleTabKey);
 		}
 		return () => {
 			document.removeEventListener('keyup', handleKeyUp);
+			document.removeEventListener('keydown', handleTabKey);
 		}; // eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isOpen, setIsOpen]);
 
@@ -69,7 +116,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 
 	return (
 		<section className={block({isOpen})}>
-			<div className={element('window', {type: window})}>
+			<div className={element('window', {type: window})} ref={modalRef}>
 				{window === 'login' && <Login openRegistration={openRegistration} successLogin={successAuth} />}
 				{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
 				{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
@@ -77,7 +124,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
 				{window === 'delete-list' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
 				{window === 'confirm-execution-all-goal' && <ConfirmExecutionAllGoal closeModal={closeWindow} funcModal={funcModal} />}
-				<Button theme="blue-light" className={element('close')} onClick={closeWindow}>
+				<Button theme="blue-light" className={element('close')} onClick={closeWindow} refInner={closeButtonRef}>
 					<Svg icon="cross" />
 				</Button>
 			</div>

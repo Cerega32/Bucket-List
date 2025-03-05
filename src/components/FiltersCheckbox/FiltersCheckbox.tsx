@@ -1,11 +1,11 @@
-import React, {useState, useRef, useEffect, FC} from 'react';
+import {FC, useEffect, useRef, useState} from 'react';
 
+import {useBem} from '@/hooks/useBem';
 import './filters-checkbox.scss';
+
 import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
 import {Line} from '../Line/Line';
 import {Svg} from '../Svg/Svg';
-
-import {useBem} from '@/hooks/useBem';
 
 interface IFilters {
 	name: string;

@@ -14,22 +14,55 @@
 		align-items: center;
 		width: 16px;
 		height: 16px;
-		margin-right: 8px;
-		border: 1px solid var(--color-primary);
+		background: var(--color-secondary);
+		border: 1px solid var(--color-gray-4);
 		border-radius: 4px;
+
+		&:focus-visible {
+			outline: 2px solid rgb(var(--color-primary-rgb) / 40%);
+		}
 	}
 
 	input:checked + {
-		#{$block}__checkbox {
+		#{$block}__label > #{$block}__checkbox {
 			background: var(--color-primary);
+			border: 1px solid var(--color-primary);
+		}
+
+		#{$block}__label:hover > #{$block}__checkbox {
+			background: var(--color-primary-hover);
+			border: 1px solid var(--color-primary-hover);
 		}
 	}
 
 	&__icon path {
-		fill: var(--color-white);
+		fill: var(--color-secondary);
+		transition: none;
 	}
 
 	&__label {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 8px;
 		font-weight: 500;
+
+		&:hover {
+			#{$block}__checkbox {
+				background: var(--color-secondary-hover);
+
+				& #{$block}__icon path {
+					fill: var(--color-secondary-hover);
+				}
+			}
+		}
+
+		&:focus-visible {
+			outline: none;
+
+			#{$block}__checkbox {
+				outline: 2px solid rgb(var(--color-primary-rgb) / 40%);
+			}
+		}
 	}
 }

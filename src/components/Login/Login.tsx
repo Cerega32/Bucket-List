@@ -7,6 +7,7 @@ import {useBem} from '@/hooks/useBem';
 import {postLogin} from '@/utils/api/post/postLogin';
 import './login.scss';
 
+import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
 import {Title} from '../Title/Title';
 
 interface LoginProps {
@@ -23,12 +24,13 @@ export const Login: FC<LoginProps> = (props) => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
+	const [rememberMe, setRememberMe] = useState(false);
 
 	const signIn = async (e: FormEvent) => {
 		setError('');
 		e.preventDefault();
 
-		const res = await postLogin(email, password);
+		const res = await postLogin(email, password, rememberMe);
 		if (res.success) {
 			successLogin(res.data);
 		} else {
@@ -63,10 +65,10 @@ export const Login: FC<LoginProps> = (props) => {
 					required
 				/>
 				{error && <p className={element('error')}>{error}</p>}
-				{/* <div className={element('move')}>
-				<FieldCheckbox id="remember" text="Запомнить меня" />
-				<Button theme="no-border">Забыли пароль</Button>
-			</div> */}
+				<div className={element('move')}>
+					<FieldCheckbox id="remember" text="Запомнить меня" checked={rememberMe} setChecked={setRememberMe} />
+					{/* <Button theme="no-border">Забыли пароль</Button> */}
+				</div>
 				<Button typeBtn="submit" icon="sign-in" theme="blue" className={element('btn')} onClick={signIn}>
 					Войти
 				</Button>

@@ -22,6 +22,7 @@ interface ButtonProps {
 	hoverIcon?: string;
 	active?: boolean;
 	loading?: boolean;
+	refInner?: React.RefObject<HTMLButtonElement>;
 }
 
 export const Button: FC<ButtonProps> = (props) => {
@@ -40,6 +41,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		hoverIcon,
 		active,
 		loading,
+		refInner,
 	} = props;
 
 	const [block, element] = useBem('button', className);
@@ -89,6 +91,7 @@ export const Button: FC<ButtonProps> = (props) => {
 						onMouseEnter={() => onHover(true)}
 						onMouseLeave={() => onHover(false)}
 						disabled={active}
+						ref={refInner}
 					>
 						{content}
 					</button>
