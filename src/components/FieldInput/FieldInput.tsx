@@ -1,8 +1,9 @@
 import {FC, useState} from 'react';
 
+import {useBem} from '@/hooks/useBem';
+
 import {Svg} from '../Svg/Svg';
 
-import {useBem} from '@/hooks/useBem';
 import './field-input.scss';
 
 interface FieldInputProps {
@@ -56,10 +57,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 	};
 
 	return (
-		<div className={block()}>
-			{error?.map((er) => (
-				<p className={element('error')}>{er}</p>
-			))}
+		<div className={block({error: !!error})}>
 			{text && (
 				<label className={element('label')} htmlFor={id}>
 					{text}
@@ -89,10 +87,13 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 				)}
 				{type === 'password' && (
 					<button type="button" className={element('show-password')} onClick={toggleTypePassword} aria-label="Показать пароль">
-						<Svg icon="eye" />
+						{typeState === 'password' ? <Svg icon="eye" /> : <Svg icon="eye-closed" />}
 					</button>
 				)}
 			</div>
+			{error?.map((er) => (
+				<p className={element('error')}>{er}</p>
+			))}
 		</div>
 	);
 };

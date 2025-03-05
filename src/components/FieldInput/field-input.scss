@@ -1,9 +1,11 @@
 .field-input {
+	$block: &;
+
 	display: flex;
 	flex-direction: column;
 
 	&__error {
-		color: var(--color-red-1);
+		color: var(--color-sentiment-negative);
 		font-weight: var(--weight-medium);
 	}
 
@@ -34,11 +36,34 @@
 		&--iconBegin {
 			padding-left: 40px;
 		}
+
+		&:hover {
+			border: 1px solid var(--color-primary-hover);
+		}
+
+		&:focus {
+			border: 1px solid var(--color-primary-hover);
+			outline: 2px solid rgb(var(--color-primary-rgb) / 40%);
+		}
 	}
 
 	&__show-password {
 		position: absolute;
-		top: 10px;
+		top: 8px;
 		right: 16px;
+
+		* {
+			fill: var(--color-text-secondary);
+		}
+	}
+
+	&--error {
+		#{$block}__wrapper {
+			margin-bottom: 4px;
+		}
+
+		#{$block}__input {
+			border: 1px solid var(--color-sentiment-negative);
+		}
 	}
 }

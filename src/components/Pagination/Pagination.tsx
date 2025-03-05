@@ -1,8 +1,9 @@
 import {FC, useEffect, useState} from 'react';
 
+import {useBem} from '@/hooks/useBem';
+
 import {Button} from '../Button/Button';
 
-import {useBem} from '@/hooks/useBem';
 import './pagination.scss';
 
 interface PaginationProps {
