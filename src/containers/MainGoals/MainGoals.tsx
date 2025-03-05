@@ -1,6 +1,7 @@
 import {FC, useEffect, useState} from 'react';
 
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
+import {Loader} from '@/components/Loader/Loader';
 import {MainCards} from '@/components/MainCards/MainCards';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
@@ -57,35 +58,52 @@ export const MainGoals: FC<IPage> = () => {
 
 	return (
 		<main className={block()}>
-			<div className={element('info')}>
-				<div className={element('description')}>
-					<Title className={element('title')} tag="h1">
-						Твои 100 целей на жизнь!
-					</Title>
-					<p>
-						Сколько всего вы бы хотели сделать, увидеть, испытать за свою жизнь, но мечты постоянно откладываются? Превратите
-						свои мечты в цели, и скоро вы заметите, как ваша жизнь изменилась. Мы уже сделали это за вас - дерзайте!
-					</p>
-				</div>
-				<Info100Goals // TODO проверить кнопку
-					className={element('stats')}
-					totalAddedEasy={mainGoals.easyGoals.data.length}
-					totalAddedMedium={mainGoals.mediumGoals.data.length}
-					totalAddedHard={mainGoals.hardGoals.data.length}
-					totalCompletedEasy={mainGoals.easyGoals.countCompleted}
-					totalCompletedMedium={mainGoals.mediumGoals.countCompleted}
-					totalCompletedHard={mainGoals.hardGoals.countCompleted}
-				/>
-			</div>
-			<MainCards className={element('goals')} goals={mainGoals.easyGoals.data} complexity="easy" withBtn updateGoal={updateGoal} />
-			<MainCards
-				className={element('goals')}
-				goals={mainGoals.mediumGoals.data}
-				complexity="medium"
-				withBtn
-				updateGoal={updateGoal}
-			/>
-			<MainCards className={element('goals')} goals={mainGoals.hardGoals.data} complexity="hard" withBtn updateGoal={updateGoal} />
+			<Loader isLoading={false}>
+				<>
+					<div className={element('info')}>
+						<div className={element('description')}>
+							<Title className={element('title')} tag="h1">
+								Твои 100 целей на жизнь!
+							</Title>
+							<p>
+								Сколько всего вы бы хотели сделать, увидеть, испытать за свою жизнь, но мечты постоянно откладываются?
+								Превратите свои мечты в цели, и скоро вы заметите, как ваша жизнь изменилась. Мы уже сделали это за вас -
+								дерзайте!
+							</p>
+						</div>
+						<Info100Goals // TODO проверить кнопку
+							className={element('stats')}
+							totalAddedEasy={mainGoals.easyGoals.data.length}
+							totalAddedMedium={mainGoals.mediumGoals.data.length}
+							totalAddedHard={mainGoals.hardGoals.data.length}
+							totalCompletedEasy={mainGoals.easyGoals.countCompleted}
+							totalCompletedMedium={mainGoals.mediumGoals.countCompleted}
+							totalCompletedHard={mainGoals.hardGoals.countCompleted}
+						/>
+					</div>
+					<MainCards
+						className={element('goals')}
+						goals={mainGoals.easyGoals.data}
+						complexity="easy"
+						withBtn
+						updateGoal={updateGoal}
+					/>
+					<MainCards
+						className={element('goals')}
+						goals={mainGoals.mediumGoals.data}
+						complexity="medium"
+						withBtn
+						updateGoal={updateGoal}
+					/>
+					<MainCards
+						className={element('goals')}
+						goals={mainGoals.hardGoals.data}
+						complexity="hard"
+						withBtn
+						updateGoal={updateGoal}
+					/>
+				</>
+			</Loader>
 		</main>
 	);
 };
