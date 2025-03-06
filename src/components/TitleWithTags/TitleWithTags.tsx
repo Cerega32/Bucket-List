@@ -1,8 +1,10 @@
 import {FC} from 'react';
+
 import {useBem} from '@/hooks/useBem';
-import './title-with-tags.scss';
-import {Tags} from '../Tags/Tags';
 import {ICategory, IComplexity} from '@/typings/goal';
+import './title-with-tags.scss';
+
+import {Tags} from '../Tags/Tags';
 import {Title} from '../Title/Title';
 
 interface TitleWithTagsProps {

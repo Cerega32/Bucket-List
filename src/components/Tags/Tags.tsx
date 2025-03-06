@@ -1,13 +1,12 @@
 import {FC} from 'react';
 
-import {Line} from '../Line/Line';
-import {Tag} from '../Tag/Tag';
-
 import {useBem} from '@/hooks/useBem';
-
-import './tags.scss';
 import {ICategory, IComplexity} from '@/typings/goal';
 import {getComplexity} from '@/utils/values/complexity';
+
+import {Line} from '../Line/Line';
+import {Tag} from '../Tag/Tag';
+import './tags.scss';
 
 interface TagsProps {
 	className?: string;
