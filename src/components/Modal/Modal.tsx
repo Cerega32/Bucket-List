@@ -77,6 +77,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			e.preventDefault();
 			lastElement.focus();
 		}
+
 		// Если нажат Tab и фокус на последнем элементе - переходим к первому
 		else if (!e.shiftKey && document.activeElement === lastElement) {
 			e.preventDefault();

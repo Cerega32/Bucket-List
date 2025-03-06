@@ -1,5 +1,7 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {scroller} from 'react-scroll';
 
 import './content-goal.scss';
 
@@ -8,9 +10,11 @@ import {GoalStore} from '@/store/GoalStore';
 import {IGoal} from '@/typings/goal';
 import {getComments} from '@/utils/api/get/getComments';
 
+import {Button} from '../Button/Button';
 import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
 import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
 import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
+import {Svg} from '../Svg/Svg';
 
 interface ContentGoalProps {
 	className?: string;
@@ -22,6 +26,7 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 	const {className, goal, page} = props;
 
 	const [block, element] = useBem('content-goal', className);
+	const navigate = useNavigate();
 
 	const {comments, setComments, setInfoPaginationComments} = GoalStore;
 
@@ -50,22 +55,29 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 		}
 	};
 
+	const scrollToComments = () => {
+		navigate(`/goals/${goal.code}/lists`);
+		scroller.scrollTo('comments-section', {
+			duration: 800,
+			delay: 0,
+			smooth: 'easeInOutQuart',
+			offset: -50, // Можно настроить отступ
+		});
+	};
+
 	return (
 		<article className={block()}>
-			{/* <div className={element('')}> */}
+			{!!goal.addedFromList.length && (
+				<div className={element('goal-in-list')}>
+					<Svg icon="info" />
+					Цель включена в список и отображается вместе с ним
+					<Button className={element('goal-in-list-btn')} theme="no-border" type="button" onClick={scrollToComments}>
+						Смотреть списки
+					</Button>
+				</div>
+			)}
 			<DescriptionWithLinks goal={goal} page={page} />
-			{/* </div> */}
-
-			{/* {!!goal.listsCount && (
-				<ListGoals
-					list={goal.lists}
-					title="Списки с целью"
-					// count={goal.listsCount}
-					className={element('section')}
-					columns="two"
-				/>
-			)} */}
-			<section className={element('comments')}>
+			<section className={element('comments')} id="comments-section">
 				{/* <Title tag="h2" className={element('title-section')}>
 					Отметки выполнения&nbsp;
 					<span className={element('title-counter')}>256</span>

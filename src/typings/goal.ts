@@ -55,6 +55,7 @@ export interface IGoal {
 	addedByUser: boolean;
 	totalLists: number;
 	totalComments: number;
+	addedFromList: Array<string>;
 }
 
 export interface IShortGoal {

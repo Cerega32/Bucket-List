@@ -1,4 +1,16 @@
 .content-goal {
+	&__goal-in-list {
+		display: flex;
+		gap: 10px;
+		margin-bottom: 24px;
+
+		@include block-radius;
+	}
+
+	&__goal-in-list-btn {
+		margin-left: auto;
+	}
+
 	&__info-all {
 		display: flex;
 		gap: 24px;

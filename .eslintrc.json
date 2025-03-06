@@ -45,17 +45,7 @@
 		"react/jsx-props-no-spreading": "off",
 		"max-len": ["error", 140, 2],
 		"@typescript-eslint/no-unused-vars": ["error", {"destructuredArrayIgnorePattern": "^_"}],
-		// "import/order": [
-		// 	2,
-		// 	{
-		// 		"groups": ["external", "builtin", "index", "sibling", "parent", "internal", "type"],
-		// 		"alphabetize": {
-		// 			"order": "asc",
-		// 			"caseInsensitive": true
-		// 		},
-		// 		"newlines-between": "always-and-inside-groups"
-		// 	}
-		// ]
+		"@typescript-eslint/brace-style": "off",
 		"import/order": [
 			"error",
 			{

@@ -1,8 +1,10 @@
 import {FC, useEffect, useState} from 'react';
+
 import {useBem} from '@/hooks/useBem';
-import './header-goal.scss';
-import {TitleWithTags} from '../TitleWithTags/TitleWithTags';
 import {ICategory, IGoal} from '@/typings/goal';
+import './header-goal.scss';
+
+import {TitleWithTags} from '../TitleWithTags/TitleWithTags';
 
 interface HeaderGoalProps {
 	className?: string;

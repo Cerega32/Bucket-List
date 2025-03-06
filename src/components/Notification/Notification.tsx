@@ -5,8 +5,8 @@ import React from 'react';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
 
-import './notification.scss';
 import {Button} from '../Button/Button';
+import './notification.scss';
 
 interface NotificationProps {
 	id: string;
