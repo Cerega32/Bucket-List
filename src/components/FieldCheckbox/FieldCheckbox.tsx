@@ -17,7 +17,7 @@ interface FieldCheckboxProps {
 export const FieldCheckbox: FC<FieldCheckboxProps> = (props) => {
 	const {className, id, text, checked, setChecked} = props;
 
-	const [block, element] = useBem('field-checkbox', className);
+	const [block, element] = useBem('field-checkbox');
 
 	const handleKeyDown = (event: React.KeyboardEvent) => {
 		if (event.key === ' ' || event.key === 'Enter') {
@@ -36,7 +36,7 @@ export const FieldCheckbox: FC<FieldCheckboxProps> = (props) => {
 				onChange={() => setChecked(!checked)}
 				checked={checked}
 			/>
-			<label className={element('label')} htmlFor={id}>
+			<label className={`${element('label')} ${className}`} htmlFor={id}>
 				<span className={element('checkbox')} role="button" tabIndex={0} onKeyDown={handleKeyDown} aria-label={text}>
 					<Svg icon="done" className={element('icon')} />
 				</span>

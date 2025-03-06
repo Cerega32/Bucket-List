@@ -1,14 +1,16 @@
 import {FC, useEffect, useRef, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
+import {AllCategories} from '@/components/AllCategories/AllCategories';
 import {Card} from '@/components/Card/Card';
 import {CatalogItems} from '@/components/CatalogItems/CatalogItems';
 import {HeaderCategory} from '@/components/HeaderCategory/HeaderCategory';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
-import {ICategoryWithSubcategories, IGoal} from '@/typings/goal';
+import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import {IPage} from '@/typings/page';
+import {getCategories} from '@/utils/api/get/getCategories';
 import {getCategory} from '@/utils/api/get/getCategory';
 import {getPopularGoals} from '@/utils/api/get/getPopularGoals';
 import {getPopularLists} from '@/utils/api/get/getPopularLists';
@@ -18,7 +20,6 @@ import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
 
-import {Categories} from '../Categories/Categories';
 import './category.scss';
 
 export const Category: FC<IPage> = ({subPage, page}) => {
@@ -27,9 +28,22 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 	const [category, setCategory] = useState<ICategoryWithSubcategories | null>(null);
 	const [popularGoals, setPopularGoals] = useState<Array<IGoal>>([]);
 	const [popularLists, setPopularLists] = useState<Array<IList>>([]);
+	const [categories, setCategories] = useState<Array<ICategoryDetailed>>([]);
+
 	const refTitle = useRef<HTMLElement>(null);
 
 	const {id} = useParams();
+
+	useEffect(() => {
+		(async () => {
+			if (!id) {
+				const res = await getCategories();
+				if (res.success) {
+					setCategories(res.data);
+				}
+			}
+		})();
+	}, [id]);
 
 	useEffect(() => {
 		if (id) {
@@ -152,8 +166,9 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 				subPage={subPage}
 				category={category}
 				beginUrl={id ? '/categories/' : '/categories/all'}
+				categories={categories}
 			/>
-			{!id && <Categories page="isCategories" />}
+			{!id && <AllCategories categories={categories} />}
 		</main>
 	);
 };

@@ -50,19 +50,24 @@
 	}
 
 	&__item {
-		padding: 8px;
+		border-radius: 4px;
 		cursor: pointer;
 
 		&--active {
 			color: var(--color-primary);
 		}
+
+		&:hover {
+			background: var(--color-secondary-hover);
+		}
+
+		&--selected {
+			color: var(--color-primary);
+		}
 	}
 
-	li:hover {
-		background-color: #f0f0f0;
-	}
-
-	li.active {
-		background-color: #e0e0e0;
+	&__checkbox {
+		width: 100%;
+		padding: 8px;
 	}
 }

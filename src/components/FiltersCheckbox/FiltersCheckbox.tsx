@@ -3,6 +3,8 @@ import {FC, useEffect, useRef, useState} from 'react';
 import {useBem} from '@/hooks/useBem';
 import './filters-checkbox.scss';
 
+import {pluralize} from '@/utils/text/pluralize';
+
 import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
 import {Line} from '../Line/Line';
 import {Svg} from '../Svg/Svg';
@@ -16,11 +18,13 @@ interface FiltersCheckboxProps {
 	head: IFilters;
 	items: Array<IFilters>;
 	icon?: string;
-	onFinish: () => void;
+	onFinish: (selectedCategories: string[]) => void;
+	multipleSelectedText?: Array<string>;
+	multipleThreshold?: number;
 }
 
 export const FiltersCheckbox: FC<FiltersCheckboxProps> = (props) => {
-	const {head, icon = 'filter', items, onFinish} = props;
+	const {head, icon = 'filter', items, onFinish, multipleSelectedText = ['Выбрано несколько'], multipleThreshold = 2} = props;
 
 	const [isOpen, setIsOpen] = useState(false);
 	const [title, setTitle] = useState(head.name);
@@ -42,10 +46,11 @@ export const FiltersCheckbox: FC<FiltersCheckboxProps> = (props) => {
 		}
 	};
 
-	// const handleClickHead = () => { // TODO
-	// 	setActiveItems((prevItems) => {
-	// 		prevItems.map((item) => ({...item, value: false})));
-	// };
+	const handleClickHead = () => {
+		const allFalse = Object.keys(activeItems).reduce((acc, key) => ({...acc, [key]: {value: false, name: activeItems[key].name}}), {});
+		setActiveItems(allFalse);
+		setActiveHead(true);
+	};
 
 	useEffect(() => {
 		document.addEventListener('mousedown', handleClickOutside);
@@ -59,15 +64,38 @@ export const FiltersCheckbox: FC<FiltersCheckboxProps> = (props) => {
 		if (!isOpen) {
 			const appliedFilters = Object.entries(activeItems).filter((item) => item[1].value);
 			if (appliedFilters.length) {
-				setTitle(appliedFilters.map((filter) => filter[1].name).join(', '));
+				if (appliedFilters.length > multipleThreshold && multipleSelectedText) {
+					setTitle(`Выбрано ${pluralize(appliedFilters.length, multipleSelectedText)}`);
+				} else {
+					setTitle(appliedFilters.map((filter) => filter[1].name).join(', '));
+				}
 				setActiveHead(false);
+
+				const selectedCategories = appliedFilters.map((filter) => filter[0]);
+				onFinish(selectedCategories);
 			} else {
 				setTitle(head.name);
 				setActiveHead(true);
+				onFinish([]);
 			}
-			// onFinish();
 		}
-	}, [isOpen]);
+	}, [isOpen, activeItems]);
+
+	useEffect(() => {
+		setActiveItems(
+			items.reduce((acc, item) => {
+				const currentState = activeItems[item.code] ? activeItems[item.code].value : false;
+
+				return {
+					...acc,
+					[item.code]: {
+						value: currentState,
+						name: item.name,
+					},
+				};
+			}, {})
+		);
+	}, [items]);
 
 	return (
 		<div className={block()} ref={selectRef}>
@@ -77,15 +105,17 @@ export const FiltersCheckbox: FC<FiltersCheckboxProps> = (props) => {
 			</button>
 			{isOpen && (
 				<ul className={element('list')}>
-					<li className={element('head', {active: activeHead})}>{head.name}</li>
+					<li className={element('head', {active: activeHead})} onClick={handleClickHead} role="button" tabIndex={0}>
+						{head.name}
+					</li>
 					<Line margin="8px 0" />
 					{items.map((item) => (
-						<li key={item.code} className={element('item')}>
+						<li key={item.code} className={element('item', {selected: activeItems[item.code]?.value})}>
 							<FieldCheckbox
-								value={item.code}
+								className={element('checkbox')}
 								text={item.name}
 								id={item.code}
-								checked={activeItems[item.code].value}
+								checked={activeItems[item.code]?.value || false}
 								setChecked={(value) => {
 									setActiveItems({...activeItems, [item.code]: {value, name: item.name}});
 								}}

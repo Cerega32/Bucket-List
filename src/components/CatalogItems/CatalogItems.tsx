@@ -3,7 +3,7 @@ import {FC, useEffect, useMemo, useState} from 'react';
 import './catalog-items.scss';
 
 import {useBem} from '@/hooks/useBem';
-import {ICategoryWithSubcategories, IGoal} from '@/typings/goal';
+import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import {IPaginationPage} from '@/typings/request';
 import {getAllGoals} from '@/utils/api/get/getAllGoals';
@@ -17,6 +17,7 @@ import {defaultPagination} from '@/utils/data/default';
 
 import {Card} from '../Card/Card';
 import {FieldInput} from '../FieldInput/FieldInput';
+import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
 import {Pagination} from '../Pagination/Pagination';
 import Select, {OptionSelect} from '../Select/Select';
 import {Switch} from '../Switch/Switch';
@@ -33,6 +34,7 @@ interface CatalogItemsCategoriesProps extends CatalogItemsProps {
 	category: ICategoryWithSubcategories | null;
 	userId?: never;
 	completed?: never;
+	categories: Array<ICategoryDetailed>;
 }
 
 interface CatalogItemsUsersProps extends CatalogItemsProps {
@@ -40,6 +42,7 @@ interface CatalogItemsUsersProps extends CatalogItemsProps {
 	code?: never;
 	category?: never;
 	completed: boolean;
+	categories?: never;
 }
 
 const sortBy: Array<OptionSelect> = [
@@ -62,7 +65,7 @@ const sortBy: Array<OptionSelect> = [
 ];
 
 export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersProps> = (props) => {
-	const {className, code = 'all', subPage, category, userId, completed, beginUrl, columns} = props;
+	const {className, code = 'all', subPage, category, userId, completed, beginUrl, columns, categories} = props;
 
 	const [block, element] = useBem('catalog-items', className);
 
@@ -78,6 +81,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	const [search, setSearch] = useState('');
 	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 	const [get, setGet] = useState(userId ? {user_id: userId, completed} : {});
+	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
 	const buttonsSwitch = useMemo(() => {
 		let url = '';
@@ -101,6 +105,15 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			},
 		];
 	}, [goals, lists, category, beginUrl]);
+
+	// Преобразуем категории в формат для FiltersCheckbox
+	const categoryFilters = useMemo(() => {
+		if (!categories) return [];
+		return categories.map((cat: ICategoryDetailed) => ({
+			name: cat.name,
+			code: cat.nameEn,
+		}));
+	}, [categories]);
 
 	useEffect(() => {
 		(async () => {
@@ -127,16 +140,23 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	useEffect(() => {
 		setActiveSort(0);
 		setSearch('');
+		setSelectedCategories([]);
 	}, [subPage, beginUrl]);
 
-	const fetchData = async (sortValue: string, page?: number): Promise<boolean> => {
+	const fetchData = async (sortValue: string, page?: number, categoriesSort?: string[]): Promise<boolean> => {
 		try {
 			let res;
+			const queryParams = {
+				...get,
+				sort_by: sortValue,
+				page,
+				...(categoriesSort && categoriesSort.length > 0 ? {categories: categoriesSort.join(',')} : {}),
+			};
 
 			if (subPage === 'goals') {
-				res = await getAllGoals(code, {...get, sort_by: sortValue, page});
+				res = await getAllGoals(code, queryParams);
 			} else {
-				res = await getAllLists(code, {...get, sort_by: sortValue, page});
+				res = await getAllLists(code, queryParams);
 			}
 
 			if (res.success) {
@@ -156,11 +176,11 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 
 	const onSelect = async (active: number): Promise<void> => {
 		setActiveSort(active);
-		await fetchData(sortBy[active].value);
+		await fetchData(sortBy[active].value, undefined, selectedCategories);
 	};
 
 	const goToPage = async (active: number): Promise<boolean> => {
-		const success = await fetchData(sortBy[active].value, active);
+		const success = await fetchData(sortBy[activeSort].value, active, selectedCategories);
 		return success;
 	};
 
@@ -181,6 +201,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						const res = await getAllGoals(code, {
 							sort_by: sortBy[activeSort].value,
 							search: query,
+							...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
 						});
 						if (res.success) {
 							setGoals(res.data);
@@ -190,6 +211,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						const res = await getAllGoals(code, {
 							sort_by: sortBy[activeSort].value,
 							search: '',
+							...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
 						});
 						if (res.success) {
 							setGoals(res.data);
@@ -199,22 +221,29 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					const res = await getAllLists(code, {
 						sort_by: sortBy[activeSort].value,
 						search: query,
+						...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
 					});
 					if (res.success) {
-						setGoals(res.data);
+						setLists(res.data);
 					}
 				} else {
 					// Если длина запроса меньше 3, делаем запрос с пустым значением
 					const res = await getAllLists(code, {
 						sort_by: sortBy[activeSort].value,
 						search: '',
+						...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
 					});
 					if (res.success) {
-						setGoals(res.data);
+						setLists(res.data);
 					}
 				}
 			}, delay)
 		);
+	};
+
+	const handleCategoryFilter = async (selected: string[]) => {
+		setSelectedCategories(selected);
+		await fetchData(sortBy[activeSort].value, undefined, selected);
 	};
 
 	const updateGoal = async (codeGoal: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
@@ -252,7 +281,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			const newLists = [...lists.data];
 			newLists[i] = updatedList;
 
-			setLists({...goals, data: newLists});
+			setLists({...lists, data: newLists});
 		}
 	};
 
@@ -268,17 +297,15 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					setValue={onSearch}
 					iconBegin="search"
 				/>
-				{/* {!!userId && (
+				{categories && categories.length > 0 && (
 					<FiltersCheckbox
 						head={{name: 'Все категории', code: 'all'}}
-						items={[
-							{name: 'Путешествия', code: 'travel'},
-							{name: 'Путешествия', code: 'trave'},
-							{name: 'Путешествия', code: 'trav'},
-							{name: 'Путешествия', code: 'tra'},
-						]}
+						items={categoryFilters}
+						onFinish={handleCategoryFilter}
+						multipleSelectedText={['категория', 'категории', 'категорий']}
+						multipleThreshold={1}
 					/>
-				)} */}
+				)}
 				<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} filter />
 			</div>
 			{subPage === 'goals' ? (
@@ -290,7 +317,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 							key={goal.code}
 							onClickAdd={() => updateGoal(goal.code, i, 'add')}
 							onClickDelete={() => updateGoal(goal.code, i, 'delete')}
-							onClickMark={() => updateGoal(goal.code, i, 'mark')}
+							onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
 						/>
 					))}
 				</section>
