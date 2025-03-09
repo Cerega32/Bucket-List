@@ -9,3 +9,7 @@
 	border: 1px solid var(--color-gray-9);
 	border-radius: 8px;
 }
+
+@mixin focus-outline {
+	outline: 2px solid rgb(var(--color-primary-rgb) / 40%);
+}

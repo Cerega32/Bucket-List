@@ -41,11 +41,16 @@
 		padding: 6px 16px;
 		border-radius: 16px;
 		color: var(--color-white);
+		font-weight: var(--font-weight-medium);
 
 		&--active {
 			background: var(--color-white);
 			color: var(--color-text);
-			font-weight: 500;
+		}
+
+		&:hover,
+		&:active {
+			background: rgb(var(--color-white-rgb) / 8%);
 		}
 	}
 
@@ -112,6 +117,12 @@
 				&--active {
 					background: var(--color-secondary);
 					color: var(--color-text-primary);
+				}
+
+				&:hover,
+				&:active {
+					background: var(--color-secondary-hover);
+					color: var(--color-text);
 				}
 			}
 

@@ -25,7 +25,8 @@
 
 		&:focus {
 			background: var(--color-secondary-hover);
-			outline: 2px solid rgb(var(--color-primary-rgb) / 40%);
+
+			@include focus-outline;
 		}
 	}
 
@@ -39,7 +40,7 @@
 		}
 
 		&:focus {
-			box-shadow: 0 0 0 2px rgb(var(--color-primary-rgb) / 40%);
+			@include focus-outline;
 		}
 
 		#{$block}__icon * {
@@ -59,6 +60,10 @@
 		&:active {
 			background: var(--color-secondary-hover);
 		}
+
+		&:focus {
+			@include focus-outline;
+		}
 	}
 
 	&--theme-green {
@@ -72,6 +77,10 @@
 
 		#{$block}__icon * {
 			fill: var(--color-white);
+		}
+
+		&:focus {
+			@include focus-outline;
 		}
 	}
 
@@ -87,6 +96,10 @@
 		#{$block}__icon * {
 			fill: var(--color-white);
 		}
+
+		&:focus {
+			@include focus-outline;
+		}
 	}
 
 	&--small {
@@ -99,6 +112,15 @@
 		width: auto;
 		padding: 0;
 		color: var(--color-primary);
+
+		&:hover,
+		&:active {
+			color: var(--color-primary-hover);
+		}
+
+		&:focus {
+			@include focus-outline;
+		}
 	}
 
 	&--size-small {

@@ -19,7 +19,7 @@
 		border-radius: 4px;
 
 		&:focus-visible {
-			outline: 2px solid rgb(var(--color-primary-rgb) / 40%);
+			@include focus-outline;
 		}
 	}
 
@@ -64,7 +64,7 @@
 			outline: none;
 
 			#{$block}__checkbox {
-				outline: 2px solid rgb(var(--color-primary-rgb) / 40%);
+				@include focus-outline;
 			}
 		}
 	}

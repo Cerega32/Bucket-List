@@ -43,9 +43,9 @@ export const Modal: FC<ModalProps> = observer((props) => {
 	};
 
 	const successAuth = (data: {name: string}) => {
-		Cookies.set('name', data.name);
+		Cookies.set('name', data.name || '');
 		closeWindow();
-		setName(data.name);
+		setName(data.name || '');
 		setIsAuth(true);
 		setAvatar(Cookies.get('avatar') || '');
 	};

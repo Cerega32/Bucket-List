@@ -1,9 +1,9 @@
 import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
-import {Svg} from '../Svg/Svg';
-
 import {useBem} from '@/hooks/useBem';
+
+import {Svg} from '../Svg/Svg';
 
 import './tabs.scss';
 
