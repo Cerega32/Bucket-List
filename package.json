@@ -26,7 +26,8 @@
 		"react-dropzone": "^14.2.3",
 		"react-router-dom": "^6.10.0",
 		"react-scroll": "^1.9.3",
-		"react-svg": "^16.1.18"
+		"react-svg": "^16.1.18",
+		"yet-another-react-lightbox": "^3.21.7"
 	},
 	"scripts": {
 		"dev": "vite",

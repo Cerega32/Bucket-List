@@ -73,6 +73,10 @@
 		width: 72px;
 		height: 72px;
 		border-radius: 8px;
+
+		&:focus {
+			@include focus-outline;
+		}
 	}
 
 	&__score {

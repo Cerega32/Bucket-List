@@ -28,7 +28,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	const [activeComplexity, setActiveComplexity] = useState<number | null>(null);
 	const [newComment, setNewComment] = useState('');
 	const [photos, setPhotos] = useState<File[]>([]);
-	const {setComments, comments} = GoalStore;
+	const {setComments, comments, id} = GoalStore;
 
 	const onDrop = useCallback(
 		(acceptedFiles: File[]) => {
@@ -56,7 +56,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 		const formData = new FormData();
 		formData.append('complexity', selectComplexity[activeComplexity].value);
 		formData.append('text', newComment);
-		formData.append('goal_id', '4');
+		formData.append('goal_id', id.toString());
 		photos.forEach((photo) => {
 			formData.append('photo', photo);
 		});
@@ -105,7 +105,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 					</div>
 					{photos.map((photo, index) => (
 						<div key={index} className={element('photo-wrapper')}>
-							<img className={element('photo')} src={URL.createObjectURL(photo)} alt={`photo${index}`} />
+							<img className={element('photo')} src={URL.createObjectURL(photo)} alt={`Фотография ${index}`} />
 							<button
 								className={element('delete-photo')}
 								type="button"

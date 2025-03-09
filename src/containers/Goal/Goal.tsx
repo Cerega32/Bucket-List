@@ -5,6 +5,7 @@ import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {ContentGoal} from '@/components/ContentGoal/ContentGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
 import {useBem} from '@/hooks/useBem';
+import {GoalStore} from '@/store/GoalStore';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
 import {getGoal} from '@/utils/api/get/getGoal';
@@ -16,6 +17,7 @@ import './goal.scss';
 export const Goal: FC<IPage> = ({page}) => {
 	const [block, element] = useBem('goal');
 
+	const {setId} = GoalStore;
 	const params = useParams();
 	const [goal, setGoal] = useState<IGoal | null>(null);
 
@@ -24,6 +26,7 @@ export const Goal: FC<IPage> = ({page}) => {
 			const res = await getGoal(params?.['id'] as string);
 			if (res.success) {
 				setGoal(res.data.goal);
+				setId(res.data.goal.id);
 			}
 		})();
 	}, [params?.['id']]);

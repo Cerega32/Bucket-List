@@ -1,15 +1,18 @@
-import {FC} from 'react';
+import {FC, useState} from 'react';
+import 'yet-another-react-lightbox/styles.css';
 
 import './comment-goal.scss';
-import {Avatar} from '../Avatar/Avatar';
-import {Button} from '../Button/Button';
 
-import {Tag} from '../Tag/Tag';
+import Lightbox from 'yet-another-react-lightbox';
 
 import {useBem} from '@/hooks/useBem';
 import {IComment} from '@/typings/comments';
 import {getDate} from '@/utils/date/getDate';
 import {pluralize} from '@/utils/text/pluralize';
+
+import {Avatar} from '../Avatar/Avatar';
+import {Button} from '../Button/Button';
+import {Tag} from '../Tag/Tag';
 
 interface CommentGoalProps {
 	className?: string;
@@ -20,8 +23,14 @@ interface CommentGoalProps {
 
 export const CommentGoal: FC<CommentGoalProps> = (props) => {
 	const {className, comment, isUser, onClickScore} = props;
-
 	const [block, element] = useBem('comment-goal', className);
+
+	// Состояния для лайтбокса
+	const [isOpen, setIsOpen] = useState(false);
+	const [photoIndex, setPhotoIndex] = useState(0);
+
+	// Получаем массив URL изображений в формате, необходимом для библиотеки
+	const slides = comment.photos ? comment.photos.map((photo) => ({src: photo.image})) : [];
 
 	return (
 		<article className={block()}>
@@ -57,8 +66,25 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 			<p className={element('text')}>{comment.text}</p>
 			{comment.photos && !!comment.photos.length && (
 				<div className={element('comment-images')}>
-					{comment.photos.map((el) => (
-						<img key={el.id} src={el.image} alt="Изображения комментария" className={element('comment-img')} />
+					{comment.photos.map((el, index) => (
+						<img
+							key={el.id}
+							src={el.image}
+							alt="Изображение комментария"
+							className={element('comment-img')}
+							role="button"
+							tabIndex={0}
+							onClick={() => {
+								setPhotoIndex(index);
+								setIsOpen(true);
+							}}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									setPhotoIndex(index);
+									setIsOpen(true);
+								}
+							}}
+						/>
 					))}
 				</div>
 			)}
@@ -81,6 +107,18 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 					{comment.dislikesCount}
 				</Button>
 			</div>
+
+			{/* Лайтбокс для просмотра изображений */}
+			<Lightbox
+				open={isOpen}
+				close={() => setIsOpen(false)}
+				slides={slides}
+				index={photoIndex}
+				carousel={{finite: true, padding: '16px'}}
+				controller={{closeOnBackdropClick: true}}
+				animation={{fade: 300}}
+				styles={{container: {backgroundColor: 'rgba(0, 0, 0, .8)'}}}
+			/>
 		</article>
 	);
 };

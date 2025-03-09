@@ -1,11 +1,11 @@
 import {FC} from 'react';
 
-import './aside-goal.scss';
-import {Button} from '../Button/Button';
-import {Line} from '../Line/Line';
-
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
+import './aside-goal.scss';
+
+import {Button} from '../Button/Button';
+import {Line} from '../Line/Line';
 
 interface AsideProps {
 	className?: string;
