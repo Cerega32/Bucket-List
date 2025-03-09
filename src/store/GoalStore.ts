@@ -1,7 +1,7 @@
 import {makeAutoObservable} from 'mobx';
 
 import {IComment} from '@/typings/comments';
-import {IGoal, IShortList} from '@/typings/goal';
+import {IShortList} from '@/typings/goal';
 import {IPaginationPage} from '@/typings/request';
 import {defaultPagination} from '@/utils/data/default';
 
@@ -41,7 +41,7 @@ class Store implements IGoalStore {
 		this.infoPaginationComments = infoComments;
 	};
 
-	setId = (id: IGoal) => {
+	setId = (id: number) => {
 		this.id = id;
 	};
 }
