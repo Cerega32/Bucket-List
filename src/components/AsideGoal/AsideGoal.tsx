@@ -25,7 +25,7 @@ interface AsideGoalProps extends AsideProps {
 export interface AsideListsProps extends AsideProps {
 	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark-all') => Promise<void | boolean>;
 	isList: true;
-	openAddReview: never;
+	openAddReview?: never;
 }
 
 export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
