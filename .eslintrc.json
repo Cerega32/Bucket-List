@@ -46,7 +46,7 @@
 		"object-curly-newline": "off",
 		"no-nested-ternary": "off",
 		"react/jsx-props-no-spreading": "off",
-		"max-len": ["error", 140, 1],
+		"max-len": ["error", 140, 0],
 		"@typescript-eslint/no-unused-vars": ["error", {"destructuredArrayIgnorePattern": "^_"}],
 		"@typescript-eslint/brace-style": "off",
 		"import/order": [

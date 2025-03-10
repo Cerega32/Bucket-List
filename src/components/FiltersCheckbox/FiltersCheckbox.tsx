@@ -1,8 +1,10 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-to-interactive-role */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import {FC, useEffect, useRef, useState} from 'react';
 
-import {useBem} from '@/hooks/useBem';
 import './filters-checkbox.scss';
 
+import {useBem} from '@/hooks/useBem';
 import {pluralize} from '@/utils/text/pluralize';
 
 import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
@@ -79,7 +81,7 @@ export const FiltersCheckbox: FC<FiltersCheckboxProps> = (props) => {
 				onFinish([]);
 			}
 		}
-	}, [isOpen, activeItems]);
+	}, [isOpen, activeItems, head.name, multipleSelectedText, multipleThreshold, onFinish]);
 
 	useEffect(() => {
 		setActiveItems(
@@ -95,7 +97,7 @@ export const FiltersCheckbox: FC<FiltersCheckboxProps> = (props) => {
 				};
 			}, {})
 		);
-	}, [items]);
+	}, [items, activeItems]);
 
 	return (
 		<div className={block()} ref={selectRef}>

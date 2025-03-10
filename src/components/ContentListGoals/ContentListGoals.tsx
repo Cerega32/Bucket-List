@@ -1,15 +1,13 @@
 import {FC} from 'react';
 
 import {useBem} from '@/hooks/useBem';
-
-import {TitleWithTags} from '../TitleWithTags/TitleWithTags';
-
 import {IList} from '@/typings/list';
 import './content-list-goals.scss';
 
 import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
 import {InfoGoal} from '../InfoGoal/InfoGoal';
 import {ListGoals} from '../ListGoals/ListGoals';
+import {TitleWithTags} from '../TitleWithTags/TitleWithTags';
 
 interface ContentListGoalsProps {
 	className?: string;

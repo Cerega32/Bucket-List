@@ -70,6 +70,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 							src={el.image}
 							alt="Изображение комментария"
 							className={element('comment-img')}
+							// eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
 							role="button"
 							tabIndex={0}
 							onClick={() => {

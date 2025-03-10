@@ -30,7 +30,7 @@ export const ListsWithGoal: FC<ListsWithGoalProps> = observer((props) => {
 				setInfoPaginationLists(res.data.pagination);
 			}
 		})();
-	}, []);
+	}, [code, setLists, setInfoPaginationLists]);
 
 	const updateListGoal = async (codeList: string, i: number, operation: 'add' | 'delete'): Promise<void> => {
 		const res = await (operation === 'add' ? addListGoal(codeList) : removeListGoal(codeList));
