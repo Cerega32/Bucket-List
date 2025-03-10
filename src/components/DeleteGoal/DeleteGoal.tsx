@@ -19,7 +19,7 @@ export const DeleteGoal: FC<DeleteGoalProps> = (props) => {
 	const [block, element] = useBem('delete-goal', className);
 
 	const handleDeleteGoal = async () => {
-		const res = funcModal(); // TODO
+		const res = funcModal();
 		if (res) {
 			closeModal();
 		}

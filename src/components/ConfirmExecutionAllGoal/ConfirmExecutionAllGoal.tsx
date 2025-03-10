@@ -2,16 +2,18 @@ import {FC} from 'react';
 
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
+import {IFuncModal} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 
 import {Title} from '../Title/Title';
+
 import './confirm-execution-all-goal.scss';
 // import {markAllGoalsFromList} from '@/utils/api/post/markAllGoalsFromList';
 
 interface ConfirmExecutionAllGoalProps {
 	className?: string;
 	closeModal: () => void;
-	funcModal: () => void | boolean;
+	funcModal: IFuncModal;
 }
 
 export const ConfirmExecutionAllGoal: FC<ConfirmExecutionAllGoalProps> = (props) => {

@@ -7,7 +7,7 @@ export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 interface IModalStore {
 	isOpen: boolean;
 	window: IWindow;
-	funcModal: IFuncModal | null;
+	funcModal: IFuncModal;
 }
 
 class Store implements IModalStore {
@@ -15,7 +15,8 @@ class Store implements IModalStore {
 
 	window: IWindow = 'login';
 
-	funcModal: IFuncModal | null = null;
+	// eslint-disable-next-line class-methods-use-this
+	funcModal: IFuncModal = () => undefined;
 
 	constructor() {
 		makeAutoObservable(this);
