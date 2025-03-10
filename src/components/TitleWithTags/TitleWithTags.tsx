@@ -16,10 +16,11 @@ interface TitleWithTagsProps {
 	totalCompleted: number;
 	isList?: boolean;
 	short?: boolean;
+	categoryRank?: number;
 }
 
 export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
-	const {className, title, theme, category, complexity, totalCompleted, isList, short} = props;
+	const {className, title, theme, category, complexity, totalCompleted, isList, short, categoryRank} = props;
 
 	const [block, element] = useBem('title-with-tags', className);
 
@@ -28,7 +29,15 @@ export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
 			<Title className={element('title', {short})} tag="h1" theme={isList ? 'black' : 'white'}>
 				{title}
 			</Title>
-			{!short && <Tags category={category} medal="Топ 1 в категории" complexity={complexity} done={totalCompleted} theme={theme} />}
+			{!short && (
+				<Tags
+					category={category}
+					medal={categoryRank ? `Топ ${categoryRank} в категории` : undefined}
+					complexity={complexity}
+					done={totalCompleted}
+					theme={theme}
+				/>
+			)}
 		</div>
 	);
 };

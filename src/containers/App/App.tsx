@@ -1,6 +1,7 @@
 import {FC, StrictMode} from 'react';
-import {ErrorBoundary} from '../ErrorBoundary/ErrorBoundary';
+
 import {AppProviders} from '../AppProviders/AppProviders';
+import {ErrorBoundary} from '../ErrorBoundary/ErrorBoundary';
 import Layout from '../Layout/Layout';
 
 const App: FC = () => {

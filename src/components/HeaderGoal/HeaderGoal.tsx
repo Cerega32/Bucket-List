@@ -43,6 +43,7 @@ export const HeaderGoal: FC<HeaderGoalProps> = (props) => {
 				title={title}
 				className={element('wrapper')}
 				short={shrink}
+				categoryRank={goal.categoryRank}
 			/>
 		</header>
 	);

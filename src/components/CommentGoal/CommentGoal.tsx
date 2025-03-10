@@ -1,8 +1,4 @@
 import {FC, useState} from 'react';
-import 'yet-another-react-lightbox/styles.css';
-
-import './comment-goal.scss';
-
 import Lightbox from 'yet-another-react-lightbox';
 
 import {useBem} from '@/hooks/useBem';
@@ -13,6 +9,8 @@ import {pluralize} from '@/utils/text/pluralize';
 import {Avatar} from '../Avatar/Avatar';
 import {Button} from '../Button/Button';
 import {Tag} from '../Tag/Tag';
+
+import './comment-goal.scss';
 
 interface CommentGoalProps {
 	className?: string;

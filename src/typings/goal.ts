@@ -56,6 +56,7 @@ export interface IGoal {
 	totalLists: number;
 	totalComments: number;
 	addedFromList: Array<string>;
+	categoryRank?: number;
 }
 
 export interface IShortGoal {
