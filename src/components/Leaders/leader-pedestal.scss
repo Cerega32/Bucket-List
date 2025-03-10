@@ -4,25 +4,32 @@
 
 	display: flex;
 	align-items: flex-end;
-	gap: 16px;
+
 	width: 100%;
 	padding: calc(16px + 48px) 24px 16px;
-	background: var(--color-white);
+
 	border: 1px solid var(--color-gray-9);
 	border-radius: 8px;
+	background: var(--color-white);
+	gap: 16px;
 
 	&__user {
-		flex-grow: 1;
 		position: relative;
-		padding: 16px 0;
+
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		flex-grow: 1;
+
+		padding: 16px 0;
+
 		border-radius: 8px;
 
 		&:first-child {
-			padding-top: calc(48px + 8px);
 			order: 2;
+
+			padding-top: calc(48px + 8px);
+
 			background: var(--color-yellow-2);
 
 			#{$place} {
@@ -36,6 +43,7 @@
 
 		&:nth-child(2) {
 			padding-top: calc(28px + 8px);
+
 			background: var(--color-gray-10);
 
 			#{$place} {
@@ -48,8 +56,10 @@
 		}
 
 		&:nth-child(3) {
-			padding-top: calc(20px + 8px);
 			order: 3;
+
+			padding-top: calc(20px + 8px);
+
 			background: var(--color-brown);
 
 			#{$place} {
@@ -72,23 +82,28 @@
 
 	&__name {
 		margin-bottom: 4px;
+
 		font-weight: var(--weight-medium);
 	}
 
 	&__experience {
 		margin-bottom: 16px;
+
+		color: var(--color-text-secondary);
+
 		font-size: 12px;
 		line-height: var(--line-height-12);
-		color: var(--color-text-secondary);
 	}
 
 	&__place {
-		padding: 2px 8px;
 		display: flex;
 		align-items: center;
-		gap: 4px;
-		border-radius: 4px;
+
+		padding: 2px 8px;
+
 		color: var(--color-white);
+		border-radius: 4px;
+		gap: 4px;
 
 		svg * {
 			fill: var(--color-white);

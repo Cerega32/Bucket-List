@@ -5,11 +5,46 @@
 
 @mixin block-radius($padding: 16px 24px) {
 	padding: $padding;
-	background: var(--color-white);
+
 	border: 1px solid var(--color-gray-9);
 	border-radius: 8px;
+	background: var(--color-white);
 }
 
 @mixin focus-outline {
-	outline: 2px solid rgb(var(--color-primary-rgb) / 40%);
+	outline: 2px solid rgb(var(--color-primary-rgb) 0.4);
+}
+
+@mixin category-tag($category) {
+	color: var(--color-white);
+	border: none;
+	background: var(--color-#{$category});
+}
+
+// Миксин для градиентов категорий
+@mixin category-gradient($category, $opacity-start: 0%, $opacity-step1: 10%, $opacity-step2: 20%, $opacity-step3: 30%) {
+	background: linear-gradient(
+		180deg,
+		rgb(var(--color-#{$category}-rgb) #{$opacity-start / 100}) 0%,
+		rgb(var(--color-#{$category}-rgb) #{$opacity-step1 / 100}) 10%,
+		rgb(var(--color-#{$category}-rgb) #{$opacity-step2 / 100}) 20%,
+		rgb(var(--color-#{$category}-rgb) #{$opacity-step3 / 100}) 30%,
+		var(--color-black) 100%
+	);
+}
+
+@mixin category-gradient-without-black($category) {
+	background: linear-gradient(180deg, rgb(var(--color-#{$category}-rgb) 0.5) 0%, rgb(var(--color-#{$category}-rgb) 1) 100%);
+}
+
+// Миксин для градиентов заголовков категорий
+@mixin category-header-gradient($category, $opacity-start: 50%, $opacity-step1: 55%, $opacity-step2: 60%, $opacity-step3: 65%) {
+	background: linear-gradient(
+		180deg,
+		rgb(var(--color-#{$category}-rgb) #{$opacity-start / 100}) 0%,
+		rgb(var(--color-#{$category}-rgb) #{$opacity-step1 / 100}) 10%,
+		rgb(var(--color-#{$category}-rgb) #{$opacity-step2 / 100}) 20%,
+		rgb(var(--color-#{$category}-rgb) #{$opacity-step3 / 100}) 30%,
+		var(--color-black) 100%
+	);
 }

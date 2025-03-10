@@ -3,11 +3,7 @@
 // либо правила, фиксируемые автоматически, но требующие ручного контроля.
 
 module.exports = {
-	extends: [
-		'stylelint-config-recommended-scss',
-		'stylelint-prettier/recommended',
-		'stylelint-order',
-	],
+	extends: ['stylelint-config-recommended-scss', 'stylelint-prettier/recommended', 'stylelint-order'],
 	plugins: ['stylelint-no-unsupported-browser-features'],
 	rules: {
 		'no-unknown-animations': true,
@@ -38,7 +34,7 @@ module.exports = {
 		'block-no-empty': null,
 		'color-no-hex': true,
 		'color-named': 'never',
-		'function-disallowed-list': ['rgb', 'hsl', 'hsla'],
+		'function-disallowed-list': ['hsl', 'hsla'],
 		'plugin/no-unsupported-browser-features': [
 			true,
 			{

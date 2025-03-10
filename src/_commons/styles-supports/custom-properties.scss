@@ -37,6 +37,14 @@
 	--color-blue-3: rgb(var(--color-blue-rgb-3)); // #3A89D8
 	--color-blue-rgb-4: 71 152 232; // #4798E8
 	--color-blue-4: rgb(var(--color-blue-rgb-4)); // #4798E8
+	--color-blue-rgb-5: 22 168 177; // #16A8B1
+	--color-blue-5: rgb(var(--color-blue-rgb-5)); // #16A8B1
+	--color-blue-rgb-6: 22 84 177; // #168491
+	--color-blue-6: rgb(var(--color-blue-rgb-6)); // #168491
+	//////
+	//////
+	--color-pink-rgb: 199 53 202; // #C735CA
+	--color-pink: rgb(var(--color-pink-rgb)); // #C735CA
 	//////
 	//////
 	--color-orange-rgb: 255 107 0; // #FF6B00
@@ -47,6 +55,8 @@
 	//////
 	--color-purple-rgb: 135 0 198; // #8700C6
 	--color-purple: rgb(var(--color-purple-rgb)); // #8700C6
+	--color-purple-rgb-2: 118 22 177; // #7616B1
+	--color-purple-2: rgb(var(--color-purple-rgb-2)); // #7616B1
 	//////
 	//////
 	--color-brown-rgb: 255 234 222; // #FFEAD6
@@ -61,18 +71,25 @@
 	--color-green-3: rgb(var(--color-green-rgb-3)); // #039824
 	--color-green-rgb-4: 4 177 42; // #04B12A
 	--color-green-4: rgb(var(--color-green-rgb-4)); // #04B12A
-	//////
+	--color-green-rgb-5: 100 177 22; // #64B116
+	--color-green-5: rgb(var(--color-green-rgb-5)); // #64B116
+	--color-green-rgb-6: 22 177 65; // #16B141
+	--color-green-6: rgb(var(--color-green-rgb-6)); // #16B141
 	//////
 	--color-yellow-rgb: 255 184 0; // #FFB800
 	--color-yellow: rgb(var(--color-yellow-rgb)); // #FFB800
 	--color-yellow-rgb-2: 255 251 211; // #FFFBD3
 	--color-yellow-2: rgb(var(--color-yellow-rgb-2)); // #FFFBD3
+	--color-yellow-rgb-3: 177 161 22; // #B1A116
+	--color-yellow-3: rgb(var(--color-yellow-rgb-3)); // #B1A116
 	//////
 	//////
 	--color-red-rgb-1: 227 66 53; // #E34235
 	--color-red-1: rgb(var(--color-red-rgb-1)); // #E34235
 	--color-red-rgb-2: 248 53 37; // #F83525
 	--color-red-2: rgb(var(--color-red-rgb-2)); // #F83525
+	--color-red-rgb-3: 177 22 22; // #B11616
+	--color-red-3: rgb(var(--color-red-rgb-3)); // #B11616
 	//////
 	//////
 	--color-gold-rgb: 255 208 44; // #FFD02C
@@ -96,9 +113,25 @@
 
 	//////
 	//////
+	--color-education: var(--color-purple-2); // #7616B1
+	--color-education-rgb: var(--color-purple-rgb-2); // #7616B1
+	--color-travel: var(--color-green-5); // #64B116
+	--color-travel-rgb: var(--color-green-rgb-5); // #64B116
+	--color-health-and-sport: var(--color-blue-5); // #16A8B1
+	--color-health-and-sport-rgb: var(--color-blue-rgb-5); // #16A8B1
+	--color-career: var(--color-blue-5); // #16A8B1
+	--color-career-rgb: var(--color-blue-rgb-5); // #16A8B1
+	--color-relations: var(--color-red-3); // #B11616
+	--color-relations-rgb: var(--color-red-rgb-3); // #B11616
+	--color-entertainment: var(--color-yellow-3); // #B1A116
+	--color-entertainment-rgb: var(--color-yellow-rgb-3); // #B1A116
+	--color-hobbies: var(--color-pink); // #C735CA
+	--color-hobbies-rgb: var(--color-pink-rgb); // #C735CA
+	--color-gastronomy: var(--color-green-6); // #16B141
+	--color-gastronomy-rgb: var(--color-green-rgb-6); // #16B141
+	//////
+	//////
 	--color-border: var(--color-gray-9); // #E7EEF4
-	--color-travel: var(--color-green-2); // #21AB1E
-	--color-travel-rgb: var(--color-green-rgb-2); // #21AB1E
 	--color-sentiment-positive: var(--color-green-3); // #039824
 	--color-sentiment-positive-hover: var(--color-green-4); // #04B12A
 	--color-sentiment-negative: var(--color-red-1); // #E34235

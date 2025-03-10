@@ -1,3 +1,5 @@
+@import '@/_commons/styles-supports/mixins';
+
 .gradient {
 	$block: &;
 
@@ -9,8 +11,10 @@
 	&__img {
 		position: relative;
 		z-index: 0;
+
 		width: 100%;
 		height: 100%;
+
 		object-fit: cover;
 
 		&--blacked {
@@ -20,46 +24,97 @@
 
 	&__color {
 		position: absolute;
-		z-index: 1;
 		top: 0;
 		left: 0;
+		z-index: 1;
+
 		width: 100%;
 		height: 100%;
-		opacity: 0;
+
 		transition: all 0.3s linear;
 
+		opacity: 0;
+
+		// Категории с градиентами
 		&--category-travel {
-			background: linear-gradient(
-				180deg,
-				rgb(var(--color-travel-rgb) / 0%) 0%,
-				rgb(var(--color-travel-rgb) / 10%) 10%,
-				rgb(var(--color-travel-rgb) / 20%) 20%,
-				rgb(var(--color-travel-rgb) / 30%) 30%,
-				var(--color-black) 100%
-			);
+			@include category-gradient('travel');
+			&#{$block}__color {
+				@include category-gradient-without-black('travel');
+			}
+		}
+
+		&--category-education {
+			@include category-gradient('education');
+			&#{$block}__color {
+				@include category-gradient-without-black('education');
+			}
+		}
+
+		&--category-health-and-sport {
+			@include category-gradient('health-and-sport');
+			&#{$block}__color {
+				@include category-gradient-without-black('health-and-sport');
+			}
+		}
+
+		&--category-career {
+			@include category-gradient('career');
+			&#{$block}__color {
+				@include category-gradient-without-black('career');
+			}
+		}
+
+		&--category-relations {
+			@include category-gradient('relations');
+			&#{$block}__color {
+				@include category-gradient-without-black('relations');
+			}
+		}
+
+		&--category-entertainment {
+			@include category-gradient('entertainment');
+			&#{$block}__color {
+				@include category-gradient-without-black('entertainment');
+			}
+		}
+
+		&--category-hobbies {
+			@include category-gradient('hobbies');
+			&#{$block}__color {
+				@include category-gradient-without-black('hobbies');
+			}
+		}
+
+		&--category-gastronomy {
+			@include category-gradient('gastronomy');
+			&#{$block}__color {
+				@include category-gradient-without-black('gastronomy');
+			}
 		}
 
 		&--blacked {
 			background: linear-gradient(
 				180deg,
-				rgb(var(--color-black-rgb) / 10%) 0%,
-				rgb(var(--color-black-rgb) / 20%) 20%,
-				rgb(var(--color-black-rgb) / 30%) 30%,
+				rgb(var(--color-black-rgb) 0.1) 0%,
+				rgb(var(--color-black-rgb) 0.2) 20%,
+				rgb(var(--color-black-rgb) 0.3) 30%,
 				var(--color-black) 100%
 			);
 		}
 
 		&--show {
-			opacity: 1;
 			transition: all 0.3s linear;
+
+			opacity: 1;
 		}
 	}
 
 	&__top-info {
 		position: absolute;
-		z-index: 10;
 		top: 16px;
 		left: 16px;
+		z-index: 10;
+
 		width: calc(100% - 32px);
 		height: calc(100% - 32px);
 	}

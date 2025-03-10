@@ -22,7 +22,7 @@ export const CardCategory: FC<CardCategoryProps> = (props) => {
 	return (
 		<section className={block()}>
 			<Link to={`/categories/${category.nameEn}`} className={element('gradient')}>
-				<Gradient img={{src: category.image, alt: category.name}} category={category.nameEn}>
+				<Gradient img={{src: category.image, alt: category.name}} category={category.nameEn} withoutBlack>
 					<div className={element('description')}>
 						<Title className={element('title')} theme="white" tag="h3">
 							{category.name}
