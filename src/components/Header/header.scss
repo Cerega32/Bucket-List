@@ -42,6 +42,7 @@
 		border-radius: 16px;
 		color: var(--color-white);
 		font-weight: var(--font-weight-medium);
+		transition: all 0.15s ease-in-out;
 
 		&--active {
 			background: var(--color-white);
@@ -57,6 +58,7 @@
 	&__profile-wrapper {
 		position: relative;
 		padding: 4px 0;
+		transition: all 0.15s ease-in-out;
 
 		&:hover {
 			#{$block} {
@@ -113,6 +115,7 @@
 		#{$block} {
 			&__item-link {
 				color: var(--color-text);
+				transition: all 0.15s ease-in-out;
 
 				&--active {
 					background: var(--color-secondary);

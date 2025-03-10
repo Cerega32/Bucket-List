@@ -72,6 +72,7 @@
 		border-radius: 8px;
 		color: var(--color-white);
 		font-weight: var(--weight-semi-bold);
+		transition: all 0.15s ease-in-out;
 
 		&:hover {
 			background: rgb(var(--color-primary-hover-rgb) / 8%);
