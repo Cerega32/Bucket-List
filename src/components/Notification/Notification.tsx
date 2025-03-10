@@ -6,6 +6,7 @@ import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
 
 import {Button} from '../Button/Button';
+import {Svg} from '../Svg/Svg';
 import './notification.scss';
 
 interface NotificationProps {
@@ -28,14 +29,14 @@ const Notification: React.FC<NotificationProps> = observer(({id, type, title, me
 			exit={{opacity: 0, y: -10, scale: 0.9}}
 			transition={{duration: 0.3}}
 		>
-			<span className={element('icon')}>{type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️'}</span>
+			<Svg icon="info" className={element('info', {type})} />
 			<div className={element('content')}>
-				<strong>{title}</strong>
+				<h3 className={element('title')}>{title}</h3>
 				{typeof message === 'string' && <p>{message}</p>}
 				{actionText && (
-					<button type="button" onClick={action}>
+					<Button className={element('btn')} onClick={action} theme="no-border">
 						{actionText}
-					</button>
+					</Button>
 				)}
 			</div>
 			<Button type="button-close" onClick={() => NotificationStore.removeNotification(id)} />

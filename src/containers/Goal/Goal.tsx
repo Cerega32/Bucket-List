@@ -6,6 +6,7 @@ import {ContentGoal} from '@/components/ContentGoal/ContentGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
 import {useBem} from '@/hooks/useBem';
 import {GoalStore} from '@/store/GoalStore';
+import {ModalStore} from '@/store/ModalStore';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
 import {getGoal} from '@/utils/api/get/getGoal';
@@ -21,6 +22,8 @@ export const Goal: FC<IPage> = ({page}) => {
 	const params = useParams();
 	const [goal, setGoal] = useState<IGoal | null>(null);
 
+	const {setIsOpen, setWindow} = ModalStore;
+
 	useEffect(() => {
 		(async () => {
 			const res = await getGoal(params?.['id'] as string);
@@ -35,8 +38,30 @@ export const Goal: FC<IPage> = ({page}) => {
 		return null;
 	}
 
+	const openAddReview = () => {
+		setWindow('add-review');
+		setIsOpen(true);
+	};
+
 	const updateGoal = async (code: string, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
-		const res = await (operation === 'add' ? addGoal(code) : operation === 'delete' ? removeGoal(code) : markGoal(code, !done));
+		const res = await (operation === 'add'
+			? addGoal(code)
+			: operation === 'delete'
+			? removeGoal(code)
+			: markGoal(
+					code,
+					!done,
+					!done
+						? {
+								title: 'Цель успешно выполнена!',
+								type: 'success',
+								id: goal.id.toString(),
+								message: 'Добавьте отзыв чтобы заработать больше очков',
+								actionText: 'Добавить отзыв',
+								action: openAddReview,
+						  }
+						: undefined
+			  ));
 
 		if (res.success) {
 			const updatedGoal = {
@@ -62,6 +87,7 @@ export const Goal: FC<IPage> = ({page}) => {
 					code={goal.code}
 					done={goal.completedByUser}
 					added={goal.addedByUser}
+					openAddReview={openAddReview}
 				/>
 				<ContentGoal page={page} goal={goal} className={element('content')} />
 			</section>

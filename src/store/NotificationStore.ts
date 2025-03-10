@@ -33,7 +33,7 @@ class Store {
 			if (nextNotification) {
 				this.visibleNotifications.push(nextNotification);
 
-				setTimeout(() => this.removeNotification(nextNotification.id), 7000);
+				// setTimeout(() => this.removeNotification(nextNotification.id), 7000);
 			}
 		}
 	}

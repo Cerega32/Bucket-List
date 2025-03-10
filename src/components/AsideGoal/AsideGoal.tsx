@@ -19,24 +19,21 @@ interface AsideProps {
 interface AsideGoalProps extends AsideProps {
 	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void | boolean>;
 	isList?: never;
+	openAddReview: () => void;
 }
 
 export interface AsideListsProps extends AsideProps {
 	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark-all') => Promise<void | boolean>;
 	isList: true;
+	openAddReview: never;
 }
 
 export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
-	const {className, title, image, added, updateGoal, code, done, isList} = props;
+	const {className, title, image, added, updateGoal, code, done, isList, openAddReview} = props;
 
 	const [block, element] = useBem('aside-goal', className);
 
 	const {setIsOpen, setWindow, setFuncModal} = ModalStore;
-
-	const openAddReview = () => {
-		setWindow('add-review');
-		setIsOpen(true);
-	};
 
 	const openMarkAll = () => {
 		setWindow('confirm-execution-all-goal');
