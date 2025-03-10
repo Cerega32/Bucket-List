@@ -10,7 +10,6 @@ import {ModalStore} from '@/store/ModalStore';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
 import {getGoal} from '@/utils/api/get/getGoal';
-import {getStreak} from '@/utils/api/get/getStreak';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
@@ -21,19 +20,22 @@ export const Goal: FC<IPage> = ({page}) => {
 
 	const {setId} = GoalStore;
 	const params = useParams();
+	const listId = params?.['id'];
 	const [goal, setGoal] = useState<IGoal | null>(null);
 
 	const {setIsOpen, setWindow} = ModalStore;
 
 	useEffect(() => {
 		(async () => {
-			const res = await getGoal(params?.['id'] as string);
-			if (res.success) {
-				setGoal(res.data.goal);
-				setId(res.data.goal.id);
+			if (listId) {
+				const res = await getGoal(listId);
+				if (res.success) {
+					setGoal(res.data.goal);
+					setId(res.data.goal.id);
+				}
 			}
 		})();
-	}, [params?.['id']]);
+	}, [listId, setId]);
 
 	if (!goal) {
 		return null;

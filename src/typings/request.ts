@@ -25,6 +25,4 @@ export interface ISuccessResponseWithPagination<T> {
 
 export type AnyResponse<T> = ISuccessResponse<T> | IErrorResponse;
 
-export type AnyResponsePagination<T> =
-	| ISuccessResponseWithPagination<T>
-	| IErrorResponse;
+export type AnyResponsePagination<T> = ISuccessResponseWithPagination<T> | IErrorResponse;

@@ -69,8 +69,9 @@
 // export default useScreenSize;
 
 import {useEffect, useState, useCallback} from 'react';
-import {screenSizes} from '@/utils/values/screenSizes';
+
 import {ScreenMode, ScreenSizeCode} from '@/typings/screen';
+import {screenSizes} from '@/utils/values/screenSizes';
 
 const getScreenByMode = (mode: ScreenSizeCode): ScreenMode => {
 	const base = {
@@ -94,14 +95,10 @@ const getScreenByMode = (mode: ScreenSizeCode): ScreenMode => {
 };
 
 const useScreenSize = (): ScreenMode => {
-	const [windowDimensions, setWindowDimensions] = useState<ScreenMode>(
-		getScreenByMode('xl')
-	);
+	const [windowDimensions, setWindowDimensions] = useState<ScreenMode>(getScreenByMode('xl'));
 
 	const listener = useCallback(() => {
-		const nameScreen = screenSizes.find(
-			(el) => window.innerWidth >= el.size
-		);
+		const nameScreen = screenSizes.find((el) => window.innerWidth >= el.size);
 		const screenSize = nameScreen?.name || 'xl';
 		setWindowDimensions(getScreenByMode(screenSize));
 	}, []);

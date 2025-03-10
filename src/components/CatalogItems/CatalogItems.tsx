@@ -169,7 +169,6 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			}
 			return false;
 		} catch (error) {
-			console.error('Error fetching data:', error);
 			return false;
 		}
 	};

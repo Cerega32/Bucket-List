@@ -1,11 +1,11 @@
 import {observer} from 'mobx-react-lite';
 import {FC} from 'react';
 
-import {CommentGoal} from '../CommentGoal/CommentGoal';
-
 import {useBem} from '@/hooks/useBem';
 import {IComment} from '@/typings/comments';
 import {postLikeComment} from '@/utils/api/post/postLikeComment';
+
+import {CommentGoal} from '../CommentGoal/CommentGoal';
 import './comments-goal.scss';
 
 interface CommentsGoalProps {

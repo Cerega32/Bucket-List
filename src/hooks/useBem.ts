@@ -8,10 +8,7 @@ const getMod = ([key, value]: InputObject): string => {
 	return typeof value === 'string' ? `${key}-${value}` : key;
 };
 
-export const useBem = (
-	blockName: string,
-	className?: string
-): [(mods?: BemMods) => string, (elem: string, mods?: BemMods) => string] => {
+export const useBem = (blockName: string, className?: string): [(mods?: BemMods) => string, (elem: string, mods?: BemMods) => string] => {
 	const blockClass = useMemo(() => blockName.trim(), [blockName]);
 	const classClass = useMemo(() => (className || '').trim(), [className]);
 

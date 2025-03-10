@@ -11,7 +11,7 @@ export const PageLeaders: FC<IPage> = ({page}) => {
 		setPage(page);
 		setHeader('white');
 		setFull(false);
-	}, []);
+	}, [page, setPage, setHeader, setFull]);
 
 	return <Leaders />;
 };

@@ -1,6 +1,9 @@
 import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
+import {useBem} from '@/hooks/useBem';
+import {IShortGoal, IShortList} from '@/typings/goal';
+
 import {Button} from '../Button/Button';
 import {Gradient} from '../Gradient/Gradient';
 import {Line} from '../Line/Line';
@@ -8,11 +11,7 @@ import {Progress} from '../Progress/Progress';
 import {Svg} from '../Svg/Svg';
 import {Tag} from '../Tag/Tag';
 import {Tags} from '../Tags/Tags';
-
 import {Title} from '../Title/Title';
-
-import {useBem} from '@/hooks/useBem';
-import {IShortGoal, IShortList} from '@/typings/goal';
 
 import './card.scss';
 

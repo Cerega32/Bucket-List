@@ -19,15 +19,16 @@ export const ListGoalsContainer: FC = () => {
 	const [list, setList] = useState<IList | null>(null);
 
 	const params = useParams();
+	const listId = params?.['id'];
 
 	useEffect(() => {
 		(async () => {
-			const res = await getList(`goal-lists/${params['id']}`);
+			const res = await getList(`goal-lists/${listId}`);
 			if (res.success) {
 				setList(res.data.list);
 			}
 		})();
-	}, [params['id']]);
+	}, [listId]);
 
 	const updateList = async (code: string, operation: 'add' | 'delete' | 'mark-all'): Promise<void | boolean> => {
 		const res = await (operation === 'add'
@@ -49,6 +50,7 @@ export const ListGoalsContainer: FC = () => {
 			});
 			return true;
 		}
+		return res.success;
 	};
 
 	const updateGoal = async (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {

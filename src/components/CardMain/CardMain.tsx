@@ -1,14 +1,14 @@
 import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
+import {useBem} from '@/hooks/useBem';
+import {IShortGoal} from '@/typings/goal';
+
 import {Button} from '../Button/Button';
 import {Gradient} from '../Gradient/Gradient';
 import {Line} from '../Line/Line';
 import {Tag} from '../Tag/Tag';
 import {Title} from '../Title/Title';
-
-import {useBem} from '@/hooks/useBem';
-import {IShortGoal} from '@/typings/goal';
 
 import './card-main.scss';
 

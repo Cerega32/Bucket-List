@@ -1,7 +1,4 @@
 import {FC, FormEvent, useCallback, useState} from 'react';
-
-import './add-review.scss';
-
 import {useDropzone} from 'react-dropzone';
 
 import {Button} from '@/components/Button/Button';
@@ -15,6 +12,7 @@ import {selectComplexity} from '@/utils/values/complexity';
 
 import Select from '../Select/Select';
 import {Title} from '../Title/Title';
+import './add-review.scss';
 
 interface AddReviewProps {
 	className?: string;
@@ -104,8 +102,8 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 						<Svg icon="plus" />
 					</div>
 					{photos.map((photo, index) => (
-						<div key={index} className={element('photo-wrapper')}>
-							<img className={element('photo')} src={URL.createObjectURL(photo)} alt={`Фотография ${index}`} />
+						<div key={`${photo.name}-${photo.lastModified}`} className={element('photo-wrapper')}>
+							<img className={element('photo')} src={URL.createObjectURL(photo)} alt={`Фотография ${index + 1}`} />
 							<button
 								className={element('delete-photo')}
 								type="button"

@@ -32,11 +32,7 @@ interface ScreenModeDesktop {
 	isScreenDesktop: true;
 }
 
-export type ScreenMode =
-	| ScreenModeMobile
-	| ScreenModeTablet
-	| ScreenModeSmallTablet
-	| ScreenModeDesktop;
+export type ScreenMode = ScreenModeMobile | ScreenModeTablet | ScreenModeSmallTablet | ScreenModeDesktop;
 
 interface ScreenModeMobileWithSize extends ScreenModeMobile, WasModeChange {
 	mode: 'xs' | 'sm';
@@ -50,7 +46,4 @@ interface ScreenModeDesktopWithSize extends ScreenModeDesktop, WasModeChange {
 	mode: 'xl';
 }
 
-export type ScreenModeWithSize =
-	| ScreenModeDesktopWithSize
-	| ScreenModeMobileWithSize
-	| ScreenModeTabletWithSize;
+export type ScreenModeWithSize = ScreenModeDesktopWithSize | ScreenModeMobileWithSize | ScreenModeTabletWithSize;

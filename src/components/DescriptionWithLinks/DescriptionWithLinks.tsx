@@ -58,13 +58,8 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 							page: 'isGoalLists',
 							count: goal.totalLists,
 						},
-						// {
-						// 	url: '/similar',
-						// 	name: 'Похожие цели',
-						// 	page: 'isUserActiveGoals',
-						// },
 				  ],
-		[goal]
+		[goal, isList]
 	);
 
 	return (

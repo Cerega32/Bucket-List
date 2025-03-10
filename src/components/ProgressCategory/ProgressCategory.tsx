@@ -1,11 +1,11 @@
 import {FC, useEffect, useRef} from 'react';
 
-import {Svg} from '../Svg/Svg';
-
 import {useBem} from '@/hooks/useBem';
-import './progress-category.scss';
 import {IComplexity} from '@/typings/goal';
 import {getComplexityCategory} from '@/utils/values/complexity';
+
+import {Svg} from '../Svg/Svg';
+import './progress-category.scss';
 
 interface ProgressCategoryProps {
 	className?: string;

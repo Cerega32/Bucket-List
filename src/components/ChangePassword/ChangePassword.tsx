@@ -1,13 +1,12 @@
 import {FC, FormEvent, useState} from 'react';
 
-import {Title} from '../Title/Title';
-
 import {Button} from '@/components/Button/Button';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
-import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
-import './change-password.scss';
 import {putChangePassword} from '@/utils/api/put/putChangePassword';
+
+import {Title} from '../Title/Title';
+import './change-password.scss';
 
 interface ChangePasswordProps {
 	className?: string;

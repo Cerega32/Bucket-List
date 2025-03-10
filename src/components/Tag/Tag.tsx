@@ -1,11 +1,11 @@
 import {FC} from 'react';
 
-import {Svg} from '../Svg/Svg';
-
 import {useBem} from '@/hooks/useBem';
-import './tag.scss';
 import {IComplexity} from '@/typings/goal';
 import {getComplexity} from '@/utils/values/complexity';
+
+import {Svg} from '../Svg/Svg';
+import './tag.scss';
 
 interface TagProps {
 	icon?: string;

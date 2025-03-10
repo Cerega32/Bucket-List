@@ -1,5 +1,7 @@
 import {FC} from 'react';
+
 import {useBem} from '@/hooks/useBem';
+
 import './item-goal.scss';
 import {Title} from '../Title/Title';
 

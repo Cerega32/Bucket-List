@@ -11,10 +11,7 @@ interface IResSuccess {
 	success: true;
 }
 
-export const postLikeComment = async (
-	id: number,
-	isLike: boolean
-): Promise<IResError | IResSuccess> => {
+export const postLikeComment = async (id: number, isLike: boolean): Promise<IResError | IResSuccess> => {
 	const response = await POST(`comments/${id}/like-or-dislike`, {
 		auth: true,
 		body: {isLike},

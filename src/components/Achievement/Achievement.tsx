@@ -1,10 +1,10 @@
 import {FC} from 'react';
 
-import {Title} from '../Title/Title';
-
 import {useBem} from '@/hooks/useBem';
-import './achievement.scss';
 import {IAchievement} from '@/typings/achievements';
+
+import {Title} from '../Title/Title';
+import './achievement.scss';
 
 interface AchievementProps {
 	className?: string;

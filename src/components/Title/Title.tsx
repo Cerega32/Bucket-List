@@ -1,4 +1,5 @@
 import {FC, ReactNode} from 'react';
+
 import {useBem} from '@/hooks/useBem';
 import './title.scss';
 

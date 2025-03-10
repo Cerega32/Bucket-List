@@ -7,7 +7,7 @@ export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 interface IModalStore {
 	isOpen: boolean;
 	window: IWindow;
-	funcModal: IFuncModal;
+	funcModal: IFuncModal | null;
 }
 
 class Store implements IModalStore {
@@ -15,7 +15,7 @@ class Store implements IModalStore {
 
 	window: IWindow = 'login';
 
-	funcModal: () => void = () => {};
+	funcModal: IFuncModal | null = null;
 
 	constructor() {
 		makeAutoObservable(this);

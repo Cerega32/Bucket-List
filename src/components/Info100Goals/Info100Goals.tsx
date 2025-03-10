@@ -1,10 +1,11 @@
 import {FC} from 'react';
 
+import {useBem} from '@/hooks/useBem';
+
 import {Line} from '../Line/Line';
 import {Progress} from '../Progress/Progress';
 import {ProgressCategory} from '../ProgressCategory/ProgressCategory';
 
-import {useBem} from '@/hooks/useBem';
 import './info-100-goals.scss';
 
 interface Info100GoalsProps {

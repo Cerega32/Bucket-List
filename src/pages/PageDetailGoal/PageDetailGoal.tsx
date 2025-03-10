@@ -1,7 +1,8 @@
 import {FC, useEffect} from 'react';
+
 import {Goal} from '@/containers/Goal/Goal';
-import {IPage} from '@/typings/page';
 import {ThemeStore} from '@/store/ThemeStore';
+import {IPage} from '@/typings/page';
 
 export const PageDetailGoal: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;

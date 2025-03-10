@@ -1,16 +1,14 @@
 import {FC} from 'react';
 
+import {useBem} from '@/hooks/useBem';
+import {IComplexity, IGoal} from '@/typings/goal';
+import {getComplexityCategory} from '@/utils/values/complexity';
+
 import {CardMain} from '../CardMain/CardMain';
 import {Svg} from '../Svg/Svg';
 import {Title} from '../Title/Title';
 
-import {useBem} from '@/hooks/useBem';
-
-import {IComplexity, IGoal} from '@/typings/goal';
-
 import './main-cards.scss';
-
-import {getComplexityCategory} from '@/utils/values/complexity';
 
 interface MainCardsProps {
 	className?: string;
