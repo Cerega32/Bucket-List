@@ -10,6 +10,7 @@ import {ModalStore} from '@/store/ModalStore';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
 import {getGoal} from '@/utils/api/get/getGoal';
+import {getStreak} from '@/utils/api/get/getStreak';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
