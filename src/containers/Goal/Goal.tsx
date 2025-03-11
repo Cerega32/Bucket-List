@@ -35,7 +35,7 @@ export const Goal: FC<IPage> = ({page}) => {
 				}
 			}
 		})();
-	}, [listId, setId]);
+	}, [listId]);
 
 	if (!goal) {
 		return null;

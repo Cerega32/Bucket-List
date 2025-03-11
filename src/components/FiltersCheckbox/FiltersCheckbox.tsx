@@ -81,7 +81,7 @@ export const FiltersCheckbox: FC<FiltersCheckboxProps> = (props) => {
 				onFinish([]);
 			}
 		}
-	}, [isOpen, activeItems, head.name, multipleSelectedText, multipleThreshold, onFinish]);
+	}, [isOpen, activeItems]);
 
 	useEffect(() => {
 		setActiveItems(
@@ -97,7 +97,7 @@ export const FiltersCheckbox: FC<FiltersCheckboxProps> = (props) => {
 				};
 			}, {})
 		);
-	}, [items, activeItems]);
+	}, [items]);
 
 	return (
 		<div className={block()} ref={selectRef}>
