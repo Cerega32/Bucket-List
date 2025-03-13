@@ -12,7 +12,6 @@ import {getCategories} from '@/utils/api/get/getCategories';
 import {getCategory} from '@/utils/api/get/getCategory';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {postCreateGoal} from '@/utils/api/post/postCreateGoal';
-import {postCreateGoalList} from '@/utils/api/post/postCreateGoalList';
 import {debounce} from '@/utils/time/debounce';
 import {selectComplexity} from '@/utils/values/complexity';
 
@@ -278,47 +277,47 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 
 		setIsLoading(true);
 
-		try {
-			const formData = new FormData();
-			formData.append('title', title);
-			formData.append('description', description);
-			formData.append('complexity', selectComplexity[activeComplexity].value);
-			formData.append('category', categories[activeCategory].id.toString());
+		// try {
+		// 	const formData = new FormData();
+		// 	formData.append('title', title);
+		// 	formData.append('description', description);
+		// 	formData.append('complexity', selectComplexity[activeComplexity].value);
+		// 	formData.append('category', categories[activeCategory].id.toString());
 
-			if (activeSubcategory !== null) {
-				formData.append('subcategory', subcategories[activeSubcategory].id.toString());
-			}
+		// 	if (activeSubcategory !== null) {
+		// 		formData.append('subcategory', subcategories[activeSubcategory].id.toString());
+		// 	}
 
-			if (image) {
-				formData.append('image', image);
-			}
+		// 	if (image) {
+		// 		formData.append('image', image);
+		// 	}
 
-			// Добавляем ID выбранных целей
-			selectedGoals.forEach((goal) => {
-				formData.append('goals[]', goal.id.toString());
-			});
+		// 	// Добавляем ID выбранных целей
+		// 	selectedGoals.forEach((goal) => {
+		// 		formData.append('goals[]', goal.id.toString());
+		// 	});
 
-			const response = await postCreateGoalList(formData);
+		// 	const response = await postCreateGoalList(formData);
 
-			if (response.success) {
-				NotificationStore.addNotification({
-					type: 'success',
-					title: 'Успех',
-					message: 'Список целей успешно создан',
-				});
-				navigate(`/list/${response.data.code}`);
-			} else {
-				throw new Error(response.error || 'Неизвестная ошибка');
-			}
-		} catch (error) {
-			NotificationStore.addNotification({
-				type: 'error',
-				title: 'Ошибка',
-				message: error instanceof Error ? error.message : 'Не удалось создать список целей',
-			});
-		} finally {
-			setIsLoading(false);
-		}
+		// 	if (response.success) {
+		// 		NotificationStore.addNotification({
+		// 			type: 'success',
+		// 			title: 'Успех',
+		// 			message: 'Список целей успешно создан',
+		// 		});
+		// 		navigate(`/list/${response.data.code}`);
+		// 	} else {
+		// 		throw new Error(response.error || 'Неизвестная ошибка');
+		// 	}
+		// } catch (error) {
+		// 	NotificationStore.addNotification({
+		// 		type: 'error',
+		// 		title: 'Ошибка',
+		// 		message: error instanceof Error ? error.message : 'Не удалось создать список целей',
+		// 	});
+		// } finally {
+		// 	setIsLoading(false);
+		// }
 	};
 
 	return (
