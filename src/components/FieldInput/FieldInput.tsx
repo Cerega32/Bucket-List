@@ -19,6 +19,8 @@ interface FieldInputProps {
 	autoComplete?: string;
 	error?: Array<string>;
 	required?: boolean;
+	onFocus?: () => void;
+	onBlur?: () => void;
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -35,6 +37,8 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		autoComplete = 'off',
 		error,
 		required,
+		onFocus,
+		onBlur,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -72,6 +76,8 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						placeholder={placeholder}
 						value={value}
 						onChange={handleChange}
+						onFocus={onFocus}
+						onBlur={onBlur}
 					/>
 				) : (
 					<input
@@ -83,6 +89,8 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onChange={handleChange}
 						autoComplete={autoComplete}
 						required={required}
+						onFocus={onFocus}
+						onBlur={onBlur}
 					/>
 				)}
 				{type === 'password' && (

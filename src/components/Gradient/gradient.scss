@@ -38,56 +38,56 @@
 		// Категории с градиентами
 		&--category-travel {
 			@include category-gradient('travel');
-			&#{$block}__color {
+			&#{$block}__color--withoutBlack {
 				@include category-gradient-without-black('travel');
 			}
 		}
 
 		&--category-education {
 			@include category-gradient('education');
-			&#{$block}__color {
+			&#{$block}__color--withoutBlack {
 				@include category-gradient-without-black('education');
 			}
 		}
 
 		&--category-health-and-sport {
 			@include category-gradient('health-and-sport');
-			&#{$block}__color {
+			&#{$block}__color--withoutBlack {
 				@include category-gradient-without-black('health-and-sport');
 			}
 		}
 
 		&--category-career {
 			@include category-gradient('career');
-			&#{$block}__color {
+			&#{$block}__color--withoutBlack {
 				@include category-gradient-without-black('career');
 			}
 		}
 
 		&--category-relations {
 			@include category-gradient('relations');
-			&#{$block}__color {
+			&#{$block}__color--withoutBlack {
 				@include category-gradient-without-black('relations');
 			}
 		}
 
 		&--category-entertainment {
 			@include category-gradient('entertainment');
-			&#{$block}__color {
+			&#{$block}__color--withoutBlack {
 				@include category-gradient-without-black('entertainment');
 			}
 		}
 
 		&--category-hobbies {
 			@include category-gradient('hobbies');
-			&#{$block}__color {
+			&#{$block}__color--withoutBlack {
 				@include category-gradient-without-black('hobbies');
 			}
 		}
 
 		&--category-gastronomy {
 			@include category-gradient('gastronomy');
-			&#{$block}__color {
+			&#{$block}__color--withoutBlack {
 				@include category-gradient-without-black('gastronomy');
 			}
 		}

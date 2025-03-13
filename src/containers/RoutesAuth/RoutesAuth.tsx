@@ -4,6 +4,8 @@ import {Navigate, Route, Routes} from 'react-router-dom';
 
 import {PageCategories} from '@/pages/PageCategories/PageCategories';
 import {PageCategory} from '@/pages/PageCategory/PageCategory';
+import {PageCreateGoal} from '@/pages/PageCreateGoal/PageCreateGoal';
+import {PageCreateGoalList} from '@/pages/PageCreateGoalList/PageCreateGoalList';
 import {PageDetailGoal} from '@/pages/PageDetailGoal/PageDetailGoal';
 import {PageDetailList} from '@/pages/PageDetailList/PageDetailList';
 import {PageLeaders} from '@/pages/PageLeaders/PageLeaders';
@@ -58,6 +60,9 @@ export const RoutesAuth: FC = observer(() => {
 				<Route path="/user/:id/done-goals" element={<PageUser page="isUserDoneGoals" subPage="goals" />} />
 				<Route path="/user/:id/done-goals/lists" element={<PageUser page="isUserDoneGoals" subPage="lists" />} />
 				<Route path="/user/:id/achievements" element={<PageUser page="isUserAchievements" />} />
+
+				<Route path="/goals/create" element={<ProtectedRoute element={<PageCreateGoal page="isCreateGoal" />} />} />
+				<Route path="/lists/create" element={<ProtectedRoute element={<PageCreateGoalList page="isCreateGoalList" />} />} />
 
 				{/* Защищенные маршруты пользователя */}
 				<Route path="/user/self" element={<ProtectedRoute element={<PageUserSelf page="isUserSelf" />} />} />
