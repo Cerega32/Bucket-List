@@ -1,4 +1,4 @@
-.add-goal-item {
+.goal-search-item {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -64,14 +64,27 @@
 	}
 
 	&__complexity {
-		margin: 0;
+		margin: 0 0 4px;
 
 		color: var(--color-text-secondary);
 
 		font-size: 14px;
 	}
 
-	&__remove-btn {
+	&__description {
+		display: flex;
+		overflow: hidden;
+
+		margin: 0;
+
+		color: var(--color-text-secondary);
+
+		font-size: 14px;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+	}
+
+	&__add-btn {
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -82,14 +95,13 @@
 
 		cursor: pointer;
 
-		color: var(--color-text-secondary);
+		color: var(--color-white);
 		border: none;
 		border-radius: 50%;
-		background-color: var(--color-gray-9);
+		background-color: var(--color-primary);
 
 		&:hover {
-			color: var(--color-red-2);
-			background-color: var(--color-gray-5);
+			background-color: var(--color-primary-hover);
 		}
 	}
 }

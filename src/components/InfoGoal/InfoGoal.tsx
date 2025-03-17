@@ -41,6 +41,7 @@ export const InfoGoal: FC<InfoGoalProps> = (props) => {
 						{index !== items.length - 1 && <div className={element('vertical-line')} />}
 					</Fragment>
 				))}
+				{!!items.length && horizontal && progressData && <div className={element('vertical-line')} />}
 				{horizontal && progressData && (
 					<div className={element('wrapper-horizontal')}>
 						<span className={element('title')}>Мой прогресс выполнения</span>

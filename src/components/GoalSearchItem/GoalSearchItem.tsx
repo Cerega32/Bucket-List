@@ -3,14 +3,15 @@ import {FC} from 'react';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
 import {IGoal} from '@/typings/goal';
+import './goal-search-item.scss';
 
-interface AddGoalItemProps {
+interface GoalSearchItemProps {
 	goal: IGoal;
-	onRemove: (goalId: number) => void;
+	onAdd: (goal: IGoal) => void;
 }
 
-export const AddGoalItem: FC<AddGoalItemProps> = ({goal, onRemove}) => {
-	const [block, element] = useBem('add-goal-item');
+export const GoalSearchItem: FC<GoalSearchItemProps> = ({goal, onAdd}) => {
+	const [block, element] = useBem('goal-search-item');
 
 	return (
 		<div className={block()}>
@@ -27,10 +28,11 @@ export const AddGoalItem: FC<AddGoalItemProps> = ({goal, onRemove}) => {
 				<div className={element('info')}>
 					<h4 className={element('title')}>{goal.title}</h4>
 					<p className={element('complexity')}>{goal.complexity}</p>
+					<p className={element('description')}>{goal.shortDescription}</p>
 				</div>
 			</div>
-			<button type="button" className={element('remove-btn')} onClick={() => onRemove(goal.id)} aria-label="Удалить цель">
-				<Svg icon="cross" />
+			<button type="button" className={element('add-btn')} onClick={() => onAdd(goal)} aria-label="Добавить цель">
+				<Svg icon="plus" />
 			</button>
 		</div>
 	);

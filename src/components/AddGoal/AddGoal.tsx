@@ -24,10 +24,14 @@ import './add-goal.scss';
 
 interface AddGoalProps {
 	className?: string;
+	onGoalCreated?: (goal: IGoal) => void;
+	hideNavigation?: boolean;
+	noForm?: boolean;
+	onSubmitForm?: (e: FormEvent<HTMLFormElement>) => void;
 }
 
 export const AddGoal: FC<AddGoalProps> = (props) => {
-	const {className} = props;
+	const {className, onGoalCreated, hideNavigation = false, noForm = false, onSubmitForm} = props;
 	const navigate = useNavigate();
 
 	const [block, element] = useBem('add-goal', className);
@@ -47,6 +51,11 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const [isSearching, setIsSearching] = useState(false);
 	const [showSimilarGoals, setShowSimilarGoals] = useState(false);
 	const [isTitleFocused, setIsTitleFocused] = useState(false);
+
+	// Обработчик изменения названия цели
+	const handleTitleChange = (value: string) => {
+		setTitle(value);
+	};
 
 	// Загрузка категорий при монтировании компонента
 	useEffect(() => {
@@ -158,7 +167,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 					// Если у цели есть подкатегория, находим ее индекс
 					if (goal.subcategory) {
-						const subcategoryIndex = data.data.subcategories.findIndex((sub: ICategory) => sub.id === goal.subcategory.id);
+						const subcategoryIndex = data.data.subcategories.findIndex((sub: ICategory) => sub.id === goal.subcategory?.id);
 						if (subcategoryIndex !== -1) {
 							setActiveSubcategory(subcategoryIndex);
 						}
@@ -199,8 +208,24 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		setImage(null);
 	};
 
+	const resetForm = () => {
+		setTitle('');
+		setDescription('');
+		setActiveComplexity(null);
+		setActiveCategory(null);
+		setActiveSubcategory(null);
+		setImage(null);
+		setSimilarGoals([]);
+	};
+
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+
+		// Если передан внешний обработчик, используем его
+		if (onSubmitForm) {
+			onSubmitForm(e);
+			return;
+		}
 
 		if (!title || !description || activeComplexity === null || activeCategory === null) {
 			NotificationStore.addNotification({
@@ -217,8 +242,14 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			const formData = new FormData();
 			formData.append('title', title);
 			formData.append('description', description);
-			formData.append('complexity', selectComplexity[activeComplexity].value);
-			formData.append('category', categories[activeCategory].id.toString());
+
+			if (activeComplexity !== null) {
+				formData.append('complexity', selectComplexity[activeComplexity].value);
+			}
+
+			if (activeCategory !== null) {
+				formData.append('category', categories[activeCategory].id.toString());
+			}
 
 			if (activeSubcategory !== null) {
 				formData.append('subcategory', subcategories[activeSubcategory].id.toString());
@@ -229,7 +260,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			// }
 
 			if (image) {
-				formData.append('image', image);
+				formData.append('image', image as Blob);
 			}
 			const response = await postCreateGoal(formData);
 
@@ -239,11 +270,20 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					title: 'Успех',
 					message: 'Цель успешно создана',
 				});
-				navigate(`/goals/${response.data.code}`);
+
+				// Если передан обработчик создания цели, вызываем его
+				if (onGoalCreated && response.data) {
+					onGoalCreated(response.data);
+					resetForm();
+				} else if (!hideNavigation) {
+					// Если не нужно скрывать навигацию, переходим на страницу цели
+					navigate(`/goals/${response.data.code}`);
+				}
 			} else {
+				// Упрощаем обработку ошибок, так как теперь бэкенд должен корректно обрабатывать любые названия
 				throw new Error(response.error || 'Неизвестная ошибка');
 			}
-		} catch (error) {
+		} catch (error: unknown) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -254,11 +294,80 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		}
 	};
 
-	return (
-		<form className={block()} onSubmit={onSubmit}>
-			<Title tag="h1" className={element('title')}>
-				Создание новой цели
-			</Title>
+	// Метод для программного создания цели
+	const createGoal = async () => {
+		if (!title || !description || activeComplexity === null || activeCategory === null) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Заполните все обязательные поля',
+			});
+			return;
+		}
+
+		setIsLoading(true);
+
+		try {
+			const formData = new FormData();
+			formData.append('title', title);
+			formData.append('description', description);
+
+			if (activeComplexity !== null) {
+				formData.append('complexity', selectComplexity[activeComplexity].value);
+			}
+
+			if (activeCategory !== null) {
+				formData.append('category', categories[activeCategory].id.toString());
+			}
+
+			if (activeSubcategory !== null) {
+				formData.append('subcategory', subcategories[activeSubcategory].id.toString());
+			}
+
+			if (image) {
+				formData.append('image', image as Blob);
+			}
+
+			const response = await postCreateGoal(formData);
+
+			if (response.success) {
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Успех',
+					message: 'Цель успешно создана',
+				});
+
+				// Если передан обработчик создания цели, вызываем его
+				if (onGoalCreated && response.data) {
+					onGoalCreated(response.data);
+					resetForm();
+				} else if (!hideNavigation) {
+					// Если не нужно скрывать навигацию, переходим на страницу цели
+					navigate(`/goals/${response.data.code}`);
+				}
+			} else {
+				// Упрощаем обработку ошибок, так как теперь бэкенд должен корректно обрабатывать любые названия
+				throw new Error(response.error || 'Неизвестная ошибка');
+			}
+		} catch (error: unknown) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: error instanceof Error ? error.message : 'Не удалось создать цель',
+			});
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	// Содержимое компонента
+	const content = (
+		<>
+			{!hideNavigation && (
+				<Title tag="h1" className={element('title')}>
+					Создание новой цели
+				</Title>
+			)}
 			<Loader isLoading={isLoading}>
 				<div className={element('content')}>
 					<div className={element('image-section')}>
@@ -286,7 +395,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 								id="goal-title"
 								text="Название цели *"
 								value={title}
-								setValue={setTitle}
+								setValue={handleTitleChange}
 								className={element('field')}
 								required
 								onFocus={handleTitleFocus}
@@ -376,16 +485,39 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					/> */}
 
 						<div className={element('btns-wrapper')}>
-							<Button theme="blue-light" className={element('btn')} onClick={() => navigate(-1)} type="button">
-								Отмена
-							</Button>
-							<Button theme="blue" className={element('btn')} typeBtn="submit">
+							{!hideNavigation && (
+								<Button theme="blue-light" className={element('btn')} onClick={() => navigate(-1)} type="button">
+									Отмена
+								</Button>
+							)}
+							<Button
+								theme="blue"
+								className={element('btn')}
+								typeBtn="submit"
+								onClick={
+									noForm
+										? (e) => {
+												e.preventDefault();
+												createGoal();
+										  }
+										: undefined
+								}
+							>
 								Создать цель (+15 опыта)
 							</Button>
 						</div>
 					</div>
 				</div>
 			</Loader>
+		</>
+	);
+
+	// Возвращаем содержимое с оберткой form или без нее
+	return noForm ? (
+		<div className={block()}>{content}</div>
+	) : (
+		<form className={block()} onSubmit={onSubmit}>
+			{content}
 		</form>
 	);
 };

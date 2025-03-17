@@ -62,7 +62,7 @@ export const RoutesAuth: FC = observer(() => {
 				<Route path="/user/:id/achievements" element={<PageUser page="isUserAchievements" />} />
 
 				<Route path="/goals/create" element={<ProtectedRoute element={<PageCreateGoal page="isCreateGoal" />} />} />
-				<Route path="/lists/create" element={<ProtectedRoute element={<PageCreateGoalList page="isCreateGoalList" />} />} />
+				<Route path="/list/create" element={<ProtectedRoute element={<PageCreateGoalList page="isCreateGoalList" />} />} />
 
 				{/* Защищенные маршруты пользователя */}
 				<Route path="/user/self" element={<ProtectedRoute element={<PageUserSelf page="isUserSelf" />} />} />
