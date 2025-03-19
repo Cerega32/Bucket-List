@@ -3,6 +3,7 @@ import {useDropzone} from 'react-dropzone';
 import {useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
+import {ExternalGoalSearch} from '@/components/ExternalGoalSearch/ExternalGoalSearch';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
@@ -42,13 +43,14 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const [activeSubcategory, setActiveSubcategory] = useState<number | null>(null);
 	// const [deadline, setDeadline] = useState('');
 	const [image, setImage] = useState<File | null>(null);
+	const [imageUrl, setImageUrl] = useState<string | null>(null);
 	const [categories, setCategories] = useState<ICategory[]>([]);
 	const [subcategories, setSubcategories] = useState<ICategory[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 
 	// Новые состояния для поиска похожих целей
 	const [similarGoals, setSimilarGoals] = useState<IGoal[]>([]);
-	const [isSearching, setIsSearching] = useState(false);
+	const [, setIsSearching] = useState(false);
 	const [showSimilarGoals, setShowSimilarGoals] = useState(false);
 	const [isTitleFocused, setIsTitleFocused] = useState(false);
 
@@ -193,6 +195,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const onDrop = useCallback((acceptedFiles: File[]) => {
 		if (acceptedFiles.length > 0) {
 			setImage(acceptedFiles[0]);
+			setImageUrl(null); // Сбрасываем URL изображения при загрузке локального файла
 		}
 	}, []);
 
@@ -204,10 +207,6 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		maxFiles: 1,
 	});
 
-	const removeImage = () => {
-		setImage(null);
-	};
-
 	const resetForm = () => {
 		setTitle('');
 		setDescription('');
@@ -215,6 +214,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		setActiveCategory(null);
 		setActiveSubcategory(null);
 		setImage(null);
+		setImageUrl(null);
 		setSimilarGoals([]);
 	};
 
@@ -227,7 +227,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			return;
 		}
 
-		if (!title || !description || activeComplexity === null || activeCategory === null) {
+		if (!title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -259,9 +259,15 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			// 	formData.append('deadline', new Date(deadline).toISOString());
 			// }
 
+			// Если есть локальное изображение, добавляем его в formData
 			if (image) {
 				formData.append('image', image as Blob);
 			}
+			// Если есть URL изображения, добавляем его в formData
+			else if (imageUrl) {
+				formData.append('image_url', imageUrl);
+			}
+
 			const response = await postCreateGoal(formData);
 
 			if (response.success) {
@@ -296,7 +302,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 	// Метод для программного создания цели
 	const createGoal = async () => {
-		if (!title || !description || activeComplexity === null || activeCategory === null) {
+		if (!title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -324,8 +330,13 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				formData.append('subcategory', subcategories[activeSubcategory].id.toString());
 			}
 
+			// Если есть локальное изображение, добавляем его в formData
 			if (image) {
 				formData.append('image', image as Blob);
+			}
+			// Если есть URL изображения, добавляем его в formData
+			else if (imageUrl) {
+				formData.append('image_url', imageUrl);
 			}
 
 			const response = await postCreateGoal(formData);
@@ -360,6 +371,67 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		}
 	};
 
+	// Обработчик для добавления цели из внешнего источника
+	const handleExternalGoalSelected = (
+		goalData: Partial<IGoal> & {imageUrl?: string; external_id?: string | number; externalType?: string}
+	) => {
+		// Заполняем форму данными из внешней цели
+		setTitle(goalData.title || '');
+		setDescription(goalData.description || '');
+
+		// Находим индекс сложности в массиве selectComplexity
+		if (goalData.complexity) {
+			const complexityIndex = selectComplexity.findIndex((item) => item.value === goalData.complexity);
+			if (complexityIndex !== -1) {
+				setActiveComplexity(complexityIndex);
+			}
+		}
+
+		// Если у цели есть категория, находим ее индекс
+		if (goalData.category) {
+			const categoryIndex = categories.findIndex((cat) => cat.id === goalData.category?.id);
+			if (categoryIndex !== -1) {
+				setActiveCategory(categoryIndex);
+
+				// Загружаем подкатегории для выбранной категории
+				const loadSubcategoriesAndSetSubcategory = async () => {
+					const data = await getCategory(categories[categoryIndex].nameEn);
+					if (data.success) {
+						setSubcategories(data.data.subcategories);
+
+						// Если у цели есть подкатегория, находим ее индекс
+						if (goalData.subcategory) {
+							const subcategoryIndex = data.data.subcategories.findIndex(
+								(sub: ICategory) => sub.id === goalData.subcategory?.id
+							);
+							if (subcategoryIndex !== -1) {
+								setActiveSubcategory(subcategoryIndex);
+							}
+						}
+					}
+				};
+
+				loadSubcategoriesAndSetSubcategory();
+			}
+		}
+
+		// Сохраняем URL изображения, если он есть
+		if (goalData.imageUrl) {
+			setImageUrl(goalData.imageUrl);
+			setImage(null); // Сбрасываем локально загруженное изображение
+		} else if (goalData.image) {
+			setImageUrl(goalData.image);
+			setImage(null); // Сбрасываем локально загруженное изображение
+		}
+
+		// Показываем уведомление
+		NotificationStore.addNotification({
+			type: 'success',
+			title: 'Готово',
+			message: 'Данные цели загружены! Проверьте и дополните при необходимости.',
+		});
+	};
+
 	// Содержимое компонента
 	const content = (
 		<>
@@ -370,24 +442,38 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			)}
 			<Loader isLoading={isLoading}>
 				<div className={element('content')}>
+					{/* Добавляем компонент поиска внешних целей */}
+					<div className={element('external-search-section')}>
+						<ExternalGoalSearch onGoalSelected={handleExternalGoalSelected} className={element('external-search')} />
+					</div>
+
 					<div className={element('image-section')}>
-						<p className={element('field-title')}>Изображение цели</p>
-						{!image ? (
+						<p className={element('field-title')}>Изображение цели *</p>
+						{!image && !imageUrl ? (
 							<div {...getRootProps({className: element('dropzone')})}>
 								<input {...getInputProps()} />
 								<div className={element('upload-placeholder')}>
 									<Svg icon="mount" className={element('upload-icon')} />
-									<p>Перетащите изображение сюда или кликните для выбора</p>
+									<p>Перетащите изображение сюда или кликните для выбора (обязательно)</p>
 								</div>
 							</div>
 						) : (
 							<div className={element('image-preview')}>
-								<img src={URL.createObjectURL(image)} alt="Предпросмотр" className={element('preview')} />
-								<Button className={element('remove-image')} type="button-close" onClick={removeImage} />
+								{image && <img src={URL.createObjectURL(image)} alt="Предпросмотр" className={element('preview')} />}
+								{imageUrl && !image && (
+									<img src={imageUrl} alt="Предпросмотр из источника" className={element('preview')} />
+								)}
+								<Button
+									className={element('remove-image')}
+									type="button-close"
+									onClick={() => {
+										setImage(null);
+										setImageUrl(null);
+									}}
+								/>
 							</div>
 						)}
 					</div>
-
 					<div className={element('form')}>
 						<div className={element('field-container')}>
 							<FieldInput
@@ -402,12 +488,12 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 								onBlur={handleTitleBlur}
 							/>
 
-							{isSearching && (
+							{/* {isSearching && (
 								<div className={element('searching')}>
 									<Svg icon="loading" className={element('loading-icon')} />
 									Поиск похожих целей...
 								</div>
-							)}
+							)} */}
 
 							{showSimilarGoals && (
 								<div className={element('similar-goals')}>

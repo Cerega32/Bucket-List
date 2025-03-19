@@ -21,6 +21,7 @@ interface FieldInputProps {
 	required?: boolean;
 	onFocus?: () => void;
 	onBlur?: () => void;
+	onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -39,6 +40,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		required,
 		onFocus,
 		onBlur,
+		onKeyDown,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -78,6 +80,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onChange={handleChange}
 						onFocus={onFocus}
 						onBlur={onBlur}
+						onKeyDown={onKeyDown}
 					/>
 				) : (
 					<input
@@ -91,6 +94,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						required={required}
 						onFocus={onFocus}
 						onBlur={onBlur}
+						onKeyDown={onKeyDown}
 					/>
 				)}
 				{type === 'password' && (

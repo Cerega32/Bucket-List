@@ -162,7 +162,7 @@
 
 		border-radius: 8px;
 		background-color: var(--color-white);
-		box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+		box-shadow: 0 4px 12px rgb(var(--color-black-rbg) / 10%);
 	}
 
 	&__loading {
@@ -265,7 +265,7 @@
 	}
 
 	&__goal-description {
-		display: box;
+		display: flex;
 		overflow: hidden;
 
 		margin: 0;
@@ -327,7 +327,7 @@
 
 		border-radius: 8px;
 		background-color: var(--color-white);
-		box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
+		box-shadow: 0 2px 8px rgb(var(--color-black-rbg) / 5%);
 	}
 
 	&__form-title {

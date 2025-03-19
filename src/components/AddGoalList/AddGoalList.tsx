@@ -46,7 +46,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 	const [selectedGoals, setSelectedGoals] = useState<IGoal[]>([]);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [searchResults, setSearchResults] = useState<IGoal[]>([]);
-	const [isSearching, setIsSearching] = useState(false);
+	const [, setIsSearching] = useState(false);
 
 	const handleTitleChange = (value: string) => {
 		setTitle(value);
@@ -178,7 +178,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		if (!title || !description || activeComplexity === null || activeCategory === null) {
+		if (!title || !description || activeComplexity === null || activeCategory === null || !image) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -215,9 +215,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 				formData.append('subcategory', subcategories[activeSubcategory].id.toString());
 			}
 
-			if (image) {
-				formData.append('image', image as Blob);
-			}
+			formData.append('image', image as Blob);
 
 			// Добавляем ID выбранных целей
 			selectedGoals.forEach((goal) => {
@@ -256,13 +254,13 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 
 			<div className={element('content')}>
 				<div className={element('image-section')}>
-					<p className={element('field-title')}>Изображение списка</p>
+					<p className={element('field-title')}>Изображение списка *</p>
 					{!image ? (
 						<div {...getRootProps({className: element('dropzone')})}>
 							<input {...getInputProps()} />
 							<div className={element('upload-placeholder')}>
 								<Svg icon="mount" className={element('upload-icon')} />
-								<p>Перетащите изображение сюда или кликните для выбора</p>
+								<p>Перетащите изображение сюда или кликните для выбора (обязательно)</p>
 							</div>
 						</div>
 					) : (
@@ -353,8 +351,6 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 								className={element('search-field')}
 								iconBegin="search"
 							/>
-
-							{isSearching && <div className={element('loading')}>Поиск...</div>}
 
 							{searchResults.length > 0 && (
 								<div className={element('search-results')}>
