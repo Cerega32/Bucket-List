@@ -14,5 +14,6 @@
 		"editor.defaultFormatter": "ms-python.black-formatter"
 	},
 	"python.formatting.provider": "none",
-	"stylelint.validate": ["css", "scss"]
+	"stylelint.validate": ["css", "scss"],
+	"stylelint.configFile": "./stylelint.config.js"
 }

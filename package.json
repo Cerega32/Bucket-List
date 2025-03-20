@@ -40,10 +40,11 @@
 		"pre-push": "tsc --noEmit --locale ru && npm run lint:all",
 		"prepare": "husky install",
 		"commit": "cz",
-		"lint:js": "eslint \"src/**/*.{ts,tsx}\" --fix",
 		"lint:css": "stylelint \"src/**/*.{css,scss}\" --fix --config ./stylelint.config.js",
+		"lint:js": "eslint \"src/**/*.{ts,tsx}\" --fix",
 		"lint:all": "npm run lint:js && npm run lint:css"
 	},
+
 	"lint-staged": {
 		"src/**/*.{ts,tsx}": [
 			"eslint --fix"
