@@ -148,7 +148,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 
 	// Опции для категорий
 	const categoryOptions = [
-		{name: 'Фильмы', value: 'movies'},
+		// {name: 'Фильмы', value: 'movies'},
 		{name: 'Книги', value: 'books'},
 		// {name: 'Путешествия', value: 'travel'},
 	];
