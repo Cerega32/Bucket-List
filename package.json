@@ -52,7 +52,7 @@
 			"stylelint --config ./stylelint.config.js --fix"
 		],
 		"src/**/*.css": [
-			"stylelint --fix --config ./stylelint.config.js"
+			"stylelint --config ./stylelint.config.js --fix"
 		]
 	},
 	"devDependencies": {
@@ -97,5 +97,9 @@
 	"license": "ISC",
 	"description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
 	"main": "commitizen.js",
-	"keywords": []
+	"keywords": [],
+	"stylelint.configFile": "./stylelint.config.js",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.stylelint": true
+	}
 }
