@@ -237,7 +237,6 @@
 }
 
 @keyframes spin {
-
 	from {
 		transform: rotate(0deg);
 	}
@@ -248,9 +247,7 @@
 }
 
 @media (width <= 768px) {
-
 	.external-goal-search {
-
 		&__selectors {
 			grid-template-columns: 1fr;
 		}
