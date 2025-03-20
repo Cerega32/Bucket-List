@@ -114,7 +114,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 
 	return (
 		<main className={block({sub: page === 'isSubCategories', empty: !category?.subcategories.length, all: !id})}>
-			{id !== 'all' && category && (
+			{id && id !== 'all' && category && (
 				<HeaderCategory category={category} className={element('header')} isSub={page === 'isSubCategories'} refHeader={refTitle} />
 			)}
 			{!!popularGoals.length && (

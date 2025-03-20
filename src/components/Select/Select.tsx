@@ -136,10 +136,10 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, classNa
 				className={element('option', {isOpen, placeholder: typeof activeOption !== 'number'})}
 				onClick={toggleDropdown}
 				onKeyDown={handleSelectKeyDown}
-				aria-label={typeof activeOption === 'number' ? `Выбрано: ${options[activeOption].name}` : placeholder}
+				aria-label={typeof activeOption === 'number' ? `Выбрано: ${options[activeOption]?.name}` : placeholder}
 			>
 				<Svg icon={filter ? 'sort' : 'arrow--right'} />
-				{typeof activeOption === 'number' ? options[activeOption].name : placeholder}
+				{typeof activeOption === 'number' ? options[activeOption]?.name : placeholder}
 			</button>
 			{isOpen && (
 				<ul id="select-options-list" className={element('list')} role="listbox" aria-label="Доступные опции">

@@ -34,7 +34,7 @@ interface ExternalGoalSearchProps {
 export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected, className}) => {
 	const [block, element] = useBem('external-goal-search', className);
 	const [query, setQuery] = useState('');
-	const [category, setCategory] = useState<'movies' | 'books'>('movies'); // По умолчанию фильмы
+	const [category, setCategory] = useState<'movies' | 'books'>('books'); // По умолчанию фильмы
 	const [results, setResults] = useState<ExternalGoalResult[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [activeComplexity, setActiveComplexity] = useState<number>(1); // По умолчанию средняя сложность (индекс 1)
@@ -148,8 +148,8 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 
 	// Опции для категорий
 	const categoryOptions = [
-		// {name: 'Фильмы', value: 'movies'},
 		{name: 'Книги', value: 'books'},
+		// {name: 'Фильмы', value: 'movies'},
 		// {name: 'Путешествия', value: 'travel'},
 	];
 
