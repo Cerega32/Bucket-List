@@ -1,17 +1,14 @@
 .description-with-links {
 	padding: 16px 24px 0;
-	background: var(--color-white);
+
 	border: 1px solid var(--color-border);
 	border-radius: 8px;
-
-	&--list {
-		padding-bottom: 16px;
-	}
+	background: var(--color-white);
 
 	&__wrapper {
 		display: flex;
-		gap: 24px;
 		align-self: flex-start;
+		gap: 24px;
 	}
 
 	&__text {
@@ -28,5 +25,9 @@
 
 	&__info {
 		flex-basis: 33%;
+	}
+
+	&--list {
+		padding-bottom: 16px;
 	}
 }

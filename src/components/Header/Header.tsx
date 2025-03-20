@@ -1,12 +1,13 @@
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
-import {FC} from 'react';
+import {FC, useEffect} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
+import {getUser} from '@/utils/api/get/getUser';
 
 import {ThemeStore} from '../../store/ThemeStore';
 import {Avatar} from '../Avatar/Avatar';
@@ -24,11 +25,17 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const {header, page} = ThemeStore;
 	const {setIsOpen, setWindow} = ModalStore;
-	const {isAuth, name, avatar, setAvatar, setIsAuth, setName} = UserStore;
+	const {isAuth, name, avatar, setAvatar, setIsAuth, setName, userInfo} = UserStore;
 
 	const [block, element] = useBem('header', className);
 
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		(async () => {
+			await getUser();
+		})();
+	}, []);
 
 	const openLogin = () => {
 		setIsOpen(true);
@@ -93,7 +100,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 							<span className={element('nickname')}>{name}</span>
 						</div>
 						<div className={element('profile-menu')}>
-							<Link className={element('menu-item')} to="/user/self">
+							<Link className={element('menu-item')} to={`/user/${userInfo?.id}/showcase/`}>
 								Мой профиль
 							</Link>
 							<Link className={element('menu-item')} to="/user/self">

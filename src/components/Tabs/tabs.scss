@@ -51,11 +51,11 @@
 	}
 
 	&--vertical {
+		@include block-radius;
+
 		flex-direction: column;
 		gap: 8px;
 		padding: 16px 24px;
-
-		@include block-radius;
 
 		#{$block} {
 			&__link {
@@ -70,16 +70,16 @@
 					border-radius: 0 4px 4px 0;
 				}
 
-				&--active {
-					background: var(--color-secondary);
-				}
-
 				&:hover {
 					background: var(--color-secondary-hover);
 
 					&::after {
 						display: none;
 					}
+				}
+
+				&--active {
+					background: var(--color-secondary);
 				}
 			}
 		}

@@ -12,6 +12,12 @@
 	border-radius: 50%;
 	overflow: hidden;
 
+	&__image {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
 	&--noBorder {
 		border: none;
 	}
@@ -64,11 +70,5 @@
 			width: 16px;
 			height: 16px;
 		}
-	}
-
-	&__image {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
 	}
 }

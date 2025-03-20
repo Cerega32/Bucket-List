@@ -18,9 +18,9 @@
 
 	&__option-text {
 		display: block;
+		overflow: hidden;
 		max-width: calc(240px - 32px - 16px);
 		white-space: nowrap;
-		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
@@ -54,12 +54,12 @@
 		cursor: pointer;
 		transition: all 0.15s ease-in-out;
 
-		&--active {
-			color: var(--color-primary);
-		}
-
 		&:hover {
 			background: var(--color-secondary-hover);
+		}
+
+		&--active {
+			color: var(--color-primary);
 		}
 
 		&--selected {

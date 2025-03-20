@@ -15,10 +15,12 @@
 		justify-content: space-between;
 		align-items: center;
 		gap: 4px;
+		width: 100%;
 		padding: 10px 16px;
 		background: var(--color-white);
 		border: 1px solid var(--color-gray-4);
 		border-radius: 8px;
+		color: var(--color-text);
 		font-weight: var(--weight-medium);
 		cursor: pointer;
 
@@ -44,8 +46,8 @@
 		margin: 0;
 		background: var(--color-white);
 		border-radius: 8px;
-		list-style: none;
 		overflow-y: scroll;
+		list-style: none;
 		box-shadow: 0 0 20px -2px rgb(var(--color-gray-rgb-8) / 8%);
 	}
 
@@ -54,13 +56,17 @@
 		border-radius: 4px;
 		cursor: pointer;
 
+		&:hover {
+			background-color: var(--color-secondary-hover);
+		}
+
 		&--active {
 			background-color: var(--color-white);
 			color: var(--color-primary);
 		}
 
-		&:hover {
-			background-color: var(--color-secondary-hover);
+		&--highlighted {
+			background-color: var(--color-gray-5);
 		}
 	}
 

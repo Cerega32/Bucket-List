@@ -8,5 +8,13 @@
 	"useTabs": true,
 	"semi": true,
 	"bracketSpacing": false,
-	"endOfLine": "auto"
+	"endOfLine": "auto",
+	"overrides": [
+		{
+			"files": ["*.scss", "*.css"],
+			"options": {
+				"parser": "scss"
+			}
+		}
+	]
 }

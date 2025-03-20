@@ -2,13 +2,14 @@
 	$block: &;
 
 	min-width: 336px;
+	max-width: 336px;
 
 	&__image {
 		width: 100%;
 		height: 336px;
 		margin-bottom: 16px;
-		border-radius: 8px;
 		object-fit: cover;
+		border-radius: 8px;
 	}
 
 	&__btn {

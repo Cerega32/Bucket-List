@@ -130,7 +130,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 								key={goal.code}
 								onClickAdd={() => updateGoal(goal.code, i, 'add')}
 								onClickDelete={() => updateGoal(goal.code, i, 'delete')}
-								onClickMark={() => updateGoal(goal.code, i, 'mark')}
+								onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
 							/>
 						))}
 					</section>

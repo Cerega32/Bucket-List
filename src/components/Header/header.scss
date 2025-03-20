@@ -2,7 +2,6 @@
 	$block: &;
 
 	position: fixed;
-	z-index: 110;
 	top: 0;
 	width: 100%;
 	height: var(--height-header);
@@ -10,11 +9,11 @@
 	border-bottom: 1px solid rgb(var(--color-white-rgb) / 16%);
 
 	&__wrapper {
+		@include max-width;
+
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-
-		@include max-width;
 	}
 
 	&__logo {
@@ -44,14 +43,14 @@
 		font-weight: var(--font-weight-medium);
 		transition: all 0.15s ease-in-out;
 
-		&--active {
-			background: var(--color-white);
-			color: var(--color-text);
-		}
-
 		&:hover,
 		&:active {
 			background: rgb(var(--color-white-rgb) / 8%);
+		}
+
+		&--active {
+			background: var(--color-white);
+			color: var(--color-text);
 		}
 	}
 
@@ -64,8 +63,8 @@
 			#{$block} {
 				&__profile-menu {
 					opacity: 1;
-					visibility: visible;
 					transform: translateY(0);
+					visibility: visible;
 				}
 			}
 		}
@@ -117,15 +116,15 @@
 				color: var(--color-text);
 				transition: all 0.15s ease-in-out;
 
-				&--active {
-					background: var(--color-secondary);
-					color: var(--color-text-primary);
-				}
-
 				&:hover,
 				&:active {
 					background: var(--color-secondary-hover);
 					color: var(--color-text);
+				}
+
+				&--active {
+					background: var(--color-secondary);
+					color: var(--color-text-primary);
 				}
 			}
 

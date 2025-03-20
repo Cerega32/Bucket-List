@@ -8,8 +8,13 @@
 	background: var(--color-white);
 	border: 1px solid var(--color-gray-9);
 	border-radius: 8px;
-	overflow: hidden;
 	transition: all 0.15s ease-in-out;
+	overflow: hidden;
+
+	&:hover {
+		outline: 1px solid var(--color-primary-hover);
+		outline-offset: -1px;
+	}
 
 	&__gradient {
 		display: flex;
@@ -31,10 +36,5 @@
 	&__goals {
 		color: var(--color-white);
 		font-size: 14px;
-	}
-
-	&:hover {
-		outline: 1px solid var(--color-primary-hover);
-		outline-offset: -1px;
 	}
 }

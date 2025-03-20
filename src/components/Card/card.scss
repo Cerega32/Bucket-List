@@ -7,8 +7,17 @@
 	background: var(--color-white);
 	border: 1px solid var(--color-gray-9);
 	border-radius: 8px;
-	overflow: hidden;
 	transition: all 0.15s ease-in-out;
+	overflow: hidden;
+
+	&:hover {
+		outline: 1px solid var(--color-primary-hover);
+		outline-offset: -1px;
+
+		#{$block}__buttons {
+			display: flex;
+		}
+	}
 
 	&__gradient {
 		display: flex;
@@ -47,12 +56,12 @@
 	}
 
 	&__text {
+		display: flex;
 		overflow: hidden;
-		display: -webkit-box;
+		color: var(--color-text);
+		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 3; /* number of lines to show */
 		line-clamp: 3;
-		-webkit-box-orient: vertical;
-		color: var(--color-text);
 	}
 
 	&__tags-wrapper {
@@ -76,15 +85,6 @@
 			* {
 				fill: var(--color-white);
 			}
-		}
-	}
-
-	&:hover {
-		outline: 1px solid var(--color-primary-hover);
-		outline-offset: -1px;
-
-		#{$block}__buttons {
-			display: flex;
 		}
 	}
 
@@ -113,11 +113,11 @@
 			}
 
 			&__text {
-				display: -webkit-box;
+				display: flex;
+				overflow: hidden;
+				-webkit-box-orient: vertical;
 				-webkit-line-clamp: 2;
 				line-clamp: 2;
-				-webkit-box-orient: vertical;
-				overflow: hidden;
 			}
 
 			&__tags-wrapper {

@@ -1,13 +1,16 @@
 .user-self {
 	display: flex;
 	align-items: flex-start;
-	gap: 24px;
+
 	max-width: var(--max-width);
 	margin: 56px auto 102px;
+
 	background: var(--color-gray-3);
+	gap: 24px;
 
 	&__sidebar {
 		flex-shrink: 0;
+
 		width: 336px;
 	}
 }

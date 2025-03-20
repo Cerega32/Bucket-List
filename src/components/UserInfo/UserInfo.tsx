@@ -9,7 +9,7 @@ import {Title} from '../Title/Title';
 import './user-info.scss';
 
 interface UserInfoProps {
-	background?: string;
+	background?: string | null;
 	avatar: string | null;
 	name: string;
 	totalAdded: number;
@@ -22,18 +22,7 @@ interface UserInfoProps {
 }
 
 export const UserInfo: FC<UserInfoProps> = (props) => {
-	const {
-		background = '/src/assets/jpg/Background.jpg',
-		avatar,
-		name,
-		totalAdded,
-		totalCompleted,
-		page,
-		id,
-		totalAddedLists,
-		totalCompletedLists,
-		totalAchievements,
-	} = props;
+	const {background, avatar, name, totalAdded, totalCompleted, page, id, totalAddedLists, totalCompletedLists, totalAchievements} = props;
 	const [block, element] = useBem('user-info');
 
 	const tabs: Array<ITabs> = useMemo(() => {
@@ -71,7 +60,7 @@ export const UserInfo: FC<UserInfoProps> = (props) => {
 
 	return (
 		<article className={block()}>
-			<div style={{backgroundImage: `url('${background}')`}} className={element('bg')} />
+			{background && <div style={{backgroundImage: `url('${background}')`}} className={element('bg')} />}
 			<section className={element('about')}>
 				<Avatar avatar={avatar} className={element('avatar')} size="large" />
 				<div className={element('wrapper')}>

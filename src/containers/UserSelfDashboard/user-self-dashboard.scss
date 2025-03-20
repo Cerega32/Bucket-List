@@ -3,9 +3,9 @@
 
 	&__info-wrapper {
 		display: grid;
-		grid-template-columns: 1fr 1fr 1fr;
 		gap: 24px;
 		margin-bottom: 56px;
+		grid-template-columns: 1fr 1fr 1fr;
 	}
 
 	&__info {

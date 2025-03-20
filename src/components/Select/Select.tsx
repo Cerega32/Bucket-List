@@ -22,12 +22,17 @@ interface SelectProps {
 
 const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, className, filter, placeholder = 'Сделайте выбор'}) => {
 	const [isOpen, setIsOpen] = useState(false);
+	const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
 	const selectRef = useRef<HTMLDivElement | null>(null);
+	const optionsRef = useRef<(HTMLLIElement | null)[]>([]);
 
 	const [block, element] = useBem('select', className);
 
 	const toggleDropdown = () => {
 		setIsOpen(!isOpen);
+		if (!isOpen && typeof activeOption === 'number') {
+			setHighlightedIndex(activeOption);
+		}
 	};
 
 	const handleClickOutside = (event: MouseEvent) => {
@@ -41,6 +46,65 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, classNa
 		setIsOpen(false);
 	};
 
+	const handleKeyDown = (event: React.KeyboardEvent) => {
+		if (!isOpen && (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown')) {
+			event.preventDefault();
+			setIsOpen(true);
+			setHighlightedIndex(activeOption !== null ? activeOption : 0);
+			return;
+		}
+
+		if (!isOpen) return;
+
+		switch (event.key) {
+			case 'Escape':
+				event.preventDefault();
+				setIsOpen(false);
+				break;
+			case 'ArrowDown':
+				event.preventDefault();
+				setHighlightedIndex((prevIndex) => {
+					const newIndex = prevIndex === null ? 0 : (prevIndex + 1) % options.length;
+					optionsRef.current[newIndex]?.scrollIntoView({block: 'nearest'});
+					return newIndex;
+				});
+				break;
+			case 'ArrowUp':
+				event.preventDefault();
+				setHighlightedIndex((prevIndex) => {
+					const newIndex = prevIndex === null || prevIndex === 0 ? options.length - 1 : prevIndex - 1;
+					optionsRef.current[newIndex]?.scrollIntoView({block: 'nearest'});
+					return newIndex;
+				});
+				break;
+			case 'Enter':
+			case ' ':
+				event.preventDefault();
+				if (highlightedIndex !== null) {
+					handleOptionClick(highlightedIndex);
+				}
+				break;
+			default:
+				break;
+		}
+	};
+
+	// Обработчик для элемента выбора
+	const handleSelectKeyDown = (event: React.KeyboardEvent) => {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			toggleDropdown();
+		}
+	};
+
+	// Обработчик для элементов списка
+	const handleOptionKeyDown = (event: React.KeyboardEvent, index: number) => {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			handleOptionClick(index);
+		}
+	};
+
 	useEffect(() => {
 		document.addEventListener('mousedown', handleClickOutside);
 
@@ -49,28 +113,50 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, classNa
 		};
 	}, []);
 
+	// Сбрасываем optionsRef при изменении количества опций
+	useEffect(() => {
+		optionsRef.current = optionsRef.current.slice(0, options.length);
+	}, [options.length]);
+
 	return (
-		<div className={block({filter})} ref={selectRef}>
+		<div
+			className={block({filter})}
+			ref={selectRef}
+			onKeyDown={handleKeyDown}
+			role="combobox"
+			aria-haspopup="listbox"
+			aria-expanded={isOpen}
+			aria-controls={isOpen ? 'select-options-list' : undefined}
+			aria-label={text || 'Выпадающий список'}
+			tabIndex={0}
+		>
 			{text && <p className={element('text')}>{text}</p>}
-			<div
+			<button
+				type="button"
 				className={element('option', {isOpen, placeholder: typeof activeOption !== 'number'})}
 				onClick={toggleDropdown}
-				onKeyUp={toggleDropdown}
-				role="button"
-				tabIndex={0}
+				onKeyDown={handleSelectKeyDown}
+				aria-label={typeof activeOption === 'number' ? `Выбрано: ${options[activeOption].name}` : placeholder}
 			>
 				<Svg icon={filter ? 'sort' : 'arrow--right'} />
 				{typeof activeOption === 'number' ? options[activeOption].name : placeholder}
-			</div>
+			</button>
 			{isOpen && (
-				<ul className={element('list')}>
+				<ul id="select-options-list" className={element('list')} role="listbox" aria-label="Доступные опции">
 					{options.map((option, i) => (
 						<li
 							key={option.value}
-							className={element('item', {active: activeOption === i})}
+							ref={(el) => {
+								optionsRef.current[i] = el;
+							}}
+							className={element('item', {
+								active: activeOption === i,
+								highlighted: highlightedIndex === i,
+							})}
 							onClick={() => handleOptionClick(i)}
-							onKeyUp={toggleDropdown}
-							role="row"
+							onKeyDown={(e) => handleOptionKeyDown(e, i)}
+							role="option"
+							aria-selected={activeOption === i}
 							tabIndex={0}
 						>
 							{option.name}

@@ -10,24 +10,32 @@
 	border-radius: 4px;
 	transition: all 0.15s ease-in-out;
 
+	&__loading {
+		width: 16px;
+		height: 16px;
+		animation: 2s linear infinite rotate;
+		border-bottom: 1px solid var(--color-text-primary);
+		border-radius: 50%;
+	}
+
 	&--close {
 		width: 24px;
 		height: 24px;
 		padding: 2px;
 		border: none;
 
-		* {
-			fill: var(--color-text);
-		}
-
 		&:hover {
 			background: var(--color-secondary-hover);
 		}
 
 		&:focus {
-			background: var(--color-secondary-hover);
-
 			@include focus-outline;
+
+			background: var(--color-secondary-hover);
+		}
+
+		* {
+			fill: var(--color-text);
 		}
 	}
 
@@ -53,10 +61,6 @@
 		background: var(--color-secondary);
 		color: var(--color-text-primary);
 
-		path {
-			fill: var(--color-text-primary);
-		}
-
 		&:hover,
 		&:active {
 			background: var(--color-secondary-hover);
@@ -64,6 +68,10 @@
 
 		&:focus {
 			@include focus-outline;
+		}
+
+		path {
+			fill: var(--color-text-primary);
 		}
 	}
 
@@ -76,12 +84,12 @@
 			background: var(--color-sentiment-positive-hover);
 		}
 
-		#{$block}__icon * {
-			fill: var(--color-white);
-		}
-
 		&:focus {
 			@include focus-outline;
+		}
+
+		#{$block}__icon * {
+			fill: var(--color-white);
 		}
 	}
 
@@ -94,12 +102,12 @@
 			background: var(--color-sentiment-negative-hover);
 		}
 
-		#{$block}__icon * {
-			fill: var(--color-white);
-		}
-
 		&:focus {
 			@include focus-outline;
+		}
+
+		#{$block}__icon * {
+			fill: var(--color-white);
 		}
 	}
 
@@ -144,14 +152,6 @@
 			background: var(--color-white);
 			cursor: initial;
 		}
-	}
-
-	&__loading {
-		width: 16px;
-		height: 16px;
-		border-radius: 50%;
-		border-bottom: 1px solid var(--color-text-primary);
-		animation: 2s linear infinite rotate;
 	}
 
 	@keyframes rotate {

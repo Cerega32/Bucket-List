@@ -23,14 +23,14 @@
 	}
 
 	&__dart {
-		animation: dart-flight 2.5s linear infinite;
 		transform-origin: center;
+		animation: dart-flight 2.5s linear infinite;
 		transform-box: fill-box;
 	}
 
 	&__aim {
-		animation: aim-shake 2.5s linear infinite;
 		transform-origin: center;
+		animation: aim-shake 2.5s linear infinite;
 		transform-box: fill-box;
 	}
 }

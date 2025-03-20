@@ -1,24 +1,6 @@
 .login {
 	$block: &;
 
-	&--page {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		height: 100vh;
-
-		#{$block} {
-			&__form {
-				width: 456px;
-				padding: 24px;
-				background-color: var(--color-white);
-				border: 1px solid var(--color-gray-9);
-				border-radius: 8px;
-			}
-		}
-	}
-
 	&__logo {
 		display: flex;
 		justify-content: center;
@@ -58,5 +40,23 @@
 
 	&__btn-registration {
 		margin-left: 4px;
+	}
+
+	&--page {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		height: 100vh;
+
+		#{$block} {
+			&__form {
+				width: 456px;
+				padding: 24px;
+				background-color: var(--color-white);
+				border: 1px solid var(--color-gray-9);
+				border-radius: 8px;
+			}
+		}
 	}
 }

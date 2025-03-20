@@ -24,13 +24,13 @@
 			cursor: initial;
 			transition: all 0.2s linear;
 
-			* {
-				fill: transparent;
-				transition: all 0.2s linear;
-			}
-
 			&:hover {
 				background: transparent;
+			}
+
+			* {
+				transition: all 0.2s linear;
+				fill: transparent;
 			}
 		}
 	}

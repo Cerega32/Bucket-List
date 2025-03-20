@@ -47,15 +47,15 @@
 
 	&__photo-wrapper {
 		position: relative;
+		overflow: hidden;
 		width: 72px;
 		height: 72px;
-		overflow: hidden;
 		border-radius: 8px;
 	}
 
 	&__photo {
-		object-fit: cover;
 		height: 100%;
+		object-fit: cover;
 	}
 
 	&__delete-photo {
