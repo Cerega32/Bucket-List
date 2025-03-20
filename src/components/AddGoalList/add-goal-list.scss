@@ -1,7 +1,7 @@
 .add-goal-list {
 	max-width: 1200px;
-	margin: 0 auto;
 	padding: 20px;
+	margin: 0 auto;
 
 	@media (width <= 768px) {
 		&__content {
@@ -10,7 +10,6 @@
 
 		&__image-section {
 			position: static;
-
 			width: 100%;
 			margin-bottom: 24px;
 		}
@@ -18,13 +17,11 @@
 
 	&__title {
 		margin-bottom: 32px;
-
 		text-align: center;
 	}
 
 	&__subtitle {
 		margin: 32px 0 24px;
-
 		font-size: 24px;
 	}
 
@@ -41,9 +38,7 @@
 	&__image-section {
 		position: sticky;
 		top: 20px;
-
 		flex-shrink: 0;
-
 		width: 300px;
 		margin-bottom: 0;
 	}
@@ -54,7 +49,6 @@
 
 	&__field-title {
 		margin-bottom: 8px;
-
 		font-weight: 500;
 	}
 
@@ -62,16 +56,13 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-
 		height: 300px;
 		padding: 40px 20px;
-
-		cursor: pointer;
-		transition: border-color 0.3s;
-		text-align: center;
-
 		border: 2px dashed var(--color-border);
 		border-radius: 8px;
+		text-align: center;
+		cursor: pointer;
+		transition: border-color 0.3s;
 
 		&:hover {
 			border-color: var(--color-primary);
@@ -88,25 +79,20 @@
 	&__upload-icon {
 		width: 48px;
 		height: 48px;
-
 		color: var(--color-text-secondary);
 	}
 
 	&__image-preview {
 		position: relative;
-
 		overflow: hidden;
-
 		max-width: 100%;
 		height: 300px;
-
 		border-radius: 8px;
 	}
 
 	&__preview {
 		width: 100%;
 		height: 100%;
-
 		object-fit: cover;
 	}
 
@@ -114,20 +100,16 @@
 		position: absolute;
 		top: 8px;
 		right: 8px;
-
 		display: flex;
 		justify-content: center;
 		align-items: center;
-
 		width: 32px;
 		height: 32px;
-
-		cursor: pointer;
-
-		color: var(--color-white);
+		background: rgb(var(--color-black-rgb) / 50%);
 		border: none;
 		border-radius: 50%;
-		background: rgb(var(--color-black-rgb) / 50%);
+		color: var(--color-white);
+		cursor: pointer;
 
 		&:hover {
 			background: rgb(var(--color-black-rgb) / 70%);
@@ -135,46 +117,38 @@
 	}
 
 	&__goals-section {
-		margin-bottom: 32px;
 		padding: 24px;
-
-		border-radius: 12px;
+		margin-bottom: 32px;
 		background-color: var(--color-gray-6);
+		border-radius: 12px;
 	}
 
 	&__search-container {
 		position: relative;
-
 		margin-bottom: 24px;
 	}
 
 	&__search-results {
 		position: absolute;
+		z-index: 10;
 		top: 100%;
 		right: 0;
 		left: 0;
-		z-index: 10;
-
-		overflow-y: auto;
-
 		max-height: 300px;
-
-		border-radius: 8px;
 		background-color: var(--color-white);
+		border-radius: 8px;
+		overflow-y: auto;
 		box-shadow: 0 4px 12px rgb(var(--color-black-rbg) / 10%);
 	}
 
 	&__loading {
 		padding: 12px;
-
-		text-align: center;
-
 		color: var(--color-text-secondary);
+		text-align: center;
 	}
 
 	&__section-title {
 		margin-bottom: 16px;
-
 		font-size: 18px;
 		font-weight: 500;
 	}
@@ -193,35 +167,30 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-
 		padding: 12px;
-
-		border-radius: 8px;
 		background-color: var(--color-white);
+		border-radius: 8px;
 		box-shadow: 0 2px 6px rgb(var(--color-black-rgb) / 5%);
 	}
 
 	&__goal-content {
 		display: flex;
-		align-items: center;
 		flex: 1;
+		align-items: center;
 		gap: 12px;
 	}
 
 	&__goal-image-container {
 		overflow: hidden;
 		flex-shrink: 0;
-
 		width: 60px;
 		height: 60px;
-
 		border-radius: 8px;
 	}
 
 	&__goal-image {
 		width: 100%;
 		height: 100%;
-
 		object-fit: cover;
 	}
 
@@ -229,48 +198,37 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-
 		width: 100%;
 		height: 100%;
-
-		color: var(--color-text-secondary);
 		background-color: var(--color-gray-9);
+		color: var(--color-text-secondary);
 	}
 
 	&__goal-info {
 		flex: 1;
-
 		min-width: 0;
 	}
 
 	&__goal-title {
 		overflow: hidden;
-
 		margin: 0 0 4px;
-
 		white-space: nowrap;
 		text-overflow: ellipsis;
-
 		font-size: 16px;
 		font-weight: 500;
 	}
 
 	&__goal-complexity {
 		margin: 0 0 4px;
-
 		color: var(--color-text-secondary);
-
 		font-size: 14px;
 	}
 
 	&__goal-description {
 		display: flex;
 		overflow: hidden;
-
 		margin: 0;
-
 		color: var(--color-text-secondary);
-
 		font-size: 14px;
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;
@@ -278,34 +236,29 @@
 
 	&__goal-remove-btn {
 		display: flex;
+		flex-shrink: 0;
 		justify-content: center;
 		align-items: center;
-		flex-shrink: 0;
-
 		width: 32px;
 		height: 32px;
-
-		cursor: pointer;
-
-		color: var(--color-text-secondary);
+		background-color: var(--color-gray-9);
 		border: none;
 		border-radius: 50%;
-		background-color: var(--color-gray-9);
+		color: var(--color-text-secondary);
+		cursor: pointer;
 
 		&:hover {
-			color: var(--color-red-2);
 			background-color: var(--color-gray-5);
+			color: var(--color-red-2);
 		}
 	}
 
 	&__empty-message {
 		padding: 24px;
-
-		text-align: center;
-
-		color: var(--color-text-secondary);
-		border-radius: 8px;
 		background-color: var(--color-white);
+		border-radius: 8px;
+		color: var(--color-text-secondary);
+		text-align: center;
 	}
 
 	&__add-new-goal {
@@ -316,30 +269,25 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-
-		width: 100%;
 		gap: 8px;
+		width: 100%;
 	}
 
 	&__new-goal-form {
 		padding: 24px;
-
-		border-radius: 8px;
 		background-color: var(--color-white);
+		border-radius: 8px;
 		box-shadow: 0 2px 8px rgb(var(--color-black-rbg) / 5%);
 	}
 
 	&__form-title {
 		margin-bottom: 16px;
-
 		font-size: 20px;
 	}
 
 	&__embedded-add-goal-wrapper {
 		position: relative;
-
 		overflow: hidden;
-
 		width: 100%;
 	}
 
@@ -350,17 +298,15 @@
 	&__form-buttons {
 		display: flex;
 		justify-content: flex-end;
-
-		margin-top: 24px;
 		gap: 12px;
+		margin-top: 24px;
 	}
 
 	&__btns-wrapper {
 		display: flex;
 		justify-content: flex-end;
-
-		margin-top: 32px;
 		gap: 16px;
+		margin-top: 32px;
 	}
 
 	&__btn {

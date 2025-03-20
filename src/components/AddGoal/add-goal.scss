@@ -1,7 +1,7 @@
 .add-goal {
 	max-width: 1200px;
-	margin: 0 auto;
 	padding: 20px;
+	margin: 0 auto;
 
 	@media (width <= 768px) {
 		&__content {
@@ -10,7 +10,6 @@
 
 		&__image-section {
 			position: static;
-
 			width: 100%;
 			margin-bottom: 24px;
 		}
@@ -34,16 +33,13 @@
 	&__image-section {
 		position: sticky;
 		top: 20px;
-
 		flex-shrink: 0;
-
 		width: 300px;
 		margin-bottom: 0;
 	}
 
 	&__field-container {
 		position: relative;
-
 		margin-bottom: 20px;
 	}
 
@@ -54,39 +50,32 @@
 	&__searching {
 		display: flex;
 		align-items: center;
-
-		margin-top: 4px;
-		padding: 8px 12px;
-
-		color: var(--color-text-secondary);
-		border-radius: 4px;
-		background-color: var(--color-gray-5);
-
-		font-size: 14px;
 		gap: 8px;
+		padding: 8px 12px;
+		margin-top: 4px;
+		background-color: var(--color-gray-5);
+		border-radius: 4px;
+		color: var(--color-text-secondary);
+		font-size: 14px;
 	}
 
 	&__loading-icon {
 		width: 16px;
 		height: 16px;
-
 		animation: spin 1s linear infinite;
 	}
 
 	&__similar-goals {
 		position: absolute;
+		z-index: 10;
 		top: 100%;
 		right: 0;
 		left: 0;
-		z-index: 10;
-
-		overflow-y: auto;
-
 		max-height: 400px;
 		padding: 16px;
-
-		border-radius: 8px;
 		background-color: var(--color-white);
+		border-radius: 8px;
+		overflow-y: auto;
 		box-shadow: 0 4px 12px rgb(var(--color-black-rgb) / 10%);
 	}
 
@@ -94,27 +83,22 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-
 		margin-bottom: 8px;
 	}
 
 	&__similar-title {
 		margin: 0;
-
 		color: var(--color-primary);
-
 		font-size: 16px;
 		font-weight: 500;
 	}
 
 	&__close-similar {
 		padding: 4px;
-
-		cursor: pointer;
-
-		color: var(--color-text-secondary);
-		border: none;
 		background: none;
+		border: none;
+		color: var(--color-text-secondary);
+		cursor: pointer;
 
 		&:hover {
 			color: var(--color-text-primary);
@@ -123,9 +107,7 @@
 
 	&__similar-desc {
 		margin-bottom: 12px;
-
 		color: var(--color-text-secondary);
-
 		font-size: 14px;
 	}
 
@@ -137,7 +119,6 @@
 
 	&__field-title {
 		margin-bottom: 8px;
-
 		font-weight: 500;
 	}
 
@@ -145,16 +126,13 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-
 		height: 300px;
 		padding: 40px 20px;
-
-		cursor: pointer;
-		transition: border-color 0.3s;
-		text-align: center;
-
 		border: 2px dashed var(--color-border);
 		border-radius: 8px;
+		text-align: center;
+		cursor: pointer;
+		transition: border-color 0.3s;
 
 		&:hover {
 			border-color: var(--color-primary);
@@ -171,25 +149,20 @@
 	&__upload-icon {
 		width: 48px;
 		height: 48px;
-
 		color: var(--color-text-secondary);
 	}
 
 	&__image-preview {
 		position: relative;
-
 		overflow: hidden;
-
 		max-width: 100%;
 		height: 300px;
-
 		border-radius: 8px;
 	}
 
 	&__preview {
 		width: 100%;
 		height: 100%;
-
 		object-fit: cover;
 	}
 
@@ -202,9 +175,8 @@
 	&__btns-wrapper {
 		display: flex;
 		justify-content: flex-end;
-
-		margin-top: 32px;
 		gap: 16px;
+		margin-top: 32px;
 	}
 
 	&__btn {
