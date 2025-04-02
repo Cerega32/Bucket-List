@@ -2,6 +2,7 @@ import {FC, useEffect, useRef, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
 import {AllCategories} from '@/components/AllCategories/AllCategories';
+import {Button} from '@/components/Button/Button';
 import {Card} from '@/components/Card/Card';
 import {CatalogItems} from '@/components/CatalogItems/CatalogItems';
 import {HeaderCategory} from '@/components/HeaderCategory/HeaderCategory';
@@ -119,9 +120,13 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 			)}
 			{!!popularGoals.length && (
 				<>
-					<Title className={element('title')} tag="h2">
-						Популярные цели этой недели
-					</Title>
+					<div className={element('wrapper-title')}>
+						<Title tag="h2">Популярные цели этой недели</Title>
+						<Button type="Link" theme="blue" icon="plus" href={`/goals/create${id && id !== 'all' ? `?category=${id}` : ''}`}>
+							Добавить цель
+						</Button>
+					</div>
+
 					<section className={element('popular-goals')}>
 						{popularGoals.map((goal, i) => (
 							<Card
@@ -138,9 +143,12 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 			)}
 			{!!popularLists.length && (
 				<>
-					<Title className={element('title')} tag="h2">
-						Популярные списки этой недели
-					</Title>
+					<div className={element('wrapper-title')}>
+						<Title tag="h2">Популярные списки этой недели</Title>
+						<Button type="Link" theme="blue" icon="plus" href={`/list/create${id && id !== 'all' ? `?category=${id}` : ''}`}>
+							Добавить список целей
+						</Button>
+					</div>
 					<section className={element('popular-lists')}>
 						{popularLists.map((list, i) => (
 							<Card

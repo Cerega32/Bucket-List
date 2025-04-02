@@ -15,7 +15,10 @@
 		}
 	}
 
-	&__title {
+	&__wrapper-title {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 		margin-bottom: 24px;
 	}
 

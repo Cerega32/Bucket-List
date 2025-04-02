@@ -1,6 +1,6 @@
 import {FC, FormEvent, useCallback, useEffect, useState} from 'react';
 import {useDropzone} from 'react-dropzone';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 
 import {AddGoal} from '@/components/AddGoal/AddGoal';
 import {Button} from '@/components/Button/Button';
@@ -29,6 +29,7 @@ interface AddGoalListProps {
 export const AddGoalList: FC<AddGoalListProps> = (props) => {
 	const {className} = props;
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const [block, element] = useBem('add-goal-list', className);
 	const [title, setTitle] = useState('');
@@ -85,6 +86,20 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 			loadSubcategories();
 		}
 	}, [activeCategory, categories]);
+
+	// Добавляем обработку параметра категории из URL
+	useEffect(() => {
+		const params = new URLSearchParams(location.search);
+		const categoryParam = params.get('category');
+
+		if (categoryParam && categories.length > 0) {
+			// Находим индекс категории в массиве categories
+			const categoryIndex = categories.findIndex((cat) => cat.nameEn === categoryParam);
+			if (categoryIndex !== -1) {
+				setActiveCategory(categoryIndex);
+			}
+		}
+	}, [location.search, categories]);
 
 	// Функция для поиска целей с дебаунсом
 	const debouncedSearch = useCallback(

@@ -3,9 +3,11 @@ import {FC, useMemo} from 'react';
 import {useBem} from '@/hooks/useBem';
 
 import {Avatar} from '../Avatar/Avatar';
+import {Button} from '../Button/Button';
 import {InfoGoal} from '../InfoGoal/InfoGoal';
 import {ITabs, Tabs} from '../Tabs/Tabs';
 import {Title} from '../Title/Title';
+
 import './user-info.scss';
 
 interface UserInfoProps {
@@ -67,13 +69,18 @@ export const UserInfo: FC<UserInfoProps> = (props) => {
 					<Title tag="h2" className={element('name')}>
 						{name}
 					</Title>
-					<InfoGoal
-						items={[
-							{title: 'Всего целей', value: totalAdded},
-							{title: 'Выполнено', value: totalCompleted},
-						]}
-						className={element('goals')}
-					/>
+					<div className={element('right')}>
+						<Button type="Link" theme="blue" icon="plus" href="/goals/create">
+							Добавить цель
+						</Button>
+						<InfoGoal
+							items={[
+								{title: 'Всего целей', value: totalAdded},
+								{title: 'Выполнено', value: totalCompleted},
+							]}
+							className={element('goals')}
+						/>
+					</div>
 				</div>
 			</section>
 			<Tabs tabs={tabs} active={page} />

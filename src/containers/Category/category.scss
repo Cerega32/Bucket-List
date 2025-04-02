@@ -1,6 +1,13 @@
 .category {
 	padding: calc(380px + 56px) 0 0;
 
+	&__wrapper-title {
+		display: flex;
+		justify-content: space-between;
+		max-width: var(--max-width);
+		margin: 0 auto 24px;
+	}
+
 	&__title {
 		max-width: var(--max-width);
 		margin: 0 auto 24px;

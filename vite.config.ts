@@ -42,6 +42,7 @@ export default defineConfig(({mode}) => {
 			outDir: 'dist',
 			assetsDir: 'assets',
 			assetsInlineLimit: 4096, // Файлы меньше 4kb будут инлайниться
+			chunkSizeWarningLimit: 1000, // Увеличение лимита размера чанка
 			cleanCssOptions: {
 				level: {
 					1: {
@@ -51,6 +52,14 @@ export default defineConfig(({mode}) => {
 			},
 			sourcemap: mode === 'development',
 			minify: mode === 'production',
+			rollupOptions: {
+				output: {
+					manualChunks: {
+						vendor: ['react', 'react-dom'],
+						ui: ['framer-motion', 'react-router-dom'],
+					},
+				},
+			},
 		},
 		server: {
 			port: 3000,

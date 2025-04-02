@@ -1,6 +1,6 @@
 import {FC, FormEvent, useCallback, useEffect, useState} from 'react';
 import {useDropzone} from 'react-dropzone';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
 import {ExternalGoalSearch} from '@/components/ExternalGoalSearch/ExternalGoalSearch';
@@ -34,6 +34,7 @@ interface AddGoalProps {
 export const AddGoal: FC<AddGoalProps> = (props) => {
 	const {className, onGoalCreated, hideNavigation = false, noForm = false, onSubmitForm} = props;
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const [block, element] = useBem('add-goal', className);
 	const [title, setTitle] = useState('');
@@ -92,6 +93,20 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			loadSubcategories();
 		}
 	}, [activeCategory, categories]);
+
+	// Добавляем обработку параметра категории из URL
+	useEffect(() => {
+		const params = new URLSearchParams(location.search);
+		const categoryParam = params.get('category');
+
+		if (categoryParam && categories.length > 0) {
+			// Находим индекс категории в массиве categories
+			const categoryIndex = categories.findIndex((cat) => cat.nameEn === categoryParam);
+			if (categoryIndex !== -1) {
+				setActiveCategory(categoryIndex);
+			}
+		}
+	}, [location.search, categories]);
 
 	// Функция для поиска похожих целей с дебаунсом
 	const debouncedSearch = useCallback(
@@ -436,9 +451,14 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const content = (
 		<>
 			{!hideNavigation && (
-				<Title tag="h1" className={element('title')}>
-					Создание новой цели
-				</Title>
+				<div className={element('wrapper-title')}>
+					<Title tag="h1" className={element('title')}>
+						Создание новой цели
+					</Title>
+					<Button type="Link" theme="blue" icon="plus" href="/list/create">
+						Добавить список целей
+					</Button>
+				</div>
 			)}
 			<Loader isLoading={isLoading}>
 				<div className={element('content')}>
