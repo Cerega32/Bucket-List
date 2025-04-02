@@ -292,6 +292,15 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					message: 'Цель успешно создана',
 				});
 
+				// Показываем уведомление о возможности редактирования
+				if (response.data.message) {
+					NotificationStore.addNotification({
+						type: 'warning',
+						title: 'Обратите внимание',
+						message: response.data.message,
+					});
+				}
+
 				// Если передан обработчик создания цели, вызываем его
 				if (onGoalCreated && response.data) {
 					onGoalCreated(response.data);
@@ -455,13 +464,19 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					<Title tag="h1" className={element('title')}>
 						Создание новой цели
 					</Title>
-					<Button type="Link" theme="blue" icon="plus" href="/list/create">
+					<Button size="small" type="Link" theme="blue" icon="plus" href="/list/create">
 						Добавить список целей
 					</Button>
 				</div>
 			)}
 			<Loader isLoading={isLoading}>
 				<div className={element('content')}>
+					{/* Добавляем информационное сообщение */}
+					<div className={element('edit-info-message')}>
+						<Svg icon="info" className={element('info-icon')} />
+						<p>Вы сможете отредактировать или удалить цель в течение 24ч после создания, затем действие будет недоступно</p>
+					</div>
+
 					{/* Добавляем компонент поиска внешних целей */}
 					<div className={element('external-search-section')}>
 						<ExternalGoalSearch onGoalSelected={handleExternalGoalSelected} className={element('external-search')} />

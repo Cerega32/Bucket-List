@@ -122,7 +122,13 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 				<>
 					<div className={element('wrapper-title')}>
 						<Title tag="h2">Популярные цели этой недели</Title>
-						<Button type="Link" theme="blue" icon="plus" href={`/goals/create${id && id !== 'all' ? `?category=${id}` : ''}`}>
+						<Button
+							type="Link"
+							theme="blue"
+							icon="plus"
+							href={`/goals/create${id && id !== 'all' ? `?category=${id}` : ''}`}
+							size="small"
+						>
 							Добавить цель
 						</Button>
 					</div>
@@ -145,7 +151,13 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 				<>
 					<div className={element('wrapper-title')}>
 						<Title tag="h2">Популярные списки этой недели</Title>
-						<Button type="Link" theme="blue" icon="plus" href={`/list/create${id && id !== 'all' ? `?category=${id}` : ''}`}>
+						<Button
+							type="Link"
+							theme="blue"
+							icon="plus"
+							href={`/list/create${id && id !== 'all' ? `?category=${id}` : ''}`}
+							size="small"
+						>
 							Добавить список целей
 						</Button>
 					</div>

@@ -20,16 +20,20 @@ interface AsideGoalProps extends AsideProps {
 	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void | boolean>;
 	isList?: never;
 	openAddReview: () => void;
+	editGoal?: () => void;
+	canEdit?: boolean;
 }
 
 export interface AsideListsProps extends AsideProps {
 	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark-all') => Promise<void | boolean>;
 	isList: true;
 	openAddReview?: never;
+	editGoal: never;
+	canEdit?: never;
 }
 
 export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
-	const {className, title, image, added, updateGoal, code, done, isList, openAddReview} = props;
+	const {className, title, image, added, updateGoal, code, done, isList, openAddReview, editGoal, canEdit} = props;
 
 	const [block, element] = useBem('aside-goal', className);
 
@@ -89,6 +93,11 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						Удалить
 					</Button>
 				)}
+				{canEdit && editGoal && (
+					<Button theme="blue-light" onClick={editGoal} icon="edit" className={element('btn')}>
+						Редактировать
+					</Button>
+				)}
 				<Line className={element('line')} />
 				<Button
 					theme="blue-light"
@@ -100,7 +109,6 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 							'status=0,toolbar=0,width=650,height=500'
 						);
 					}}
-					// TODO Добавить действие
 					className={element('btn')}
 				>
 					Поделиться

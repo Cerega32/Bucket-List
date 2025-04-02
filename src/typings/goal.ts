@@ -57,6 +57,15 @@ export interface IGoal {
 	totalComments: number;
 	addedFromList: Array<string>;
 	categoryRank?: number;
+	createdAt: string;
+	createdBy?: {
+		id: number;
+		username: string;
+		avatar?: string;
+	};
+	createdByUser?: boolean;
+	canEdit?: boolean;
+	totalAdditions?: number;
 }
 
 export interface IShortGoal {

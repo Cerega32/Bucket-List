@@ -3,12 +3,16 @@ import {useParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {ContentGoal} from '@/components/ContentGoal/ContentGoal';
+import {EditGoal} from '@/components/EditGoal/EditGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
 import {useBem} from '@/hooks/useBem';
 import {GoalStore} from '@/store/GoalStore';
 import {ModalStore} from '@/store/ModalStore';
+import {NotificationStore} from '@/store/NotificationStore';
+import {ThemeStore} from '@/store/ThemeStore';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
+import {canEditGoal} from '@/utils/api/get/canEditGoal';
 import {getGoal} from '@/utils/api/get/getGoal';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
@@ -22,8 +26,14 @@ export const Goal: FC<IPage> = ({page}) => {
 	const params = useParams();
 	const listId = params?.['id'];
 	const [goal, setGoal] = useState<IGoal | null>(null);
+	const [isEditing, setIsEditing] = useState(false);
+	const [canEditCheck, setCanEditCheck] = useState<{can_edit: boolean; checked: boolean}>({
+		can_edit: false,
+		checked: false,
+	});
 
 	const {setIsOpen, setWindow} = ModalStore;
+	const {setHeader} = ThemeStore;
 
 	useEffect(() => {
 		(async () => {
@@ -36,6 +46,26 @@ export const Goal: FC<IPage> = ({page}) => {
 			}
 		})();
 	}, [listId]);
+
+	useEffect(() => {
+		const checkEditPermission = async () => {
+			if (goal && goal.createdBy && !canEditCheck.checked) {
+				try {
+					const response = await canEditGoal(listId || '');
+					if (response.success && response.data) {
+						setCanEditCheck({
+							can_edit: response.data.can_edit,
+							checked: true,
+						});
+					}
+				} catch (error) {
+					console.error('Ошибка при проверке возможности редактирования:', error);
+				}
+			}
+		};
+
+		checkEditPermission();
+	}, [goal, listId, canEditCheck.checked]);
 
 	if (!goal) {
 		return null;
@@ -78,6 +108,37 @@ export const Goal: FC<IPage> = ({page}) => {
 		}
 	};
 
+	const handleEditClick = () => {
+		if (goal?.canEdit) {
+			setIsEditing(true);
+		} else {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Вы не можете редактировать эту цель',
+			});
+		}
+	};
+
+	const handleGoalUpdated = (updatedGoal: IGoal) => {
+		setGoal({...goal, ...updatedGoal});
+		setHeader('transparent');
+		setIsEditing(false);
+	};
+
+	const handleCancelEdit = () => {
+		setHeader('transparent');
+		setIsEditing(false);
+	};
+
+	if (isEditing && goal) {
+		return (
+			<main className={block({editing: true})}>
+				<EditGoal goal={goal} onGoalUpdated={handleGoalUpdated} cancelEdit={handleCancelEdit} />
+			</main>
+		);
+	}
+
 	return (
 		<main className={block()}>
 			<HeaderGoal title={goal.title} category={goal.category} image={goal.image} goal={goal} />
@@ -85,12 +146,14 @@ export const Goal: FC<IPage> = ({page}) => {
 				<AsideGoal
 					className={element('aside')}
 					title={goal.title}
-					image={goal.image}
+					image={goal.image || ''}
+					added={goal.addedByUser}
 					updateGoal={updateGoal}
 					code={goal.code}
 					done={goal.completedByUser}
-					added={goal.addedByUser}
 					openAddReview={openAddReview}
+					editGoal={goal.createdByUser && goal.canEdit ? handleEditClick : undefined}
+					canEdit={!!goal.canEdit}
 				/>
 				<ContentGoal page={page} goal={goal} className={element('content')} />
 			</section>
