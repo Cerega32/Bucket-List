@@ -28,7 +28,7 @@ export interface AsideListsProps extends AsideProps {
 	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark-all') => Promise<void | boolean>;
 	isList: true;
 	openAddReview?: never;
-	editGoal: never;
+	editGoal?: never;
 	canEdit?: never;
 }
 
