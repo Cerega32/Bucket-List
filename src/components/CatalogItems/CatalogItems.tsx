@@ -47,19 +47,19 @@ interface CatalogItemsUsersProps extends CatalogItemsProps {
 
 const sortBy: Array<OptionSelect> = [
 	{
-		name: 'Сначала новые',
+		name: 'Новые',
 		value: '-created_at',
 	},
 	{
-		name: 'Сначала старые',
+		name: 'Старые',
 		value: 'created_at',
 	},
 	{
-		name: 'Сначала самые популярные',
+		name: 'Cамые популярные',
 		value: '-added_by_users',
 	},
 	{
-		name: 'Сначала больше всего выполненные',
+		name: 'Больше всего выполненные',
 		value: '-completed_by_users',
 	},
 ];

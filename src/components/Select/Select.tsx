@@ -161,7 +161,9 @@ const Select: FC<SelectProps> = ({
 				disabled={disabled}
 			>
 				<Svg icon={filter ? 'sort' : 'arrow--right'} />
-				{typeof activeOption === 'number' ? options[activeOption]?.name : placeholder}
+				<span className={element('option-text')}>
+					{typeof activeOption === 'number' ? options[activeOption]?.name : placeholder}
+				</span>
 			</button>
 			{isOpen && !disabled && (
 				<ul id="select-options-list" className={element('list')} role="listbox" aria-label="Доступные опции">

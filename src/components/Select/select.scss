@@ -12,7 +12,7 @@
 	&__option {
 		display: flex;
 		flex-direction: row-reverse;
-		justify-content: space-between;
+		justify-content: flex-start;
 		align-items: center;
 		gap: 4px;
 		width: 100%;
@@ -32,6 +32,15 @@
 			color: var(--color-text-secondary);
 			font-weight: var(--weight-regular);
 		}
+	}
+
+	&__option-text {
+		display: box;
+		-webkit-line-clamp: 1;
+		-webkit-box-orient: vertical;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		text-align: left;
 	}
 
 	&__list {
