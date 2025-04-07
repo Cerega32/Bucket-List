@@ -226,7 +226,7 @@
 	}
 
 	&__goal-description {
-		display: box;
+		display: -webkit-box;
 		max-height: 100px;
 		margin: 0;
 		color: var(--color-text-secondary);

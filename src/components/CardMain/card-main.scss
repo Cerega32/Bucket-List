@@ -48,7 +48,7 @@
 	}
 
 	&__text {
-		display: box;
+		display: -webkit-box;
 		overflow: hidden;
 		color: var(--color-white);
 		-webkit-box-orient: vertical;

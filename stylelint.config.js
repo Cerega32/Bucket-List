@@ -10,15 +10,10 @@ module.exports = {
 		'font-family-name-quotes': 'always-unless-keyword',
 		'font-weight-notation': 'numeric',
 		'selector-nested-pattern': '(.*&(?![-_][^-_]).*)|(^[^&]*$)',
-		'value-no-vendor-prefix': [
-			true,
-			{
-				ignoreValues: ['optimize-contrast'],
-			},
-		],
-		'selector-no-vendor-prefix': true,
+		'value-no-vendor-prefix': null,
+		'selector-no-vendor-prefix': null,
 		'media-feature-name-no-vendor-prefix': true,
-		'at-rule-no-vendor-prefix': true,
+		'at-rule-no-vendor-prefix': null,
 		'selector-max-id': 0,
 		'declaration-block-single-line-max-declarations': 1,
 		'declaration-block-no-duplicate-properties': [
