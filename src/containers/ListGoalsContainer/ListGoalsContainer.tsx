@@ -67,7 +67,23 @@ export const ListGoalsContainer: FC = () => {
 			const newGoals = [...list.goals];
 			newGoals[i] = updatedGoal;
 
-			setList({...list, goals: newGoals});
+			let {userCompletedGoals} = list;
+
+			if (operation === 'mark' && !done && !list.goals[i].completedByUser) {
+				userCompletedGoals += 1;
+			} else if (operation === 'mark' && done && list.goals[i].completedByUser) {
+				userCompletedGoals -= 1;
+			}
+
+			const completedByUser = userCompletedGoals === list.goalsCount;
+
+			setList({
+				...list,
+				goals: newGoals,
+				userCompletedGoals,
+				completedByUser,
+				totalCompleted: completedByUser ? list.totalCompleted + 1 : list.totalCompleted,
+			});
 		}
 	};
 
