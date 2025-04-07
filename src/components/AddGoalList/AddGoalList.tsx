@@ -22,6 +22,19 @@ import Select from '../Select/Select';
 
 import './add-goal-list.scss';
 
+// Ключ для хранения данных в localStorage
+const CACHE_KEY = 'addGoalList_cachedData';
+
+interface CachedGoalListData {
+	title: string;
+	description: string;
+	activeComplexity: number | null;
+	activeCategory: number | null;
+	activeSubcategory: number | null;
+	selectedGoals: IGoal[];
+	// Не кешируем image, так как FileList нельзя сериализовать
+}
+
 interface AddGoalListProps {
 	className?: string;
 }
@@ -52,10 +65,71 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 	// Добавляем состояние для перехода к созданию цели
 	const [canCreateGoal, setCanCreateGoal] = useState(false);
 
+	// Восстанавливаем данные из кеша при загрузке компонента
+	useEffect(() => {
+		const loadCachedData = () => {
+			try {
+				const cachedData = localStorage.getItem(CACHE_KEY);
+				if (cachedData) {
+					const parsedData: CachedGoalListData = JSON.parse(cachedData);
+
+					// Восстанавливаем состояние из кеша
+					setTitle(parsedData.title);
+					setDescription(parsedData.description);
+					setActiveComplexity(parsedData.activeComplexity);
+					setActiveCategory(parsedData.activeCategory);
+					setActiveSubcategory(parsedData.activeSubcategory);
+					setSelectedGoals(parsedData.selectedGoals);
+				}
+			} catch (error) {
+				console.error('Ошибка при загрузке кешированных данных:', error);
+				// В случае ошибки просто продолжаем с пустыми данными
+			}
+		};
+
+		loadCachedData();
+	}, []);
+
+	// Сохраняем данные в кеш при изменении релевантных состояний
+	useEffect(() => {
+		// Не сохраняем данные, если все поля пустые
+		if (!title && !description && activeComplexity === null && activeCategory === null && selectedGoals.length === 0) {
+			return;
+		}
+
+		const cacheData = () => {
+			try {
+				const dataToCache: CachedGoalListData = {
+					title,
+					description,
+					activeComplexity,
+					activeCategory,
+					activeSubcategory,
+					selectedGoals,
+				};
+
+				localStorage.setItem(CACHE_KEY, JSON.stringify(dataToCache));
+			} catch (error) {
+				console.error('Ошибка при кешировании данных:', error);
+			}
+		};
+
+		cacheData();
+	}, [title, description, activeComplexity, activeCategory, activeSubcategory, selectedGoals]);
+
 	// Обновляем эффект для проверки возможности создания цели
 	useEffect(() => {
 		setCanCreateGoal(activeCategory !== null);
 	}, [activeCategory]);
+
+	// Функция для очистки кеша
+	const clearCache = () => {
+		try {
+			localStorage.removeItem(CACHE_KEY);
+		} catch (error) {
+			console.error('Ошибка при очистке кеша:', error);
+		}
+	};
 
 	const handleTitleChange = (value: string) => {
 		setTitle(value);
@@ -246,6 +320,9 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 			const response = await postCreateGoalList(formData);
 
 			if (response.success) {
+				// Очищаем кеш после успешного создания списка
+				clearCache();
+
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успех',
