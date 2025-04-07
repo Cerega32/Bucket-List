@@ -222,12 +222,10 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 				formData.append('complexity', selectComplexity[activeComplexity].value);
 			}
 
-			if (activeCategory !== null) {
-				formData.append('category', categories[activeCategory].id.toString());
-			}
-
 			if (activeSubcategory !== null) {
-				formData.append('subcategory', subcategories[activeSubcategory].id.toString());
+				formData.append('category', subcategories[activeSubcategory].id.toString());
+			} else if (activeCategory !== null) {
+				formData.append('category', categories[activeCategory].id.toString());
 			}
 
 			formData.append('image', image as Blob);

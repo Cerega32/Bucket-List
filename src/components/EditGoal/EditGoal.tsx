@@ -157,12 +157,13 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 				formData.append('complexity', selectComplexity[activeComplexity].value);
 			}
 
-			if (activeCategory !== null) {
-				formData.append('category', categories[activeCategory].id.toString());
-			}
-
+			// Если выбрана подкатегория, используем её ID
 			if (activeSubcategory !== null) {
-				formData.append('subcategory', subcategories[activeSubcategory].id.toString());
+				formData.append('category', subcategories[activeSubcategory].id.toString());
+			}
+			// Иначе используем ID основной категории
+			else if (activeCategory !== null) {
+				formData.append('category', categories[activeCategory].id.toString());
 			}
 
 			// Если есть локальное изображение, добавляем его в formData
