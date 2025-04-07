@@ -15,7 +15,7 @@ import {getCategory} from '@/utils/api/get/getCategory';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {postCreateGoalList} from '@/utils/api/post/postCreateGoalList';
 import {debounce} from '@/utils/time/debounce';
-import {selectComplexity} from '@/utils/values/complexity';
+import {getComplexity, selectComplexity} from '@/utils/values/complexity';
 
 import {GoalSearchItem} from '../GoalSearchItem/GoalSearchItem';
 import Select from '../Select/Select';
@@ -48,6 +48,14 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [searchResults, setSearchResults] = useState<IGoal[]>([]);
 	const [, setIsSearching] = useState(false);
+
+	// Добавляем состояние для перехода к созданию цели
+	const [canCreateGoal, setCanCreateGoal] = useState(false);
+
+	// Обновляем эффект для проверки возможности создания цели
+	useEffect(() => {
+		setCanCreateGoal(activeCategory !== null);
+	}, [activeCategory]);
 
 	const handleTitleChange = (value: string) => {
 		setTitle(value);
@@ -393,7 +401,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 												</div>
 												<div className={element('goal-info')}>
 													<h4 className={element('goal-title')}>{goal.title}</h4>
-													<p className={element('goal-complexity')}>{goal.complexity}</p>
+													<p className={element('goal-complexity')}>{getComplexity[goal.complexity]}</p>
 													<p className={element('goal-description')}>{goal.shortDescription}</p>
 												</div>
 											</div>
@@ -425,9 +433,20 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 								<Button
 									theme="blue-light"
 									className={element('add-goal-btn')}
-									onClick={() => setShowAddGoalForm(true)}
+									onClick={() => {
+										if (canCreateGoal) {
+											setShowAddGoalForm(true);
+										} else {
+											NotificationStore.addNotification({
+												type: 'warning',
+												title: 'Внимание',
+												message: 'Для создания цели необходимо сначала выбрать категорию списка',
+											});
+										}
+									}}
 									type="button"
 									icon="plus"
+									active={!canCreateGoal} // Блокируем кнопку, если не выбрана категория
 								>
 									Создать новую цель
 								</Button>
@@ -444,6 +463,10 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 											hideNavigation
 											noForm
 											onSubmitForm={handleAddGoalSubmit}
+											initialCategory={
+												activeSubcategory !== null ? subcategories[activeSubcategory] : categories[activeCategory!]
+											}
+											lockCategory // Блокируем выбор категории
 										/>
 									</div>
 

@@ -26,6 +26,7 @@
 	}
 
 	&__content {
+		overflow: hidden;
 		display: flex;
 		align-items: flex-start;
 		gap: 24px;
@@ -166,7 +167,6 @@
 	&__goal-item {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
 		padding: 12px;
 		background-color: var(--color-white);
 		border-radius: 8px;
@@ -174,9 +174,10 @@
 	}
 
 	&__goal-content {
+		overflow: hidden;
 		display: flex;
 		flex: 1;
-		align-items: center;
+		align-items: flex-start;
 		gap: 12px;
 	}
 
@@ -225,13 +226,15 @@
 	}
 
 	&__goal-description {
-		display: flex;
-		overflow: hidden;
+		display: box;
+		max-height: 100px;
 		margin: 0;
 		color: var(--color-text-secondary);
 		font-size: 14px;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 2;
+		-webkit-line-clamp: 5;
 	}
 
 	&__goal-remove-btn {

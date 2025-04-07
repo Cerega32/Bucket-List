@@ -29,17 +29,29 @@ interface AddGoalProps {
 	hideNavigation?: boolean;
 	noForm?: boolean;
 	onSubmitForm?: (e: FormEvent<HTMLFormElement>) => void;
+	initialCategory?: ICategory;
+	lockCategory?: boolean;
+	initialCategoryParam?: string;
 }
 
 export const AddGoal: FC<AddGoalProps> = (props) => {
-	const {className, onGoalCreated, hideNavigation = false, noForm = false, onSubmitForm} = props;
+	const {
+		className,
+		onGoalCreated,
+		hideNavigation = false,
+		noForm = false,
+		onSubmitForm,
+		initialCategory,
+		lockCategory = false,
+		initialCategoryParam,
+	} = props;
 	const navigate = useNavigate();
 	const location = useLocation();
 
 	const [block, element] = useBem('add-goal', className);
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
-	const [activeComplexity, setActiveComplexity] = useState<number | null>(null);
+	const [activeComplexity, setActiveComplexity] = useState<number | null>(1);
 	const [activeCategory, setActiveCategory] = useState<number | null>(null);
 	const [activeSubcategory, setActiveSubcategory] = useState<number | null>(null);
 	// const [deadline, setDeadline] = useState('');
@@ -93,20 +105,66 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			loadSubcategories();
 		}
 	}, [activeCategory, categories]);
-
-	// Добавляем обработку параметра категории из URL
+	// Добавляем эффект для установки начальной категории из props
 	useEffect(() => {
-		const params = new URLSearchParams(location.search);
-		const categoryParam = params.get('category');
+		if (initialCategory && categories.length > 0) {
+			// Если передана подкатегория, ищем её родительскую категорию
+			if (initialCategory.parentCategory) {
+				const parentIndex = categories.findIndex((cat) => cat.id === initialCategory.parentCategory?.id);
 
-		if (categoryParam && categories.length > 0) {
-			// Находим индекс категории в массиве categories
-			const categoryIndex = categories.findIndex((cat) => cat.nameEn === categoryParam);
+				if (parentIndex !== -1) {
+					setActiveCategory(parentIndex);
+
+					// Загружаем подкатегории для родительской категории
+					const loadSubcategoriesAndSetSubcategory = async () => {
+						const data = await getCategory(categories[parentIndex].nameEn);
+						if (data.success) {
+							setSubcategories(data.data.subcategories);
+
+							// Ищем индекс подкатегории
+							const subcategoryIndex = data.data.subcategories.findIndex((sub: ICategory) => sub.id === initialCategory.id);
+
+							if (subcategoryIndex !== -1) {
+								setActiveSubcategory(subcategoryIndex);
+							}
+						}
+					};
+
+					loadSubcategoriesAndSetSubcategory();
+				}
+			} else {
+				// Если передана основная категория
+				const categoryIndex = categories.findIndex((cat) => cat.id === initialCategory.id);
+
+				if (categoryIndex !== -1) {
+					setActiveCategory(categoryIndex);
+				}
+			}
+		}
+	}, [initialCategory, categories]);
+
+	// Добавляем эффект для получения категории из URL параметра
+	useEffect(() => {
+		// Обрабатываем параметр initialCategoryParam, если он передан
+		if (initialCategoryParam && categories.length > 0) {
+			const categoryIndex = categories.findIndex((cat) => cat.nameEn === initialCategoryParam);
 			if (categoryIndex !== -1) {
 				setActiveCategory(categoryIndex);
 			}
 		}
-	}, [location.search, categories]);
+		// Иначе продолжаем обрабатывать параметр category из URL
+		else {
+			const params = new URLSearchParams(location.search);
+			const categoryParam = params.get('category');
+
+			if (categoryParam && categories.length > 0) {
+				const categoryIndex = categories.findIndex((cat) => cat.nameEn === categoryParam);
+				if (categoryIndex !== -1) {
+					setActiveCategory(categoryIndex);
+				}
+			}
+		}
+	}, [initialCategoryParam, location.search, categories]);
 
 	// Функция для поиска похожих целей с дебаунсом
 	const debouncedSearch = useCallback(
@@ -475,9 +533,21 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 						<p>Вы сможете отредактировать или удалить цель в течение 24ч после создания, затем действие будет недоступно</p>
 					</div>
 
-					{/* Добавляем компонент поиска внешних целей */}
+					{/* Добавляем компонент поиска внешних целей с учетом выбранной категории/подкатегории */}
 					<div className={element('external-search-section')}>
-						<ExternalGoalSearch onGoalSelected={handleExternalGoalSelected} className={element('external-search')} />
+						<ExternalGoalSearch
+							onGoalSelected={handleExternalGoalSelected}
+							className={element('external-search')}
+							category={
+								// Если выбрана подкатегория, используем её nameEn
+								activeSubcategory !== null && subcategories.length > 0
+									? subcategories[activeSubcategory].nameEn
+									: // Иначе если выбрана категория, используем её nameEn
+									activeCategory !== null
+									? categories[activeCategory].nameEn
+									: undefined
+							}
+						/>
 					</div>
 
 					<div className={element('image-section')}>
@@ -560,6 +630,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							activeOption={activeCategory}
 							onSelect={setActiveCategory}
 							text="Категория *"
+							disabled={lockCategory}
 						/>
 
 						{activeCategory !== null && subcategories.length > 0 && (
@@ -570,6 +641,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 								activeOption={activeSubcategory}
 								onSelect={setActiveSubcategory}
 								text="Подкатегория"
+								disabled={lockCategory}
 							/>
 						)}
 

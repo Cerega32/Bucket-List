@@ -14,6 +14,8 @@ import Select from '../Select/Select';
 
 import './external-goal-search.scss';
 
+const AllowedCategories = ['books'];
+
 interface ExternalGoalResult {
 	externalId: string | number;
 	title: string;
@@ -29,12 +31,13 @@ interface ExternalGoalResult {
 interface ExternalGoalSearchProps {
 	onGoalSelected: (goalData: Partial<IGoal> & {imageUrl?: string; external_id?: string | number; externalType?: string}) => void;
 	className?: string;
+	category?: string | undefined;
 }
 
-export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected, className}) => {
+export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected, className, category}) => {
 	const [block, element] = useBem('external-goal-search', className);
 	const [query, setQuery] = useState('');
-	const [category, setCategory] = useState<'movies' | 'books'>('books'); // По умолчанию фильмы
+	const [contentType] = useState<'movies' | 'books'>('books');
 	const [results, setResults] = useState<ExternalGoalResult[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [activeComplexity, setActiveComplexity] = useState<number>(1); // По умолчанию средняя сложность (индекс 1)
@@ -49,6 +52,10 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 		setImageLoading({});
 	}, [results]);
 
+	if ((category && !AllowedCategories.includes(category)) || !category) {
+		return null;
+	}
+
 	// Функция для поиска внешних целей
 	const searchExternalGoals = async () => {
 		if (query.length < 2) {
@@ -61,11 +68,10 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 		setSearchWasPerformed(true);
 		try {
 			const response = await GET('goals/search-external', {
-				get: {category, query},
+				get: {category: contentType, query},
 			});
 
 			if (response.success && response.data.results) {
-				// Полностью заменяем результаты вместо добавления
 				setResults(response.data.results);
 			} else {
 				NotificationStore.addNotification({
@@ -146,31 +152,29 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 		});
 	};
 
-	// Опции для категорий
-	const categoryOptions = [
-		{name: 'Книги', value: 'books'},
-		// {name: 'Фильмы', value: 'movies'},
-		// {name: 'Путешествия', value: 'travel'},
-	];
+	// const contentTypeOptions = [
+	// 	{name: 'Книги', value: 'books'},
+	// 	// {name: 'Фильмы', value: 'movies'},
+	// 	// {name: 'Путешествия', value: 'travel'},
+	// ];
 
 	return (
 		<div className={block()}>
 			<h3 className={element('title')}>Найти готовую цель</h3>
 			<div className={element('search-panel')}>
 				<div className={element('selectors')}>
-					<Select
+					{/* <Select
 						className={element('category-select')}
 						placeholder="Выберите тип"
-						options={categoryOptions}
-						activeOption={categoryOptions.findIndex((opt) => opt.value === category)}
+						options={contentTypeOptions}
+						activeOption={contentTypeOptions.findIndex((opt) => opt.value === contentType)}
 						onSelect={(index) => {
-							setCategory(categoryOptions[index].value as 'movies' | 'books');
-							// Очищаем результаты при смене категории
+							setContentType(contentTypeOptions[index].value as 'movies' | 'books');
 							setResults([]);
 							setSearchWasPerformed(false);
 						}}
 						text="Тип контента"
-					/>
+					/> */}
 
 					<Select
 						className={element('complexity-select')}
@@ -219,19 +223,12 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 								<div className={element('result-item')} key={`${item.type}-${item.externalId}`}>
 									<div className={element('result-image')}>
 										{item.imageUrl ? (
-											<>
-												{/* {imageLoading[String(item.externalId)] && (
-													<div className={element('image-loading')}>
-														<Svg icon="loading" className={element('loading-icon')} />
-													</div>
-												)} */}
-												<img
-													src={item.imageUrl}
-													alt={item.title}
-													onLoad={() => handleImageLoad(String(item.externalId))}
-													onError={() => handleImageError(String(item.externalId))}
-												/>
-											</>
+											<img
+												src={item.imageUrl}
+												alt={item.title}
+												onLoad={() => handleImageLoad(String(item.externalId))}
+												onError={() => handleImageError(String(item.externalId))}
+											/>
 										) : (
 											<div className={element('no-image')}>
 												<Svg icon="mount" />

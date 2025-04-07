@@ -4,7 +4,7 @@ export interface ICategory {
 	id: number;
 	name: string;
 	nameEn: string;
-	parentCategory: number | null;
+	parentCategory: ICategory | null;
 }
 
 export interface ICategoryDetailed {

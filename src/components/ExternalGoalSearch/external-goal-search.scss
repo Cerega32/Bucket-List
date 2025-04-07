@@ -20,11 +20,11 @@
 		margin-bottom: 20px;
 	}
 
-	&__selectors {
-		display: grid;
-		gap: 16px;
-		grid-template-columns: 2fr 1fr;
-	}
+	// &__selectors {
+	// 	// display: grid;
+	// 	// gap: 16px;
+	// 	// grid-template-columns: 2fr;
+	// }
 
 	&__search-field {
 		display: flex;
@@ -50,7 +50,6 @@
 		// position: absolute;
 		z-index: 1;
 		top: 100%;
-		min-height: 100px;
 
 		&.is-empty {
 			min-height: 0;

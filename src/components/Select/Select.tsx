@@ -18,9 +18,19 @@ interface SelectProps {
 	className?: string;
 	filter?: boolean;
 	placeholder?: string;
+	disabled?: boolean;
 }
 
-const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, className, filter, placeholder = 'Сделайте выбор'}) => {
+const Select: FC<SelectProps> = ({
+	options,
+	activeOption,
+	onSelect,
+	text,
+	className,
+	filter,
+	placeholder = 'Сделайте выбор',
+	disabled = false,
+}) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
 	const selectRef = useRef<HTMLDivElement | null>(null);
@@ -29,6 +39,8 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, classNa
 	const [block, element] = useBem('select', className);
 
 	const toggleDropdown = () => {
+		if (disabled) return;
+
 		setIsOpen(!isOpen);
 		if (!isOpen && typeof activeOption === 'number') {
 			setHighlightedIndex(activeOption);
@@ -42,11 +54,15 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, classNa
 	};
 
 	const handleOptionClick = (active: number) => {
+		if (disabled) return;
+
 		onSelect(active);
 		setIsOpen(false);
 	};
 
 	const handleKeyDown = (event: React.KeyboardEvent) => {
+		if (disabled) return;
+
 		if (!isOpen && (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown')) {
 			event.preventDefault();
 			setIsOpen(true);
@@ -91,6 +107,8 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, classNa
 
 	// Обработчик для элемента выбора
 	const handleSelectKeyDown = (event: React.KeyboardEvent) => {
+		if (disabled) return;
+
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
 			toggleDropdown();
@@ -99,6 +117,8 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, classNa
 
 	// Обработчик для элементов списка
 	const handleOptionKeyDown = (event: React.KeyboardEvent, index: number) => {
+		if (disabled) return;
+
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
 			handleOptionClick(index);
@@ -120,7 +140,7 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, classNa
 
 	return (
 		<div
-			className={block({filter})}
+			className={block({filter, disabled})}
 			ref={selectRef}
 			onKeyDown={handleKeyDown}
 			role="combobox"
@@ -128,20 +148,22 @@ const Select: FC<SelectProps> = ({options, activeOption, onSelect, text, classNa
 			aria-expanded={isOpen}
 			aria-controls={isOpen ? 'select-options-list' : undefined}
 			aria-label={text || 'Выпадающий список'}
-			tabIndex={0}
+			tabIndex={disabled ? -1 : 0}
+			aria-disabled={disabled}
 		>
 			{text && <p className={element('text')}>{text}</p>}
 			<button
 				type="button"
-				className={element('option', {isOpen, placeholder: typeof activeOption !== 'number'})}
+				className={element('option', {isOpen, placeholder: typeof activeOption !== 'number', disabled})}
 				onClick={toggleDropdown}
 				onKeyDown={handleSelectKeyDown}
 				aria-label={typeof activeOption === 'number' ? `Выбрано: ${options[activeOption]?.name}` : placeholder}
+				disabled={disabled}
 			>
 				<Svg icon={filter ? 'sort' : 'arrow--right'} />
 				{typeof activeOption === 'number' ? options[activeOption]?.name : placeholder}
 			</button>
-			{isOpen && (
+			{isOpen && !disabled && (
 				<ul id="select-options-list" className={element('list')} role="listbox" aria-label="Доступные опции">
 					{options.map((option, i) => (
 						<li
