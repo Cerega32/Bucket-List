@@ -43,12 +43,16 @@
 	}
 
 	&__info {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
 		padding: 16px 24px;
 		border-top: none;
 	}
 
 	&__info-link {
 		display: block;
+		margin-bottom: auto;
 	}
 
 	&__title {
@@ -95,7 +99,14 @@
 		#{$block} {
 			&__gradient {
 				width: 37%;
-				max-height: 169px;
+			}
+
+			&__title {
+				display: -webkit-box;
+				overflow: hidden;
+				-webkit-box-orient: vertical;
+				-webkit-line-clamp: 2;
+				line-clamp: 2;
 			}
 
 			&__img-tags {

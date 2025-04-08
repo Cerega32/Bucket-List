@@ -523,7 +523,6 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 									}}
 									type="button"
 									icon="plus"
-									active={!canCreateGoal} // Блокируем кнопку, если не выбрана категория
 								>
 									Создать новую цель
 								</Button>
