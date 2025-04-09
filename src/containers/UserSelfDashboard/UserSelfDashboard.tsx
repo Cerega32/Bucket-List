@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 
+import {ActivityHeatmap} from '@/components/ActivityHeatmap/ActivityHeatmap';
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
 import {Svg} from '@/components/Svg/Svg';
 import {UserStatistics} from '@/components/UserStatistics/UserStatistics';
@@ -77,6 +78,7 @@ export const UserSelfDashboard: FC = observer(() => {
 				{userStatistics?.weeklyProgress && <WeeklySchedule weeks={userStatistics?.weeklyProgress} className={element('weekly')} />}
 				{userStatistics && <UserStatistics statistics={userStatistics} />}
 			</div>
+			<ActivityHeatmap />
 			{/* <div className={element('title-wrapper')}>
 				<Title className={element('title')} tag="h2">
 					Можно выполнить сегодня
