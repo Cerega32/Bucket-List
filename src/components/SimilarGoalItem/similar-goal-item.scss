@@ -65,6 +65,7 @@
 
 	&__description {
 		display: -webkit-box;
+		overflow-wrap: anywhere;
 		overflow: hidden;
 		margin: 0;
 		color: var(--color-text-secondary);

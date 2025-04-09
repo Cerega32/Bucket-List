@@ -1,0 +1,55 @@
+.dashboard {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	max-width: 1200px;
+	padding: 16px;
+	margin: 0 auto;
+
+	&__welcome {
+		width: 100%;
+	}
+
+	&__section-title {
+		margin-bottom: 16px;
+	}
+
+	&__timers {
+		width: 100%;
+	}
+
+	&__timers-list {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: 16px;
+	}
+
+	&__progress-row {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: 16px;
+	}
+
+	&__widget {
+		height: 100%;
+		min-height: 260px;
+	}
+
+	&__navigation {
+		width: 100%;
+	}
+
+	&__popular {
+		width: 100%;
+	}
+
+	&__hundred-goals {
+		width: 100%;
+	}
+
+	@media (width <= 768px) {
+		&__progress-row {
+			grid-template-columns: 1fr;
+		}
+	}
+}

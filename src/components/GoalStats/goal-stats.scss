@@ -1,0 +1,140 @@
+.goal-stats {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	padding: 20px;
+	background-color: var(--color-white);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgb(var(--color-black-rgb) 0.08);
+
+	&__title {
+		margin-bottom: 16px;
+	}
+
+	&__health-indicator {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 12px;
+		margin-bottom: 20px;
+		background-color: var(--color-secondary);
+		border-radius: 8px;
+
+		&--status-excellent {
+			background-color: rgb(var(--color-green-rgb-3) 0.1);
+			color: var(--color-green-3);
+		}
+
+		&--status-good {
+			background-color: rgb(var(--color-blue-rgb-1) 0.1);
+			color: var(--color-blue-1);
+		}
+
+		&--status-moderate {
+			background-color: rgb(var(--color-yellow-rgb) 0.1);
+			color: var(--color-orange-2);
+		}
+
+		&--status-poor {
+			background-color: rgb(var(--color-red-rgb-1) 0.1);
+			color: var(--color-red-1);
+		}
+	}
+
+	&__health-icon {
+		margin-right: 8px;
+	}
+
+	&__health-label {
+		font-weight: 600;
+	}
+
+	&__stats {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+		gap: 16px;
+	}
+
+	&__stat-item {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	&__stat-header {
+		display: flex;
+		align-items: center;
+	}
+
+	&__stat-icon {
+		margin-right: 8px;
+
+		&--active {
+			color: var(--color-primary);
+		}
+
+		&--completed {
+			color: var(--color-sentiment-positive);
+		}
+
+		&--expired {
+			color: var(--color-sentiment-negative);
+		}
+	}
+
+	&__stat-name {
+		flex-grow: 1;
+	}
+
+	&__stat-value {
+		font-weight: 600;
+	}
+
+	&__progress-bar {
+		height: 8px;
+		background-color: var(--color-secondary);
+		border-radius: 4px;
+		overflow: hidden;
+	}
+
+	&__progress-fill {
+		height: 100%;
+		border-radius: 4px;
+
+		&--active {
+			background-color: var(--color-primary);
+		}
+
+		&--completed {
+			background-color: var(--color-sentiment-positive);
+		}
+
+		&--expired {
+			background-color: var(--color-sentiment-negative);
+		}
+	}
+
+	&__total {
+		display: flex;
+		justify-content: space-between;
+		padding-top: 16px;
+		margin-top: 16px;
+		border-top: 1px solid var(--color-border);
+	}
+
+	&__total-label {
+		font-weight: 500;
+	}
+
+	&__total-value {
+		font-size: 18px;
+		font-weight: 700;
+	}
+
+	&__empty {
+		margin-top: 16px;
+		color: var(--color-text-secondary);
+		text-align: center;
+	}
+}

@@ -14,6 +14,7 @@
 	&__text {
 		display: -webkit-box;
 		overflow: hidden;
+		overflow-wrap: anywhere;
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2; /* number of lines to show */
 		line-clamp: 2;

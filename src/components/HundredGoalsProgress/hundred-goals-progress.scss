@@ -1,0 +1,142 @@
+.hundred-goals-progress {
+	padding: 20px;
+	background-color: var(--color-white);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgb(var(--color-black-rgb) 0.08);
+
+	&__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 20px;
+	}
+
+	&__title {
+		margin: 0;
+	}
+
+	&__content {
+		display: flex;
+		gap: 24px;
+	}
+
+	&__progress-container {
+		display: flex;
+		flex: 0 0 300px;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	&__progress-circle {
+		width: 150px;
+		height: 150px;
+		margin-bottom: 16px;
+	}
+
+	&__progress-svg {
+		width: 100%;
+		height: 100%;
+	}
+
+	&__progress-bg {
+		fill: none;
+		stroke: var(--color-secondary);
+		stroke-width: 3;
+	}
+
+	&__progress-fill {
+		transition: stroke-dasharray 0.5s;
+		transform: rotate(-90deg);
+		fill: none;
+		stroke: var(--color-primary);
+		stroke-width: 3;
+		stroke-linecap: round;
+		transform-origin: center;
+	}
+
+	&__progress-text {
+		fill: var(--color-primary);
+		font-size: 10px;
+		text-anchor: middle;
+		font-weight: 700;
+	}
+
+	&__progress-info {
+		width: 100%;
+	}
+
+	&__progress-stat {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 8px;
+	}
+
+	&__progress-label {
+		color: var(--color-text-secondary);
+	}
+
+	&__progress-value {
+		font-weight: 600;
+	}
+
+	&__categories {
+		flex-grow: 1;
+	}
+
+	&__categories-title {
+		margin-bottom: 12px;
+		font-size: 16px;
+	}
+
+	&__categories-list {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		max-height: 250px;
+		overflow-y: auto;
+	}
+
+	&__category-item {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	&__category-name {
+		flex: 0 0 120px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	&__category-bar {
+		flex-grow: 1;
+		height: 8px;
+		background-color: var(--color-secondary);
+		border-radius: 4px;
+		overflow: hidden;
+	}
+
+	&__category-fill {
+		height: 100%;
+		background-color: var(--color-primary);
+		border-radius: 4px;
+	}
+
+	&__category-count {
+		flex: 0 0 30px;
+		font-weight: 600;
+		text-align: right;
+	}
+
+	@media (width <= 768px) {
+		&__content {
+			flex-direction: column;
+		}
+
+		&__progress-container {
+			flex: 0 0 auto;
+			max-width: 100%;
+		}
+	}
+}

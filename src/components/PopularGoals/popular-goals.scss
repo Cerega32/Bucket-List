@@ -1,0 +1,13 @@
+.popular-goals {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	gap: 16px;
+
+	&__card {
+		height: 100%;
+	}
+
+	@media (width <= 768px) {
+		grid-template-columns: 1fr;
+	}
+}

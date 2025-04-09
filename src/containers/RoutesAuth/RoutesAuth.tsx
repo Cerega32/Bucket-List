@@ -38,7 +38,14 @@ export const RoutesAuth: FC = observer(() => {
 	return (
 		<main className="main">
 			<Routes>
-				<Route path="/" element={<PageMainGoals page="isMainGoals" />} />
+				{/* Новый маршрут для дашборда (главной страницы) */}
+				{/* <Route path="/" element={<PageDashboard page="isDashboard" />} /> */}
+				<Route path="/" element={<ProtectedRoute element={<PageUserSelf page="isUserSelf" />} />} />
+
+				{/* Перемещаем старую главную страницу на новый путь */}
+				<Route path="/100-goals" element={<PageMainGoals page="isMainGoals" />} />
+
+				{/* Остальные маршруты остаются без изменений */}
 				<Route path="/list/:id" element={<PageDetailList page="isList" />} />
 				<Route path="/list/100-goals" element={<PageMainGoals page="isMainGoals" />} />
 				<Route path="/categories" element={<PageCategories page="isCategories" />} />

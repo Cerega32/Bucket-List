@@ -61,6 +61,7 @@
 
 	&__text {
 		display: -webkit-box;
+		overflow-wrap: anywhere;
 		overflow: hidden;
 		color: var(--color-text);
 		-webkit-box-orient: vertical;
@@ -107,6 +108,7 @@
 				-webkit-box-orient: vertical;
 				-webkit-line-clamp: 2;
 				line-clamp: 2;
+				overflow-wrap: anywhere;
 			}
 
 			&__img-tags {
@@ -125,6 +127,7 @@
 
 			&__text {
 				display: -webkit-box;
+				overflow-wrap: anywhere;
 				overflow: hidden;
 				-webkit-box-orient: vertical;
 				-webkit-line-clamp: 2;

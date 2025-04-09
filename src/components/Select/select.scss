@@ -36,6 +36,7 @@
 
 	&__option-text {
 		display: -webkit-box;
+		overflow-wrap: anywhere;
 		-webkit-line-clamp: 1;
 		-webkit-box-orient: vertical;
 		text-overflow: ellipsis;
