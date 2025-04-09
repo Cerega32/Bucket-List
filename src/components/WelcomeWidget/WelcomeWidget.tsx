@@ -17,7 +17,7 @@ interface WelcomeWidgetProps {
 
 export const WelcomeWidget: FC<WelcomeWidgetProps> = ({className, quote, stats}) => {
 	const [block, element] = useBem('welcome-widget', className);
-	const {user} = UserStore;
+	const {userInfo} = UserStore;
 
 	// Определяем время суток
 	const getTimeOfDay = (): string => {
@@ -31,18 +31,18 @@ export const WelcomeWidget: FC<WelcomeWidgetProps> = ({className, quote, stats})
 		<section className={block()}>
 			<div className={element('user-info')}>
 				<div className={element('avatar')}>
-					{user?.avatar ? (
-						<img src={user.avatar} alt={user.firstName} className={element('avatar-img')} />
+					{userInfo?.avatar ? (
+						<img src={userInfo.avatar} alt={userInfo.firstName} className={element('avatar-img')} />
 					) : (
 						<div className={element('avatar-placeholder')}>
-							{user?.firstName.charAt(0)}
-							{user?.lastName.charAt(0)}
+							{userInfo?.firstName.charAt(0)}
+							{userInfo?.lastName.charAt(0)}
 						</div>
 					)}
 				</div>
 				<div className={element('greeting')}>
 					<Title className={element('title')} tag="h1">
-						Добрый {getTimeOfDay()}, {user?.firstName}!
+						Добрый {getTimeOfDay()}, {userInfo?.firstName}!
 					</Title>
 					<div className={element('stats')}>
 						<div className={element('stat-item')}>

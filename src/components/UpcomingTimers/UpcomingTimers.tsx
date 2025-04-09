@@ -37,7 +37,7 @@ export const UpcomingTimers: FC<UpcomingTimersProps> = ({className, timers, onMa
 						<div className={element('timer-header')}>
 							<Tag
 								text={timer.goal.complexity === 'easy' ? 'Легко' : timer.goal.complexity === 'medium' ? 'Средне' : 'Сложно'}
-								theme={timer.goal.complexity === 'easy' ? 'green' : timer.goal.complexity === 'medium' ? 'yellow' : 'red'}
+								theme="light"
 							/>
 							<div className={element('deadline', {urgent: isUrgent})}>
 								<Svg icon="clock" width="16px" height="16px" />
