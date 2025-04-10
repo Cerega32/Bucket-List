@@ -2,12 +2,12 @@ import {FC, useEffect, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
-import {getGoalTimer} from '@/utils/api/get/getGoalTimer';
+import {getGoalTimer, TimerInfo} from '@/utils/api/get/getGoalTimer';
 
 import './aside-goal.scss';
 
 import {Button} from '../Button/Button';
-import {GoalTimer, TimerInfo} from '../GoalTimer/GoalTimer';
+import {GoalTimer} from '../GoalTimer/GoalTimer';
 import {Line} from '../Line/Line';
 
 interface AsideProps {

@@ -2,7 +2,7 @@ import {GET} from '@/utils/fetch/requests';
 
 export const getGoalActivity = async (
 	period: 'year' | 'halfyear' | 'quarter' | 'month' = 'year'
-): Promise<{success: boolean; data: any}> => {
+): Promise<{success: boolean; data?: any; errors?: string}> => {
 	try {
 		// Используем существующую функцию GET
 		const response = await GET('users/activity', {
