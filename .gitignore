@@ -10,8 +10,6 @@ package-lock.json
 /coverage
 
 # production
-/dist/
-dist/
 build/
 
 # misc

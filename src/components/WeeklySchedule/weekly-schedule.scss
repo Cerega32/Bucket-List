@@ -1,4 +1,4 @@
-@import '../../_commons/styles-supports/mixins';
+@use '@/_commons/styles-supports/mixins' as *;
 
 .weekly-schedule {
 	$block: &;

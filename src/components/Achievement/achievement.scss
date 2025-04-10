@@ -1,4 +1,4 @@
-@import '../../_commons/styles-supports/mixins';
+@use '@/_commons/styles-supports/mixins' as *;
 
 .achievement {
 	@include block-radius(16px);
