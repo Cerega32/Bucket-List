@@ -1,8 +1,10 @@
+import {format} from 'date-fns';
 import {FC, FormEvent, useCallback, useEffect, useState} from 'react';
 import {useDropzone} from 'react-dropzone';
 import {useLocation, useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
+import {DatePicker} from '@/components/DatePicker/DatePicker';
 import {ExternalGoalSearch} from '@/components/ExternalGoalSearch/ExternalGoalSearch';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
@@ -54,7 +56,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const [activeComplexity, setActiveComplexity] = useState<number | null>(1);
 	const [activeCategory, setActiveCategory] = useState<number | null>(null);
 	const [activeSubcategory, setActiveSubcategory] = useState<number | null>(null);
-	// const [deadline, setDeadline] = useState('');
+	const [deadline, setDeadline] = useState<string>('');
 	const [image, setImage] = useState<File | null>(null);
 	const [imageUrl, setImageUrl] = useState<string | null>(null);
 	const [categories, setCategories] = useState<ICategory[]>([]);
@@ -286,6 +288,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		setActiveComplexity(null);
 		setActiveCategory(null);
 		setActiveSubcategory(null);
+		setDeadline('');
 		setImage(null);
 		setImageUrl(null);
 		setSimilarGoals([]);
@@ -336,6 +339,11 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			// Если есть URL изображения, добавляем его в formData
 			else if (imageUrl) {
 				formData.append('image_url', imageUrl);
+			}
+
+			// Если задан дедлайн, добавляем его в formData
+			if (deadline) {
+				formData.append('deadline', deadline);
 			}
 
 			const response = await postCreateGoal(formData);
@@ -417,6 +425,11 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			// Если есть URL изображения, добавляем его в formData
 			else if (imageUrl) {
 				formData.append('image_url', imageUrl);
+			}
+
+			// Если задан дедлайн, добавляем его в formData
+			if (deadline) {
+				formData.append('deadline', deadline);
 			}
 
 			const response = await postCreateGoal(formData);
@@ -665,15 +678,26 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							required
 						/>
 
-						{/* <FieldInput
-						placeholder="Выберите дату (необязательно)"
-						id="goal-deadline"
-						text="Дедлайн"
-						value={deadline}
-						setValue={setDeadline}
-						className={element('field')}
-						type="date"
-					/> */}
+						<div className={element('date-field-container')}>
+							<p className={element('field-title')}>Планируемая дата реализации</p>
+							<DatePicker
+								selected={deadline ? new Date(deadline) : null}
+								onChange={(date) => {
+									if (date) {
+										// Форматируем дату в строку в формате YYYY-MM-DD
+										setDeadline(format(date, 'yyyy-MM-dd'));
+									} else {
+										setDeadline('');
+									}
+								}}
+								className={element('date-input')}
+								placeholderText="ДД.ММ.ГГГГ"
+								minDate={new Date(new Date().setDate(new Date().getDate() + 1))} // завтра
+							/>
+							<small id="date-format-hint" className={element('format-hint')}>
+								Укажите планируемую дату достижения цели (не ранее завтрашнего дня)
+							</small>
+						</div>
 
 						<div className={element('btns-wrapper')}>
 							{!hideNavigation && (

@@ -1,10 +1,13 @@
-import {FC} from 'react';
+import {FC, useEffect, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
+import {getGoalTimer} from '@/utils/api/get/getGoalTimer';
+
 import './aside-goal.scss';
 
 import {Button} from '../Button/Button';
+import {GoalTimer, TimerInfo} from '../GoalTimer/GoalTimer';
 import {Line} from '../Line/Line';
 
 interface AsideProps {
@@ -34,10 +37,33 @@ export interface AsideListsProps extends AsideProps {
 
 export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const {className, title, image, added, updateGoal, code, done, isList, openAddReview, editGoal, canEdit} = props;
+	const [timer, setTimer] = useState<TimerInfo | null>(null);
 
 	const [block, element] = useBem('aside-goal', className);
 
 	const {setIsOpen, setWindow, setFuncModal} = ModalStore;
+
+	// Загрузка информации о таймере
+	useEffect(() => {
+		const loadTimer = async () => {
+			if (added && !isList) {
+				const response = await getGoalTimer(code);
+				if (response.success && response.data?.timer) {
+					// Данные таймера уже в нужном формате, используем напрямую
+					setTimer(response.data.timer);
+				} else {
+					// Сбрасываем таймер, если его нет или произошла ошибка
+					setTimer(null);
+				}
+			}
+		};
+
+		loadTimer();
+	}, [code, added, isList]);
+
+	const handleTimerUpdate = (updatedTimer: TimerInfo | null) => {
+		setTimer(updatedTimer);
+	};
 
 	const openMarkAll = () => {
 		setWindow('confirm-execution-all-goal');
@@ -98,6 +124,15 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						Редактировать
 					</Button>
 				)}
+
+				{/* Показываем таймер, если цель добавлена и не является списком */}
+				{added && !isList && (
+					<>
+						<Line className={element('line')} />
+						<GoalTimer timer={timer} goalCode={code} onTimerUpdate={handleTimerUpdate} />
+					</>
+				)}
+
 				<Line className={element('line')} />
 				<Button
 					theme="blue-light"

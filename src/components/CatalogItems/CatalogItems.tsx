@@ -42,7 +42,7 @@ interface CatalogItemsUsersProps extends CatalogItemsProps {
 	code?: never;
 	category?: never;
 	completed: boolean;
-	categories?: never;
+	categories?: Array<ICategoryDetailed>;
 }
 
 const sortBy: Array<OptionSelect> = [
