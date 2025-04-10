@@ -43,6 +43,7 @@ interface IActivityStats {
 	currentStreak: number;
 	maxStreak: number;
 	activityPercentage: number;
+	isActiveToday: boolean;
 }
 
 interface ActivityHeatmapProps {
@@ -88,6 +89,10 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 				const response = await getGoalActivity(period);
 
 				if (response.success && response.data) {
+					// Преобразуем snake_case в camelCase для совместимости с интерфейсами
+					if (response.data.stats && response.data.stats.is_active_today !== undefined) {
+						response.data.stats.isActiveToday = response.data.stats.is_active_today;
+					}
 					setActivityData(response.data);
 					setFetchStatus('success');
 				} else {
@@ -400,6 +405,17 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 							<div className={element('stat-item')}>
 								<span className={element('stat-value')}>{activityData.stats.activityPercentage}%</span>
 								<span className={element('stat-label')}>активность</span>
+							</div>
+							<div className={element('stat-item')}>
+								<span
+									className={element('stat-value', {
+										active: activityData.stats.isActiveToday,
+										inactive: !activityData.stats.isActiveToday,
+									})}
+								>
+									{activityData.stats.isActiveToday ? 'Да' : 'Нет'}
+								</span>
+								<span className={element('stat-label')}>сегодня</span>
 							</div>
 						</div>
 

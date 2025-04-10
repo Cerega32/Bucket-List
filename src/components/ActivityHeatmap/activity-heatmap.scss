@@ -28,6 +28,14 @@
 		color: var(--color-text-primary);
 		font-size: 18px;
 		font-weight: var(--weight-bold);
+
+		&--active {
+			color: var(--color-sentiment-positive);
+		}
+
+		&--inactive {
+			color: var(--color-sentiment-negative);
+		}
 	}
 
 	&__stat-label {
