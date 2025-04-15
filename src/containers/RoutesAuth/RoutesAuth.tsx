@@ -95,6 +95,13 @@ export const RoutesAuth: FC = observer(() => {
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfDone" subPage="lists" />} />}
 				/>
 
+				{/* Новые маршруты для друзей */}
+				{/* <Route path="/user/self/friends" element={<ProtectedRoute element={<PageFriends page="isUserSelfFriends" />} />} />
+				<Route
+					path="/friends/compare/:friendId"
+					element={<ProtectedRoute element={<PageFriendCompare page="isFriendCompare" />} />}
+				/> */}
+
 				<Route path="*" element={<PageNotFound page="NotFound" />} />
 			</Routes>
 		</main>

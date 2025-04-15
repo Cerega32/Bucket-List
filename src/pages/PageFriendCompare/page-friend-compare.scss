@@ -1,0 +1,226 @@
+@use '@/_commons/styles-supports/mixins' as *;
+
+.page-friend-compare {
+	width: 100%;
+	max-width: 800px;
+	padding: 24px 0;
+	margin: 0 auto;
+
+	&__header {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		margin-bottom: 32px;
+	}
+
+	&__back-button {
+		flex-shrink: 0;
+	}
+
+	&__title {
+		margin: 0;
+		color: var(--color-text-primary);
+		font-size: 28px;
+		font-weight: var(--weight-bold);
+	}
+
+	&__error {
+		padding: 16px;
+		margin-bottom: 24px;
+		background-color: rgb(var(--color-error-rgb) 0.1);
+		border-radius: 8px;
+		color: var(--color-error);
+		text-align: center;
+	}
+
+	&__comparison-container {
+		padding: 24px;
+		background-color: var(--color-bg-secondary);
+		border-radius: 12px;
+		box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+	}
+
+	&__users-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 32px;
+	}
+
+	&__user-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: 45%;
+		padding: 16px;
+		background-color: var(--color-white);
+		border-radius: 8px;
+		text-align: center;
+		box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
+	}
+
+	&__user-avatar {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 64px;
+		height: 64px;
+		margin-bottom: 12px;
+		background-color: var(--color-primary);
+		border-radius: 50%;
+		color: var(--color-white);
+		font-size: 24px;
+		font-weight: var(--weight-semi-bold);
+		text-transform: uppercase;
+	}
+
+	&__user-name {
+		margin-bottom: 8px;
+		color: var(--color-text-primary);
+		font-size: 18px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__user-username {
+		display: block;
+		margin-top: 4px;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+		font-weight: var(--weight-normal);
+	}
+
+	&__user-label {
+		padding: 4px 12px;
+		background-color: var(--color-gray-20);
+		border-radius: 16px;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__vs {
+		flex-shrink: 0;
+		color: var(--color-primary);
+		font-size: 24px;
+		font-weight: var(--weight-bold);
+	}
+
+	&__stats-grid {
+		margin-bottom: 32px;
+		background-color: var(--color-white);
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
+	}
+
+	&__stat-row {
+		display: grid;
+		grid-template-columns: 2fr 1fr 1fr;
+		border-bottom: 1px solid var(--color-gray-20);
+
+		&:last-child {
+			border-bottom: none;
+		}
+	}
+
+	&__stat-label {
+		padding: 16px;
+		background-color: var(--color-gray-10);
+		color: var(--color-text-primary);
+		font-size: 16px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__stat-value {
+		padding: 16px;
+		font-size: 18px;
+		font-weight: var(--weight-semi-bold);
+		text-align: center;
+
+		&--winning {
+			background-color: rgb(var(--color-success-rgb) 0.1);
+			color: var(--color-success);
+		}
+
+		&--losing {
+			background-color: rgb(var(--color-error-rgb) 0.1);
+			color: var(--color-error);
+		}
+
+		&--equal {
+			background-color: var(--color-gray-10);
+			color: var(--color-text-primary);
+		}
+	}
+
+	&__summary {
+		padding: 16px;
+		background-color: var(--color-white);
+		border-radius: 8px;
+		text-align: center;
+	}
+
+	&__summary-message {
+		font-size: 18px;
+		font-weight: var(--weight-medium);
+
+		&--winning {
+			color: var(--color-success);
+		}
+
+		&--losing {
+			color: var(--color-error);
+		}
+
+		&--equal {
+			color: var(--color-primary);
+		}
+	}
+
+	@media (width <= 768px) {
+		&__users-header {
+			flex-direction: column;
+			gap: 16px;
+		}
+
+		&__user-card {
+			width: 100%;
+		}
+
+		&__vs {
+			margin: 8px 0;
+		}
+
+		&__stat-row {
+			display: grid;
+			grid-template-columns: 1fr;
+			grid-template-rows: auto auto auto;
+		}
+
+		&__stat-label {
+			grid-column: 1;
+			text-align: center;
+		}
+
+		&__stat-value {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 12px 16px;
+
+			&::before {
+				color: var(--color-text-secondary);
+				font-size: 14px;
+				font-weight: var(--weight-normal);
+				content: 'Вы:';
+			}
+
+			&:last-child::before {
+				color: var(--color-text-secondary);
+				font-size: 14px;
+				font-weight: var(--weight-normal);
+				content: 'Друг:';
+			}
+		}
+	}
+}

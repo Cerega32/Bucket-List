@@ -35,6 +35,8 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 				return <UserSelfSettings />;
 			case 'isUserSelfAchievements':
 				return <UserSelfAchievements />;
+			// case 'isUserSelfFriends':
+			// 	return <PageFriends page={page} />;
 			default:
 				return <UserSelfDashboard />;
 		}
@@ -52,6 +54,11 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 				name: 'Достижения',
 				page: 'isUserSelfAchievements',
 			},
+			// {
+			// 	url: '/user/self/friends',
+			// 	name: 'Друзья',
+			// 	page: 'isUserSelfFriends',
+			// },
 			{
 				url: '/user/self/active-goals',
 				name: 'Активные цели и списки',
