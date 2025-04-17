@@ -130,6 +130,7 @@
 		var(--color-education) 90%,
 		var(--color-white) 10%
 	); // Оттенок фиолетового для карьерного успеха
+
 	--color-career-success-rgb: 126 38 179; // #7E26B3
 	--color-intellectual-development: color-mix(
 		in srgb,
@@ -147,6 +148,7 @@
 		var(--color-health-and-sport) 80%,
 		var(--color-white) 20%
 	); // Более светлый оттенок для здоровья
+
 	--color-wellness-and-health-rgb: 49 179 183; // #31B3B7
 
 	/* Подкатегории - Развлечения, Искусство и Хобби (entertainment) */
@@ -157,6 +159,7 @@
 		var(--color-entertainment) 90%,
 		var(--color-white) 10%
 	); // Оттенок для музыкальных впечатлений
+
 	--color-musical-experiences-rgb: 184 170 48; // #B8AA30
 	--color-creative-arts: color-mix(in srgb, var(--color-entertainment) 85%, var(--color-white) 15%); // Оттенок для творческих искусств
 	--color-creative-arts-rgb: 187 174 56; // #BBAE38
@@ -173,12 +176,14 @@
 		var(--color-relations) 85%,
 		var(--color-white) 15%
 	); // Оттенок красного для общественного вклада
+
 	--color-community-contribution-rgb: 185 45 45; // #B92D2D
 	--color-romantic-moments: color-mix(
 		in srgb,
 		var(--color-relations) 75%,
 		var(--color-white) 25%
 	); // Более светлый оттенок для романтических моментов
+
 	--color-romantic-moments-rgb: 192 68 68; // #C04444
 
 	/* Подкатегории - Путешествия и открытия (travel) */
@@ -187,6 +192,7 @@
 		var(--color-travel) 90%,
 		var(--color-white) 10%
 	); // Оттенок зеленого для культурного погружения
+
 	--color-cultural-immersion-rgb: 110 183 36; // #6EB724
 	--color-culinary-explorations: color-mix(
 		in srgb,
@@ -200,6 +206,7 @@
 		var(--color-travel) 70%,
 		var(--color-white) 30%
 	); // Еще более светлый оттенок для уникальных мест
+
 	--color-unique-places-rgb: 129 195 64; // #81C340
 
 	/* Специальная категория */
