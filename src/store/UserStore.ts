@@ -60,6 +60,24 @@ class Store implements IUserStore {
 		totalAchievements: 0,
 	};
 
+	userSelf: IUserInfo = {
+		avatar: Cookies.get('avatar') || '',
+		email: '',
+		name: '',
+		id: +(Cookies.get('id') || 0),
+		username: '',
+		firstName: '',
+		lastName: '',
+		country: '',
+		coverImage: '',
+		aboutMe: '',
+		totalAddedGoals: 0,
+		totalCompletedGoals: 0,
+		totalCompletedLists: 0,
+		totalAddedLists: 0,
+		totalAchievements: 0,
+	};
+
 	addedGoals: IAddedGoals = {goals: [], totalAdded: 0};
 
 	addedLists: IAddedLists = {lists: [], totalAdded: 0};
@@ -84,6 +102,10 @@ class Store implements IUserStore {
 
 	setUserInfo = (userInfo: IUserInfo) => {
 		this.userInfo = userInfo;
+	};
+
+	setUserSelf = (userSelf: IUserInfo) => {
+		this.userSelf = userSelf;
 	};
 
 	setAddedGoals = (addedGoals: IAddedGoals) => {

@@ -1,3 +1,27 @@
+$main-categories: (
+	'travel',
+	'education',
+	'health-and-sport',
+	'relations',
+	'entertainment',
+	'100-goals',
+	'career-success',
+	'intellectual-development',
+	'sport',
+	'hobby',
+	'musical-experiences',
+	'creative-arts',
+	'gaming',
+	'cinema-art',
+	'books',
+	'community-contribution',
+	'romantic-moments',
+	'unique-places',
+	'culinary-explorations',
+	'cultural-immersion',
+	'wellness-and-health'
+);
+
 @mixin max-width {
 	max-width: 1416px;
 	margin: 0 auto;
@@ -5,10 +29,9 @@
 
 @mixin block-radius($padding: 16px 24px) {
 	padding: $padding;
-
+	background: var(--color-white);
 	border: 1px solid var(--color-gray-9);
 	border-radius: 8px;
-	background: var(--color-white);
 }
 
 @mixin focus-outline {
@@ -16,9 +39,9 @@
 }
 
 @mixin category-tag($category) {
-	color: var(--color-white);
-	border: none;
 	background: var(--color-#{$category});
+	border: none;
+	color: var(--color-white);
 }
 
 // Миксин для градиентов категорий

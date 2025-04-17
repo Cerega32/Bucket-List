@@ -25,7 +25,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const {header, page} = ThemeStore;
 	const {setIsOpen, setWindow} = ModalStore;
-	const {isAuth, name, avatar, setAvatar, setIsAuth, setName, userInfo} = UserStore;
+	const {isAuth, name, avatar, setAvatar, setIsAuth, setName, userSelf} = UserStore;
 
 	const [block, element] = useBem('header', className);
 
@@ -100,7 +100,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 							<span className={element('nickname')}>{name}</span>
 						</div>
 						<div className={element('profile-menu')}>
-							<Link className={element('menu-item')} to={`/user/${userInfo?.id}/showcase/`}>
+							<Link className={element('menu-item')} to={`/user/${userSelf?.id}/showcase/`}>
 								Мой профиль
 							</Link>
 							<Link className={element('menu-item')} to="/user/self">

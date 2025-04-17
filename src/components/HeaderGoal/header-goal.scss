@@ -1,5 +1,3 @@
-@import '@/_commons/styles-supports/mixins';
-
 .header-goal {
 	$block: &;
 
@@ -34,36 +32,10 @@
 		margin: 0 auto;
 	}
 
-	&--category-travel::after {
-		@include category-header-gradient('travel');
-	}
-
-	&--category-education::after {
-		@include category-header-gradient('education');
-	}
-
-	&--category-health-and-sport::after {
-		@include category-header-gradient('health-and-sport');
-	}
-
-	&--category-career::after {
-		@include category-header-gradient('career');
-	}
-
-	&--category-relations::after {
-		@include category-header-gradient('relations');
-	}
-
-	&--category-entertainment::after {
-		@include category-header-gradient('entertainment');
-	}
-
-	&--category-hobbies::after {
-		@include category-header-gradient('hobbies');
-	}
-
-	&--category-gastronomy::after {
-		@include category-header-gradient('gastronomy');
+	@each $category in $main-categories {
+		&--category-#{$category}::after {
+			@include category-header-gradient($category);
+		}
 	}
 
 	&--shrink {

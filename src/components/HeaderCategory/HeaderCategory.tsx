@@ -38,8 +38,7 @@ export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
 	return (
 		<header
 			className={block({
-				category:
-					isSub && category.category.parentCategory?.nameEn ? category.category.parentCategory?.nameEn : category.category.nameEn,
+				category: isSub && category.category.parentCategory?.nameEn ? category.category.nameEn : category.category.nameEn,
 				fixed: isFixed,
 			})}
 			style={{backgroundImage: `url(${category.category.image})`}}

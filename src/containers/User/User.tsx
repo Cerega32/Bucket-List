@@ -19,6 +19,7 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 
 	const {userInfo} = UserStore;
 	const {id} = useParams();
+
 	if (!id) {
 		return null;
 	}

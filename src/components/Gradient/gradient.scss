@@ -11,10 +11,8 @@
 	&__img {
 		position: relative;
 		z-index: 0;
-
 		width: 100%;
 		height: 100%;
-
 		object-fit: cover;
 
 		&--blacked {
@@ -24,71 +22,20 @@
 
 	&__color {
 		position: absolute;
+		z-index: 1;
 		top: 0;
 		left: 0;
-		z-index: 1;
-
 		width: 100%;
 		height: 100%;
-
+		opacity: 0;
 		transition: all 0.3s linear;
 
-		opacity: 0;
-
-		// Категории с градиентами
-		&--category-travel {
-			@include category-gradient('travel');
-			&#{$block}__color--withoutBlack {
-				@include category-gradient-without-black('travel');
-			}
-		}
-
-		&--category-education {
-			@include category-gradient('education');
-			&#{$block}__color--withoutBlack {
-				@include category-gradient-without-black('education');
-			}
-		}
-
-		&--category-health-and-sport {
-			@include category-gradient('health-and-sport');
-			&#{$block}__color--withoutBlack {
-				@include category-gradient-without-black('health-and-sport');
-			}
-		}
-
-		&--category-career {
-			@include category-gradient('career');
-			&#{$block}__color--withoutBlack {
-				@include category-gradient-without-black('career');
-			}
-		}
-
-		&--category-relations {
-			@include category-gradient('relations');
-			&#{$block}__color--withoutBlack {
-				@include category-gradient-without-black('relations');
-			}
-		}
-
-		&--category-entertainment {
-			@include category-gradient('entertainment');
-			&#{$block}__color--withoutBlack {
-				@include category-gradient-without-black('entertainment');
-			}
-		}
-
-		&--category-hobbies {
-			@include category-gradient('hobbies');
-			&#{$block}__color--withoutBlack {
-				@include category-gradient-without-black('hobbies');
-			}
-		}
-
-		&--category-gastronomy {
-			@include category-gradient('gastronomy');
-			&#{$block}__color--withoutBlack {
-				@include category-gradient-without-black('gastronomy');
+		@each $category in $main-categories {
+			&--category-#{$category} {
+				@include category-gradient($category);
+				&#{$block}__color--withoutBlack {
+					@include category-gradient-without-black($category);
+				}
 			}
 		}
 
@@ -103,18 +50,16 @@
 		}
 
 		&--show {
-			transition: all 0.3s linear;
-
 			opacity: 1;
+			transition: all 0.3s linear;
 		}
 	}
 
 	&__top-info {
 		position: absolute;
+		z-index: 10;
 		top: 16px;
 		left: 16px;
-		z-index: 10;
-
 		width: calc(100% - 32px);
 		height: calc(100% - 32px);
 	}
