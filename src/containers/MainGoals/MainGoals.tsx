@@ -14,6 +14,7 @@ import './main-goals.scss';
 
 export const MainGoals: FC<IPage> = () => {
 	const [block, element] = useBem('main-goals');
+	const [isLoading, setIsLoading] = useState(true);
 
 	const [mainGoals, setMainGoals] = useState<IMainGoals>({
 		easyGoals: {data: [], countCompleted: 0},
@@ -23,10 +24,12 @@ export const MainGoals: FC<IPage> = () => {
 
 	useEffect(() => {
 		(async () => {
+			setIsLoading(true);
 			const res = await get100Goals();
 			if (res.success) {
 				setMainGoals(res.data);
 			}
+			setIsLoading(false);
 		})();
 	}, []);
 
@@ -58,7 +61,7 @@ export const MainGoals: FC<IPage> = () => {
 
 	return (
 		<main className={block()}>
-			<Loader isLoading={false}>
+			<Loader isLoading={isLoading}>
 				<>
 					<div className={element('info')}>
 						<div className={element('description')}>

@@ -1,7 +1,8 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect} from 'react';
+import {FC, useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
+import {Loader} from '@/components/Loader/Loader';
 import {UserInfo} from '@/components/UserInfo/UserInfo';
 import {useBem} from '@/hooks/useBem';
 import {UserStore} from '@/store/UserStore';
@@ -19,6 +20,7 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 
 	const {userInfo} = UserStore;
 	const {id} = useParams();
+	const [isLoading, setIsLoading] = useState(true);
 
 	if (!id) {
 		return null;
@@ -26,7 +28,9 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 
 	useEffect(() => {
 		(async () => {
+			setIsLoading(true);
 			await getUser(id);
+			setIsLoading(false);
 		})();
 	}, [id]);
 
@@ -49,18 +53,20 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 
 	return (
 		<main className={block()}>
-			<UserInfo
-				avatar={userInfo.avatar || null}
-				name={userInfo.name}
-				totalAdded={userInfo.totalAddedGoals}
-				totalCompleted={userInfo.totalCompletedGoals}
-				page={page}
-				id={id}
-				totalAddedLists={userInfo.totalAddedLists}
-				totalCompletedLists={userInfo.totalCompletedLists}
-				totalAchievements={userInfo.totalAchievements}
-				background={userInfo.coverImage}
-			/>
+			<Loader isLoading={isLoading}>
+				<UserInfo
+					avatar={userInfo.avatar || null}
+					name={userInfo.name}
+					totalAdded={userInfo.totalAddedGoals}
+					totalCompleted={userInfo.totalCompletedGoals}
+					page={page}
+					id={id}
+					totalAddedLists={userInfo.totalAddedLists}
+					totalCompletedLists={userInfo.totalCompletedLists}
+					totalAchievements={userInfo.totalAchievements}
+					background={userInfo.coverImage}
+				/>
+			</Loader>
 			{getUserContent()}
 		</main>
 	);

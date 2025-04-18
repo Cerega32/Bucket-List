@@ -3,6 +3,7 @@ import {FC, useEffect, useState} from 'react';
 import {InfoGoal} from '@/components/InfoGoal/InfoGoal';
 import {LeaderBoard} from '@/components/LeaderBoard/LeaderBoard';
 import {LeaderPedestal} from '@/components/Leaders/LeaderPedestal';
+import {Loader} from '@/components/Loader/Loader';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {IInfoStats, IWeeklyLeader} from '@/typings/user';
@@ -14,19 +15,21 @@ export const Leaders: FC = () => {
 	const [block, element] = useBem('leaders');
 	const [leaders, setLeaders] = useState<Array<IWeeklyLeader>>([]);
 	const [infoStats, setInfoStats] = useState<IInfoStats>(defaultInfoStats);
-
+	const [isLoading, setIsLoading] = useState(true);
 	useEffect(() => {
 		(async () => {
+			setIsLoading(true);
 			const response = await getWeeklyLeaders();
 			if (response.success) {
 				setLeaders(response.data.leaders);
 				setInfoStats(response.data.totalStats);
 			}
+			setIsLoading(false);
 		})();
 	}, []);
 
 	return (
-		<main className={block()}>
+		<Loader isLoading={isLoading} className={block()}>
 			<div className={element('wrapper')}>
 				<Title className={element('title')} tag="h1">
 					Лидеры прошлой недели
@@ -53,6 +56,6 @@ export const Leaders: FC = () => {
 			) : (
 				<div className={element('empty')}>Никто еще не стал лидером недели. Но вы можете стать им!</div>
 			)}
-		</main>
+		</Loader>
 	);
 };

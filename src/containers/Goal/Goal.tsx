@@ -5,6 +5,7 @@ import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {ContentGoal} from '@/components/ContentGoal/ContentGoal';
 import {EditGoal} from '@/components/EditGoal/EditGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
+import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
 import {GoalStore} from '@/store/GoalStore';
 import {ModalStore} from '@/store/ModalStore';
@@ -27,6 +28,7 @@ export const Goal: FC<IPage> = ({page}) => {
 	const listId = params?.['id'];
 	const [goal, setGoal] = useState<IGoal | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 	const [canEditCheck, setCanEditCheck] = useState<{can_edit: boolean; checked: boolean}>({
 		can_edit: false,
 		checked: false,
@@ -38,11 +40,13 @@ export const Goal: FC<IPage> = ({page}) => {
 	useEffect(() => {
 		(async () => {
 			if (listId) {
+				setIsLoading(true);
 				const res = await getGoal(listId);
 				if (res.success) {
 					setGoal(res.data.goal);
 					setId(res.data.goal.id);
 				}
+				setIsLoading(false);
 			}
 		})();
 	}, [listId]);
@@ -67,16 +71,15 @@ export const Goal: FC<IPage> = ({page}) => {
 		checkEditPermission();
 	}, [goal, listId, canEditCheck.checked]);
 
-	if (!goal) {
-		return null;
-	}
-
 	const openAddReview = () => {
 		setWindow('add-review');
 		setIsOpen(true);
 	};
 
 	const updateGoal = async (code: string, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
+		if (!goal) {
+			return;
+		}
 		const res = await (operation === 'add'
 			? addGoal(code)
 			: operation === 'delete'
@@ -137,6 +140,10 @@ export const Goal: FC<IPage> = ({page}) => {
 				<EditGoal goal={goal} onGoalUpdated={handleGoalUpdated} cancelEdit={handleCancelEdit} />
 			</main>
 		);
+	}
+
+	if (!goal) {
+		return <Loader isLoading={isLoading} />;
 	}
 
 	return (

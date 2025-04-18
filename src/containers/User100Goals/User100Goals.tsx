@@ -1,7 +1,8 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect} from 'react';
+import {FC, useEffect, useState} from 'react';
 
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
+import {Loader} from '@/components/Loader/Loader';
 import {MainCards} from '@/components/MainCards/MainCards';
 import {useBem} from '@/hooks/useBem';
 import {UserStore} from '@/store/UserStore';
@@ -17,12 +18,15 @@ export const User100Goals: FC<User100GoalsProps> = observer((props) => {
 	const [block, element] = useBem('user-100-goals');
 
 	const {mainGoals, setMainGoals} = UserStore;
+	const [isLoading, setIsLoading] = useState(true);
 
 	const getGoals = async (): Promise<void> => {
+		setIsLoading(true);
 		const res = await get100Goals(id);
 		if (res.success) {
 			setMainGoals(res.data);
 		}
+		setIsLoading(false);
 	};
 
 	useEffect(() => {
@@ -31,7 +35,7 @@ export const User100Goals: FC<User100GoalsProps> = observer((props) => {
 	}, []);
 
 	return (
-		<section className={block()}>
+		<Loader isLoading={isLoading} className={block()}>
 			<Info100Goals
 				className={element('stats')}
 				totalAddedEasy={mainGoals.easyGoals.data.length}
@@ -44,6 +48,6 @@ export const User100Goals: FC<User100GoalsProps> = observer((props) => {
 			<MainCards className={element('goals')} goals={mainGoals.easyGoals.data} complexity="easy" />
 			<MainCards className={element('goals')} goals={mainGoals.mediumGoals.data} complexity="medium" />
 			<MainCards className={element('goals')} goals={mainGoals.hardGoals.data} complexity="hard" />
-		</section>
+		</Loader>
 	);
 });

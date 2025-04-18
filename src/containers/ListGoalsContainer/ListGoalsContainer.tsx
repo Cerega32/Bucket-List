@@ -3,6 +3,7 @@ import {useParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {ContentListGoals} from '@/components/ContentListGoals/ContentListGoals';
+import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
 import {IList} from '@/typings/list';
 import {getList} from '@/utils/api/get/getList';
@@ -17,16 +18,19 @@ import './list-goals-container.scss';
 export const ListGoalsContainer: FC = () => {
 	const [block, element] = useBem('list-goals-container');
 	const [list, setList] = useState<IList | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
 
 	const params = useParams();
 	const listId = params?.['id'];
 
 	useEffect(() => {
 		(async () => {
+			setIsLoading(true);
 			const res = await getList(`goal-lists/${listId}`);
 			if (res.success) {
 				setList(res.data.list);
 			}
+			setIsLoading(false);
 		})();
 	}, [listId]);
 
@@ -88,7 +92,7 @@ export const ListGoalsContainer: FC = () => {
 	};
 
 	if (!list) {
-		return null;
+		return <Loader isLoading={isLoading} />;
 	}
 
 	return (

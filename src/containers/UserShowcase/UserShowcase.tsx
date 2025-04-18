@@ -5,6 +5,7 @@ import {Achievement} from '@/components/Achievement/Achievement';
 import {Button} from '@/components/Button/Button';
 import {CommentsGoal} from '@/components/CommentsGoal/CommentsGoal';
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
+import {Loader} from '@/components/Loader/Loader';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {UserStore} from '@/store/UserStore';
@@ -24,45 +25,40 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 
 	// const {addedGoals, addedLists} = UserStore;
 	const [comments, setComments] = useState<Array<IComment>>([]);
+	const [isLoading, setIsLoading] = useState(true);
 
 	const {mainGoals, setMainGoals} = UserStore;
-
-	const getGoals = async (): Promise<void> => {
-		const res = await get100Goals(id);
-		if (res.success) {
-			setMainGoals(res.data);
-		}
-	};
 
 	const [achievements, setAchievements] = useState<Array<IAchievement>>([]);
 
 	useEffect(() => {
 		(async () => {
-			const res = await GET('achievements', {get: {user_id: id}});
-			if (res.success) {
-				setAchievements(res.data.data);
-			}
-		})();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+			setIsLoading(true);
+			try {
+				const [goalsRes, achievementsRes, commentsRes] = await Promise.all([
+					get100Goals(id),
+					GET('achievements', {get: {user_id: id}}),
+					GET(`comments/${id}`, {auth: true}),
+				]);
 
-	useEffect(() => {
-		getGoals();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
-	useEffect(() => {
-		(async () => {
-			const res = await GET(`comments/${id}`, {auth: true});
-			if (res.success) {
-				setComments(res.data.data);
+				if (goalsRes.success) {
+					setMainGoals(goalsRes.data);
+				}
+				if (achievementsRes.success) {
+					setAchievements(achievementsRes.data.data);
+				}
+				if (commentsRes.success) {
+					setComments(commentsRes.data.data);
+				}
+			} finally {
+				setIsLoading(false);
 			}
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
-		<section className={block()}>
+		<Loader isLoading={isLoading} className={block()}>
 			<CommentsGoal comments={comments} setComments={setComments} isUser />
 			<aside className={element('sidebar')}>
 				<div className={element('title')}>
@@ -91,6 +87,6 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 					<Achievement key={achievement.id} className={element('achievement')} achievement={achievement} />
 				))}
 			</aside>
-		</section>
+		</Loader>
 	);
 });

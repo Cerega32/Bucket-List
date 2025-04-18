@@ -7,15 +7,18 @@ import './loader.scss';
 interface LoaderProps {
 	isLoading: boolean;
 	children?: React.ReactNode;
+	className?: string;
 }
 
-export const Loader: FC<LoaderProps> = ({isLoading, children}) => {
+export const Loader: FC<LoaderProps> = ({isLoading, children, className}) => {
 	const [block, element] = useBem('loader');
 
 	if (!isLoading && !children) return null;
 
 	return (
 		<div className={block()}>
+			{children && <div className={element('content', {blurred: isLoading}, className)}>{children}</div>}
+
 			{isLoading && (
 				<div className={element('overlay')}>
 					<svg width="80" height="80" viewBox="-10 -10 50 46" fill="none" xmlns="http://www.w3.org/2000/svg" overflow="visible">
@@ -47,7 +50,6 @@ export const Loader: FC<LoaderProps> = ({isLoading, children}) => {
 					</svg>
 				</div>
 			)}
-			<div className={element('content', {blurred: isLoading})}>{children}</div>
 		</div>
 	);
 };

@@ -6,6 +6,7 @@ import {Button} from '@/components/Button/Button';
 import {Card} from '@/components/Card/Card';
 import {CatalogItems} from '@/components/CatalogItems/CatalogItems';
 import {HeaderCategory} from '@/components/HeaderCategory/HeaderCategory';
+import {Loader} from '@/components/Loader/Loader';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
@@ -30,51 +31,43 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 	const [popularGoals, setPopularGoals] = useState<Array<IGoal>>([]);
 	const [popularLists, setPopularLists] = useState<Array<IList>>([]);
 	const [categories, setCategories] = useState<Array<ICategoryDetailed>>([]);
-
+	const [isLoading, setIsLoading] = useState(true);
 	const refTitle = useRef<HTMLElement>(null);
 
 	const {id} = useParams();
 
 	useEffect(() => {
 		(async () => {
+			setIsLoading(true);
+
+			const promises = [];
+
 			if (!id) {
-				const res = await getCategories();
-				if (res.success) {
-					setCategories(res.data);
-				}
+				promises.push(getCategories());
+			} else {
+				promises.push(getCategory(id));
 			}
-		})();
-	}, [id]);
 
-	useEffect(() => {
-		if (id) {
-			(async () => {
-				const res = await getCategory(id);
+			promises.push(getPopularGoals(id || 'all'));
+			promises.push(getPopularLists(id || 'all'));
 
-				if (res.success) {
-					setCategory(res.data);
-				}
-			})();
-		}
-	}, [id]);
+			const [categoriesRes, goalsRes, listsRes] = await Promise.all(promises);
 
-	useEffect(() => {
-		(async () => {
-			const res = await getPopularGoals(id || 'all');
-
-			if (res.success) {
-				setPopularGoals(res.data);
+			if (!id && categoriesRes.success) {
+				setCategories(categoriesRes.data);
+			} else if (id && categoriesRes.success) {
+				setCategory(categoriesRes.data);
 			}
-		})();
-	}, [id]);
 
-	useEffect(() => {
-		(async () => {
-			const res = await getPopularLists(id || 'all');
-
-			if (res.success) {
-				setPopularLists(res.data);
+			if (goalsRes.success) {
+				setPopularGoals(goalsRes.data);
 			}
+
+			if (listsRes.success) {
+				setPopularLists(listsRes.data);
+			}
+
+			setIsLoading(false);
 		})();
 	}, [id]);
 
@@ -115,80 +108,87 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 
 	return (
 		<main className={block({sub: page === 'isSubCategories', empty: !category?.subcategories.length, all: !id})}>
-			{id && id !== 'all' && category && (
-				<HeaderCategory category={category} className={element('header')} isSub={page === 'isSubCategories'} refHeader={refTitle} />
-			)}
-			{!!popularGoals.length && (
-				<>
-					<div className={element('wrapper-title')}>
-						<Title tag="h2">Популярные цели этой недели</Title>
-						<Button
-							type="Link"
-							theme="blue"
-							icon="plus"
-							href={`/goals/create${id && id !== 'all' ? `?category=${id}` : ''}`}
-							size="small"
-						>
-							Добавить цель
-						</Button>
-					</div>
+			<Loader isLoading={isLoading}>
+				{id && id !== 'all' && category && (
+					<HeaderCategory
+						category={category}
+						className={element('header')}
+						isSub={page === 'isSubCategories'}
+						refHeader={refTitle}
+					/>
+				)}
+				{!!popularGoals.length && (
+					<>
+						<div className={element('wrapper-title')}>
+							<Title tag="h2">Популярные цели этой недели</Title>
+							<Button
+								type="Link"
+								theme="blue"
+								icon="plus"
+								href={`/goals/create${id && id !== 'all' ? `?category=${id}` : ''}`}
+								size="small"
+							>
+								Добавить цель
+							</Button>
+						</div>
 
-					<section className={element('popular-goals')}>
-						{popularGoals.map((goal, i) => (
-							<Card
-								goal={goal}
-								className={element('popular-goal')}
-								key={goal.code}
-								onClickAdd={() => updateGoal(goal.code, i, 'add')}
-								onClickDelete={() => updateGoal(goal.code, i, 'delete')}
-								onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
-							/>
-						))}
-					</section>
-				</>
-			)}
-			{!!popularLists.length && (
-				<>
-					<div className={element('wrapper-title')}>
-						<Title tag="h2">Популярные списки этой недели</Title>
-						<Button
-							type="Link"
-							theme="blue"
-							icon="plus"
-							href={`/list/create${id && id !== 'all' ? `?category=${id}` : ''}`}
-							size="small"
-						>
-							Добавить список целей
-						</Button>
-					</div>
-					<section className={element('popular-lists')}>
-						{popularLists.map((list, i) => (
-							<Card
-								horizontal
-								isList
-								goal={list}
-								className={element('popular-list')}
-								key={list.code}
-								onClickAdd={() => updateList(list.code, i, 'add')}
-								onClickDelete={() => updateList(list.code, i, 'delete')}
-							/>
-						))}
-					</section>
-				</>
-			)}
+						<section className={element('popular-goals')}>
+							{popularGoals.map((goal, i) => (
+								<Card
+									goal={goal}
+									className={element('popular-goal')}
+									key={goal.code}
+									onClickAdd={() => updateGoal(goal.code, i, 'add')}
+									onClickDelete={() => updateGoal(goal.code, i, 'delete')}
+									onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
+								/>
+							))}
+						</section>
+					</>
+				)}
+				{!!popularLists.length && (
+					<>
+						<div className={element('wrapper-title')}>
+							<Title tag="h2">Популярные списки этой недели</Title>
+							<Button
+								type="Link"
+								theme="blue"
+								icon="plus"
+								href={`/list/create${id && id !== 'all' ? `?category=${id}` : ''}`}
+								size="small"
+							>
+								Добавить список целей
+							</Button>
+						</div>
+						<section className={element('popular-lists')}>
+							{popularLists.map((list, i) => (
+								<Card
+									horizontal
+									isList
+									goal={list}
+									className={element('popular-list')}
+									key={list.code}
+									onClickAdd={() => updateList(list.code, i, 'add')}
+									onClickDelete={() => updateList(list.code, i, 'delete')}
+								/>
+							))}
+						</section>
+					</>
+				)}
 
-			<Title className={element('title')} tag="h2">
-				Все цели и списки
-			</Title>
-			<CatalogItems
-				code={id || 'all'}
-				className={element('all-goals')}
-				subPage={subPage}
-				category={category}
-				beginUrl={id ? '/categories/' : '/categories/all'}
-				categories={categories}
-			/>
-			{!id && <AllCategories categories={categories} />}
+				<Title className={element('title')} tag="h2">
+					Все цели и списки
+				</Title>
+				<CatalogItems
+					code={id || 'all'}
+					className={element('all-goals')}
+					subPage={subPage}
+					category={category}
+					beginUrl={id ? '/categories/' : '/categories/all'}
+					categories={categories}
+				/>
+				{!id && <AllCategories categories={categories} />}
+			</Loader>
 		</main>
 	);
 };
