@@ -16,7 +16,7 @@
 		object-fit: cover;
 
 		&--blacked {
-			filter: grayscale(100%);
+			filter: grayscale(100%) contrast(0.7);
 		}
 	}
 

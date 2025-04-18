@@ -24,7 +24,7 @@ export const CardCategory: FC<CardCategoryProps> = (props) => {
 			<Link to={`/categories/${category.nameEn}`} className={element('gradient')}>
 				<Gradient img={{src: category.image, alt: category.name}} category={category.nameEn} withoutBlack>
 					<div className={element('description')}>
-						<Title className={element('title')} theme="white" tag="h3">
+						<Title className={element('title')} theme="white" tag="h2">
 							{category.name}
 						</Title>
 						<p className={element('goals')}>{pluralize(category.goalCount, ['цель', 'цели', 'целей'])}</p>

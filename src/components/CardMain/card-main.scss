@@ -45,6 +45,7 @@
 
 	&__title {
 		margin-bottom: 8px;
+		text-shadow: 0 0 10px var(--color-black);
 	}
 
 	&__text {
@@ -55,6 +56,7 @@
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2; /* number of lines to show */
 		line-clamp: 2;
+		text-shadow: 0 0 10px var(--color-black);
 	}
 
 	&__line {
