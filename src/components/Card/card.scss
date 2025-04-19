@@ -77,8 +77,12 @@
 	}
 
 	&__buttons {
-		display: none;
+		display: flex;
 		gap: 8px;
+
+		@media (width >= 768px) {
+			display: none;
+		}
 	}
 
 	&__btn-done {

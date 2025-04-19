@@ -11,7 +11,11 @@
 		}
 
 		&--columns-three {
-			width: calc(33% - 24px * 2 / 3);
+			width: 100%;
+
+			@media (width >= 768px) {
+				width: calc(33% - 24px * 2 / 3);
+			}
 		}
 
 		&--columns-four {

@@ -16,11 +16,17 @@
 	&__wrapper {
 		position: relative;
 		display: flex;
+		flex-wrap: wrap;
 		align-items: flex-start;
 		gap: 24px;
 		max-width: 1440px;
 		padding-top: calc(var(--height-header) + 40px);
-		margin: 0 auto;
+		margin: 0 24px;
+
+		@media (width >= 768px) {
+			flex-wrap: nowrap;
+			margin: 0 auto;
+		}
 	}
 
 	&__aside {
