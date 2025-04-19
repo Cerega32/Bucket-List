@@ -1,8 +1,12 @@
 .aside-goal {
 	$block: &;
 
-	min-width: 336px;
-	max-width: 336px;
+	min-width: 100%;
+
+	@media (width >= 768px) {
+		min-width: 336px;
+		max-width: 336px;
+	}
 
 	&__image {
 		width: 100%;

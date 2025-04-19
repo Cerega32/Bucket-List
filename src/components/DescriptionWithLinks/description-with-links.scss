@@ -16,7 +16,11 @@
 	}
 
 	&__text {
-		flex-basis: 67%;
+		flex-basis: 100%;
+
+		@media (width >= 768px) {
+			flex-basis: 67%;
+		}
 	}
 
 	&__btn-more {
