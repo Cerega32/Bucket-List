@@ -1,4 +1,12 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Запуск сборки проекта
+npm run build
+
+# Добавление папки dist в git и создание автоматического коммита
+git add dist/
+git commit -m "chore: автоматическая сборка проекта" --no-verify || true
+
+# Запуск стандартных проверок перед пушем
 npm run pre-push
