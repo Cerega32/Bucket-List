@@ -1,6 +1,5 @@
 import {FC, useEffect, useMemo, useState} from 'react';
-
-import './catalog-items.scss';
+import {scroller} from 'react-scroll';
 
 import {useBem} from '@/hooks/useBem';
 import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
@@ -18,9 +17,11 @@ import {defaultPagination} from '@/utils/data/default';
 import {Card} from '../Card/Card';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
+import {Loader} from '../Loader/Loader';
 import {Pagination} from '../Pagination/Pagination';
 import Select, {OptionSelect} from '../Select/Select';
 import {Switch} from '../Switch/Switch';
+import './catalog-items.scss';
 
 interface CatalogItemsProps {
 	className?: string;
@@ -82,6 +83,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 	const [get, setGet] = useState(userId ? {user_id: userId, completed} : {});
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+	const [loading, setLoading] = useState(false);
 
 	const buttonsSwitch = useMemo(() => {
 		let url = '';
@@ -179,7 +181,15 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	};
 
 	const goToPage = async (active: number): Promise<boolean> => {
+		setLoading(true);
 		const success = await fetchData(sortBy[activeSort].value, active, selectedCategories);
+		scroller.scrollTo('catalog-items-goals', {
+			duration: 800,
+			delay: 0,
+			smooth: 'easeInOutQuart',
+			offset: -150,
+		});
+		setLoading(false);
 		return success;
 	};
 
@@ -307,34 +317,36 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 				)}
 				<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} filter />
 			</div>
-			{subPage === 'goals' ? (
-				<section className={element('goals', {columns})}>
-					{goals.data.map((goal, i) => (
-						<Card
-							className={element('goal')}
-							goal={goal}
-							key={goal.code}
-							onClickAdd={() => updateGoal(goal.code, i, 'add')}
-							onClickDelete={() => updateGoal(goal.code, i, 'delete')}
-							onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
-						/>
-					))}
-				</section>
-			) : (
-				<section className={element('goals', {columns})}>
-					{lists.data.map((goal, i) => (
-						<Card
-							className={element('list')}
-							goal={goal}
-							key={goal.code}
-							horizontal
-							isList
-							onClickAdd={() => updateList(goal.code, i, 'add')}
-							onClickDelete={() => updateList(goal.code, i, 'delete')}
-						/>
-					))}
-				</section>
-			)}
+			<Loader isLoading={loading}>
+				{subPage === 'goals' ? (
+					<section className={element('goals', {columns})} id="catalog-items-goals">
+						{goals.data.map((goal, i) => (
+							<Card
+								className={element('goal')}
+								goal={goal}
+								key={goal.code}
+								onClickAdd={() => updateGoal(goal.code, i, 'add')}
+								onClickDelete={() => updateGoal(goal.code, i, 'delete')}
+								onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
+							/>
+						))}
+					</section>
+				) : (
+					<section className={element('goals', {columns})} id="catalog-items-lists">
+						{lists.data.map((goal, i) => (
+							<Card
+								className={element('list')}
+								goal={goal}
+								key={goal.code}
+								horizontal
+								isList
+								onClickAdd={() => updateList(goal.code, i, 'add')}
+								onClickDelete={() => updateList(goal.code, i, 'delete')}
+							/>
+						))}
+					</section>
+				)}
+			</Loader>
 			{subPage === 'lists' ? (
 				<Pagination currentPage={lists.pagination.page} totalPages={lists.pagination.totalPages} goToPage={goToPage} />
 			) : (
