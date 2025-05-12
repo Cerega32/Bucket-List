@@ -63,12 +63,13 @@ export interface IGoal {
 		username: string;
 		avatar?: string;
 	};
-	createdByUser?: boolean;
-	canEdit?: boolean;
+	createdByUser: boolean;
+	isCanEdit: boolean;
 	totalAdditions?: number;
 }
 
 export interface IShortGoal {
+	id: number;
 	category: ICategory;
 	code: string;
 	complexity: IComplexity;

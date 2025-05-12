@@ -23,7 +23,7 @@ interface AsideGoalProps extends AsideProps {
 	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void | boolean>;
 	isList?: never;
 	openAddReview: () => void;
-	editGoal?: () => void;
+	editGoal?: (() => void) | undefined;
 	canEdit?: boolean;
 }
 
@@ -32,7 +32,7 @@ export interface AsideListsProps extends AsideProps {
 	isList: true;
 	openAddReview?: never;
 	editGoal?: never;
-	canEdit?: never;
+	canEdit?: boolean;
 }
 
 export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
@@ -119,8 +119,15 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						Удалить
 					</Button>
 				)}
-				{canEdit && editGoal && (
-					<Button theme="blue-light" onClick={editGoal} icon="edit" className={element('btn')}>
+				{canEdit && (
+					<Button
+						theme="blue-light"
+						onClick={editGoal}
+						icon="edit"
+						className={element('btn')}
+						type={editGoal ? 'button' : 'Link'}
+						href={editGoal ? undefined : `/edit-list/${code}`}
+					>
 						Редактировать
 					</Button>
 				)}

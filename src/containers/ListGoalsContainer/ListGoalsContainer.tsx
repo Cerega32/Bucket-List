@@ -107,6 +107,7 @@ export const ListGoalsContainer: FC = () => {
 					code={list.code}
 					isList
 					done={list.completedByUser}
+					canEdit={list.isCanEdit || list.isCanAddGoals}
 				/>
 				<ContentListGoals className={element('content')} list={list} updateGoal={updateGoal} />
 			</article>

@@ -8,6 +8,7 @@ import {PageCreateGoal} from '@/pages/PageCreateGoal/PageCreateGoal';
 import {PageCreateGoalList} from '@/pages/PageCreateGoalList/PageCreateGoalList';
 import {PageDetailGoal} from '@/pages/PageDetailGoal/PageDetailGoal';
 import {PageDetailList} from '@/pages/PageDetailList/PageDetailList';
+import {PageEditGoalList} from '@/pages/PageEditGoalList/PageEditGoalList';
 import {PageLeaders} from '@/pages/PageLeaders/PageLeaders';
 import {PageLogin} from '@/pages/PageLogin/PageLogin';
 import {PageMainGoals} from '@/pages/PageMainGoals/PageMainGoals';
@@ -47,6 +48,7 @@ export const RoutesAuth: FC = observer(() => {
 
 				{/* Остальные маршруты остаются без изменений */}
 				<Route path="/list/:id" element={<PageDetailList page="isList" />} />
+				<Route path="/edit-list/:id" element={<PageEditGoalList page="isEditList" />} />
 				<Route path="/list/100-goals" element={<PageMainGoals page="isMainGoals" />} />
 				<Route path="/categories" element={<PageCategories page="isCategories" />} />
 				<Route path="/categories/all" element={<PageCategory page="isCategoriesAll" subPage="goals" />} />

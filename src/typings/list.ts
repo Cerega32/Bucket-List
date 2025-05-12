@@ -16,4 +16,7 @@ export interface IList {
 	goals: Array<IShortGoal>;
 	goalsCount: number;
 	userCompletedGoals: number;
+	createdByUser: boolean;
+	isCanEdit: boolean;
+	isCanAddGoals: boolean;
 }

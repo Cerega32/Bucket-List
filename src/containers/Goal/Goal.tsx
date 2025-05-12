@@ -9,7 +9,6 @@ import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
 import {GoalStore} from '@/store/GoalStore';
 import {ModalStore} from '@/store/ModalStore';
-import {NotificationStore} from '@/store/NotificationStore';
 import {ThemeStore} from '@/store/ThemeStore';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
@@ -111,18 +110,6 @@ export const Goal: FC<IPage> = ({page}) => {
 		}
 	};
 
-	const handleEditClick = () => {
-		if (goal?.canEdit) {
-			setIsEditing(true);
-		} else {
-			NotificationStore.addNotification({
-				type: 'error',
-				title: 'Ошибка',
-				message: 'Вы не можете редактировать эту цель',
-			});
-		}
-	};
-
 	const handleGoalUpdated = (updatedGoal: IGoal) => {
 		setGoal({...goal, ...updatedGoal});
 		setHeader('transparent');
@@ -159,8 +146,8 @@ export const Goal: FC<IPage> = ({page}) => {
 					code={goal.code}
 					done={goal.completedByUser}
 					openAddReview={openAddReview}
-					editGoal={goal.createdByUser && goal.canEdit ? handleEditClick : undefined}
-					canEdit={!!goal.canEdit}
+					editGoal={goal.createdByUser && goal.isCanEdit ? () => setIsEditing(true) : undefined}
+					canEdit={goal?.isCanEdit}
 				/>
 				<ContentGoal page={page} goal={goal} className={element('content')} />
 			</section>
