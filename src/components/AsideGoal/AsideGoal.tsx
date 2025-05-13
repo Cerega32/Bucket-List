@@ -133,7 +133,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				)}
 
 				{/* Показываем таймер, если цель добавлена и не является списком */}
-				{added && !isList && (
+				{added && !done && !isList && (
 					<>
 						<Line className={element('line')} />
 						<GoalTimer timer={timer} goalCode={code} onTimerUpdate={handleTimerUpdate} />

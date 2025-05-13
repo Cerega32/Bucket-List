@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
-import React, {FC, useEffect, useState} from 'react';
-import {useDropzone} from 'react-dropzone';
+import React, {FC, useEffect, useRef, useState} from 'react';
+import {FileDrop} from 'react-file-drop';
 
 import {Avatar} from '@/components/Avatar/Avatar';
 import {Button} from '@/components/Button/Button';
@@ -28,6 +28,8 @@ export const UserSelfSettings: FC = observer(() => {
 	const [surname, setSurname] = useState(user.lastName);
 	const [about, setAbout] = useState(user.aboutMe);
 	const [activeCountry, setActiveCountry] = useState<number | null>(null);
+	const avatarInputRef = useRef<HTMLInputElement | null>(null);
+	const coverInputRef = useRef<HTMLInputElement | null>(null);
 
 	const [block, element] = useBem('user-self-settings');
 
@@ -57,15 +59,10 @@ export const UserSelfSettings: FC = observer(() => {
 		}
 	};
 
-	const {getRootProps, getInputProps} = useDropzone({
-		accept: {
-			'image/*': [],
-		},
-		onDrop: (acceptedFiles) => {
+	const handleAvatarDrop = (files: FileList) => {
+		if (files && files.length > 0) {
 			const formData = new FormData();
-			acceptedFiles.forEach((file) => {
-				formData.append('avatar', file, file.name);
-			});
+			formData.append('avatar', files[0], files[0].name);
 			(async () => {
 				const res = await postAvatar(formData);
 				if (res.success) {
@@ -73,26 +70,45 @@ export const UserSelfSettings: FC = observer(() => {
 					setAvatar(Cookies.get('avatar') || '');
 				}
 			})();
-		},
-	});
+		}
+	};
 
-	const {getRootProps: getRootCoverProps, getInputProps: getInputCoverProps} = useDropzone({
-		accept: {
-			'image/*': [],
-		},
-		onDrop: (acceptedFiles) => {
+	const handleCoverDrop = (files: FileList) => {
+		if (files && files.length > 0) {
 			const formData = new FormData();
-			acceptedFiles.forEach((file) => {
-				formData.append('cover', file, file.name);
-			});
+			formData.append('cover', files[0], files[0].name);
 			(async () => {
 				const res = await postCover(formData);
 				if (res.success) {
 					setUserInfo({...user, coverImage: Cookies.get('cover')});
 				}
 			})();
-		},
-	});
+		}
+	};
+
+	const handleAvatarClick = () => {
+		if (avatarInputRef.current) {
+			avatarInputRef.current.click();
+		}
+	};
+
+	const handleCoverClick = () => {
+		if (coverInputRef.current) {
+			coverInputRef.current.click();
+		}
+	};
+
+	const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if (event.target.files) {
+			handleAvatarDrop(event.target.files);
+		}
+	};
+
+	const handleCoverChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if (event.target.files) {
+			handleCoverDrop(event.target.files);
+		}
+	};
 
 	const handleDeleteAvatar = async () => {
 		const res = await deleteAvatar();
@@ -142,20 +158,57 @@ export const UserSelfSettings: FC = observer(() => {
 			</Title>
 			<section className={element('edit-fields')}>
 				<div style={{backgroundImage: `url('${user.coverImage}')`}} className={element('bg')}>
-					<div {...getRootCoverProps()} className={element('btn-cover')}>
-						<input {...getInputCoverProps()} />
-						<Button theme="blue-light" icon="image-edit" size="small">
-							Изменить обложку
-						</Button>
+					<div
+						className={element('btn-cover')}
+						onClick={handleCoverClick}
+						role="button"
+						tabIndex={0}
+						aria-label="Изменить обложку"
+						onKeyPress={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								handleCoverClick();
+							}
+						}}
+					>
+						<FileDrop onDrop={(files) => handleCoverDrop(files)}>
+							<input
+								type="file"
+								style={{display: 'none'}}
+								ref={coverInputRef}
+								onChange={handleCoverChange}
+								accept="image/*"
+							/>
+							<Button theme="blue-light" icon="image-edit" size="small">
+								Изменить обложку
+							</Button>
+						</FileDrop>
 					</div>
 				</div>
 				<section className={element('avatar-wrapper')}>
 					<Avatar avatar={user.avatar} className={element('avatar')} size="large" />
-					<div {...getRootProps()}>
-						<input {...getInputProps()} />
-						<Button icon="image-edit" theme="blue" size="small">
-							Изменить фотографию
-						</Button>
+					<div
+						onClick={handleAvatarClick}
+						role="button"
+						tabIndex={0}
+						aria-label="Изменить фотографию"
+						onKeyPress={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								handleAvatarClick();
+							}
+						}}
+					>
+						<FileDrop onDrop={(files) => handleAvatarDrop(files)}>
+							<input
+								type="file"
+								style={{display: 'none'}}
+								ref={avatarInputRef}
+								onChange={handleAvatarChange}
+								accept="image/*"
+							/>
+							<Button icon="image-edit" theme="blue" size="small">
+								Изменить фотографию
+							</Button>
+						</FileDrop>
 					</div>
 					<Button className={element('delete-avatar')} icon="trash" theme="blue-light" onClick={handleDeleteAvatar} size="small">
 						Удалить фото

@@ -18,6 +18,12 @@
 		gap: 8px;
 	}
 
+	&__goal-img {
+		width: 56px;
+		height: 56px;
+		border-radius: 4px;
+	}
+
 	&__user-img {
 		width: 48px;
 		height: 48px;
@@ -34,6 +40,16 @@
 	&__user-wrapper {
 		display: flex;
 		flex-direction: column;
+
+		&--goal {
+			gap: 8px;
+		}
+	}
+
+	&__goal-info {
+		display: flex;
+		align-items: center;
+		gap: 8px;
 	}
 
 	&__comment-info {

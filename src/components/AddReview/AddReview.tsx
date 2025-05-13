@@ -1,5 +1,6 @@
-import {FC, FormEvent, useCallback, useState} from 'react';
-import {useDropzone} from 'react-dropzone';
+/* eslint-disable react/no-array-index-key */
+import {FC, FormEvent, useCallback, useRef, useState} from 'react';
+import {FileDrop} from 'react-file-drop';
 
 import {Button} from '@/components/Button/Button';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
@@ -27,10 +28,12 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	const [newComment, setNewComment] = useState('');
 	const [photos, setPhotos] = useState<File[]>([]);
 	const {setComments, comments, id} = GoalStore;
+	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
 	const onDrop = useCallback(
-		(acceptedFiles: File[]) => {
-			if (acceptedFiles.length + photos.length > 10) {
+		(acceptedFiles: FileList) => {
+			const filesArray = Array.from(acceptedFiles);
+			if (filesArray.length + photos.length > 10) {
 				NotificationStore.addNotification({
 					type: 'error',
 					title: 'Слишком много фотографий',
@@ -38,12 +41,10 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 				});
 				return;
 			}
-			setPhotos((prevPhotos) => [...prevPhotos, ...acceptedFiles]);
+			setPhotos((prevPhotos) => [...prevPhotos, ...filesArray]);
 		},
 		[photos]
 	);
-
-	const {getRootProps, getInputProps} = useDropzone({onDrop});
 
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -67,9 +68,20 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 		}
 	};
 
-	const deletePhoto = (e: React.MouseEvent<HTMLButtonElement>, i: number): void => {
-		e.stopPropagation();
+	const deletePhoto = (i: number): void => {
 		setPhotos([...photos.slice(0, i), ...photos.slice(i + 1)]);
+	};
+
+	const handleFileInputClick = () => {
+		if (fileInputRef.current) {
+			fileInputRef.current.click();
+		}
+	};
+
+	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if (event.target.files) {
+			onDrop(event.target.files);
+		}
 	};
 
 	return (
@@ -95,26 +107,46 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 				type="textarea"
 			/>
 			<p className={element('field-title')}>Фотографии</p>
-			<div {...getRootProps({className: element('dropzone')})}>
-				<input {...getInputProps()} />
-				<div className={element('photos')}>
-					<div className={element('btn-add')}>
-						<Svg icon="plus" />
-					</div>
-					{photos.map((photo, index) => (
-						<div key={`${photo.name}-${photo.lastModified}`} className={element('photo-wrapper')}>
-							<img className={element('photo')} src={URL.createObjectURL(photo)} alt={`Фотография ${index + 1}`} />
-							<button
-								className={element('delete-photo')}
-								type="button"
-								onClick={(e) => deletePhoto(e, index)}
-								aria-label="Удалить фотографию"
-							>
-								<Svg icon="cross" />
-							</button>
+			<div className={element('dropzone')}>
+				<FileDrop onDrop={(files) => onDrop(files)}>
+					<div
+						className={element('photos')}
+						onClick={handleFileInputClick}
+						role="button"
+						tabIndex={0}
+						aria-label="Добавить фотографии"
+						onKeyPress={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								handleFileInputClick();
+							}
+						}}
+					>
+						<input
+							type="file"
+							multiple
+							ref={fileInputRef}
+							style={{display: 'none'}}
+							onChange={handleFileChange}
+							accept="image/*"
+						/>
+						<div className={element('btn-add')}>
+							<Svg icon="plus" />
 						</div>
-					))}
-				</div>
+					</div>
+				</FileDrop>
+				{photos.map((photo, index) => (
+					<div key={`${photo.name}-${index}`} className={element('photo-wrapper')}>
+						<img className={element('photo')} src={URL.createObjectURL(photo)} alt={`Фотография ${index + 1}`} />
+						<button
+							className={element('delete-photo')}
+							type="button"
+							onClick={() => deletePhoto(index)}
+							aria-label="Удалить фотографию"
+						>
+							<Svg icon="cross" />
+						</button>
+					</div>
+				))}
 			</div>
 			<div className={element('btns-wrapper')}>
 				<Button theme="blue-light" className={element('btn')} onClick={closeModal}>

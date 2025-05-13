@@ -5,6 +5,15 @@ export interface IPhotoComment {
 	image: string;
 }
 
+export interface ICommentGoal {
+	code: string;
+	complexity: IComplexity;
+	id: number;
+	title: string;
+	totalAdded: number;
+	image: string | null;
+}
+
 export interface IComment {
 	complexity: IComplexity;
 	dateCreated: string;
@@ -21,6 +30,7 @@ export interface IComment {
 	userTotalCompletedGoals: number;
 	userAvatar: string | null;
 	goalCategory: ICategory;
+	goalInfo: ICommentGoal;
 }
 
 export interface IComments {

@@ -1,5 +1,5 @@
-import {FC, FormEvent, useCallback, useEffect, useState} from 'react';
-import {useDropzone} from 'react-dropzone';
+import {FC, FormEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {FileDrop} from 'react-file-drop';
 import {useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
@@ -46,6 +46,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	const [canEdit, setCanEdit] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const {setHeader} = ThemeStore;
+	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
 	// Загрузка категорий и проверка возможности редактирования при монтировании компонента
 	useEffect(() => {
@@ -119,20 +120,24 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 		}
 	}, [activeCategory, categories, goal.subcategory]);
 
-	const onDrop = useCallback((acceptedFiles: File[]) => {
-		if (acceptedFiles.length > 0) {
+	const onDrop = useCallback((acceptedFiles: FileList) => {
+		if (acceptedFiles && acceptedFiles.length > 0) {
 			setImage(acceptedFiles[0]);
 			setImageUrl(null); // Сбрасываем URL изображения при загрузке локального файла
 		}
 	}, []);
 
-	const {getRootProps, getInputProps} = useDropzone({
-		onDrop,
-		accept: {
-			'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
-		},
-		maxFiles: 1,
-	});
+	const handleFileInputClick = () => {
+		if (fileInputRef.current) {
+			fileInputRef.current.click();
+		}
+	};
+
+	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if (event.target.files) {
+			onDrop(event.target.files);
+		}
+	};
 
 	const handleUpdateGoal = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -259,12 +264,31 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 						<div className={element('image-section')}>
 							<p className={element('field-title')}>Изображение цели *</p>
 							{!image && !imageUrl ? (
-								<div {...getRootProps({className: element('dropzone')})}>
-									<input {...getInputProps()} />
-									<div className={element('upload-placeholder')}>
-										<Svg icon="mount" className={element('upload-icon')} />
-										<p>Перетащите изображение сюда или кликните для выбора (обязательно)</p>
-									</div>
+								<div className={element('dropzone')}>
+									<FileDrop onDrop={(files) => onDrop(files)}>
+										<div
+											className={element('upload-placeholder')}
+											onClick={handleFileInputClick}
+											role="button"
+											tabIndex={0}
+											aria-label="Добавить изображение"
+											onKeyPress={(e) => {
+												if (e.key === 'Enter' || e.key === ' ') {
+													handleFileInputClick();
+												}
+											}}
+										>
+											<input
+												type="file"
+												ref={fileInputRef}
+												style={{display: 'none'}}
+												onChange={handleFileChange}
+												accept="image/*"
+											/>
+											<Svg icon="mount" className={element('upload-icon')} />
+											<p>Перетащите изображение сюда или кликните для выбора (обязательно)</p>
+										</div>
+									</FileDrop>
 								</div>
 							) : (
 								<div className={element('image-preview')}>

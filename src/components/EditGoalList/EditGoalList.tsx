@@ -1,5 +1,5 @@
-import {FC, FormEvent, useCallback, useEffect, useState} from 'react';
-import {useDropzone} from 'react-dropzone';
+import {FC, FormEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {FileDrop} from 'react-file-drop';
 import {useNavigate} from 'react-router-dom';
 
 import {AddGoal} from '@/components/AddGoal/AddGoal';
@@ -27,7 +27,6 @@ interface EditGoalListProps {
 	className?: string;
 	listData: IList;
 	canEditAll: boolean; // Полное редактирование (в течение 24 часов)
-	canAddGoals: boolean; // Только добавление целей
 }
 
 export const EditGoalList: FC<EditGoalListProps> = (props) => {
@@ -46,6 +45,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 	const [subcategories, setSubcategories] = useState<ICategory[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [showAddGoalForm, setShowAddGoalForm] = useState(false);
+	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
 	// Состояния для работы с целями
 	const [selectedGoals, setSelectedGoals] = useState<IShortGoal[]>(listData?.goals || []);
@@ -161,21 +161,24 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 		}
 	}, [searchQuery, debouncedSearch]);
 
-	const onDrop = useCallback((acceptedFiles: File[]) => {
-		if (acceptedFiles.length > 0) {
+	const onDrop = useCallback((acceptedFiles: FileList) => {
+		if (acceptedFiles && acceptedFiles.length > 0) {
 			setImage(acceptedFiles[0]);
 			setImagePreview(URL.createObjectURL(acceptedFiles[0]));
 		}
 	}, []);
 
-	const {getRootProps, getInputProps} = useDropzone({
-		onDrop,
-		accept: {
-			'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
-		},
-		maxFiles: 1,
-		disabled: !canEditAll,
-	});
+	const handleFileInputClick = () => {
+		if (fileInputRef.current && canEditAll) {
+			fileInputRef.current.click();
+		}
+	};
+
+	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if (event.target.files) {
+			onDrop(event.target.files);
+		}
+	};
 
 	const removeImage = () => {
 		if (canEditAll) {
@@ -304,16 +307,37 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 				<div className={element('image-section')}>
 					<p className={element('field-title')}>Изображение списка</p>
 					{!imagePreview ? (
-						<div {...getRootProps({className: element('dropzone', {disabled: !canEditAll})})}>
-							<input {...getInputProps()} />
-							<div className={element('upload-placeholder')}>
-								<Svg icon="mount" className={element('upload-icon')} />
-								<p>
-									{canEditAll
-										? 'Перетащите изображение сюда или кликните для выбора'
-										: 'Изображение нельзя изменить (прошло более 24 часов после создания)'}
-								</p>
-							</div>
+						<div className={element('dropzone', {disabled: !canEditAll})}>
+							<FileDrop onDrop={(files) => canEditAll && onDrop(files)}>
+								<div
+									className={element('upload-placeholder')}
+									onClick={handleFileInputClick}
+									role="button"
+									tabIndex={canEditAll ? 0 : -1}
+									aria-label="Добавить изображение"
+									aria-disabled={!canEditAll}
+									onKeyPress={(e) => {
+										if (canEditAll && (e.key === 'Enter' || e.key === ' ')) {
+											handleFileInputClick();
+										}
+									}}
+								>
+									<input
+										type="file"
+										ref={fileInputRef}
+										style={{display: 'none'}}
+										onChange={handleFileChange}
+										accept="image/*"
+										disabled={!canEditAll}
+									/>
+									<Svg icon="mount" className={element('upload-icon')} />
+									<p>
+										{canEditAll
+											? 'Перетащите изображение сюда или кликните для выбора'
+											: 'Изображение нельзя изменить (прошло более 24 часов после создания)'}
+									</p>
+								</div>
+							</FileDrop>
 						</div>
 					) : (
 						<div className={element('image-preview')}>

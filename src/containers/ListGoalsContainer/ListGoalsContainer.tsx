@@ -45,12 +45,6 @@ export const ListGoalsContainer: FC = () => {
 			setList({
 				...list,
 				...res.data,
-				goals: list?.goals.map((goal) => {
-					return {
-						...goal,
-						completedByUser: operation === 'mark-all' ? true : goal.completedByUser,
-					};
-				}),
 			});
 			return true;
 		}

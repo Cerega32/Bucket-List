@@ -1,6 +1,6 @@
 import {format} from 'date-fns';
-import {FC, FormEvent, useCallback, useEffect, useState} from 'react';
-import {useDropzone} from 'react-dropzone';
+import {FC, FormEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {FileDrop} from 'react-file-drop';
 import {useLocation, useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
@@ -62,6 +62,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const [categories, setCategories] = useState<ICategory[]>([]);
 	const [subcategories, setSubcategories] = useState<ICategory[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
+	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
 	// Новые состояния для поиска похожих целей
 	const [similarGoals, setSimilarGoals] = useState<IGoal[]>([]);
@@ -267,20 +268,24 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		});
 	};
 
-	const onDrop = useCallback((acceptedFiles: File[]) => {
-		if (acceptedFiles.length > 0) {
+	const onDrop = useCallback((acceptedFiles: FileList) => {
+		if (acceptedFiles && acceptedFiles.length > 0) {
 			setImage(acceptedFiles[0]);
 			setImageUrl(null); // Сбрасываем URL изображения при загрузке локального файла
 		}
 	}, []);
 
-	const {getRootProps, getInputProps} = useDropzone({
-		onDrop,
-		accept: {
-			'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
-		},
-		maxFiles: 1,
-	});
+	const handleFileInputClick = () => {
+		if (fileInputRef.current) {
+			fileInputRef.current.click();
+		}
+	};
+
+	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if (event.target.files) {
+			onDrop(event.target.files);
+		}
+	};
 
 	const resetForm = () => {
 		setTitle('');
@@ -525,6 +530,48 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		});
 	};
 
+	// Заменяем блок с dropzone
+	const imageSection = (
+		<div className={element('image-section')}>
+			<p className={element('field-title')}>Изображение цели *</p>
+			{!image && !imageUrl ? (
+				<div className={element('dropzone')}>
+					<FileDrop onDrop={(files) => onDrop(files)}>
+						<div
+							className={element('upload-placeholder')}
+							onClick={handleFileInputClick}
+							role="button"
+							tabIndex={0}
+							aria-label="Добавить изображение"
+							onKeyPress={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									handleFileInputClick();
+								}
+							}}
+						>
+							<input type="file" ref={fileInputRef} style={{display: 'none'}} onChange={handleFileChange} accept="image/*" />
+							<Svg icon="mount" className={element('upload-icon')} />
+							<p>Перетащите изображение сюда или кликните для выбора (обязательно)</p>
+						</div>
+					</FileDrop>
+				</div>
+			) : (
+				<div className={element('image-preview')}>
+					{image && <img src={URL.createObjectURL(image)} alt="Предпросмотр" className={element('preview')} />}
+					{imageUrl && !image && <img src={imageUrl} alt="Предпросмотр из источника" className={element('preview')} />}
+					<Button
+						className={element('remove-image')}
+						type="button-close"
+						onClick={() => {
+							setImage(null);
+							setImageUrl(null);
+						}}
+					/>
+				</div>
+			)}
+		</div>
+	);
+
 	// Содержимое компонента
 	const content = (
 		<>
@@ -563,33 +610,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 						/>
 					</div>
 
-					<div className={element('image-section')}>
-						<p className={element('field-title')}>Изображение цели *</p>
-						{!image && !imageUrl ? (
-							<div {...getRootProps({className: element('dropzone')})}>
-								<input {...getInputProps()} />
-								<div className={element('upload-placeholder')}>
-									<Svg icon="mount" className={element('upload-icon')} />
-									<p>Перетащите изображение сюда или кликните для выбора (обязательно)</p>
-								</div>
-							</div>
-						) : (
-							<div className={element('image-preview')}>
-								{image && <img src={URL.createObjectURL(image)} alt="Предпросмотр" className={element('preview')} />}
-								{imageUrl && !image && (
-									<img src={imageUrl} alt="Предпросмотр из источника" className={element('preview')} />
-								)}
-								<Button
-									className={element('remove-image')}
-									type="button-close"
-									onClick={() => {
-										setImage(null);
-										setImageUrl(null);
-									}}
-								/>
-							</div>
-						)}
-					</div>
+					{imageSection}
 					<div className={element('form')}>
 						<div className={element('field-container')}>
 							<FieldInput

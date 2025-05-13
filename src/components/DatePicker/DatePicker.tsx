@@ -48,7 +48,7 @@ const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(({value, onCl
 			{...rest}
 		/>
 		<button type="button" onClick={onClick as unknown as React.MouseEventHandler<HTMLButtonElement>} aria-label="Календарь">
-			<Svg icon="calender" className="calendar-icon" />
+			<Svg icon="calender" className="calendar-icon" width="16" height="16" />
 		</button>
 	</div>
 ));

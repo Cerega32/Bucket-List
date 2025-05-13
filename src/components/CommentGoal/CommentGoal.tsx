@@ -1,4 +1,5 @@
 import {FC, useState} from 'react';
+import {Link} from 'react-router-dom';
 import Lightbox from 'yet-another-react-lightbox';
 
 import {useBem} from '@/hooks/useBem';
@@ -9,7 +10,8 @@ import {pluralize} from '@/utils/text/pluralize';
 import {Avatar} from '../Avatar/Avatar';
 import {Button} from '../Button/Button';
 import {Tag} from '../Tag/Tag';
-
+import {Tags} from '../Tags/Tags';
+import {Title} from '../Title/Title';
 import './comment-goal.scss';
 
 interface CommentGoalProps {
@@ -33,16 +35,26 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 	return (
 		<article className={block()}>
 			<div className={element('info')}>
-				<div className={element('user-info')}>
-					<Avatar avatar={comment.userAvatar} size="medium" />
+				<Link to={isUser ? `/goals/${comment.goalInfo.code}` : `/user/${comment.user}/showcase`} className={element('user-info')}>
 					{isUser ? (
-						<div className={element('user-wrapper')}>
-							{/* <h4>{comment.goalName}</h4> */}
-							<Tag category={comment.goalCategory.nameEn} text={comment.goalCategory.name} />
-							<p className={element('user-level')}>
-								{/* {comment.level} уровень&nbsp; */}
-								{pluralize(comment.userTotalCompletedGoals, ['цель выполнена', 'цели выполнено', 'целей выполнено'])}
-							</p>
+						<img src={comment.goalInfo.image || ''} alt={comment.goalInfo.title} className={element('goal-img')} />
+					) : (
+						<Avatar avatar={comment.userAvatar} size="medium" />
+					)}
+					{isUser ? (
+						<div className={element('user-wrapper', {goal: true})}>
+							<div className={element('goal-info')}>
+								<Title tag="h3">{comment.goalInfo.title}</Title>
+								<Tag category={comment.goalCategory.nameEn} text={comment.goalCategory.name} />
+							</div>
+							<Tags
+								complexity={comment.goalInfo.complexity}
+								added={comment.goalInfo.totalAdded}
+								time="7 дней" // TODO добавить время
+								theme="integrate"
+								className={element('tags')}
+								separator={['complexity', !!comment.goalInfo.totalAdded && 'added']}
+							/>
 						</div>
 					) : (
 						<div className={element('user-wrapper')}>
@@ -53,7 +65,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 							</p>
 						</div>
 					)}
-				</div>
+				</Link>
 				<div className={element('comment-info')}>
 					<span className={element('date')}>{getDate(comment.dateCreated)}</span>
 					<div className={element('vertical-line')} />
