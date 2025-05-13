@@ -56,7 +56,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 				setIsLoading(true);
 
 				// Используем свойство canEdit из объекта цели вместо отдельного запроса
-				if (goal.canEdit) {
+				if (goal.isCanEdit) {
 					setCanEdit(true);
 				} else {
 					setErrorMessage('Отредактировать цель невозможно. Возможно, прошло более 24 часов с момента создания.');
@@ -265,7 +265,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 							<p className={element('field-title')}>Изображение цели *</p>
 							{!image && !imageUrl ? (
 								<div className={element('dropzone')}>
-									<FileDrop onDrop={(files) => onDrop(files)}>
+									<FileDrop onDrop={(files) => files && onDrop(files)}>
 										<div
 											className={element('upload-placeholder')}
 											onClick={handleFileInputClick}

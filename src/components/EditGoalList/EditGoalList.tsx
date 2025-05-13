@@ -282,7 +282,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 					title: 'Успех',
 					message: 'Список целей успешно обновлен',
 				});
-				navigate(`/list/${response.data.code}`);
+				navigate(`/list/${response?.data?.code}`);
 			} else {
 				throw new Error(response.error || 'Неизвестная ошибка');
 			}
@@ -308,7 +308,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 					<p className={element('field-title')}>Изображение списка</p>
 					{!imagePreview ? (
 						<div className={element('dropzone', {disabled: !canEditAll})}>
-							<FileDrop onDrop={(files) => canEditAll && onDrop(files)}>
+							<FileDrop onDrop={(files) => files && canEditAll && onDrop(files)}>
 								<div
 									className={element('upload-placeholder')}
 									onClick={handleFileInputClick}

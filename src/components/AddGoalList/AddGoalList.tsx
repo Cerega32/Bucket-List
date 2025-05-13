@@ -360,7 +360,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					<p className={element('field-title')}>Изображение списка *</p>
 					{!image ? (
 						<div className={element('dropzone')}>
-							<FileDrop onDrop={(files) => onDrop(files)}>
+							<FileDrop onDrop={(files) => files && onDrop(files)}>
 								<div
 									className={element('upload-placeholder')}
 									onClick={handleFileInputClick}

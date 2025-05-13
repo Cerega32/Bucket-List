@@ -108,7 +108,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 			/>
 			<p className={element('field-title')}>Фотографии</p>
 			<div className={element('dropzone')}>
-				<FileDrop onDrop={(files) => onDrop(files)}>
+				<FileDrop onDrop={(files) => files && onDrop(files)}>
 					<div
 						className={element('photos')}
 						onClick={handleFileInputClick}

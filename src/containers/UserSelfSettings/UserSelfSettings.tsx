@@ -170,7 +170,7 @@ export const UserSelfSettings: FC = observer(() => {
 							}
 						}}
 					>
-						<FileDrop onDrop={(files) => handleCoverDrop(files)}>
+						<FileDrop onDrop={(files) => files && handleCoverDrop(files)}>
 							<input
 								type="file"
 								style={{display: 'none'}}
@@ -197,7 +197,7 @@ export const UserSelfSettings: FC = observer(() => {
 							}
 						}}
 					>
-						<FileDrop onDrop={(files) => handleAvatarDrop(files)}>
+						<FileDrop onDrop={(files) => files && handleAvatarDrop(files)}>
 							<input
 								type="file"
 								style={{display: 'none'}}

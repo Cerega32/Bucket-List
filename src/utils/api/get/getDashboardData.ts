@@ -96,6 +96,7 @@ export const getDashboardData = async (): Promise<{success: boolean; data: IDash
 				categoriesCount: 8,
 				popularGoals: [
 					{
+						id: 1,
 						code: 'popular-1',
 						title: 'Пробежать марафон',
 						shortDescription: 'Подготовиться и пробежать полный марафон',
@@ -120,6 +121,7 @@ export const getDashboardData = async (): Promise<{success: boolean; data: IDash
 						completedByUser: false,
 					},
 					{
+						id: 2,
 						code: 'popular-2',
 						title: 'Научиться кататься на сноуборде',
 						shortDescription: 'Освоить основы катания на сноуборде',
@@ -144,6 +146,7 @@ export const getDashboardData = async (): Promise<{success: boolean; data: IDash
 						completedByUser: false,
 					},
 					{
+						id: 3,
 						code: 'popular-3',
 						title: 'Прыгнуть с парашютом',
 						shortDescription: 'Преодолеть страх и прыгнуть с парашютом',
@@ -168,6 +171,7 @@ export const getDashboardData = async (): Promise<{success: boolean; data: IDash
 						completedByUser: true,
 					},
 					{
+						id: 4,
 						code: 'popular-4',
 						title: 'Увидеть северное сияние',
 						shortDescription: 'Отправиться в путешествие и увидеть северное сияние',
