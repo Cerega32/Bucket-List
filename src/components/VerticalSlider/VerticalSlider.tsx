@@ -67,7 +67,7 @@ export const VerticalSlider: FC<VerticalSliderProps> = (props) => {
 			if (images.length === 0) {
 				// Если изображений нет, считаем контент загруженным
 				setImagesLoaded(true);
-				return;
+				return undefined;
 			}
 
 			let loadedCount = 0;
@@ -99,6 +99,7 @@ export const VerticalSlider: FC<VerticalSliderProps> = (props) => {
 				});
 			};
 		}
+		return undefined;
 	}, [visibleItems]);
 
 	useEffect(() => {

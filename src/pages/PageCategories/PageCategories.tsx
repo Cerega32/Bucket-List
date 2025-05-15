@@ -14,5 +14,5 @@ export const PageCategories: FC<IPage> = ({page}) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	return <Categories page={page} />;
+	return <Categories />;
 };

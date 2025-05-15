@@ -182,7 +182,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 					beginUrl={id ? '/categories/' : '/categories/all'}
 					categories={categories}
 				/>
-				{!id && <AllCategories categories={categories} />}
+				{!id && <AllCategories categories={categories} tag="h2" title="Категории" />}
 			</Loader>
 		</main>
 	);
