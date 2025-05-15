@@ -3,10 +3,14 @@ import {FC, useEffect, useState} from 'react';
 import {AllCategories} from '@/components/AllCategories/AllCategories';
 import {Loader} from '@/components/Loader/Loader';
 import {ICategoryDetailed} from '@/typings/goal';
-import {IPage} from '@/typings/page';
 import {getCategories} from '@/utils/api/get/getCategories';
 
-export const Categories: FC<IPage> = () => {
+interface CategoriesProps {
+	tag?: 'h1' | 'h2' | 'h3';
+	title?: string;
+}
+
+export const Categories: FC<CategoriesProps> = ({tag = 'h1', title = 'Категории'}) => {
 	const [categories, setCategories] = useState<Array<ICategoryDetailed>>([]);
 	const [isLoading, setIsLoading] = useState(true);
 
@@ -23,7 +27,7 @@ export const Categories: FC<IPage> = () => {
 
 	return (
 		<Loader isLoading={isLoading}>
-			<AllCategories categories={categories} />
+			<AllCategories categories={categories} tag={tag} title={title} />
 		</Loader>
 	);
 };

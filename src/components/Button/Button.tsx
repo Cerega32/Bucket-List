@@ -9,7 +9,7 @@ import './button.scss';
 
 interface ButtonProps {
 	className?: string;
-	theme?: 'blue' | 'blue-light' | 'no-border' | 'green' | 'red';
+	theme?: 'blue' | 'blue-light' | 'no-border' | 'green' | 'red' | 'gradient';
 	width?: 'auto';
 	size?: 'small' | 'medium';
 	children?: ReactElement | string | number;
@@ -80,6 +80,7 @@ export const Button: FC<ButtonProps> = (props) => {
 				return (
 					<Link to={href} className={block({theme, small, size, active})}>
 						{content}
+						{theme === 'gradient' && <div className={element('gradient-shadow')} />}
 					</Link>
 				);
 			case 'button-close':
@@ -108,6 +109,7 @@ export const Button: FC<ButtonProps> = (props) => {
 						ref={refInner}
 					>
 						{content}
+						{theme === 'gradient' && <div className={element('gradient-shadow')} />}
 					</button>
 				);
 		}

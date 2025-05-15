@@ -31,6 +31,7 @@
 		"react-router-dom": "^6.10.0",
 		"react-scroll": "^1.9.3",
 		"react-svg": "^16.1.18",
+		"swiper": "^11.2.6",
 		"yet-another-react-lightbox": "^3.21.7"
 	},
 	"scripts": {

@@ -19,10 +19,11 @@ interface CommentGoalProps {
 	comment: IComment;
 	onClickScore: (id: number, like: boolean) => Promise<void>;
 	isUser?: boolean;
+	isMain?: boolean;
 }
 
 export const CommentGoal: FC<CommentGoalProps> = (props) => {
-	const {className, comment, isUser, onClickScore} = props;
+	const {className, comment, isUser, onClickScore, isMain} = props;
 	const [block, element] = useBem('comment-goal', className);
 
 	// Состояния для лайтбокса
@@ -66,11 +67,13 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 						</div>
 					)}
 				</Link>
-				<div className={element('comment-info')}>
-					<span className={element('date')}>{getDate(comment.dateCreated)}</span>
-					<div className={element('vertical-line')} />
-					<Tag complexity={comment.complexity} theme="integrate" icon={comment.complexity} />
-				</div>
+				{!isMain && (
+					<div className={element('comment-info')}>
+						<span className={element('date')}>{getDate(comment.dateCreated)}</span>
+						<div className={element('vertical-line')} />
+						<Tag complexity={comment.complexity} theme="integrate" icon={comment.complexity} />
+					</div>
+				)}
 			</div>
 			<hr className={element('horizontal-line')} />
 			<p className={element('text')}>{comment.text}</p>
@@ -99,27 +102,28 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 					))}
 				</div>
 			)}
-			<div className={element('score')}>
-				<Button
-					icon="like"
-					small
-					theme={comment.hasLiked ? 'green' : 'blue-light'}
-					onClick={() => onClickScore(comment.id, true)}
-					className={element('like')}
-				>
-					{comment.likesCount}
-				</Button>
-				<Button
-					icon="like--bottom"
-					small
-					theme={comment.hasDisliked ? 'red' : 'blue-light'}
-					onClick={() => onClickScore(comment.id, false)}
-				>
-					{comment.dislikesCount}
-				</Button>
-			</div>
-
-			{/* Лайтбокс для просмотра изображений */}
+			{!isMain && (
+				<div className={element('score')}>
+					<Button
+						icon="like"
+						small
+						theme={comment.hasLiked ? 'green' : 'blue-light'}
+						onClick={() => onClickScore(comment.id, true)}
+						className={element('like')}
+					>
+						{comment.likesCount}
+					</Button>
+					<Button
+						icon="like--bottom"
+						small
+						theme={comment.hasDisliked ? 'red' : 'blue-light'}
+						onClick={() => onClickScore(comment.id, false)}
+					>
+						{comment.dislikesCount}
+					</Button>
+				</div>
+			)}
+			-{/* Лайтбокс для просмотра изображений */}
 			<Lightbox
 				open={isOpen}
 				close={() => setIsOpen(false)}

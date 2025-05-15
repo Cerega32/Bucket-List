@@ -8,15 +8,17 @@ import './all-categories.scss';
 
 interface AllCategoriesProps {
 	categories: Array<ICategoryDetailed>;
+	tag: 'h1' | 'h2' | 'h3';
+	title: string;
 }
 
-export const AllCategories: FC<AllCategoriesProps> = ({categories}) => {
+export const AllCategories: FC<AllCategoriesProps> = ({categories, tag, title}) => {
 	const [block, element] = useBem('categories');
 
 	return (
 		<main className={block()}>
-			<Title className={element('title')} tag="h1">
-				Категории
+			<Title className={element('title', {tag})} tag={tag}>
+				{title}
 			</Title>
 			<section className={element('list')}>
 				{!!categories.length &&

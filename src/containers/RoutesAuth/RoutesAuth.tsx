@@ -11,6 +11,7 @@ import {PageDetailList} from '@/pages/PageDetailList/PageDetailList';
 import {PageEditGoalList} from '@/pages/PageEditGoalList/PageEditGoalList';
 import {PageLeaders} from '@/pages/PageLeaders/PageLeaders';
 import {PageLogin} from '@/pages/PageLogin/PageLogin';
+import {PageMain} from '@/pages/PageMain/PageMain';
 import {PageMainGoals} from '@/pages/PageMainGoals/PageMainGoals';
 import {PageNotFound} from '@/pages/PageNotFound/PageNotFound';
 import {PageRegistration} from '@/pages/PageRegistration/PageRegistration';
@@ -41,7 +42,7 @@ export const RoutesAuth: FC = observer(() => {
 			<Routes>
 				{/* Новый маршрут для дашборда (главной страницы) */}
 				{/* <Route path="/" element={<PageDashboard page="isDashboard" />} /> */}
-				<Route path="/" element={<ProtectedRoute element={<PageUserSelf page="isUserSelf" />} />} />
+				<Route path="/" element={<PageMain page="isMain" />} />
 
 				{/* Перемещаем старую главную страницу на новый путь */}
 				<Route path="/100-goals" element={<PageMainGoals page="isMainGoals" />} />

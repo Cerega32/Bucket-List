@@ -1,0 +1,7 @@
+.main-container {
+	@include max-width;
+
+	display: flex;
+	flex-direction: column;
+	gap: 96px;
+}

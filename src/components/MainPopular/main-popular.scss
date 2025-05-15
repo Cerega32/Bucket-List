@@ -1,0 +1,24 @@
+.main-popular {
+	$block: &;
+
+	&__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 24px;
+	}
+
+	&__content {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 24px;
+	}
+
+	&__card {
+		width: calc(25% - 24px * 3 / 4);
+
+		&--big {
+			width: calc(33.33% - 24px * 2 / 3);
+		}
+	}
+}

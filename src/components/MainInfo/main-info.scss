@@ -1,0 +1,82 @@
+.main-info {
+	$block: &;
+
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: 1fr 1fr 1fr;
+	gap: 24px;
+
+	&__title {
+		margin-bottom: 8px;
+	}
+
+	&__item {
+		position: relative;
+		overflow: hidden;
+
+		@include block-radius(24px, var(--color-gray-5));
+
+		&:first-child {
+			grid-row: 1 / 4;
+
+			#{$block}__title {
+				margin-bottom: 16px;
+			}
+		}
+	}
+
+	&__icon {
+		margin-bottom: 16px;
+
+		&--apps {
+			svg * {
+				fill: var(--color-logo);
+			}
+		}
+	}
+
+	&__example {
+		@include block-radius;
+
+		position: absolute;
+		z-index: 1;
+		right: 96px;
+		bottom: 43%;
+		width: 336px;
+		box-shadow: 0 0 20px -2px rgb(var(--color-text-primary-rgb) / 8%);
+		color: var(--color-text);
+	}
+
+	&__info-title {
+		margin-bottom: 4px;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+		font-weight: var(--weight-regular);
+		line-height: var(--line-height-14);
+	}
+
+	&__info-count {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 22px;
+		font-weight: var(--weight-semi-bold);
+		line-height: var(--line-height-22);
+	}
+
+	&__achievement {
+		position: absolute;
+		z-index: 1;
+		right: 24px;
+		bottom: 20%;
+		width: 336px;
+		box-shadow: 0 0 20px -2px rgb(var(--color-text-primary-rgb) / 8%);
+	}
+
+	&__info-100-goals {
+		position: absolute;
+		bottom: -15px;
+		width: 336px;
+		box-shadow: 0 0 20px -2px rgb(var(--color-text-primary-rgb) / 8%);
+	}
+}
