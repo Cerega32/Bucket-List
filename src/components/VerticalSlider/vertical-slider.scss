@@ -11,6 +11,7 @@
 		height: 100%;
 		padding: 10px 0;
 		overflow: hidden;
+		mask-image: linear-gradient(to bottom, transparent 0%, var(--color-black) 30%, var(--color-black) 70%, transparent 100%);
 	}
 
 	&__items-container {
@@ -30,27 +31,5 @@
 		opacity: 1;
 		transition: opacity 0.2s ease;
 		box-sizing: border-box;
-	}
-
-	&__gradient-top {
-		position: absolute;
-		z-index: 2;
-		top: 0;
-		right: 0;
-		left: 0;
-		height: 100px;
-		background: linear-gradient(to bottom, rgb(var(--color-white-rgb) / 100%) 20%, rgb(var(--color-white-rgb) / 0%));
-		pointer-events: none;
-	}
-
-	&__gradient-bottom {
-		position: absolute;
-		z-index: 2;
-		right: 0;
-		bottom: 0;
-		left: 0;
-		height: 100px;
-		background: linear-gradient(to top, rgb(var(--color-white-rgb) / 100%) 20%, rgb(var(--color-white-rgb) / 0%));
-		pointer-events: none;
 	}
 }

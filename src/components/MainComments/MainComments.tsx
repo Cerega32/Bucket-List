@@ -21,11 +21,6 @@ export const MainComments: FC<MainCommentsProps> = (props) => {
 	const {className, comments} = props;
 	const [block, element] = useBem('main-comments', className);
 
-	const handleClickScore = async (id: number, like: boolean) => {
-		// Здесь должна быть логика для лайков/дизлайков комментария
-		console.log('Score clicked', id, like);
-	};
-
 	if (!comments.length) {
 		return null;
 	}
@@ -56,13 +51,12 @@ export const MainComments: FC<MainCommentsProps> = (props) => {
 					// }}
 					className={element('slider')}
 				>
-					<div className={element('gradient-left')} />
-					{comments.map((comment) => (
-						<SwiperSlide key={comment.id} className={element('slide')}>
-							<CommentGoal comment={comment} onClickScore={handleClickScore} className={element('comment')} isMain />
+					{comments.map((comment, index) => (
+						// eslint-disable-next-line react/no-array-index-key
+						<SwiperSlide key={`${comment.id}-${index}`} className={element('slide')}>
+							<CommentGoal comment={comment} className={element('comment')} isMain />
 						</SwiperSlide>
 					))}
-					<div className={element('gradient-right')} />
 				</Swiper>
 
 				<div className={element('navigation')}>

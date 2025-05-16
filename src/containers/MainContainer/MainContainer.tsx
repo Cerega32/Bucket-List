@@ -13,6 +13,7 @@ import {getPopularCommentsPhoto} from '@/utils/api/get/getPopularCommentsPhoto';
 import {getPopularGoalsForAllTime} from '@/utils/api/get/getPopularGoalsForAllTime';
 import {getPopularGoalsForDay} from '@/utils/api/get/getPopularGoalsForDay';
 import {getTopLikedComments} from '@/utils/api/get/getTopLikedComments';
+import {getTotalCompleted} from '@/utils/api/get/getTotalCompleted';
 
 import {Categories} from '../Categories/Categories';
 
@@ -25,6 +26,7 @@ export const MainContainer: FC<IPage> = () => {
 	const [popularGoalsForDay, setPopularGoalsForDay] = useState<IGoal[]>([]);
 	const [popularGoalsForAllTime, setPopularGoalsForAllTime] = useState<IGoal[]>([]);
 	const [commentsTopLiked, setCommentsTopLiked] = useState<IComment[]>([]);
+	const [totalCompleted, setTotalCompleted] = useState<number>(0);
 
 	const getPhoto = async () => {
 		setIsLoading(isLoading + 1);
@@ -53,6 +55,15 @@ export const MainContainer: FC<IPage> = () => {
 		setIsLoading(isLoading - 1);
 	};
 
+	const getTotal = async () => {
+		setIsLoading(isLoading + 1);
+		const response = await getTotalCompleted();
+		if (response.success) {
+			setTotalCompleted(response.data.totalCompletedGoals);
+		}
+		setIsLoading(isLoading - 1);
+	};
+
 	const getComments = async () => {
 		setIsLoading(isLoading + 1);
 		const response = await getTopLikedComments();
@@ -67,14 +78,19 @@ export const MainContainer: FC<IPage> = () => {
 		getGoals();
 		getGoalsForAllTime();
 		getComments();
+		getTotal();
 	}, []);
 
 	return (
 		<Loader isLoading={!isLoading} className={block()}>
-			<MainHeader leftPhotos={popularCommentsPhoto.slice(0, 10)} rightPhotos={popularCommentsPhoto.slice(10, 20)} />
+			<MainHeader
+				leftPhotos={popularCommentsPhoto.slice(0, 10)}
+				rightPhotos={popularCommentsPhoto.slice(10, 20)}
+				totalCompleted={totalCompleted}
+			/>
 			<MainPopular goalsForDay={popularGoalsForDay} goalsForAllTime={popularGoalsForAllTime} />
 			<MainInfo />
-			<MainComments comments={commentsTopLiked} />
+			<MainComments comments={[...commentsTopLiked, ...commentsTopLiked]} />
 			<Categories tag="h2" title="Что тебе интересно?" />
 		</Loader>
 	);

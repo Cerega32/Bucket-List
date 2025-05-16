@@ -14,10 +14,11 @@ interface MainHeaderProps {
 	className?: string;
 	leftPhotos: any[];
 	rightPhotos: any[];
+	totalCompleted: number;
 }
 
 export const MainHeader: FC<MainHeaderProps> = (props) => {
-	const {className, leftPhotos, rightPhotos} = props;
+	const {className, leftPhotos, rightPhotos, totalCompleted} = props;
 
 	const [block, element] = useBem('main-header', className);
 	const {setWindow, setIsOpen} = ModalStore;
@@ -53,7 +54,8 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 					Начать путь
 				</Button>
 				<p className={element('completed')}>
-					🔥 Уже выполнено: <span className={element('completed-number')}>{pluralize(15320, ['цель', 'цели', 'целей'])}</span>
+					🔥 Уже выполнено:{' '}
+					<span className={element('completed-number')}>{pluralize(totalCompleted, ['цель', 'цели', 'целей'])}</span>
 				</p>
 			</div>
 			<div className={element('slider')}>

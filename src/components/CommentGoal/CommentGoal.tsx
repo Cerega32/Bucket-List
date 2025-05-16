@@ -17,7 +17,7 @@ import './comment-goal.scss';
 interface CommentGoalProps {
 	className?: string;
 	comment: IComment;
-	onClickScore: (id: number, like: boolean) => Promise<void>;
+	onClickScore?: (id: number, like: boolean) => Promise<void>;
 	isUser?: boolean;
 	isMain?: boolean;
 }
@@ -59,7 +59,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 						</div>
 					) : (
 						<div className={element('user-wrapper')}>
-							<h4>{comment.userName}</h4>
+							<Title tag="h4">{comment.userName}</Title>
 							<p className={element('user-level')}>
 								{/* {comment.level} уровень&nbsp; */}
 								{pluralize(comment.userTotalCompletedGoals, ['цель выполнена', 'цели выполнено', 'целей выполнено'])}
@@ -102,7 +102,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 					))}
 				</div>
 			)}
-			{!isMain && (
+			{!isMain && onClickScore && (
 				<div className={element('score')}>
 					<Button
 						icon="like"
@@ -123,7 +123,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 					</Button>
 				</div>
 			)}
-			-{/* Лайтбокс для просмотра изображений */}
+			{/* Лайтбокс для просмотра изображений */}
 			<Lightbox
 				open={isOpen}
 				close={() => setIsOpen(false)}

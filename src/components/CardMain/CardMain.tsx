@@ -18,9 +18,10 @@ interface CardMainProps {
 	big?: boolean;
 	withBtn?: boolean;
 	updateGoal?: () => void;
+	colored?: boolean;
 }
 export const CardMain: FC<CardMainProps> = (props) => {
-	const {className, goal, big, withBtn, updateGoal} = props;
+	const {className, goal, big, withBtn, updateGoal, colored} = props;
 
 	const [block, element] = useBem('card-main', className);
 
@@ -34,7 +35,11 @@ export const CardMain: FC<CardMainProps> = (props) => {
 	return (
 		<section className={block({big, withBtn})}>
 			<Link to={`/goals/${goal.code}`} className={element('gradient')}>
-				<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} blacked={!goal.completedByUser}>
+				<Gradient
+					img={{src: goal.image, alt: goal.title}}
+					category={goal.category.nameEn}
+					blacked={!colored && !goal.completedByUser}
+				>
 					<div className={element('info')}>
 						<div className={element('img-tags')}>
 							{goal.completedByUser && <Tag icon="done" theme="light" classNameIcon={element('img-tag-icon-done')} />}

@@ -38,25 +38,11 @@ export const MainPopular: FC<MainPopularProps> = (props) => {
 			<div className={element('content')}>
 				{active === 'top' &&
 					goalsForAllTime?.map((goal, i) => (
-						<CardMain
-							key={goal.code}
-							goal={goal}
-							className={element('card', {big: i < 3})}
-							big={i < 3}
-							withBtn
-							updateGoal={() => {}}
-						/>
+						<CardMain key={goal.code} goal={goal} className={element('card', {big: i < 3})} big={i < 3} colored />
 					))}
 				{active === 'today' &&
 					goalsForDay?.map((goal, i) => (
-						<CardMain
-							key={goal.code}
-							goal={goal}
-							className={element('card', {big: i < 3})}
-							big={i < 3}
-							withBtn
-							updateGoal={() => {}}
-						/>
+						<CardMain key={goal.code} goal={goal} className={element('card', {big: i < 3})} big={i < 3} colored />
 					))}
 			</div>
 		</section>

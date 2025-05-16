@@ -24,6 +24,9 @@ export const VerticalSlider: FC<VerticalSliderProps> = (props) => {
 
 	const [block, element] = useBem('vertical-slider', className);
 
+	// Дублируем слайды для бесшовной прокрутки
+	const loopedSlides = [...visibleItems, ...visibleItems];
+
 	// Функция для обновления размеров
 	const updateSizes = () => {
 		if (containerRef.current) {
@@ -108,53 +111,52 @@ export const VerticalSlider: FC<VerticalSliderProps> = (props) => {
 
 	// Анимация с эффектом смены направления при достижении конца
 	useEffect(() => {
-		if (containerHeight > 0 && sliderContainerHeight > 0) {
-			const moveDistance = sliderContainerHeight - containerHeight; // Расстояние движения
+		if (containerHeight > 0 && sliderContainerHeight > 0 && imagesLoaded) {
+			const moveDistance = sliderContainerHeight / 2; // Только оригинальные слайды
 
-			// Запускаем анимацию только если есть что анимировать
-			if (moveDistance > 0) {
-				const startAnimation = async () => {
-					if (direction === 'down') {
-						await controls.set({y: -moveDistance});
-						await controls.start({
-							y: [-moveDistance, 0, -moveDistance],
-							transition: {
-								duration: speed,
-								ease: 'linear',
-								repeat: Infinity,
-								repeatType: 'mirror',
-								times: [0, 0.5, 1],
-							},
-						});
-					} else {
-						await controls.start({
-							y: [0, -moveDistance, 0],
-							transition: {
-								duration: speed,
-								ease: 'linear',
-								repeat: Infinity,
-								repeatType: 'mirror',
-								times: [0, 0.5, 1],
-							},
-						});
-					}
-				};
+			let isCancelled = false;
 
-				startAnimation();
-			}
+			const animate = async () => {
+				if (isCancelled) return;
+				if (direction === 'down') {
+					await controls.set({y: -moveDistance});
+					await controls.start({
+						y: 0,
+						transition: {
+							duration: speed,
+							ease: 'linear',
+						},
+					});
+				} else {
+					await controls.set({y: 0});
+					await controls.start({
+						y: -moveDistance,
+						transition: {
+							duration: speed,
+							ease: 'linear',
+						},
+					});
+				}
+				animate(); // рекурсивный вызов
+			};
+
+			animate();
+
+			return () => {
+				isCancelled = true;
+				controls.stop();
+			};
 		}
-	}, [controls, containerHeight, sliderContainerHeight, direction, speed, slides, imagesLoaded]);
+		// обязательно вернуть undefined, чтобы не было ошибки useEffect
+		return undefined;
+	}, [controls, containerHeight, sliderContainerHeight, speed, slides, imagesLoaded, direction]);
 
 	return (
 		<div className={block()} ref={containerRef}>
-			<div className={element('gradient-top')} />
 			<div className={element('slider-container')}>
 				<motion.div className={element('items-container')} animate={controls} ref={sliderContainerRef}>
-					{visibleItems.map((slide, index) => {
-						// Создаем уникальный идентификатор для каждого элемента на основе его содержимого
-						// Это помогает избежать использования индекса в качестве ключа
+					{loopedSlides.map((slide, index) => {
 						const slideId = `slide-${index}-${Math.random().toString(36).substr(2, 9)}`;
-
 						return (
 							<div key={slideId} className={element('slide')}>
 								{slide}
@@ -163,7 +165,6 @@ export const VerticalSlider: FC<VerticalSliderProps> = (props) => {
 					})}
 				</motion.div>
 			</div>
-			<div className={element('gradient-bottom')} />
 		</div>
 	);
 };

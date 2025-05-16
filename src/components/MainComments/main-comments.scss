@@ -14,23 +14,7 @@
 		width: 100%;
 		height: 100%;
 		overflow: visible;
-	}
-
-	&__gradient-left,
-	&__gradient-right {
-		position: absolute;
-		z-index: 1;
-		top: 0;
-		left: 0;
-		width: 100px;
-		height: 100%;
-		background: linear-gradient(to right, rgb(var(--color-white-rgb) / 100%), rgb(var(--color-white-rgb) / 0%));
-	}
-
-	&__gradient-right {
-		right: 0;
-		left: auto;
-		background: linear-gradient(to right, rgb(var(--color-white-rgb) / 0%), rgb(var(--color-white-rgb) / 100%));
+		mask-image: linear-gradient(to right, transparent 0%, var(--color-black) 10%, var(--color-black) 90%, transparent 100%);
 	}
 
 	&__slide {

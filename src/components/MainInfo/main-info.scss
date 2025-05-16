@@ -14,7 +14,7 @@
 		position: relative;
 		overflow: hidden;
 
-		@include block-radius(24px, var(--color-gray-5));
+		@include block-radius(24px, var(--color-gray-11));
 
 		&:first-child {
 			grid-row: 1 / 4;
