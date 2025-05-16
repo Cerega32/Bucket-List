@@ -29,48 +29,48 @@ export const MainContainer: FC<IPage> = () => {
 	const [totalCompleted, setTotalCompleted] = useState<number>(0);
 
 	const getPhoto = async () => {
-		setIsLoading(isLoading + 1);
+		setIsLoading((prev) => prev + 1);
 		const response = await getPopularCommentsPhoto();
 		if (response.success) {
 			setPopularCommentsPhoto(response.data.photos);
 		}
-		setIsLoading(isLoading - 1);
+		setIsLoading((prev) => prev - 1);
 	};
 
 	const getGoals = async () => {
-		setIsLoading(isLoading + 1);
+		setIsLoading((prev) => prev + 1);
 		const response = await getPopularGoalsForDay();
 		if (response.success) {
 			setPopularGoalsForDay(response.data);
 		}
-		setIsLoading(isLoading - 1);
+		setIsLoading((prev) => prev - 1);
 	};
 
 	const getGoalsForAllTime = async () => {
-		setIsLoading(isLoading + 1);
+		setIsLoading((prev) => prev + 1);
 		const response = await getPopularGoalsForAllTime();
 		if (response.success) {
 			setPopularGoalsForAllTime(response.data);
 		}
-		setIsLoading(isLoading - 1);
+		setIsLoading((prev) => prev - 1);
 	};
 
 	const getTotal = async () => {
-		setIsLoading(isLoading + 1);
+		setIsLoading((prev) => prev + 1);
 		const response = await getTotalCompleted();
 		if (response.success) {
 			setTotalCompleted(response.data.totalCompletedGoals);
 		}
-		setIsLoading(isLoading - 1);
+		setIsLoading((prev) => prev - 1);
 	};
 
 	const getComments = async () => {
-		setIsLoading(isLoading + 1);
+		setIsLoading((prev) => prev + 1);
 		const response = await getTopLikedComments();
 		if (response.success) {
 			setCommentsTopLiked(response.data);
 		}
-		setIsLoading(isLoading - 1);
+		setIsLoading((prev) => prev - 1);
 	};
 
 	useEffect(() => {
