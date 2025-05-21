@@ -33,7 +33,9 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	useEffect(() => {
 		(async () => {
-			await getUser();
+			if (isAuth) {
+				await getUser();
+			}
 		})();
 	}, []);
 

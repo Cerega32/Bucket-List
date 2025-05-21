@@ -21,10 +21,19 @@ export const HeaderGoal = forwardRef<HTMLElement, HeaderGoalProps>((props, ref) 
 	const {className, title, category, image, goal, background, shrink} = props;
 	const [block, element] = useBem('header-goal', className);
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
+	const isMobile = isScreenMobile || isScreenSmallTablet;
 
 	return (
-		<header ref={ref} className={block({category: category.nameEn, shrink})} style={{backgroundImage: `url(${background})`}}>
-			{(isScreenMobile || isScreenSmallTablet) && <img src={image} alt={title} className={element('image')} />}
+		<header
+			ref={ref}
+			className={block({
+				category: category.nameEn,
+				shrink,
+				mobile: isMobile,
+			})}
+			style={{backgroundImage: `url(${background})`}}
+		>
+			{isMobile && <img src={image} alt={title} className={element('image')} />}
 			<TitleWithTags
 				category={category}
 				complexity={goal.complexity}

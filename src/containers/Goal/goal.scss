@@ -4,7 +4,7 @@
 	background: var(--color-gray-3);
 
 	@include md {
-		padding: 0;
+		padding: 24px 0 0;
 	}
 
 	&::before {
@@ -41,6 +41,10 @@
 		@include lg {
 			flex-direction: column;
 			margin-top: 24px;
+		}
+
+		@include md {
+			margin-top: 0;
 		}
 	}
 

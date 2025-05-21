@@ -56,6 +56,10 @@
 	&__comment-info {
 		display: flex;
 		gap: 8px;
+
+		@include sm {
+			flex-direction: column;
+		}
 	}
 
 	&__date {
@@ -67,6 +71,10 @@
 		width: 1px;
 		height: auto;
 		background: var(--color-gray-9);
+
+		@include sm {
+			display: none;
+		}
 	}
 
 	&__horizontal-line {
@@ -82,6 +90,7 @@
 
 	&__comment-images {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 8px;
 		margin-bottom: 16px;
 	}

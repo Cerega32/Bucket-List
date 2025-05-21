@@ -1,15 +1,15 @@
-@import '../../_commons/styles-supports/mixins';
-
 .tabs {
 	$block: &;
 
 	display: flex;
 	gap: 32px;
+	overflow-x: scroll;
 
 	&__link {
 		position: relative;
 		display: flex;
 		align-items: center;
+		text-wrap: nowrap;
 		padding: 16px 0;
 		color: var(--color-text);
 		font-weight: var(--weight-medium);

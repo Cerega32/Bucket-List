@@ -125,33 +125,50 @@ export const Goal: FC<IPage> = ({page}) => {
 	};
 
 	const [shrink, setShrink] = useState(false);
+	const [headerHeight, setHeaderHeight] = useState<number>(340);
+
+	useEffect(() => {
+		const updateHeaderHeight = () => {
+			if (headerRef.current) {
+				setHeaderHeight(headerRef.current.offsetHeight);
+			} else {
+				setHeaderHeight(isScreenMobile || isScreenSmallTablet ? 340 : 340);
+			}
+		};
+
+		if ((headerRef?.current?.offsetHeight || 0) > headerHeight) {
+			updateHeaderHeight();
+		}
+	}, [shrink, isScreenMobile, isScreenSmallTablet, headerRef.current]);
 
 	useEffect(() => {
 		const handleScroll = () => {
-			const isMobile = isScreenMobile || isScreenSmallTablet;
+			const isMobile = isScreenMobile;
+			const headerH = headerRef.current?.offsetHeight || (isMobile ? 480 : 340);
+			const threshold = isMobile ? headerH * 0.8 : 160;
 
-			// Получаем фактическую высоту шапки
-			const headerHeight = headerRef.current?.offsetHeight || (isMobile ? 480 : 340);
-
-			// Порог прокрутки: когда видно 20% высоты шапки
-			const threshold = isMobile ? headerHeight * 0.8 : 160;
-
-			if (window.scrollY > threshold) {
+			if (isMobile) {
+				if (shrink) {
+					if (window.scrollY < headerHeight - (headerRef.current?.offsetHeight || 0)) {
+						setShrink(false);
+					}
+				} else if (window.scrollY > headerHeight - 128) {
+					setShrink(true);
+				}
+			} else if (window.scrollY > threshold) {
 				setShrink(true);
 			} else {
 				setShrink(false);
 			}
 		};
 
-		// Запускаем handleScroll один раз после монтирования,
-		// чтобы получить начальную высоту шапки
 		setTimeout(() => {
 			handleScroll();
 		}, 100);
 
 		window.addEventListener('scroll', handleScroll);
 		return () => window.removeEventListener('scroll', handleScroll);
-	}, [isScreenMobile, isScreenSmallTablet]);
+	}, [isScreenMobile, shrink]);
 
 	if (isEditing && goal) {
 		return (
@@ -176,7 +193,12 @@ export const Goal: FC<IPage> = ({page}) => {
 				goal={goal}
 				shrink={shrink}
 			/>
-			<section className={element('wrapper')}>
+			<section
+				className={element('wrapper')}
+				style={{
+					paddingTop: isScreenMobile ? headerHeight : 0,
+				}}
+			>
 				<AsideGoal
 					className={element('aside', {shrink})}
 					title={goal.title}
