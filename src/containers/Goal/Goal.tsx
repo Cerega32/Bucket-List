@@ -127,19 +127,19 @@ export const Goal: FC<IPage> = ({page}) => {
 	const [shrink, setShrink] = useState(false);
 	const [headerHeight, setHeaderHeight] = useState<number>(340);
 
-	useEffect(() => {
-		const updateHeaderHeight = () => {
-			if (headerRef.current) {
-				setHeaderHeight(headerRef.current.offsetHeight);
-			} else {
-				setHeaderHeight(isScreenMobile || isScreenSmallTablet ? 340 : 340);
-			}
-		};
+	const updateHeaderHeight = () => {
+		if (headerRef.current) {
+			setHeaderHeight(headerRef.current.offsetHeight);
+		} else {
+			setHeaderHeight(isScreenMobile || isScreenSmallTablet ? 340 : 340);
+		}
+	};
 
+	useEffect(() => {
 		if ((headerRef?.current?.offsetHeight || 0) > headerHeight) {
 			updateHeaderHeight();
 		}
-	}, [shrink, isScreenMobile, isScreenSmallTablet, headerRef.current]);
+	}, [shrink, isScreenMobile, isScreenSmallTablet]);
 
 	useEffect(() => {
 		const handleScroll = () => {
@@ -192,6 +192,7 @@ export const Goal: FC<IPage> = ({page}) => {
 				background={goal.image}
 				goal={goal}
 				shrink={shrink}
+				onImageLoad={updateHeaderHeight}
 			/>
 			<section
 				className={element('wrapper')}

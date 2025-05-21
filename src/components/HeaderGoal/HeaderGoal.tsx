@@ -15,10 +15,11 @@ interface HeaderGoalProps {
 	goal: IGoal;
 	background: string;
 	shrink: boolean;
+	onImageLoad?: () => void;
 }
 
 export const HeaderGoal = forwardRef<HTMLElement, HeaderGoalProps>((props, ref) => {
-	const {className, title, category, image, goal, background, shrink} = props;
+	const {className, title, category, image, goal, background, shrink, onImageLoad} = props;
 	const [block, element] = useBem('header-goal', className);
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 	const isMobile = isScreenMobile || isScreenSmallTablet;
@@ -33,7 +34,7 @@ export const HeaderGoal = forwardRef<HTMLElement, HeaderGoalProps>((props, ref) 
 			})}
 			style={{backgroundImage: `url(${background})`}}
 		>
-			{isMobile && <img src={image} alt={title} className={element('image')} />}
+			{isMobile && <img src={image} alt={title} className={element('image')} onLoad={onImageLoad} />}
 			<TitleWithTags
 				category={category}
 				complexity={goal.complexity}
