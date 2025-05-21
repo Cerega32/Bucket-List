@@ -1,11 +1,11 @@
 .aside-goal {
 	$block: &;
+	min-width: 336px;
+	max-width: 336px;
 
-	min-width: 100%;
-
-	@media (width >= 768px) {
-		min-width: 336px;
-		max-width: 336px;
+	@include lg {
+		min-width: 100%;
+		max-width: 100%;
 	}
 
 	&__image {
@@ -14,6 +14,10 @@
 		margin-bottom: 16px;
 		object-fit: cover;
 		border-radius: 8px;
+
+		@include lg {
+			display: none;
+		}
 	}
 
 	&__btn {
@@ -37,5 +41,16 @@
 		background: var(--color-white);
 		border: 1px solid var(--color-gray-9);
 		border-radius: 8px;
+
+		@include lg {
+			display: flex;
+			gap: 8px;
+		}
+
+		@include md {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
 	}
 }

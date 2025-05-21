@@ -71,3 +71,35 @@ $main-categories: (
 		var(--color-black) 100%
 	);
 }
+
+// Media queries mixins
+
+@mixin retina {
+	@media (resolution >= 144dpi), (resolution >= 1.5dppx) {
+		@content;
+	}
+}
+
+@mixin xl {
+	@media (width <= 1463px) {
+		@content;
+	}
+}
+
+@mixin lg {
+	@media (width <= 1199px) {
+		@content;
+	}
+}
+
+@mixin md {
+	@media (width <= 767px) {
+		@content;
+	}
+}
+
+@mixin sm {
+	@media (width <= 575px) {
+		@content;
+	}
+}

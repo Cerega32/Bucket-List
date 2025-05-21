@@ -82,7 +82,7 @@ export const MainContainer: FC<IPage> = () => {
 	}, []);
 
 	return (
-		<Loader isLoading={!isLoading} className={block()}>
+		<Loader isLoading={!!isLoading} className={block()}>
 			<MainHeader
 				leftPhotos={popularCommentsPhoto.slice(0, 10)}
 				rightPhotos={popularCommentsPhoto.slice(10, 20)}

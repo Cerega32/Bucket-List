@@ -1,6 +1,7 @@
-import {FC, useEffect, useState} from 'react';
+import {forwardRef} from 'react';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {ICategory, IGoal} from '@/typings/goal';
 import './header-goal.scss';
 
@@ -12,30 +13,18 @@ interface HeaderGoalProps {
 	category: ICategory;
 	image: string;
 	goal: IGoal;
+	background: string;
+	shrink: boolean;
 }
 
-export const HeaderGoal: FC<HeaderGoalProps> = (props) => {
-	const {className, title, category, image, goal} = props;
-
+export const HeaderGoal = forwardRef<HTMLElement, HeaderGoalProps>((props, ref) => {
+	const {className, title, category, image, goal, background, shrink} = props;
 	const [block, element] = useBem('header-goal', className);
-
-	const [shrink, setShrink] = useState(false);
-
-	useEffect(() => {
-		const handleScroll = () => {
-			if (window.scrollY > 160) {
-				setShrink(true);
-			} else {
-				setShrink(false);
-			}
-		};
-
-		window.addEventListener('scroll', handleScroll);
-		return () => window.removeEventListener('scroll', handleScroll);
-	}, []);
+	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 
 	return (
-		<header className={block({category: category.nameEn, shrink})} style={{backgroundImage: `url(${image})`}}>
+		<header ref={ref} className={block({category: category.nameEn, shrink})} style={{backgroundImage: `url(${background})`}}>
+			{(isScreenMobile || isScreenSmallTablet) && <img src={image} alt={title} className={element('image')} />}
 			<TitleWithTags
 				category={category}
 				complexity={goal.complexity}
@@ -47,4 +36,6 @@ export const HeaderGoal: FC<HeaderGoalProps> = (props) => {
 			/>
 		</header>
 	);
-};
+});
+
+HeaderGoal.displayName = 'HeaderGoal';

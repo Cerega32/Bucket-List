@@ -4,7 +4,9 @@ import {defineConfig, loadEnv} from 'vite';
 
 const path = require('path');
 
-const postcssGlobalData = require('@csstools/postcss-global-data');
+const postcssCustomMedia = require('postcss-custom-media');
+// Убираем сортировку медиа-запросов, чтобы сохранить порядок как в исходном файле
+// const postcssSortMediaQueries = require('postcss-sort-media-queries');
 
 // https://vitejs.dev/config/
 export default defineConfig(({mode}) => {
@@ -22,17 +24,19 @@ export default defineConfig(({mode}) => {
 		css: {
 			preprocessorOptions: {
 				scss: {
-					additionalData: `@use "@/_commons/styles-supports/mixins" as *;`,
+					additionalData: `
+					@use "@/_commons/styles-supports/mixins" as *;
+				`,
 				},
 			},
 			postcss: {
 				plugins: [
 					require('postcss-normalize'),
-					postcssGlobalData({
-						files: ['./src/_commons/styles-supports/variables.scss'],
-					}),
 					require('autoprefixer'),
-					require('postcss-sort-media-queries'),
+					// Отключаем сортировку медиа-запросов
+					// postcssSortMediaQueries({
+					//	sort: 'desktop-first',
+					// }),
 					require('postcss-normalize-charset'),
 					// require('postcss-preset-env'),
 				],

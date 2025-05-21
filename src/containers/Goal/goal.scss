@@ -3,6 +3,10 @@
 	padding: var(--height-header-goal) 0 0;
 	background: var(--color-gray-3);
 
+	@include md {
+		padding: 0;
+	}
+
 	&::before {
 		position: absolute;
 		z-index: -1;
@@ -29,6 +33,15 @@
 		gap: 24px;
 		max-width: 1440px;
 		margin: 0 auto;
+
+		@include xl {
+			padding: 0 24px;
+		}
+
+		@include lg {
+			flex-direction: column;
+			margin-top: 24px;
+		}
 	}
 
 	&__aside {
@@ -36,11 +49,39 @@
 		z-index: 13;
 		top: 284px;
 		margin-bottom: -93px;
+		transition: all linear 0.3s;
 		transform: translateY(-132px);
+
+		@include lg {
+			position: relative;
+			z-index: 1;
+			top: 0;
+			margin-bottom: 0;
+			transform: none;
+		}
+
+		&--shrink {
+			z-index: 0;
+			top: 168px;
+			margin-bottom: 40px;
+			transform: translateY(0);
+
+			@include lg {
+				position: relative;
+				z-index: 0;
+				top: 0;
+				margin-bottom: 0;
+				transform: none;
+			}
+		}
 	}
 
 	&__content {
 		width: 100%;
 		padding: 40px 0;
+
+		@include lg {
+			padding: 0;
+		}
 	}
 }

@@ -5,9 +5,16 @@
 		margin-bottom: 16px;
 
 		&--short {
+			margin-bottom: 0;
 			font-size: 22px;
 			font-weight: var(--weight-semi-bold);
 			line-height: var(--line-height-22);
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			overflow-wrap: anywhere;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 1;
 		}
 	}
 

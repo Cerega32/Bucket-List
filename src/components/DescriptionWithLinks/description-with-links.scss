@@ -6,20 +6,20 @@
 
 	&__wrapper {
 		display: flex;
-		align-self: flex-start;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
+		align-items: flex-start;
 		gap: 24px;
 
-		@media (width >= 768px) {
-			flex-wrap: nowrap;
+		@include md {
+			flex-direction: column;
 		}
 	}
 
 	&__text {
-		flex-basis: 100%;
+		flex-basis: 67%;
 
-		@media (width >= 768px) {
-			flex-basis: 67%;
+		@include md {
+			flex-basis: 100%;
 		}
 	}
 

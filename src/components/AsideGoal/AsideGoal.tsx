@@ -1,6 +1,7 @@
 import {FC, useEffect, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {ModalStore} from '@/store/ModalStore';
 import {getGoalTimer, TimerInfo} from '@/utils/api/get/getGoalTimer';
 
@@ -42,6 +43,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const [block, element] = useBem('aside-goal', className);
 
 	const {setIsOpen, setWindow, setFuncModal} = ModalStore;
+	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 
 	// Загрузка информации о таймере
 	useEffect(() => {
@@ -95,27 +97,52 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						className={element('btn', {done: true})}
 						hoverContent={done ? 'Отменить выполнение' : ''}
 						hoverIcon={done ? 'cross' : ''}
+						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 					>
 						{done ? 'Выполнено' : 'Выполнить'}
 					</Button>
 				)}
 				{isList && added && !done && (
-					<Button theme="blue" onClick={openMarkAll} icon="done" className={element('btn')}>
+					<Button
+						theme="blue"
+						onClick={openMarkAll}
+						icon="done"
+						className={element('btn')}
+						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+					>
 						Выполнить все цели
 					</Button>
 				)}
 				{!added && (
-					<Button onClick={() => updateGoal(code, 'add')} icon="plus" className={element('btn')} theme="blue">
+					<Button
+						onClick={() => updateGoal(code, 'add')}
+						icon="plus"
+						className={element('btn')}
+						theme="blue"
+						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+					>
 						Добавить к себе
 					</Button>
 				)}
 				{!isList && done && (
-					<Button theme="blue-light" onClick={openAddReview} icon="comment" className={element('btn')}>
+					<Button
+						theme="blue-light"
+						onClick={openAddReview}
+						icon="comment"
+						className={element('btn')}
+						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+					>
 						Написать отзыв
 					</Button>
 				)}
 				{added && (
-					<Button theme="blue-light" onClick={deleteGoal} icon="trash" className={element('btn')}>
+					<Button
+						theme="blue-light"
+						onClick={deleteGoal}
+						icon="trash"
+						className={element('btn')}
+						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+					>
 						Удалить
 					</Button>
 				)}
@@ -127,6 +154,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						className={element('btn')}
 						type={editGoal ? 'button' : 'Link'}
 						href={editGoal ? undefined : `/edit-list/${code}`}
+						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 					>
 						Редактировать
 					</Button>
@@ -140,7 +168,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					</>
 				)}
 
-				<Line className={element('line')} />
+				<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
 				<Button
 					theme="blue-light"
 					icon="mount"
@@ -152,6 +180,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						);
 					}}
 					className={element('btn')}
+					size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 				>
 					Поделиться
 				</Button>

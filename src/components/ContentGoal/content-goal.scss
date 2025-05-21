@@ -5,10 +5,20 @@
 		display: flex;
 		gap: 10px;
 		margin-bottom: 24px;
+
+		@include sm {
+			display: grid;
+			grid-template-columns: 20px 1fr;
+		}
 	}
 
 	&__goal-in-list-btn {
 		margin-left: auto;
+		text-wrap: nowrap;
+
+		@include sm {
+			grid-column: 2;
+		}
 	}
 
 	&__info-all {

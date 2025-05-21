@@ -1,4 +1,4 @@
-import {FC, useEffect, useState} from 'react';
+import {FC, useEffect, useRef, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
@@ -7,6 +7,7 @@ import {EditGoal} from '@/components/EditGoal/EditGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
 import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {GoalStore} from '@/store/GoalStore';
 import {ModalStore} from '@/store/ModalStore';
 import {ThemeStore} from '@/store/ThemeStore';
@@ -21,6 +22,8 @@ import './goal.scss';
 
 export const Goal: FC<IPage> = ({page}) => {
 	const [block, element] = useBem('goal');
+	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
+	const headerRef = useRef<HTMLElement | null>(null);
 
 	const {setId} = GoalStore;
 	const params = useParams();
@@ -121,6 +124,35 @@ export const Goal: FC<IPage> = ({page}) => {
 		setIsEditing(false);
 	};
 
+	const [shrink, setShrink] = useState(false);
+
+	useEffect(() => {
+		const handleScroll = () => {
+			const isMobile = isScreenMobile || isScreenSmallTablet;
+
+			// Получаем фактическую высоту шапки
+			const headerHeight = headerRef.current?.offsetHeight || (isMobile ? 480 : 340);
+
+			// Порог прокрутки: когда видно 20% высоты шапки
+			const threshold = isMobile ? headerHeight * 0.8 : 160;
+
+			if (window.scrollY > threshold) {
+				setShrink(true);
+			} else {
+				setShrink(false);
+			}
+		};
+
+		// Запускаем handleScroll один раз после монтирования,
+		// чтобы получить начальную высоту шапки
+		setTimeout(() => {
+			handleScroll();
+		}, 100);
+
+		window.addEventListener('scroll', handleScroll);
+		return () => window.removeEventListener('scroll', handleScroll);
+	}, [isScreenMobile, isScreenSmallTablet]);
+
 	if (isEditing && goal) {
 		return (
 			<main className={block({editing: true})}>
@@ -135,10 +167,18 @@ export const Goal: FC<IPage> = ({page}) => {
 
 	return (
 		<main className={block()}>
-			<HeaderGoal title={goal.title} category={goal.category} image={goal.image} goal={goal} />
+			<HeaderGoal
+				ref={headerRef}
+				title={goal.title}
+				category={goal.category}
+				image={goal.image}
+				background={goal.image}
+				goal={goal}
+				shrink={shrink}
+			/>
 			<section className={element('wrapper')}>
 				<AsideGoal
-					className={element('aside')}
+					className={element('aside', {shrink})}
 					title={goal.title}
 					image={goal.image || ''}
 					added={goal.addedByUser}

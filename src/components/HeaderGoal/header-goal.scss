@@ -6,12 +6,27 @@
 	top: 0;
 	width: 100%;
 	height: 340px;
-	padding: 196px 0 0;
+	padding: 200px 0 0;
 	background-repeat: no-repeat;
 	background-position: 50% 50%;
 	background-size: cover;
 	transition: all linear 0.3s;
 	overflow: hidden;
+
+	@include lg {
+		display: flex;
+		align-items: flex-end;
+		gap: 24px;
+		padding-top: 128px;
+		padding-bottom: 56px;
+	}
+
+	@include md {
+		position: relative;
+		flex-direction: column;
+		align-items: flex-start;
+		height: initial;
+	}
 
 	&::after {
 		position: absolute;
@@ -30,6 +45,44 @@
 		max-width: 1440px;
 		padding-left: 360px;
 		margin: 0 auto;
+
+		@include xl {
+			padding-right: 24px;
+			padding-left: calc(24px + 336px + 24px);
+		}
+
+		@include lg {
+			width: calc(100% - 24px);
+			padding-left: 0;
+			margin: 0;
+		}
+
+		@include md {
+			margin: 0 24px;
+		}
+	}
+
+	&__image {
+		position: relative;
+		z-index: 2;
+		flex-shrink: 0;
+		width: 160px;
+		height: 160px;
+		margin-left: 24px;
+		border-radius: 8px;
+		object-fit: cover;
+
+		@include md {
+			width: 192px;
+			height: 192px;
+		}
+
+		@include sm {
+			width: calc(100% - 48px);
+			height: calc(100% - 48px);
+			aspect-ratio: 1;
+			margin: 0 24px;
+		}
 	}
 
 	@each $category in $main-categories {
@@ -46,6 +99,14 @@
 		#{$block} {
 			&__wrapper {
 				padding-left: 0;
+
+				@include xl {
+					margin: 0 24px;
+				}
+			}
+
+			&__image {
+				display: none;
 			}
 		}
 	}
