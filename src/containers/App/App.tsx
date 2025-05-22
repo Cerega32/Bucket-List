@@ -1,4 +1,5 @@
 import {FC, StrictMode} from 'react';
+import {HelmetProvider} from 'react-helmet-async';
 
 import {AppProviders} from '../AppProviders/AppProviders';
 import {ErrorBoundary} from '../ErrorBoundary/ErrorBoundary';
@@ -9,7 +10,9 @@ const App: FC = () => {
 		<StrictMode>
 			<AppProviders>
 				<ErrorBoundary>
-					<Layout />
+					<HelmetProvider>
+						<Layout />
+					</HelmetProvider>
 				</ErrorBoundary>
 			</AppProviders>
 		</StrictMode>
