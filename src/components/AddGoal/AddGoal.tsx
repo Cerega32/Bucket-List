@@ -34,6 +34,8 @@ interface AddGoalProps {
 	initialCategory?: ICategory;
 	lockCategory?: boolean;
 	initialCategoryParam?: string;
+	preloadedCategories?: ICategory[];
+	preloadedSubcategories?: ICategory[];
 }
 
 export const AddGoal: FC<AddGoalProps> = (props) => {
@@ -46,6 +48,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		initialCategory,
 		lockCategory = false,
 		initialCategoryParam,
+		preloadedCategories,
+		preloadedSubcategories,
 	} = props;
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -79,7 +83,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	// Обработчик изменения предполагаемого времени
 	const handleEstimatedTimeChange = (value: string) => {
 		// Разрешаем цифры, двоеточия, пробелы и русские буквы
-		const cleanValue = value.replace(/[^0-9:дчмдней часовминут\s]/gi, '');
+		const cleanValue = value.replace(/[^0-9:дчмдней ыячасовминут\s]/gi, '');
 
 		// Проверяем различные форматы:
 		// 1. HH:MM
@@ -155,9 +159,15 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	useEffect(() => {
 		const loadCategories = async () => {
 			try {
-				const data = await getCategories();
-				if (data.success) {
-					setCategories(data.data);
+				// Если переданы готовые категории, используем их
+				if (preloadedCategories) {
+					setCategories(preloadedCategories);
+				} else {
+					// Иначе загружаем категории с сервера
+					const data = await getCategories();
+					if (data.success) {
+						setCategories(data.data);
+					}
 				}
 			} catch (error) {
 				NotificationStore.addNotification({
@@ -169,21 +179,30 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		};
 
 		loadCategories();
-	}, []);
+	}, [preloadedCategories]);
 
 	// Фильтрация подкатегорий при изменении категории
 	useEffect(() => {
 		if (activeCategory !== null) {
 			const loadSubcategories = async () => {
-				const data = await getCategory(categories[activeCategory].nameEn);
-				if (data.success) {
-					setSubcategories(data.data.subcategories);
+				// Если переданы готовые подкатегории, используем их
+				if (preloadedSubcategories) {
+					setSubcategories(preloadedSubcategories);
+				} else {
+					// Иначе загружаем подкатегории с сервера
+					const data = await getCategory(categories[activeCategory].nameEn);
+					if (data.success) {
+						setSubcategories(data.data.subcategories);
+					}
 				}
-				setActiveSubcategory(null);
+				// Сбрасываем подкатегорию только если не устанавливается initialCategory
+				if (!initialCategory || !initialCategory.parentCategory) {
+					setActiveSubcategory(null);
+				}
 			};
 			loadSubcategories();
 		}
-	}, [activeCategory, categories]);
+	}, [activeCategory, categories, initialCategory, preloadedSubcategories]);
 	// Добавляем эффект для установки начальной категории из props
 	useEffect(() => {
 		if (initialCategory && categories.length > 0) {
@@ -196,20 +215,43 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 					// Загружаем подкатегории для родительской категории
 					const loadSubcategoriesAndSetSubcategory = async () => {
-						const data = await getCategory(categories[parentIndex].nameEn);
-						if (data.success) {
-							setSubcategories(data.data.subcategories);
+						try {
+							let subcategoriesData;
 
-							// Ищем индекс подкатегории
-							const subcategoryIndex = data.data.subcategories.findIndex((sub: ICategory) => sub.id === initialCategory.id);
-
-							if (subcategoryIndex !== -1) {
-								setActiveSubcategory(subcategoryIndex);
+							// Если переданы готовые подкатегории, используем их
+							if (preloadedSubcategories) {
+								subcategoriesData = preloadedSubcategories;
+								setSubcategories(preloadedSubcategories);
+							} else {
+								// Иначе загружаем подкатегории с сервера
+								const data = await getCategory(categories[parentIndex].nameEn);
+								if (data.success) {
+									subcategoriesData = data.data.subcategories;
+									setSubcategories(data.data.subcategories);
+								}
 							}
+
+							if (subcategoriesData) {
+								// Ищем индекс подкатегории
+								const subcategoryIndex = subcategoriesData.findIndex((sub: ICategory) => sub.id === initialCategory.id);
+
+								if (subcategoryIndex !== -1) {
+									// Добавляем небольшую задержку для обеспечения корректной установки
+									setTimeout(() => {
+										setActiveSubcategory(subcategoryIndex);
+									}, 100);
+								} else {
+									console.warn('Подкатегория не найдена:', initialCategory);
+								}
+							}
+						} catch (error) {
+							console.error('Ошибка при загрузке подкатегорий для initialCategory:', error);
 						}
 					};
 
 					loadSubcategoriesAndSetSubcategory();
+				} else {
+					console.warn('Родительская категория не найдена:', initialCategory.parentCategory);
 				}
 			} else {
 				// Если передана основная категория
@@ -217,10 +259,12 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 				if (categoryIndex !== -1) {
 					setActiveCategory(categoryIndex);
+				} else {
+					console.warn('Основная категория не найдена:', initialCategory);
 				}
 			}
 		}
-	}, [initialCategory, categories]);
+	}, [initialCategory, categories, preloadedSubcategories]);
 
 	// Добавляем эффект для получения категории из URL параметра
 	useEffect(() => {
@@ -316,16 +360,26 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 			// Загружаем подкатегории для выбранной категории
 			const loadSubcategoriesAndSetSubcategory = async () => {
-				const data = await getCategory(categories[categoryIndex].nameEn);
-				if (data.success) {
-					setSubcategories(data.data.subcategories);
+				let subcategoriesData;
 
-					// Если у цели есть подкатегория, находим ее индекс
-					if (goal.subcategory) {
-						const subcategoryIndex = data.data.subcategories.findIndex((sub: ICategory) => sub.id === goal.subcategory?.id);
-						if (subcategoryIndex !== -1) {
-							setActiveSubcategory(subcategoryIndex);
-						}
+				// Если переданы готовые подкатегории, используем их
+				if (preloadedSubcategories) {
+					subcategoriesData = preloadedSubcategories;
+					setSubcategories(preloadedSubcategories);
+				} else {
+					// Иначе загружаем подкатегории с сервера
+					const data = await getCategory(categories[categoryIndex].nameEn);
+					if (data.success) {
+						subcategoriesData = data.data.subcategories;
+						setSubcategories(data.data.subcategories);
+					}
+				}
+
+				// Если у цели есть подкатегория, находим ее индекс
+				if (goal.subcategory && subcategoriesData) {
+					const subcategoryIndex = subcategoriesData.findIndex((sub: ICategory) => sub.id === goal.subcategory?.id);
+					if (subcategoryIndex !== -1) {
+						setActiveSubcategory(subcategoryIndex);
 					}
 				}
 			};
@@ -584,18 +638,26 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 				// Загружаем подкатегории для выбранной категории
 				const loadSubcategoriesAndSetSubcategory = async () => {
-					const data = await getCategory(categories[categoryIndex].nameEn);
-					if (data.success) {
-						setSubcategories(data.data.subcategories);
+					let subcategoriesData;
 
-						// Если у цели есть подкатегория, находим ее индекс
-						if (goalData.subcategory) {
-							const subcategoryIndex = data.data.subcategories.findIndex(
-								(sub: ICategory) => sub.id === goalData.subcategory?.id
-							);
-							if (subcategoryIndex !== -1) {
-								setActiveSubcategory(subcategoryIndex);
-							}
+					// Если переданы готовые подкатегории, используем их
+					if (preloadedSubcategories) {
+						subcategoriesData = preloadedSubcategories;
+						setSubcategories(preloadedSubcategories);
+					} else {
+						// Иначе загружаем подкатегории с сервера
+						const data = await getCategory(categories[categoryIndex].nameEn);
+						if (data.success) {
+							subcategoriesData = data.data.subcategories;
+							setSubcategories(data.data.subcategories);
+						}
+					}
+
+					// Если у цели есть подкатегория, находим ее индекс
+					if (goalData.subcategory && subcategoriesData) {
+						const subcategoryIndex = subcategoriesData.findIndex((sub: ICategory) => sub.id === goalData.subcategory?.id);
+						if (subcategoryIndex !== -1) {
+							setActiveSubcategory(subcategoryIndex);
 						}
 					}
 				};

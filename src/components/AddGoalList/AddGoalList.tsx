@@ -567,6 +567,8 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 												activeSubcategory !== null ? subcategories[activeSubcategory] : categories[activeCategory!]
 											}
 											lockCategory // Блокируем выбор категории
+											preloadedCategories={categories}
+											preloadedSubcategories={subcategories}
 										/>
 									</div>
 

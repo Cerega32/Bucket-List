@@ -527,6 +527,8 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 												activeSubcategory !== null ? subcategories[activeSubcategory] : categories[activeCategory!]
 											}
 											lockCategory // Блокируем выбор категории
+											preloadedCategories={categories}
+											preloadedSubcategories={subcategories}
 										/>
 									</div>
 
