@@ -752,11 +752,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							onGoalSelected={handleExternalGoalSelected}
 							className={element('external-search')}
 							category={
-								// Если выбрана подкатегория, используем её nameEn
 								activeSubcategory !== null && subcategories.length > 0
 									? subcategories[activeSubcategory].nameEn
-									: // Иначе если выбрана категория, используем её nameEn
-									activeCategory !== null
+									: activeCategory !== null
 									? categories[activeCategory].nameEn
 									: undefined
 							}

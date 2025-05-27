@@ -14,7 +14,8 @@ import Select from '../Select/Select';
 
 import './external-goal-search.scss';
 
-const AllowedCategories = ['books'];
+// Список поддерживаемых категорий
+const SupportedCategories = ['books', 'movies'];
 
 interface ExternalGoalResult {
 	externalId: string | number;
@@ -37,7 +38,6 @@ interface ExternalGoalSearchProps {
 export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected, className, category}) => {
 	const [block, element] = useBem('external-goal-search', className);
 	const [query, setQuery] = useState('');
-	const [contentType] = useState<'movies' | 'books'>('books');
 	const [results, setResults] = useState<ExternalGoalResult[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [activeComplexity, setActiveComplexity] = useState<number>(1); // По умолчанию средняя сложность (индекс 1)
@@ -52,7 +52,8 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 		setImageLoading({});
 	}, [results]);
 
-	if ((category && !AllowedCategories.includes(category)) || !category) {
+	// Если категория не поддерживается или не передана, не показываем компонент
+	if (!category || !SupportedCategories.includes(category)) {
 		return null;
 	}
 
@@ -68,7 +69,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 		setSearchWasPerformed(true);
 		try {
 			const response = await GET('goals/search-external', {
-				get: {category: contentType, query},
+				get: {category, query},
 			});
 
 			if (response.success && response.data.results) {
@@ -152,30 +153,20 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 		});
 	};
 
-	// const contentTypeOptions = [
-	// 	{name: 'Книги', value: 'books'},
-	// 	// {name: 'Фильмы', value: 'movies'},
-	// 	// {name: 'Путешествия', value: 'travel'},
-	// ];
+	// Определяем название типа контента для отображения
+	const getContentTypeName = (categoryEn: string): string => {
+		const names: Record<string, string> = {
+			books: 'книги',
+			movies: 'фильмы',
+		};
+		return names[categoryEn] || 'контент';
+	};
 
 	return (
 		<div className={block()}>
-			<h3 className={element('title')}>Найти готовую цель</h3>
+			<h3 className={element('title')}>Найти готовую цель ({getContentTypeName(category)})</h3>
 			<div className={element('search-panel')}>
 				<div className={element('selectors')}>
-					{/* <Select
-						className={element('category-select')}
-						placeholder="Выберите тип"
-						options={contentTypeOptions}
-						activeOption={contentTypeOptions.findIndex((opt) => opt.value === contentType)}
-						onSelect={(index) => {
-							setContentType(contentTypeOptions[index].value as 'movies' | 'books');
-							setResults([]);
-							setSearchWasPerformed(false);
-						}}
-						text="Тип контента"
-					/> */}
-
 					<Select
 						className={element('complexity-select')}
 						placeholder="Выберите сложность"
@@ -192,7 +183,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 						text="Поиск"
 						value={query}
 						setValue={handleQueryChange}
-						placeholder="Введите название для поиска..."
+						placeholder={`Введите название для поиска ${getContentTypeName(category)}...`}
 						iconBegin="search"
 						className={element('search-input')}
 						onKeyDown={(e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {

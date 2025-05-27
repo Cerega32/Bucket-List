@@ -20,11 +20,14 @@
 		margin-bottom: 20px;
 	}
 
-	// &__selectors {
-	// 	// display: grid;
-	// 	// gap: 16px;
-	// 	// grid-template-columns: 2fr;
-	// }
+	&__selectors {
+		display: flex;
+		justify-content: flex-start;
+	}
+
+	&__complexity-select {
+		max-width: 200px;
+	}
 
 	&__search-field {
 		display: flex;
@@ -47,7 +50,6 @@
 	}
 
 	&__results-container {
-		// position: absolute;
 		z-index: 1;
 		top: 100%;
 
@@ -213,7 +215,11 @@
 @media (width <= 768px) {
 	.external-goal-search {
 		&__selectors {
-			grid-template-columns: 1fr;
+			justify-content: stretch;
+		}
+
+		&__complexity-select {
+			max-width: none;
 		}
 
 		&__search-field {
