@@ -57,6 +57,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const [activeCategory, setActiveCategory] = useState<number | null>(null);
 	const [activeSubcategory, setActiveSubcategory] = useState<number | null>(null);
 	const [deadline, setDeadline] = useState<string>('');
+	const [estimatedTime, setEstimatedTime] = useState<string>('');
 	const [image, setImage] = useState<File | null>(null);
 	const [imageUrl, setImageUrl] = useState<string | null>(null);
 	const [categories, setCategories] = useState<ICategory[]>([]);
@@ -73,6 +74,81 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	// Обработчик изменения названия цели
 	const handleTitleChange = (value: string) => {
 		setTitle(value);
+	};
+
+	// Обработчик изменения предполагаемого времени
+	const handleEstimatedTimeChange = (value: string) => {
+		// Разрешаем цифры, двоеточия, пробелы и русские буквы
+		const cleanValue = value.replace(/[^0-9:дчмдней часовминут\s]/gi, '');
+
+		// Проверяем различные форматы:
+		// 1. HH:MM
+		const timePattern = /^(\d{0,2}):?(\d{0,2})$/;
+		// 2. X дней, X д, X дня
+		const daysPattern = /^(\d+)\s*(д|дн|дня|дней)?$/i;
+		// 3. X часов, X ч
+		const hoursPattern = /^(\d+)\s*(ч|час|часа|часов)?$/i;
+		// 4. X минут, X м, X мин
+		const minutesPattern = /^(\d+)\s*(м|мин|минут|минуты)?$/i;
+
+		// Разрешаем ввод, если поле пустое или соответствует одному из паттернов
+		if (
+			cleanValue === '' ||
+			timePattern.test(cleanValue) ||
+			daysPattern.test(cleanValue) ||
+			hoursPattern.test(cleanValue) ||
+			minutesPattern.test(cleanValue) ||
+			cleanValue.includes('д') ||
+			cleanValue.includes('ч') ||
+			cleanValue.includes('м')
+		) {
+			setEstimatedTime(cleanValue);
+		}
+	};
+
+	// Функция для преобразования времени в стандартный формат HH:MM
+	const convertTimeToStandardFormat = (timeString: string): string => {
+		if (!timeString) return '';
+
+		// Если уже в формате HH:MM, возвращаем как есть
+		const timePattern = /^(\d{1,2}):(\d{1,2})$/;
+		if (timePattern.test(timeString)) {
+			const match = timeString.match(timePattern);
+			if (match) {
+				const hours = match[1].padStart(2, '0');
+				const minutes = match[2].padStart(2, '0');
+				return `${hours}:${minutes}`;
+			}
+		}
+
+		// Преобразуем дни в часы (1 день = 24 часа)
+		const daysPattern = /^(\d+)\s*(д|дн|дня|дней)$/i;
+		const daysMatch = timeString.match(daysPattern);
+		if (daysMatch) {
+			const days = parseInt(daysMatch[1], 10);
+			const totalHours = days * 24;
+			return `${totalHours.toString().padStart(2, '0')}:00`;
+		}
+
+		// Преобразуем часы
+		const hoursPattern = /^(\d+)\s*(ч|час|часа|часов)$/i;
+		const hoursMatch = timeString.match(hoursPattern);
+		if (hoursMatch) {
+			const hours = parseInt(hoursMatch[1], 10);
+			return `${hours.toString().padStart(2, '0')}:00`;
+		}
+
+		// Преобразуем минуты
+		const minutesPattern = /^(\d+)\s*(м|мин|минут|минуты)$/i;
+		const minutesMatch = timeString.match(minutesPattern);
+		if (minutesMatch) {
+			const minutes = parseInt(minutesMatch[1], 10);
+			const hours = Math.floor(minutes / 60);
+			const remainingMinutes = minutes % 60;
+			return `${hours.toString().padStart(2, '0')}:${remainingMinutes.toString().padStart(2, '0')}`;
+		}
+
+		return timeString; // Возвращаем исходную строку, если не удалось распознать формат
 	};
 
 	// Загрузка категорий при монтировании компонента
@@ -225,6 +301,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const fillFormWithGoalData = (goal: IGoal) => {
 		setTitle(goal.title);
 		setDescription(goal.description);
+		setEstimatedTime(goal.estimatedTime || '');
 
 		// Находим индекс сложности в массиве selectComplexity
 		const complexityIndex = selectComplexity.findIndex((item) => item.value === goal.complexity);
@@ -294,6 +371,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		setActiveCategory(null);
 		setActiveSubcategory(null);
 		setDeadline('');
+		setEstimatedTime('');
 		setImage(null);
 		setImageUrl(null);
 		setSimilarGoals([]);
@@ -349,6 +427,12 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			// Если задан дедлайн, добавляем его в formData
 			if (deadline) {
 				formData.append('deadline', deadline);
+			}
+
+			// Если задано предполагаемое время, добавляем его в formData
+			if (estimatedTime) {
+				const standardTime = convertTimeToStandardFormat(estimatedTime);
+				formData.append('estimated_time', standardTime);
 			}
 
 			const response = await postCreateGoal(formData);
@@ -437,6 +521,12 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				formData.append('deadline', deadline);
 			}
 
+			// Если задано предполагаемое время, добавляем его в formData
+			if (estimatedTime) {
+				const standardTime = convertTimeToStandardFormat(estimatedTime);
+				formData.append('estimated_time', standardTime);
+			}
+
 			const response = await postCreateGoal(formData);
 
 			if (response.success) {
@@ -476,6 +566,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		// Заполняем форму данными из внешней цели
 		setTitle(goalData.title || '');
 		setDescription(goalData.description || '');
+		setEstimatedTime(goalData.estimatedTime || '');
 
 		// Находим индекс сложности в массиве selectComplexity
 		if (goalData.complexity) {
@@ -698,6 +789,21 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							type="textarea"
 							required
 						/>
+
+						<div className={element('time-field-container')}>
+							<FieldInput
+								placeholder="Например: 2:30, 3 дня, 5 часов, 30 минут"
+								id="goal-estimated-time"
+								text="Предполагаемое время выполнения"
+								value={estimatedTime}
+								setValue={handleEstimatedTimeChange}
+								className={element('field')}
+								type="text"
+							/>
+							<small className={element('format-hint')}>
+								Укажите время в одном из форматов: ЧЧ:ММ (02:30), X дней (3 дня), X часов (5 часов), X минут (30 минут)
+							</small>
+						</div>
 
 						<div className={element('date-field-container')}>
 							<p className={element('field-title')}>Планируемая дата реализации</p>

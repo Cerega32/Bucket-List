@@ -66,6 +66,7 @@ export interface IGoal {
 	createdByUser: boolean;
 	isCanEdit: boolean;
 	totalAdditions?: number;
+	estimatedTime?: string;
 }
 
 export interface IShortGoal {
