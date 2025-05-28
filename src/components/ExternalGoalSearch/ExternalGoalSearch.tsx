@@ -15,14 +15,14 @@ import Select from '../Select/Select';
 import './external-goal-search.scss';
 
 // Список поддерживаемых категорий
-const SupportedCategories = ['books', 'movies'];
+const SupportedCategories = ['books', 'cinema-art'];
 
 interface ExternalGoalResult {
 	externalId: string | number;
 	title: string;
 	description?: string;
 	imageUrl?: string;
-	type: 'movie' | 'book' | 'travel';
+	type: 'cinema-art' | 'book' | 'travel';
 	releaseDate?: string;
 	authors?: string[];
 	address?: string;
@@ -157,7 +157,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 	const getContentTypeName = (categoryEn: string): string => {
 		const names: Record<string, string> = {
 			books: 'книги',
-			movies: 'фильмы',
+			'cinema-art': 'фильмы',
 		};
 		return names[categoryEn] || 'контент';
 	};

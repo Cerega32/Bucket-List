@@ -88,20 +88,29 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		// Проверяем различные форматы:
 		// 1. HH:MM
 		const timePattern = /^(\d{0,2}):?(\d{0,2})$/;
-		// 2. X дней, X д, X дня
+		// 2. Простое число (часы)
+		const simpleNumberPattern = /^\d+$/;
+		// 3. X дней, X д, X дня
 		const daysPattern = /^(\d+)\s*(д|дн|дня|дней)?$/i;
-		// 3. X часов, X ч
+		// 4. X часов, X ч
 		const hoursPattern = /^(\d+)\s*(ч|час|часа|часов)?$/i;
-		// 4. X минут, X м, X мин
+		// 5. X минут, X м, X мин
 		const minutesPattern = /^(\d+)\s*(м|мин|минут|минуты)?$/i;
+		// 6. Комбинированные форматы: "3д5ч", "3д 5ч", "3д5 ч", "3д 5 ч"
+		const combinedPattern = /^(\d+)\s*д\s*(\d+)?\s*ч?$/i;
+		// 7. Более сложные комбинации с минутами: "3д5ч30м"
+		const fullCombinedPattern = /^(\d+)?\s*д?\s*(\d+)?\s*ч?\s*(\d+)?\s*м?$/i;
 
 		// Разрешаем ввод, если поле пустое или соответствует одному из паттернов
 		if (
 			cleanValue === '' ||
 			timePattern.test(cleanValue) ||
+			simpleNumberPattern.test(cleanValue) ||
 			daysPattern.test(cleanValue) ||
 			hoursPattern.test(cleanValue) ||
 			minutesPattern.test(cleanValue) ||
+			combinedPattern.test(cleanValue) ||
+			fullCombinedPattern.test(cleanValue) ||
 			cleanValue.includes('д') ||
 			cleanValue.includes('ч') ||
 			cleanValue.includes('м')
@@ -123,6 +132,27 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				const minutes = match[2].padStart(2, '0');
 				return `${hours}:${minutes}`;
 			}
+		}
+
+		// Простое число - считаем часами
+		const simpleNumberPattern = /^\d+$/;
+		if (simpleNumberPattern.test(timeString)) {
+			const hours = parseInt(timeString, 10);
+			return `${hours.toString().padStart(2, '0')}:00`;
+		}
+
+		// Комбинированные форматы: "3д5ч", "3д 5ч", "3д5 ч", "3д 5 ч", "3д5ч30м"
+		const fullCombinedPattern = /^(\d+)?\s*д?\s*(\d+)?\s*ч?\s*(\d+)?\s*м?$/i;
+		const fullMatch = timeString.match(fullCombinedPattern);
+		if (fullMatch && (fullMatch[1] || fullMatch[2] || fullMatch[3])) {
+			const days = fullMatch[1] ? parseInt(fullMatch[1], 10) : 0;
+			const hours = fullMatch[2] ? parseInt(fullMatch[2], 10) : 0;
+			const minutes = fullMatch[3] ? parseInt(fullMatch[3], 10) : 0;
+
+			const totalHours = days * 24 + hours + Math.floor(minutes / 60);
+			const remainingMinutes = minutes % 60;
+
+			return `${totalHours.toString().padStart(2, '0')}:${remainingMinutes.toString().padStart(2, '0')}`;
 		}
 
 		// Преобразуем дни в часы (1 день = 24 часа)
@@ -852,7 +882,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 						<div className={element('time-field-container')}>
 							<FieldInput
-								placeholder="Например: 2:30, 3 дня, 5 часов, 30 минут"
+								placeholder="Например: 5, 2:30, 3д5ч, 3д 5 ч, 3 дня, 5 часов"
 								id="goal-estimated-time"
 								text="Предполагаемое время выполнения"
 								value={estimatedTime}
@@ -861,7 +891,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 								type="text"
 							/>
 							<small className={element('format-hint')}>
-								Укажите время в одном из форматов: ЧЧ:ММ (02:30), X дней (3 дня), X часов (5 часов), X минут (30 минут)
+								Укажите время: просто число (часы), ЧЧ:ММ (02:30), комбинации (3д5ч, 3д 5ч), или словами (3 дня, 5 часов, 30
+								минут)
 							</small>
 						</div>
 
