@@ -85,7 +85,6 @@ export class NewsStore {
 			addComment: action,
 			updateComment: action,
 			deleteComment: action,
-			loadReplies: action,
 			reset: action,
 		});
 	}
