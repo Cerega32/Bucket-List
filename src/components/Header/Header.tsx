@@ -89,6 +89,11 @@ export const Header: FC<HeaderProps> = observer((props) => {
 							</Link>
 						</li>
 						<li className={element('item')}>
+							<Link className={element('item-link', {active: page === 'isNews'})} to="/news">
+								Новости
+							</Link>
+						</li>
+						<li className={element('item')}>
 							<Link className={element('item-link', {active: page === 'isLeaders'})} to="/leaders">
 								Лидеры
 							</Link>

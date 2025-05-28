@@ -2,6 +2,8 @@ import {observer} from 'mobx-react-lite';
 import {FC} from 'react';
 import {Navigate, Route, Routes} from 'react-router-dom';
 
+import {NewsDetailPage} from '@/pages/NewsDetailPage/NewsDetailPage';
+import {NewsPage} from '@/pages/NewsPage/NewsPage';
 import {PageCategories} from '@/pages/PageCategories/PageCategories';
 import {PageCategory} from '@/pages/PageCategory/PageCategory';
 import {PageCreateGoal} from '@/pages/PageCreateGoal/PageCreateGoal';
@@ -46,6 +48,10 @@ export const RoutesAuth: FC = observer(() => {
 
 				{/* Перемещаем старую главную страницу на новый путь */}
 				<Route path="/100-goals" element={<PageMainGoals page="isMainGoals" />} />
+
+				{/* Маршруты для новостей */}
+				<Route path="/news" element={<NewsPage />} />
+				<Route path="/news/:id" element={<NewsDetailPage />} />
 
 				{/* Остальные маршруты остаются без изменений */}
 				<Route path="/list/:id" element={<PageDetailList page="isList" />} />

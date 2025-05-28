@@ -1,5 +1,5 @@
 {
-	"name": "bucket-list",
+	"name": "ву",
 	"version": "0.1.0",
 	"private": true,
 	"config": {
@@ -29,9 +29,13 @@
 		"react-file-drop": "^3.1.6",
 		"react-helmet-async": "^2.0.5",
 		"react-input-mask": "^2.0.4",
+		"react-markdown": "^10.1.0",
 		"react-router-dom": "^6.10.0",
 		"react-scroll": "^1.9.3",
 		"react-svg": "^16.1.18",
+		"rehype-raw": "^7.0.0",
+		"rehype-sanitize": "^6.0.0",
+		"remark-gfm": "^4.0.1",
 		"swiper": "^11.2.6",
 		"yet-another-react-lightbox": "^3.21.7"
 	},
