@@ -232,7 +232,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 											<p className={element('result-description')}>{item.description.substring(0, 150)}...</p>
 										)}
 										<div className={element('result-meta')}>
-											{item.type === 'movie' && item.releaseDate && (
+											{item.type === 'cinema-art' && item.releaseDate && (
 												<span>Год: {item.releaseDate.substring(0, 4)}</span>
 											)}
 											{item.type === 'book' && item.authors && <span>Авторы: {item.authors.join(', ')}</span>}
