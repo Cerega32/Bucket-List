@@ -56,6 +56,7 @@ export default defineConfig(({mode}) => {
 			},
 			sourcemap: mode === 'development',
 			minify: mode === 'production',
+			target: 'es2020', // Поддержка BigInt
 			rollupOptions: {
 				output: {
 					manualChunks: {

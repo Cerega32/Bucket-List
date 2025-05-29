@@ -1,3 +1,5 @@
+import {Location} from '@/utils/mapApi';
+
 export type IComplexity = 'hard' | 'medium' | 'easy';
 
 export interface ICategory {
@@ -67,6 +69,7 @@ export interface IGoal {
 	isCanEdit: boolean;
 	totalAdditions?: number;
 	estimatedTime?: string;
+	location?: Location;
 }
 
 export interface IShortGoal {
@@ -83,4 +86,5 @@ export interface IShortGoal {
 	totalCompleted: number;
 	totalAdded: number;
 	addedByUser: boolean;
+	location?: Location;
 }

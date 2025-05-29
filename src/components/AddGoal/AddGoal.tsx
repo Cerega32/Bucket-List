@@ -69,11 +69,40 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+	// // Состояния для работы с местами
+	// const [selectedGoalLocation, setSelectedGoalLocation] = useState<Location | null>(null);
+	// const [showLocationPicker, setShowLocationPicker] = useState(false);
+
 	// Новые состояния для поиска похожих целей
 	const [similarGoals, setSimilarGoals] = useState<IGoal[]>([]);
 	const [, setIsSearching] = useState(false);
 	const [showSimilarGoals, setShowSimilarGoals] = useState(false);
 	const [isTitleFocused, setIsTitleFocused] = useState(false);
+
+	// Обработчик выбора места с карты
+	// const handleLocationFromPicker = (selectedLocation: Partial<Location>) => {
+	// 	// Создаем полный объект Location
+	// 	const fullLocation: Location = {
+	// 		id: 0, // Временный ID, будет создан на сервере
+	// 		name: selectedLocation.name || '',
+	// 		longitude: selectedLocation.longitude || 0,
+	// 		latitude: selectedLocation.latitude || 0,
+	// 		country: selectedLocation.country || '',
+	// 		city: selectedLocation.city || undefined,
+	// 		description: selectedLocation.description || undefined,
+	// 		place_type: 'other',
+	// 		address: undefined,
+	// 		created_at: new Date().toISOString(), // Добавляем created_at
+	// 	};
+
+	// 	setSelectedGoalLocation(fullLocation);
+	// 	setShowLocationPicker(false);
+	// };
+
+	// // Функция для сброса выбранного места
+	// const clearSelectedLocation = () => {
+	// 	setSelectedGoalLocation(null);
+	// };
 
 	// Обработчик изменения названия цели
 	const handleTitleChange = (value: string) => {
@@ -459,6 +488,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		setImage(null);
 		setImageUrl(null);
 		setSimilarGoals([]);
+		// // Сброс места
+		// setSelectedGoalLocation(null);
+		// setShowLocationPicker(false);
 	};
 
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -518,6 +550,40 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				const standardTime = convertTimeToStandardFormat(estimatedTime);
 				formData.append('estimated_time', standardTime);
 			}
+
+			// // Если выбрано место, обрабатываем его
+			// let locationId = null;
+			// if (selectedGoalLocation) {
+			// 	if (selectedGoalLocation.id === 0) {
+			// 		// Создаем новое место
+			// 		try {
+			// 			const newLocation = await mapApi.createLocation({
+			// 				name: selectedGoalLocation.name,
+			// 				longitude: selectedGoalLocation.longitude,
+			// 				latitude: selectedGoalLocation.latitude,
+			// 				country: selectedGoalLocation.country,
+			// 				city: selectedGoalLocation.city,
+			// 				description: selectedGoalLocation.description,
+			// 				place_type: selectedGoalLocation.place_type || 'other',
+			// 			});
+			// 			locationId = newLocation.id;
+			// 		} catch (error) {
+			// 			NotificationStore.addNotification({
+			// 				type: 'error',
+			// 				title: 'Ошибка',
+			// 				message: 'Не удалось создать место',
+			// 			});
+			// 			return;
+			// 		}
+			// 	} else {
+			// 		locationId = selectedGoalLocation.id;
+			// 	}
+			// }
+
+			// // Если создано место, добавляем его ID
+			// if (locationId) {
+			// 	formData.append('location_id', locationId.toString());
+			// }
 
 			const response = await postCreateGoal(formData);
 
@@ -610,6 +676,40 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				const standardTime = convertTimeToStandardFormat(estimatedTime);
 				formData.append('estimated_time', standardTime);
 			}
+
+			// // Если выбрано место, обрабатываем его
+			// let locationId = null;
+			// if (selectedGoalLocation) {
+			// 	if (selectedGoalLocation.id === 0) {
+			// 		// Создаем новое место
+			// 		try {
+			// 			const newLocation = await mapApi.createLocation({
+			// 				name: selectedGoalLocation.name,
+			// 				longitude: selectedGoalLocation.longitude,
+			// 				latitude: selectedGoalLocation.latitude,
+			// 				country: selectedGoalLocation.country,
+			// 				city: selectedGoalLocation.city,
+			// 				description: selectedGoalLocation.description,
+			// 				place_type: selectedGoalLocation.place_type || 'other',
+			// 			});
+			// 			locationId = newLocation.id;
+			// 		} catch (error) {
+			// 			NotificationStore.addNotification({
+			// 				type: 'error',
+			// 				title: 'Ошибка',
+			// 				message: 'Не удалось создать место',
+			// 			});
+			// 			return;
+			// 		}
+			// 	} else {
+			// 		locationId = selectedGoalLocation.id;
+			// 	}
+			// }
+
+			// // Если создано место, добавляем его ID
+			// if (locationId) {
+			// 	formData.append('location_id', locationId.toString());
+			// }
 
 			const response = await postCreateGoal(formData);
 
@@ -713,48 +813,6 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		});
 	};
 
-	// Заменяем блок с dropzone
-	const imageSection = (
-		<div className={element('image-section')}>
-			<p className={element('field-title')}>Изображение цели *</p>
-			{!image && !imageUrl ? (
-				<div className={element('dropzone')}>
-					<FileDrop onDrop={(files) => files && onDrop(files)}>
-						<div
-							className={element('upload-placeholder')}
-							onClick={handleFileInputClick}
-							role="button"
-							tabIndex={0}
-							aria-label="Добавить изображение"
-							onKeyPress={(e) => {
-								if (e.key === 'Enter' || e.key === ' ') {
-									handleFileInputClick();
-								}
-							}}
-						>
-							<input type="file" ref={fileInputRef} style={{display: 'none'}} onChange={handleFileChange} accept="image/*" />
-							<Svg icon="mount" className={element('upload-icon')} />
-							<p>Перетащите изображение сюда или кликните для выбора (обязательно)</p>
-						</div>
-					</FileDrop>
-				</div>
-			) : (
-				<div className={element('image-preview')}>
-					{image && <img src={URL.createObjectURL(image)} alt="Предпросмотр" className={element('preview')} />}
-					{imageUrl && !image && <img src={imageUrl} alt="Предпросмотр из источника" className={element('preview')} />}
-					<Button
-						className={element('remove-image')}
-						type="button-close"
-						onClick={() => {
-							setImage(null);
-							setImageUrl(null);
-						}}
-					/>
-				</div>
-			)}
-		</div>
-	);
-
 	// Содержимое компонента
 	const content = (
 		<>
@@ -791,7 +849,54 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 						/>
 					</div>
 
-					{imageSection}
+					{/* Блок с изображением */}
+					<div className={element('image-section')}>
+						<p className={element('field-title')}>Изображение цели *</p>
+						{!image && !imageUrl ? (
+							<div className={element('dropzone')}>
+								<FileDrop onDrop={(files) => files && onDrop(files)}>
+									<div
+										className={element('upload-placeholder')}
+										onClick={handleFileInputClick}
+										role="button"
+										tabIndex={0}
+										aria-label="Добавить изображение"
+										onKeyPress={(e) => {
+											if (e.key === 'Enter' || e.key === ' ') {
+												handleFileInputClick();
+											}
+										}}
+									>
+										<input
+											type="file"
+											ref={fileInputRef}
+											style={{display: 'none'}}
+											onChange={handleFileChange}
+											accept="image/*"
+										/>
+										<Svg icon="mount" className={element('upload-icon')} />
+										<p>Перетащите изображение сюда или кликните для выбора (обязательно)</p>
+									</div>
+								</FileDrop>
+							</div>
+						) : (
+							<div className={element('image-preview')}>
+								{image && <img src={URL.createObjectURL(image)} alt="Предпросмотр" className={element('preview')} />}
+								{imageUrl && !image && (
+									<img src={imageUrl} alt="Предпросмотр из источника" className={element('preview')} />
+								)}
+								<Button
+									className={element('remove-image')}
+									type="button-close"
+									onClick={() => {
+										setImage(null);
+										setImageUrl(null);
+									}}
+								/>
+							</div>
+						)}
+					</div>
+
 					<div className={element('form')}>
 						<div className={element('field-container')}>
 							<FieldInput
@@ -805,13 +910,6 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 								onFocus={handleTitleFocus}
 								onBlur={handleTitleBlur}
 							/>
-
-							{/* {isSearching && (
-								<div className={element('searching')}>
-									<Svg icon="loading" className={element('loading-icon')} />
-									Поиск похожих целей...
-								</div>
-							)} */}
 
 							{showSimilarGoals && (
 								<div className={element('similar-goals')}>
@@ -917,6 +1015,50 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							</small>
 						</div>
 
+						{/* Новое поле для места с картой */}
+						{/* <div className={element('location-field-container')}>
+							<p className={element('field-title')}>Связанное место (необязательно)</p> */}
+
+						{/* {selectedGoalLocation ? (
+								<div className={element('selected-location')}>
+									<div className={element('selected-location-info')}>
+										<Svg icon="location" className={element('location-icon')} />
+										<div>
+											<div className={element('selected-location-name')}>{selectedGoalLocation.name}</div>
+											<div className={element('selected-location-details')}>
+												{selectedGoalLocation.city && `${selectedGoalLocation.city}, `}
+												{selectedGoalLocation.country}
+											</div>
+											{selectedGoalLocation.description && (
+												<div className={element('selected-location-description')}>
+													{selectedGoalLocation.description}
+												</div>
+											)}
+										</div>
+									</div>
+									<div className={element('location-actions')}>
+										<Button theme="blue-light" size="small" onClick={() => setShowLocationPicker(true)}>
+											Изменить место
+										</Button>
+										<Button theme="red" size="small" onClick={clearSelectedLocation}>
+											Удалить место
+										</Button>
+									</div>
+								</div>
+							) : (
+								<div className={element('location-empty')}>
+									<p>Выберите географическое место, связанное с целью</p>
+									<Button theme="blue" onClick={() => setShowLocationPicker(true)}>
+										Выбрать место на карте
+									</Button>
+								</div>
+							)} */}
+						{/*
+							<small className={element('format-hint')}>
+								Выберите географическое место, связанное с целью. Это поможет отслеживать ваши путешествия на карте.
+							</small>
+						</div> */}
+
 						<div className={element('btns-wrapper')}>
 							{!hideNavigation && (
 								<Button theme="blue-light" className={element('btn')} onClick={() => navigate(-1)} type="button">
@@ -940,6 +1082,15 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							</Button>
 						</div>
 					</div>
+
+					{/* Модальное окно выбора места */}
+					{/* {showLocationPicker && (
+						<LocationPicker
+							onLocationSelect={handleLocationFromPicker}
+							onClose={() => setShowLocationPicker(false)}
+							initialLocation={selectedGoalLocation || undefined}
+						/> */}
+					{/* )} */}
 				</div>
 			</Loader>
 		</>

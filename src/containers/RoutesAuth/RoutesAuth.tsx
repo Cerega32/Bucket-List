@@ -19,6 +19,7 @@ import {PageNotFound} from '@/pages/PageNotFound/PageNotFound';
 import {PageRegistration} from '@/pages/PageRegistration/PageRegistration';
 import {PageUser} from '@/pages/PageUser/PageUser';
 import {PageUserSelf} from '@/pages/PageUserSelf/PageUserSelf';
+import UserMapPage from '@/pages/UserMapPage/UserMapPage';
 import {UserStore} from '@/store/UserStore';
 
 import './routes-auth.scss';
@@ -82,6 +83,7 @@ export const RoutesAuth: FC = observer(() => {
 
 				{/* Защищенные маршруты пользователя */}
 				<Route path="/user/self" element={<ProtectedRoute element={<PageUserSelf page="isUserSelf" />} />} />
+				<Route path="/user/self/maps" element={<ProtectedRoute element={<UserMapPage />} />} />
 				<Route
 					path="/user/self/achievements"
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfAchievements" />} />}

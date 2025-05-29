@@ -1,0 +1,356 @@
+.user-map-page {
+	max-width: 1200px;
+	padding: 24px;
+	margin: 0 auto;
+
+	.title {
+		margin-bottom: 32px;
+	}
+
+	p {
+		margin-bottom: 24px;
+		color: var(--color-text-secondary);
+		font-size: 16px;
+	}
+
+	.loading-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 400px;
+
+		.loading-spinner {
+			color: var(--color-text-secondary);
+			font-size: 18px;
+		}
+	}
+
+	&__header {
+		margin-bottom: 32px;
+		text-align: center;
+
+		h1 {
+			margin-bottom: 16px;
+			color: var(--color-text-primary);
+			font-size: 32px;
+			font-weight: 700;
+		}
+
+		p {
+			margin: 0;
+			color: var(--color-text-secondary);
+			font-size: 18px;
+			line-height: 1.6;
+		}
+	}
+
+	.map-tabs {
+		display: flex;
+		gap: 8px;
+		padding: 8px;
+		margin-bottom: 32px;
+		background: var(--color-gray-3);
+		border-radius: 12px;
+
+		.tab-button {
+			flex: 1;
+			padding: 12px 24px;
+			background: transparent;
+			border: none;
+			border-radius: 8px;
+			color: var(--color-text-secondary);
+			font-size: 16px;
+			font-weight: 500;
+			cursor: pointer;
+			transition: all 0.2s ease;
+
+			&.active {
+				background: var(--color-white);
+				color: var(--color-primary);
+				box-shadow: 0 2px 8px rgb(var(--color-black-rgb) / 10%);
+			}
+
+			&:hover:not(.active) {
+				background: rgb(var(--color-white-rgb) / 50%);
+			}
+		}
+	}
+
+	.map-content {
+		.locations-tab {
+			.map-section {
+				margin-bottom: 32px;
+
+				.section-header {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					margin-bottom: 16px;
+
+					h2 {
+						margin: 0;
+						color: var(--color-text-primary);
+						font-size: 24px;
+						font-weight: 600;
+					}
+
+					.map-legend {
+						display: flex;
+						gap: 16px;
+
+						.legend-item {
+							display: flex;
+							align-items: center;
+							color: var(--color-text-secondary);
+							font-size: 14px;
+
+							.legend-marker {
+								width: 12px;
+								height: 12px;
+								margin-right: 6px;
+								border-radius: 50%;
+
+								&.visited {
+									background-color: var(--color-green-1);
+								}
+
+								&.unvisited {
+									background-color: var(--color-red-1);
+								}
+							}
+						}
+					}
+				}
+
+				.empty-state {
+					padding: 60px 20px;
+					background: var(--color-gray-3);
+					border: 2px dashed var(--color-gray-4);
+					border-radius: 12px;
+					text-align: center;
+
+					h3 {
+						margin: 0 0 8px;
+						color: var(--color-text-primary);
+						font-size: 20px;
+					}
+
+					p {
+						margin: 0;
+						color: var(--color-text-secondary);
+						font-size: 16px;
+					}
+				}
+			}
+
+			.visited-locations-list {
+				h3 {
+					margin: 0 0 16px;
+					color: var(--color-text-primary);
+					font-size: 20px;
+					font-weight: 600;
+				}
+
+				.locations-grid {
+					display: grid;
+					grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+					gap: 16px;
+
+					.location-card {
+						padding: 20px;
+						background: var(--color-white);
+						border-radius: 12px;
+						transition: transform 0.2s ease;
+						box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+
+						&:hover {
+							transform: translateY(-2px);
+						}
+
+						h4 {
+							margin: 0 0 8px;
+							color: var(--color-text-primary);
+							font-size: 18px;
+							font-weight: 600;
+						}
+
+						p {
+							margin: 4px 0;
+							font-size: 14px;
+
+							&.location-country {
+								color: var(--color-text-secondary);
+								font-weight: 500;
+							}
+
+							&.location-city {
+								color: var(--color-gray-1);
+							}
+
+							&.related-goal {
+								margin-top: 8px;
+								color: var(--color-primary);
+								font-weight: 500;
+							}
+
+							&.visit-date {
+								margin-top: 8px;
+								color: var(--color-green-1);
+								font-size: 12px;
+								font-weight: 500;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		.countries-tab {
+			// Стили для скретч-карты уже определены в ScratchMap.scss
+		}
+	}
+}
+
+.map-loading {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 400px;
+	background: var(--color-gray-3);
+	border: 2px dashed var(--color-gray-4);
+	border-radius: 12px;
+
+	.loading-text {
+		color: var(--color-text-primary);
+		font-size: 18px;
+		font-weight: 500;
+	}
+
+	.loading-description {
+		color: var(--color-text-secondary);
+		font-size: 14px;
+	}
+}
+
+.map-error {
+	padding: 24px;
+	background: var(--color-red-4);
+	border-radius: 12px;
+	text-align: center;
+
+	.error-title {
+		margin-bottom: 8px;
+		color: var(--color-white);
+		font-size: 18px;
+		font-weight: 600;
+	}
+
+	.error-message {
+		margin: 0;
+		color: var(--color-white);
+		font-size: 14px;
+		opacity: 0.9;
+	}
+}
+
+.map-stats {
+	display: flex;
+	gap: 24px;
+	margin-bottom: 24px;
+
+	.stat-item {
+		flex: 1;
+		padding: 20px;
+		background: var(--color-white);
+		border-radius: 12px;
+		text-align: center;
+		box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+
+		.stat-number {
+			display: block;
+			margin-bottom: 8px;
+			color: var(--color-text-primary);
+			font-size: 28px;
+			font-weight: 700;
+		}
+
+		.stat-label {
+			color: var(--color-text-secondary);
+			font-size: 14px;
+			font-weight: 500;
+		}
+
+		&.visited .stat-number {
+			color: var(--color-green-1);
+		}
+
+		&.unvisited .stat-number {
+			color: var(--color-red-1);
+		}
+	}
+}
+
+// Адаптивность
+@media (width <= 768px) {
+	.user-map-page {
+		padding: 16px;
+
+		&__header {
+			margin-bottom: 24px;
+
+			h1 {
+				font-size: 24px;
+			}
+
+			p {
+				font-size: 16px;
+			}
+		}
+
+		.map-tabs {
+			flex-direction: column;
+			gap: 4px;
+
+			.tab-button {
+				padding: 16px;
+				font-size: 14px;
+			}
+		}
+
+		.map-content {
+			.locations-tab {
+				.map-section {
+					.section-header {
+						flex-direction: column;
+						align-items: flex-start;
+						gap: 12px;
+
+						h2 {
+							font-size: 20px;
+						}
+
+						.map-legend {
+							gap: 12px;
+						}
+					}
+				}
+
+				.visited-locations-list {
+					.locations-grid {
+						grid-template-columns: 1fr;
+						gap: 12px;
+
+						.location-card {
+							padding: 16px;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	.map-stats {
+		flex-direction: column;
+		gap: 16px;
+	}
+}

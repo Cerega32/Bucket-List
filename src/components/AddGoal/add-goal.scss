@@ -287,6 +287,154 @@
 		color: var(--color-text-secondary);
 		font-size: 12px;
 	}
+
+	// Стили для поля места
+	&__location-field-container {
+		margin-bottom: 24px;
+	}
+
+	&__location-empty {
+		padding: 20px;
+		margin-bottom: 12px;
+		background: var(--color-gray-3);
+		border: 2px dashed var(--color-gray-4);
+		border-radius: 8px;
+		text-align: center;
+
+		p {
+			margin: 0 0 16px;
+			color: var(--color-text-secondary);
+			font-size: 14px;
+		}
+	}
+
+	&__selected-location {
+		padding: 16px;
+		margin-bottom: 12px;
+		background-color: var(--color-gray-10);
+		border: 1px solid var(--color-blue-2);
+		border-radius: 8px;
+	}
+
+	&__selected-location-info {
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+		margin-bottom: 12px;
+	}
+
+	&__location-icon {
+		width: 20px;
+		height: 20px;
+		margin-top: 2px;
+		color: var(--color-primary);
+	}
+
+	&__selected-location-name {
+		margin-bottom: 4px;
+		color: var(--color-text-primary);
+		font-size: 16px;
+		font-weight: 600;
+	}
+
+	&__selected-location-details {
+		margin-bottom: 4px;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+	}
+
+	&__location-description {
+		color: var(--color-text-secondary);
+		font-size: 12px;
+		font-style: italic;
+	}
+
+	&__location-actions {
+		display: flex;
+		gap: 8px;
+	}
+
+	// Удаляем старые стили поиска места
+	&__location-search-wrapper {
+		position: relative;
+	}
+
+	&__location-field {
+		width: 100%;
+	}
+
+	&__clear-location {
+		position: absolute;
+		top: 50%;
+		right: 12px;
+		padding: 4px;
+		background: none;
+		border: none;
+		color: var(--color-text-secondary);
+		cursor: pointer;
+		transform: translateY(-50%);
+
+		&:hover {
+			color: var(--color-text-primary);
+		}
+
+		svg {
+			width: 16px;
+			height: 16px;
+		}
+	}
+
+	&__location-loading {
+		position: absolute;
+		top: 50%;
+		right: 12px;
+		transform: translateY(-50%);
+	}
+
+	&__location-results {
+		position: absolute;
+		z-index: 10;
+		top: 100%;
+		right: 0;
+		left: 0;
+		max-height: 200px;
+		background: var(--color-white);
+		border: 1px solid var(--color-border);
+		border-radius: 4px;
+		overflow-y: auto;
+		box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
+	}
+
+	&__location-item {
+		padding: 12px;
+		border-bottom: 1px solid var(--color-border);
+		cursor: pointer;
+		transition: background-color 0.2s;
+
+		&:hover {
+			background-color: var(--color-gray-5);
+		}
+
+		&:last-child {
+			border-bottom: none;
+		}
+	}
+
+	&__location-info {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	&__location-name {
+		color: var(--color-text-primary);
+		font-weight: 500;
+	}
+
+	&__location-details {
+		color: var(--color-text-secondary);
+		font-size: 14px;
+	}
 }
 
 @keyframes spin {

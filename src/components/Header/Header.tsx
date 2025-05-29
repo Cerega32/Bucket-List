@@ -116,6 +116,9 @@ export const Header: FC<HeaderProps> = observer((props) => {
 							<Link className={element('menu-item')} to="/user/self/achievements">
 								Достижения
 							</Link>
+							<Link className={element('menu-item')} to="/user/self/maps">
+								Мои карты
+							</Link>
 							<Link className={element('menu-item')} to="/user/self/active-goals">
 								Активные цели и списки
 							</Link>
