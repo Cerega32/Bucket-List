@@ -4,7 +4,7 @@ import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {ModalStore} from '@/store/ModalStore';
 import {getGoalTimer, TimerInfo} from '@/utils/api/get/getGoalTimer';
-import {ILocation} from '@/utils/mapApi';
+import {GoalWithLocation, ILocation} from '@/utils/mapApi';
 
 import {Button} from '../Button/Button';
 import {GoalTimer} from '../GoalTimer/GoalTimer';
@@ -36,7 +36,7 @@ export interface AsideListsProps extends AsideProps {
 	openAddReview?: never;
 	editGoal?: never;
 	canEdit?: boolean;
-	location?: never;
+	location?: GoalWithLocation[];
 }
 
 export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
@@ -89,12 +89,18 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	};
 
 	const openMapModal = () => {
-		if (location) {
+		if (!isList) {
 			setWindow('goal-map');
 			setIsOpen(true);
 			setModalProps({
 				location,
 				userVisitedLocation: done,
+			});
+		} else {
+			setWindow('goal-map-multi');
+			setIsOpen(true);
+			setModalProps({
+				goals: location,
 			});
 		}
 	};
@@ -116,17 +122,6 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						{done ? 'Выполнено' : 'Выполнить'}
 					</Button>
 				)}
-				{location && (
-					<Button
-						theme="blue-light"
-						icon="map"
-						onClick={openMapModal}
-						className={element('btn')}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
-						Открыть карту
-					</Button>
-				)}
 				{isList && added && !done && (
 					<Button
 						theme="blue"
@@ -138,6 +133,18 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						Выполнить все цели
 					</Button>
 				)}
+				{((location && !isList) || (isList && !!location?.length)) && (
+					<Button
+						theme="blue-light"
+						icon="map"
+						onClick={openMapModal}
+						className={element('btn')}
+						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+					>
+						Открыть карту
+					</Button>
+				)}
+
 				{!added && (
 					<Button
 						onClick={() => updateGoal(code, 'add')}

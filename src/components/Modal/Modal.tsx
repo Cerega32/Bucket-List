@@ -14,6 +14,7 @@ import {ChangePassword} from '../ChangePassword/ChangePassword';
 import {ConfirmExecutionAllGoal} from '../ConfirmExecutionAllGoal/ConfirmExecutionAllGoal';
 import {DeleteGoal} from '../DeleteGoal/DeleteGoal';
 import {GoalMap} from '../GoalMap/GoalMap';
+import {GoalMapMulti} from '../GoalMap/GoalMapMulti';
 import {Svg} from '../Svg/Svg';
 import './modal.scss';
 
@@ -118,7 +119,10 @@ export const Modal: FC<ModalProps> = observer((props) => {
 
 	return (
 		<section className={block({isOpen})}>
-			<div className={element('window', {type: window, fullscreen: window === 'goal-map'})} ref={modalRef}>
+			<div
+				className={element('window', {type: window, fullscreen: window === 'goal-map' || window === 'goal-map-multi'})}
+				ref={modalRef}
+			>
 				{window === 'login' && <Login openRegistration={openRegistration} successLogin={successAuth} />}
 				{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
 				{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
@@ -127,6 +131,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				{window === 'delete-list' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
 				{window === 'confirm-execution-all-goal' && <ConfirmExecutionAllGoal closeModal={closeWindow} funcModal={funcModal} />}
 				{window === 'goal-map' && <GoalMap {...modalProps} />}
+				{window === 'goal-map-multi' && <GoalMapMulti {...modalProps} />}
 				<Button theme="blue-light" className={element('close')} onClick={closeWindow} refInner={closeButtonRef}>
 					<Svg icon="cross" />
 				</Button>

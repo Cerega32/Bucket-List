@@ -8,7 +8,8 @@ type IWindow =
 	| 'delete-goal'
 	| 'delete-list'
 	| 'confirm-execution-all-goal'
-	| 'goal-map';
+	| 'goal-map'
+	| 'goal-map-multi';
 
 export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 

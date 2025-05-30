@@ -61,6 +61,14 @@ export interface MapData {
 	category_name?: string;
 }
 
+export interface GoalWithLocation {
+	location: ILocation;
+	userVisitedLocation: boolean;
+	name?: string;
+	address?: string;
+	description?: string;
+}
+
 // API функции
 export const mapApi = {
 	// Получить данные карты пользователя

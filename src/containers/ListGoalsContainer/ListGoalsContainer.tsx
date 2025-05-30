@@ -89,9 +89,25 @@ export const ListGoalsContainer: FC = () => {
 		return <Loader isLoading={isLoading} />;
 	}
 
+	// Собираем массив целей с локацией для карты
+	const goalsWithLocation = list.goals
+		.filter((goal) => goal.location && typeof goal.location.latitude === 'number' && typeof goal.location.longitude === 'number')
+		.map((goal) => ({
+			location: goal.location,
+			userVisitedLocation: goal.completedByUser,
+			name: goal.title,
+			address: goal.location.address,
+			description: goal.description,
+		}));
+
 	return (
 		<main className={block()}>
 			<article className={element('wrapper')}>
+				{/* {goalsWithLocation.length > 0 && (
+					<div style={{marginBottom: 32}}>
+						<GoalMapMulti goals={goalsWithLocation} />
+					</div>
+				)} */}
 				<AsideGoal
 					className={element('aside')}
 					title={list.title}
@@ -102,6 +118,7 @@ export const ListGoalsContainer: FC = () => {
 					isList
 					done={list.completedByUser}
 					canEdit={list.isCanEdit || list.isCanAddGoals}
+					location={goalsWithLocation}
 				/>
 				<ContentListGoals className={element('content')} list={list} updateGoal={updateGoal} />
 			</article>

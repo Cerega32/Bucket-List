@@ -51,6 +51,7 @@
 		"@typescript-eslint/no-unused-vars": ["error", {"destructuredArrayIgnorePattern": "^_"}],
 		"@typescript-eslint/brace-style": "off",
 		"no-plusplus": "off",
+		"consistent-return": "off",
 		"import/order": [
 			"error",
 			{
