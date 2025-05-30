@@ -94,12 +94,12 @@ export const ListGoalsContainer: FC = () => {
 	const goalsWithLocation = list.goals
 		.filter((goal) => goal.location && typeof goal.location.latitude === 'number' && typeof goal.location.longitude === 'number')
 		.map((goal) => ({
-			location: goal.location,
+			location: goal.location!,
 			userVisitedLocation: goal.completedByUser,
 			name: goal.title,
 			address: goal.location?.address,
 			description: goal.description,
-		})) as Partial<GoalWithLocation>[];
+		})) as GoalWithLocation[];
 
 	return (
 		<main className={block()}>
