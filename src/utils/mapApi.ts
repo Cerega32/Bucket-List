@@ -132,7 +132,7 @@ export const mapApi = {
 	},
 
 	// Поиск мест
-	searchLocations: async (query: string): Promise<{results: Location[]}> => {
+	searchLocations: async (query: string): Promise<{results: ILocation[]}> => {
 		const response = await POST('maps/locations/search', {
 			auth: true,
 			body: {query},
@@ -147,8 +147,7 @@ export const mapApi = {
 	},
 
 	// Создать новое место
-	createLocation: async (locationData: Partial<Location>): Promise<Location> => {
-		console.log(locationData);
+	createLocation: async (locationData: Partial<ILocation>): Promise<ILocation> => {
 		const response = await POST('maps/locations/create', {
 			auth: true,
 			body: locationData,

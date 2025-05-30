@@ -1,294 +1,229 @@
-import 'maplibre-gl/dist/maplibre-gl.css';
-import React, {useCallback, useState} from 'react';
-import {GeolocateControl, Map as MapLibreMap, MapProvider, Marker, NavigationControl} from 'react-map-gl/maplibre';
+import React, {useEffect, useRef, useState} from 'react';
 
 import {Button} from '@/components/Button/Button';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
-import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
-import {Location} from '@/utils/mapApi';
+import {ILocation} from '@/utils/mapApi';
+
+import {Title} from '../Title/Title';
 import './LocationPicker.scss';
 
-// OpenStreetMap стиль - полностью бесплатный
-const MAP_STYLE = {
-	version: 8 as const,
-	sources: {
-		'osm-tiles': {
-			type: 'raster' as const,
-			tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-			tileSize: 256,
-			attribution: '© OpenStreetMap contributors',
-		},
-	},
-	layers: [
-		{
-			id: 'osm-tiles',
-			type: 'raster' as const,
-			source: 'osm-tiles',
-		},
-	],
-};
-
-interface LocationPickerProps {
-	onLocationSelect: (location: Partial<Location>) => void;
-	onClose: () => void;
-	initialLocation?: Partial<Location>;
-}
-
-interface SelectedPoint {
-	longitude: number;
+interface Location {
 	latitude: number;
+	longitude: number;
 	name?: string;
 	country?: string;
 	city?: string;
 	description?: string;
 }
 
-interface NominatimResult {
-	place_id: number;
-	display_name: string;
-	name: string;
-	lat: string;
-	lon: string;
-	address: {
-		country?: string;
-		city?: string;
-		town?: string;
-		village?: string;
-		state?: string;
-	};
+interface LocationPickerProps {
+	onLocationSelect: (location: Partial<Location>) => void;
+	initialLocation?: Partial<ILocation>;
+	closeModal: () => void;
 }
 
-const LocationPicker: React.FC<LocationPickerProps> = ({onLocationSelect, onClose, initialLocation}) => {
-	const [, element] = useBem('location-picker');
-
-	const [viewState, setViewState] = useState({
-		longitude: initialLocation?.longitude || 37.6176,
-		latitude: initialLocation?.latitude || 55.7558,
-		zoom: initialLocation ? 12 : 2,
-	});
-
-	const [selectedLocation, setSelectedLocation] = useState<SelectedPoint | null>(
-		initialLocation
-			? {
-					longitude: initialLocation.longitude!,
-					latitude: initialLocation.latitude!,
-					name: initialLocation.name,
-					country: initialLocation.country,
-					city: initialLocation.city,
-					description: initialLocation.description,
-			  }
-			: null
-	);
-
+const LocationPicker: React.FC<LocationPickerProps> = ({onLocationSelect, initialLocation, closeModal}) => {
+	const [block, element] = useBem('location-picker');
+	const mapRef = useRef<HTMLDivElement>(null);
 	const [searchQuery, setSearchQuery] = useState('');
-	const [isSearching, setIsSearching] = useState(false);
-	const [searchResults, setSearchResults] = useState<NominatimResult[]>([]);
+	const [searchResults, setSearchResults] = useState<any[]>([]);
+	const [selectedLocation, setSelectedLocation] = useState<Partial<ILocation> | null>(initialLocation || null);
+	const markerRef = useRef<any>(null);
+	const mapInstance = useRef<any>(null);
+	const [isSearchFocused, setIsSearchFocused] = useState(false);
+	const [activeResult, setActiveResult] = useState<number>(-1);
 
-	// Поиск места через Nominatim API (OpenStreetMap)
-	const searchPlace = async (query: string) => {
-		if (!query.trim()) {
-			setSearchResults([]);
-			return;
-		}
+	// Инициализация карты
+	useEffect(() => {
+		const initMap = () => {
+			if (!mapRef.current || mapInstance.current) return;
+			const center =
+				initialLocation && initialLocation.latitude && initialLocation.longitude
+					? [initialLocation.latitude, initialLocation.longitude]
+					: [55.751244, 37.618423];
+			const map = new window.ymaps.Map(mapRef.current, {
+				center,
+				zoom: initialLocation ? 12 : 2,
+				controls: ['zoomControl', 'typeSelector'],
+			});
+			mapInstance.current = map;
 
-		setIsSearching(true);
-		try {
-			const response = await fetch(
-				`https://nominatim.openstreetmap.org/search?${new URLSearchParams({
-					q: query,
-					format: 'json',
-					limit: '5',
-					addressdetails: '1',
-					'accept-language': 'ru,en',
-				})}`
-			);
-			const data: NominatimResult[] = await response.json();
-			setSearchResults(data || []);
-		} catch (error) {
-			console.error('Error searching places:', error);
-			setSearchResults([]);
-		} finally {
-			setIsSearching(false);
-		}
-	};
+			// Клик по карте
+			map.events.add('click', (e: any) => {
+				const coords = e.get('coords');
+				setSelectedLocation({
+					latitude: coords[0],
+					longitude: coords[1],
+				});
+				if (markerRef.current) {
+					markerRef.current.geometry.setCoordinates(coords);
+				} else {
+					markerRef.current = new window.ymaps.Placemark(coords, {}, {preset: 'islands#redDotIcon'});
+					map.geoObjects.add(markerRef.current);
+				}
+				// Обратное геокодирование
+				window.ymaps.geocode(coords).then((res: any) => {
+					const firstGeoObject = res.geoObjects.get(0);
+					setSelectedLocation((prev) => ({
+						...prev!,
+						name: firstGeoObject.getLocalities()[0] || firstGeoObject.getAddressLine(),
+						country: firstGeoObject.getCountry(),
+						city: firstGeoObject.getLocalities()[0],
+					}));
+				});
+			});
 
-	// Debounced поиск
-	const debouncedSearch = useCallback((query: string) => {
-		const timer = setTimeout(() => searchPlace(query), 300);
-		return () => clearTimeout(timer);
-	}, []);
-
-	// Обратное геокодирование для получения информации о месте
-	const reverseGeocode = async (lng: number, lat: number) => {
-		try {
-			const response = await fetch(
-				`https://nominatim.openstreetmap.org/reverse?${new URLSearchParams({
-					lat: lat.toString(),
-					lon: lng.toString(),
-					format: 'json',
-					addressdetails: '1',
-					'accept-language': 'ru,en',
-				})}`
-			);
-			const data: NominatimResult = await response.json();
-
-			if (data && data.display_name) {
-				const country = data.address?.country || 'Неизвестная страна';
-				const city = data.address?.city || data.address?.town || data.address?.village || '';
-
-				setSelectedLocation((prev) => ({
-					...prev!,
-					name: data.name || data.display_name.split(',')[0],
-					country,
-					city,
-				}));
+			// Если есть начальная точка
+			if (initialLocation && initialLocation.latitude && initialLocation.longitude) {
+				markerRef.current = new window.ymaps.Placemark(center, {}, {preset: 'islands#redDotIcon'});
+				map.geoObjects.add(markerRef.current);
 			}
-		} catch (error) {
-			console.error('Error reverse geocoding:', error);
-		}
-	};
-
-	// Обработчик клика по карте
-	const onMapClick = useCallback((event: any) => {
-		const {lng, lat} = event.lngLat;
-		setSelectedLocation({
-			longitude: lng,
-			latitude: lat,
-			name: `Точка ${lat.toFixed(4)}, ${lng.toFixed(4)}`,
-		});
-
-		// Получаем информацию о месте через обратное геокодирование
-		reverseGeocode(lng, lat);
-	}, []);
-
-	const handleSearchChange = (value: string) => {
-		setSearchQuery(value);
-		debouncedSearch(value);
-	};
-
-	// Обработчик выбора места из результатов поиска
-	const handleSearchResultSelect = (result: NominatimResult) => {
-		const lng = parseFloat(result.lon);
-		const lat = parseFloat(result.lat);
-		const country = result.address?.country || 'Неизвестная страна';
-		const city = result.address?.city || result.address?.town || result.address?.village || '';
-
-		setSelectedLocation({
-			longitude: lng,
-			latitude: lat,
-			name: result.name || result.display_name.split(',')[0],
-			country,
-			city,
-		});
-
-		setViewState({
-			longitude: lng,
-			latitude: lat,
-			zoom: 12,
-		});
-
-		setSearchResults([]);
-		setSearchQuery('');
-	};
-
-	// Обработчик сохранения выбранного места
-	const handleSave = () => {
-		if (!selectedLocation) return;
-
-		const location: Partial<Location> = {
-			name: selectedLocation.name || `Точка ${selectedLocation.latitude.toFixed(4)}, ${selectedLocation.longitude.toFixed(4)}`,
-			longitude: selectedLocation.longitude,
-			latitude: selectedLocation.latitude,
-			country: selectedLocation.country || 'Неизвестная страна',
-			city: selectedLocation.city,
-			description: selectedLocation.description,
 		};
 
-		onLocationSelect(location);
+		const scriptSrc = `https://api-maps.yandex.ru/2.1/?apikey=${process.env['NEXT_PUBLIC_YANDEX_API_KEY']}&lang=ru_RU`;
+
+		if (window.ymaps && window.ymaps.Map) {
+			window.ymaps.ready(initMap);
+		} else if (!document.querySelector(`script[src="${scriptSrc}"]`)) {
+			const script = document.createElement('script');
+			script.src = scriptSrc;
+			script.async = true;
+			script.onload = () => window.ymaps.ready(initMap);
+			document.head.appendChild(script);
+		} else {
+			// Скрипт уже загружен, но ymaps еще не инициализирован
+			const waitForYmaps = () => {
+				if (window.ymaps && typeof window.ymaps.ready === 'function') {
+					window.ymaps.ready(initMap);
+				} else {
+					setTimeout(waitForYmaps, 100);
+				}
+			};
+			waitForYmaps();
+		}
+
+		return () => {
+			if (mapInstance.current) {
+				mapInstance.current.destroy();
+				mapInstance.current = null;
+			}
+		};
+	}, [initialLocation]);
+
+	// Поиск по Яндекс Геокодеру
+	const handleSearch = async () => {
+		if (!searchQuery.trim() || !window.ymaps) return;
+		window.ymaps.geocode(searchQuery).then((res: any) => {
+			const results: any[] = [];
+			res.geoObjects.each((obj: any) => {
+				const coords = obj.geometry.getCoordinates();
+				results.push({
+					name: obj.getAddressLine(),
+					latitude: coords[0],
+					longitude: coords[1],
+				});
+			});
+			setSearchResults(results);
+			setActiveResult(-1);
+		});
 	};
 
-	const handleMove = useCallback((evt: any) => {
-		setViewState(evt.viewState);
-	}, []);
+	// Выбор результата поиска
+	const handleResultSelect = (result: any) => {
+		setSelectedLocation(result);
+		setSearchResults([]);
+		setSearchQuery('');
+		if (mapInstance.current) {
+			mapInstance.current.setCenter([result.latitude, result.longitude], 12);
+			if (markerRef.current) {
+				markerRef.current.geometry.setCoordinates([result.latitude, result.longitude]);
+			} else {
+				markerRef.current = new window.ymaps.Placemark([result.latitude, result.longitude], {}, {preset: 'islands#redDotIcon'});
+				mapInstance.current.geoObjects.add(markerRef.current);
+			}
+		}
+	};
+
+	// Обработка Enter и стрелок в поиске
+	const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			if (searchResults.length > 0 && activeResult >= 0) {
+				handleResultSelect(searchResults[activeResult]);
+			} else {
+				handleSearch();
+			}
+		}
+		if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			setActiveResult((prev) => Math.min(prev + 1, searchResults.length - 1));
+		}
+		if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			setActiveResult((prev) => Math.max(prev - 1, 0));
+		}
+	};
 
 	return (
-		<div className="location-picker-overlay">
-			<div className="location-picker">
-				<div className="location-picker__header">
-					<h3>Выберите место на карте</h3>
-					<button type="button" className="location-picker__close" onClick={onClose} aria-label="Закрыть">
-						<Svg icon="cross" />
-					</button>
-				</div>
+		<div className={block()}>
+			<Title tag="h2">Выберите место на карте</Title>
 
-				<div className="location-picker__search">
-					<FieldInput
-						placeholder="Поиск места..."
-						id="location-search"
-						text=""
-						value={searchQuery}
-						setValue={handleSearchChange}
-						className={element('search-input')}
-					/>
-					{isSearching && (
-						<div className="location-picker__search-loading">
-							<Svg icon="loading" className="loading-icon" />
-						</div>
-					)}
+			<div className={element('search')}>
+				<FieldInput
+					placeholder="Поиск по Яндекс.Картам..."
+					id="location-search"
+					text=""
+					value={searchQuery}
+					setValue={setSearchQuery}
+					onFocus={() => setIsSearchFocused(true)}
+					onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+					onKeyDown={handleSearchKeyDown}
+					className={element('search-input')}
+				/>
+				<Button theme="blue-light" onClick={handleSearch} size="medium">
+					Поиск
+				</Button>
+				{isSearchFocused && searchResults.length > 0 && (
+					<div className={element('search-results')} style={{transition: 'all 0.2s', boxShadow: '0 8px 32px rgb(0 0 0 / 15%)'}}>
+						{searchResults.map((result, idx) => (
+							<button
+								key={`${result.latitude}-${result.longitude}`}
+								type="button"
+								className={element('search-result', {active: activeResult === idx})}
+								onClick={() => handleResultSelect(result)}
+								style={{
+									background: activeResult === idx ? 'var(--color-gray-4)' : undefined,
+									fontWeight: activeResult === idx ? 600 : undefined,
+									borderLeft: activeResult === idx ? '3px solid var(--color-primary)' : undefined,
+								}}
+							>
+								<div className={element('result-name')}>{result.name}</div>
+								<div className={element('result-place')}>
+									{result.latitude.toFixed(6)}, {result.longitude.toFixed(6)}
+								</div>
+							</button>
+						))}
+					</div>
+				)}
+			</div>
 
-					{searchResults.length > 0 && (
-						<div className="location-picker__search-results">
-							{searchResults.map((result) => (
-								<button
-									key={result.place_id}
-									type="button"
-									className="location-picker__search-result"
-									onClick={() => handleSearchResultSelect(result)}
-								>
-									<div className="result-name">{result.name || result.display_name.split(',')[0]}</div>
-									<div className="result-place">{result.display_name}</div>
-								</button>
-							))}
-						</div>
-					)}
-				</div>
+			<div className={element('map')}>
+				<div ref={mapRef} style={{width: '100%', height: 450, borderRadius: 12}} />
+			</div>
 
-				<div className="location-picker__map">
-					<MapProvider>
-						<MapLibreMap
-							{...viewState}
-							mapStyle={MAP_STYLE}
-							onMove={handleMove}
-							onClick={onMapClick}
-							style={{width: '100%', height: '400px'}}
-						>
-							<NavigationControl position="top-right" />
-							<GeolocateControl position="top-right" />
-
-							{selectedLocation && (
-								<Marker longitude={selectedLocation.longitude} latitude={selectedLocation.latitude} anchor="bottom">
-									<div className="location-picker__marker">
-										<div className="marker-icon">📍</div>
-									</div>
-								</Marker>
-							)}
-						</MapLibreMap>
-					</MapProvider>
-				</div>
-
-				{selectedLocation && (
-					<div className="location-picker__selected">
-						<h4>Выбранное место:</h4>
-						<div className="location-picker__details">
-							<FieldInput
-								text="Название места"
-								placeholder="Введите название"
-								id="location-name"
-								value={selectedLocation.name || ''}
-								setValue={(value) => setSelectedLocation((prev) => ({...prev!, name: value}))}
-							/>
-							<FieldInput
+			{selectedLocation && (
+				<div className={element('selected')}>
+					<h4>Выбранное место:</h4>
+					<div className={element('details')}>
+						<FieldInput
+							text="Название места"
+							placeholder="Введите название"
+							id="location-name"
+							value={selectedLocation.name || ''}
+							setValue={(value) => setSelectedLocation((prev) => ({...prev!, name: value}))}
+						/>
+						{/* <FieldInput
 								text="Страна"
 								placeholder="Введите страну"
 								id="location-country"
@@ -301,32 +236,31 @@ const LocationPicker: React.FC<LocationPickerProps> = ({onLocationSelect, onClos
 								id="location-city"
 								value={selectedLocation.city || ''}
 								setValue={(value) => setSelectedLocation((prev) => ({...prev!, city: value}))}
-							/>
-							<FieldInput
-								text="Описание"
-								placeholder="Краткое описание места"
-								id="location-description"
-								value={selectedLocation.description || ''}
-								setValue={(value) => setSelectedLocation((prev) => ({...prev!, description: value}))}
-								type="textarea"
-							/>
-							<div className="coordinates">
-								<span>
-									Координаты: {selectedLocation.latitude.toFixed(6)}, {selectedLocation.longitude.toFixed(6)}
-								</span>
-							</div>
+							/> */}
+						<FieldInput
+							text="Описание"
+							placeholder="Краткое описание места"
+							id="location-description"
+							value={selectedLocation.description || ''}
+							setValue={(value) => setSelectedLocation((prev) => ({...prev!, description: value}))}
+							type="textarea"
+						/>
+						<div className={element('coordinates')}>
+							<span>
+								Координаты: {selectedLocation.latitude?.toFixed(6)}, {selectedLocation.longitude?.toFixed(6)}
+							</span>
 						</div>
 					</div>
-				)}
-
-				<div className="location-picker__actions">
-					<Button theme="blue-light" onClick={onClose}>
-						Отмена
-					</Button>
-					<Button theme="blue" onClick={handleSave}>
-						Выбрать место
-					</Button>
 				</div>
+			)}
+
+			<div className={element('actions')}>
+				<Button theme="blue-light" onClick={closeModal}>
+					Отмена
+				</Button>
+				<Button theme="blue" onClick={() => selectedLocation && onLocationSelect(selectedLocation)}>
+					Выбрать место
+				</Button>
 			</div>
 		</div>
 	);

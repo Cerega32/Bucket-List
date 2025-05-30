@@ -9,18 +9,18 @@ import {ExternalGoalSearch} from '@/components/ExternalGoalSearch/ExternalGoalSe
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
+import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {ICategory, IGoal} from '@/typings/goal';
 import {getCategories} from '@/utils/api/get/getCategories';
 import {getCategory} from '@/utils/api/get/getCategory';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {postCreateGoal} from '@/utils/api/post/postCreateGoal';
-import {mapApi} from '@/utils/mapApi';
+import {ILocation, mapApi} from '@/utils/mapApi';
 import {debounce} from '@/utils/time/debounce';
 import {selectComplexity} from '@/utils/values/complexity';
 
 import {Loader} from '../Loader/Loader';
-import LocationPicker from '../LocationPicker/LocationPicker';
 import Select from '../Select/Select';
 import {SimilarGoalItem} from '../SimilarGoalItem/SimilarGoalItem';
 import {Title} from '../Title/Title';
@@ -72,8 +72,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
 	// // Состояния для работы с местами
-	const [selectedGoalLocation, setSelectedGoalLocation] = useState<Location | null>(null);
-	const [showLocationPicker, setShowLocationPicker] = useState(false);
+	const [selectedGoalLocation, setSelectedGoalLocation] = useState<Partial<ILocation> | null>(null);
+	const {setWindow, setModalProps, setIsOpen} = ModalStore;
 
 	// Новые состояния для поиска похожих целей
 	const [similarGoals, setSimilarGoals] = useState<IGoal[]>([]);
@@ -82,10 +82,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const [isTitleFocused, setIsTitleFocused] = useState(false);
 
 	// Обработчик выбора места с карты
-	const handleLocationFromPicker = (selectedLocation: Partial<Location>) => {
-		// Создаем полный объект Location
-		const fullLocation: Location = {
-			id: 0, // Временный ID, будет создан на сервере
+	const handleLocationFromPicker = (selectedLocation: Partial<ILocation>) => {
+		// Создаем полный объект ILocation (частичный, id будет создан на сервере)
+		const fullLocation: Partial<ILocation> = {
 			name: selectedLocation.name || '',
 			longitude: selectedLocation.longitude || 0,
 			latitude: selectedLocation.latitude || 0,
@@ -94,11 +93,10 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			description: selectedLocation.description || undefined,
 			place_type: 'other',
 			address: undefined,
-			created_at: new Date().toISOString(), // Добавляем created_at
+			created_at: new Date().toISOString(),
 		};
-
 		setSelectedGoalLocation(fullLocation);
-		setShowLocationPicker(false);
+		setIsOpen(false);
 	};
 
 	// Функция для сброса выбранного места
@@ -241,6 +239,15 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 		loadCategories();
 	}, [preloadedCategories]);
+
+	const openLocationPicker = () => {
+		setIsOpen(true);
+		setWindow('goal-map-add');
+		setModalProps({
+			onLocationSelect: handleLocationFromPicker,
+			initialLocation: selectedGoalLocation || undefined,
+		});
+	};
 
 	// Фильтрация подкатегорий при изменении категории
 	useEffect(() => {
@@ -556,14 +563,14 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			// // Если выбрано место, обрабатываем его
 			let locationId = null;
 			if (selectedGoalLocation) {
-				if (selectedGoalLocation.id === 0) {
+				if (!selectedGoalLocation.id) {
 					// Создаем новое место
 					try {
 						const newLocation = await mapApi.createLocation({
-							name: selectedGoalLocation.name,
-							longitude: selectedGoalLocation.longitude,
-							latitude: selectedGoalLocation.latitude,
-							country: selectedGoalLocation.country,
+							name: selectedGoalLocation.name!,
+							longitude: selectedGoalLocation.longitude!,
+							latitude: selectedGoalLocation.latitude!,
+							country: selectedGoalLocation.country!,
 							city: selectedGoalLocation.city,
 							description: selectedGoalLocation.description,
 							place_type: selectedGoalLocation.place_type || 'other',
@@ -682,14 +689,14 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			// // Если выбрано место, обрабатываем его
 			let locationId = null;
 			if (selectedGoalLocation) {
-				if (selectedGoalLocation.id === 0) {
+				if (!selectedGoalLocation.id) {
 					// Создаем новое место
 					try {
 						const newLocation = await mapApi.createLocation({
-							name: selectedGoalLocation.name,
-							longitude: selectedGoalLocation.longitude,
-							latitude: selectedGoalLocation.latitude,
-							country: selectedGoalLocation.country,
+							name: selectedGoalLocation.name!,
+							longitude: selectedGoalLocation.longitude!,
+							latitude: selectedGoalLocation.latitude!,
+							country: selectedGoalLocation.country!,
 							city: selectedGoalLocation.city,
 							description: selectedGoalLocation.description,
 							place_type: selectedGoalLocation.place_type || 'other',
@@ -960,6 +967,52 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							/>
 						)}
 
+						{/* Новое поле для места с картой */}
+						{activeCategory !== null && categories[activeCategory].nameEn === 'travel' && (
+							<div className={element('location-field-container')}>
+								<p className={element('field-title')}>Место на карте</p>
+
+								{selectedGoalLocation ? (
+									<div className={element('selected-location')}>
+										<div className={element('selected-location-info')}>
+											<Svg icon="map" className={element('location-icon')} />
+											<div>
+												<div className={element('selected-location-name')}>{selectedGoalLocation?.name}</div>
+												<div className={element('selected-location-details')}>
+													{selectedGoalLocation?.city && `${selectedGoalLocation.city}, `}
+													{selectedGoalLocation?.country}
+												</div>
+												{selectedGoalLocation?.description && (
+													<div className={element('selected-location-description')}>
+														{selectedGoalLocation.description}
+													</div>
+												)}
+											</div>
+										</div>
+										<div className={element('location-actions')}>
+											<Button theme="blue-light" size="small" onClick={openLocationPicker}>
+												Изменить место
+											</Button>
+											<Button theme="red" size="small" onClick={clearSelectedLocation}>
+												Удалить место
+											</Button>
+										</div>
+									</div>
+								) : (
+									<div className={element('location-empty')}>
+										<p>Выберите географическое место на карте</p>
+										<Button theme="blue" onClick={openLocationPicker}>
+											Выбрать место на карте
+										</Button>
+									</div>
+								)}
+
+								<small className={element('format-hint')}>
+									Выберите географическое место на карте. Это поможет отслеживать ваши путешествия на карте.
+								</small>
+							</div>
+						)}
+
 						<Select
 							className={element('field')}
 							placeholder="Выберите сложность"
@@ -1017,50 +1070,6 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							</small>
 						</div>
 
-						{/* Новое поле для места с картой */}
-						<div className={element('location-field-container')}>
-							<p className={element('field-title')}>Связанное место (необязательно)</p>
-
-							{selectedGoalLocation ? (
-								<div className={element('selected-location')}>
-									<div className={element('selected-location-info')}>
-										<Svg icon="location" className={element('location-icon')} />
-										<div>
-											<div className={element('selected-location-name')}>{selectedGoalLocation.name}</div>
-											<div className={element('selected-location-details')}>
-												{selectedGoalLocation.city && `${selectedGoalLocation.city}, `}
-												{selectedGoalLocation.country}
-											</div>
-											{selectedGoalLocation.description && (
-												<div className={element('selected-location-description')}>
-													{selectedGoalLocation.description}
-												</div>
-											)}
-										</div>
-									</div>
-									<div className={element('location-actions')}>
-										<Button theme="blue-light" size="small" onClick={() => setShowLocationPicker(true)}>
-											Изменить место
-										</Button>
-										<Button theme="red" size="small" onClick={clearSelectedLocation}>
-											Удалить место
-										</Button>
-									</div>
-								</div>
-							) : (
-								<div className={element('location-empty')}>
-									<p>Выберите географическое место, связанное с целью</p>
-									<Button theme="blue" onClick={() => setShowLocationPicker(true)}>
-										Выбрать место на карте
-									</Button>
-								</div>
-							)}
-
-							<small className={element('format-hint')}>
-								Выберите географическое место, связанное с целью. Это поможет отслеживать ваши путешествия на карте.
-							</small>
-						</div>
-
 						<div className={element('btns-wrapper')}>
 							{!hideNavigation && (
 								<Button theme="blue-light" className={element('btn')} onClick={() => navigate(-1)} type="button">
@@ -1084,15 +1093,6 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							</Button>
 						</div>
 					</div>
-
-					{/* Модальное окно выбора места */}
-					{showLocationPicker && (
-						<LocationPicker
-							onLocationSelect={handleLocationFromPicker}
-							onClose={() => setShowLocationPicker(false)}
-							initialLocation={selectedGoalLocation || undefined}
-						/>
-					)}
 				</div>
 			</Loader>
 		</>
