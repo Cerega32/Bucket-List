@@ -1,3 +1,4 @@
+import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useRef, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
@@ -18,9 +19,10 @@ import {getGoal} from '@/utils/api/get/getGoal';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
+
 import './goal.scss';
 
-export const Goal: FC<IPage> = ({page}) => {
+export const Goal: FC<IPage> = observer(({page}) => {
 	const [block, element] = useBem('goal');
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 	const headerRef = useRef<HTMLElement | null>(null);
@@ -93,7 +95,7 @@ export const Goal: FC<IPage> = ({page}) => {
 						? {
 								title: 'Цель успешно выполнена!',
 								type: 'success',
-								id: goal.id.toString(),
+								id: Math.random().toString(36).substring(2, 15),
 								message: 'Добавьте отзыв чтобы заработать больше очков',
 								actionText: 'Добавить отзыв',
 								action: openAddReview,
@@ -211,9 +213,10 @@ export const Goal: FC<IPage> = ({page}) => {
 					openAddReview={openAddReview}
 					editGoal={goal.createdByUser && goal.isCanEdit ? () => setIsEditing(true) : undefined}
 					canEdit={goal?.isCanEdit}
+					location={goal?.location}
 				/>
 				<ContentGoal page={page} goal={goal} className={element('content')} />
 			</section>
 		</main>
 	);
-};
+});

@@ -4,12 +4,13 @@ import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {ModalStore} from '@/store/ModalStore';
 import {getGoalTimer, TimerInfo} from '@/utils/api/get/getGoalTimer';
-
-import './aside-goal.scss';
+import {ILocation} from '@/utils/mapApi';
 
 import {Button} from '../Button/Button';
 import {GoalTimer} from '../GoalTimer/GoalTimer';
 import {Line} from '../Line/Line';
+
+import './aside-goal.scss';
 
 interface AsideProps {
 	className?: string;
@@ -26,6 +27,7 @@ interface AsideGoalProps extends AsideProps {
 	openAddReview: () => void;
 	editGoal?: (() => void) | undefined;
 	canEdit?: boolean;
+	location?: ILocation;
 }
 
 export interface AsideListsProps extends AsideProps {
@@ -34,15 +36,16 @@ export interface AsideListsProps extends AsideProps {
 	openAddReview?: never;
 	editGoal?: never;
 	canEdit?: boolean;
+	location?: never;
 }
 
 export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
-	const {className, title, image, added, updateGoal, code, done, isList, openAddReview, editGoal, canEdit} = props;
+	const {className, title, image, added, updateGoal, code, done, isList, openAddReview, editGoal, canEdit, location} = props;
 	const [timer, setTimer] = useState<TimerInfo | null>(null);
 
 	const [block, element] = useBem('aside-goal', className);
 
-	const {setIsOpen, setWindow, setFuncModal} = ModalStore;
+	const {setIsOpen, setWindow, setFuncModal, setModalProps} = ModalStore;
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 
 	// Загрузка информации о таймере
@@ -85,6 +88,17 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		setFuncModal(() => updateGoal(code, 'delete'));
 	};
 
+	const openMapModal = () => {
+		if (location) {
+			setWindow('goal-map');
+			setIsOpen(true);
+			setModalProps({
+				location,
+				userVisitedLocation: done,
+			});
+		}
+	};
+
 	return (
 		<aside className={block()}>
 			<img src={image} alt={title} className={element('image')} />
@@ -100,6 +114,17 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 					>
 						{done ? 'Выполнено' : 'Выполнить'}
+					</Button>
+				)}
+				{location && (
+					<Button
+						theme="blue-light"
+						icon="map"
+						onClick={openMapModal}
+						className={element('btn')}
+						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+					>
+						Открыть карту
 					</Button>
 				)}
 				{isList && added && !done && (

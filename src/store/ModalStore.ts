@@ -1,6 +1,14 @@
 import {makeAutoObservable} from 'mobx';
 
-type IWindow = 'login' | 'registration' | 'change-password' | 'add-review' | 'delete-goal' | 'delete-list' | 'confirm-execution-all-goal';
+type IWindow =
+	| 'login'
+	| 'registration'
+	| 'change-password'
+	| 'add-review'
+	| 'delete-goal'
+	| 'delete-list'
+	| 'confirm-execution-all-goal'
+	| 'goal-map';
 
 export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 
@@ -14,6 +22,8 @@ class Store implements IModalStore {
 	isOpen = false;
 
 	window: IWindow = 'login';
+
+	modalProps: any;
 
 	// eslint-disable-next-line class-methods-use-this
 	funcModal: IFuncModal = () => undefined;
@@ -32,6 +42,10 @@ class Store implements IModalStore {
 
 	setFuncModal = (func: IFuncModal) => {
 		this.funcModal = func;
+	};
+
+	setModalProps = (props: any) => {
+		this.modalProps = props;
 	};
 }
 

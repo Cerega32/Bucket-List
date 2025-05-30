@@ -1,15 +1,7 @@
 import {DELETE, GET, POST} from './fetch/requests';
 
-// Получаем базовый URL и токен из конфигурации
-const API_BASE_URL = process.env['REACT_APP_API_URL'] || 'http://localhost:8000';
-
-// Функция для получения токена аутентификации
-const getAuthToken = () => {
-	return localStorage.getItem('authToken') || '';
-};
-
 // Типы для работы с картами
-export interface Location {
+export interface ILocation {
 	id: number;
 	name: string;
 	country: string;
@@ -148,20 +140,17 @@ export const mapApi = {
 
 	// Создать новое место
 	createLocation: async (locationData: Partial<Location>): Promise<Location> => {
-		const response = await fetch(`${API_BASE_URL}/api/maps/locations/create/`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Token ${getAuthToken()}`,
-			},
-			body: JSON.stringify(locationData),
+		console.log(locationData);
+		const response = await POST('maps/locations/create', {
+			auth: true,
+			body: locationData,
 		});
 
-		if (!response.ok) {
-			throw new Error('Failed to create location');
+		if (!response.success) {
+			throw new Error(response.errors || 'Failed to create location');
 		}
 
-		return response.json();
+		return response.data;
 	},
 
 	// Получить список всех стран

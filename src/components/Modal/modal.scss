@@ -26,6 +26,21 @@
 		&--type-add-review {
 			width: 696px;
 		}
+
+		&--fullscreen {
+			display: flex;
+			align-items: stretch;
+			width: 95vw;
+			max-width: 1200px;
+			height: 90vh;
+			max-height: 900px;
+			padding: 0;
+
+			#{$block}__close {
+				top: 46px;
+				right: 8px;
+			}
+		}
 	}
 
 	&__base {

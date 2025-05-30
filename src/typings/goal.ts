@@ -70,6 +70,12 @@ export interface IGoal {
 	totalAdditions?: number;
 	estimatedTime?: string;
 	location?: Location;
+	userVisitedLocation: boolean;
+	timer?: {
+		deadline: string;
+		days_left: number;
+		is_expired: boolean;
+	} | null;
 }
 
 export interface IShortGoal {

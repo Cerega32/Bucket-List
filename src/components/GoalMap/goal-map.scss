@@ -1,0 +1,89 @@
+.goal-map {
+	position: relative;
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow: 0 2px 8px rgb(var(--color-black-rgb) / 10%);
+
+	&__container {
+		width: 100vw;
+		max-width: 1200px;
+		height: 90vh;
+		max-height: 900px;
+		border-radius: 12px;
+	}
+
+	&__content {
+		padding: 5px 0;
+	}
+
+	&__title {
+		margin: 0 0 8px;
+		color: var(--color-text-primary);
+		font-size: 16px;
+		font-weight: var(--weight-semi-bold);
+	}
+
+	&__address {
+		margin: 0 0 4px;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+	}
+
+	&__description {
+		margin: 0 0 4px;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+		line-height: 1.4;
+	}
+
+	&__coordinates {
+		margin: 0 0 4px;
+		color: var(--color-text-secondary);
+		font-family: monospace;
+		font-size: 14px;
+	}
+
+	&__coordinates-label {
+		margin-right: 8px;
+		color: var(--color-text-primary);
+		font-weight: var(--weight-medium);
+	}
+
+	&__coordinates-value {
+		user-select: all;
+	}
+
+	&__status {
+		padding-top: 8px;
+		margin: 8px 0 0;
+		color: var(--color-text-primary);
+		font-size: 14px;
+		font-weight: var(--weight-medium);
+		border-top: 1px solid var(--color-border);
+	}
+
+	// Если потребуется кастомная иконка маркера:
+	&__marker-icon {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 32px;
+		height: 32px;
+	}
+}
+
+.ymaps-2-1-79-balloon {
+	&__content {
+		padding: 12px 16px !important;
+		margin: 0 !important;
+	}
+
+	&__close {
+		opacity: 0.5;
+		transition: opacity 0.2s;
+
+		&:hover {
+			opacity: 1;
+		}
+	}
+}

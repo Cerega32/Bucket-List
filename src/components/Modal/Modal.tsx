@@ -13,6 +13,7 @@ import {AddReview} from '../AddReview/AddReview';
 import {ChangePassword} from '../ChangePassword/ChangePassword';
 import {ConfirmExecutionAllGoal} from '../ConfirmExecutionAllGoal/ConfirmExecutionAllGoal';
 import {DeleteGoal} from '../DeleteGoal/DeleteGoal';
+import {GoalMap} from '../GoalMap/GoalMap';
 import {Svg} from '../Svg/Svg';
 import './modal.scss';
 
@@ -23,7 +24,7 @@ interface ModalProps {
 export const Modal: FC<ModalProps> = observer((props) => {
 	const {className} = props;
 	const [block, element] = useBem('modal', className);
-	const {isOpen, setIsOpen, window, setWindow, funcModal} = ModalStore;
+	const {isOpen, setIsOpen, window, setWindow, funcModal, modalProps} = ModalStore;
 	const {setIsAuth, setName, setAvatar} = UserStore;
 
 	// Ссылки на первый и последний фокусируемые элементы
@@ -117,7 +118,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 
 	return (
 		<section className={block({isOpen})}>
-			<div className={element('window', {type: window})} ref={modalRef}>
+			<div className={element('window', {type: window, fullscreen: window === 'goal-map'})} ref={modalRef}>
 				{window === 'login' && <Login openRegistration={openRegistration} successLogin={successAuth} />}
 				{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
 				{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
@@ -125,6 +126,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
 				{window === 'delete-list' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
 				{window === 'confirm-execution-all-goal' && <ConfirmExecutionAllGoal closeModal={closeWindow} funcModal={funcModal} />}
+				{window === 'goal-map' && <GoalMap {...modalProps} />}
 				<Button theme="blue-light" className={element('close')} onClick={closeWindow} refInner={closeButtonRef}>
 					<Svg icon="cross" />
 				</Button>

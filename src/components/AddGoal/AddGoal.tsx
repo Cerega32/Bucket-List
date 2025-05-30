@@ -15,10 +15,12 @@ import {getCategories} from '@/utils/api/get/getCategories';
 import {getCategory} from '@/utils/api/get/getCategory';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {postCreateGoal} from '@/utils/api/post/postCreateGoal';
+import {mapApi} from '@/utils/mapApi';
 import {debounce} from '@/utils/time/debounce';
 import {selectComplexity} from '@/utils/values/complexity';
 
 import {Loader} from '../Loader/Loader';
+import LocationPicker from '../LocationPicker/LocationPicker';
 import Select from '../Select/Select';
 import {SimilarGoalItem} from '../SimilarGoalItem/SimilarGoalItem';
 import {Title} from '../Title/Title';
@@ -70,8 +72,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
 	// // Состояния для работы с местами
-	// const [selectedGoalLocation, setSelectedGoalLocation] = useState<Location | null>(null);
-	// const [showLocationPicker, setShowLocationPicker] = useState(false);
+	const [selectedGoalLocation, setSelectedGoalLocation] = useState<Location | null>(null);
+	const [showLocationPicker, setShowLocationPicker] = useState(false);
 
 	// Новые состояния для поиска похожих целей
 	const [similarGoals, setSimilarGoals] = useState<IGoal[]>([]);
@@ -80,29 +82,29 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const [isTitleFocused, setIsTitleFocused] = useState(false);
 
 	// Обработчик выбора места с карты
-	// const handleLocationFromPicker = (selectedLocation: Partial<Location>) => {
-	// 	// Создаем полный объект Location
-	// 	const fullLocation: Location = {
-	// 		id: 0, // Временный ID, будет создан на сервере
-	// 		name: selectedLocation.name || '',
-	// 		longitude: selectedLocation.longitude || 0,
-	// 		latitude: selectedLocation.latitude || 0,
-	// 		country: selectedLocation.country || '',
-	// 		city: selectedLocation.city || undefined,
-	// 		description: selectedLocation.description || undefined,
-	// 		place_type: 'other',
-	// 		address: undefined,
-	// 		created_at: new Date().toISOString(), // Добавляем created_at
-	// 	};
+	const handleLocationFromPicker = (selectedLocation: Partial<Location>) => {
+		// Создаем полный объект Location
+		const fullLocation: Location = {
+			id: 0, // Временный ID, будет создан на сервере
+			name: selectedLocation.name || '',
+			longitude: selectedLocation.longitude || 0,
+			latitude: selectedLocation.latitude || 0,
+			country: selectedLocation.country || '',
+			city: selectedLocation.city || undefined,
+			description: selectedLocation.description || undefined,
+			place_type: 'other',
+			address: undefined,
+			created_at: new Date().toISOString(), // Добавляем created_at
+		};
 
-	// 	setSelectedGoalLocation(fullLocation);
-	// 	setShowLocationPicker(false);
-	// };
+		setSelectedGoalLocation(fullLocation);
+		setShowLocationPicker(false);
+	};
 
-	// // Функция для сброса выбранного места
-	// const clearSelectedLocation = () => {
-	// 	setSelectedGoalLocation(null);
-	// };
+	// Функция для сброса выбранного места
+	const clearSelectedLocation = () => {
+		setSelectedGoalLocation(null);
+	};
 
 	// Обработчик изменения названия цели
 	const handleTitleChange = (value: string) => {
@@ -552,38 +554,38 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			}
 
 			// // Если выбрано место, обрабатываем его
-			// let locationId = null;
-			// if (selectedGoalLocation) {
-			// 	if (selectedGoalLocation.id === 0) {
-			// 		// Создаем новое место
-			// 		try {
-			// 			const newLocation = await mapApi.createLocation({
-			// 				name: selectedGoalLocation.name,
-			// 				longitude: selectedGoalLocation.longitude,
-			// 				latitude: selectedGoalLocation.latitude,
-			// 				country: selectedGoalLocation.country,
-			// 				city: selectedGoalLocation.city,
-			// 				description: selectedGoalLocation.description,
-			// 				place_type: selectedGoalLocation.place_type || 'other',
-			// 			});
-			// 			locationId = newLocation.id;
-			// 		} catch (error) {
-			// 			NotificationStore.addNotification({
-			// 				type: 'error',
-			// 				title: 'Ошибка',
-			// 				message: 'Не удалось создать место',
-			// 			});
-			// 			return;
-			// 		}
-			// 	} else {
-			// 		locationId = selectedGoalLocation.id;
-			// 	}
-			// }
+			let locationId = null;
+			if (selectedGoalLocation) {
+				if (selectedGoalLocation.id === 0) {
+					// Создаем новое место
+					try {
+						const newLocation = await mapApi.createLocation({
+							name: selectedGoalLocation.name,
+							longitude: selectedGoalLocation.longitude,
+							latitude: selectedGoalLocation.latitude,
+							country: selectedGoalLocation.country,
+							city: selectedGoalLocation.city,
+							description: selectedGoalLocation.description,
+							place_type: selectedGoalLocation.place_type || 'other',
+						});
+						locationId = newLocation.id;
+					} catch (error) {
+						NotificationStore.addNotification({
+							type: 'error',
+							title: 'Ошибка',
+							message: error instanceof Error ? error.message : 'Не удалось создать место',
+						});
+						return;
+					}
+				} else {
+					locationId = selectedGoalLocation.id;
+				}
+			}
 
 			// // Если создано место, добавляем его ID
-			// if (locationId) {
-			// 	formData.append('location_id', locationId.toString());
-			// }
+			if (locationId) {
+				formData.append('location_id', locationId.toString());
+			}
 
 			const response = await postCreateGoal(formData);
 
@@ -678,38 +680,38 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			}
 
 			// // Если выбрано место, обрабатываем его
-			// let locationId = null;
-			// if (selectedGoalLocation) {
-			// 	if (selectedGoalLocation.id === 0) {
-			// 		// Создаем новое место
-			// 		try {
-			// 			const newLocation = await mapApi.createLocation({
-			// 				name: selectedGoalLocation.name,
-			// 				longitude: selectedGoalLocation.longitude,
-			// 				latitude: selectedGoalLocation.latitude,
-			// 				country: selectedGoalLocation.country,
-			// 				city: selectedGoalLocation.city,
-			// 				description: selectedGoalLocation.description,
-			// 				place_type: selectedGoalLocation.place_type || 'other',
-			// 			});
-			// 			locationId = newLocation.id;
-			// 		} catch (error) {
-			// 			NotificationStore.addNotification({
-			// 				type: 'error',
-			// 				title: 'Ошибка',
-			// 				message: 'Не удалось создать место',
-			// 			});
-			// 			return;
-			// 		}
-			// 	} else {
-			// 		locationId = selectedGoalLocation.id;
-			// 	}
-			// }
+			let locationId = null;
+			if (selectedGoalLocation) {
+				if (selectedGoalLocation.id === 0) {
+					// Создаем новое место
+					try {
+						const newLocation = await mapApi.createLocation({
+							name: selectedGoalLocation.name,
+							longitude: selectedGoalLocation.longitude,
+							latitude: selectedGoalLocation.latitude,
+							country: selectedGoalLocation.country,
+							city: selectedGoalLocation.city,
+							description: selectedGoalLocation.description,
+							place_type: selectedGoalLocation.place_type || 'other',
+						});
+						locationId = newLocation.id;
+					} catch (error) {
+						NotificationStore.addNotification({
+							type: 'error',
+							title: 'Ошибка',
+							message: 'Не удалось создать место',
+						});
+						return;
+					}
+				} else {
+					locationId = selectedGoalLocation.id;
+				}
+			}
 
 			// // Если создано место, добавляем его ID
-			// if (locationId) {
-			// 	formData.append('location_id', locationId.toString());
-			// }
+			if (locationId) {
+				formData.append('location_id', locationId.toString());
+			}
 
 			const response = await postCreateGoal(formData);
 
@@ -1016,10 +1018,10 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 						</div>
 
 						{/* Новое поле для места с картой */}
-						{/* <div className={element('location-field-container')}>
-							<p className={element('field-title')}>Связанное место (необязательно)</p> */}
+						<div className={element('location-field-container')}>
+							<p className={element('field-title')}>Связанное место (необязательно)</p>
 
-						{/* {selectedGoalLocation ? (
+							{selectedGoalLocation ? (
 								<div className={element('selected-location')}>
 									<div className={element('selected-location-info')}>
 										<Svg icon="location" className={element('location-icon')} />
@@ -1052,12 +1054,12 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 										Выбрать место на карте
 									</Button>
 								</div>
-							)} */}
-						{/*
+							)}
+
 							<small className={element('format-hint')}>
 								Выберите географическое место, связанное с целью. Это поможет отслеживать ваши путешествия на карте.
 							</small>
-						</div> */}
+						</div>
 
 						<div className={element('btns-wrapper')}>
 							{!hideNavigation && (
@@ -1084,13 +1086,13 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					</div>
 
 					{/* Модальное окно выбора места */}
-					{/* {showLocationPicker && (
+					{showLocationPicker && (
 						<LocationPicker
 							onLocationSelect={handleLocationFromPicker}
 							onClose={() => setShowLocationPicker(false)}
 							initialLocation={selectedGoalLocation || undefined}
-						/> */}
-					{/* )} */}
+						/>
+					)}
 				</div>
 			</Loader>
 		</>

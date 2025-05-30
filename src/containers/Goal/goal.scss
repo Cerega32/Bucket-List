@@ -88,4 +88,26 @@
 			padding: 0;
 		}
 	}
+
+	&__map-section {
+		padding: 0 20px;
+		margin: 40px 0;
+
+		@media (width <= 768px) {
+			padding: 0 16px;
+			margin: 32px 0;
+		}
+	}
+
+	&__section-title {
+		margin: 0 0 20px;
+		color: var(--text-primary);
+		font-size: 24px;
+		font-weight: 600;
+
+		@media (width <= 768px) {
+			margin: 0 0 16px;
+			font-size: 20px;
+		}
+	}
 }
