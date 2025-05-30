@@ -3,8 +3,9 @@ import {FC, useEffect, useState} from 'react';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {ModalStore} from '@/store/ModalStore';
+import {ILocation} from '@/typings/goal';
 import {getGoalTimer, TimerInfo} from '@/utils/api/get/getGoalTimer';
-import {GoalWithLocation, ILocation} from '@/utils/mapApi';
+import {GoalWithLocation} from '@/utils/mapApi';
 
 import {Button} from '../Button/Button';
 import {GoalTimer} from '../GoalTimer/GoalTimer';

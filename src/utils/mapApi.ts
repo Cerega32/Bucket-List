@@ -1,18 +1,6 @@
-import {DELETE, GET, POST} from './fetch/requests';
+import {IGoal, ILocation} from '@/typings/goal';
 
-// Типы для работы с картами
-export interface ILocation {
-	id: number;
-	name: string;
-	country: string;
-	city?: string;
-	latitude: number;
-	longitude: number;
-	place_type: string;
-	description?: string;
-	address?: string;
-	created_at: string;
-}
+import {DELETE, GET, POST} from './fetch/requests';
 
 export interface Country {
 	id: number;
@@ -25,7 +13,7 @@ export interface Country {
 
 export interface UserVisitedLocation {
 	id: number;
-	location: Location;
+	location: ILocation;
 	goal_title?: string;
 	visited_at: string;
 	notes?: string;
@@ -38,24 +26,8 @@ export interface UserVisitedCountry {
 	notes?: string;
 }
 
-export interface Goal {
-	id: number;
-	title: string;
-	category: any;
-	complexity: string;
-	image?: string;
-	description: string;
-	short_description: string;
-	code: string;
-	location?: Location;
-	added_by_user: boolean;
-	completed_by_user: boolean;
-	user_visited_location: boolean;
-	created_at: string;
-}
-
 export interface MapData {
-	goals: Goal[];
+	goals: IGoal[];
 	visited_locations: UserVisitedLocation[];
 	list_title?: string;
 	category_name?: string;

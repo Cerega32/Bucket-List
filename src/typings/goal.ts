@@ -1,5 +1,3 @@
-import {Location} from '@/utils/mapApi';
-
 export type IComplexity = 'hard' | 'medium' | 'easy';
 
 export interface ICategory {
@@ -69,7 +67,7 @@ export interface IGoal {
 	isCanEdit: boolean;
 	totalAdditions?: number;
 	estimatedTime?: string;
-	location?: Location;
+	location?: ILocation;
 	userVisitedLocation: boolean;
 	timer?: {
 		deadline: string;
@@ -92,5 +90,19 @@ export interface IShortGoal {
 	totalCompleted: number;
 	totalAdded: number;
 	addedByUser: boolean;
-	location?: Location;
+	location?: ILocation;
+}
+
+// Типы для работы с картами
+export interface ILocation {
+	id: number;
+	name: string;
+	country: string;
+	city?: string;
+	latitude: number;
+	longitude: number;
+	place_type: string;
+	description?: string;
+	address?: string;
+	created_at: string;
 }

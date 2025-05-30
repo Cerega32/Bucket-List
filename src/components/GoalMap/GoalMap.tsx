@@ -1,6 +1,6 @@
 import {FC, useEffect, useRef} from 'react';
 
-import {ILocation} from '@/utils/mapApi';
+import {ILocation} from '@/typings/goal';
 import './goal-map.scss';
 
 declare global {

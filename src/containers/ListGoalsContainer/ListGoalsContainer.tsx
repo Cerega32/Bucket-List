@@ -13,6 +13,7 @@ import {markAllGoalsFromList} from '@/utils/api/post/markAllGoalsFromList';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
+import {GoalWithLocation} from '@/utils/mapApi';
 import './list-goals-container.scss';
 
 export const ListGoalsContainer: FC = () => {
@@ -96,9 +97,9 @@ export const ListGoalsContainer: FC = () => {
 			location: goal.location,
 			userVisitedLocation: goal.completedByUser,
 			name: goal.title,
-			address: goal.location.address,
+			address: goal.location?.address,
 			description: goal.description,
-		}));
+		})) as Partial<GoalWithLocation>[];
 
 	return (
 		<main className={block()}>

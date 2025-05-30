@@ -3,22 +3,14 @@ import React, {useEffect, useRef, useState} from 'react';
 import {Button} from '@/components/Button/Button';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {useBem} from '@/hooks/useBem';
-import {ILocation} from '@/utils/mapApi';
+import {ILocation} from '@/typings/goal';
 
 import {Title} from '../Title/Title';
+
 import './LocationPicker.scss';
 
-interface Location {
-	latitude: number;
-	longitude: number;
-	name?: string;
-	country?: string;
-	city?: string;
-	description?: string;
-}
-
 interface LocationPickerProps {
-	onLocationSelect: (location: Partial<Location>) => void;
+	onLocationSelect: (location: Partial<ILocation>) => void;
 	initialLocation?: Partial<ILocation>;
 	closeModal: () => void;
 }

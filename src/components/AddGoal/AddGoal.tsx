@@ -11,12 +11,12 @@ import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
-import {ICategory, IGoal} from '@/typings/goal';
+import {ICategory, IGoal, ILocation} from '@/typings/goal';
 import {getCategories} from '@/utils/api/get/getCategories';
 import {getCategory} from '@/utils/api/get/getCategory';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {postCreateGoal} from '@/utils/api/post/postCreateGoal';
-import {ILocation, mapApi} from '@/utils/mapApi';
+import {mapApi} from '@/utils/mapApi';
 import {debounce} from '@/utils/time/debounce';
 import {selectComplexity} from '@/utils/values/complexity';
 

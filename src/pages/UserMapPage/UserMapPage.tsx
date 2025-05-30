@@ -1,8 +1,8 @@
 import {observer} from 'mobx-react-lite';
 import React, {useEffect, useState} from 'react';
 
-import Map from '@/components/Map/Map';
-import ScratchMap from '@/components/ScratchMap/ScratchMap';
+import {GoalMapMulti} from '@/components/GoalMap/GoalMapMulti';
+import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
 import {MapData, mapApi} from '@/utils/mapApi';
 import './UserMapPage.scss';
@@ -10,7 +10,7 @@ import './UserMapPage.scss';
 const UserMapPage: React.FC = observer(() => {
 	const [mapData, setMapData] = useState<MapData | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [activeTab, setActiveTab] = useState<'locations' | 'countries'>('locations');
+	const [activeTab] = useState<'locations' | 'countries'>('locations');
 	const [block, element] = useBem('user-map-page');
 
 	const loadUserMapData = async () => {
@@ -29,44 +29,14 @@ const UserMapPage: React.FC = observer(() => {
 		loadUserMapData();
 	}, []);
 
-	const handleLocationVisit = async (locationId: number, goalId?: number) => {
-		try {
-			await mapApi.markLocationVisited(locationId, goalId);
-			// Перезагружаем данные карты
-			await loadUserMapData();
-		} catch (error) {
-			console.error('Error marking location as visited:', error);
-		}
-	};
-
-	const handleLocationUnvisit = async (locationId: number) => {
-		try {
-			await mapApi.unmarkLocationVisited(locationId);
-			// Перезагружаем данные карты
-			await loadUserMapData();
-		} catch (error) {
-			console.error('Error unmarking location as visited:', error);
-		}
-	};
-
-	if (loading) {
-		return (
-			<div className="user-map-page">
-				<div className="loading-container">
-					<div className="loading-spinner">Загрузка карт...</div>
-				</div>
-			</div>
-		);
-	}
-
 	return (
-		<div className={block()}>
+		<Loader isLoading={loading} className={block()}>
 			<div className={element('header')}>
 				<h1>Мои карты</h1>
 				<p>Отслеживайте свои путешествия и достижения на карте</p>
 			</div>
 
-			<div className={element('map-tabs')}>
+			{/* <div className={element('map-tabs')}>
 				<button
 					type="button"
 					className={`${element('tab-button', {active: activeTab === 'locations'})}`}
@@ -81,7 +51,7 @@ const UserMapPage: React.FC = observer(() => {
 				>
 					Скретч-карта стран
 				</button>
-			</div>
+			</div> */}
 
 			<div className={element('map-content')}>
 				{activeTab === 'locations' && (
@@ -89,7 +59,7 @@ const UserMapPage: React.FC = observer(() => {
 						<div className={element('map-section')}>
 							<div className={element('section-header')}>
 								<h2>Места из ваших целей</h2>
-								<div className={element('map-legend')}>
+								{/* <div className={element('map-legend')}>
 									<div className={element('legend-item')}>
 										<div className={element('legend-marker visited')} />
 										<span>Посещенные места</span>
@@ -98,16 +68,25 @@ const UserMapPage: React.FC = observer(() => {
 										<div className={element('legend-marker unvisited')} />
 										<span>Запланированные места</span>
 									</div>
-								</div>
+								</div> */}
 							</div>
 
 							{mapData && mapData.goals?.length > 0 ? (
-								<Map
-									goals={mapData.goals}
-									visitedLocations={mapData.visited_locations}
-									onLocationVisit={handleLocationVisit}
-									onLocationUnvisit={handleLocationUnvisit}
-									height="500px"
+								<GoalMapMulti
+									goals={mapData.goals
+										.filter(
+											(goal) =>
+												goal.location &&
+												typeof goal.location.latitude === 'number' &&
+												typeof goal.location.longitude === 'number'
+										)
+										.map((goal) => ({
+											location: goal.location!,
+											userVisitedLocation: goal.completedByUser,
+											name: goal.title,
+											address: goal.location!.address,
+											description: goal.description,
+										}))}
 								/>
 							) : (
 								<div className={element('empty-state')}>
@@ -142,13 +121,13 @@ const UserMapPage: React.FC = observer(() => {
 					</div>
 				)}
 
-				{activeTab === 'countries' && (
+				{/* {activeTab === 'countries' && (
 					<div className={element('countries-tab')}>
 						<ScratchMap height="600px" />
 					</div>
-				)}
+				)} */}
 			</div>
-		</div>
+		</Loader>
 	);
 });
 
