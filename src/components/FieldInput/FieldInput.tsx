@@ -104,7 +104,9 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 				)}
 			</div>
 			{error?.map((er) => (
-				<p className={element('error')}>{er}</p>
+				<p key={er} className={element('error')}>
+					{er}
+				</p>
 			))}
 		</div>
 	);

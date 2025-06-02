@@ -4,14 +4,24 @@ import React, {useEffect, useState} from 'react';
 import {GoalMapMulti} from '@/components/GoalMap/GoalMapMulti';
 import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
+import {ThemeStore} from '@/store/ThemeStore';
+import {IPage} from '@/typings/page';
 import {MapData, mapApi} from '@/utils/mapApi';
 import './UserMapPage.scss';
 
-const UserMapPage: React.FC = observer(() => {
+const UserMapPage: React.FC<IPage> = observer(({page}) => {
 	const [mapData, setMapData] = useState<MapData | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [activeTab] = useState<'locations' | 'countries'>('locations');
 	const [block, element] = useBem('user-map-page');
+
+	const {setHeader, setPage, setFull} = ThemeStore;
+
+	useEffect(() => {
+		setHeader('white');
+		setPage(page);
+		setFull(false);
+	}, []);
 
 	const loadUserMapData = async () => {
 		try {

@@ -12,11 +12,14 @@ import {UserStore} from '@/store/UserStore';
 import {AddReview} from '../AddReview/AddReview';
 import {ChangePassword} from '../ChangePassword/ChangePassword';
 import {ConfirmExecutionAllGoal} from '../ConfirmExecutionAllGoal/ConfirmExecutionAllGoal';
+import {CreateTodoListForm} from '../CreateTodoListForm/CreateTodoListForm';
+import {CreateTodoTaskForm} from '../CreateTodoTaskForm/CreateTodoTaskForm';
 import {DeleteGoal} from '../DeleteGoal/DeleteGoal';
 import {GoalMap} from '../GoalMap/GoalMap';
 import {GoalMapMulti} from '../GoalMap/GoalMapMulti';
 import LocationPicker from '../LocationPicker/LocationPicker';
 import {Svg} from '../Svg/Svg';
+
 import './modal.scss';
 
 interface ModalProps {
@@ -106,17 +109,59 @@ export const Modal: FC<ModalProps> = observer((props) => {
 					}
 				}
 			}, 50);
+
+			// Отключаем прокрутку body при открытии модального окна
+			document.body.style.overflow = 'hidden';
 		} else {
 			document.removeEventListener('keyup', handleKeyUp);
 			document.removeEventListener('keydown', handleTabKey);
-		}
-		return () => {
-			document.removeEventListener('keyup', handleKeyUp);
-			document.removeEventListener('keydown', handleTabKey);
-		}; // eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isOpen, setIsOpen]);
 
+			// Включаем прокрутку body при закрытии модального окна
+			document.body.style.overflow = '';
+		}
+
+		// Cleanup при размонтировании компонента
+		return () => {
+			document.body.style.overflow = '';
+		};
+	}, [isOpen]);
+
+	// Определяем нужен ли скролл для текущего типа окна
 	if (!isOpen) return null;
+
+	const modalContent = (
+		<>
+			{window === 'login' && <Login openRegistration={openRegistration} successLogin={successAuth} />}
+			{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
+			{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
+			{window === 'add-review' && <AddReview closeModal={closeWindow} />}
+			{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
+			{window === 'delete-list' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
+			{window === 'confirm-execution-all-goal' && <ConfirmExecutionAllGoal closeModal={closeWindow} funcModal={funcModal} />}
+			{window === 'goal-map' && <GoalMap {...modalProps} />}
+			{window === 'goal-map-multi' && <GoalMapMulti {...modalProps} />}
+			{window === 'goal-map-add' && <LocationPicker closeModal={closeWindow} {...modalProps} />}
+			{window === 'create-todo-list' && (
+				<CreateTodoListForm
+					onSuccess={() => {
+						closeWindow();
+						modalProps?.onSuccess?.();
+					}}
+					onCancel={closeWindow}
+				/>
+			)}
+			{window === 'create-todo-task' && (
+				<CreateTodoTaskForm
+					defaultListId={modalProps?.defaultListId}
+					onSuccess={() => {
+						closeWindow();
+						modalProps?.onSuccess?.();
+					}}
+					onCancel={closeWindow}
+				/>
+			)}
+		</>
+	);
 
 	return (
 		<section className={block({isOpen})}>
@@ -127,16 +172,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				})}
 				ref={modalRef}
 			>
-				{window === 'login' && <Login openRegistration={openRegistration} successLogin={successAuth} />}
-				{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
-				{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
-				{window === 'add-review' && <AddReview closeModal={closeWindow} />}
-				{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
-				{window === 'delete-list' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
-				{window === 'confirm-execution-all-goal' && <ConfirmExecutionAllGoal closeModal={closeWindow} funcModal={funcModal} />}
-				{window === 'goal-map' && <GoalMap {...modalProps} />}
-				{window === 'goal-map-multi' && <GoalMapMulti {...modalProps} />}
-				{window === 'goal-map-add' && <LocationPicker closeModal={closeWindow} {...modalProps} />}
+				<div className={element('content')}>{modalContent}</div>
 				<Button
 					theme="blue-light"
 					className={element('close', {map: window === 'goal-map' || window === 'goal-map-multi'})}

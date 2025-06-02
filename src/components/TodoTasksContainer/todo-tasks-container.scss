@@ -1,0 +1,311 @@
+.todo-tasks-container {
+	padding: 20px;
+	background: rgb(255 255 255 / 95%);
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgb(0 0 0 / 10%);
+	backdrop-filter: blur(10px);
+
+	&__loading,
+	&__empty {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		min-height: 300px;
+		text-align: center;
+	}
+
+	&__loading {
+		color: var(--color-gray-2);
+		font-size: 16px;
+	}
+
+	&__empty-title {
+		margin: 0 0 12px;
+		color: var(--color-gray-1);
+		font-size: 24px;
+		font-weight: 600;
+	}
+
+	&__empty-text {
+		max-width: 400px;
+		margin: 0 0 20px;
+		color: var(--color-gray-2);
+		font-size: 16px;
+	}
+
+	&__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: 16px;
+		margin-bottom: 20px;
+		border-bottom: 1px solid var(--color-gray-9);
+
+		@include md {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 12px;
+		}
+	}
+
+	&__header-info {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	&__title {
+		margin: 0;
+		color: var(--color-gray-1);
+		font-size: 24px;
+		font-weight: 600;
+	}
+
+	&__count {
+		color: var(--color-gray-2);
+		font-size: 14px;
+	}
+
+	&__bulk-actions {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	&__selected-count {
+		margin-right: 8px;
+		color: var(--color-gray-2);
+		font-size: 14px;
+	}
+
+	&__list {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	&__task {
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+		padding: 16px;
+		background: var(--color-white);
+		border: 1px solid var(--color-gray-9);
+		border-radius: 8px;
+		transition: all 0.2s ease;
+
+		&:hover {
+			box-shadow: 0 2px 12px rgb(0 0 0 / 8%);
+		}
+
+		&--selected {
+			background: rgb(59 130 246 / 10%);
+			border-color: var(--color-blue);
+		}
+
+		&--overdue {
+			background: rgb(239 68 68 / 10%);
+			border-color: rgb(239 68 68 / 60%);
+		}
+	}
+
+	&__task-title {
+		margin: 0 0 4px;
+		color: var(--color-gray-1);
+		font-size: 16px;
+		font-weight: 500;
+		line-height: 1.4;
+	}
+
+	&__task--completed {
+		opacity: 0.6;
+	}
+
+	&__task--completed &__task-title {
+		text-decoration: line-through;
+	}
+
+	&__task-main {
+		display: flex;
+		flex: 1;
+		align-items: flex-start;
+		gap: 12px;
+		min-width: 0;
+	}
+
+	&__task-checkbox {
+		margin-top: 2px;
+		cursor: pointer;
+	}
+
+	&__task-toggle {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 24px;
+		height: 24px;
+		margin-top: 2px;
+		background: transparent;
+		border: 2px solid var(--color-gray-7);
+		border-radius: 50%;
+		color: var(--color-gray-2);
+		font-size: 16px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+
+		&:hover {
+			border-color: var(--color-blue);
+			color: var(--color-blue);
+		}
+
+		&--completed {
+			background: var(--color-green);
+			border-color: var(--color-green);
+			color: var(--color-white);
+		}
+	}
+
+	&__task-content {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__task-description {
+		margin: 0 0 8px;
+		color: var(--color-gray-2);
+		font-size: 14px;
+		line-height: 1.4;
+	}
+
+	&__task-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin-bottom: 8px;
+	}
+
+	&__task-priority,
+	&__task-context,
+	&__task-deadline,
+	&__task-meeting,
+	&__task-recurring,
+	&__task-progress,
+	&__task-subtasks {
+		padding: 2px 6px;
+		border-radius: 4px;
+		color: var(--color-white);
+		font-size: 11px;
+		font-weight: 500;
+		text-transform: uppercase;
+	}
+
+	&__task-priority {
+		// Цвет устанавливается через style
+	}
+
+	&__task-context {
+		background: var(--color-gray-9);
+		color: var(--color-gray-6);
+	}
+
+	&__task-deadline {
+		background: var(--color-gray-9);
+		color: var(--color-gray-6);
+
+		&--overdue {
+			background: var(--color-red);
+			color: var(--color-white);
+		}
+	}
+
+	&__task-meeting {
+		background: var(--color-purple);
+		color: var(--color-white);
+	}
+
+	&__task-recurring {
+		background: var(--color-orange);
+		color: var(--color-white);
+	}
+
+	&__task-progress {
+		// Цвет устанавливается через style
+		color: var(--color-white);
+	}
+
+	&__task-subtasks {
+		background: var(--color-gray-9);
+		color: var(--color-gray-6);
+	}
+
+	&__task-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+
+	&__task-tag {
+		padding: 2px 6px;
+		background: rgb(59 130 246 / 10%);
+		border-radius: 4px;
+		color: var(--color-blue);
+		font-size: 11px;
+	}
+
+	&__task-actions {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	&__task-action {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 32px;
+		height: 32px;
+		padding: 0;
+		background: transparent;
+		border: 1px solid var(--color-gray-8);
+		border-radius: 6px;
+		font-size: 14px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+
+		&:hover {
+			background: var(--color-gray-10);
+		}
+	}
+
+	// Адаптивность
+	@include md {
+		padding: 16px;
+
+		&__task {
+			padding: 12px;
+		}
+
+		&__task-main {
+			gap: 8px;
+		}
+
+		&__task-title {
+			font-size: 15px;
+		}
+
+		&__task-description {
+			font-size: 13px;
+		}
+
+		&__task-actions {
+			flex-direction: row;
+		}
+
+		&__task-action {
+			width: 28px;
+			height: 28px;
+			font-size: 12px;
+		}
+	}
+}

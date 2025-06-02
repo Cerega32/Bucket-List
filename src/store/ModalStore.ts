@@ -10,7 +10,9 @@ type IWindow =
 	| 'confirm-execution-all-goal'
 	| 'goal-map'
 	| 'goal-map-multi'
-	| 'goal-map-add';
+	| 'goal-map-add'
+	| 'create-todo-list'
+	| 'create-todo-task';
 
 export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 

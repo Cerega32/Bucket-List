@@ -17,6 +17,7 @@ import {PageMain} from '@/pages/PageMain/PageMain';
 import {PageMainGoals} from '@/pages/PageMainGoals/PageMainGoals';
 import {PageNotFound} from '@/pages/PageNotFound/PageNotFound';
 import {PageRegistration} from '@/pages/PageRegistration/PageRegistration';
+import PageTodos from '@/pages/PageTodos/PageTodos';
 import {PageUser} from '@/pages/PageUser/PageUser';
 import {PageUserSelf} from '@/pages/PageUserSelf/PageUserSelf';
 import UserMapPage from '@/pages/UserMapPage/UserMapPage';
@@ -83,7 +84,7 @@ export const RoutesAuth: FC = observer(() => {
 
 				{/* Защищенные маршруты пользователя */}
 				<Route path="/user/self" element={<ProtectedRoute element={<PageUserSelf page="isUserSelf" />} />} />
-				<Route path="/user/self/maps" element={<ProtectedRoute element={<UserMapPage />} />} />
+				<Route path="/user/self/maps" element={<ProtectedRoute element={<UserMapPage page="isUserSelfMaps" />} />} />
 				<Route
 					path="/user/self/achievements"
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfAchievements" />} />}
@@ -105,6 +106,9 @@ export const RoutesAuth: FC = observer(() => {
 					path="/user/self/done-goals/lists"
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfDone" subPage="lists" />} />}
 				/>
+
+				{/* TODO System */}
+				<Route path="/todos" element={<ProtectedRoute element={<PageTodos page="isTodos" />} />} />
 
 				{/* Новые маршруты для друзей */}
 				{/* <Route path="/user/self/friends" element={<ProtectedRoute element={<PageFriends page="isUserSelfFriends" />} />} />

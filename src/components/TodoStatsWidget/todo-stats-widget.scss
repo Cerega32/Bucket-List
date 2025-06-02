@@ -1,0 +1,112 @@
+.todo-stats-widget {
+	padding: 16px;
+	background: var(--color-white);
+	border: 1px solid var(--color-gray-9);
+	border-radius: 8px;
+
+	&__header {
+		margin-bottom: 16px;
+	}
+
+	&__title {
+		margin: 0;
+		color: var(--color-gray-1);
+		font-size: 16px;
+		font-weight: 600;
+	}
+
+	&__loading {
+		padding: 20px;
+		color: var(--color-gray-2);
+		font-size: 14px;
+		text-align: center;
+	}
+
+	&__section {
+		margin-bottom: 16px;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	&__section-title {
+		margin: 0 0 8px;
+		color: var(--color-gray-2);
+		font-size: 14px;
+		font-weight: 500;
+	}
+
+	&__stats {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 8px;
+
+		@include md {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	&__stat {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 8px;
+		background: var(--color-gray-10);
+		border-radius: 6px;
+		text-align: center;
+	}
+
+	&__stat-value {
+		display: block;
+		margin-bottom: 2px;
+		color: var(--color-blue);
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 1;
+	}
+
+	&__stat-label {
+		display: block;
+		color: var(--color-gray-2);
+		font-size: 12px;
+		line-height: 1;
+	}
+
+	&__stat--overdue {
+		background: rgb(239 68 68 / 10%);
+
+		& .todo-stats-widget__stat-value {
+			color: var(--color-red);
+		}
+	}
+
+	&__progress {
+		padding-top: 16px;
+		margin-top: 16px;
+		border-top: 1px solid var(--color-gray-9);
+	}
+
+	&__progress-bar {
+		position: relative;
+		height: 6px;
+		margin-bottom: 6px;
+		background: var(--color-gray-9);
+		border-radius: 3px;
+		overflow: hidden;
+	}
+
+	&__progress-fill {
+		height: 100%;
+		background: linear-gradient(135deg, var(--color-blue), var(--color-blue-light));
+		border-radius: 3px;
+		transition: width 0.3s ease;
+	}
+
+	&__progress-text {
+		display: block;
+		color: var(--color-gray-2);
+		font-size: 12px;
+		text-align: center;
+	}
+}

@@ -3,6 +3,7 @@
 
 	&__close {
 		position: absolute;
+		z-index: 1;
 		top: 24px;
 		right: 24px;
 		width: min-content;
@@ -21,16 +22,47 @@
 		left: 50%;
 		display: none;
 		width: 456px;
+		max-height: 90vh;
 		padding: 24px;
 		margin: 0 auto;
 		background: var(--color-white);
 		border: 1px solid var(--color-gray-9);
 		border-radius: 8px;
 		transform: translate(-50%, -50%);
+		overflow: hidden;
 
 		&--type-add-review {
 			width: 696px;
 		}
+
+		&--type-create-todo-list,
+		&--type-create-todo-task {
+			width: 600px;
+			max-width: 90vw;
+
+			@media (width <= 768px) {
+				width: 95vw;
+				padding: 16px;
+			}
+		}
+
+		// &--scrollable {
+		// 	max-height: 90vh;
+		// 	overflow: hidden;
+
+		// 	.ps {
+		// 		max-height: calc(90vh - 48px);
+
+		// 		@media (width <= 768px) {
+		// 			max-height: calc(90vh - 32px);
+		// 		}
+		// 	}
+
+		// 	@media (width <= 768px) {
+		// 		top: 50%;
+		// 		max-height: 95vh;
+		// 	}
+		// }
 
 		&--fullscreen {
 			display: flex;
@@ -40,6 +72,69 @@
 			height: 90vh;
 			max-height: 900px;
 			padding: 0;
+		}
+
+		@media (width <= 768px) {
+			width: 95vw;
+			max-width: 95vw;
+			padding: 16px;
+
+			&--type-add-review {
+				width: 95vw;
+			}
+		}
+	}
+
+	&__content {
+		position: relative;
+		max-height: calc(90vh - 48px);
+		overflow: hidden auto;
+
+		// Кастомный скроллбар
+		&::-webkit-scrollbar {
+			width: 8px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color-blue);
+			border: 2px solid transparent;
+			border-radius: 4px;
+			background-clip: content-box;
+
+			&:hover {
+				background: var(--color-blue-hover);
+				background-clip: content-box;
+			}
+		}
+
+		// Для Firefox
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-blue) transparent;
+
+		@media (width <= 768px) {
+			max-height: calc(90vh - 32px);
+		}
+	}
+
+	&__window--fullscreen &__content {
+		height: 100%;
+		max-height: 100%;
+	}
+
+	&__title {
+		margin: 0 0 24px;
+		color: var(--color-black);
+		font-size: 24px;
+		font-weight: 600;
+		line-height: 1.2;
+
+		@media (width <= 768px) {
+			margin: 0 0 16px;
+			font-size: 20px;
 		}
 	}
 
