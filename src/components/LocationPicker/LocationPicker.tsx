@@ -18,15 +18,11 @@ interface LocationPickerProps {
 const LocationPicker: React.FC<LocationPickerProps> = ({onLocationSelect, initialLocation, closeModal}) => {
 	const [block, element] = useBem('location-picker');
 	const mapRef = useRef<HTMLDivElement>(null);
-	const [searchQuery, setSearchQuery] = useState('');
-	const [searchResults, setSearchResults] = useState<any[]>([]);
 	const [selectedLocation, setSelectedLocation] = useState<Partial<ILocation> | null>(initialLocation || null);
 	const markerRef = useRef<any>(null);
 	const mapInstance = useRef<any>(null);
-	const [isSearchFocused, setIsSearchFocused] = useState(false);
-	const [activeResult, setActiveResult] = useState<number>(-1);
 
-	// Инициализация карты
+	// Инициализация карты с контролом поиска
 	useEffect(() => {
 		const initMap = () => {
 			if (!mapRef.current || mapInstance.current) return;
@@ -41,7 +37,50 @@ const LocationPicker: React.FC<LocationPickerProps> = ({onLocationSelect, initia
 			});
 			mapInstance.current = map;
 
-			// Клик по карте
+			// Добавляем контрол поиска
+			const searchControl = new window.ymaps.control.SearchControl({
+				options: {
+					provider: 'yandex#search',
+					noPlacemark: true,
+					results: 10,
+					size: 'large',
+					noSuggestPanel: true,
+					suggestProvider: {
+						provider: 'yandex#suggest',
+						apikey: process.env['NEXT_PUBLIC_YANDEX_SUGGEST_API_KEY'],
+					},
+				},
+			});
+			map.controls.add(searchControl);
+
+			// Обработка выбора результата поиска
+			searchControl.events.add('resultselect', (e: any) => {
+				const index = e.get('index');
+				searchControl.getResult(index).then((res: any) => {
+					const coords = res.geometry.getCoordinates();
+					if (markerRef.current) {
+						markerRef.current.geometry.setCoordinates(coords);
+					} else {
+						markerRef.current = new window.ymaps.Placemark(coords, {}, {preset: 'islands#redDotIcon'});
+						map.geoObjects.add(markerRef.current);
+					}
+					// Делаем обратное геокодирование для получения города и страны
+					window.ymaps.geocode(coords).then((geoRes: any) => {
+						const firstGeoObject = geoRes.geoObjects.get(0);
+						setSelectedLocation({
+							name: res.properties.get('name') || res.properties.get('text') || (res.getAddressLine && res.getAddressLine()),
+							description: res.properties.get('description') || '',
+							latitude: coords[0],
+							longitude: coords[1],
+							country: firstGeoObject.getCountry(),
+							city: firstGeoObject.getLocalities()[0],
+						});
+					});
+					map.setCenter(coords, 12);
+				});
+			});
+
+			// Клик по карте (оставляем для ручного выбора)
 			map.events.add('click', (e: any) => {
 				const coords = e.get('coords');
 				setSelectedLocation({
@@ -54,7 +93,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({onLocationSelect, initia
 					markerRef.current = new window.ymaps.Placemark(coords, {}, {preset: 'islands#redDotIcon'});
 					map.geoObjects.add(markerRef.current);
 				}
-				// Обратное геокодирование
+				// Обратное геокодирование для ручного выбора
 				window.ymaps.geocode(coords).then((res: any) => {
 					const firstGeoObject = res.geoObjects.get(0);
 					setSelectedLocation((prev) => ({
@@ -84,7 +123,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({onLocationSelect, initia
 			script.onload = () => window.ymaps.ready(initMap);
 			document.head.appendChild(script);
 		} else {
-			// Скрипт уже загружен, но ymaps еще не инициализирован
 			const waitForYmaps = () => {
 				if (window.ymaps && typeof window.ymaps.ready === 'function') {
 					window.ymaps.ready(initMap);
@@ -103,102 +141,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({onLocationSelect, initia
 		};
 	}, [initialLocation]);
 
-	// Поиск по Яндекс Геокодеру
-	const handleSearch = async () => {
-		if (!searchQuery.trim() || !window.ymaps) return;
-		window.ymaps.geocode(searchQuery).then((res: any) => {
-			const results: any[] = [];
-			res.geoObjects.each((obj: any) => {
-				const coords = obj.geometry.getCoordinates();
-				results.push({
-					name: obj.getAddressLine(),
-					latitude: coords[0],
-					longitude: coords[1],
-				});
-			});
-			setSearchResults(results);
-			setActiveResult(-1);
-		});
-	};
-
-	// Выбор результата поиска
-	const handleResultSelect = (result: any) => {
-		setSelectedLocation(result);
-		setSearchResults([]);
-		setSearchQuery('');
-		if (mapInstance.current) {
-			mapInstance.current.setCenter([result.latitude, result.longitude], 12);
-			if (markerRef.current) {
-				markerRef.current.geometry.setCoordinates([result.latitude, result.longitude]);
-			} else {
-				markerRef.current = new window.ymaps.Placemark([result.latitude, result.longitude], {}, {preset: 'islands#redDotIcon'});
-				mapInstance.current.geoObjects.add(markerRef.current);
-			}
-		}
-	};
-
-	// Обработка Enter и стрелок в поиске
-	const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-		if (e.key === 'Enter') {
-			e.preventDefault();
-			if (searchResults.length > 0 && activeResult >= 0) {
-				handleResultSelect(searchResults[activeResult]);
-			} else {
-				handleSearch();
-			}
-		}
-		if (e.key === 'ArrowDown') {
-			e.preventDefault();
-			setActiveResult((prev) => Math.min(prev + 1, searchResults.length - 1));
-		}
-		if (e.key === 'ArrowUp') {
-			e.preventDefault();
-			setActiveResult((prev) => Math.max(prev - 1, 0));
-		}
-	};
-
 	return (
 		<div className={block()}>
 			<Title tag="h2">Выберите место на карте</Title>
-
-			<div className={element('search')}>
-				<FieldInput
-					placeholder="Поиск по Яндекс.Картам..."
-					id="location-search"
-					text=""
-					value={searchQuery}
-					setValue={setSearchQuery}
-					onFocus={() => setIsSearchFocused(true)}
-					onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-					onKeyDown={handleSearchKeyDown}
-					className={element('search-input')}
-				/>
-				<Button theme="blue-light" onClick={handleSearch} size="medium">
-					Поиск
-				</Button>
-				{isSearchFocused && searchResults.length > 0 && (
-					<div className={element('search-results')} style={{transition: 'all 0.2s', boxShadow: '0 8px 32px rgb(0 0 0 / 15%)'}}>
-						{searchResults.map((result, idx) => (
-							<button
-								key={`${result.latitude}-${result.longitude}`}
-								type="button"
-								className={element('search-result', {active: activeResult === idx})}
-								onClick={() => handleResultSelect(result)}
-								style={{
-									background: activeResult === idx ? 'var(--color-gray-4)' : undefined,
-									fontWeight: activeResult === idx ? 600 : undefined,
-									borderLeft: activeResult === idx ? '3px solid var(--color-primary)' : undefined,
-								}}
-							>
-								<div className={element('result-name')}>{result.name}</div>
-								<div className={element('result-place')}>
-									{result.latitude.toFixed(6)}, {result.longitude.toFixed(6)}
-								</div>
-							</button>
-						))}
-					</div>
-				)}
-			</div>
 
 			<div className={element('map')}>
 				<div ref={mapRef} style={{width: '100%', height: 450, borderRadius: 12}} />
@@ -216,19 +161,19 @@ const LocationPicker: React.FC<LocationPickerProps> = ({onLocationSelect, initia
 							setValue={(value) => setSelectedLocation((prev) => ({...prev!, name: value}))}
 						/>
 						{/* <FieldInput
-								text="Страна"
-								placeholder="Введите страну"
-								id="location-country"
-								value={selectedLocation.country || ''}
-								setValue={(value) => setSelectedLocation((prev) => ({...prev!, country: value}))}
-							/>
-							<FieldInput
-								text="Город"
-								placeholder="Введите город"
-								id="location-city"
-								value={selectedLocation.city || ''}
-								setValue={(value) => setSelectedLocation((prev) => ({...prev!, city: value}))}
-							/> */}
+							text="Страна"
+							placeholder="Введите страну"
+							id="location-country"
+							value={selectedLocation.country || ''}
+							setValue={(value) => setSelectedLocation((prev) => ({...prev!, country: value}))}
+						/>
+						<FieldInput
+							text="Город"
+							placeholder="Введите город"
+							id="location-city"
+							value={selectedLocation.city || ''}
+							setValue={(value) => setSelectedLocation((prev) => ({...prev!, city: value}))}
+						/> */}
 						<FieldInput
 							text="Описание"
 							placeholder="Краткое описание места"

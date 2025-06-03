@@ -1,0 +1,427 @@
+import React, {useEffect, useRef, useState} from 'react';
+
+import {Country} from '@/utils/mapApi';
+
+interface WorldMapProps {
+	countries: Country[];
+	visitedCountries: number[];
+	onCountryClick: (countryIsoCode: string) => void;
+	onCountryHover?: (country: Country | null) => void;
+}
+
+const WorldMap: React.FC<WorldMapProps> = ({countries, visitedCountries, onCountryClick, onCountryHover}) => {
+	const svgRef = useRef<SVGSVGElement>(null);
+	const [tooltip, setTooltip] = useState<{x: number; y: number; country: Country} | null>(null);
+
+	// Маппинг ISO кодов на цвета для посещенных стран
+	const getCountryById = (isoCode: string) => {
+		if (!isoCode) return undefined;
+		return countries.find((country) => country.iso_code?.toLowerCase() === isoCode.toLowerCase());
+	};
+
+	const isCountryVisited = (isoCode: string) => {
+		const country = getCountryById(isoCode);
+		return country ? visitedCountries.includes(country.id) : false;
+	};
+
+	useEffect(() => {
+		const svg = svgRef.current;
+		if (!svg) return;
+
+		// Добавляем обработчики событий для всех путей стран
+		const countryPaths = svg.querySelectorAll('path[id]');
+		const handlers: Array<{element: Element; type: string; handler: EventListener}> = [];
+
+		countryPaths.forEach((path) => {
+			const isoCode = path.id;
+			if (!isoCode) return;
+
+			const country = getCountryById(isoCode);
+
+			if (country) {
+				// Устанавливаем цвет в зависимости от статуса посещения
+				const isVisited = isCountryVisited(isoCode);
+				const pathElement = path as SVGPathElement;
+
+				pathElement.style.fill = isVisited ? country.color_hex : '#e5e5e5';
+				pathElement.style.cursor = 'pointer';
+
+				// Обработчик клика
+				const handleClick = () => {
+					onCountryClick(isoCode);
+				};
+
+				// Обработчик hover - используем Event вместо MouseEvent
+				const handleMouseEnter = (e: Event) => {
+					const mouseEvent = e as MouseEvent;
+					pathElement.style.opacity = '0.8';
+
+					if (onCountryHover) {
+						onCountryHover(country);
+					}
+
+					// Показываем tooltip
+					const rect = svg.getBoundingClientRect();
+					setTooltip({
+						x: mouseEvent.clientX - rect.left,
+						y: mouseEvent.clientY - rect.top,
+						country,
+					});
+				};
+
+				const handleMouseLeave = () => {
+					pathElement.style.opacity = '1';
+
+					if (onCountryHover) {
+						onCountryHover(null);
+					}
+
+					setTooltip(null);
+				};
+
+				// Добавляем слушатели
+				path.addEventListener('click', handleClick);
+				path.addEventListener('mouseenter', handleMouseEnter);
+				path.addEventListener('mouseleave', handleMouseLeave);
+
+				// Сохраняем ссылки на обработчики для cleanup
+				handlers.push(
+					{element: path, type: 'click', handler: handleClick},
+					{element: path, type: 'mouseenter', handler: handleMouseEnter},
+					{element: path, type: 'mouseleave', handler: handleMouseLeave}
+				);
+			}
+		});
+
+		// Cleanup функция
+		return () => {
+			handlers.forEach(({element, type, handler}) => {
+				if (element && element.removeEventListener) {
+					element.removeEventListener(type, handler);
+				}
+			});
+		};
+	}, [countries, visitedCountries, onCountryClick, onCountryHover]);
+
+	return (
+		<div style={{position: 'relative', width: '100%', height: '100%'}}>
+			<svg
+				ref={svgRef}
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 1000 500"
+				style={{width: '100%', height: '100%', background: '#f8f9fa'}}
+			>
+				{/* Россия */}
+				<path
+					id="ru"
+					d="M510 80 Q570 60 650 80 Q720 90 800 70 Q850 75 900 90 L900 150 Q880 180 820 170 Q750 160 680 170 Q620 165 560 150 Q520 140 500 120 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* США */}
+				<path
+					id="us"
+					d="M50 150 Q120 140 180 160 Q240 155 280 170 L280 220 Q250 240 200 235 Q140 230 90 220 L50 200 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Канада */}
+				<path
+					id="ca"
+					d="M80 90 Q150 70 220 85 Q290 80 350 95 L350 140 Q320 150 280 145 Q220 140 180 135 Q130 130 100 125 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Китай */}
+				<path
+					id="cn"
+					d="M650 180 Q720 170 780 190 Q820 200 850 210 L850 250 Q820 270 780 265 Q720 260 680 250 Q650 245 630 230 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Бразилия */}
+				<path
+					id="br"
+					d="M280 280 Q350 270 420 290 Q480 300 520 320 L520 380 Q480 400 420 395 Q350 390 300 375 Q280 365 270 345 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Австралия */}
+				<path
+					id="au"
+					d="M750 350 Q820 340 880 360 Q920 370 950 380 L950 420 Q920 440 880 435 Q820 430 780 420 Q750 415 730 395 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Индия */}
+				<path
+					id="in"
+					d="M620 220 Q660 210 700 230 Q730 240 750 260 L750 300 Q730 320 700 315 Q660 310 630 295 Q620 285 610 265 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Германия */}
+				<path
+					id="de"
+					d="M480 140 Q500 135 520 145 Q535 150 545 160 L545 180 Q535 190 520 185 Q500 180 485 175 Q480 165 475 155 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Франция */}
+				<path
+					id="fr"
+					d="M450 160 Q470 155 485 165 Q495 170 500 180 L500 200 Q495 210 485 205 Q470 200 455 195 Q450 185 445 175 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Великобритания */}
+				<path
+					id="gb"
+					d="M430 130 Q445 125 455 135 Q465 140 470 150 L470 170 Q465 180 455 175 Q445 170 435 165 Q430 155 425 145 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Япония */}
+				<path
+					id="jp"
+					d="M850 200 Q870 195 885 205 Q895 210 900 220 L900 240 Q895 250 885 245 Q870 240 855 235 Q850 225 845 215 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Италия */}
+				<path
+					id="it"
+					d="M490 190 Q505 185 515 195 Q525 200 530 210 L530 240 Q525 255 515 250 Q505 245 495 240 Q490 230 485 220 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Испания */}
+				<path
+					id="es"
+					d="M420 190 Q440 185 455 195 Q470 200 480 210 L480 230 Q470 240 455 235 Q440 230 425 225 Q420 215 415 205 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Аргентина */}
+				<path
+					id="ar"
+					d="M300 380 Q320 375 340 385 Q360 390 380 400 L380 450 Q360 470 340 465 Q320 460 305 455 Q300 445 295 435 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Мексика */}
+				<path
+					id="mx"
+					d="M180 200 Q220 190 260 210 Q300 220 330 240 L330 270 Q300 290 260 285 Q220 280 190 270 Q180 260 175 250 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Турция */}
+				<path
+					id="tr"
+					d="M540 180 Q560 175 575 185 Q590 190 600 200 L600 220 Q590 230 575 225 Q560 220 545 215 Q540 205 535 195 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Египет */}
+				<path
+					id="eg"
+					d="M520 240 Q535 235 545 245 Q555 250 560 260 L560 280 Q555 290 545 285 Q535 280 525 275 Q520 265 515 255 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* ЮАР */}
+				<path
+					id="za"
+					d="M520 340 Q540 335 555 345 Q570 350 580 360 L580 380 Q570 390 555 385 Q540 380 525 375 Q520 365 515 355 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Саудовская Аравия */}
+				<path
+					id="sa"
+					d="M580 240 Q600 235 615 245 Q630 250 640 260 L640 290 Q630 300 615 295 Q600 290 585 285 Q580 275 575 265 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Иран */}
+				<path
+					id="ir"
+					d="M600 200 Q620 195 635 205 Q650 210 660 220 L660 250 Q650 260 635 255 Q620 250 605 245 Q600 235 595 225 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Казахстан */}
+				<path
+					id="kz"
+					d="M580 120 Q620 110 660 130 Q700 140 730 150 L730 180 Q700 190 660 185 Q620 180 590 175 Q580 165 575 155 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Монголия */}
+				<path
+					id="mn"
+					d="M700 140 Q730 130 760 150 Q790 160 810 170 L810 190 Q790 200 760 195 Q730 190 705 185 Q700 175 695 165 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Индонезия */}
+				<path
+					id="id"
+					d="M720 290 Q760 280 800 300 Q840 310 870 320 L870 340 Q840 350 800 345 Q760 340 730 335 Q720 325 715 315 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Норвегия */}
+				<path
+					id="no"
+					d="M480 80 Q490 75 500 85 Q510 90 515 100 L515 130 Q510 140 500 135 Q490 130 485 125 Q480 115 475 105 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Швеция */}
+				<path
+					id="se"
+					d="M500 90 Q510 85 520 95 Q530 100 535 110 L535 140 Q530 150 520 145 Q510 140 505 135 Q500 125 495 115 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Финляндия */}
+				<path
+					id="fi"
+					d="M520 90 Q530 85 540 95 Q550 100 555 110 L555 140 Q550 150 540 145 Q530 140 525 135 Q520 125 515 115 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Польша */}
+				<path
+					id="pl"
+					d="M510 150 Q525 145 535 155 Q545 160 550 170 L550 190 Q545 200 535 195 Q525 190 515 185 Q510 175 505 165 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Украина */}
+				<path
+					id="ua"
+					d="M530 160 Q550 155 565 165 Q580 170 590 180 L590 200 Q580 210 565 205 Q550 200 535 195 Q530 185 525 175 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Беларусь */}
+				<path
+					id="by"
+					d="M520 140 Q535 135 545 145 Q555 150 560 160 L560 180 Q555 190 545 185 Q535 180 525 175 Q520 165 515 155 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Литва */}
+				<path
+					id="lt"
+					d="M510 130 Q520 125 525 135 Q530 140 535 150 L535 165 Q530 175 525 170 Q520 165 515 160 Q510 150 505 140 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Латвия */}
+				<path
+					id="lv"
+					d="M515 125 Q525 120 530 130 Q535 135 540 145 L540 160 Q535 170 530 165 Q525 160 520 155 Q515 145 510 135 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+
+				{/* Эстония */}
+				<path
+					id="ee"
+					d="M520 120 Q530 115 535 125 Q540 130 545 140 L545 155 Q540 165 535 160 Q530 155 525 150 Q520 140 515 130 Z"
+					fill="#e5e5e5"
+					stroke="#fff"
+					strokeWidth="0.5"
+				/>
+			</svg>
+
+			{/* Tooltip */}
+			{tooltip && (
+				<div
+					style={{
+						position: 'absolute',
+						left: tooltip.x + 10,
+						top: tooltip.y - 30,
+						background: 'rgba(0, 0, 0, 0.8)',
+						color: 'white',
+						padding: '8px 12px',
+						borderRadius: '4px',
+						fontSize: '12px',
+						whiteSpace: 'nowrap',
+						pointerEvents: 'none',
+						zIndex: 1000,
+					}}
+				>
+					{tooltip.country.name}
+				</div>
+			)}
+		</div>
+	);
+};
+
+export default WorldMap;

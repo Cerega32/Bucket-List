@@ -39,7 +39,7 @@ export const PageEditGoalList: FC<IPage> = ({page}) => {
 					throw new Error(response.error || 'Невозможно загрузить список');
 				}
 
-				if (!response.data.list.isCanEdit) {
+				if (!response.data.list.isCanEdit && !response.data.list.isCanAddGoals) {
 					NotificationStore.addNotification({
 						type: 'error',
 						title: 'Ошибка',

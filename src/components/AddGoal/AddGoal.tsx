@@ -567,7 +567,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					// Создаем новое место
 					try {
 						const newLocation = await mapApi.createLocation({
-							name: selectedGoalLocation.name!,
+							name: selectedGoalLocation.name! || title,
 							longitude: selectedGoalLocation.longitude!,
 							latitude: selectedGoalLocation.latitude!,
 							country: selectedGoalLocation.country!,
