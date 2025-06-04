@@ -7,6 +7,7 @@ import {ContentGoal} from '@/components/ContentGoal/ContentGoal';
 import {EditGoal} from '@/components/EditGoal/EditGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
 import {Loader} from '@/components/Loader/Loader';
+import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {GoalStore} from '@/store/GoalStore';
@@ -217,6 +218,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				/>
 				<ContentGoal page={page} goal={goal} className={element('content')} />
 			</section>
+			<ScrollToTop />
 		</main>
 	);
 });

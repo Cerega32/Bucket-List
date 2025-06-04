@@ -73,7 +73,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 				{iconBegin && <Svg icon={iconBegin} className={element('icon-begin')} />}
 				{typeState === 'textarea' ? (
 					<textarea
-						className={element('input', {iconBegin: !!iconBegin})}
+						className={element('input', {iconBegin: !!iconBegin, textarea: true})}
 						id={id}
 						placeholder={placeholder}
 						value={value}

@@ -74,6 +74,28 @@ export interface IGoal {
 		days_left: number;
 		is_expired: boolean;
 	} | null;
+
+	// Поля для игр
+	gamePlatforms?: string[];
+	gameRating?: number;
+	gameMetacritic?: number;
+	gameIdRawg?: string;
+	gameReleased?: string;
+	gameGenres?: string[];
+	gameDevelopers?: string[];
+
+	// Поля для книг
+	bookAuthors?: string[];
+	bookPublishedDate?: string;
+
+	// Поля для фильмов
+	movieContentType?: string;
+	movieIdKinopoisk?: string;
+	movieRatingKp?: number;
+	movieRatingImdb?: number;
+	movieYear?: number;
+	movieGenres?: string[];
+	movieCountries?: string[];
 }
 
 export interface IShortGoal {

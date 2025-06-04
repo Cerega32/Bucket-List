@@ -1,0 +1,68 @@
+.scroll-to-top {
+	position: fixed;
+	z-index: 1000;
+	right: 20px;
+	bottom: 20px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 48px;
+	height: 48px;
+	background: var(--color-green);
+	border: none;
+	border-radius: 50%;
+	color: var(--color-white);
+	cursor: pointer;
+	pointer-events: auto;
+	opacity: 1;
+	transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+	transform: translateY(0);
+	box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+
+	@include md {
+		right: 16px;
+		bottom: 16px;
+		width: 44px;
+		height: 44px;
+	}
+
+	&:hover {
+		background: var(--color-green-dark);
+		transform: translateY(-2px);
+		box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
+	}
+
+	&:active {
+		transform: translateY(0);
+		box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+	}
+
+	&:hover &__icon {
+		transform: translateY(-1px);
+	}
+
+	&--fade-out {
+		pointer-events: none;
+		opacity: 0;
+		transform: translateY(20px);
+	}
+}
+
+@keyframes fade-in-up {
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes fade-out-down {
+	from {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	to {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+}

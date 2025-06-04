@@ -15,18 +15,39 @@ import Select from '../Select/Select';
 import './external-goal-search.scss';
 
 // Список поддерживаемых категорий
-const SupportedCategories = ['books', 'cinema-art'];
+const SupportedCategories = ['books', 'cinema-art', 'gaming'];
 
 interface ExternalGoalResult {
 	externalId: string | number;
 	title: string;
 	description?: string;
 	imageUrl?: string;
-	type: 'cinema-art' | 'book' | 'travel';
+	type: 'cinema-art' | 'book' | 'travel' | 'gaming';
 	releaseDate?: string;
 	authors?: string[];
 	address?: string;
 	popularity?: number;
+	// Дополнительные поля из API
+	additionalFields?: {
+		// Поля для игр
+		platforms?: string[];
+		rating?: number;
+		metacritic?: number;
+		released?: string;
+		genres?: string[];
+		developers?: string[];
+
+		// Поля для книг
+		authors?: string[];
+		publishedDate?: string;
+
+		// Поля для фильмов
+		contentType?: string;
+		ratingKp?: number;
+		ratingImdb?: number;
+		year?: number;
+		countries?: string[];
+	};
 }
 
 interface ExternalGoalSearchProps {
@@ -124,6 +145,20 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 			externalType: goalData.type, // Тип внешнего источника
 			complexity: selectComplexity[activeComplexity].value as IComplexity,
 		};
+
+		// Добавляем дополнительные поля из API, если они есть
+		if (goalData.additionalFields) {
+			const fields = goalData.additionalFields;
+
+			// Добавляем все дополнительные поля как отдельные свойства
+			Object.keys(fields).forEach((key) => {
+				const value = fields[key as keyof typeof fields];
+				if (value !== undefined && value !== null) {
+					(goalInfo as any)[key] = value;
+				}
+			});
+		}
+
 		// Если есть URL изображения, проверяем его доступность
 		if (goalData.imageUrl) {
 			setImageLoading((prev) => ({...prev, [String(goalData.externalId)]: true}));
@@ -158,6 +193,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 		const names: Record<string, string> = {
 			books: 'книги',
 			'cinema-art': 'фильмы',
+			gaming: 'игры',
 		};
 		return names[categoryEn] || 'контент';
 	};

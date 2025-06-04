@@ -56,6 +56,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [showAddGoalForm, setShowAddGoalForm] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
+	const formRef = useRef<HTMLDivElement>(null);
 
 	// Состояния для работы с целями
 	const [selectedGoals, setSelectedGoals] = useState<IGoal[]>([]);
@@ -349,6 +350,12 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 		}
 	};
 
+	useEffect(() => {
+		if (showAddGoalForm && formRef.current) {
+			formRef.current.scrollIntoView({behavior: 'smooth', block: 'start'});
+		}
+	}, [showAddGoalForm]);
+
 	return (
 		<form className={block()} onSubmit={onSubmit}>
 			<Title tag="h1" className={element('title')}>
@@ -551,7 +558,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 									Создать новую цель
 								</Button>
 							) : (
-								<div className={element('new-goal-form')}>
+								<div className={element('new-goal-form')} ref={formRef}>
 									<Title tag="h3" className={element('form-title')}>
 										Создание новой цели
 									</Title>

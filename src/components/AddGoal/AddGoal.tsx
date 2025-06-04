@@ -71,6 +71,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+	// Состояние для хранения дополнительных полей из внешних API
+	const [externalGoalFields, setExternalGoalFields] = useState<any>(null);
+
 	// // Состояния для работы с местами
 	const [selectedGoalLocation, setSelectedGoalLocation] = useState<Partial<ILocation> | null>(null);
 	const {setWindow, setModalProps, setIsOpen} = ModalStore;
@@ -497,6 +500,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		setImage(null);
 		setImageUrl(null);
 		setSimilarGoals([]);
+		setExternalGoalFields(null); // Очищаем дополнительные поля
 		// // Сброс места
 		// setSelectedGoalLocation(null);
 		// setShowLocationPicker(false);
@@ -592,6 +596,19 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			// // Если создано место, добавляем его ID
 			if (locationId) {
 				formData.append('location_id', locationId.toString());
+			}
+
+			// Добавляем дополнительные поля из внешних API, если они есть
+			if (externalGoalFields) {
+				Object.entries(externalGoalFields).forEach(([key, value]) => {
+					if (value !== undefined && value !== null) {
+						if (Array.isArray(value)) {
+							formData.append(key, JSON.stringify(value));
+						} else {
+							formData.append(key, String(value));
+						}
+					}
+				});
 			}
 
 			const response = await postCreateGoal(formData);
@@ -720,6 +737,19 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				formData.append('location_id', locationId.toString());
 			}
 
+			// Добавляем дополнительные поля из внешних API, если они есть
+			if (externalGoalFields) {
+				Object.entries(externalGoalFields).forEach(([key, value]) => {
+					if (value !== undefined && value !== null) {
+						if (Array.isArray(value)) {
+							formData.append(key, JSON.stringify(value));
+						} else {
+							formData.append(key, String(value));
+						}
+					}
+				});
+			}
+
 			const response = await postCreateGoal(formData);
 
 			if (response.success) {
@@ -813,6 +843,32 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			setImageUrl(goalData.image);
 			setImage(null); // Сбрасываем локально загруженное изображение
 		}
+
+		// Сохраняем дополнительные поля для передачи на сервер
+		const additionalFields = {
+			external_id: goalData.external_id,
+			type: goalData.externalType,
+			// Извлекаем все дополнительные поля, исключая стандартные поля IGoal
+			...Object.fromEntries(
+				Object.entries(goalData).filter(
+					([key]) =>
+						![
+							'title',
+							'description',
+							'estimatedTime',
+							'complexity',
+							'category',
+							'subcategory',
+							'imageUrl',
+							'image',
+							'external_id',
+							'externalType',
+						].includes(key)
+				)
+			),
+		};
+		console.log(additionalFields);
+		setExternalGoalFields(additionalFields);
 
 		// Показываем уведомление
 		NotificationStore.addNotification({
