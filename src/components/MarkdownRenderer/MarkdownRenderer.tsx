@@ -132,21 +132,21 @@ const createMarkdownComponents = (
 	handleCheckboxChange: (checked: boolean, index: number) => void,
 	editable: boolean
 ): Components => ({
-	input: (props: MarkdownInputProps) => (
-		<MarkdownInput {...props} element={element} onCheckboxChange={handleCheckboxChange} editable={editable} />
+	input: (props: any) => (
+		<MarkdownInput {...(props as MarkdownInputProps)} element={element} onCheckboxChange={handleCheckboxChange} editable={editable} />
 	),
-	li: (props: MarkdownComponentProps) => <MarkdownListItem {...props} element={element} />,
-	p: (props: MarkdownComponentProps) => <MarkdownParagraph {...props} element={element} />,
-	h1: (props: MarkdownComponentProps) => <MarkdownHeading1 {...props} element={element} />,
-	h2: (props: MarkdownComponentProps) => <MarkdownHeading2 {...props} element={element} />,
-	h3: (props: MarkdownComponentProps) => <MarkdownHeading3 {...props} element={element} />,
-	code: (props: MarkdownCodeProps) => <MarkdownCode {...props} element={element} />,
-	pre: (props: MarkdownComponentProps) => <MarkdownPre {...props} element={element} />,
-	blockquote: (props: MarkdownComponentProps) => <MarkdownBlockquote {...props} element={element} />,
-	a: (props: MarkdownComponentProps) => <MarkdownLink {...props} element={element} />,
-	table: (props: MarkdownComponentProps) => <MarkdownTable {...props} element={element} />,
-	th: (props: MarkdownComponentProps) => <MarkdownTableHeader {...props} element={element} />,
-	td: (props: MarkdownComponentProps) => <MarkdownTableCell {...props} element={element} />,
+	li: (props: any) => <MarkdownListItem {...(props as MarkdownComponentProps)} element={element} />,
+	p: (props: any) => <MarkdownParagraph {...(props as MarkdownComponentProps)} element={element} />,
+	h1: (props: any) => <MarkdownHeading1 {...(props as MarkdownComponentProps)} element={element} />,
+	h2: (props: any) => <MarkdownHeading2 {...(props as MarkdownComponentProps)} element={element} />,
+	h3: (props: any) => <MarkdownHeading3 {...(props as MarkdownComponentProps)} element={element} />,
+	code: (props: any) => <MarkdownCode {...(props as MarkdownCodeProps)} element={element} />,
+	pre: (props: any) => <MarkdownPre {...(props as MarkdownComponentProps)} element={element} />,
+	blockquote: (props: any) => <MarkdownBlockquote {...(props as MarkdownComponentProps)} element={element} />,
+	a: (props: any) => <MarkdownLink {...(props as MarkdownComponentProps)} element={element} />,
+	table: (props: any) => <MarkdownTable {...(props as MarkdownComponentProps)} element={element} />,
+	th: (props: any) => <MarkdownTableHeader {...(props as MarkdownComponentProps)} element={element} />,
+	td: (props: any) => <MarkdownTableCell {...(props as MarkdownComponentProps)} element={element} />,
 });
 
 export const MarkdownRenderer: FC<MarkdownRendererProps> = ({className, content, onProgressChange, editable = false, onContentChange}) => {

@@ -290,11 +290,12 @@ export const CreateTodoTaskForm: FC<CreateTodoTaskFormProps> = ({className, defa
 							<select
 								id="task-recurring-type"
 								className={element('select')}
-								value={formData.recurringPattern.type}
+								value={formData.recurringPattern?.type || 'daily'}
 								onChange={(e) => {
 									const newPattern: RecurringPattern = {
-										...formData.recurringPattern,
 										type: e.target.value as RecurringPattern['type'],
+										interval: formData.recurringPattern?.interval || 1,
+										...formData.recurringPattern,
 									};
 									handleInputChange('recurringPattern', newPattern);
 								}}
@@ -314,11 +315,12 @@ export const CreateTodoTaskForm: FC<CreateTodoTaskFormProps> = ({className, defa
 								type="number"
 								min="1"
 								className={element('input')}
-								value={formData.recurringPattern.interval}
+								value={formData.recurringPattern?.interval || 1}
 								onChange={(e) => {
 									const newPattern: RecurringPattern = {
-										...formData.recurringPattern,
+										type: formData.recurringPattern?.type || 'daily',
 										interval: parseInt(e.target.value, 10) || 1,
+										...formData.recurringPattern,
 									};
 									handleInputChange('recurringPattern', newPattern);
 								}}
