@@ -3,6 +3,7 @@ import {FileDrop} from 'react-file-drop';
 import {useLocation, useNavigate} from 'react-router-dom';
 
 import {AddGoal} from '@/components/AddGoal/AddGoal';
+import {AutoListCreator} from '@/components/AutoListCreator/AutoListCreator';
 import {Button} from '@/components/Button/Button';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
@@ -19,7 +20,7 @@ import {getComplexity, selectComplexity} from '@/utils/values/complexity';
 
 import {GoalSearchItem} from '../GoalSearchItem/GoalSearchItem';
 import Select from '../Select/Select';
-
+import {SwitchButton} from '../SwitchButton/SwitchButton';
 import './add-goal-list.scss';
 
 // Ключ для хранения данных в localStorage
@@ -38,6 +39,8 @@ interface CachedGoalListData {
 interface AddGoalListProps {
 	className?: string;
 }
+
+type CreationMode = 'manual' | 'auto';
 
 export const AddGoalList: FC<AddGoalListProps> = (props) => {
 	const {className} = props;
@@ -66,6 +69,9 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 
 	// Добавляем состояние для перехода к созданию цели
 	const [canCreateGoal, setCanCreateGoal] = useState(false);
+
+	// Добавляем состояние для режима создания
+	const [creationMode, setCreationMode] = useState<CreationMode>('manual');
 
 	// Восстанавливаем данные из кеша при загрузке компонента
 	useEffect(() => {
@@ -356,253 +362,342 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 		}
 	}, [showAddGoalForm]);
 
+	// Обработчик для успешного создания списка из автоматического режима
+	const handleAutoListCreated = (listCode: string) => {
+		clearCache();
+
+		NotificationStore.addNotification({
+			type: 'success',
+			title: 'Готово!',
+			message: 'Список успешно создан автоматически',
+		});
+
+		navigate(`/list/${listCode}`);
+	};
+
+	// Получаем ID выбранной категории для передачи в AutoListCreator
+	const getCategoryId = () => {
+		if (activeCategory === null) return undefined;
+		return typeof activeSubcategory === 'number' ? subcategories[activeSubcategory]?.id : categories[activeCategory]?.id;
+	};
+
 	return (
 		<form className={block()} onSubmit={onSubmit}>
-			<Title tag="h1" className={element('title')}>
-				Создание нового списка целей
-			</Title>
-
-			<div className={element('content')}>
-				<div className={element('image-section')}>
-					<p className={element('field-title')}>Изображение списка *</p>
-					{!image ? (
-						<div className={element('dropzone')}>
-							<FileDrop onDrop={(files) => files && onDrop(files)}>
-								<div
-									className={element('upload-placeholder')}
-									onClick={handleFileInputClick}
-									role="button"
-									tabIndex={0}
-									aria-label="Добавить изображение"
-									onKeyPress={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											handleFileInputClick();
-										}
-									}}
-								>
-									<input
-										type="file"
-										ref={fileInputRef}
-										style={{display: 'none'}}
-										onChange={handleFileChange}
-										accept="image/*"
-									/>
-									<Svg icon="mount" className={element('upload-icon')} />
-									<p>Перетащите изображение сюда или кликните для выбора (обязательно)</p>
-								</div>
-							</FileDrop>
-						</div>
-					) : (
-						<div className={element('image-preview')}>
-							<img src={URL.createObjectURL(image)} alt="Предпросмотр" className={element('preview')} />
-							<button
-								type="button"
-								className={element('remove-image')}
-								onClick={removeImage}
-								aria-label="Удалить изображение"
-								onKeyDown={(e) => {
-									if (e.key === 'Enter' || e.key === ' ') {
-										removeImage();
-									}
-								}}
-							>
-								<Svg icon="cross" />
-							</button>
-						</div>
-					)}
+			<div className={element('container')}>
+				<Title tag="h1" className={element('title')}>
+					Создание списка целей
+				</Title>
+				<div className={element('wrapper-title')}>
+					<SwitchButton
+						className={element('mode-tabs')}
+						buttons={[
+							{id: 'manual', name: 'Создать вручную'},
+							{id: 'auto', name: 'Загрузить готовый список'},
+						]}
+						active={creationMode}
+						onChange={(id) => setCreationMode(id as CreationMode)}
+					/>
+					<Button size="small" type="Link" theme="blue" icon="plus" href="/goal/create">
+						Добавить цель
+					</Button>
 				</div>
 
-				<div className={element('form')}>
-					<div className={element('field-wrapper')}>
-						<FieldInput
-							placeholder="Введите название списка целей"
-							id="goal-list-title"
-							text="Название списка *"
-							value={title}
-							setValue={handleTitleChange}
-							className={element('field')}
-							required
-						/>
-					</div>
-
-					<Select
-						className={element('field')}
-						placeholder="Выберите категорию"
-						options={categories.map((cat) => ({name: cat.name, value: cat.nameEn}))}
-						activeOption={activeCategory}
-						onSelect={setActiveCategory}
-						text="Категория *"
-					/>
-
-					{activeCategory !== null && subcategories.length > 0 && (
-						<Select
-							className={element('field')}
-							placeholder="Выберите подкатегорию (необязательно)"
-							options={subcategories.map((sub) => ({name: sub.name, value: sub.nameEn}))}
-							activeOption={activeSubcategory}
-							onSelect={setActiveSubcategory}
-							text="Подкатегория"
-						/>
-					)}
-
-					<Select
-						className={element('field')}
-						placeholder="Выберите сложность"
-						options={selectComplexity}
-						activeOption={activeComplexity}
-						onSelect={setActiveComplexity}
-						text="Сложность *"
-					/>
-
-					<FieldInput
-						placeholder="Опишите список целей подробно"
-						id="goal-list-description"
-						text="Описание *"
-						value={description}
-						setValue={setDescription}
-						className={element('field')}
-						type="textarea"
-						required
-					/>
-
-					<div className={element('goals-section')}>
-						<Title tag="h2" className={element('subtitle')}>
-							Добавление целей в список
-						</Title>
-
-						<div className={element('search-container')}>
-							<FieldInput
-								placeholder="Поиск существующих целей"
-								id="goal-search"
-								text="Поиск целей"
-								value={searchQuery}
-								setValue={setSearchQuery}
-								className={element('search-field')}
-								iconBegin="search"
+				{creationMode === 'auto' ? (
+					// Автоматический режим создания из текста
+					<div className={element('auto-mode')}>
+						<div className={element('auto-category-selector')}>
+							<Select
+								className={element('field')}
+								placeholder="Сначала выберите категорию"
+								options={categories.map((cat) => ({name: cat.name, value: cat.nameEn}))}
+								activeOption={activeCategory}
+								onSelect={setActiveCategory}
+								text="Категория *"
 							/>
 
-							{searchResults.length > 0 && (
-								<div className={element('search-results')}>
-									{searchResults.map((goal) => (
-										<GoalSearchItem key={goal.id} goal={goal} onAdd={addGoalFromSearch} />
-									))}
-								</div>
+							{activeCategory !== null && subcategories.length > 0 && (
+								<Select
+									className={element('field')}
+									placeholder="Выберите подкатегорию (необязательно)"
+									options={subcategories.map((sub) => ({name: sub.name, value: sub.nameEn}))}
+									activeOption={activeSubcategory}
+									onSelect={setActiveSubcategory}
+									text="Подкатегория"
+								/>
 							)}
 						</div>
 
-						<div className={element('selected-goals')}>
-							<h3 className={element('section-title')}>Выбранные цели ({selectedGoals.length})</h3>
+						{activeCategory !== null && (
+							<AutoListCreator
+								categoryId={getCategoryId()}
+								onListCreated={handleAutoListCreated}
+								className={element('auto-creator')}
+								initialCategory={
+									activeSubcategory !== null ? subcategories[activeSubcategory] : categories[activeCategory!]
+								}
+								preloadedCategories={categories}
+								preloadedSubcategories={subcategories}
+							/>
+						)}
 
-							{selectedGoals.length > 0 ? (
-								<div className={element('goals-list')}>
-									{selectedGoals.map((goal) => (
-										<div key={goal.id} className={element('goal-item')}>
-											<div className={element('goal-content')}>
-												<div className={element('goal-image-container')}>
-													{goal.image ? (
-														<img src={goal.image} alt={goal.title} className={element('goal-image')} />
-													) : (
-														<div className={element('goal-no-image')}>
-															<Svg icon="mount" />
-														</div>
-													)}
-												</div>
-												<div className={element('goal-info')}>
-													<h4 className={element('goal-title')}>{goal.title}</h4>
-													<p className={element('goal-complexity')}>{getComplexity[goal.complexity]}</p>
-													<p className={element('goal-description')}>{goal.shortDescription}</p>
-												</div>
-											</div>
-											<button
-												type="button"
-												className={element('goal-remove-btn')}
-												onClick={() => removeSelectedGoal(goal.id)}
-												aria-label="Удалить цель"
-												onKeyDown={(e) => {
-													if (e.key === 'Enter' || e.key === ' ') {
-														removeSelectedGoal(goal.id);
-													}
-												}}
-											>
-												<Svg icon="cross" />
-											</button>
+						{activeCategory === null && (
+							<div className={element('auto-placeholder')}>
+								<Svg icon="info" className={element('auto-placeholder-icon')} />
+								<h3 className={element('auto-placeholder-title')}>Выберите категорию</h3>
+								<p className={element('auto-placeholder-text')}>
+									Для автоматического создания списка сначала выберите категорию. Это поможет системе лучше находить
+									соответствующие цели.
+								</p>
+							</div>
+						)}
+					</div>
+				) : (
+					// Существующий ручной режим создания
+					<div className={element('content')}>
+						<div className={element('image-section')}>
+							<p className={element('field-title')}>Изображение списка *</p>
+							{!image ? (
+								<div className={element('dropzone')}>
+									<FileDrop onDrop={(files) => files && onDrop(files)}>
+										<div
+											className={element('upload-placeholder')}
+											onClick={handleFileInputClick}
+											role="button"
+											tabIndex={0}
+											aria-label="Добавить изображение"
+											onKeyPress={(e) => {
+												if (e.key === 'Enter' || e.key === ' ') {
+													handleFileInputClick();
+												}
+											}}
+										>
+											<input
+												type="file"
+												ref={fileInputRef}
+												style={{display: 'none'}}
+												onChange={handleFileChange}
+												accept="image/*"
+											/>
+											<Svg icon="mount" className={element('upload-icon')} />
+											<p>Перетащите изображение сюда или кликните для выбора (обязательно)</p>
 										</div>
-									))}
+									</FileDrop>
 								</div>
 							) : (
-								<div className={element('empty-message')}>
-									Вы еще не добавили ни одной цели. Воспользуйтесь поиском или создайте новую цель.
+								<div className={element('image-preview')}>
+									<img src={URL.createObjectURL(image)} alt="Предпросмотр" className={element('preview')} />
+									<button
+										type="button"
+										className={element('remove-image')}
+										onClick={removeImage}
+										aria-label="Удалить изображение"
+										onKeyDown={(e) => {
+											if (e.key === 'Enter' || e.key === ' ') {
+												removeImage();
+											}
+										}}
+									>
+										<Svg icon="cross" />
+									</button>
 								</div>
 							)}
 						</div>
 
-						<div className={element('add-new-goal')}>
-							{!showAddGoalForm ? (
-								<Button
-									theme="blue-light"
-									className={element('add-goal-btn')}
-									onClick={() => {
-										if (canCreateGoal) {
-											setShowAddGoalForm(true);
-										} else {
-											NotificationStore.addNotification({
-												type: 'warning',
-												title: 'Внимание',
-												message: 'Для создания цели необходимо сначала выбрать категорию списка',
-											});
-										}
-									}}
-									type="button"
-									icon="plus"
-								>
-									Создать новую цель
-								</Button>
-							) : (
-								<div className={element('new-goal-form')} ref={formRef}>
-									<Title tag="h3" className={element('form-title')}>
-										Создание новой цели
-									</Title>
+						<div className={element('form')}>
+							<div className={element('field-wrapper')}>
+								<FieldInput
+									placeholder="Введите название списка целей"
+									id="goal-list-title"
+									text="Название списка *"
+									value={title}
+									setValue={handleTitleChange}
+									className={element('field')}
+									required
+								/>
+							</div>
 
-									<div className={element('embedded-add-goal-wrapper')}>
-										<AddGoal
-											className={element('embedded-add-goal')}
-											onGoalCreated={handleGoalCreated}
-											hideNavigation
-											noForm
-											onSubmitForm={handleAddGoalSubmit}
-											initialCategory={
-												activeSubcategory !== null ? subcategories[activeSubcategory] : categories[activeCategory!]
-											}
-											lockCategory // Блокируем выбор категории
-											preloadedCategories={categories}
-											preloadedSubcategories={subcategories}
-										/>
-									</div>
+							<Select
+								className={element('field')}
+								placeholder="Выберите категорию"
+								options={categories.map((cat) => ({name: cat.name, value: cat.nameEn}))}
+								activeOption={activeCategory}
+								onSelect={setActiveCategory}
+								text="Категория *"
+							/>
 
-									<div className={element('form-buttons')}>
+							{activeCategory !== null && subcategories.length > 0 && (
+								<Select
+									className={element('field')}
+									placeholder="Выберите подкатегорию (необязательно)"
+									options={subcategories.map((sub) => ({name: sub.name, value: sub.nameEn}))}
+									activeOption={activeSubcategory}
+									onSelect={setActiveSubcategory}
+									text="Подкатегория"
+								/>
+							)}
+
+							<Select
+								className={element('field')}
+								placeholder="Выберите сложность"
+								options={selectComplexity}
+								activeOption={activeComplexity}
+								onSelect={setActiveComplexity}
+								text="Сложность *"
+							/>
+
+							<FieldInput
+								placeholder="Опишите список целей подробно"
+								id="goal-list-description"
+								text="Описание *"
+								value={description}
+								setValue={setDescription}
+								className={element('field')}
+								type="textarea"
+								required
+							/>
+
+							<div className={element('goals-section')}>
+								<Title tag="h2" className={element('subtitle')}>
+									Добавление целей в список
+								</Title>
+
+								<div className={element('search-container')}>
+									<FieldInput
+										placeholder="Поиск существующих целей"
+										id="goal-search"
+										text="Поиск целей"
+										value={searchQuery}
+										setValue={setSearchQuery}
+										className={element('search-field')}
+										iconBegin="search"
+									/>
+
+									{searchResults.length > 0 && (
+										<div className={element('search-results')}>
+											{searchResults.map((goal) => (
+												<GoalSearchItem key={goal.id} goal={goal} onAdd={addGoalFromSearch} />
+											))}
+										</div>
+									)}
+								</div>
+
+								<div className={element('selected-goals')}>
+									<h3 className={element('section-title')}>Выбранные цели ({selectedGoals.length})</h3>
+
+									{selectedGoals.length > 0 ? (
+										<div className={element('goals-list')}>
+											{selectedGoals.map((goal) => (
+												<div key={goal.id} className={element('goal-item')}>
+													<div className={element('goal-content')}>
+														<div className={element('goal-image-container')}>
+															{goal.image ? (
+																<img src={goal.image} alt={goal.title} className={element('goal-image')} />
+															) : (
+																<div className={element('goal-no-image')}>
+																	<Svg icon="mount" />
+																</div>
+															)}
+														</div>
+														<div className={element('goal-info')}>
+															<h4 className={element('goal-title')}>{goal.title}</h4>
+															<p className={element('goal-complexity')}>{getComplexity[goal.complexity]}</p>
+															<p className={element('goal-description')}>{goal.shortDescription}</p>
+														</div>
+													</div>
+													<button
+														type="button"
+														className={element('goal-remove-btn')}
+														onClick={() => removeSelectedGoal(goal.id)}
+														aria-label="Удалить цель"
+														onKeyDown={(e) => {
+															if (e.key === 'Enter' || e.key === ' ') {
+																removeSelectedGoal(goal.id);
+															}
+														}}
+													>
+														<Svg icon="cross" />
+													</button>
+												</div>
+											))}
+										</div>
+									) : (
+										<div className={element('empty-message')}>
+											Вы еще не добавили ни одной цели. Воспользуйтесь поиском или создайте новую цель.
+										</div>
+									)}
+								</div>
+
+								<div className={element('add-new-goal')}>
+									{!showAddGoalForm ? (
 										<Button
 											theme="blue-light"
-											className={element('cancel-btn')}
-											onClick={() => setShowAddGoalForm(false)}
+											className={element('add-goal-btn')}
+											onClick={() => {
+												if (canCreateGoal) {
+													setShowAddGoalForm(true);
+												} else {
+													NotificationStore.addNotification({
+														type: 'warning',
+														title: 'Внимание',
+														message: 'Для создания цели необходимо сначала выбрать категорию списка',
+													});
+												}
+											}}
 											type="button"
+											icon="plus"
 										>
-											Отмена
+											Создать новую цель
 										</Button>
-									</div>
+									) : (
+										<div className={element('new-goal-form')} ref={formRef}>
+											<Title tag="h3" className={element('form-title')}>
+												Создание новой цели
+											</Title>
+
+											<div className={element('embedded-add-goal-wrapper')}>
+												<AddGoal
+													className={element('embedded-add-goal')}
+													onGoalCreated={handleGoalCreated}
+													hideNavigation
+													noForm
+													onSubmitForm={handleAddGoalSubmit}
+													initialCategory={
+														activeSubcategory !== null
+															? subcategories[activeSubcategory]
+															: categories[activeCategory!]
+													}
+													lockCategory // Блокируем выбор категории
+													preloadedCategories={categories}
+													preloadedSubcategories={subcategories}
+												/>
+											</div>
+
+											<div className={element('form-buttons')}>
+												<Button
+													theme="blue-light"
+													className={element('cancel-btn')}
+													onClick={() => setShowAddGoalForm(false)}
+													type="button"
+												>
+													Отмена
+												</Button>
+											</div>
+										</div>
+									)}
 								</div>
-							)}
+							</div>
+
+							<div className={element('btns-wrapper')}>
+								<Button theme="blue-light" className={element('btn')} onClick={() => navigate(-1)} type="button">
+									Отмена
+								</Button>
+								<Button theme="blue" className={element('btn')} typeBtn="submit">
+									{isLoading ? 'Создание...' : 'Создать список целей (+20 опыта)'}
+								</Button>
+							</div>
 						</div>
 					</div>
-
-					<div className={element('btns-wrapper')}>
-						<Button theme="blue-light" className={element('btn')} onClick={() => navigate(-1)} type="button">
-							Отмена
-						</Button>
-						<Button theme="blue" className={element('btn')} typeBtn="submit">
-							{isLoading ? 'Создание...' : 'Создать список целей (+20 опыта)'}
-						</Button>
-					</div>
-				</div>
+				)}
 			</div>
 		</form>
 	);
