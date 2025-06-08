@@ -11,7 +11,7 @@ interface IGoalExtended {
 	id: number | string;
 	title: string;
 	description: string;
-	image?: string;
+	image?: string | File;
 	shortDescription: string;
 	complexity: string;
 	category: ICategory;
