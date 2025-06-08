@@ -867,7 +867,6 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				)
 			),
 		};
-		console.log(additionalFields);
 		setExternalGoalFields(additionalFields);
 
 		// Показываем уведомление
