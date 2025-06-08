@@ -14,7 +14,7 @@ import {getCategories} from '@/utils/api/get/getCategories';
 import {getCategory} from '@/utils/api/get/getCategory';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {postCreateGoalList} from '@/utils/api/post/postCreateGoalList';
-import {POST} from '@/utils/fetch/requests';
+import {POST_WITH_RETRY} from '@/utils/fetch/requests';
 import {debounce} from '@/utils/time/debounce';
 import {selectComplexity} from '@/utils/values/complexity';
 
@@ -464,7 +464,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 
 		setIsParsingText(true);
 		try {
-			const response = await POST('goal-lists/parse-text', {
+			const response = await POST_WITH_RETRY('goal-lists/parse-text', {
 				body: {
 					text: autoText,
 					category_id: categoryId,

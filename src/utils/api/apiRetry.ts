@@ -18,10 +18,16 @@ const sleep = (ms: number): Promise<void> =>
 /**
  * Выполняет API запрос с автоматическим повтором при rate limiting
  * @param apiCall - Функция выполнения API запроса
- * @param maxRetries - Максимальное количество повторов (по умолчанию 2)
+ * @param maxRetries - Максимальное количество повторов (по умолчанию 3 для лучшей совместимости с backend)
  * @param baseDelay - Базовая задержка в секундах (по умолчанию 1)
+ * @param exponentialBackoff - Использовать экспоненциальную задержку (по умолчанию true)
  */
-export const withRetry = async <T extends ApiResponse>(apiCall: () => Promise<T>, maxRetries = 2, baseDelay = 1): Promise<T> => {
+export const withRetry = async <T extends ApiResponse>(
+	apiCall: () => Promise<T>,
+	maxRetries = 3,
+	baseDelay = 1,
+	exponentialBackoff = true
+): Promise<T> => {
 	let retryCount = 0;
 
 	while (retryCount <= maxRetries) {
@@ -41,13 +47,28 @@ export const withRetry = async <T extends ApiResponse>(apiCall: () => Promise<T>
 				const retryAfter = (response.errors as any).retry_after || baseDelay;
 				const apiName = (response.errors as any).api_name || 'API';
 
+				// Рассчитываем задержку
+				let delay = retryAfter;
+
+				if (exponentialBackoff && retryCount > 0) {
+					// Экспоненциальная задержка с jitter для избежания thundering herd
+					delay = baseDelay * 2 ** retryCount + Math.random() * 0.5;
+				} else {
+					// Линейная задержка с небольшим jitter
+					delay = retryAfter + Math.random() * 0.5;
+				}
+
+				// Минимальная задержка для IGDB API
+				if (apiName.toLowerCase().includes('igdb')) {
+					delay = Math.max(delay, 0.3);
+				}
+
 				console.log(
-					`${apiName} rate limit exceeded, retrying after ${retryAfter} seconds... (attempt ${retryCount + 1}/${maxRetries})`
+					`${apiName} rate limit exceeded, retrying in ${delay.toFixed(1)} seconds... (attempt ${retryCount + 1}/${maxRetries})`
 				);
 
-				// Ждем указанное время + небольшая случайная задержка для избежания thundering herd
-				const delay = (retryAfter + Math.random() * 0.5) * 1000;
-				await sleep(delay);
+				// Ждем рассчитанное время
+				await sleep(delay * 1000);
 
 				retryCount++;
 				continue;
@@ -64,13 +85,26 @@ export const withRetry = async <T extends ApiResponse>(apiCall: () => Promise<T>
 
 /**
  * Декоратор для автоматического добавления retry логики к API функциям
+ * @param apiFunction - API функция для оборачивания
+ * @param maxRetries - Максимальное количество повторов
+ * @param baseDelay - Базовая задержка в секундах
+ * @param exponentialBackoff - Использовать экспоненциальную задержку
  */
 export const withApiRetry = <T extends any[], R extends ApiResponse>(
 	apiFunction: (...args: T) => Promise<R>,
-	maxRetries = 2,
-	baseDelay = 1
+	maxRetries = 3,
+	baseDelay = 1,
+	exponentialBackoff = true
 ) => {
 	return async (...args: T): Promise<R> => {
-		return withRetry(() => apiFunction(...args), maxRetries, baseDelay);
+		return withRetry(() => apiFunction(...args), maxRetries, baseDelay, exponentialBackoff);
 	};
+};
+
+/**
+ * Специальная версия retry для автопарсера с пониженными лимитами
+ * для более быстрой обработки batch'ей
+ */
+export const withAutoParserRetry = <T extends ApiResponse>(apiCall: () => Promise<T>): Promise<T> => {
+	return withRetry(apiCall, 2, 0.5, true); // Меньше попыток, но быстрее
 };
