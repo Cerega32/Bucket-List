@@ -1,4 +1,4 @@
-import {FC, FormEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {FileDrop} from 'react-file-drop';
 import {useLocation, useNavigate} from 'react-router-dom';
 
@@ -10,8 +10,7 @@ import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
 import {ICategory, IGoal} from '@/typings/goal';
-import {getCategories} from '@/utils/api/get/getCategories';
-import {getCategory} from '@/utils/api/get/getCategory';
+import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {postCreateGoalList} from '@/utils/api/post/postCreateGoalList';
 import {POST_WITH_RETRY} from '@/utils/fetch/requests';
@@ -90,6 +89,9 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 
 	// Состояние для отслеживания редактируемой цели (только одна одновременно)
 	const [editingGoalId, setEditingGoalId] = useState<number | string | null>(null);
+
+	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
+	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
 
 	// Восстанавливаем данные из кеша при загрузке компонента
 	useEffect(() => {
@@ -177,7 +179,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 	useEffect(() => {
 		const loadCategories = async () => {
 			try {
-				const data = await getCategories();
+				const data = await getAllCategories();
 				if (data.success) {
 					setCategories(data.data);
 				}
@@ -195,31 +197,36 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 
 	// Фильтрация подкатегорий при изменении категории
 	useEffect(() => {
-		if (activeCategory !== null) {
-			const loadSubcategories = async () => {
-				const data = await getCategory(categories[activeCategory].nameEn);
-				if (data.success) {
-					setSubcategories(data.data.subcategories);
-				}
-				setActiveSubcategory(null);
-			};
-			loadSubcategories();
+		if (activeCategory !== null && parentCategories.length > 0 && parentCategories[activeCategory]) {
+			const selectedCategory = parentCategories[activeCategory];
+
+			// Фильтруем подкатегории из общего списка категорий
+			const filteredSubcategories = categories.filter(
+				(cat: ICategory) => cat.parentCategory && cat.parentCategory.id === selectedCategory.id
+			);
+
+			setSubcategories(filteredSubcategories);
+			setActiveSubcategory(null);
+		} else {
+			// Если категория не выбрана
+			setSubcategories([]);
+			setActiveSubcategory(null);
 		}
-	}, [activeCategory, categories]);
+	}, [activeCategory, parentCategories.length]);
 
 	// Добавляем обработку параметра категории из URL
 	useEffect(() => {
 		const params = new URLSearchParams(location.search);
 		const categoryParam = params.get('category');
 
-		if (categoryParam && categories.length > 0) {
-			// Находим индекс категории в массиве categories
-			const categoryIndex = categories.findIndex((cat) => cat.nameEn === categoryParam);
+		if (categoryParam && parentCategories.length > 0) {
+			// Находим индекс категории в массиве parentCategories
+			const categoryIndex = parentCategories.findIndex((cat) => cat.nameEn === categoryParam);
 			if (categoryIndex !== -1) {
 				setActiveCategory(categoryIndex);
 			}
 		}
-	}, [location.search, categories]);
+	}, [location.search, parentCategories.length]);
 
 	// Функция для поиска целей с дебаунсом
 	const debouncedSearch = useCallback(
@@ -247,7 +254,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 				setIsSearching(false);
 			}
 		}, 500),
-		[selectedGoals]
+		[]
 	);
 
 	// Вызов поиска при изменении запроса
@@ -349,10 +356,10 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 				formData.append('complexity', selectComplexity[activeComplexity].value);
 			}
 
-			if (activeSubcategory !== null) {
+			if (activeSubcategory !== null && subcategories[activeSubcategory]) {
 				formData.append('category', subcategories[activeSubcategory].id.toString());
 			} else if (activeCategory !== null) {
-				formData.append('category', categories[activeCategory].id.toString());
+				formData.append('category', parentCategories[activeCategory].id.toString());
 			}
 
 			formData.append('image', image as Blob);
@@ -438,7 +445,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 	// Получаем ID выбранной категории
 	const getCategoryId = () => {
 		if (activeCategory === null) return undefined;
-		return typeof activeSubcategory === 'number' ? subcategories[activeSubcategory]?.id : categories[activeCategory]?.id;
+		return typeof activeSubcategory === 'number' ? subcategories[activeSubcategory]?.id : parentCategories[activeCategory]?.id;
 	};
 
 	// Обработчик автоматического парсинга текста
@@ -493,7 +500,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					deadline: goal.deadline || '',
 					shortDescription: `${goal.description?.substring(0, 100)}...`,
 					complexity: activeComplexity !== null ? selectComplexity[activeComplexity].value : 'medium',
-					category: activeSubcategory !== null ? subcategories[activeSubcategory] : categories[activeCategory!],
+					category: activeSubcategory !== null ? subcategories[activeSubcategory] : parentCategories[activeCategory!],
 					isFromAutoParser: true,
 					originalSearchText: goal.searchText,
 					autoParserData: goal,
@@ -620,7 +627,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 						<Select
 							className={element('field')}
 							placeholder="Выберите категорию"
-							options={categories.map((cat) => ({name: cat.name, value: cat.nameEn}))}
+							options={parentCategories.map((cat) => ({name: cat.name, value: cat.nameEn}))}
 							activeOption={activeCategory}
 							onSelect={setActiveCategory}
 							text="Категория *"
@@ -840,7 +847,6 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 												}
 												lockCategory // Блокируем выбор категории
 												preloadedCategories={categories}
-												preloadedSubcategories={subcategories}
 											/>
 										</div>
 

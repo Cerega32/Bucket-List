@@ -1,4 +1,4 @@
-import {FC, FormEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {FileDrop} from 'react-file-drop';
 import {useNavigate} from 'react-router-dom';
 
@@ -10,8 +10,7 @@ import {NotificationStore} from '@/store/NotificationStore';
 import {ThemeStore} from '@/store/ThemeStore';
 import {ICategory, IGoal} from '@/typings/goal';
 import {deleteGoal} from '@/utils/api/delete/deleteGoal';
-import {getCategories} from '@/utils/api/get/getCategories';
-import {getCategory} from '@/utils/api/get/getCategory';
+import {getAllCategories} from '@/utils/api/get/getCategories';
 import {updateGoal} from '@/utils/api/put/updateGoal';
 import {selectComplexity} from '@/utils/values/complexity';
 
@@ -43,11 +42,14 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	const [imageUrl, setImageUrl] = useState<string | null>(goal.image || null);
 	const [categories, setCategories] = useState<ICategory[]>([]);
 	const [subcategories, setSubcategories] = useState<ICategory[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 	const [canEdit, setCanEdit] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const {setHeader} = ThemeStore;
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
+	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
 
 	// Загрузка категорий и проверка возможности редактирования при монтировании компонента
 	useEffect(() => {
@@ -65,24 +67,42 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 				}
 
 				// Загружаем категории
-				const categoriesResponse = await getCategories();
+				const categoriesResponse = await getAllCategories();
 				if (categoriesResponse.success) {
 					setCategories(categoriesResponse.data);
 
 					// Устанавливаем активную категорию
 					if (goal.category) {
-						const categoryIndex = categoriesResponse.data.findIndex((cat: ICategory) => cat.id === goal.category.id);
-						if (categoryIndex !== -1) {
-							setActiveCategory(categoryIndex);
+						// Определяем, является ли категория цели подкатегорией
+						const goalCategory = categoriesResponse.data.find((cat: ICategory) => cat.id === goal.category.id);
+
+						if (goalCategory) {
+							if (goalCategory.parentCategory) {
+								// Если это подкатегория, находим её родительскую категорию
+								const parentCategoryIndex = categoriesResponse.data
+									.filter((cat: ICategory) => !cat.parentCategory)
+									.findIndex((cat: ICategory) => cat.id === goalCategory.parentCategory?.id);
+								if (parentCategoryIndex !== -1) {
+									setActiveCategory(parentCategoryIndex);
+								}
+							} else {
+								// Если это родительская категория
+								const categoryIndex = categoriesResponse.data
+									.filter((cat: ICategory) => !cat.parentCategory)
+									.findIndex((cat: ICategory) => cat.id === goal.category.id);
+								if (categoryIndex !== -1) {
+									setActiveCategory(categoryIndex);
+								}
+							}
 						}
 					}
-				}
 
-				// Устанавливаем активную сложность
-				if (goal.complexity) {
-					const complexityIndex = selectComplexity.findIndex((item) => item.value === goal.complexity);
-					if (complexityIndex !== -1) {
-						setActiveComplexity(complexityIndex);
+					// Устанавливаем активную сложность
+					if (goal.complexity) {
+						const complexityIndex = selectComplexity.findIndex((item) => item.value === goal.complexity);
+						if (complexityIndex !== -1) {
+							setActiveComplexity(complexityIndex);
+						}
 					}
 				}
 			} catch (error) {
@@ -102,24 +122,41 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 
 	// Загрузка подкатегорий при изменении категории
 	useEffect(() => {
-		if (activeCategory !== null) {
-			const loadSubcategories = async () => {
-				const data = await getCategory(categories[activeCategory].nameEn);
-				if (data.success) {
-					setSubcategories(data.data.subcategories);
+		if (activeCategory !== null && parentCategories.length > 0 && parentCategories[activeCategory]) {
+			const selectedCategory = parentCategories[activeCategory];
 
-					// Если у цели есть подкатегория, находим её индекс
-					if (goal.subcategory) {
-						const subcategoryIndex = data.data.subcategories.findIndex((sub: ICategory) => sub.id === goal.subcategory?.id);
-						if (subcategoryIndex !== -1) {
-							setActiveSubcategory(subcategoryIndex);
-						}
-					}
+			// Фильтруем подкатегории из общего списка категорий
+			const filteredSubcategories = categories.filter(
+				(cat: ICategory) => cat.parentCategory && cat.parentCategory.id === selectedCategory.id
+			);
+
+			setSubcategories(filteredSubcategories);
+
+			// Сбрасываем подкатегорию по умолчанию
+			setActiveSubcategory(null);
+
+			// Если у цели есть подкатегория или сама категория является подкатегорией, находим её индекс
+			const goalCategory = categories.find((cat: ICategory) => cat.id === goal.category.id);
+
+			if (goalCategory && goalCategory.parentCategory && goalCategory.parentCategory.id === selectedCategory.id) {
+				// Цель имеет подкатегорию, которая принадлежит выбранной родительской категории
+				const subcategoryIndex = filteredSubcategories.findIndex((sub: ICategory) => sub.id === goalCategory.id);
+				if (subcategoryIndex !== -1) {
+					setActiveSubcategory(subcategoryIndex);
 				}
-			};
-			loadSubcategories();
+			} else if (goal.subcategory && filteredSubcategories.length > 0) {
+				// У цели есть отдельная подкатегория и в новой категории есть подкатегории
+				const subcategoryIndex = filteredSubcategories.findIndex((sub: ICategory) => sub.id === goal.subcategory?.id);
+				if (subcategoryIndex !== -1) {
+					setActiveSubcategory(subcategoryIndex);
+				}
+			}
+		} else {
+			// Если категория не выбрана или у неё нет подкатегорий
+			setSubcategories([]);
+			setActiveSubcategory(null);
 		}
-	}, [activeCategory, categories, goal.subcategory]);
+	}, [activeCategory, parentCategories.length, goal.category.id]);
 
 	const onDrop = useCallback((acceptedFiles: FileList) => {
 		if (acceptedFiles && acceptedFiles.length > 0) {
@@ -209,12 +246,12 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 			}
 
 			// Если выбрана подкатегория, используем её ID
-			if (activeSubcategory !== null) {
+			if (activeSubcategory !== null && subcategories[activeSubcategory]) {
 				formData.append('category', subcategories[activeSubcategory].id.toString());
 			}
 			// Иначе используем ID основной категории
 			else if (activeCategory !== null) {
-				formData.append('category', categories[activeCategory].id.toString());
+				formData.append('category', parentCategories[activeCategory].id.toString());
 			}
 
 			// Если есть локальное изображение, добавляем его в formData
@@ -403,7 +440,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 							<Select
 								className={element('field')}
 								placeholder="Выберите категорию"
-								options={categories.map((cat) => ({name: cat.name, value: cat.nameEn}))}
+								options={parentCategories.map((cat) => ({name: cat.name, value: cat.nameEn}))}
 								activeOption={activeCategory}
 								onSelect={setActiveCategory}
 								text="Категория *"

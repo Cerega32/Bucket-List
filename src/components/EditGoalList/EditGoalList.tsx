@@ -1,4 +1,4 @@
-import {FC, FormEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {FileDrop} from 'react-file-drop';
 import {useNavigate} from 'react-router-dom';
 
@@ -11,8 +11,7 @@ import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
 import {ICategory, IGoal, IShortGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
-import {getCategories} from '@/utils/api/get/getCategories';
-import {getCategory} from '@/utils/api/get/getCategory';
+import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {updateGoalList} from '@/utils/api/put/updateGoalList';
 import {debounce} from '@/utils/time/debounce';
@@ -56,6 +55,9 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 	// Добавляем состояние для перехода к созданию цели
 	const [canCreateGoal, setCanCreateGoal] = useState(false);
 
+	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
+	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
+
 	// Инициализация данных списка при загрузке компонента
 	useEffect(() => {
 		// Загрузка комплексности из списка
@@ -73,14 +75,31 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 	useEffect(() => {
 		const loadCategories = async () => {
 			try {
-				const data = await getCategories();
+				const data = await getAllCategories();
 				if (data.success) {
 					setCategories(data.data);
 
-					// Находим индекс категории списка в загруженных категориях
-					const categoryIndex = data.data.findIndex((cat: ICategory) => cat.id === listData.category.id);
-					if (categoryIndex !== -1) {
-						setActiveCategory(categoryIndex);
+					// Определяем, является ли категория списка подкатегорией
+					const listCategory = data.data.find((cat: ICategory) => cat.id === listData.category.id);
+
+					if (listCategory) {
+						if (listCategory.parentCategory) {
+							// Если это подкатегория, находим её родительскую категорию
+							const parentCategoryIndex = data.data
+								.filter((cat: ICategory) => !cat.parentCategory)
+								.findIndex((cat: ICategory) => cat.id === listCategory.parentCategory?.id);
+							if (parentCategoryIndex !== -1) {
+								setActiveCategory(parentCategoryIndex);
+							}
+						} else {
+							// Если это родительская категория
+							const categoryIndex = data.data
+								.filter((cat: ICategory) => !cat.parentCategory)
+								.findIndex((cat: ICategory) => cat.id === listData.category.id);
+							if (categoryIndex !== -1) {
+								setActiveCategory(categoryIndex);
+							}
+						}
 					}
 				}
 			} catch (error) {
@@ -97,26 +116,34 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 
 	// Фильтрация подкатегорий при изменении категории
 	useEffect(() => {
-		if (activeCategory !== null) {
-			const loadSubcategories = async () => {
-				const data = await getCategory(categories[activeCategory].nameEn);
-				if (data.success) {
-					setSubcategories(data.data.subcategories);
+		if (activeCategory !== null && parentCategories[activeCategory]) {
+			const selectedCategory = parentCategories[activeCategory];
 
-					// Проверяем, является ли категория списка подкатегорией
-					if (listData.category.parentCategory) {
-						const subcategoryIndex = data.data.subcategories.findIndex(
-							(subcat: ICategory) => subcat.id === listData.category.id
-						);
-						if (subcategoryIndex !== -1) {
-							setActiveSubcategory(subcategoryIndex);
-						}
-					}
+			// Фильтруем подкатегории из общего списка категорий
+			const filteredSubcategories = categories.filter(
+				(cat: ICategory) => cat.parentCategory && cat.parentCategory.id === selectedCategory.id
+			);
+
+			setSubcategories(filteredSubcategories);
+
+			// Если категория списка является подкатегорией выбранной родительской категории, устанавливаем её
+			const listCategory = categories.find((cat: ICategory) => cat.id === listData.category.id);
+
+			if (listCategory && listCategory.parentCategory && listCategory.parentCategory.id === selectedCategory.id) {
+				// Категория списка является подкатегорией выбранной родительской категории
+				const subcategoryIndex = filteredSubcategories.findIndex((sub: ICategory) => sub.id === listCategory.id);
+				if (subcategoryIndex !== -1) {
+					setActiveSubcategory(subcategoryIndex);
 				}
-			};
-			loadSubcategories();
+			} else if (listData.category.parentCategory) {
+				// У списка есть отдельная подкатегория
+				const subcategoryIndex = filteredSubcategories.findIndex((subcat: ICategory) => subcat.id === listData.category.id);
+				if (subcategoryIndex !== -1) {
+					setActiveSubcategory(subcategoryIndex);
+				}
+			}
 		}
-	}, [activeCategory, categories, listData.category.id, listData.category?.parentCategory]);
+	}, [activeCategory, parentCategories, categories, listData.category.id, listData.category?.parentCategory]);
 
 	// Обновляем эффект для проверки возможности создания цели
 	useEffect(() => {
@@ -257,10 +284,10 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 					formData.append('complexity', selectComplexity[activeComplexity].value);
 				}
 
-				if (activeSubcategory !== null) {
+				if (activeSubcategory !== null && subcategories[activeSubcategory]) {
 					formData.append('category', subcategories[activeSubcategory].id.toString());
 				} else if (activeCategory !== null) {
-					formData.append('category', categories[activeCategory].id.toString());
+					formData.append('category', parentCategories[activeCategory].id.toString());
 				}
 
 				// Добавляем изображение только если оно было изменено
@@ -379,7 +406,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 							<Select
 								className={element('field')}
 								placeholder="Выберите категорию"
-								options={categories.map((cat) => ({name: cat.name, value: cat.nameEn}))}
+								options={parentCategories.map((cat) => ({name: cat.name, value: cat.nameEn}))}
 								activeOption={activeCategory}
 								onSelect={setActiveCategory}
 								text="Категория *"
@@ -524,11 +551,12 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 											noForm
 											onSubmitForm={handleAddGoalSubmit}
 											initialCategory={
-												activeSubcategory !== null ? subcategories[activeSubcategory] : categories[activeCategory!]
+												activeSubcategory !== null
+													? subcategories[activeSubcategory]
+													: parentCategories[activeCategory!]
 											}
 											lockCategory // Блокируем выбор категории
 											preloadedCategories={categories}
-											preloadedSubcategories={subcategories}
 										/>
 									</div>
 

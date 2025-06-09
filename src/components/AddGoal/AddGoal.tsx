@@ -1,5 +1,5 @@
 import {format} from 'date-fns';
-import {FC, FormEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {FileDrop} from 'react-file-drop';
 import {useLocation, useNavigate} from 'react-router-dom';
 
@@ -12,8 +12,7 @@ import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {ICategory, IGoal, ILocation} from '@/typings/goal';
-import {getCategories} from '@/utils/api/get/getCategories';
-import {getCategory} from '@/utils/api/get/getCategory';
+import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {postCreateGoal} from '@/utils/api/post/postCreateGoal';
 import {mapApi} from '@/utils/mapApi';
@@ -37,7 +36,6 @@ interface AddGoalProps {
 	lockCategory?: boolean;
 	initialCategoryParam?: string;
 	preloadedCategories?: ICategory[];
-	preloadedSubcategories?: ICategory[];
 }
 
 export const AddGoal: FC<AddGoalProps> = (props) => {
@@ -51,7 +49,6 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		lockCategory = false,
 		initialCategoryParam,
 		preloadedCategories,
-		preloadedSubcategories,
 	} = props;
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -82,7 +79,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const [similarGoals, setSimilarGoals] = useState<IGoal[]>([]);
 	const [, setIsSearching] = useState(false);
 	const [showSimilarGoals, setShowSimilarGoals] = useState(false);
-	const [isTitleFocused, setIsTitleFocused] = useState(false);
+
+	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
+	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
 
 	// Обработчик выбора места с карты
 	const handleLocationFromPicker = (selectedLocation: Partial<ILocation>) => {
@@ -226,7 +225,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					setCategories(preloadedCategories);
 				} else {
 					// Иначе загружаем категории с сервера
-					const data = await getCategories();
+					const data = await getAllCategories();
 					if (data.success) {
 						setCategories(data.data);
 					}
@@ -254,79 +253,60 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 	// Фильтрация подкатегорий при изменении категории
 	useEffect(() => {
-		if (activeCategory !== null) {
-			const loadSubcategories = async () => {
-				// Если переданы готовые подкатегории, используем их
-				if (preloadedSubcategories) {
-					setSubcategories(preloadedSubcategories);
-				} else {
-					// Иначе загружаем подкатегории с сервера
-					const data = await getCategory(categories[activeCategory].nameEn);
-					if (data.success) {
-						setSubcategories(data.data.subcategories);
-					}
-				}
-				// Сбрасываем подкатегорию только если не устанавливается initialCategory
-				if (!initialCategory || !initialCategory.parentCategory) {
-					setActiveSubcategory(null);
-				}
-			};
-			loadSubcategories();
+		if (activeCategory !== null && parentCategories.length > 0 && parentCategories[activeCategory]) {
+			const selectedCategory = parentCategories[activeCategory];
+
+			// Фильтруем подкатегории из общего списка категорий
+			const filteredSubcategories = categories.filter(
+				(cat: ICategory) => cat.parentCategory && cat.parentCategory.id === selectedCategory.id
+			);
+
+			setSubcategories(filteredSubcategories);
+
+			// Сбрасываем подкатегорию только если не устанавливается initialCategory
+			if (!initialCategory || !initialCategory.parentCategory) {
+				setActiveSubcategory(null);
+			}
+		} else {
+			// Если категория не выбрана
+			setSubcategories([]);
+			setActiveSubcategory(null);
 		}
-	}, [activeCategory, categories, initialCategory, preloadedSubcategories]);
+	}, [activeCategory, parentCategories.length]);
+
 	// Добавляем эффект для установки начальной категории из props
 	useEffect(() => {
-		if (initialCategory && categories.length > 0) {
+		if (initialCategory && categories.length > 0 && parentCategories.length > 0) {
 			// Если передана подкатегория, ищем её родительскую категорию
 			if (initialCategory.parentCategory) {
-				const parentIndex = categories.findIndex((cat) => cat.id === initialCategory.parentCategory?.id);
+				const parentIndex = parentCategories.findIndex((cat) => cat.id === initialCategory.parentCategory?.id);
 
 				if (parentIndex !== -1) {
 					setActiveCategory(parentIndex);
 
-					// Загружаем подкатегории для родительской категории
-					const loadSubcategoriesAndSetSubcategory = async () => {
-						try {
-							let subcategoriesData;
+					// Фильтруем подкатегории из общего списка
+					const filteredSubcategories = categories.filter(
+						(cat: ICategory) => cat.parentCategory && cat.parentCategory.id === initialCategory.parentCategory?.id
+					);
+					setSubcategories(filteredSubcategories);
 
-							// Если переданы готовые подкатегории, используем их
-							if (preloadedSubcategories) {
-								subcategoriesData = preloadedSubcategories;
-								setSubcategories(preloadedSubcategories);
-							} else {
-								// Иначе загружаем подкатегории с сервера
-								const data = await getCategory(categories[parentIndex].nameEn);
-								if (data.success) {
-									subcategoriesData = data.data.subcategories;
-									setSubcategories(data.data.subcategories);
-								}
-							}
+					// Ищем индекс подкатегории в отфильтрованном списке
+					const subcategoryIndex = filteredSubcategories.findIndex((sub: ICategory) => sub.id === initialCategory.id);
 
-							if (subcategoriesData) {
-								// Ищем индекс подкатегории
-								const subcategoryIndex = subcategoriesData.findIndex((sub: ICategory) => sub.id === initialCategory.id);
-
-								if (subcategoryIndex !== -1) {
-									// Добавляем небольшую задержку для обеспечения корректной установки
-									setTimeout(() => {
-										setActiveSubcategory(subcategoryIndex);
-									}, 100);
-								} else {
-									console.warn('Подкатегория не найдена:', initialCategory);
-								}
-							}
-						} catch (error) {
-							console.error('Ошибка при загрузке подкатегорий для initialCategory:', error);
-						}
-					};
-
-					loadSubcategoriesAndSetSubcategory();
+					if (subcategoryIndex !== -1) {
+						// Добавляем небольшую задержку для обеспечения корректной установки
+						setTimeout(() => {
+							setActiveSubcategory(subcategoryIndex);
+						}, 100);
+					} else {
+						console.warn('Подкатегория не найдена:', initialCategory);
+					}
 				} else {
 					console.warn('Родительская категория не найдена:', initialCategory.parentCategory);
 				}
 			} else {
 				// Если передана основная категория
-				const categoryIndex = categories.findIndex((cat) => cat.id === initialCategory.id);
+				const categoryIndex = parentCategories.findIndex((cat) => cat.id === initialCategory.id);
 
 				if (categoryIndex !== -1) {
 					setActiveCategory(categoryIndex);
@@ -335,13 +315,13 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				}
 			}
 		}
-	}, [initialCategory, categories, preloadedSubcategories]);
+	}, [initialCategory?.id, parentCategories.length, categories.length]);
 
 	// Добавляем эффект для получения категории из URL параметра
 	useEffect(() => {
 		// Обрабатываем параметр initialCategoryParam, если он передан
-		if (initialCategoryParam && categories.length > 0) {
-			const categoryIndex = categories.findIndex((cat) => cat.nameEn === initialCategoryParam);
+		if (initialCategoryParam && parentCategories.length > 0) {
+			const categoryIndex = parentCategories.findIndex((cat) => cat.nameEn === initialCategoryParam);
 			if (categoryIndex !== -1) {
 				setActiveCategory(categoryIndex);
 			}
@@ -351,30 +331,29 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			const params = new URLSearchParams(location.search);
 			const categoryParam = params.get('category');
 
-			if (categoryParam && categories.length > 0) {
-				const categoryIndex = categories.findIndex((cat) => cat.nameEn === categoryParam);
+			if (categoryParam && parentCategories.length > 0) {
+				const categoryIndex = parentCategories.findIndex((cat) => cat.nameEn === categoryParam);
 				if (categoryIndex !== -1) {
 					setActiveCategory(categoryIndex);
 				}
 			}
 		}
-	}, [initialCategoryParam, location.search, categories]);
+	}, [initialCategoryParam, location.search, parentCategories.length]);
 
 	// Функция для поиска похожих целей с дебаунсом
-	const debouncedSearch = useCallback(
+	const debouncedSearchSimilarGoals = useCallback(
 		debounce(async (query: string) => {
 			if (query.length < 3) {
 				setSimilarGoals([]);
 				setIsSearching(false);
-				setShowSimilarGoals(false);
 				return;
 			}
 
 			try {
 				const response = await getSimilarGoals(query);
-				if (response.success && response?.data?.results) {
-					setSimilarGoals(response.data.results);
-					setShowSimilarGoals(response.data.results.length > 0 && isTitleFocused);
+
+				if (response.success && response.data?.results) {
+					setSimilarGoals(response.data.results.slice(0, 5)); // Ограничиваем до 5 результатов
 				}
 			} catch (error) {
 				console.error('Ошибка при поиске похожих целей:', error);
@@ -382,23 +361,22 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				setIsSearching(false);
 			}
 		}, 500),
-		[isTitleFocused]
+		[]
 	);
 
 	// Вызов поиска при изменении названия цели
 	useEffect(() => {
 		if (title) {
 			setIsSearching(true);
-			debouncedSearch(title);
+			debouncedSearchSimilarGoals(title);
 		} else {
 			setSimilarGoals([]);
 			setShowSimilarGoals(false);
 		}
-	}, [title, debouncedSearch]);
+	}, [title, debouncedSearchSimilarGoals]);
 
 	// Обработчики фокуса для поля ввода названия
 	const handleTitleFocus = () => {
-		setIsTitleFocused(true);
 		if (similarGoals.length > 0) {
 			setShowSimilarGoals(true);
 		}
@@ -407,7 +385,6 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const handleTitleBlur = () => {
 		// Используем setTimeout, чтобы дать время для клика по элементу списка
 		setTimeout(() => {
-			setIsTitleFocused(false);
 			setShowSimilarGoals(false);
 		}, 200);
 	};
@@ -424,43 +401,53 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			setActiveComplexity(complexityIndex);
 		}
 
-		// Находим индекс категории в массиве categories
-		const categoryIndex = categories.findIndex((cat) => cat.id === goal.category.id);
-		if (categoryIndex !== -1) {
-			setActiveCategory(categoryIndex);
+		// Определяем, является ли категория цели подкатегорией
+		const goalCategory = categories.find((cat) => cat.id === goal.category.id);
 
-			// Загружаем подкатегории для выбранной категории
-			const loadSubcategoriesAndSetSubcategory = async () => {
-				let subcategoriesData;
+		if (goalCategory) {
+			if (goalCategory.parentCategory) {
+				// Если это подкатегория, находим её родительскую категорию
+				const parentCategoryIndex = parentCategories.findIndex((cat) => cat.id === goalCategory.parentCategory?.id);
+				if (parentCategoryIndex !== -1) {
+					setActiveCategory(parentCategoryIndex);
 
-				// Если переданы готовые подкатегории, используем их
-				if (preloadedSubcategories) {
-					subcategoriesData = preloadedSubcategories;
-					setSubcategories(preloadedSubcategories);
-				} else {
-					// Иначе загружаем подкатегории с сервера
-					const data = await getCategory(categories[categoryIndex].nameEn);
-					if (data.success) {
-						subcategoriesData = data.data.subcategories;
-						setSubcategories(data.data.subcategories);
-					}
-				}
+					// Фильтруем подкатегории из общего списка
+					const filteredSubcategories = categories.filter(
+						(cat: ICategory) => cat.parentCategory && cat.parentCategory.id === goalCategory.parentCategory?.id
+					);
+					setSubcategories(filteredSubcategories);
 
-				// Если у цели есть подкатегория, находим ее индекс
-				if (goal.subcategory && subcategoriesData) {
-					const subcategoryIndex = subcategoriesData.findIndex((sub: ICategory) => sub.id === goal.subcategory?.id);
+					// Находим индекс подкатегории в отфильтрованном списке
+					const subcategoryIndex = filteredSubcategories.findIndex((sub: ICategory) => sub.id === goalCategory.id);
 					if (subcategoryIndex !== -1) {
 						setActiveSubcategory(subcategoryIndex);
 					}
 				}
-			};
+			} else {
+				// Если это родительская категория
+				const categoryIndex = parentCategories.findIndex((cat) => cat.id === goalCategory.id);
+				if (categoryIndex !== -1) {
+					setActiveCategory(categoryIndex);
 
-			loadSubcategoriesAndSetSubcategory();
+					// Фильтруем подкатегории из общего списка
+					const filteredSubcategories = categories.filter(
+						(cat: ICategory) => cat.parentCategory && cat.parentCategory.id === goalCategory.id
+					);
+					setSubcategories(filteredSubcategories);
+
+					// Если у цели есть подкатегория, находим ее индекс
+					if (goal.subcategory && filteredSubcategories) {
+						const subcategoryIndex = filteredSubcategories.findIndex((sub: ICategory) => sub.id === goal.subcategory?.id);
+						if (subcategoryIndex !== -1) {
+							setActiveSubcategory(subcategoryIndex);
+						}
+					}
+				}
+			}
 		}
 
 		// Скрываем список похожих целей после выбора
 		setShowSimilarGoals(false);
-		setIsTitleFocused(false);
 
 		// Показываем уведомление
 		NotificationStore.addNotification({
@@ -536,12 +523,12 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			}
 
 			// Если выбрана подкатегория, используем её ID
-			if (activeSubcategory !== null) {
+			if (activeSubcategory !== null && subcategories[activeSubcategory]) {
 				formData.append('category', subcategories[activeSubcategory].id.toString());
 			}
 			// Иначе используем ID основной категории
 			else if (activeCategory !== null) {
-				formData.append('category', categories[activeCategory].id.toString());
+				formData.append('category', parentCategories[activeCategory].id.toString());
 			}
 
 			// Если есть локальное изображение, добавляем его в formData
@@ -675,12 +662,12 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			}
 
 			// Если выбрана подкатегория, используем её ID
-			if (activeSubcategory !== null) {
+			if (activeSubcategory !== null && subcategories[activeSubcategory]) {
 				formData.append('category', subcategories[activeSubcategory].id.toString());
 			}
 			// Иначе используем ID основной категории
 			else if (activeCategory !== null) {
-				formData.append('category', categories[activeCategory].id.toString());
+				formData.append('category', parentCategories[activeCategory].id.toString());
 			}
 
 			// Если есть локальное изображение, добавляем его в formData
@@ -786,52 +773,58 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const handleExternalGoalSelected = (
 		goalData: Partial<IGoal> & {imageUrl?: string; external_id?: string | number; externalType?: string}
 	) => {
-		// Заполняем форму данными из внешней цели
-		setTitle(goalData.title || '');
-		setDescription(goalData.description || '');
-		setEstimatedTime(goalData.estimatedTime || '');
-
-		// Находим индекс сложности в массиве selectComplexity
-		if (goalData.complexity) {
-			const complexityIndex = selectComplexity.findIndex((item) => item.value === goalData.complexity);
-			if (complexityIndex !== -1) {
-				setActiveComplexity(complexityIndex);
-			}
-		}
+		// Заполняем основные поля
+		if (goalData.title) setTitle(goalData.title);
+		if (goalData.description) setDescription(goalData.description);
+		if (goalData.estimatedTime) setEstimatedTime(goalData.estimatedTime);
 
 		// Если у цели есть категория, находим ее индекс
 		if (goalData.category) {
-			const categoryIndex = categories.findIndex((cat) => cat.id === goalData.category?.id);
-			if (categoryIndex !== -1) {
-				setActiveCategory(categoryIndex);
+			// Определяем, является ли категория подкатегорией
+			const goalCategory = categories.find((cat) => cat.id === goalData.category?.id);
 
-				// Загружаем подкатегории для выбранной категории
-				const loadSubcategoriesAndSetSubcategory = async () => {
-					let subcategoriesData;
+			if (goalCategory) {
+				if (goalCategory.parentCategory) {
+					// Если это подкатегория, находим её родительскую категорию
+					const parentCategoryIndex = parentCategories.findIndex((cat) => cat.id === goalCategory.parentCategory?.id);
+					if (parentCategoryIndex !== -1) {
+						setActiveCategory(parentCategoryIndex);
 
-					// Если переданы готовые подкатегории, используем их
-					if (preloadedSubcategories) {
-						subcategoriesData = preloadedSubcategories;
-						setSubcategories(preloadedSubcategories);
-					} else {
-						// Иначе загружаем подкатегории с сервера
-						const data = await getCategory(categories[categoryIndex].nameEn);
-						if (data.success) {
-							subcategoriesData = data.data.subcategories;
-							setSubcategories(data.data.subcategories);
-						}
-					}
+						// Фильтруем подкатегории из общего списка
+						const filteredSubcategories = categories.filter(
+							(cat: ICategory) => cat.parentCategory && cat.parentCategory.id === goalCategory.parentCategory?.id
+						);
+						setSubcategories(filteredSubcategories);
 
-					// Если у цели есть подкатегория, находим ее индекс
-					if (goalData.subcategory && subcategoriesData) {
-						const subcategoryIndex = subcategoriesData.findIndex((sub: ICategory) => sub.id === goalData.subcategory?.id);
+						// Находим индекс подкатегории в отфильтрованном списке
+						const subcategoryIndex = filteredSubcategories.findIndex((sub: ICategory) => sub.id === goalCategory.id);
 						if (subcategoryIndex !== -1) {
 							setActiveSubcategory(subcategoryIndex);
 						}
 					}
-				};
+				} else {
+					// Если это родительская категория
+					const categoryIndex = parentCategories.findIndex((cat) => cat.id === goalCategory.id);
+					if (categoryIndex !== -1) {
+						setActiveCategory(categoryIndex);
 
-				loadSubcategoriesAndSetSubcategory();
+						// Фильтруем подкатегории из общего списка
+						const filteredSubcategories = categories.filter(
+							(cat: ICategory) => cat.parentCategory && cat.parentCategory.id === goalCategory.id
+						);
+						setSubcategories(filteredSubcategories);
+
+						// Если у цели есть подкатегория, находим ее индекс
+						if (goalData.subcategory && filteredSubcategories) {
+							const subcategoryIndex = filteredSubcategories.findIndex(
+								(sub: ICategory) => sub.id === goalData.subcategory?.id
+							);
+							if (subcategoryIndex !== -1) {
+								setActiveSubcategory(subcategoryIndex);
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -907,7 +900,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 								activeSubcategory !== null && subcategories.length > 0
 									? subcategories[activeSubcategory].nameEn
 									: activeCategory !== null
-									? categories[activeCategory].nameEn
+									? parentCategories[activeCategory].nameEn
 									: undefined
 							}
 						/>
@@ -1003,7 +996,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 						<Select
 							className={element('field')}
 							placeholder="Выберите категорию"
-							options={categories.map((cat) => ({name: cat.name, value: cat.nameEn}))}
+							options={parentCategories.map((cat) => ({name: cat.name, value: cat.nameEn}))}
 							activeOption={activeCategory}
 							onSelect={setActiveCategory}
 							text="Категория *"
@@ -1023,7 +1016,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 						)}
 
 						{/* Новое поле для места с картой */}
-						{activeCategory !== null && categories[activeCategory].nameEn === 'travel' && (
+						{activeCategory !== null && parentCategories[activeCategory].nameEn === 'travel' && (
 							<div className={element('location-field-container')}>
 								<p className={element('field-title')}>Место на карте</p>
 
