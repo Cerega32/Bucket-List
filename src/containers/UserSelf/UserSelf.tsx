@@ -8,6 +8,7 @@ import {getUser} from '@/utils/api/get/getUser';
 
 import {UserSelfAchievements} from '../UserSelfAchievements/UserAchievements';
 import {UserSelfDashboard} from '../UserSelfDashboard/UserSelfDashboard';
+import {UserSelfFriends} from '../UserSelfFriends/UserSelfFriends';
 import {UserSelfGoals} from '../UserSelfGoals/UserSelfGoals';
 import {UserSelfSettings} from '../UserSelfSettings/UserSelfSettings';
 import './user-self.scss';
@@ -35,8 +36,8 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 				return <UserSelfSettings />;
 			case 'isUserSelfAchievements':
 				return <UserSelfAchievements />;
-			// case 'isUserSelfFriends':
-			// 	return <PageFriends page={page} />;
+			case 'isUserSelfFriends':
+				return <UserSelfFriends subPage={subPage as string} />;
 			default:
 				return <UserSelfDashboard />;
 		}
@@ -54,11 +55,11 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 				name: 'Достижения',
 				page: 'isUserSelfAchievements',
 			},
-			// {
-			// 	url: '/user/self/friends',
-			// 	name: 'Друзья',
-			// 	page: 'isUserSelfFriends',
-			// },
+			{
+				url: '/user/self/friends',
+				name: 'Друзья',
+				page: 'isUserSelfFriends',
+			},
 			{
 				url: '/user/self/active-goals',
 				name: 'Активные цели и списки',

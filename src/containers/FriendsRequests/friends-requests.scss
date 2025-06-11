@@ -1,0 +1,107 @@
+@use '@/_commons/styles-supports/mixins' as *;
+
+.friends-requests {
+	flex: 1;
+	padding: 32px;
+	background: var(--color-white);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
+
+	&__header {
+		margin-bottom: 32px;
+	}
+
+	&__title {
+		margin: 0 0 8px;
+		color: var(--color-text-primary);
+		font-size: 28px;
+		font-weight: var(--weight-bold);
+		line-height: var(--line-height-28);
+	}
+
+	&__subtitle {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 16px;
+		line-height: var(--line-height-16);
+	}
+
+	&__requests-list {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	&__empty-state {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		padding: 80px 20px;
+		text-align: center;
+	}
+
+	&__empty-icon {
+		margin-bottom: 24px;
+		font-size: 64px;
+		opacity: 0.6;
+	}
+
+	&__empty-title {
+		margin: 0 0 12px;
+		color: var(--color-text-primary);
+		font-size: 24px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__empty-text {
+		max-width: 400px;
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 16px;
+		line-height: var(--line-height-16);
+	}
+
+	&__loading {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 80px 20px;
+		text-align: center;
+
+		p {
+			margin: 0;
+			color: var(--color-text-secondary);
+			font-size: 16px;
+		}
+	}
+
+	// Responsive design
+	@media (width <= 768px) {
+		padding: 24px;
+
+		&__title {
+			font-size: 24px;
+		}
+
+		&__empty-icon {
+			font-size: 48px;
+		}
+
+		&__empty-title {
+			font-size: 20px;
+		}
+
+		&__empty-text {
+			font-size: 14px;
+		}
+	}
+
+	@media (width <= 480px) {
+		padding: 16px;
+
+		&__empty-state {
+			padding: 60px 16px;
+		}
+	}
+}

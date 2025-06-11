@@ -1,0 +1,128 @@
+.friend-request-card {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 16px;
+	background: var(--color-white);
+	border: 1px solid var(--color-primary-light);
+	border-radius: 12px;
+	transition: all 0.2s ease;
+
+	&:hover {
+		border-color: var(--color-primary);
+		box-shadow: 0 2px 8px rgb(var(--color-primary-rbg) / 15%);
+	}
+
+	&__avatar {
+		flex-shrink: 0;
+	}
+
+	&__avatar-placeholder {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 100%;
+		height: 100%;
+		background: var(--color-primary);
+		color: var(--color-white);
+		font-size: 20px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__info {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__name {
+		margin: 0 0 4px;
+		color: var(--color-text-primary);
+		font-size: 16px;
+		font-weight: var(--weight-medium);
+		line-height: var(--line-height-16);
+	}
+
+	&__username {
+		margin: 0 0 8px;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+		line-height: var(--line-height-14);
+	}
+
+	&__date {
+		margin: 0;
+		color: var(--color-text-tertiary);
+		font-size: 12px;
+		line-height: var(--line-height-12);
+
+		&::before {
+			content: 'Отправлен: ';
+		}
+	}
+
+	&__status {
+		margin: 4px 0 0;
+		color: var(--color-warning);
+		font-size: 12px;
+		font-weight: var(--weight-medium);
+		line-height: var(--line-height-12);
+	}
+
+	// Модификатор для исходящих запросов
+	&--outgoing {
+		border-color: var(--color-warning-light);
+
+		&:hover {
+			border-color: var(--color-warning);
+			box-shadow: 0 2px 8px rgb(var(--color-warning-rbg) / 15%);
+		}
+
+		.friend-request-card__date::before {
+			content: 'Отправлено: ';
+		}
+	}
+
+	&__actions {
+		display: flex;
+		flex-shrink: 0;
+		gap: 8px;
+
+		.button {
+			white-space: nowrap;
+		}
+	}
+
+	// Responsive design
+	@media (width <= 768px) {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+
+		&__actions {
+			justify-content: space-between;
+			width: 100%;
+
+			.button {
+				flex: 1;
+			}
+		}
+	}
+
+	@media (width <= 480px) {
+		padding: 12px;
+
+		&__avatar {
+			width: 48px;
+			height: 48px;
+		}
+
+		&__avatar-placeholder {
+			font-size: 18px;
+		}
+
+		&__actions {
+			flex-direction: column;
+			gap: 8px;
+		}
+	}
+}

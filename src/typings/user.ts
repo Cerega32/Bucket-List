@@ -75,3 +75,71 @@ export interface IUserStatistics {
 	weeklyProgress: Array<IWeeklyProgressItem>;
 	hundredGoals: IHundredGoals;
 }
+
+// Типы для системы друзей
+export interface IFriend {
+	id: number;
+	username: string;
+	firstName: string;
+	lastName: string;
+	avatar?: string;
+	status: 'accepted' | 'pending' | 'rejected';
+	createdAt: string;
+}
+
+export interface IFriendRequest {
+	requestId: number; // ID запроса на дружбу
+	id: number; // ID пользователя
+	username: string;
+	firstName: string;
+	lastName: string;
+	avatar?: string;
+	status?: 'pending' | 'accepted' | 'rejected';
+	createdAt: string;
+	type: 'incoming' | 'outgoing'; // Тип запроса: входящий или исходящий
+}
+
+export interface IFriendSearchResult {
+	id: number;
+	username: string;
+	firstName: string;
+	lastName: string;
+	avatar?: string;
+	email: string;
+	isFriend: boolean;
+	hasPendingRequest: boolean;
+	isRequestFromMe: boolean;
+}
+
+export interface IFriendsResponse {
+	count: number;
+	results: IFriend[];
+}
+
+export interface IFriendRequestsResponse {
+	count: number;
+	results: IFriendRequest[];
+}
+
+export interface IFriendSearchResponse {
+	count: number;
+	results: IFriendSearchResult[];
+}
+
+export interface IFriendComparison {
+	friend: IUserInfo;
+	comparison: {
+		myStats: {
+			completedGoals: number;
+			totalGoals: number;
+			level: number;
+			experience: number;
+		};
+		friendStats: {
+			completedGoals: number;
+			totalGoals: number;
+			level: number;
+			experience: number;
+		};
+	};
+}

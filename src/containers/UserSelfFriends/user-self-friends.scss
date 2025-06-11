@@ -1,0 +1,34 @@
+.user-self-friends {
+	flex: 1;
+
+	&__header {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+		margin-bottom: 32px;
+
+		@media (width <= 768px) {
+			gap: 16px;
+			margin-bottom: 24px;
+		}
+	}
+
+	&__title {
+		margin: 0;
+		color: var(--color-text-primary);
+		font-size: 32px;
+		font-weight: 700;
+
+		@media (width <= 768px) {
+			font-size: 24px;
+		}
+	}
+
+	&__switch {
+		align-self: flex-start;
+	}
+
+	&__content {
+		flex: 1;
+	}
+}

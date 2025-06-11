@@ -31,4 +31,10 @@
 		margin-top: 20px;
 		margin-left: auto;
 	}
+
+	&__friend-actions {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
 }

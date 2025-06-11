@@ -10,6 +10,7 @@ export interface Friend {
 }
 
 export interface FriendRequest {
+	request_id: number;
 	id: number;
 	username: string;
 	first_name: string;
@@ -59,7 +60,7 @@ export interface ComparisonData {
  */
 export const getFriends = async (): Promise<{success: boolean; data?: Friend[]; error?: string}> => {
 	try {
-		const response = await GET('api/friends/', {
+		const response = await GET('friends', {
 			auth: true,
 			showErrorNotification: true,
 		});
@@ -88,7 +89,7 @@ export const getFriends = async (): Promise<{success: boolean; data?: Friend[]; 
  */
 export const getFriendRequests = async (): Promise<{success: boolean; data?: FriendRequest[]; error?: string}> => {
 	try {
-		const response = await GET('api/friends/requests/', {
+		const response = await GET('friends/requests', {
 			auth: true,
 			showErrorNotification: true,
 		});
@@ -118,7 +119,7 @@ export const getFriendRequests = async (): Promise<{success: boolean; data?: Fri
  */
 export const sendFriendRequest = async (userId: number): Promise<{success: boolean; message?: string; error?: string}> => {
 	try {
-		const response = await POST('api/friends/send-request/', {
+		const response = await POST('friends/send-request', {
 			auth: true,
 			body: {user_id: userId},
 			showSuccessNotification: true,
@@ -154,7 +155,7 @@ export const respondToFriendRequest = async (
 	action: 'accept' | 'reject'
 ): Promise<{success: boolean; message?: string; error?: string}> => {
 	try {
-		const response = await POST('api/friends/respond/', {
+		const response = await POST('friends/respond', {
 			auth: true,
 			body: {request_id: requestId, action},
 			showSuccessNotification: true,
@@ -186,7 +187,7 @@ export const respondToFriendRequest = async (
  */
 export const removeFriend = async (friendId: number): Promise<{success: boolean; message?: string; error?: string}> => {
 	try {
-		const response = await DELETE(`api/friends/remove/${friendId}/`, {
+		const response = await DELETE(`friends/remove/${friendId}`, {
 			auth: true,
 			showSuccessNotification: true,
 			showErrorNotification: true,
@@ -224,7 +225,7 @@ export const searchUsers = async (query: string): Promise<{success: boolean; dat
 			};
 		}
 
-		const response = await GET('api/friends/search/', {
+		const response = await GET('friends/search', {
 			auth: true,
 			get: {query},
 			showErrorNotification: true,
@@ -255,7 +256,7 @@ export const searchUsers = async (query: string): Promise<{success: boolean; dat
  */
 export const compareWithFriend = async (friendId: number): Promise<{success: boolean; data?: ComparisonData; error?: string}> => {
 	try {
-		const response = await GET(`api/friends/compare/${friendId}/`, {
+		const response = await GET(`friends/compare/${friendId}`, {
 			auth: true,
 			showErrorNotification: true,
 		});

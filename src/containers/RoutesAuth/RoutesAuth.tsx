@@ -110,12 +110,24 @@ export const RoutesAuth: FC = observer(() => {
 				{/* TODO System */}
 				<Route path="/todos" element={<ProtectedRoute element={<PageTodos page="isTodos" />} />} />
 
-				{/* Новые маршруты для друзей */}
-				{/* <Route path="/user/self/friends" element={<ProtectedRoute element={<PageFriends page="isUserSelfFriends" />} />} />
+				{/* Маршруты для друзей - теперь через UserSelf */}
 				<Route
-					path="/friends/compare/:friendId"
-					element={<ProtectedRoute element={<PageFriendCompare page="isFriendCompare" />} />}
-				/> */}
+					path="/user/self/friends"
+					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfFriends" subPage="friends" />} />}
+				/>
+				<Route
+					path="/user/self/friends/requests"
+					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfFriends" subPage="requests" />} />}
+				/>
+				<Route
+					path="/user/self/friends/search"
+					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfFriends" subPage="search" />} />}
+				/>
+
+				{/* Редиректы старых маршрутов друзей на новые */}
+				<Route path="/friends" element={<Navigate to="/user/self/friends" replace />} />
+				<Route path="/friends/requests" element={<Navigate to="/user/self/friends/requests" replace />} />
+				<Route path="/friends/search" element={<Navigate to="/user/self/friends/search" replace />} />
 
 				<Route path="*" element={<PageNotFound page="NotFound" />} />
 			</Routes>

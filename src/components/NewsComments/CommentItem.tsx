@@ -39,7 +39,6 @@ export const CommentItem = observer(({comment, newsId, level = 0, onReply, onEdi
 		if (window.confirm('Вы уверены, что хотите изменить комментарий?')) {
 			setIsEditing(true);
 			try {
-				console.log('Редактирование комментария:', editContent);
 				await onEdit?.(comment.id, editContent.trim());
 				setShowEditForm(false);
 			} catch (error) {
@@ -53,7 +52,6 @@ export const CommentItem = observer(({comment, newsId, level = 0, onReply, onEdi
 	const handleDelete = async () => {
 		if (window.confirm('Вы уверены, что хотите удалить комментарий?')) {
 			try {
-				console.log('Удаление комментария:', comment.id);
 				await onDelete?.(comment.id);
 			} catch (error) {
 				console.error('Ошибка удаления:', error);

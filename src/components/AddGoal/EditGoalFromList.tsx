@@ -348,7 +348,6 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 	const handleExternalGoalSelected = (
 		goalData: Partial<IGoal> & {imageUrl?: string; external_id?: string | number; externalType?: string}
 	) => {
-		console.log('[LOG] goalData', goalData);
 		// Заполняем форму данными из внешней цели
 		setTitle(goalData.title || '');
 		setDescription(goalData.description || '');
@@ -393,7 +392,7 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 				)
 			),
 		};
-		console.log('[!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!LOG] additionalFields', additionalFields);
+
 		setExternalGoalFields({
 			...externalGoalFields,
 			additionalFields: {...additionalFields},
@@ -450,7 +449,6 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 					estimatedTime: estimatedTime ? convertTimeToStandardFormat(estimatedTime) : '',
 				},
 			};
-			console.log('[!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!LOG] editedGoal', editedGoal);
 			// Вызываем callback с отредактированной целью
 			onGoalEdited(editedGoal);
 

@@ -1,6 +1,11 @@
-import {FC, useMemo} from 'react';
+import {observer} from 'mobx-react-lite';
+import {FC, useMemo, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
+import {FriendsStore} from '@/store/FriendsStore';
+import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
+import {sendFriendRequest} from '@/utils/api/friends';
 
 import {Avatar} from '../Avatar/Avatar';
 import {Button} from '../Button/Button';
@@ -23,9 +28,42 @@ interface UserInfoProps {
 	totalAchievements: number;
 }
 
-export const UserInfo: FC<UserInfoProps> = (props) => {
+export const UserInfo: FC<UserInfoProps> = observer((props) => {
 	const {background, avatar, name, totalAdded, totalCompleted, page, id, totalAddedLists, totalCompletedLists, totalAchievements} = props;
 	const [block, element] = useBem('user-info');
+	const [isAddingFriend, setIsAddingFriend] = useState(false);
+
+	// Проверяем, является ли это своим профилем
+	const isOwnProfile = UserStore.userSelf.id.toString() === id;
+
+	// Проверяем, является ли пользователь уже другом
+	const isFriend = FriendsStore.friends.some((friend) => friend.id.toString() === id);
+
+	// Проверяем, есть ли уже отправленная заявка
+	const hasPendingRequest = FriendsStore.friendRequests.some((request) => request?.id.toString() === id);
+
+	const handleAddFriend = async () => {
+		if (isAddingFriend) return;
+
+		try {
+			setIsAddingFriend(true);
+			await sendFriendRequest(parseInt(id, 10));
+
+			NotificationStore.addNotification({
+				type: 'success',
+				title: 'Заявка отправлена',
+				message: `Заявка в друзья отправлена пользователю ${name}`,
+			});
+		} catch (error) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: error instanceof Error ? error.message : 'Не удалось отправить заявку в друзья',
+			});
+		} finally {
+			setIsAddingFriend(false);
+		}
+	};
 
 	const tabs: Array<ITabs> = useMemo(() => {
 		return [
@@ -70,9 +108,34 @@ export const UserInfo: FC<UserInfoProps> = (props) => {
 						{name}
 					</Title>
 					<div className={element('right')}>
-						<Button type="Link" theme="blue" icon="plus" href="/goals/create">
-							Добавить цель
-						</Button>
+						{isOwnProfile ? (
+							<Button type="Link" theme="blue" icon="plus" href="/goals/create">
+								Добавить цель
+							</Button>
+						) : (
+							<div className={element('friend-actions')}>
+								{!isFriend && !hasPendingRequest && (
+									<Button
+										theme="blue"
+										icon="plus"
+										onClick={isAddingFriend ? undefined : handleAddFriend}
+										active={isAddingFriend}
+									>
+										{isAddingFriend ? 'Отправка...' : 'Добавить в друзья'}
+									</Button>
+								)}
+								{isFriend && (
+									<Button theme="green" icon="check">
+										В друзьях
+									</Button>
+								)}
+								{hasPendingRequest && !isFriend && (
+									<Button theme="blue-light" active>
+										Заявка отправлена
+									</Button>
+								)}
+							</div>
+						)}
 						<InfoGoal
 							items={[
 								{title: 'Всего целей', value: totalAdded},
@@ -86,4 +149,4 @@ export const UserInfo: FC<UserInfoProps> = (props) => {
 			<Tabs tabs={tabs} active={page} />
 		</article>
 	);
-};
+});
