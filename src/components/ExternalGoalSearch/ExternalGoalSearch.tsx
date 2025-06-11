@@ -22,11 +22,15 @@ interface ExternalGoalResult {
 	title: string;
 	description?: string;
 	imageUrl?: string;
-	type: 'cinema-art' | 'book' | 'travel' | 'gaming';
+	type: 'cinema-art' | 'book' | 'travel' | 'gaming' | 'existing_goal';
 	releaseDate?: string;
 	authors?: string[];
 	address?: string;
 	popularity?: number;
+	isOwnDatabase?: boolean; // Является ли результат из собственной БД
+	matchPercentage?: number; // Процент совпадения для собственных результатов
+	match_percentage?: number; // Альтернативное название поля
+	goalCode?: string; // Код цели для существующих целей
 	// Дополнительные поля из API
 	additionalFields?: {
 		// Поля для игр
@@ -54,11 +58,12 @@ interface ExternalGoalSearchProps {
 	onGoalSelected: (goalData: Partial<IGoal> & {imageUrl?: string; external_id?: string | number; externalType?: string}) => void;
 	className?: string;
 	category?: string | undefined;
+	initialQuery?: string; // Начальный поисковый запрос
 }
 
-export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected, className, category}) => {
+export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected, className, category, initialQuery}) => {
 	const [block, element] = useBem('external-goal-search', className);
-	const [query, setQuery] = useState('');
+	const [query, setQuery] = useState(initialQuery || '');
 	const [results, setResults] = useState<ExternalGoalResult[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [activeComplexity, setActiveComplexity] = useState<number>(1); // По умолчанию средняя сложность (индекс 1)
@@ -67,16 +72,6 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 
 	// Проверка доступности кнопки поиска
 	const isSearchButtonDisabled = loading || query.length < 2;
-
-	// Очистка состояния загрузки изображений при изменении результатов
-	useEffect(() => {
-		setImageLoading({});
-	}, [results]);
-
-	// Если категория не поддерживается или не передана, не показываем компонент
-	if (!category || !SupportedCategories.includes(category)) {
-		return null;
-	}
 
 	// Функция для поиска внешних целей
 	const searchExternalGoals = async () => {
@@ -94,7 +89,16 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 			});
 
 			if (response.success && response.data.results) {
-				setResults(response.data.results);
+				// Обрабатываем новую структуру ответа
+				const {ownResults = [], externalResults = []} = response.data.results;
+
+				// Объединяем результаты: сначала свои, потом внешние
+				const combinedResults = [
+					...ownResults.map((result: any) => ({...result, isOwnDatabase: true})),
+					...externalResults.map((result: any) => ({...result, isOwnDatabase: false})),
+				];
+
+				setResults(combinedResults);
 			} else {
 				NotificationStore.addNotification({
 					type: 'error',
@@ -115,6 +119,23 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 			setLoading(false);
 		}
 	};
+
+	// Очистка состояния загрузки изображений при изменении результатов
+	useEffect(() => {
+		setImageLoading({});
+	}, [results]);
+
+	// Автоматический поиск при передаче initialQuery
+	useEffect(() => {
+		if (initialQuery && initialQuery.length >= 2) {
+			searchExternalGoals();
+		}
+	}, [initialQuery]);
+
+	// Если категория не поддерживается или не передана, не показываем компонент
+	if (!category || !SupportedCategories.includes(category)) {
+		return null;
+	}
 
 	// Обработчик изменения запроса
 	const handleQueryChange = (value: string) => {
@@ -138,12 +159,26 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 	// Обработчик выбора цели - теперь просто передает данные родительскому компоненту
 	const handleSelectGoal = async (goalData: ExternalGoalResult) => {
 		// Преобразуем данные в формат, подходящий для IGoal
-		const goalInfo: Partial<IGoal> & {imageUrl?: string; external_id?: string | number; externalType?: string} = {
+		const goalInfo: Partial<IGoal> & {
+			imageUrl?: string;
+			external_id?: string | number;
+			externalType?: string;
+			deadline?: string;
+			isExistingGoal?: boolean;
+		} = {
 			title: goalData.title,
 			description: goalData.description || `Цель: ${goalData.title}`,
 			external_id: goalData.externalId, // Сохраняем ID внешнего источника
 			externalType: goalData.type, // Тип внешнего источника
 			complexity: selectComplexity[activeComplexity].value as IComplexity,
+			// Добавляем изображение
+			imageUrl: goalData.imageUrl,
+			// Добавляем оценочное время (если есть)
+			estimatedTime: '',
+			// Добавляем дедлайн (если есть)
+			deadline: '',
+			// Добавляем все дополнительные поля
+			...goalData.additionalFields,
 		};
 
 		// Добавляем дополнительные поля из API, если они есть
@@ -157,6 +192,13 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 					(goalInfo as any)[key] = value;
 				}
 			});
+		}
+
+		// Если цель из собственной базы данных, добавляем специальные поля
+		if (goalData.isOwnDatabase) {
+			goalInfo.id = Number(goalData.externalId);
+			goalInfo.code = goalData.goalCode;
+			goalInfo.isExistingGoal = true; // Помечаем как существующую цель
 		}
 
 		// Если есть URL изображения, проверяем его доступность
@@ -246,47 +288,126 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 				<Loader isLoading={loading}>
 					{results.length > 0 && (
 						<div className={element('results')}>
-							{results.map((item) => (
-								<div className={element('result-item')} key={`${item.type}-${item.externalId}`}>
-									<div className={element('result-image')}>
-										{item.imageUrl ? (
-											<img
-												src={item.imageUrl}
-												alt={item.title}
-												onLoad={() => handleImageLoad(String(item.externalId))}
-												onError={() => handleImageError(String(item.externalId))}
-											/>
-										) : (
-											<div className={element('no-image')}>
-												<Svg icon="mount" />
+							{/* Показываем разделитель между своими и внешними результатами */}
+							{(() => {
+								const ownResults = results.filter((item) => item.isOwnDatabase);
+								const externalResults = results.filter((item) => !item.isOwnDatabase);
+
+								return (
+									<>
+										{ownResults.length > 0 && (
+											<>
+												<div className={element('section-header')}>
+													<h4>
+														Цели из базы данных (если ваша цель уже есть в базе, просим вас выбирать её, а не
+														создавать новую)
+													</h4>
+												</div>
+												{ownResults.map((item) => (
+													<div
+														className={element('result-item', {'own-database': true})}
+														key={`own-${item.externalId}`}
+													>
+														<div className={element('result-image')}>
+															{item.imageUrl ? (
+																<img
+																	src={item.imageUrl}
+																	alt={item.title}
+																	onLoad={() => handleImageLoad(String(item.externalId))}
+																	onError={() => handleImageError(String(item.externalId))}
+																/>
+															) : (
+																<div className={element('no-image')}>
+																	<Svg icon="mount" />
+																</div>
+															)}
+														</div>
+														<div className={element('result-details')}>
+															<h4 className={element('result-title')}>{item.title}</h4>
+															{item.description && (
+																<p className={element('result-description')}>
+																	{item.description.substring(0, 150)}...
+																</p>
+															)}
+															<div className={element('result-meta')}>
+																<span className={element('match-percentage')}>
+																	Совпадение: {item.matchPercentage || item.match_percentage}%
+																</span>
+															</div>
+															<Button
+																theme="green"
+																onClick={() => handleSelectGoal(item)}
+																className={`${element('add-button')} ${
+																	imageLoading[String(item.externalId)] ? 'disabled' : ''
+																}`}
+																icon="plus"
+															>
+																{imageLoading[String(item.externalId)]
+																	? 'Проверка...'
+																	: 'Добавить как цель'}
+															</Button>
+														</div>
+													</div>
+												))}
+
+												{externalResults.length > 0 && (
+													<div className={element('section-divider')}>
+														<hr />
+														<span>Результаты из внешних источников</span>
+														<hr />
+													</div>
+												)}
+											</>
+										)}
+
+										{externalResults.map((item) => (
+											<div className={element('result-item')} key={`external-${item.type}-${item.externalId}`}>
+												<div className={element('result-image')}>
+													{item.imageUrl ? (
+														<img
+															src={item.imageUrl}
+															alt={item.title}
+															onLoad={() => handleImageLoad(String(item.externalId))}
+															onError={() => handleImageError(String(item.externalId))}
+														/>
+													) : (
+														<div className={element('no-image')}>
+															<Svg icon="mount" />
+														</div>
+													)}
+												</div>
+												<div className={element('result-details')}>
+													<h4 className={element('result-title')}>{item.title}</h4>
+													{item.description && (
+														<p className={element('result-description')}>
+															{item.description.substring(0, 150)}...
+														</p>
+													)}
+													<div className={element('result-meta')}>
+														{item.type === 'cinema-art' && item.releaseDate && (
+															<span>Год: {item.releaseDate.substring(0, 4)}</span>
+														)}
+														{item.type === 'book' && item.authors && (
+															<span>Авторы: {item.authors.join(', ')}</span>
+														)}
+														{item.type === 'travel' && item.address && <span>Адрес: {item.address}</span>}
+													</div>
+													<Button
+														theme="green"
+														onClick={() => handleSelectGoal(item)}
+														className={`${element('add-button')} ${
+															imageLoading[String(item.externalId)] ? 'disabled' : ''
+														}`}
+														icon="plus"
+													>
+														{imageLoading[String(item.externalId)] ? 'Проверка...' : 'Добавить как цель'}
+													</Button>
+												</div>
 											</div>
-										)}
-									</div>
-									<div className={element('result-details')}>
-										<h4 className={element('result-title')}>{item.title}</h4>
-										{item.description && (
-											<p className={element('result-description')}>{item.description.substring(0, 150)}...</p>
-										)}
-										<div className={element('result-meta')}>
-											{item.type === 'cinema-art' && item.releaseDate && (
-												<span>Год: {item.releaseDate.substring(0, 4)}</span>
-											)}
-											{item.type === 'book' && item.authors && <span>Авторы: {item.authors.join(', ')}</span>}
-											{item.type === 'travel' && item.address && <span>Адрес: {item.address}</span>}
-										</div>
-										<Button
-											theme="green"
-											onClick={() => handleSelectGoal(item)}
-											className={`${element('add-button')} ${
-												imageLoading[String(item.externalId)] ? 'disabled' : ''
-											}`}
-											icon="plus"
-										>
-											{imageLoading[String(item.externalId)] ? 'Проверка...' : 'Добавить как цель'}
-										</Button>
-									</div>
-								</div>
-							))}
+										))}
+									</>
+								);
+							})()}
 						</div>
 					)}
 

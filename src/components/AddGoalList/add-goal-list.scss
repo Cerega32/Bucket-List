@@ -17,11 +17,6 @@
 		}
 	}
 
-	&__title {
-		margin-bottom: 32px;
-		text-align: center;
-	}
-
 	&__wrapper-title {
 		display: flex;
 		justify-content: space-between;
@@ -195,7 +190,7 @@
 
 		textarea {
 			min-height: 120px;
-			font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+			font-family: "Monaco", "Menlo", 'Ubuntu Mono', monospace;
 			font-size: 13px;
 			line-height: 1.4;
 		}
@@ -256,8 +251,29 @@
 		text-align: center;
 	}
 
-	&__section-title {
+	&__selected-goals-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 		margin-bottom: 16px;
+	}
+
+	&__goals-controls {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+	}
+
+	&__hide-checkbox {
+		font-size: 14px;
+
+		.field-checkbox__label {
+			color: var(--color-gray-666);
+			font-size: 14px;
+		}
+	}
+
+	&__section-title {
 		font-size: 18px;
 		font-weight: 500;
 	}

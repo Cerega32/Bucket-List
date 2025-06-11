@@ -13,11 +13,9 @@ import './friend-request-card.scss';
 
 interface FriendRequestCardProps {
 	request: IFriendRequest;
-	onAccept?: (requestId: number) => void;
-	onReject?: (requestId: number) => void;
 }
 
-export const FriendRequestCard: React.FC<FriendRequestCardProps> = observer(({request, onAccept, onReject}) => {
+export const FriendRequestCard: React.FC<FriendRequestCardProps> = observer(({request}) => {
 	const [block, element] = useBem('friend-request-card');
 	const [isProcessing, setIsProcessing] = useState(false);
 
@@ -40,7 +38,6 @@ export const FriendRequestCard: React.FC<FriendRequestCardProps> = observer(({re
 				status: 'accepted',
 				createdAt: new Date().toISOString(),
 			});
-			onAccept?.(request.requestId);
 		} catch (error) {
 			NotificationStore.addNotification({
 				type: 'error',
@@ -61,7 +58,6 @@ export const FriendRequestCard: React.FC<FriendRequestCardProps> = observer(({re
 
 			// Обновляем локальное состояние
 			FriendsStore.removeFriendRequest(request.requestId);
-			onReject?.(request.requestId);
 		} catch (error) {
 			NotificationStore.addNotification({
 				type: 'error',

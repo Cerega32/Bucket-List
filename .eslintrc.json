@@ -52,6 +52,7 @@
 		"@typescript-eslint/brace-style": "off",
 		"no-plusplus": "off",
 		"consistent-return": "off",
+		"function-paren-newline": "off",
 		"import/order": [
 			"error",
 			{

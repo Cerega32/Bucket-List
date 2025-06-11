@@ -34,11 +34,6 @@ export const FriendsRequests: FC = observer(() => {
 		loadFriendRequests();
 	}, []);
 
-	const handleRequestProcessed = () => {
-		// Обновляем список заявок после обработки
-		// Это может понадобиться для некоторых edge случаев
-	};
-
 	if (FriendsStore.isLoading) {
 		return (
 			<section className={block()}>
@@ -65,12 +60,7 @@ export const FriendsRequests: FC = observer(() => {
 			) : (
 				<div className={element('requests-list')}>
 					{FriendsStore.friendRequests.map((request) => (
-						<FriendRequestCard
-							key={request.requestId}
-							request={request}
-							onAccept={handleRequestProcessed}
-							onReject={handleRequestProcessed}
-						/>
+						<FriendRequestCard key={request.requestId} request={request} />
 					))}
 				</div>
 			)}

@@ -252,4 +252,60 @@
 	--height-header: 65px;
 	--height-header-goal: 340px;
 	--max-width: 1416px;
+
+	// Новые переменные для явных цветов из SCSS (теперь в rgb-формате)
+	--color-orange-light-rgb: 255 243 224;
+	--color-orange-light: rgb(var(--color-orange-light-rgb));
+	--color-orange-border-rgb: 255 167 38;
+	--color-orange-border: rgb(var(--color-orange-border-rgb));
+	--color-red-light-rgb: 255 235 238;
+	--color-red-light: rgb(var(--color-red-light-rgb));
+	--color-red-border-rgb: 239 83 80;
+	--color-red-border: rgb(var(--color-red-border-rgb));
+	--color-gray-light-rgb: 245 245 245;
+	--color-gray-light: rgb(var(--color-gray-light-rgb));
+	--color-pink-light-rgb: 255 205 210;
+	--color-pink-light: rgb(var(--color-pink-light-rgb));
+	--color-red-dark-rgb: 211 47 47;
+	--color-red-dark: rgb(var(--color-red-dark-rgb));
+	--color-red-left-rgb: 244 67 54;
+	--color-red-left: rgb(var(--color-red-left-rgb));
+	--color-red-fill-rgb: 244 67 54;
+	--color-red-fill: rgb(var(--color-red-fill-rgb));
+	--color-orange-bg-rgb: 255 243 224;
+	--color-orange-bg: rgb(var(--color-orange-bg-rgb));
+	--color-orange-border2-rgb: 255 167 38;
+	--color-orange-border2: rgb(var(--color-orange-border2-rgb));
+	--color-orange-text-rgb: 230 81 0;
+	--color-orange-text: rgb(var(--color-orange-text-rgb));
+	--color-orange-fill-rgb: 255 152 0;
+	--color-orange-fill: rgb(var(--color-orange-fill-rgb));
+	--color-gray-bg-rgb: 250 250 250;
+	--color-gray-bg: rgb(var(--color-gray-bg-rgb));
+	--color-gray-border2-rgb: 224 224 224;
+	--color-gray-border2: rgb(var(--color-gray-border2-rgb));
+	--color-gray-text-rgb: 51 51 51;
+	--color-gray-text: rgb(var(--color-gray-text-rgb));
+	--color-green-border-rgb: 76 175 80;
+	--color-green-border: rgb(var(--color-green-border-rgb));
+	--color-green-bg-rgb: 241 248 233;
+	--color-green-bg: rgb(var(--color-green-bg-rgb));
+	--color-blue-section-bg-rgb: 227 242 253;
+	--color-blue-section-bg: rgb(var(--color-blue-section-bg-rgb));
+	--color-blue-section-border-rgb: 33 150 243;
+	--color-blue-section-border: rgb(var(--color-blue-section-border-rgb));
+	--color-blue-section-title-rgb: 25 118 210;
+	--color-blue-section-title: rgb(var(--color-blue-section-title-rgb));
+	--color-gray-divider-rgb: 224 224 224;
+	--color-gray-divider: rgb(var(--color-gray-divider-rgb));
+	--color-gray-divider-text-rgb: 117 117 117;
+	--color-gray-divider-text: rgb(var(--color-gray-divider-text-rgb));
+	--color-green-match-bg-rgb: 232 245 232;
+	--color-green-match-bg: rgb(var(--color-green-match-bg-rgb));
+	--color-green-match-text-rgb: 76 175 80;
+	--color-green-match-text: rgb(var(--color-green-match-text-rgb));
+
+	// Для #666
+	--color-gray-666-rgb: 102 102 102;
+	--color-gray-666: rgb(var(--color-gray-666-rgb));
 }

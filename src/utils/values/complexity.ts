@@ -1,3 +1,5 @@
+import {IComplexity} from '@/typings/goal';
+
 export const getComplexity = {
 	hard: 'Тяжело',
 	medium: 'Средне',
@@ -10,7 +12,7 @@ export const getComplexityCategory = {
 	easy: 'Легкая категория',
 };
 
-export const selectComplexity = [
+export const selectComplexity: Array<{name: string; value: IComplexity}> = [
 	{name: 'Легко', value: 'easy'},
 	{name: 'Средне', value: 'medium'},
 	{name: 'Тяжело', value: 'hard'},

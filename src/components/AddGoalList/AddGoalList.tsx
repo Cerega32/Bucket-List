@@ -4,6 +4,7 @@ import {useLocation, useNavigate} from 'react-router-dom';
 
 import {AddGoal} from '@/components/AddGoal/AddGoal';
 import {Button} from '@/components/Button/Button';
+import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
@@ -27,12 +28,7 @@ import './add-goal-list.scss';
 const CACHE_KEY = 'addGoalList_cachedData';
 
 // Расширенный интерфейс для целей с поддержкой автопарсера
-interface IGoalExtended extends IGoal {
-	deadline?: string;
-	isFromAutoParser?: boolean;
-	originalSearchText?: string;
-	autoParserData?: any;
-}
+type IGoalExtended = any;
 
 interface CachedGoalListData {
 	title: string;
@@ -89,6 +85,9 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 
 	// Состояние для отслеживания редактируемой цели (только одна одновременно)
 	const [editingGoalId, setEditingGoalId] = useState<number | string | null>(null);
+
+	// Добавляем состояния для подтверждения целей
+	const [hideConfirmedGoals, setHideConfirmedGoals] = useState(false);
 
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
@@ -316,6 +315,20 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 		});
 	};
 
+	// Проверка наличия неподтвержденных целей
+	const hasUnconfirmedGoals = () => {
+		return selectedGoals.some((goal) => goal.isFromAutoParser && goal.needsConfirmation && !goal.isConfirmed && !goal.isRejected);
+	};
+
+	// Проверка наличие целей требующих редактирования
+	const hasGoalsNeedingEdit = () => {
+		return selectedGoals.some(
+			(goal) =>
+				goal.autoParserData?.status === 'created' &&
+				(!goal.image || !goal.description || goal.description === `Цель: ${goal.title}`)
+		);
+	};
+
 	// Предотвращаем отправку формы списка целей при создании новой цели
 	const handleAddGoalSubmit = (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -345,7 +358,27 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 			return;
 		}
 
-		// setIsLoading(true);
+		// Проверяем наличие неподтвержденных целей
+		if (hasUnconfirmedGoals()) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Внимание',
+				message: 'Есть цели, требующие подтверждения. Пожалуйста, подтвердите или отклоните их.',
+			});
+			return;
+		}
+
+		// Проверяем наличие целей требующих редактирования
+		if (hasGoalsNeedingEdit()) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Внимание',
+				message: 'Есть новые цели, требующие редактирования. Пожалуйста, отредактируйте их.',
+			});
+			return;
+		}
+
+		setIsLoading(true);
 
 		try {
 			const formData = new FormData();
@@ -448,6 +481,38 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 		return typeof activeSubcategory === 'number' ? subcategories[activeSubcategory]?.id : parentCategories[activeCategory]?.id;
 	};
 
+	// Функция для разделения текста на части по строкам
+	const splitTextIntoChunks = (text: string, chunkSize = 5): string[] => {
+		const lines = text.split('\n').filter((line) => line.trim());
+		const chunks: string[] = [];
+
+		for (let i = 0; i < lines.length; i += chunkSize) {
+			chunks.push(lines.slice(i, i + chunkSize).join('\n'));
+		}
+
+		return chunks;
+	};
+
+	// Функция для обработки одного чанка текста
+	const processTextChunk = async (chunk: string, categoryId: string): Promise<any> => {
+		try {
+			const response = await POST_WITH_RETRY('goal-lists/parse-text', {
+				body: {
+					text: chunk,
+					category_id: categoryId,
+					prioritize_existing: true, // Новый параметр для приоритизации существующих целей
+				},
+				showSuccessNotification: false,
+				showErrorNotification: false,
+				auth: true,
+			});
+			return response;
+		} catch (error) {
+			console.error('Error processing chunk:', error);
+			throw error;
+		}
+	};
+
 	// Обработчик автоматического парсинга текста
 	const handleParseText = async () => {
 		if (!autoText.trim()) {
@@ -470,28 +535,48 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 		}
 
 		setIsParsingText(true);
+		const chunks = splitTextIntoChunks(autoText);
+		let allGoals: any[] = [];
+
 		try {
-			const response = await POST_WITH_RETRY('goal-lists/parse-text', {
-				body: {
-					text: autoText,
-					category_id: categoryId,
-				},
-				showSuccessNotification: false,
-				showErrorNotification: false,
-				auth: true,
-			});
+			// Используем последовательную обработку для соблюдения лимитов API
+			const processChunksSequentially = async () => {
+				await chunks.reduce(async (promise, chunk, index) => {
+					await promise;
+					const response = await processTextChunk(chunk, categoryId.toString());
 
-			if (response.success && response.data.goals) {
-				// Фильтруем цели, которые еще не добавлены
-				const newGoals = response.data.goals.filter(
-					(goal: any) =>
-						!selectedGoals.some(
-							(selected) => selected.id === goal.goalCode || selected.title.toLowerCase() === goal.title.toLowerCase()
-						)
-				);
+					if (response.success && response.data.goals) {
+						const newGoals = response.data.goals.filter((goal: any) => {
+							const updatedGoal = {...goal};
+							if (updatedGoal.matchPercentage > 100) {
+								updatedGoal.matchPercentage = 100;
+							}
+							return !selectedGoals.some(
+								(selected) =>
+									selected.id === updatedGoal.goalCode || selected.title.toLowerCase() === updatedGoal.title.toLowerCase()
+							);
+						});
 
-				// Преобразуем parsed goals в формат IGoal
-				const goalsToAdd = newGoals.map((goal: any) => ({
+						allGoals = [...allGoals, ...newGoals];
+					}
+
+					const progress = Math.round(((index + 1) / chunks.length) * 100);
+					NotificationStore.addNotification({
+						type: 'success',
+						title: 'Прогресс',
+						message: `Обработано ${progress}% текста...`,
+					});
+				}, Promise.resolve());
+			};
+
+			await processChunksSequentially();
+
+			// Преобразуем все найденные цели в формат IGoal
+			const goalsToAdd: IGoalExtended[] = allGoals.map((goal: any) => {
+				const confidence = goal.confidence || 0;
+				const needsConfirmation = confidence < 0.97;
+
+				const mappedGoal: IGoalExtended = {
 					id: goal.goalCode || `temp_${Date.now()}_${Math.random()}`,
 					title: goal.title,
 					description: goal.description,
@@ -504,25 +589,46 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					isFromAutoParser: true,
 					originalSearchText: goal.searchText,
 					autoParserData: goal,
-				}));
+					needsConfirmation,
+					isConfirmed: !needsConfirmation, // Автоматически подтверждаем цели с высоким confidence
+					isRejected: false,
+					replacementSearch: false,
+					// Добавляем недостающие поля из IGoal
+					code: goal.goalCode || `temp_${Date.now()}_${Math.random()}`,
+					subcategory: null as any,
+					totalAdded: 0,
+					totalCompleted: 0,
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
+					isCompleted: false,
+					isPublic: true,
+					additional: goal.additional || {},
+					createdBy: null as any,
+					rating: 0,
+					viewsCount: 0,
+					completedCount: 0,
+					// Обязательные поля из IGoalExtended
+					lists: [],
+					listsCount: 0,
+					completedByUser: false,
+					addedByUser: false,
+					favorites: [],
+					favoritesCount: 0,
+					isFavorite: false,
+					createdByUser: false,
+				};
 
-				setSelectedGoals((prev) => [...prev, ...goalsToAdd]);
-				setAutoText('');
+				return mappedGoal;
+			});
 
-				NotificationStore.addNotification({
-					type: 'success',
-					title: 'Готово!',
-					message: `Добавлено ${goalsToAdd.length} целей. ${
-						newGoals.length !== response.data.goals.length ? 'Дубликаты пропущены.' : ''
-					}`,
-				});
-			} else {
-				NotificationStore.addNotification({
-					type: 'error',
-					title: 'Ошибка',
-					message: response.data?.error || 'Не удалось проанализировать текст',
-				});
-			}
+			setSelectedGoals((prev) => [...prev, ...goalsToAdd]);
+			setAutoText('');
+
+			NotificationStore.addNotification({
+				type: 'success',
+				title: 'Готово!',
+				message: `Добавлено ${goalsToAdd.length} целей. ${allGoals.length !== goalsToAdd.length ? 'Дубликаты пропущены.' : ''}`,
+			});
 		} catch (error) {
 			console.error('Error parsing text:', error);
 			NotificationStore.addNotification({
@@ -548,14 +654,188 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 		});
 	};
 
+	// Добавляем функцию для очистки целей
+	const handleClearAllGoals = () => {
+		if (window.confirm('Вы уверены, что хотите удалить все выбранные цели?')) {
+			setSelectedGoals([]);
+			NotificationStore.addNotification({
+				type: 'success',
+				title: 'Готово',
+				message: 'Все выбранные цели удалены',
+			});
+		}
+	};
+
+	// Функция для подтверждения цели
+	const confirmGoal = (goalId: number | string) => {
+		setSelectedGoals((prev) =>
+			prev.map((goal) =>
+				goal.id === goalId ? {...goal, isConfirmed: true, needsConfirmation: false, replacementSearch: false} : goal
+			)
+		);
+	};
+
+	// Функция для отклонения цели
+	const rejectGoal = (goalId: number | string) => {
+		setSelectedGoals((prev) => prev.map((goal) => (goal.id === goalId ? {...goal, isRejected: true, replacementSearch: true} : goal)));
+	};
+
+	// Функция для закрытия поиска замены
+	const closeReplacementSearch = (goalId: number | string) => {
+		// Проверяем, была ли цель отклонена и не была изменена
+		const goal = selectedGoals.find((g) => g.id === goalId);
+		if (goal && goal.isRejected && !goal.isConfirmed) {
+			// Удаляем отклоненную цель
+			setSelectedGoals((prev) => prev.filter((g) => g.id !== goalId));
+			NotificationStore.addNotification({
+				type: 'warning',
+				title: 'Цель удалена',
+				message: 'Отклоненная цель была удалена из списка.',
+			});
+		} else {
+			// Просто закрываем поиск замены
+			setSelectedGoals((prev) => {
+				return prev.map((goalSelected) =>
+					goalSelected.id === goalId ? {...goalSelected, replacementSearch: false} : goalSelected
+				);
+			});
+		}
+	};
+
+	// Функция для замены цели на новую из поиска
+	const replaceGoalFromSearch = (oldGoalId: number | string, newGoalData: any) => {
+		setSelectedGoals((prev) => {
+			const index = prev.findIndex((goal) => goal.id === oldGoalId);
+			if (index === -1) return prev;
+
+			const oldGoal = prev[index];
+
+			// Если выбрана существующая цель из базы данных
+			if (newGoalData.isExistingGoal) {
+				const newGoal: IGoalExtended = {
+					...newGoalData,
+					id: newGoalData.id || newGoalData.external_id,
+					isFromAutoParser: false, // Помечаем как обычную цель
+					originalSearchText: undefined,
+					autoParserData: undefined,
+					isConfirmed: true,
+					needsConfirmation: false,
+					replacementSearch: false,
+					isRejected: false,
+					// Добавляем недостающие поля из IGoal
+					code: newGoalData.code || newGoalData.id || newGoalData.external_id,
+					subcategory: newGoalData.subcategory || null,
+					totalAdded: newGoalData.totalAdded || 0,
+					totalCompleted: newGoalData.totalCompleted || 0,
+					createdAt: newGoalData.createdAt || new Date().toISOString(),
+					updatedAt: newGoalData.updatedAt || new Date().toISOString(),
+					isCompleted: newGoalData.isCompleted || false,
+					isPublic: newGoalData.isPublic !== undefined ? newGoalData.isPublic : true,
+					additional: newGoalData.additional || {},
+					createdBy: newGoalData.createdBy || null,
+					rating: newGoalData.rating || 0,
+					viewsCount: newGoalData.viewsCount || 0,
+					completedCount: newGoalData.completedCount || 0,
+					shortDescription: newGoalData.description ? `${newGoalData.description.substring(0, 100)}...` : newGoalData.title,
+					// Обязательные поля
+					lists: newGoalData.lists || [],
+					listsCount: newGoalData.listsCount || 0,
+					completedByUser: newGoalData.completedByUser || false,
+					addedByUser: newGoalData.addedByUser || false,
+					favorites: newGoalData.favorites || [],
+					favoritesCount: newGoalData.favoritesCount || 0,
+					isFavorite: newGoalData.isFavorite || false,
+					createdByUser: newGoalData.createdByUser || false,
+				} as IGoalExtended;
+
+				const newArray = [...prev];
+				newArray[index] = newGoal;
+				return newArray;
+			}
+			// Если выбрана внешняя цель, создаем новую цель с данными из автопарсера
+			const newGoal: IGoalExtended = {
+				...newGoalData,
+				id: newGoalData.id || `temp_${Date.now()}_${Math.random()}`,
+				isFromAutoParser: true,
+				originalSearchText: oldGoal.originalSearchText,
+				autoParserData: {
+					...newGoalData,
+					confidence: 1.0, // Помечаем как точное совпадение
+					status: 'external',
+					apiSource: newGoalData.externalType,
+				},
+				isConfirmed: true,
+				needsConfirmation: false,
+				replacementSearch: false,
+				isRejected: false,
+				// Добавляем недостающие поля из IGoal
+				code: newGoalData.code || `temp_${Date.now()}_${Math.random()}`,
+				subcategory: newGoalData.subcategory || null,
+				totalAdded: 0,
+				totalCompleted: 0,
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+				isCompleted: false,
+				isPublic: true,
+				additional: newGoalData.additional || {},
+				createdBy: null,
+				rating: 0,
+				viewsCount: 0,
+				completedCount: 0,
+				shortDescription: newGoalData.description ? `${newGoalData.description.substring(0, 100)}...` : newGoalData.title,
+				// Обязательные поля
+				lists: [],
+				listsCount: 0,
+				totalLists: 0,
+				totalComments: 0,
+				addedFromList: false,
+				isCanEdit: true,
+				userVisitedLocation: false,
+				completedByUser: false,
+				addedByUser: false,
+				favorites: [],
+				favoritesCount: 0,
+				isFavorite: false,
+				createdByUser: false,
+			} as IGoalExtended;
+
+			const newArray = [...prev];
+			newArray[index] = newGoal;
+			return newArray;
+		});
+	};
+
+	// Получаем отфильтрованные цели для отображения
+	const getFilteredGoals = () => {
+		if (!hideConfirmedGoals) {
+			return selectedGoals;
+		}
+
+		return selectedGoals.filter((goal) => {
+			// Показываем неподтвержденные цели
+			if (goal.needsConfirmation && !goal.isConfirmed) {
+				return true;
+			}
+			// Показываем цели требующие редактирования
+			if (
+				goal.autoParserData?.status === 'created' &&
+				(!goal.image || !goal.description || goal.description === `Цель: ${goal.title}`)
+			) {
+				return true;
+			}
+			// Скрываем подтвержденные
+			return false;
+		});
+	};
+
 	return (
 		<form className={block()} onSubmit={onSubmit}>
 			<div className={element('container')}>
-				<Title tag="h1" className={element('title')}>
-					Создание списка целей
-				</Title>
 				<div className={element('wrapper-title')}>
-					<Button size="small" type="Link" theme="blue" icon="plus" href="/goal/create">
+					<Title tag="h1" className={element('title')}>
+						Создание списка целей
+					</Title>
+					<Button size="small" type="Link" theme="blue" icon="plus" href="/goals/create">
 						Добавить цель
 					</Button>
 				</div>
@@ -773,11 +1053,31 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 							</div>
 
 							<div className={element('selected-goals')}>
-								<h3 className={element('section-title')}>Выбранные цели ({selectedGoals.length})</h3>
-
+								<div className={element('selected-goals-header')}>
+									<h3 className={element('section-title')}>Выбранные цели ({selectedGoals.length})</h3>
+									<div className={element('goals-controls')}>
+										{selectedGoals.some((goal) => goal.isFromAutoParser) && (
+											<FieldCheckbox
+												id="hide-confirmed"
+												text="Скрыть подтвержденные"
+												checked={hideConfirmedGoals}
+												setChecked={setHideConfirmedGoals}
+												className={element('hide-checkbox')}
+											/>
+										)}
+										<Button
+											theme="blue-light"
+											className={element('clear-btn')}
+											onClick={handleClearAllGoals}
+											size="small"
+										>
+											Очистить все цели
+										</Button>
+									</div>
+								</div>
 								{selectedGoals.length > 0 ? (
 									<div className={element('goals-list')}>
-										{selectedGoals.map((goal) => (
+										{getFilteredGoals().map((goal) => (
 											<GoalListItem
 												key={goal.id}
 												goal={goal}
@@ -785,12 +1085,16 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 												onEdit={handleEditGoal}
 												onStartEdit={setEditingGoalId}
 												onCancelEdit={finishEditingGoal}
+												onConfirm={confirmGoal}
+												onReject={rejectGoal}
+												onReplaceFromSearch={replaceGoalFromSearch}
+												onCloseReplacementSearch={closeReplacementSearch}
 												isEditing={editingGoalId === goal.id}
 												isOtherEditing={editingGoalId !== null && editingGoalId !== goal.id}
 												initialCategory={
 													activeSubcategory !== null
 														? subcategories[activeSubcategory]
-														: categories[activeCategory!]
+														: parentCategories[activeCategory!]
 												}
 												preloadedCategories={categories}
 												preloadedSubcategories={subcategories}
@@ -843,7 +1147,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 												initialCategory={
 													activeSubcategory !== null
 														? subcategories[activeSubcategory]
-														: categories[activeCategory!]
+														: parentCategories[activeCategory!]
 												}
 												lockCategory // Блокируем выбор категории
 												preloadedCategories={categories}
