@@ -1079,7 +1079,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 									<div className={element('goals-list')}>
 										{getFilteredGoals().map((goal) => (
 											<GoalListItem
-												key={goal.id}
+												key={goal.originalSearchText}
 												goal={goal}
 												onRemove={removeSelectedGoal}
 												onEdit={handleEditGoal}
