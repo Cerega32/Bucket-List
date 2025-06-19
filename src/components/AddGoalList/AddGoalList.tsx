@@ -1,4 +1,4 @@
-import {FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {FC, FormEvent, Fragment, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {FileDrop} from 'react-file-drop';
 import {useLocation, useNavigate} from 'react-router-dom';
 
@@ -21,6 +21,7 @@ import {selectComplexity} from '@/utils/values/complexity';
 import '../GoalListItem/goal-list-item.scss';
 import {GoalListItem} from '../GoalListItem/GoalListItem';
 import {GoalSearchItem} from '../GoalSearchItem/GoalSearchItem';
+import {ScrollToTop} from '../ScrollToTop/ScrollToTop';
 import Select from '../Select/Select';
 import './add-goal-list.scss';
 
@@ -421,6 +422,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					const baseData = {
 						...goal.autoParserData,
 					};
+					if (goal.code) baseData.goalCode = goal.code;
 					// Перезаписываем обновленными полями
 					if (goal.title) baseData.title = goal.title;
 					if (goal.description) baseData.description = goal.description;
@@ -595,27 +597,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					replacementSearch: false,
 					// Добавляем недостающие поля из IGoal
 					code: goal.goalCode || `temp_${Date.now()}_${Math.random()}`,
-					subcategory: null as any,
-					totalAdded: 0,
-					totalCompleted: 0,
-					createdAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString(),
-					isCompleted: false,
-					isPublic: true,
 					additional: goal.additional || {},
-					createdBy: null as any,
-					rating: 0,
-					viewsCount: 0,
-					completedCount: 0,
-					// Обязательные поля из IGoalExtended
-					lists: [],
-					listsCount: 0,
-					completedByUser: false,
-					addedByUser: false,
-					favorites: [],
-					favoritesCount: 0,
-					isFavorite: false,
-					createdByUser: false,
 				};
 
 				return mappedGoal;
@@ -724,28 +706,8 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					isRejected: false,
 					// Добавляем недостающие поля из IGoal
 					code: newGoalData.code || newGoalData.id || newGoalData.external_id,
-					subcategory: newGoalData.subcategory || null,
-					totalAdded: newGoalData.totalAdded || 0,
-					totalCompleted: newGoalData.totalCompleted || 0,
-					createdAt: newGoalData.createdAt || new Date().toISOString(),
-					updatedAt: newGoalData.updatedAt || new Date().toISOString(),
-					isCompleted: newGoalData.isCompleted || false,
-					isPublic: newGoalData.isPublic !== undefined ? newGoalData.isPublic : true,
 					additional: newGoalData.additional || {},
-					createdBy: newGoalData.createdBy || null,
-					rating: newGoalData.rating || 0,
-					viewsCount: newGoalData.viewsCount || 0,
-					completedCount: newGoalData.completedCount || 0,
 					shortDescription: newGoalData.description ? `${newGoalData.description.substring(0, 100)}...` : newGoalData.title,
-					// Обязательные поля
-					lists: newGoalData.lists || [],
-					listsCount: newGoalData.listsCount || 0,
-					completedByUser: newGoalData.completedByUser || false,
-					addedByUser: newGoalData.addedByUser || false,
-					favorites: newGoalData.favorites || [],
-					favoritesCount: newGoalData.favoritesCount || 0,
-					isFavorite: newGoalData.isFavorite || false,
-					createdByUser: newGoalData.createdByUser || false,
 				} as IGoalExtended;
 
 				const newArray = [...prev];
@@ -761,42 +723,14 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 				autoParserData: {
 					...newGoalData,
 					confidence: 1.0, // Помечаем как точное совпадение
-					status: 'external',
+					status: newGoalData.source,
 					apiSource: newGoalData.externalType,
 				},
 				isConfirmed: true,
 				needsConfirmation: false,
 				replacementSearch: false,
 				isRejected: false,
-				// Добавляем недостающие поля из IGoal
-				code: newGoalData.code || `temp_${Date.now()}_${Math.random()}`,
-				subcategory: newGoalData.subcategory || null,
-				totalAdded: 0,
-				totalCompleted: 0,
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-				isCompleted: false,
-				isPublic: true,
 				additional: newGoalData.additional || {},
-				createdBy: null,
-				rating: 0,
-				viewsCount: 0,
-				completedCount: 0,
-				shortDescription: newGoalData.description ? `${newGoalData.description.substring(0, 100)}...` : newGoalData.title,
-				// Обязательные поля
-				lists: [],
-				listsCount: 0,
-				totalLists: 0,
-				totalComments: 0,
-				addedFromList: false,
-				isCanEdit: true,
-				userVisitedLocation: false,
-				completedByUser: false,
-				addedByUser: false,
-				favorites: [],
-				favoritesCount: 0,
-				isFavorite: false,
-				createdByUser: false,
 			} as IGoalExtended;
 
 			const newArray = [...prev];
@@ -827,7 +761,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 			return false;
 		});
 	};
-
+	console.log(getFilteredGoals(), 'selectedGoals');
 	return (
 		<form className={block()} onSubmit={onSubmit}>
 			<div className={element('container')}>
@@ -1077,28 +1011,30 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 								</div>
 								{selectedGoals.length > 0 ? (
 									<div className={element('goals-list')}>
-										{getFilteredGoals().map((goal) => (
-											<GoalListItem
-												key={goal.originalSearchText}
-												goal={goal}
-												onRemove={removeSelectedGoal}
-												onEdit={handleEditGoal}
-												onStartEdit={setEditingGoalId}
-												onCancelEdit={finishEditingGoal}
-												onConfirm={confirmGoal}
-												onReject={rejectGoal}
-												onReplaceFromSearch={replaceGoalFromSearch}
-												onCloseReplacementSearch={closeReplacementSearch}
-												isEditing={editingGoalId === goal.id}
-												isOtherEditing={editingGoalId !== null && editingGoalId !== goal.id}
-												initialCategory={
-													activeSubcategory !== null
-														? subcategories[activeSubcategory]
-														: parentCategories[activeCategory!]
-												}
-												preloadedCategories={categories}
-												preloadedSubcategories={subcategories}
-											/>
+										{getFilteredGoals().map((goal, index) => (
+											<Fragment key={`${goal?.originalSearchText}-${goal?.id}`}>
+												<GoalListItem
+													goal={goal}
+													index={index}
+													onRemove={removeSelectedGoal}
+													onEdit={handleEditGoal}
+													onStartEdit={setEditingGoalId}
+													onCancelEdit={finishEditingGoal}
+													onConfirm={confirmGoal}
+													onReject={rejectGoal}
+													onReplaceFromSearch={replaceGoalFromSearch}
+													onCloseReplacementSearch={closeReplacementSearch}
+													isEditing={editingGoalId === index}
+													isOtherEditing={editingGoalId !== null && editingGoalId !== goal.id}
+													initialCategory={
+														activeSubcategory !== null
+															? subcategories[activeSubcategory]
+															: parentCategories[activeCategory!]
+													}
+													preloadedCategories={categories}
+													preloadedSubcategories={subcategories}
+												/>
+											</Fragment>
 										))}
 									</div>
 								) : (
@@ -1180,6 +1116,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					</div>
 				</div>
 			</div>
+			<ScrollToTop />
 		</form>
 	);
 };

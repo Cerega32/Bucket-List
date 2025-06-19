@@ -47,6 +47,7 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 
 	// Инициализируем состояние один раз при монтировании
 	const [initialized, setInitialized] = useState(false);
+	const [code, setCode] = useState(goal?.code || '');
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
 	const [activeComplexity, setActiveComplexity] = useState<number | null>(null);
@@ -83,7 +84,8 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 			setDescription(goal.description || '');
 			setDeadline(goal.deadline || '');
 			setEstimatedTime(goal.estimatedTime || '');
-			setImageUrl(goal.image || null);
+			setImageUrl(goal?.imageUrl || (goal?.image instanceof File ? null : goal.image));
+			setImage(goal?.image instanceof File ? goal.image : null);
 
 			// Определяем индекс сложности
 			if (goal.complexity) {
@@ -346,11 +348,12 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 
 	// Обработчик для добавления цели из внешнего источника
 	const handleExternalGoalSelected = (
-		goalData: Partial<IGoal> & {imageUrl?: string; external_id?: string | number; externalType?: string}
+		goalData: Partial<IGoal> & {imageUrl?: string; external_id?: string | number; externalType?: string; status?: string}
 	) => {
 		// Заполняем форму данными из внешней цели
 		setTitle(goalData.title || '');
 		setDescription(goalData.description || '');
+		setCode(goalData.code || '');
 
 		// Находим индекс сложности в массиве selectComplexity
 		if (goalData.complexity) {
@@ -397,7 +400,7 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 			...externalGoalFields,
 			additionalFields: {...additionalFields},
 			// Обновляем статус на external
-			status: 'external',
+			status: goalData.status,
 			apiSource: goalData.externalType,
 		});
 
@@ -432,12 +435,15 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 				complexity: selectComplexity[activeComplexity].value,
 				category: activeSubcategory !== null ? subcategories[activeSubcategory] : categories[activeCategory],
 				estimatedTime: estimatedTime ? convertTimeToStandardFormat(estimatedTime) : '',
+				code,
 				deadline,
+				status: externalGoalFields.status,
 				shortDescription: description ? `${description.substring(0, 100)}...` : goal.shortDescription,
 				// Если есть файл изображения, сохраняем его для последующей обработки
-				imageFile: image,
+				imageFile: image instanceof File ? image : null,
 				// Если есть URL изображения, сохраняем его
 				image: image ? null : imageUrl,
+				imageUrl: null,
 				// Обновляем autoParserData с новыми данными
 				autoParserData: {
 					...goal.autoParserData,
@@ -522,9 +528,15 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 							</div>
 						) : (
 							<div className={element('image-preview')}>
-								{image && <img src={URL.createObjectURL(image)} alt="Предпросмотр" className={element('preview')} />}
 								{imageUrl && !image && (
 									<img src={imageUrl} alt="Предпросмотр из источника" className={element('preview')} />
+								)}
+								{image && (
+									<img
+										src={image instanceof File ? URL.createObjectURL(image) : image}
+										alt="Предпросмотр"
+										className={element('preview')}
+									/>
 								)}
 								<Button
 									className={element('remove-image')}

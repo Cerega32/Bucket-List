@@ -46,10 +46,12 @@ interface GoalListItemProps {
 	preloadedCategories?: ICategory[];
 	preloadedSubcategories?: ICategory[];
 	initialCategory?: ICategory;
+	index: number;
 }
 
 export const GoalListItem: React.FC<GoalListItemProps> = ({
 	goal,
+	index,
 	onRemove,
 	onEdit,
 	onStartEdit,
@@ -118,7 +120,7 @@ export const GoalListItem: React.FC<GoalListItemProps> = ({
 				return {
 					color: 'green',
 					text: 'Существующая цель',
-					icon: 'check',
+					icon: 'done',
 				};
 			case 'external':
 				return {
@@ -137,13 +139,13 @@ export const GoalListItem: React.FC<GoalListItemProps> = ({
 				return {
 					color: 'red',
 					text: 'Ошибка',
-					icon: 'exclamation',
+					icon: 'info',
 				};
 			default:
 				return {
 					color: 'gray',
 					text: 'Неизвестный статус',
-					icon: 'question',
+					icon: 'search',
 				};
 		}
 	};
@@ -169,17 +171,20 @@ export const GoalListItem: React.FC<GoalListItemProps> = ({
 				title: newGoal.title,
 				description: newGoal.description,
 				image: newGoal.image || newGoal.imageUrl || newGoal.imageFile,
+				imageUrl: null,
 				estimatedTime: newGoal.estimatedTime,
 				deadline: newGoal.deadline,
 				complexity: newGoal.complexity,
 				category: newGoal.category,
 				shortDescription: newGoal.description ? `${newGoal.description.substring(0, 100)}...` : goal.shortDescription,
+				code: newGoal.code,
+				status: newGoal.status,
 				// Обновляем autoParserData с новыми данными
 				autoParserData: {
 					...newGoal.autoParserData,
 					title: newGoal.title,
 					description: newGoal.description,
-					image: newGoal.image || newGoal.imageUrl || newGoal.imageFile,
+					image: newGoal.image || newGoal.imageFile || newGoal.imageUrl,
 					estimatedTime: newGoal.estimatedTime,
 					deadline: newGoal.deadline,
 					complexity: newGoal.complexity,
@@ -280,7 +285,7 @@ export const GoalListItem: React.FC<GoalListItemProps> = ({
 			{/* Предупреждение для новых целей */}
 			{needsEdit && (
 				<div className={element('edit-warning')}>
-					<Svg icon="exclamation" className={element('warning-icon')} />
+					<Svg icon="info" className={element('warning-icon')} />
 					<span>Требуется редактирование: добавьте изображение и описание</span>
 				</div>
 			)}
@@ -289,11 +294,11 @@ export const GoalListItem: React.FC<GoalListItemProps> = ({
 			{showConfirmationButtons && (
 				<div className={element('confirmation-buttons')}>
 					<div className={element('confirmation-message')}>
-						<Svg icon="question" className={element('question-icon')} />
+						<Svg icon="search" className={element('question-icon')} />
 						<span>Это та цель, которую вы искали?</span>
 					</div>
 					<div className={element('confirmation-actions')}>
-						<Button theme="green" size="small" onClick={() => onConfirm?.(goal.id)} icon="check">
+						<Button theme="green" size="small" onClick={() => onConfirm?.(goal.id)} icon="done">
 							Принять
 						</Button>
 						<Button theme="red" size="small" onClick={() => onReject?.(goal.id)} icon="cross">
@@ -349,7 +354,7 @@ export const GoalListItem: React.FC<GoalListItemProps> = ({
 					<button
 						type="button"
 						className={element('edit-btn')}
-						onClick={() => onStartEdit(goal.id)}
+						onClick={() => onStartEdit(index)}
 						aria-label="Редактировать цель"
 						title="Редактировать цель"
 					>

@@ -31,6 +31,7 @@ interface ExternalGoalResult {
 	matchPercentage?: number; // Процент совпадения для собственных результатов
 	match_percentage?: number; // Альтернативное название поля
 	goalCode?: string; // Код цели для существующих целей
+	source?: string;
 	// Дополнительные поля из API
 	additionalFields?: {
 		// Поля для игр
@@ -165,6 +166,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 			externalType?: string;
 			deadline?: string;
 			isExistingGoal?: boolean;
+			status?: string;
 		} = {
 			title: goalData.title,
 			description: goalData.description || `Цель: ${goalData.title}`,
@@ -177,6 +179,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 			estimatedTime: '',
 			// Добавляем дедлайн (если есть)
 			deadline: '',
+			status: goalData.source,
 			// Добавляем все дополнительные поля
 			...goalData.additionalFields,
 		};
