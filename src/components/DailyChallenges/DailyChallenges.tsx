@@ -16,10 +16,11 @@ import './daily-challenges.scss';
 interface IDailyChallengesProps {
 	compact?: boolean;
 	showHeader?: boolean;
+	className?: string;
 }
 
-export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = false, showHeader = true}) => {
-	const [block, element] = useBem('daily-challenges');
+export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = false, showHeader = true, className}) => {
+	const [block, element] = useBem('daily-challenges', className);
 	const [weeklyChallenge, setWeeklyChallenge] = useState<IWeeklyChallenge | null>(null);
 	const [challengeItems, setChallengeItems] = useState<IWeeklyChallengeItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -131,7 +132,7 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 					</span>
 					<span className={element('progress-percentage')}>{Math.round(getWeekProgress())}%</span>
 				</div>
-				<Progress done={getWeekProgress()} all={100} size={compact ? 'medium' : 'large'} className={element('progress-bar')} />
+				<Progress done={getWeekProgress()} all={100} className={element('progress-bar')} />
 			</div>
 
 			<div className={element('challenges')}>
@@ -182,12 +183,7 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 										</span>
 										<span className={element('reward-text')}>+{challenge.experienceReward} XP</span>
 									</div>
-									<Progress
-										done={progressPercentage}
-										all={100}
-										size="small"
-										className={element('challenge-progress-bar')}
-									/>
+									<Progress done={progressPercentage} all={100} className={element('challenge-progress-bar')} />
 								</div>
 							</div>
 						</div>

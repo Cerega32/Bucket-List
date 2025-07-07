@@ -163,13 +163,18 @@ export const getUserChallengeProgress = async (): Promise<{
  * Обновить прогресс пользователя по определенному типу вызова
  * @deprecated Прогресс теперь отслеживается автоматически на бэкенде
  */
-export const updateChallengeProgress = async (): Promise<{
+export const updateChallengeProgress = async (
+	challengeType?: ChallengeType
+): Promise<{
 	success: boolean;
 	data?: IUserChallengeProgress;
 	error?: string;
 }> => {
 	// Функция оставлена для обратной совместимости, но ничего не делает
-	console.warn('updateChallengeProgress is deprecated. Progress is now tracked automatically on backend.');
+	console.warn(
+		'updateChallengeProgress is deprecated. Progress is now tracked automatically on backend.',
+		challengeType ? `Challenge type: ${challengeType}` : ''
+	);
 	return {
 		success: true,
 		data: undefined,
@@ -188,7 +193,9 @@ export const resetChallengeProgress = async (
 	try {
 		await POST('challenges/reset-progress', {
 			auth: true,
-			challenge_type: challengeType,
+			body: {
+				challenge_type: challengeType,
+			},
 		});
 		return {
 			success: true,

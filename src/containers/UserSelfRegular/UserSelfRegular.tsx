@@ -6,7 +6,6 @@ import {RegularGoalCard} from '@/components/RegularGoalCard/RegularGoalCard';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
-import {IGoal} from '@/typings/goal';
 import {getRegularGoalStatistics, IRegularGoalStatistics, markRegularProgress} from '@/utils/api/goals';
 
 import './user-self-regular.scss';
@@ -87,7 +86,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	};
 
 	// Конвертируем статистику в формат IGoal для совместимости с RegularGoalCard
-	const convertStatsToGoal = (stats: IRegularGoalStatistics): IGoal => {
+	const convertStatsToGoal = (stats: IRegularGoalStatistics): any => {
 		return {
 			id: stats.regularGoalData.goal,
 			title: stats.regularGoalData.goalTitle,
@@ -117,7 +116,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 			addedFromList: [],
 			timer: null,
 			userVisitedLocation: false,
-			additional: null,
+
 			progressPercentage: 0,
 			isCompletedByUser: false,
 			isDailyGoal: false,

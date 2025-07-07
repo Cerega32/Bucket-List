@@ -144,19 +144,24 @@ export const UserSelfProgress: FC = observer(() => {
 											{goal.progressPercentage}%
 										</span>
 									</div>
-									<Progress
-										done={goal.progressPercentage}
-										all={100}
-										goal
-										className={element('progress-bar')}
+									<button
+										type="button"
+										className={element('progress-wrapper')}
 										onClick={() => openProgressModal(goal)}
 										style={
 											{
 												cursor: 'pointer',
+												border: 'none',
+												background: 'transparent',
+												padding: 0,
+												width: '100%',
 												'--progress-color': getProgressColor(goal.progressPercentage),
 											} as React.CSSProperties
 										}
-									/>
+										aria-label="Изменить прогресс"
+									>
+										<Progress done={goal.progressPercentage} all={100} goal className={element('progress-bar')} />
+									</button>
 								</div>
 
 								{goal.dailyNotes && (
