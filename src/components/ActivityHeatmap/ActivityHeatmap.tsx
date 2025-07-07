@@ -14,16 +14,34 @@ interface ICompletedItem {
 	completedAt: string;
 }
 
+interface IActivityItem {
+	id: number;
+	title: string;
+	type: 'goal_completion' | 'list_completion' | 'goal_progress' | 'daily_goal' | 'regular_goal';
+	completedAt?: string;
+	createdAt?: string;
+	percentageChange?: number;
+	notes?: string;
+	workDone?: boolean;
+	currentStreak?: number;
+	maxStreak?: number;
+}
+
 interface IActivityDay {
 	date: string;
 	goalCount: number;
 	listCount: number;
+	progressCount: number;
+	dailyCount: number;
+	regularCount: number;
 	totalCount: number;
-	activityType: 'none' | 'goal' | 'list' | 'both';
+	activityType: 'none' | 'goal' | 'list' | 'progress' | 'daily' | 'regular' | 'mixed';
+	activityTypes: string[];
 	level: number;
 	weekday: number;
 	month: number;
 	day: number;
+	activities?: IActivityItem[];
 	completedGoals?: ICompletedItem[];
 	completedLists?: ICompletedItem[];
 }
@@ -37,6 +55,9 @@ interface IActivityMonth {
 interface IActivityStats {
 	totalGoalsCompleted: number;
 	totalListsCompleted: number;
+	totalProgressUpdates: number;
+	totalDailyCompleted: number;
+	totalRegularCompleted: number;
 	totalCompleted: number;
 	activeDays: number;
 	totalDays: number;
@@ -164,6 +185,27 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 
 	// Использование useMemo для кэширования результатов
 	const gridData = useMemo(() => prepareGridData(), [activityData]);
+
+	// Функция для создания описания активности
+	const getActivityDescription = (day: IActivityDay) => {
+		const activities = [];
+		if (day.goalCount > 0) {
+			activities.push(pluralize(day.goalCount, ['цель выполнена', 'цели выполнено', 'целей выполнено']));
+		}
+		if (day.listCount > 0) {
+			activities.push(pluralize(day.listCount, ['список выполнен', 'списка выполнено', 'списков выполнено']));
+		}
+		if (day.progressCount > 0) {
+			activities.push(pluralize(day.progressCount, ['прогресс обновлен', 'прогресса обновлено', 'прогрессов обновлено']));
+		}
+		if (day.dailyCount > 0) {
+			activities.push(pluralize(day.dailyCount, ['ежедневная цель', 'ежедневные цели', 'ежедневных целей']));
+		}
+		if (day.regularCount > 0) {
+			activities.push(pluralize(day.regularCount, ['регулярная цель', 'регулярные цели', 'регулярных целей']));
+		}
+		return activities.join(', ');
+	};
 
 	// Функция для обработки клика по ячейке
 	const handleDayClick = (day: IActivityDay) => {
@@ -294,11 +336,7 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 			);
 		}
 
-		const dayDescription = `${formatDate(day.date)}: ${pluralize(day.goalCount, [
-			'цель выполнена',
-			'цели выполнено',
-			'целей выполнено',
-		])}, ${pluralize(day.listCount, ['список выполнен', 'списка выполнено', 'списков выполнено'])}`;
+		const dayDescription = `${formatDate(day.date)}: ${getActivityDescription(day)}`;
 
 		return (
 			<button
@@ -316,46 +354,149 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 		);
 	};
 
-	// Рендер списка выполненных целей
-	const renderCompletedGoals = (day: IActivityDay) => {
-		if (!day.goalCount || !day.completedGoals?.length) return null;
+	// Рендер всех активностей дня
+	const renderActivities = (day: IActivityDay) => {
+		if (!day.activities || day.activities.length === 0) {
+			return <p>Нет активности в этот день</p>;
+		}
+
+		const activitiesByType = day.activities.reduce((acc, activity) => {
+			if (!acc[activity.type]) {
+				acc[activity.type] = [];
+			}
+			acc[activity.type].push(activity);
+			return acc;
+		}, {} as Record<string, IActivityItem[]>);
 
 		return (
-			<div className={element('detail-item')}>
-				<div className={element('detail-header')}>
-					<Svg icon="target" width="16px" height="16px" className={element('detail-icon')} />
-					<span>{pluralize(day.goalCount, ['цель выполнена', 'цели выполнено', 'целей выполнено'])}</span>
-				</div>
+			<div className={element('activities-content')}>
+				{activitiesByType['goal_completion'] && (
+					<div className={element('activity-section')}>
+						<div className={element('activity-header')}>
+							<Svg icon="star" width="16px" height="16px" className={element('activity-icon')} />
+							<span>
+								{pluralize(activitiesByType['goal_completion'].length, [
+									'цель выполнена',
+									'цели выполнено',
+									'целей выполнено',
+								])}
+							</span>
+						</div>
+						<ul className={element('activity-list')}>
+							{activitiesByType['goal_completion'].map((activity) => (
+								<li key={`goal-${activity.id}`} className={element('activity-item')}>
+									{activity.title}
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
 
-				<ul className={element('completed-list')}>
-					{day.completedGoals.map((goal) => (
-						<li key={`goal-${goal.id}`} className={element('completed-item')}>
-							{goal.title}
-						</li>
-					))}
-				</ul>
-			</div>
-		);
-	};
+				{activitiesByType['list_completion'] && (
+					<div className={element('activity-section')}>
+						<div className={element('activity-header')}>
+							<Svg icon="apps" width="16px" height="16px" className={element('activity-icon')} />
+							<span>
+								{pluralize(activitiesByType['list_completion'].length, [
+									'список выполнен',
+									'списка выполнено',
+									'списков выполнено',
+								])}
+							</span>
+						</div>
+						<ul className={element('activity-list')}>
+							{activitiesByType['list_completion'].map((activity) => (
+								<li key={`list-${activity.id}`} className={element('activity-item')}>
+									{activity.title}
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
 
-	// Рендер списка выполненных списков
-	const renderCompletedLists = (day: IActivityDay) => {
-		if (!day.listCount || !day.completedLists?.length) return null;
+				{activitiesByType['goal_progress'] && (
+					<div className={element('activity-section')}>
+						<div className={element('activity-header')}>
+							<Svg icon="level" width="16px" height="16px" className={element('activity-icon')} />
+							<span>
+								{pluralize(activitiesByType['goal_progress'].length, [
+									'прогресс обновлен',
+									'прогресса обновлено',
+									'прогрессов обновлено',
+								])}
+							</span>
+						</div>
+						<ul className={element('activity-list')}>
+							{activitiesByType['goal_progress'].map((activity) => (
+								<li key={`progress-${activity.id}`} className={element('activity-item')}>
+									<div className={element('progress-info')}>
+										<span className={element('progress-title')}>{activity.title}</span>
+										{activity.percentageChange && (
+											<span className={element('progress-change', {positive: activity.percentageChange > 0})}>
+												{activity.percentageChange > 0 ? '+' : ''}
+												{activity.percentageChange}%
+											</span>
+										)}
+									</div>
+									{activity.notes && <div className={element('progress-notes')}>{activity.notes}</div>}
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
 
-		return (
-			<div className={element('detail-item')}>
-				<div className={element('detail-header')}>
-					<Svg icon="list" width="16px" height="16px" className={element('detail-icon')} />
-					<span>{pluralize(day.listCount, ['список выполнен', 'списка выполнено', 'списков выполнено'])}</span>
-				</div>
+				{activitiesByType['daily_goal'] && (
+					<div className={element('activity-section')}>
+						<div className={element('activity-header')}>
+							<Svg icon="calender" width="16px" height="16px" className={element('activity-icon')} />
+							<span>
+								{pluralize(activitiesByType['daily_goal'].length, [
+									'ежедневная цель',
+									'ежедневные цели',
+									'ежедневных целей',
+								])}
+							</span>
+						</div>
+						<ul className={element('activity-list')}>
+							{activitiesByType['daily_goal'].map((activity) => (
+								<li key={`daily-${activity.id}`} className={element('activity-item')}>
+									<div className={element('daily-info')}>
+										<span className={element('daily-title')}>{activity.title}</span>
+									</div>
+									{activity.notes && <div className={element('daily-notes')}>{activity.notes}</div>}
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
 
-				<ul className={element('completed-list')}>
-					{day.completedLists.map((list) => (
-						<li key={`list-${list.id}`} className={element('completed-item')}>
-							{list.title}
-						</li>
-					))}
-				</ul>
+				{activitiesByType['regular_goal'] && (
+					<div className={element('activity-section')}>
+						<div className={element('activity-header')}>
+							<Svg icon="watch" width="16px" height="16px" className={element('activity-icon')} />
+							<span>
+								{pluralize(activitiesByType['regular_goal'].length, [
+									'регулярная цель',
+									'регулярные цели',
+									'регулярных целей',
+								])}
+							</span>
+						</div>
+						<ul className={element('activity-list')}>
+							{activitiesByType['regular_goal'].map((activity) => (
+								<li key={`regular-${activity.id}`} className={element('activity-item')}>
+									<div className={element('regular-info')}>
+										<span className={element('regular-title')}>{activity.title}</span>
+										{activity.currentStreak && (
+											<span className={element('regular-streak')}>Серия: {activity.currentStreak}</span>
+										)}
+									</div>
+									{activity.notes && <div className={element('regular-notes')}>{activity.notes}</div>}
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
 			</div>
 		);
 	};
@@ -390,6 +531,36 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 									{pluralize(
 										activityData.stats.totalListsCompleted,
 										['список выполнен', 'списка выполнено', 'списков выполнено'],
+										false
+									)}
+								</span>
+							</div>
+							<div className={element('stat-item')}>
+								<span className={element('stat-value')}>{activityData.stats.totalProgressUpdates}</span>
+								<span className={element('stat-label')}>
+									{pluralize(
+										activityData.stats.totalProgressUpdates,
+										['прогресс обновлен', 'прогресса обновлено', 'прогрессов обновлено'],
+										false
+									)}
+								</span>
+							</div>
+							<div className={element('stat-item')}>
+								<span className={element('stat-value')}>{activityData.stats.totalDailyCompleted}</span>
+								<span className={element('stat-label')}>
+									{pluralize(
+										activityData.stats.totalDailyCompleted,
+										['ежедневная цель', 'ежедневных цели', 'ежедневных целей'],
+										false
+									)}
+								</span>
+							</div>
+							<div className={element('stat-item')}>
+								<span className={element('stat-value')}>{activityData.stats.totalRegularCompleted}</span>
+								<span className={element('stat-label')}>
+									{pluralize(
+										activityData.stats.totalRegularCompleted,
+										['регулярная цель', 'регулярных цели', 'регулярных целей'],
 										false
 									)}
 								</span>
@@ -473,13 +644,27 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 
 								<div className={element('legend-section')}>
 									<div className={element('legend-label')}>Тип активности:</div>
-									<div className={element('legend-type')}>
-										<div className={element('legend-cell', {type: 'goal'})} />
-										<span className={element('legend-type-label')}>Цели</span>
-									</div>
-									<div className={element('legend-type')}>
-										<div className={element('legend-cell', {type: 'both'})} />
-										<span className={element('legend-type-label')}>и цели, и списки</span>
+									<div className={element('legend-types')}>
+										<div className={element('legend-type')}>
+											<div className={element('legend-cell', {type: 'goal'})} />
+											<span className={element('legend-type-label')}>Цели</span>
+										</div>
+										<div className={element('legend-type')}>
+											<div className={element('legend-cell', {type: 'progress'})} />
+											<span className={element('legend-type-label')}>Прогресс</span>
+										</div>
+										<div className={element('legend-type')}>
+											<div className={element('legend-cell', {type: 'daily'})} />
+											<span className={element('legend-type-label')}>Ежедневные</span>
+										</div>
+										<div className={element('legend-type')}>
+											<div className={element('legend-cell', {type: 'regular'})} />
+											<span className={element('legend-type-label')}>Регулярные</span>
+										</div>
+										<div className={element('legend-type')}>
+											<div className={element('legend-cell', {type: 'mixed'})} />
+											<span className={element('legend-type-label')}>Смешанная</span>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -488,14 +673,7 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 						{selectedDay && (
 							<div className={element('day-details')}>
 								<h3>{formatDate(selectedDay.date)}</h3>
-								{selectedDay.totalCount === 0 ? (
-									<p>Нет активности в этот день</p>
-								) : (
-									<div className={element('details-content')}>
-										{renderCompletedGoals(selectedDay)}
-										{renderCompletedLists(selectedDay)}
-									</div>
-								)}
+								{selectedDay.totalCount === 0 ? <p>Нет активности в этот день</p> : renderActivities(selectedDay)}
 							</div>
 						)}
 					</>

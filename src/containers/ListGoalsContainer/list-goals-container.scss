@@ -33,7 +33,26 @@
 		z-index: 2;
 	}
 
+	&__content-wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+		width: 100%;
+
+		@include lg {
+			gap: 20px;
+		}
+
+		@include md {
+			gap: 16px;
+		}
+	}
+
 	&__content {
+		width: 100%;
+	}
+
+	&__folder-manager {
 		width: 100%;
 	}
 }

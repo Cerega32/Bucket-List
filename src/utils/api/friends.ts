@@ -1,12 +1,12 @@
 import {HeaderNotificationsStore} from '@/store/HeaderNotificationsStore';
 import {IFriendComparison, IFriendRequestsResponse, IFriendSearchResponse, IFriendsResponse} from '@/typings/user';
-import {getHeaderNotifications} from '@/utils/api/notifications';
+import {getNotifications} from '@/utils/api/notifications';
 import {DELETE, GET, POST} from '@/utils/fetch/requests';
 
 // Функция для обновления уведомлений
 const refreshNotifications = async () => {
 	try {
-		const notificationsData = await getHeaderNotifications();
+		const notificationsData = await getNotifications();
 		HeaderNotificationsStore.setNotifications(notificationsData.results);
 		HeaderNotificationsStore.setUnreadCount(notificationsData.unreadCount);
 	} catch (error) {

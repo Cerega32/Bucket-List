@@ -3,6 +3,7 @@ import {useParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {ContentListGoals} from '@/components/ContentListGoals/ContentListGoals';
+import {GoalFolderManager} from '@/components/GoalFolderManager/GoalFolderManager';
 import {Loader} from '@/components/Loader/Loader';
 import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
 import {useBem} from '@/hooks/useBem';
@@ -44,6 +45,8 @@ export const ListGoalsContainer: FC = () => {
 			: markAllGoalsFromList(code));
 
 		if (res.success) {
+			// Прогресс заданий обновляется автоматически на бэкенде
+
 			setList({
 				...list,
 				...res.data,
@@ -57,6 +60,8 @@ export const ListGoalsContainer: FC = () => {
 		const res = await (operation === 'add' ? addGoal(code) : operation === 'delete' ? removeGoal(code) : markGoal(code, !done));
 
 		if (res.success && list) {
+			// Прогресс заданий обновляется автоматически на бэкенде
+
 			const updatedGoal = {
 				...list.goals[i],
 				addedByUser: operation !== 'delete',
@@ -117,7 +122,10 @@ export const ListGoalsContainer: FC = () => {
 					canEdit={list.isCanEdit || list.isCanAddGoals}
 					location={goalsWithLocation}
 				/>
-				<ContentListGoals className={element('content')} list={list} updateGoal={updateGoal} />
+				<div className={element('content-wrapper')}>
+					<ContentListGoals className={element('content')} list={list} updateGoal={updateGoal} />
+					<GoalFolderManager className={element('folder-manager')} />
+				</div>
 			</article>
 			<ScrollToTop />
 		</main>

@@ -2,7 +2,7 @@
 	padding: 20px;
 	background-color: var(--color-white);
 	border-radius: 12px;
-	box-shadow: 0 2px 8px rgb(var(--color-black-rgb) 0.08);
+	box-shadow: 0 2px 8px rgb(var(--color-black-rgb) / 8%);
 
 	&__title {
 		margin-bottom: 16px;
@@ -71,7 +71,7 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		border-left: 1px solid var(--color-gray-20);
+		border-left: 1px solid var(--color-border);
 	}
 
 	&__grid {
@@ -116,7 +116,7 @@
 		height: 15px;
 		padding: 0;
 		margin: 2px;
-		background-color: var(--color-bg-inactive);
+		background-color: var(--color-secondary);
 		border: none;
 		border-radius: 2px;
 		cursor: pointer;
@@ -160,6 +160,26 @@
 			// border: 2px solid var(--color-white);
 		}
 
+		&--type-progress {
+			background-color: var(--color-blue-2);
+			border: 1px solid var(--color-blue-1);
+		}
+
+		&--type-daily {
+			background-color: var(--color-orange);
+			border: 1px solid var(--color-orange-2);
+		}
+
+		&--type-regular {
+			background-color: var(--color-green-2);
+			border: 1px solid var(--color-green-1);
+		}
+
+		&--type-mixed {
+			background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-blue-2) 50%, var(--color-green-2) 100%);
+			border: 1px solid var(--color-primary);
+		}
+
 		&--type-both {
 			background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-gold) 100%);
 		}
@@ -196,10 +216,16 @@
 		gap: 2px;
 	}
 
+	&__legend-types {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		margin-left: 8px;
+	}
+
 	&__legend-type {
 		display: flex;
 		align-items: center;
-		margin-right: 12px;
 	}
 
 	&__legend-type-label {
@@ -237,9 +263,21 @@
 			background-color: var(--color-primary);
 		}
 
-		// &--type-list {
-		// 	background-color: var(--color-primary);
-		// }
+		&--type-progress {
+			background-color: var(--color-blue-2);
+		}
+
+		&--type-daily {
+			background-color: var(--color-orange);
+		}
+
+		&--type-regular {
+			background-color: var(--color-green-2);
+		}
+
+		&--type-mixed {
+			background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-blue-2) 50%, var(--color-green-2) 100%);
+		}
 
 		&--type-both {
 			background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-gold) 100%);
@@ -249,9 +287,9 @@
 	&__day-details {
 		padding: 16px;
 		margin-top: 20px;
-		background-color: var(--color-bg-secondary);
+		background-color: var(--color-gray-3);
 		border-radius: 8px;
-		box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+		box-shadow: 0 2px 4px rgb(var(--color-black-rgb) / 10%);
 
 		h3 {
 			margin-top: 0;
@@ -262,6 +300,134 @@
 		}
 	}
 
+	&__activities-content {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	&__activity-section {
+		padding: 12px;
+		background-color: var(--color-white);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+	}
+
+	&__activity-header {
+		display: flex;
+		align-items: center;
+		margin-bottom: 8px;
+		color: var(--color-text-primary);
+		font-size: 14px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__activity-icon {
+		margin-right: 8px;
+		color: var(--color-text-secondary);
+	}
+
+	&__activity-list {
+		padding: 0;
+		margin: 0;
+		list-style: none;
+	}
+
+	&__activity-item {
+		padding: 8px 0;
+		border-bottom: 1px solid var(--color-border);
+
+		&:last-child {
+			border-bottom: none;
+		}
+	}
+
+	// Стили для прогресса
+	&__progress-info {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 4px;
+	}
+
+	&__progress-title {
+		color: var(--color-text-primary);
+		font-size: 14px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__progress-change {
+		padding: 2px 6px;
+		background-color: var(--color-gray-5);
+		border-radius: 4px;
+		color: var(--color-text-secondary);
+		font-size: 12px;
+		font-weight: var(--weight-medium);
+
+		&--positive {
+			background-color: var(--color-green-bg);
+			color: var(--color-sentiment-positive);
+		}
+	}
+
+	&__progress-notes {
+		margin-top: 4px;
+		color: var(--color-text-secondary);
+		font-size: 12px;
+		font-style: italic;
+	}
+
+	// Стили для ежедневных целей
+	&__daily-info {
+		display: flex;
+		align-items: center;
+		margin-bottom: 4px;
+	}
+
+	&__daily-title {
+		color: var(--color-text-primary);
+		font-size: 14px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__daily-notes {
+		margin-top: 4px;
+		color: var(--color-text-secondary);
+		font-size: 12px;
+		font-style: italic;
+	}
+
+	// Стили для регулярных целей
+	&__regular-info {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 4px;
+	}
+
+	&__regular-title {
+		color: var(--color-text-primary);
+		font-size: 14px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__regular-streak {
+		padding: 2px 6px;
+		background-color: var(--color-green-bg);
+		border-radius: 4px;
+		color: var(--color-sentiment-positive);
+		font-size: 12px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__regular-notes {
+		margin-top: 4px;
+		color: var(--color-text-secondary);
+		font-size: 12px;
+		font-style: italic;
+	}
+
+	// Старые стили для обратной совместимости
 	&__details-content {
 		display: flex;
 		flex-direction: column;
@@ -341,16 +507,49 @@
 			align-items: flex-start;
 		}
 
+		&__legend-types {
+			flex-wrap: wrap;
+			gap: 8px;
+		}
+
 		&__month-label {
 			height: 16px;
 			font-size: 10px;
 			line-height: 16px;
+		}
+
+		&__activities-content {
+			gap: 12px;
+		}
+
+		&__activity-section {
+			padding: 8px;
+		}
+
+		&__activity-header {
+			font-size: 12px;
+		}
+
+		&__progress-info,
+		&__daily-info,
+		&__regular-info {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		&__progress-change,
+		&__regular-streak {
+			margin-top: 4px;
 		}
 	}
 
 	@media (width <= 480px) {
 		&__stat-item {
 			flex: 1 1 100%;
+		}
+
+		&__legend-types {
+			gap: 6px;
 		}
 	}
 }

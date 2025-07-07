@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useRef} from 'react';
+import {FC, ReactNode, useEffect, useRef} from 'react';
 
 import {Button} from '@/components/Button/Button';
 import {Login} from '@/components/Login/Login';
@@ -15,29 +15,39 @@ import {ConfirmExecutionAllGoal} from '../ConfirmExecutionAllGoal/ConfirmExecuti
 import {CreateTodoListForm} from '../CreateTodoListForm/CreateTodoListForm';
 import {CreateTodoTaskForm} from '../CreateTodoTaskForm/CreateTodoTaskForm';
 import {DeleteGoal} from '../DeleteGoal/DeleteGoal';
+import {FolderSelector} from '../FolderSelector/FolderSelector';
 import {GoalMap} from '../GoalMap/GoalMap';
 import {GoalMapMulti} from '../GoalMap/GoalMapMulti';
 import LocationPicker from '../LocationPicker/LocationPicker';
+import {ProgressUpdateModal} from '../ProgressUpdateModal/ProgressUpdateModal';
 import {Svg} from '../Svg/Svg';
 
 import './modal.scss';
 
 interface ModalProps {
 	className?: string;
+	children?: ReactNode;
+	isOpen?: boolean;
+	onClose?: () => void;
+	title?: string;
 }
 
 export const Modal: FC<ModalProps> = observer((props) => {
-	const {className} = props;
+	const {className, children, isOpen: externalIsOpen, onClose: externalOnClose, title} = props;
 	const [block, element] = useBem('modal', className);
-	const {isOpen, setIsOpen, window, setWindow, funcModal, modalProps} = ModalStore;
+	const {isOpen: storeIsOpen, setIsOpen, window, setWindow, funcModal, modalProps} = ModalStore;
 	const {setIsAuth, setName, setAvatar} = UserStore;
+
+	// Используем внешние пропсы если они переданы, иначе из store
+	const isOpen = externalIsOpen !== undefined ? externalIsOpen : storeIsOpen;
+	const onClose = externalOnClose || (() => setIsOpen(false));
 
 	// Ссылки на первый и последний фокусируемые элементы
 	const modalRef = useRef<HTMLDivElement>(null);
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
 
 	const closeWindow = () => {
-		setIsOpen(false);
+		onClose();
 	};
 
 	const openRegistration = () => {
@@ -129,7 +139,8 @@ export const Modal: FC<ModalProps> = observer((props) => {
 	// Определяем нужен ли скролл для текущего типа окна
 	if (!isOpen) return null;
 
-	const modalContent = (
+	// Если переданы children, используем их вместо стандартного контента
+	const modalContent = children || (
 		<>
 			{window === 'login' && <Login openRegistration={openRegistration} successLogin={successAuth} />}
 			{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
@@ -141,6 +152,17 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			{window === 'goal-map' && <GoalMap {...modalProps} />}
 			{window === 'goal-map-multi' && <GoalMapMulti {...modalProps} />}
 			{window === 'goal-map-add' && <LocationPicker closeModal={closeWindow} {...modalProps} />}
+			{window === 'folder-selector' && (
+				<FolderSelector
+					goalId={modalProps?.goalId}
+					goalTitle={modalProps?.goalTitle}
+					onFolderSelected={(folderId, folderName) => {
+						modalProps?.onFolderSelected?.(folderId, folderName);
+						closeWindow();
+					}}
+					showCreateButton
+				/>
+			)}
 			{window === 'create-todo-list' && (
 				<CreateTodoListForm
 					onSuccess={() => {
@@ -160,6 +182,15 @@ export const Modal: FC<ModalProps> = observer((props) => {
 					onCancel={closeWindow}
 				/>
 			)}
+			{window === 'progress-update' && (
+				<ProgressUpdateModal
+					goalId={modalProps?.goalId}
+					goalTitle={modalProps?.goalTitle}
+					currentProgress={modalProps?.currentProgress}
+					onProgressUpdate={modalProps?.onProgressUpdate}
+					onClose={closeWindow}
+				/>
+			)}
 		</>
 	);
 
@@ -172,6 +203,11 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				})}
 				ref={modalRef}
 			>
+				{title && (
+					<div className={element('header')}>
+						<h2 className={element('title')}>{title}</h2>
+					</div>
+				)}
 				<div className={element('content')}>{modalContent}</div>
 				<Button
 					theme="blue-light"

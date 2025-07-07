@@ -129,7 +129,7 @@ const GoalTimers: FC = () => {
 			) : timers.length > 0 ? (
 				<div className={element('list')}>
 					{timers.map((timer, index) => (
-						<GoalTimerItem key={timer.id || `timer-${index}`} timer={timer} />
+						<GoalTimerItem key={timer.id ? `timer-${timer.id}` : `timer-${timer.goal.code}-${index}`} timer={timer} />
 					))}
 				</div>
 			) : (

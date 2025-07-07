@@ -1,6 +1,7 @@
 import {FC, useEffect, useState} from 'react';
 
 import {CategoryProgress} from '@/components/CategoryProgress/CategoryProgress';
+import {DailyChallenges} from '@/components/DailyChallenges/DailyChallenges';
 import {GoalStats} from '@/components/GoalStats/GoalStats';
 import {HundredGoalsProgress} from '@/components/HundredGoalsProgress/HundredGoalsProgress';
 import {Loader} from '@/components/Loader/Loader';
@@ -41,6 +42,8 @@ export const Dashboard: FC = () => {
 	const handleMarkGoal = async (code: string, done: boolean): Promise<void> => {
 		const res = await markGoal(code, !done);
 		if (res.success) {
+			// Прогресс заданий обновляется автоматически на бэкенде
+
 			// Обновляем таймеры в state после отметки
 			if (data && data.upcomingTimers) {
 				const updatedTimers = data.upcomingTimers.map((timer) => {
@@ -70,6 +73,8 @@ export const Dashboard: FC = () => {
 				{data && (
 					<>
 						<WelcomeWidget className={element('welcome')} quote={data.dailyQuote} stats={data.userStats} />
+
+						<DailyChallenges className={element('challenges')} />
 
 						{data.upcomingTimers && data.upcomingTimers.length > 0 && (
 							<section className={element('timers')}>

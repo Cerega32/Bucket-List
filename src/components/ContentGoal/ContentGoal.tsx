@@ -67,7 +67,7 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 
 	return (
 		<article className={block()}>
-			{!!goal.addedFromList.length && (
+			{goal.addedFromList && goal.addedFromList.length > 0 && (
 				<div className={element('goal-in-list')}>
 					<Svg icon="info" />
 					Цель включена в список и отображается вместе с ним

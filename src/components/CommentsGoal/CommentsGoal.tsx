@@ -24,6 +24,9 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 		const res = await postLikeComment(id, like);
 
 		if (res.success) {
+			// Обновляем прогресс заданий при лайке
+			// Прогресс заданий обновляется автоматически на бэкенде
+
 			const startComments = comments.slice(0, i);
 			const endComments = comments.slice(i + 1);
 			setComments([...startComments, {...comments[i], ...res.data}, ...endComments]);

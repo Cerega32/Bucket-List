@@ -69,6 +69,7 @@ export interface IGoal {
 	estimatedTime?: string;
 	location?: ILocation;
 	userVisitedLocation: boolean;
+	userFolders?: IGoalFolderTag[];
 	timer?: {
 		deadline: string;
 		days_left: number;
@@ -96,6 +97,9 @@ export interface IGoal {
 	movieYear?: number;
 	movieGenres?: string[];
 	movieCountries?: string[];
+
+	// Поля для регулярных целей
+	regularConfig?: IRegularGoalConfig;
 }
 
 export interface IShortGoal {
@@ -127,4 +131,123 @@ export interface ILocation {
 	description?: string;
 	address?: string;
 	created_at: string;
+}
+
+export interface IGoalFolder {
+	id: number;
+	name: string;
+	description?: string;
+	user?: number;
+	userUsername?: string;
+	color?: string;
+	icon?: string;
+	isPrivate: boolean;
+	createdAt: string;
+	updatedAt: string;
+	goalsCount: number;
+	items?: IGoalFolderItem[];
+}
+
+export interface IGoalFolderItem {
+	id: number;
+	image?: string;
+	code: string;
+	goal: number;
+	title: string;
+	category: string;
+	complexity: string;
+	order: number;
+	addedAt: string;
+}
+
+export interface ICreateFolderData {
+	name: string;
+	description?: string;
+	color?: string;
+	icon?: string;
+	is_private?: boolean;
+}
+
+export type IUpdateFolderData = ICreateFolderData;
+
+export interface IFolderGoal {
+	id: number;
+	goal: IGoal;
+	order: number;
+	added_at: string;
+}
+
+export interface IGoalFolderTag {
+	id: number;
+	name: string;
+	color: string;
+	icon: string;
+}
+
+// Типы для регулярных целей
+export interface IRegularGoalConfig {
+	id: number;
+	frequency: 'daily' | 'weekly' | 'custom';
+	weeklyFrequency?: number;
+	customSchedule?: any;
+	durationType: 'days' | 'weeks' | 'until_date' | 'indefinite';
+	durationValue?: number;
+	endDate?: string;
+	allowSkipDays: number;
+	resetOnSkip: boolean;
+	isActive: boolean;
+	createdAt: string;
+	statistics?: IRegularGoalStatistics;
+}
+
+export interface IRegularGoalStatistics {
+	id: number;
+	user: number;
+	userUsername: string;
+	regularGoal: number;
+	regularGoalData: {
+		id: number;
+		goal: number;
+		goalTitle: string;
+		goalCode: string;
+		goalImage: string;
+		goalCategory: string;
+		frequency: 'daily' | 'weekly' | 'custom';
+		weeklyFrequency?: number;
+		customSchedule?: any;
+		durationType: 'days' | 'weeks' | 'until_date' | 'indefinite';
+		durationValue?: number;
+		endDate?: string;
+		allowSkipDays: number;
+		resetOnSkip: boolean;
+		isActive: boolean;
+		createdAt: string;
+		updatedAt: string;
+	};
+	totalCompletions: number;
+	totalDays: number;
+	completionPercentage: number;
+	currentStreak: number;
+	maxStreak: number;
+	startDate?: string;
+	lastCompletionDate?: string;
+	totalWeeks: number;
+	completedWeeks: number;
+	currentWeekCompletions: number;
+	isActive: boolean;
+	isPaused: boolean;
+	resetCount: number;
+	currentPeriodProgress?: {
+		type: 'daily' | 'weekly';
+		completedToday?: boolean;
+		streak?: number;
+		currentWeekCompletions?: number;
+		requiredPerWeek?: number;
+		weekProgress?: number;
+		weekStart?: string;
+	};
+	nextTargetDate?: string;
+	canCompleteToday: boolean;
+	createdAt: string;
+	updatedAt: string;
 }

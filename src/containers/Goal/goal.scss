@@ -80,6 +80,21 @@
 		}
 	}
 
+	&__content-wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+		width: 100%;
+
+		@include lg {
+			gap: 20px;
+		}
+
+		@include md {
+			gap: 16px;
+		}
+	}
+
 	&__content {
 		width: 100%;
 		padding: 40px 0;

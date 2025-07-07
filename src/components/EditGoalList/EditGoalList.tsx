@@ -18,6 +18,7 @@ import {debounce} from '@/utils/time/debounce';
 import {getComplexity, selectComplexity} from '@/utils/values/complexity';
 
 import {GoalSearchItem} from '../GoalSearchItem/GoalSearchItem';
+import {ScrollToTop} from '../ScrollToTop/ScrollToTop';
 import Select from '../Select/Select';
 
 import './edit-goal-list.scss';
@@ -585,6 +586,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 					</div>
 				</div>
 			</div>
+			<ScrollToTop />
 		</form>
 	);
 };

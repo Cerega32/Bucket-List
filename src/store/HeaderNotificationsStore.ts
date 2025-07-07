@@ -1,7 +1,7 @@
 import {makeAutoObservable} from 'mobx';
 
 import {IHeaderNotification} from '@/typings/notification';
-import {markAllNotificationsAsRead, markNotificationAsRead} from '@/utils/api/notifications';
+import {markAllNotificationsAsRead, markNotificationRead} from '@/utils/api/notifications';
 
 class Store {
 	notifications: IHeaderNotification[] = [];
@@ -32,7 +32,7 @@ class Store {
 
 	async markAsRead(notificationId: number) {
 		try {
-			await markNotificationAsRead(notificationId);
+			await markNotificationRead(notificationId);
 
 			// Обновляем локальное состояние
 			this.notifications = this.notifications.map((n) => (n.id === notificationId ? {...n, isRead: true} : n));

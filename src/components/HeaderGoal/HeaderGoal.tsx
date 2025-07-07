@@ -43,6 +43,7 @@ export const HeaderGoal = forwardRef<HTMLElement, HeaderGoalProps>((props, ref) 
 				className={element('wrapper')}
 				short={shrink}
 				categoryRank={goal.categoryRank}
+				userFolders={goal.userFolders}
 			/>
 		</header>
 	);

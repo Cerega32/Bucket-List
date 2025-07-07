@@ -81,10 +81,25 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		setIsOpen(true);
 	};
 
-	const updateGoal = async (code: string, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
+	const updateGoal = async (code: string, operation: 'add' | 'delete' | 'mark' | 'partial' | 'start', done?: boolean): Promise<void> => {
 		if (!goal) {
 			return;
 		}
+
+		// Специальная обработка для начала выполнения
+		if (operation === 'start') {
+			// Логика начала выполнения обрабатывается в AsideGoal
+			// Здесь можем добавить дополнительную логику если нужно
+			return;
+		}
+
+		// Специальная обработка для частичного выполнения
+		if (operation === 'partial') {
+			// Логика частичного выполнения обрабатывается в AsideGoal
+			// Здесь можем добавить дополнительную логику если нужно
+			return;
+		}
+
 		const res = await (operation === 'add'
 			? addGoal(code)
 			: operation === 'delete'
@@ -113,6 +128,8 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			};
 
 			setGoal({...goal, ...updatedGoal});
+
+			// Прогресс заданий обновляется автоматически на бэкенде
 		}
 	};
 
@@ -125,6 +142,16 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const handleCancelEdit = () => {
 		setHeader('transparent');
 		setIsEditing(false);
+	};
+
+	const handleGoalCompleted = () => {
+		// Обновляем состояние цели как выполненной
+		if (goal) {
+			setGoal({
+				...goal,
+				completedByUser: true,
+			});
+		}
 	};
 
 	const [shrink, setShrink] = useState(false);
@@ -210,13 +237,19 @@ export const Goal: FC<IPage> = observer(({page}) => {
 					added={goal.addedByUser}
 					updateGoal={updateGoal}
 					code={goal.code}
+					goalId={goal.id}
 					done={goal.completedByUser}
 					openAddReview={openAddReview}
 					editGoal={goal.createdByUser && goal.isCanEdit ? () => setIsEditing(true) : undefined}
 					canEdit={goal?.isCanEdit}
 					location={goal?.location}
+					onGoalCompleted={handleGoalCompleted}
+					userFolders={goal.userFolders}
+					regularConfig={goal.regularConfig}
 				/>
-				<ContentGoal page={page} goal={goal} className={element('content')} />
+				<div className={element('content-wrapper')}>
+					<ContentGoal page={page} goal={goal} className={element('content')} />
+				</div>
 			</section>
 			<ScrollToTop />
 		</main>

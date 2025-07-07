@@ -1,7 +1,7 @@
 import {FC} from 'react';
 
 import {useBem} from '@/hooks/useBem';
-import {ICategory, IComplexity} from '@/typings/goal';
+import {ICategory, IComplexity, IGoalFolderTag} from '@/typings/goal';
 import './title-with-tags.scss';
 
 import {Tags} from '../Tags/Tags';
@@ -17,10 +17,11 @@ interface TitleWithTagsProps {
 	isList?: boolean;
 	short?: boolean;
 	categoryRank?: number;
+	userFolders?: IGoalFolderTag[];
 }
 
 export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
-	const {className, title, theme, category, complexity, totalCompleted, isList, short, categoryRank} = props;
+	const {className, title, theme, category, complexity, totalCompleted, isList, short, categoryRank, userFolders} = props;
 
 	const [block, element] = useBem('title-with-tags', className);
 
@@ -36,6 +37,7 @@ export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
 					complexity={complexity}
 					done={totalCompleted}
 					theme={theme}
+					userFolders={userFolders}
 				/>
 			)}
 		</div>

@@ -31,7 +31,7 @@ export const UserSelfDashboard: FC = observer(() => {
 		<section className={block()}>
 			<div className={element('info-wrapper')}>
 				<Link to="/list/100-goals" className={element('info')}>
-					<h3 className={element('info-title')}>Невыполненных целей в “100 целей”</h3>
+					<h3 className={element('info-title')}>Невыполненных целей в &quot;100 целей&quot;</h3>
 					<span className={element('info-count')}>
 						<Svg icon="star" />
 						{userStatistics &&

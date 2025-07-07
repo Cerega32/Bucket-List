@@ -82,7 +82,7 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 			</div>
 
 			<div className={element('content')}>
-				{HeaderNotificationsStore.notifications.length === 0 ? (
+				{!HeaderNotificationsStore.notifications || HeaderNotificationsStore.notifications.length === 0 ? (
 					<div className={element('empty')}>
 						<p>Нет уведомлений</p>
 					</div>

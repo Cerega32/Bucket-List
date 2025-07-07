@@ -94,6 +94,9 @@ export const RoutesAuth: FC = observer(() => {
 					path="/user/self/active-goals"
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfActive" subPage="goals" />} />}
 				/>
+				<Route path="/user/self/folders" element={<ProtectedRoute element={<PageUserSelf page="isUserSelfFolders" />} />} />
+				<Route path="/user/self/progress" element={<ProtectedRoute element={<PageUserSelf page="isUserSelfProgress" />} />} />
+				<Route path="/user/self/regular" element={<ProtectedRoute element={<PageUserSelf page="isUserSelfRegular" />} />} />
 				<Route
 					path="/user/self/done-goals"
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfDone" subPage="goals" />} />}

@@ -1,5 +1,6 @@
 .aside-goal {
 	$block: &;
+
 	min-width: 336px;
 	max-width: 336px;
 
@@ -37,6 +38,8 @@
 	}
 
 	&__info {
+		width: 100%;
+		max-width: 400px;
 		padding: 16px;
 		background: var(--color-white);
 		border: 1px solid var(--color-gray-9);
@@ -51,6 +54,117 @@
 			display: flex;
 			flex-direction: column;
 			gap: 8px;
+		}
+	}
+
+	// Стили для секции регулярных целей
+	&__regular-section {
+		padding: 16px;
+		margin-bottom: 16px;
+		background: rgb(52 152 219 / 5%);
+		border: 1px solid rgb(52 152 219 / 20%);
+		border-radius: 12px;
+	}
+
+	&__regular-header {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 8px;
+	}
+
+	&__regular-icon {
+		width: 16px;
+		height: 16px;
+		color: var(--color-primary);
+	}
+
+	&__regular-title {
+		color: var(--color-primary);
+		font-size: 14px;
+		font-weight: var(--weight-semi-bold);
+	}
+
+	&__regular-frequency {
+		margin: 0 0 12px;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+	}
+
+	&__regular-progress {
+		margin-bottom: 12px;
+	}
+
+	&__progress-text {
+		margin-bottom: 8px;
+		color: var(--color-text-secondary);
+		font-size: 13px;
+	}
+
+	&__daily-status {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 12px;
+		background: var(--color-gray-11);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		color: var(--color-text-secondary);
+		font-size: 13px;
+
+		&--completed {
+			background: rgb(46 204 113 / 10%);
+			border-color: rgb(46 204 113 / 30%);
+			color: var(--color-success);
+		}
+	}
+
+	&__status-icon {
+		flex-shrink: 0;
+		width: 14px;
+		height: 14px;
+	}
+
+	&__streak {
+		margin-left: auto;
+		color: var(--color-text-muted);
+		font-size: 11px;
+	}
+
+	&__progress-section {
+		padding: 16px;
+		margin-bottom: 16px;
+		background: var(--color-gray-11);
+		border: 1px solid var(--color-border);
+		border-radius: 12px;
+	}
+
+	&__progress-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 12px;
+	}
+
+	&__progress-label {
+		color: var(--color-text-primary);
+		font-size: 14px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__progress-value {
+		color: var(--color-primary);
+		font-size: 16px;
+		font-weight: var(--weight-semi-bold);
+	}
+
+	&__progress-bar {
+		margin-bottom: 12px;
+		transition: all 0.2s ease;
+
+		&:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 2px 8px rgb(var(--color-primary-rgb) / 20%);
 		}
 	}
 }

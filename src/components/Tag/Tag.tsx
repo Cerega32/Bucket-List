@@ -15,15 +15,16 @@ interface TagProps {
 	theme?: 'light' | 'integrate';
 	classNameIcon?: string;
 	complexity?: IComplexity;
+	style?: React.CSSProperties;
 }
 
 export const Tag: FC<TagProps> = (props) => {
-	const {icon, className, text, category, theme, classNameIcon, complexity} = props;
+	const {icon, className, text, category, theme, classNameIcon, complexity, style} = props;
 
 	const [block] = useBem('tag', className);
 
 	return (
-		<span className={block({category, theme})}>
+		<span className={block({category, theme})} style={style}>
 			{icon && <Svg className={classNameIcon} icon={icon} />}
 			{text && text}
 			{complexity && getComplexity[complexity]}

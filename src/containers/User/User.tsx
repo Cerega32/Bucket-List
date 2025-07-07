@@ -21,6 +21,7 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 	const {userInfo} = UserStore;
 	const {id} = useParams();
 	const [isLoading, setIsLoading] = useState(true);
+	const [hasVisited, setHasVisited] = useState(false);
 
 	if (!id) {
 		return null;
@@ -30,9 +31,16 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 		(async () => {
 			setIsLoading(true);
 			await getUser(id);
+
+			// Обновляем прогресс заданий при посещении профиля (только один раз за сессию)
+			if (!hasVisited) {
+				// Прогресс заданий обновляется автоматически на бэкенде
+				setHasVisited(true);
+			}
+
 			setIsLoading(false);
 		})();
-	}, [id]);
+	}, [id, hasVisited]);
 
 	const getUserContent = () => {
 		switch (page) {

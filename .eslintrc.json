@@ -53,6 +53,7 @@
 		"no-plusplus": "off",
 		"consistent-return": "off",
 		"function-paren-newline": "off",
+		"jsx-a11y/label-has-associated-control": "off",
 		"import/order": [
 			"error",
 			{

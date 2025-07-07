@@ -10,7 +10,7 @@ import {HeaderNotificationsStore} from '@/store/HeaderNotificationsStore';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
 import {getUser} from '@/utils/api/get/getUser';
-import {getHeaderNotifications} from '@/utils/api/notifications';
+import {getNotifications} from '@/utils/api/notifications';
 
 import {ThemeStore} from '../../store/ThemeStore';
 import {Avatar} from '../Avatar/Avatar';
@@ -41,7 +41,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				await getUser();
 				// Загружаем уведомления при авторизации
 				try {
-					const notificationsData = await getHeaderNotifications();
+					const notificationsData = await getNotifications();
 					HeaderNotificationsStore.setNotifications(notificationsData.results);
 					HeaderNotificationsStore.setUnreadCount(notificationsData.unreadCount);
 				} catch (error) {

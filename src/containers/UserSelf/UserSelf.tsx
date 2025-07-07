@@ -8,8 +8,11 @@ import {getUser} from '@/utils/api/get/getUser';
 
 import {UserSelfAchievements} from '../UserSelfAchievements/UserAchievements';
 import {UserSelfDashboard} from '../UserSelfDashboard/UserSelfDashboard';
+import {UserSelfFolders} from '../UserSelfFolders/UserSelfFolders';
 import {UserSelfFriends} from '../UserSelfFriends/UserSelfFriends';
 import {UserSelfGoals} from '../UserSelfGoals/UserSelfGoals';
+import {UserSelfProgress} from '../UserSelfProgress/UserSelfProgress';
+import {UserSelfRegular} from '../UserSelfRegular/UserSelfRegular';
 import {UserSelfSettings} from '../UserSelfSettings/UserSelfSettings';
 import './user-self.scss';
 
@@ -38,6 +41,12 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 				return <UserSelfAchievements />;
 			case 'isUserSelfFriends':
 				return <UserSelfFriends subPage={subPage as string} />;
+			case 'isUserSelfFolders':
+				return <UserSelfFolders />;
+			case 'isUserSelfProgress':
+				return <UserSelfProgress />;
+			case 'isUserSelfRegular':
+				return <UserSelfRegular />;
 			default:
 				return <UserSelfDashboard />;
 		}
@@ -59,6 +68,21 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 				url: '/user/self/friends',
 				name: 'Друзья',
 				page: 'isUserSelfFriends',
+			},
+			{
+				url: '/user/self/folders',
+				name: 'Папки целей',
+				page: 'isUserSelfFolders',
+			},
+			{
+				url: '/user/self/progress',
+				name: 'Прогресс целей',
+				page: 'isUserSelfProgress',
+			},
+			{
+				url: '/user/self/regular',
+				name: 'Регулярные цели',
+				page: 'isUserSelfRegular',
 			},
 			{
 				url: '/user/self/active-goals',

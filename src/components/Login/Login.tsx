@@ -32,6 +32,8 @@ export const Login: FC<LoginProps> = (props) => {
 
 		const res = await postLogin(email, password, rememberMe);
 		if (res.success) {
+			// Прогресс заданий обновляется автоматически на бэкенде
+
 			successLogin(res.data);
 		} else {
 			setError('Неправильные данные');

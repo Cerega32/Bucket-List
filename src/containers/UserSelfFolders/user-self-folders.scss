@@ -1,0 +1,16 @@
+.user-self-folders {
+	flex: 1;
+	max-width: 1200px;
+
+	&__content {
+		width: 100%;
+	}
+
+	@media (width <= 1024px) {
+		padding: 24px;
+	}
+
+	@media (width <= 768px) {
+		padding: 16px;
+	}
+}

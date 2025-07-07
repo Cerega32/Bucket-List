@@ -48,6 +48,8 @@ export interface ITotalStats {
 	completedGoals: number;
 	completedLists: number;
 	achievementsCount: number;
+	weeklyCompletedChallenges: number;
+	totalWeeklyChallenges: number;
 }
 
 export interface IWeeklyProgressItem {

@@ -12,7 +12,9 @@ type IWindow =
 	| 'goal-map-multi'
 	| 'goal-map-add'
 	| 'create-todo-list'
-	| 'create-todo-task';
+	| 'create-todo-task'
+	| 'folder-selector'
+	| 'progress-update';
 
 export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 

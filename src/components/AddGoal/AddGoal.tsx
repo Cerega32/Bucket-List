@@ -6,6 +6,7 @@ import {useLocation, useNavigate} from 'react-router-dom';
 import {Button} from '@/components/Button/Button';
 import {DatePicker} from '@/components/DatePicker/DatePicker';
 import {ExternalGoalSearch} from '@/components/ExternalGoalSearch/ExternalGoalSearch';
+import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
@@ -54,34 +55,148 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const location = useLocation();
 
 	const [block, element] = useBem('add-goal', className);
+
+	// Основные поля
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
-	const [activeComplexity, setActiveComplexity] = useState<number | null>(1);
-	const [activeCategory, setActiveCategory] = useState<number | null>(null);
-	const [activeSubcategory, setActiveSubcategory] = useState<number | null>(null);
-	const [deadline, setDeadline] = useState<string>('');
-	const [estimatedTime, setEstimatedTime] = useState<string>('');
+	const [activeComplexity, setActiveComplexity] = useState<number | null>(null);
+	const [deadline, setDeadline] = useState('');
+	const [estimatedTime, setEstimatedTime] = useState('');
+
+	// Изображение
 	const [image, setImage] = useState<File | null>(null);
 	const [imageUrl, setImageUrl] = useState<string | null>(null);
-	const [categories, setCategories] = useState<ICategory[]>([]);
-	const [subcategories, setSubcategories] = useState<ICategory[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-	// Состояние для хранения дополнительных полей из внешних API
+	// Категории
+	const [activeCategory, setActiveCategory] = useState<number | null>(null);
+	const [activeSubcategory, setActiveSubcategory] = useState<number | null>(null);
+	const [categories, setCategories] = useState<ICategory[]>([]);
+
+	// Место
+	const [selectedGoalLocation, setSelectedGoalLocation] = useState<Partial<ILocation> | null>(null);
+
+	// Внешние поля
 	const [externalGoalFields, setExternalGoalFields] = useState<any>(null);
 
-	// // Состояния для работы с местами
-	const [selectedGoalLocation, setSelectedGoalLocation] = useState<Partial<ILocation> | null>(null);
-	const {setWindow, setModalProps, setIsOpen} = ModalStore;
+	// Состояния загрузки
+	const [isLoading, setIsLoading] = useState(false);
 
-	// Новые состояния для поиска похожих целей
+	// Регулярность
+	const [isRegular, setIsRegular] = useState(false);
+	const [regularFrequency, setRegularFrequency] = useState<'daily' | 'weekly' | 'custom'>('daily');
+	const [weeklyFrequency, setWeeklyFrequency] = useState(3);
+	const [durationType, setDurationType] = useState<'days' | 'weeks' | 'until_date' | 'indefinite'>('days');
+	const [durationValue, setDurationValue] = useState(30);
+	const [regularEndDate, setRegularEndDate] = useState('');
+	const [allowSkipDays, setAllowSkipDays] = useState(0);
+	const [resetOnSkip, setResetOnSkip] = useState(false);
+
+	// Похожие цели
 	const [similarGoals, setSimilarGoals] = useState<IGoal[]>([]);
-	const [, setIsSearching] = useState(false);
 	const [showSimilarGoals, setShowSimilarGoals] = useState(false);
 
+	// Остальные локальные состояния
+	const [subcategories, setSubcategories] = useState<ICategory[]>([]);
+	const fileInputRef = useRef<HTMLInputElement | null>(null);
+	const {setWindow, setModalProps, setIsOpen} = ModalStore;
+
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
-	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
+	const parentCategories = useMemo(() => categories.filter((cat: ICategory) => !cat.parentCategory), [categories]);
+
+	// Функция для сброса формы
+	const resetForm = () => {
+		setTitle('');
+		setDescription('');
+		setActiveComplexity(null);
+		setDeadline('');
+		setEstimatedTime('');
+		setImage(null);
+		setImageUrl(null);
+		setActiveCategory(null);
+		setActiveSubcategory(null);
+		setSelectedGoalLocation(null);
+		setExternalGoalFields(null);
+		setIsRegular(false);
+		setRegularFrequency('daily');
+		setWeeklyFrequency(3);
+		setDurationType('days');
+		setDurationValue(30);
+		setRegularEndDate('');
+		setAllowSkipDays(0);
+		setResetOnSkip(false);
+		setSimilarGoals([]);
+		setShowSimilarGoals(false);
+	};
+
+	// Обработчики для похожих целей
+	const handleTitleFocus = () => {
+		if (similarGoals.length > 0) {
+			setShowSimilarGoals(true);
+		}
+	};
+
+	const handleTitleBlur = () => {
+		// Используем setTimeout чтобы дать время на клик по элементу
+		setTimeout(() => {
+			setShowSimilarGoals(false);
+		}, 200);
+	};
+
+	const fillFormWithGoalData = (goal: IGoal) => {
+		setTitle(goal.title);
+		setDescription(goal.description || '');
+		setEstimatedTime(goal.estimatedTime || '');
+
+		// Если у цели есть сложность, находим ее индекс
+		if (goal.complexity) {
+			const complexityIndex = selectComplexity.findIndex((item) => item.value === goal.complexity);
+			if (complexityIndex !== -1) {
+				setActiveComplexity(complexityIndex);
+			}
+		}
+
+		// Если у цели есть категория, находим ее индекс
+		if (goal.category) {
+			// Определяем, является ли категория подкатегорией
+			const goalCategory = categories.find((cat: ICategory) => cat.id === goal.category?.id);
+
+			if (goalCategory) {
+				if (goalCategory.parentCategory) {
+					// Если это подкатегория, находим её родительскую категорию
+					const parentCategoryIndex = parentCategories.findIndex((cat: ICategory) => cat.id === goalCategory.parentCategory?.id);
+					if (parentCategoryIndex !== -1) {
+						setActiveCategory(parentCategoryIndex);
+
+						// Фильтруем подкатегории из общего списка
+						const filteredSubcategories = categories.filter(
+							(cat: ICategory) => cat.parentCategory && cat.parentCategory.id === goalCategory.parentCategory?.id
+						);
+						setSubcategories(filteredSubcategories);
+
+						// Находим индекс подкатегории в отфильтрованном списке
+						const subcategoryIndex = filteredSubcategories.findIndex((sub: ICategory) => sub.id === goalCategory.id);
+						if (subcategoryIndex !== -1) {
+							setActiveSubcategory(subcategoryIndex);
+						}
+					}
+				} else {
+					// Если это родительская категория
+					const categoryIndex = parentCategories.findIndex((cat: ICategory) => cat.id === goalCategory.id);
+					if (categoryIndex !== -1) {
+						setActiveCategory(categoryIndex);
+					}
+				}
+			}
+		}
+
+		// Сохраняем URL изображения, если он есть
+		if (goal.image) {
+			setImageUrl(goal.image);
+			setImage(null); // Сбрасываем локально загруженное изображение
+		}
+
+		setShowSimilarGoals(false);
+	};
 
 	// Обработчик выбора места с карты
 	const handleLocationFromPicker = (selectedLocation: Partial<ILocation>) => {
@@ -345,7 +460,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		debounce(async (query: string) => {
 			if (query.length < 3) {
 				setSimilarGoals([]);
-				setIsSearching(false);
+				setShowSimilarGoals(false);
 				return;
 			}
 
@@ -357,8 +472,6 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				}
 			} catch (error) {
 				console.error('Ошибка при поиске похожих целей:', error);
-			} finally {
-				setIsSearching(false);
 			}
 		}, 500),
 		[]
@@ -367,95 +480,12 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	// Вызов поиска при изменении названия цели
 	useEffect(() => {
 		if (title) {
-			setIsSearching(true);
 			debouncedSearchSimilarGoals(title);
 		} else {
 			setSimilarGoals([]);
 			setShowSimilarGoals(false);
 		}
 	}, [title, debouncedSearchSimilarGoals]);
-
-	// Обработчики фокуса для поля ввода названия
-	const handleTitleFocus = () => {
-		if (similarGoals.length > 0) {
-			setShowSimilarGoals(true);
-		}
-	};
-
-	const handleTitleBlur = () => {
-		// Используем setTimeout, чтобы дать время для клика по элементу списка
-		setTimeout(() => {
-			setShowSimilarGoals(false);
-		}, 200);
-	};
-
-	// Функция для заполнения полей формы данными из выбранной цели
-	const fillFormWithGoalData = (goal: IGoal) => {
-		setTitle(goal.title);
-		setDescription(goal.description);
-		setEstimatedTime(goal.estimatedTime || '');
-
-		// Находим индекс сложности в массиве selectComplexity
-		const complexityIndex = selectComplexity.findIndex((item) => item.value === goal.complexity);
-		if (complexityIndex !== -1) {
-			setActiveComplexity(complexityIndex);
-		}
-
-		// Определяем, является ли категория цели подкатегорией
-		const goalCategory = categories.find((cat) => cat.id === goal.category.id);
-
-		if (goalCategory) {
-			if (goalCategory.parentCategory) {
-				// Если это подкатегория, находим её родительскую категорию
-				const parentCategoryIndex = parentCategories.findIndex((cat) => cat.id === goalCategory.parentCategory?.id);
-				if (parentCategoryIndex !== -1) {
-					setActiveCategory(parentCategoryIndex);
-
-					// Фильтруем подкатегории из общего списка
-					const filteredSubcategories = categories.filter(
-						(cat: ICategory) => cat.parentCategory && cat.parentCategory.id === goalCategory.parentCategory?.id
-					);
-					setSubcategories(filteredSubcategories);
-
-					// Находим индекс подкатегории в отфильтрованном списке
-					const subcategoryIndex = filteredSubcategories.findIndex((sub: ICategory) => sub.id === goalCategory.id);
-					if (subcategoryIndex !== -1) {
-						setActiveSubcategory(subcategoryIndex);
-					}
-				}
-			} else {
-				// Если это родительская категория
-				const categoryIndex = parentCategories.findIndex((cat) => cat.id === goalCategory.id);
-				if (categoryIndex !== -1) {
-					setActiveCategory(categoryIndex);
-
-					// Фильтруем подкатегории из общего списка
-					const filteredSubcategories = categories.filter(
-						(cat: ICategory) => cat.parentCategory && cat.parentCategory.id === goalCategory.id
-					);
-					setSubcategories(filteredSubcategories);
-
-					// Если у цели есть подкатегория, находим ее индекс
-					if (goal.subcategory && filteredSubcategories) {
-						const subcategoryIndex = filteredSubcategories.findIndex((sub: ICategory) => sub.id === goal.subcategory?.id);
-						if (subcategoryIndex !== -1) {
-							setActiveSubcategory(subcategoryIndex);
-						}
-					}
-				}
-			}
-		}
-
-		// Скрываем список похожих целей после выбора
-		setShowSimilarGoals(false);
-
-		// Показываем уведомление
-		NotificationStore.addNotification({
-			type: 'warning',
-			title: 'Данные заполнены',
-			message: 'Поля формы заполнены данными выбранной цели. Вы можете изменить их перед созданием.',
-		});
-	};
 
 	const onDrop = useCallback((acceptedFiles: FileList) => {
 		if (acceptedFiles && acceptedFiles.length > 0) {
@@ -476,23 +506,6 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		}
 	};
 
-	const resetForm = () => {
-		setTitle('');
-		setDescription('');
-		setActiveComplexity(null);
-		setActiveCategory(null);
-		setActiveSubcategory(null);
-		setDeadline('');
-		setEstimatedTime('');
-		setImage(null);
-		setImageUrl(null);
-		setSimilarGoals([]);
-		setExternalGoalFields(null); // Очищаем дополнительные поля
-		// // Сброс места
-		// setSelectedGoalLocation(null);
-		// setShowLocationPicker(false);
-	};
-
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
@@ -502,7 +515,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			return;
 		}
 
-		if (!title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+		if (!title || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -516,7 +529,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		try {
 			const formData = new FormData();
 			formData.append('title', title);
-			formData.append('description', description);
+			if (description) {
+				formData.append('description', description);
+			}
 
 			if (activeComplexity !== null) {
 				formData.append('complexity', selectComplexity[activeComplexity].value);
@@ -551,7 +566,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				formData.append('estimated_time', standardTime);
 			}
 
-			// // Если выбрано место, обрабатываем его
+			// Если выбрано место, обрабатываем его
 			let locationId = null;
 			if (selectedGoalLocation) {
 				if (!selectedGoalLocation.id) {
@@ -580,9 +595,32 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				}
 			}
 
-			// // Если создано место, добавляем его ID
+			// Если создано место, добавляем его ID
 			if (locationId) {
 				formData.append('location_id', locationId.toString());
+			}
+
+			// Добавляем данные о регулярности, если это регулярная цель
+			if (isRegular) {
+				formData.append('is_regular', 'true');
+				formData.append('regular_frequency', regularFrequency);
+
+				if (regularFrequency === 'weekly') {
+					formData.append('weekly_frequency', weeklyFrequency.toString());
+				}
+
+				formData.append('duration_type', durationType);
+
+				if (durationType === 'days' || durationType === 'weeks') {
+					formData.append('duration_value', durationValue.toString());
+				}
+
+				if (durationType === 'until_date' && regularEndDate) {
+					formData.append('end_date', regularEndDate);
+				}
+
+				formData.append('allow_skip_days', allowSkipDays.toString());
+				formData.append('reset_on_skip', resetOnSkip.toString());
 			}
 
 			// Добавляем дополнительные поля из внешних API, если они есть
@@ -604,17 +642,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успех',
-					message: 'Цель успешно создана',
+					message: isRegular ? 'Регулярная цель успешно создана' : 'Цель успешно создана',
 				});
-
-				// Показываем уведомление о возможности редактирования
-				if (response.data.message) {
-					NotificationStore.addNotification({
-						type: 'warning',
-						title: 'Обратите внимание',
-						message: response.data.message,
-					});
-				}
 
 				// Если передан обработчик создания цели, вызываем его
 				if (onGoalCreated && response.data) {
@@ -641,7 +670,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 	// Метод для программного создания цели
 	const createGoal = async () => {
-		if (!title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+		if (!title || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -655,7 +684,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		try {
 			const formData = new FormData();
 			formData.append('title', title);
-			formData.append('description', description);
+			if (description) {
+				formData.append('description', description);
+			}
 
 			if (activeComplexity !== null) {
 				formData.append('complexity', selectComplexity[activeComplexity].value);
@@ -690,14 +721,14 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				formData.append('estimated_time', standardTime);
 			}
 
-			// // Если выбрано место, обрабатываем его
+			// Если выбрано место, обрабатываем его
 			let locationId = null;
 			if (selectedGoalLocation) {
 				if (!selectedGoalLocation.id) {
 					// Создаем новое место
 					try {
 						const newLocation = await mapApi.createLocation({
-							name: selectedGoalLocation.name!,
+							name: selectedGoalLocation.name! || title,
 							longitude: selectedGoalLocation.longitude!,
 							latitude: selectedGoalLocation.latitude!,
 							country: selectedGoalLocation.country!,
@@ -710,7 +741,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 						NotificationStore.addNotification({
 							type: 'error',
 							title: 'Ошибка',
-							message: 'Не удалось создать место',
+							message: error instanceof Error ? error.message : 'Не удалось создать место',
 						});
 						return;
 					}
@@ -719,9 +750,32 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				}
 			}
 
-			// // Если создано место, добавляем его ID
+			// Если создано место, добавляем его ID
 			if (locationId) {
 				formData.append('location_id', locationId.toString());
+			}
+
+			// Добавляем данные о регулярности, если это регулярная цель
+			if (isRegular) {
+				formData.append('is_regular', 'true');
+				formData.append('regular_frequency', regularFrequency);
+
+				if (regularFrequency === 'weekly') {
+					formData.append('weekly_frequency', weeklyFrequency.toString());
+				}
+
+				formData.append('duration_type', durationType);
+
+				if (durationType === 'days' || durationType === 'weeks') {
+					formData.append('duration_value', durationValue.toString());
+				}
+
+				if (durationType === 'until_date' && regularEndDate) {
+					formData.append('end_date', regularEndDate);
+				}
+
+				formData.append('allow_skip_days', allowSkipDays.toString());
+				formData.append('reset_on_skip', resetOnSkip.toString());
 			}
 
 			// Добавляем дополнительные поля из внешних API, если они есть
@@ -743,7 +797,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успех',
-					message: 'Цель успешно создана',
+					message: isRegular ? 'Регулярная цель успешно создана' : 'Цель успешно создана',
 				});
 
 				// Если передан обработчик создания цели, вызываем его
@@ -775,7 +829,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	) => {
 		// Заполняем основные поля
 		if (goalData.title) setTitle(goalData.title);
-		if (goalData.description) setDescription(goalData.description);
+		if (goalData.description) setDescription(goalData.description || '');
 		if (goalData.estimatedTime) setEstimatedTime(goalData.estimatedTime);
 
 		// Если у цели есть категория, находим ее индекс
@@ -985,7 +1039,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 										Найдены похожие цели. Нажмите на цель, чтобы заполнить форму её данными:
 									</p>
 									<div className={element('similar-list')}>
-										{similarGoals.map((goal) => (
+										{similarGoals.map((goal: IGoal) => (
 											<SimilarGoalItem key={goal.id} goal={goal} onSelect={fillFormWithGoalData} />
 										))}
 									</div>
@@ -996,7 +1050,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 						<Select
 							className={element('field')}
 							placeholder="Выберите категорию"
-							options={parentCategories.map((cat) => ({name: cat.name, value: cat.nameEn}))}
+							options={parentCategories.map((cat: ICategory) => ({name: cat.name, value: cat.nameEn}))}
 							activeOption={activeCategory}
 							onSelect={setActiveCategory}
 							text="Категория *"
@@ -1070,15 +1124,152 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							text="Сложность *"
 						/>
 
+						{/* Секция регулярности выполнения */}
+						<div className={element('regular-section')}>
+							<FieldCheckbox
+								id="is-regular"
+								text="Это регулярная цель"
+								checked={isRegular}
+								setChecked={setIsRegular}
+								className={element('field')}
+							/>
+
+							{isRegular && (
+								<div className={element('regular-config')}>
+									<div className={element('regular-field-group')}>
+										<Select
+											className={element('field')}
+											placeholder="Выберите периодичность"
+											options={[
+												{name: 'Ежедневно', value: 'daily'},
+												{name: 'N раз в неделю', value: 'weekly'},
+												{name: 'Пользовательский график', value: 'custom'},
+											]}
+											activeOption={regularFrequency === 'daily' ? 0 : regularFrequency === 'weekly' ? 1 : 2}
+											onSelect={(index) => {
+												const frequencies = ['daily', 'weekly', 'custom'] as const;
+												setRegularFrequency(frequencies[index]);
+											}}
+											text="Периодичность"
+										/>
+
+										{regularFrequency === 'weekly' && (
+											<FieldInput
+												placeholder="Например: 3"
+												id="weekly-frequency"
+												text="Сколько раз в неделю"
+												value={weeklyFrequency.toString()}
+												setValue={(value) => {
+													const num = parseInt(value, 10) || 1;
+													setWeeklyFrequency(Math.min(7, Math.max(1, num)));
+												}}
+												className={element('field')}
+												type="number"
+											/>
+										)}
+
+										{regularFrequency === 'custom' && (
+											<div className={element('custom-schedule-info')}>
+												<p>Пользовательский график будет доступен в следующих версиях</p>
+											</div>
+										)}
+									</div>
+
+									<div className={element('regular-field-group')}>
+										<Select
+											className={element('field')}
+											placeholder="Выберите тип длительности"
+											options={[
+												{name: 'Дни', value: 'days'},
+												{name: 'Недели', value: 'weeks'},
+												{name: 'До даты', value: 'until_date'},
+												{name: 'Бессрочно', value: 'indefinite'},
+											]}
+											activeOption={
+												durationType === 'days'
+													? 0
+													: durationType === 'weeks'
+													? 1
+													: durationType === 'until_date'
+													? 2
+													: 3
+											}
+											onSelect={(index) => {
+												const types = ['days', 'weeks', 'until_date', 'indefinite'] as const;
+												setDurationType(types[index]);
+											}}
+											text="Длительность"
+										/>
+
+										{(durationType === 'days' || durationType === 'weeks') && (
+											<FieldInput
+												placeholder={durationType === 'days' ? 'Количество дней' : 'Количество недель'}
+												id="duration-value"
+												text={durationType === 'days' ? 'Количество дней' : 'Количество недель'}
+												value={durationValue.toString()}
+												setValue={(value) => {
+													const num = parseInt(value, 10) || 1;
+													setDurationValue(Math.max(1, num));
+												}}
+												className={element('field')}
+												type="number"
+											/>
+										)}
+
+										{durationType === 'until_date' && (
+											<div className={element('date-field-container')}>
+												<p className={element('field-title')}>Дата окончания</p>
+												<DatePicker
+													selected={regularEndDate ? new Date(regularEndDate) : null}
+													onChange={(date) => {
+														if (date) {
+															setRegularEndDate(format(date, 'yyyy-MM-dd'));
+														} else {
+															setRegularEndDate('');
+														}
+													}}
+													className={element('date-input')}
+													placeholderText="ДД.ММ.ГГГГ"
+													minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
+												/>
+											</div>
+										)}
+									</div>
+
+									<div className={element('regular-field-group')}>
+										<FieldInput
+											placeholder="0"
+											id="allow-skip-days"
+											text="Разрешенные пропуски"
+											value={allowSkipDays.toString()}
+											setValue={(value) => {
+												const num = parseInt(value, 10) || 0;
+												setAllowSkipDays(Math.max(0, num));
+											}}
+											className={element('field')}
+											type="number"
+										/>
+
+										<FieldCheckbox
+											id="reset-on-skip"
+											text="Сбрасывать прогресс при превышении лимита пропусков"
+											checked={resetOnSkip}
+											setChecked={setResetOnSkip}
+											className={element('field')}
+										/>
+									</div>
+								</div>
+							)}
+						</div>
+
 						<FieldInput
 							placeholder="Опишите цель подробно"
 							id="goal-description"
-							text="Описание *"
+							text="Описание"
 							value={description}
 							setValue={setDescription}
 							className={element('field')}
 							type="textarea"
-							required
 						/>
 
 						<div className={element('time-field-container')}>

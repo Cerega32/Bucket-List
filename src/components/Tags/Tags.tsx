@@ -1,7 +1,7 @@
 import {FC} from 'react';
 
 import {useBem} from '@/hooks/useBem';
-import {ICategory, IComplexity} from '@/typings/goal';
+import {ICategory, IComplexity, IGoalFolderTag} from '@/typings/goal';
 import {getComplexity} from '@/utils/values/complexity';
 
 import {Line} from '../Line/Line';
@@ -18,10 +18,11 @@ interface TagsProps {
 	medal?: string;
 	time?: string;
 	separator?: Array<string | boolean>;
+	userFolders?: IGoalFolderTag[];
 }
 
 export const Tags: FC<TagsProps> = (props) => {
-	const {className, theme, category, complexity, done, added, medal, time, separator} = props;
+	const {className, theme, category, complexity, done, added, medal, time, separator, userFolders} = props;
 
 	const [block] = useBem('tags', className);
 
@@ -38,6 +39,17 @@ export const Tags: FC<TagsProps> = (props) => {
 			{!!done && <Tag text={done} theme={theme} icon="done" />}
 			{separator?.some((el) => el === 'done') && <Line vertical />}
 			{!!time && <Tag text={time} theme={theme} icon="watch" />}
+			{userFolders && userFolders.length > 0 && (
+				<>
+					<Line vertical />
+					{userFolders.map((folder, index) => (
+						<span key={folder.id} style={{display: 'inline-flex', alignItems: 'center', gap: '8px'}}>
+							<Tag text={folder.name} theme={theme} icon={folder.icon} style={{backgroundColor: folder.color}} />
+							{index < userFolders.length - 1 && <Line vertical />}
+						</span>
+					))}
+				</>
+			)}
 		</section>
 	);
 };

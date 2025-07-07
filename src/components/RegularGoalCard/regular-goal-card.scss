@@ -1,0 +1,193 @@
+.regular-goal-card {
+	padding: 20px;
+	background: var(--background-color);
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	transition: all 0.2s ease;
+	box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+
+	&:hover {
+		box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
+		transform: translateY(-2px);
+	}
+
+	&__header {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		margin-bottom: 20px;
+	}
+
+	&__image {
+		flex-shrink: 0;
+		width: 60px;
+		height: 60px;
+		border-radius: 8px;
+		object-fit: cover;
+	}
+
+	&__info {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__title {
+		margin: 0 0 4px;
+		color: var(--text-color);
+		font-size: 18px;
+		font-weight: 600;
+
+		// @include text-overflow;
+	}
+
+	&__frequency {
+		margin: 0 0 4px;
+		color: var(--text-secondary-color);
+		font-size: 14px;
+	}
+
+	&__category {
+		display: inline-block;
+		padding: 4px 8px;
+		background: var(--background-secondary);
+		border-radius: 6px;
+		color: var(--text-muted-color);
+		font-size: 12px;
+	}
+
+	&__progress-section {
+		margin-bottom: 20px;
+	}
+
+	&__current-progress {
+		margin-bottom: 16px;
+	}
+
+	&__progress-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 8px;
+	}
+
+	&__progress-text {
+		color: var(--text-secondary-color);
+		font-size: 14px;
+	}
+
+	&__progress-percent {
+		color: var(--primary-color);
+		font-size: 14px;
+		font-weight: 600;
+	}
+
+	&__daily-status {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 12px;
+		background: var(--background-secondary);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+
+		&--completed {
+			background: rgb(46 204 113 / 10%);
+			border-color: rgb(46 204 113 / 30%);
+			color: var(--success-color);
+		}
+	}
+
+	&__status-icon {
+		flex-shrink: 0;
+		width: 16px;
+		height: 16px;
+	}
+
+	&__streak {
+		margin-left: auto;
+		color: var(--text-muted-color);
+		font-size: 12px;
+	}
+
+	&__stats {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 16px;
+	}
+
+	&__stat {
+		padding: 12px;
+		background: var(--background-secondary);
+		border-radius: 8px;
+		text-align: center;
+	}
+
+	&__stat-value {
+		display: block;
+		margin-bottom: 4px;
+		color: var(--primary-color);
+		font-size: 20px;
+		font-weight: 700;
+	}
+
+	&__stat-label {
+		color: var(--text-muted-color);
+		font-size: 12px;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	&__actions {
+		display: flex;
+		gap: 12px;
+	}
+
+	&__mark-button,
+	&__view-button {
+		flex: 1;
+	}
+
+	// Мобильная версия
+	@include md {
+		padding: 16px;
+
+		&__header {
+			gap: 12px;
+			margin-bottom: 16px;
+		}
+
+		&__image {
+			width: 50px;
+			height: 50px;
+		}
+
+		&__title {
+			font-size: 16px;
+		}
+
+		&__stats {
+			gap: 12px;
+		}
+
+		&__stat {
+			padding: 8px;
+		}
+
+		&__stat-value {
+			font-size: 18px;
+		}
+
+		&__actions {
+			flex-direction: column;
+			gap: 8px;
+		}
+	}
+
+	// Планшетная версия
+	@include lg {
+		&__stats {
+			grid-template-columns: repeat(3, 1fr);
+			gap: 14px;
+		}
+	}
+}
