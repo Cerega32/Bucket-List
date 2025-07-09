@@ -162,3 +162,37 @@ export const GET = async (url: string, params?: IFetchParams): Promise<any> => {
 };
 
 export const PUT = (url: string, params: IFetchParams): Promise<any> => fetchData(url, 'PUT', params);
+
+/**
+ * Получение детальной информации о произведении из FantLab
+ * @param workId - ID произведения или автора (для автора используется префикс "author_")
+ * @returns Promise с детальной информацией о произведении
+ */
+export const getFantLabWorkDetails = async (workId: string): Promise<any> => {
+	try {
+		const response = await fetch(`/api/goals/fantlab/${workId}/details/`, {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+
+		const data = await response.json();
+
+		if (!response.ok) {
+			return {
+				success: false,
+				error: data.error || 'Ошибка получения детальной информации',
+			};
+		}
+
+		return {
+			success: true,
+			data,
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error: 'Ошибка сети при получении детальной информации',
+		};
+	}
+};

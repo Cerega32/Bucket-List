@@ -892,9 +892,14 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		}
 
 		// Сохраняем дополнительные поля для передачи на сервер
+		console.log('🔧 Debug: goalData.additionalFields:', goalData.additionalFields);
+		console.log('🔧 Debug: goalData keys:', Object.keys(goalData));
+
 		const additionalFields = {
 			external_id: goalData.external_id,
 			type: goalData.externalType,
+			// Добавляем поля из additionalFields если они есть
+			...(goalData.additionalFields || {}),
 			// Извлекаем все дополнительные поля, исключая стандартные поля IGoal
 			...Object.fromEntries(
 				Object.entries(goalData).filter(
@@ -910,10 +915,16 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							'image',
 							'external_id',
 							'externalType',
+							'additionalFields', // Исключаем additionalFields, так как мы его уже добавили выше
+							'isExistingGoal',
+							'status',
+							'deadline',
 						].includes(key)
 				)
 			),
 		};
+
+		console.log('🔧 Debug: final additionalFields:', additionalFields);
 		setExternalGoalFields(additionalFields);
 
 		// Показываем уведомление

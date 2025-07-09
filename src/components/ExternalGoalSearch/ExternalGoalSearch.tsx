@@ -7,7 +7,7 @@ import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
 import {IComplexity, IGoal} from '@/typings/goal';
-import {GET} from '@/utils/fetch/requests';
+import {GET, getFantLabWorkDetails} from '@/utils/fetch/requests';
 import {selectComplexity} from '@/utils/values/complexity';
 
 import Select from '../Select/Select';
@@ -18,6 +18,7 @@ import './external-goal-search.scss';
 const SupportedCategories = ['books', 'cinema-art', 'gaming'];
 
 interface ExternalGoalResult {
+	apiSource: string;
 	externalId: string | number;
 	title: string;
 	description?: string;
@@ -157,80 +158,160 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 		setImageLoading((prev) => ({...prev, [id]: false}));
 	};
 
-	// Обработчик выбора цели - теперь просто передает данные родительскому компоненту
+	// Обработчик выбора цели - теперь загружает детальную информацию для книг
 	const handleSelectGoal = async (goalData: ExternalGoalResult) => {
-		// Преобразуем данные в формат, подходящий для IGoal
-		const goalInfo: Partial<IGoal> & {
-			imageUrl?: string;
-			external_id?: string | number;
-			externalType?: string;
-			deadline?: string;
-			isExistingGoal?: boolean;
-			status?: string;
-		} = {
-			title: goalData.title,
-			description: goalData.description || `Цель: ${goalData.title}`,
-			external_id: goalData.externalId, // Сохраняем ID внешнего источника
-			externalType: goalData.type, // Тип внешнего источника
-			complexity: selectComplexity[activeComplexity].value as IComplexity,
-			// Добавляем изображение
-			imageUrl: goalData.imageUrl,
-			// Добавляем оценочное время (если есть)
-			estimatedTime: '',
-			// Добавляем дедлайн (если есть)
-			deadline: '',
-			status: goalData.source,
-			// Добавляем все дополнительные поля
-			...goalData.additionalFields,
-		};
+		// Показываем индикатор загрузки для данного элемента
+		setImageLoading((prev) => ({...prev, [String(goalData.externalId)]: true}));
 
-		// Добавляем дополнительные поля из API, если они есть
-		if (goalData.additionalFields) {
-			const fields = goalData.additionalFields;
+		try {
+			let enhancedGoalData = goalData;
+			console.log('🔍 Initial goalData:', goalData);
 
-			// Добавляем все дополнительные поля как отдельные свойства
-			Object.keys(fields).forEach((key) => {
-				const value = fields[key as keyof typeof fields];
-				if (value !== undefined && value !== null) {
-					(goalInfo as any)[key] = value;
+			// Если это книга из FantLab, загружаем детальную информацию
+			if (goalData.type === 'book' && goalData.apiSource === 'fantlab' && !goalData.isOwnDatabase) {
+				console.log('📚 Loading FantLab details for book ID:', goalData.externalId);
+
+				try {
+					const detailsResponse = await getFantLabWorkDetails(String(goalData.externalId));
+					console.log('📖 FantLab details response:', detailsResponse);
+
+					if (detailsResponse.success) {
+						// Исправляем двойную вложенность ответа
+						const details = detailsResponse.data?.data || detailsResponse.data;
+						console.log('✅ FantLab details data (corrected):', details);
+						console.log('📝 Details description:', details.description);
+						console.log('🖼️ Details imageUrl:', details.imageUrl);
+
+						// Обогащаем данные детальной информацией
+						enhancedGoalData = {
+							...goalData,
+							title: details.title || goalData.title,
+							description: details.description || goalData.description,
+							imageUrl: details.imageUrl || goalData.imageUrl,
+							authors: details.authors || goalData.authors,
+							additionalFields: {
+								...goalData.additionalFields,
+								...details.additionalFields,
+							},
+						};
+
+						console.log('🔧 Enhanced goal data:', enhancedGoalData);
+
+						NotificationStore.addNotification({
+							type: 'success',
+							title: 'Информация загружена',
+							message: 'Получена детальная информация о произведении',
+						});
+					} else {
+						console.log('❌ FantLab details failed:', detailsResponse.error);
+						NotificationStore.addNotification({
+							type: 'warning',
+							title: 'Частичная загрузка',
+							message: 'Не удалось загрузить детальную информацию, используются базовые данные',
+						});
+					}
+				} catch (error) {
+					console.error('❌ Ошибка загрузки деталей:', error);
+					NotificationStore.addNotification({
+						type: 'warning',
+						title: 'Частичная загрузка',
+						message: 'Не удалось загрузить детальную информацию, используются базовые данные',
+					});
 				}
-			});
-		}
+			} else {
+				console.log(
+					'⏭️ Skipping FantLab details loading. Type:',
+					goalData.type,
+					'API:',
+					goalData.apiSource,
+					'Own DB:',
+					goalData.isOwnDatabase
+				);
+			}
 
-		// Если цель из собственной базы данных, добавляем специальные поля
-		if (goalData.isOwnDatabase) {
-			goalInfo.id = Number(goalData.externalId);
-			goalInfo.code = goalData.goalCode;
-			goalInfo.isExistingGoal = true; // Помечаем как существующую цель
-		}
+			// Преобразуем данные в формат, подходящий для IGoal
+			const goalInfo: Partial<IGoal> & {
+				imageUrl?: string;
+				external_id?: string | number;
+				externalType?: string;
+				deadline?: string;
+				isExistingGoal?: boolean;
+				status?: string;
+			} = {
+				title: enhancedGoalData.title,
+				description: enhancedGoalData.description || `Цель: ${enhancedGoalData.title}`,
+				external_id: enhancedGoalData.externalId, // Сохраняем ID внешнего источника
+				externalType: enhancedGoalData.type, // Тип внешнего источника
+				complexity: selectComplexity[activeComplexity].value as IComplexity,
+				// Добавляем изображение
+				imageUrl: enhancedGoalData.imageUrl,
+				// Добавляем оценочное время (если есть)
+				estimatedTime: '',
+				// Добавляем дедлайн (если есть)
+				deadline: '',
+				status: enhancedGoalData.source,
+				// Добавляем дополнительные поля как отдельное поле
+				additionalFields: enhancedGoalData.additionalFields,
+			};
 
-		// Если есть URL изображения, проверяем его доступность
-		if (goalData.imageUrl) {
-			setImageLoading((prev) => ({...prev, [String(goalData.externalId)]: true}));
+			// Добавляем дополнительные поля из API как отдельные свойства верхнего уровня
+			if (enhancedGoalData.additionalFields) {
+				const fields = enhancedGoalData.additionalFields;
 
-			goalInfo.imageUrl = goalData.imageUrl;
-			setImageLoading((prev) => ({...prev, [String(goalData.externalId)]: false}));
-		} else {
+				// Добавляем все дополнительные поля как отдельные свойства
+				Object.keys(fields).forEach((key) => {
+					const value = fields[key as keyof typeof fields];
+					if (value !== undefined && value !== null) {
+						// Не перезаписываем поле additionalFields
+						if (key !== 'additionalFields') {
+							(goalInfo as any)[key] = value;
+						}
+					}
+				});
+			}
+
+			// Если цель из собственной базы данных, добавляем специальные поля
+			if (enhancedGoalData.isOwnDatabase) {
+				goalInfo.id = Number(enhancedGoalData.externalId);
+				goalInfo.code = enhancedGoalData.goalCode;
+				goalInfo.isExistingGoal = true; // Помечаем как существующую цель
+			}
+
+			// Если есть URL изображения, проверяем его доступность
+			if (enhancedGoalData.imageUrl) {
+				goalInfo.imageUrl = enhancedGoalData.imageUrl;
+			} else {
+				NotificationStore.addNotification({
+					type: 'warning',
+					title: 'Внимание',
+					message: 'Не удалось загрузить изображение. Вам нужно будет выбрать его вручную.',
+				});
+			}
+
+			// Вызываем обработчик выбора цели с данными созданной цели
+			onGoalSelected(goalInfo);
+
+			// Очищаем результаты поиска и поисковый запрос
+			setResults([]);
+			setQuery('');
+			setSearchWasPerformed(false);
+
 			NotificationStore.addNotification({
-				type: 'warning',
-				title: 'Внимание',
-				message: 'Не удалось загрузить изображение. Вам нужно будет выбрать его вручную.',
+				type: 'success',
+				title: 'Готово',
+				message: 'Данные цели загружены! Проверьте и дополните при необходимости.',
 			});
+		} catch (error) {
+			console.error('Ошибка при выборе цели:', error);
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Произошла ошибка при загрузке данных цели',
+			});
+		} finally {
+			// Убираем индикатор загрузки
+			setImageLoading((prev) => ({...prev, [String(goalData.externalId)]: false}));
 		}
-
-		// Вызываем обработчик выбора цели с данными созданной цели
-		onGoalSelected(goalInfo);
-
-		// Очищаем результаты поиска и поисковый запрос
-		setResults([]);
-		setQuery('');
-		setSearchWasPerformed(false);
-
-		NotificationStore.addNotification({
-			type: 'success',
-			title: 'Готово',
-			message: 'Данные цели загружены! Проверьте и дополните при необходимости.',
-		});
 	};
 
 	// Определяем название типа контента для отображения
