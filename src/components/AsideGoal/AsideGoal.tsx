@@ -166,9 +166,6 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				// Обновляем локальное состояние
 				setIsRegularGoalCompletedToday(true);
 
-				// Можно добавить уведомление об успешном выполнении
-				console.log('Регулярная цель отмечена успешно');
-
 				// Если есть колбэк для обновления родительского компонента, вызываем его
 				if (onGoalCompleted) {
 					onGoalCompleted();

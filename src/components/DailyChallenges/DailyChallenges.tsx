@@ -28,7 +28,6 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 	const loadChallenges = async () => {
 		try {
 			const response = await getCurrentWeekChallenge();
-			console.log(response);
 			if (response.success && response.data) {
 				setWeeklyChallenge(response.data.weeklyChallenge);
 				setChallengeItems(response.data.challengeItems || []);

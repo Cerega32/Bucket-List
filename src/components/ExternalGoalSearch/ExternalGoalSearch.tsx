@@ -165,22 +165,15 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 
 		try {
 			let enhancedGoalData = goalData;
-			console.log('🔍 Initial goalData:', goalData);
 
 			// Если это книга из FantLab, загружаем детальную информацию
 			if (goalData.type === 'book' && goalData.apiSource === 'fantlab' && !goalData.isOwnDatabase) {
-				console.log('📚 Loading FantLab details for book ID:', goalData.externalId);
-
 				try {
 					const detailsResponse = await getFantLabWorkDetails(String(goalData.externalId));
-					console.log('📖 FantLab details response:', detailsResponse);
 
 					if (detailsResponse.success) {
 						// Исправляем двойную вложенность ответа
 						const details = detailsResponse.data?.data || detailsResponse.data;
-						console.log('✅ FantLab details data (corrected):', details);
-						console.log('📝 Details description:', details.description);
-						console.log('🖼️ Details imageUrl:', details.imageUrl);
 
 						// Обогащаем данные детальной информацией
 						enhancedGoalData = {
@@ -195,15 +188,12 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 							},
 						};
 
-						console.log('🔧 Enhanced goal data:', enhancedGoalData);
-
 						NotificationStore.addNotification({
 							type: 'success',
 							title: 'Информация загружена',
 							message: 'Получена детальная информация о произведении',
 						});
 					} else {
-						console.log('❌ FantLab details failed:', detailsResponse.error);
 						NotificationStore.addNotification({
 							type: 'warning',
 							title: 'Частичная загрузка',
@@ -211,22 +201,12 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 						});
 					}
 				} catch (error) {
-					console.error('❌ Ошибка загрузки деталей:', error);
 					NotificationStore.addNotification({
 						type: 'warning',
 						title: 'Частичная загрузка',
 						message: 'Не удалось загрузить детальную информацию, используются базовые данные',
 					});
 				}
-			} else {
-				console.log(
-					'⏭️ Skipping FantLab details loading. Type:',
-					goalData.type,
-					'API:',
-					goalData.apiSource,
-					'Own DB:',
-					goalData.isOwnDatabase
-				);
 			}
 
 			// Преобразуем данные в формат, подходящий для IGoal
@@ -251,7 +231,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 				deadline: '',
 				status: enhancedGoalData.source,
 				// Добавляем дополнительные поля как отдельное поле
-				additionalFields: enhancedGoalData.additionalFields,
+				// additionalFields: enhancedGoalData.additionalFields || {}, // Удалено
 			};
 
 			// Добавляем дополнительные поля из API как отдельные свойства верхнего уровня

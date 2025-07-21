@@ -891,15 +891,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			setImage(null); // Сбрасываем локально загруженное изображение
 		}
 
-		// Сохраняем дополнительные поля для передачи на сервер
-		console.log('🔧 Debug: goalData.additionalFields:', goalData.additionalFields);
-		console.log('🔧 Debug: goalData keys:', Object.keys(goalData));
-
 		const additionalFields = {
 			external_id: goalData.external_id,
 			type: goalData.externalType,
-			// Добавляем поля из additionalFields если они есть
-			...(goalData.additionalFields || {}),
 			// Извлекаем все дополнительные поля, исключая стандартные поля IGoal
 			...Object.fromEntries(
 				Object.entries(goalData).filter(
@@ -924,7 +918,6 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			),
 		};
 
-		console.log('🔧 Debug: final additionalFields:', additionalFields);
 		setExternalGoalFields(additionalFields);
 
 		// Показываем уведомление

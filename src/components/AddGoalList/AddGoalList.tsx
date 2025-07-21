@@ -761,7 +761,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 			return false;
 		});
 	};
-	console.log(getFilteredGoals(), 'selectedGoals');
+
 	return (
 		<form className={block()} onSubmit={onSubmit}>
 			<div className={element('container')}>
