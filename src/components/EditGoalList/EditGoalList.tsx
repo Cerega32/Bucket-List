@@ -371,19 +371,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 						<div className={element('image-preview')}>
 							<img src={imagePreview} alt="Предпросмотр" className={element('preview')} />
 							{canEditAll && (
-								<button
-									type="button"
-									className={element('remove-image')}
-									onClick={removeImage}
-									aria-label="Удалить изображение"
-									onKeyDown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											removeImage();
-										}
-									}}
-								>
-									<Svg icon="cross" />
-								</button>
+								<Button withBorder className={element('remove-image')} type="button-close" onClick={removeImage} />
 							)}
 						</div>
 					)}

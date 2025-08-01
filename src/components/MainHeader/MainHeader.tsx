@@ -2,6 +2,7 @@ import {FC} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
+import {UserStore} from '@/store/UserStore';
 import {pluralize} from '@/utils/text/pluralize';
 
 import {Button} from '../Button/Button';
@@ -22,6 +23,7 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 
 	const [block, element] = useBem('main-header', className);
 	const {setWindow, setIsOpen} = ModalStore;
+	const {isAuth} = UserStore;
 
 	const openLogin = () => {
 		setIsOpen(true);
@@ -50,7 +52,15 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 				<p className={element('description')}>
 					Мы уже сделали это за вас - 100 вдохновляющих целей для яркой и успешной жизни уже в вашем профиле
 				</p>
-				<Button className={element('button')} theme="gradient" size="medium" icon="rocket" onClick={openLogin}>
+				<Button
+					className={element('button')}
+					type={isAuth ? 'Link' : 'button'}
+					theme="gradient"
+					size="medium"
+					icon="rocket"
+					onClick={openLogin}
+					href="/categories/all"
+				>
 					Начать путь
 				</Button>
 				<p className={element('completed')}>

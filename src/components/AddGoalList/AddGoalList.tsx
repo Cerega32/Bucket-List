@@ -21,6 +21,7 @@ import {selectComplexity} from '@/utils/values/complexity';
 import '../GoalListItem/goal-list-item.scss';
 import {GoalListItem} from '../GoalListItem/GoalListItem';
 import {GoalSearchItem} from '../GoalSearchItem/GoalSearchItem';
+import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
 import {ScrollToTop} from '../ScrollToTop/ScrollToTop';
 import Select from '../Select/Select';
 import './add-goal-list.scss';
@@ -63,6 +64,8 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 	const [subcategories, setSubcategories] = useState<ICategory[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [showAddGoalForm, setShowAddGoalForm] = useState(false);
+	const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 	const formRef = useRef<HTMLDivElement>(null);
 
@@ -638,14 +641,12 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 
 	// Добавляем функцию для очистки целей
 	const handleClearAllGoals = () => {
-		if (window.confirm('Вы уверены, что хотите удалить все выбранные цели?')) {
-			setSelectedGoals([]);
-			NotificationStore.addNotification({
-				type: 'success',
-				title: 'Готово',
-				message: 'Все выбранные цели удалены',
-			});
-		}
+		setSelectedGoals([]);
+		NotificationStore.addNotification({
+			type: 'success',
+			title: 'Готово',
+			message: 'Все выбранные цели удалены',
+		});
 	};
 
 	// Функция для подтверждения цели
@@ -808,19 +809,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 						) : (
 							<div className={element('image-preview')}>
 								<img src={URL.createObjectURL(image)} alt="Предпросмотр" className={element('preview')} />
-								<button
-									type="button"
-									className={element('remove-image')}
-									onClick={removeImage}
-									aria-label="Удалить изображение"
-									onKeyDown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											removeImage();
-										}
-									}}
-								>
-									<Svg icon="cross" />
-								</button>
+								<Button withBorder className={element('remove-image')} type="button-close" onClick={removeImage} />
 							</div>
 						)}
 					</div>
@@ -952,7 +941,14 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 												добавит их к уже выбранным целям.
 											</p>
 										</div>
-
+										{!(activeCategory === null) && (
+											<div className={element('error-info')}>
+												<Svg icon="info" className={element('error-info-icon')} />
+												<p className={element('error-info-text')}>
+													Для автоматического добавления целей из списка необходимо выбрать категорию списка.
+												</p>
+											</div>
+										)}
 										<FieldInput
 											id="auto-goals-text"
 											type="textarea"
@@ -1002,7 +998,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 										<Button
 											theme="blue-light"
 											className={element('clear-btn')}
-											onClick={handleClearAllGoals}
+											onClick={() => setIsClearModalOpen(true)}
 											size="small"
 										>
 											Очистить все цели
@@ -1117,6 +1113,15 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 				</div>
 			</div>
 			<ScrollToTop />
+			<ModalConfirm
+				title="Очистить список целей?"
+				isOpen={isClearModalOpen}
+				onClose={() => setIsClearModalOpen(false)}
+				handleBtn={handleClearAllGoals}
+				textBtn="Очистить список целей"
+				text="Вы уверены, что хотите очистить этот список целей?"
+				themeBtn="blue"
+			/>
 		</form>
 	);
 };

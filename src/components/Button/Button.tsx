@@ -24,6 +24,7 @@ interface ButtonProps {
 	active?: boolean;
 	loading?: boolean;
 	refInner?: React.RefObject<HTMLButtonElement>;
+	withBorder?: boolean;
 }
 
 export const Button: FC<ButtonProps> = (props) => {
@@ -43,6 +44,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		active,
 		loading,
 		refInner,
+		withBorder,
 	} = props;
 
 	const [block, element] = useBem('button', className);
@@ -86,7 +88,7 @@ export const Button: FC<ButtonProps> = (props) => {
 			case 'button-close':
 				return (
 					<button
-						className={block({close: true})}
+						className={block({close: true, withBorder})}
 						onClick={onClick}
 						type="button"
 						disabled={active}

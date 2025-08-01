@@ -3,7 +3,6 @@ import {useParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {ContentListGoals} from '@/components/ContentListGoals/ContentListGoals';
-import {GoalFolderManager} from '@/components/GoalFolderManager/GoalFolderManager';
 import {Loader} from '@/components/Loader/Loader';
 import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
 import {useBem} from '@/hooks/useBem';
@@ -124,7 +123,6 @@ export const ListGoalsContainer: FC = () => {
 				/>
 				<div className={element('content-wrapper')}>
 					<ContentListGoals className={element('content')} list={list} updateGoal={updateGoal} />
-					<GoalFolderManager className={element('folder-manager')} />
 				</div>
 			</article>
 			<ScrollToTop />

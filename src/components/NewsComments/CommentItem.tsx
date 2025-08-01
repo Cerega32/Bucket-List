@@ -5,6 +5,7 @@ import {useBem} from '@/hooks/useBem';
 import {NewsComment} from '@/typings/news';
 
 import {CommentForm} from './CommentForm';
+import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
 
 interface CommentItemProps {
 	comment: NewsComment;
@@ -31,31 +32,29 @@ export const CommentItem = observer(({comment, newsId, level = 0, onReply, onEdi
 	const [showEditForm, setShowEditForm] = useState(false);
 	const [editContent, setEditContent] = useState(comment.content);
 	const [isEditing, setIsEditing] = useState(false);
+	const [isDeleteCommentOpen, setIsDeleteCommentOpen] = useState(false);
+	const [isEditCommentOpen, setIsEditCommentOpen] = useState(false);
 	const [block, element] = useBem('comment-item');
 
 	const handleEdit = async () => {
 		if (!editContent.trim() || isEditing) return;
 
-		if (window.confirm('Вы уверены, что хотите изменить комментарий?')) {
-			setIsEditing(true);
-			try {
-				await onEdit?.(comment.id, editContent.trim());
-				setShowEditForm(false);
-			} catch (error) {
-				console.error('Ошибка редактирования:', error);
-			} finally {
-				setIsEditing(false);
-			}
+		setIsEditing(true);
+		try {
+			await onEdit?.(comment.id, editContent.trim());
+			setShowEditForm(false);
+		} catch (error) {
+			console.error('Ошибка редактирования:', error);
+		} finally {
+			setIsEditing(false);
 		}
 	};
 
 	const handleDelete = async () => {
-		if (window.confirm('Вы уверены, что хотите удалить комментарий?')) {
-			try {
-				await onDelete?.(comment.id);
-			} catch (error) {
-				console.error('Ошибка удаления:', error);
-			}
+		try {
+			await onDelete?.(comment.id);
+		} catch (error) {
+			console.error('Ошибка удаления:', error);
 		}
 	};
 
@@ -171,6 +170,24 @@ export const CommentItem = observer(({comment, newsId, level = 0, onReply, onEdi
 					))}
 				</div>
 			)}
+			<ModalConfirm
+				title="Удалить комментарий?"
+				isOpen={isDeleteCommentOpen}
+				onClose={() => setIsDeleteCommentOpen(false)}
+				handleBtn={handleDelete}
+				textBtn="Удалить комментарий"
+				text="Вы уверены, что хотите удалить этот комментарий?"
+				themeBtn="red"
+			/>
+			<ModalConfirm
+				title="Редактировать комментарий?"
+				isOpen={isEditCommentOpen}
+				onClose={() => setIsEditCommentOpen(false)}
+				handleBtn={handleEdit}
+				textBtn="Редактировать комментарий"
+				text="Вы уверены, что хотите изменить комментарий?"
+				themeBtn="blue"
+			/>
 		</div>
 	);
 });

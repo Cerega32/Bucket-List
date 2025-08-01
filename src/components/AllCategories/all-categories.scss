@@ -5,11 +5,19 @@
 	margin: 0 auto;
 	background: var(--color-gray-3);
 
+	@include xl {
+		padding: 40px 24px 0;
+	}
+
 	&__title {
 		margin-bottom: 56px;
 
 		&--tag-h2 {
 			margin-bottom: 24px;
+		}
+
+		@include xl {
+			margin-bottom: 40px;
 		}
 	}
 
@@ -24,5 +32,13 @@
 	&__item {
 		flex: 1;
 		min-width: calc(100% / 3 - (48px / 3));
+
+		@include lg {
+			min-width: calc(100% / 2 - (24px / 2));
+		}
+
+		@include md {
+			min-width: 100%;
+		}
 	}
 }

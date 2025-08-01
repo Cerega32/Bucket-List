@@ -15,6 +15,7 @@ import {updateGoal} from '@/utils/api/put/updateGoal';
 import {selectComplexity} from '@/utils/values/complexity';
 
 import {Loader} from '../Loader/Loader';
+import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
 import Select from '../Select/Select';
 import {Title} from '../Title/Title';
 
@@ -45,6 +46,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [canEdit, setCanEdit] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const {setHeader} = ThemeStore;
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -300,10 +302,6 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	};
 
 	const handleDeleteGoal = async () => {
-		if (!window.confirm('Вы уверены, что хотите удалить эту цель?')) {
-			return;
-		}
-
 		setIsLoading(true);
 
 		try {
@@ -418,6 +416,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 									<Button
 										className={element('remove-image')}
 										type="button-close"
+										withBorder
 										onClick={() => {
 											setImage(null);
 											setImageUrl(null);
@@ -493,7 +492,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 							</div>
 
 							<div className={element('btns-wrapper')}>
-								<Button theme="red" className={element('btn')} onClick={handleDeleteGoal} type="button">
+								<Button theme="red" className={element('btn')} onClick={() => setIsDeleteModalOpen(true)} type="button">
 									Удалить цель
 								</Button>
 								<Button theme="blue-light" className={element('btn')} onClick={cancelEdit} type="button">
@@ -507,6 +506,15 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 					</div>
 				)}
 			</Loader>
+			<ModalConfirm
+				title="Удалить цель?"
+				isOpen={isDeleteModalOpen}
+				onClose={() => setIsDeleteModalOpen(false)}
+				themeBtn="red"
+				handleBtn={handleDeleteGoal}
+				textBtn="Удалить цель"
+				text="Вы уверены, что хотите удалить эту цель?"
+			/>
 		</form>
 	);
 };

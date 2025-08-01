@@ -565,7 +565,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					className={element('btn')}
 					size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 				>
-					Поделиться
+					Поделиться в Telegram
 				</Button>
 			</div>
 		</aside>

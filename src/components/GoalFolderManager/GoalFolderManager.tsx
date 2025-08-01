@@ -20,6 +20,7 @@ import {FieldInput} from '../FieldInput/FieldInput';
 import {ItemGoal} from '../ItemGoal/ItemGoal';
 import {Loader} from '../Loader/Loader';
 import {Modal} from '../Modal/Modal';
+import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
 
 import './goal-folder-manager.scss';
 
@@ -43,6 +44,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		icon: 'folder',
 		is_private: false,
 	});
+	const [isDeleteFolderOpen, setIsDeleteFolderOpen] = useState(false);
 
 	const loadFolders = useCallback(async () => {
 		setIsLoading(true);
@@ -105,10 +107,6 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	};
 
 	const handleDeleteFolder = async (folderId: number) => {
-		if (!window.confirm('Вы уверены, что хотите удалить эту папку? Цели не будут удалены.')) {
-			return;
-		}
-
 		try {
 			const response = await deleteGoalFolder(folderId);
 			if (response.success) {
@@ -362,6 +360,15 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 					</div>
 				</div>
 			</Modal>
+			<ModalConfirm
+				title="Удалить папку?"
+				isOpen={isDeleteFolderOpen}
+				onClose={() => setIsDeleteFolderOpen(false)}
+				handleBtn={() => handleDeleteFolder(selectedFolder?.id || 0)}
+				textBtn="Удалить папку"
+				text="Вы уверены, что хотите удалить эту папку? Цели не будут удалены."
+				themeBtn="red"
+			/>
 		</div>
 	);
 });

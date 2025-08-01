@@ -2,6 +2,10 @@
 	position: relative;
 	background: var(--color-gray-3);
 
+	@include xl {
+		padding: 0 24px;
+	}
+
 	&::before {
 		position: absolute;
 		z-index: -1;
@@ -22,6 +26,10 @@
 		max-width: 1440px;
 		padding-top: calc(var(--height-header) + 40px);
 		margin: 0 auto;
+
+		@include xl {
+			flex-direction: column;
+		}
 
 		@include lg {
 			flex-wrap: nowrap;

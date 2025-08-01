@@ -1001,6 +1001,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 									<img src={imageUrl} alt="Предпросмотр из источника" className={element('preview')} />
 								)}
 								<Button
+									withBorder
 									className={element('remove-image')}
 									type="button-close"
 									onClick={() => {
@@ -1332,7 +1333,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 										: undefined
 								}
 							>
-								Создать цель (+15 опыта)
+								Создать цель
 							</Button>
 						</div>
 					</div>

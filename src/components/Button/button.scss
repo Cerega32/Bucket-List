@@ -39,6 +39,10 @@
 		}
 	}
 
+	&--withBorder {
+		border: 1px solid var(--color-text);
+	}
+
 	&--theme-blue {
 		background: var(--color-primary);
 		color: var(--color-white);
