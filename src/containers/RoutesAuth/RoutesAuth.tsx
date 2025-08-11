@@ -17,7 +17,6 @@ import {PageMain} from '@/pages/PageMain/PageMain';
 import {PageMainGoals} from '@/pages/PageMainGoals/PageMainGoals';
 import {PageNotFound} from '@/pages/PageNotFound/PageNotFound';
 import {PageRegistration} from '@/pages/PageRegistration/PageRegistration';
-import PageTodos from '@/pages/PageTodos/PageTodos';
 import {PageUser} from '@/pages/PageUser/PageUser';
 import {PageUserSelf} from '@/pages/PageUserSelf/PageUserSelf';
 import UserMapPage from '@/pages/UserMapPage/UserMapPage';
@@ -111,7 +110,7 @@ export const RoutesAuth: FC = observer(() => {
 				/>
 
 				{/* TODO System */}
-				<Route path="/todos" element={<ProtectedRoute element={<PageTodos page="isTodos" />} />} />
+				{/* <Route path="/todos" element={<ProtectedRoute element={<PageTodos page="isTodos" />} />} /> */}
 
 				{/* Маршруты для друзей - теперь через UserSelf */}
 				<Route

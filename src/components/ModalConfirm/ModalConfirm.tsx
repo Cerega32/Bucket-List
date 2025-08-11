@@ -47,6 +47,11 @@ export const ModalConfirm: FC<ModalProps> = observer(({isOpen, onClose, title, t
 		}
 	};
 
+	const handleBtnClick = () => {
+		handleBtn();
+		onClose();
+	};
+
 	useEffect(() => {
 		if (isOpen) {
 			document.addEventListener('keyup', handleKeyUp);
@@ -91,7 +96,7 @@ export const ModalConfirm: FC<ModalProps> = observer(({isOpen, onClose, title, t
 						<Button theme="blue-light" className={element('btn')} onClick={onClose} type="button">
 							Отмена
 						</Button>
-						<Button theme={themeBtn} className={element('btn')} onClick={handleBtn} type="button">
+						<Button theme={themeBtn} className={element('btn')} onClick={handleBtnClick} type="button">
 							{textBtn}
 						</Button>
 					</div>
