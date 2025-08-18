@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
+import {FC, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
@@ -9,8 +9,6 @@ import {useBem} from '@/hooks/useBem';
 import {HeaderNotificationsStore} from '@/store/HeaderNotificationsStore';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
-import {getUser} from '@/utils/api/get/getUser';
-import {getNotifications} from '@/utils/api/notifications';
 
 import {ThemeStore} from '../../store/ThemeStore';
 import {Avatar} from '../Avatar/Avatar';
@@ -35,23 +33,23 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const navigate = useNavigate();
 
-	useEffect(() => {
-		(async () => {
-			if (isAuth) {
-				await getUser();
-				// Загружаем уведомления при авторизации
-				try {
-					const notificationsData = await getNotifications();
-					HeaderNotificationsStore.setNotifications(notificationsData.results);
-					HeaderNotificationsStore.setUnreadCount(notificationsData.unreadCount);
-				} catch (error) {
-					console.error('Ошибка загрузки уведомлений:', error);
-					// Обнуляем уведомления при ошибке
-					HeaderNotificationsStore.clearNotifications();
-				}
-			}
-		})();
-	}, [isAuth]);
+	// useEffect(() => {
+	// 	(async () => {
+	// 		if (isAuth) {
+	// 			await getUser();
+	// 			// Загружаем уведомления при авторизации
+	// 			try {
+	// 				const notificationsData = await getNotifications();
+	// 				HeaderNotificationsStore.setNotifications(notificationsData.results);
+	// 				HeaderNotificationsStore.setUnreadCount(notificationsData.unreadCount);
+	// 			} catch (error) {
+	// 				console.error('Ошибка загрузки уведомлений:', error);
+	// 				// Обнуляем уведомления при ошибке
+	// 				HeaderNotificationsStore.clearNotifications();
+	// 			}
+	// 		}
+	// 	})();
+	// }, [isAuth]);
 
 	// // Автоматическое обновление уведомлений каждые 30 секунд
 	// useEffect(() => {

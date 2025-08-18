@@ -7,8 +7,10 @@ import {Card} from '@/components/Card/Card';
 import {CatalogItems} from '@/components/CatalogItems/CatalogItems';
 import {HeaderCategory} from '@/components/HeaderCategory/HeaderCategory';
 import {Loader} from '@/components/Loader/Loader';
+import {RegularGoalSettingsModal} from '@/components/RegularGoalSettingsModal/RegularGoalSettingsModal';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {NotificationStore} from '@/store/NotificationStore';
 import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import {IPage} from '@/typings/page';
@@ -16,8 +18,10 @@ import {getCategories} from '@/utils/api/get/getCategories';
 import {getCategory} from '@/utils/api/get/getCategory';
 import {getPopularGoals} from '@/utils/api/get/getPopularGoals';
 import {getPopularLists} from '@/utils/api/get/getPopularLists';
+import {getRegularGoalSettings} from '@/utils/api/get/getRegularGoalSettings';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {addListGoal} from '@/utils/api/post/addListGoal';
+import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
@@ -33,6 +37,12 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 	const [categories, setCategories] = useState<Array<ICategoryDetailed>>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const refTitle = useRef<HTMLElement>(null);
+
+	// Состояния для модалки регулярных целей
+	const [showRegularModal, setShowRegularModal] = useState(false);
+	const [regularGoalData, setRegularGoalData] = useState<any>(null);
+	const [pendingGoalIndex, setPendingGoalIndex] = useState<number | null>(null);
+	const [isRegularLoading, setIsRegularLoading] = useState(false);
 
 	const {id} = useParams();
 
@@ -72,6 +82,25 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 	}, [id]);
 
 	const updateGoal = async (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
+		// Специальная обработка для добавления цели - проверяем на регулярность
+		if (operation === 'add') {
+			try {
+				// Проверяем, является ли цель регулярной
+				const regularSettings = await getRegularGoalSettings(code);
+
+				if (regularSettings.success && regularSettings.data) {
+					// Цель регулярная - показываем модалку настройки
+					setRegularGoalData(regularSettings.data);
+					setPendingGoalIndex(i); // Запоминаем индекс цели для последующего обновления
+					setShowRegularModal(true);
+					return; // Выходим из функции, добавление будет происходить в модалке
+				}
+			} catch (error) {
+				// Если API регулярности не отвечает или цель не регулярная, продолжаем обычное добавление
+				console.log('Цель не является регулярной или ошибка API');
+			}
+		}
+
 		const res = await (operation === 'add' ? addGoal(code) : operation === 'delete' ? removeGoal(code) : markGoal(code, !done));
 
 		if (res.success && popularGoals) {
@@ -103,6 +132,58 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 			newLists[i] = updatedList;
 
 			setPopularLists(newLists);
+		}
+	};
+
+	// Обработчики для модалки регулярных целей
+	const handleRegularModalClose = () => {
+		setShowRegularModal(false);
+		setRegularGoalData(null);
+		setPendingGoalIndex(null);
+	};
+
+	const handleRegularGoalSave = async (settings: any) => {
+		if (!regularGoalData?.goal || pendingGoalIndex === null) return;
+
+		setIsRegularLoading(true);
+		try {
+			const response = await addRegularGoalToUser(regularGoalData.goal.code, {
+				goal_code: regularGoalData.goal.code,
+				...settings,
+			});
+
+			if (response.success) {
+				// Обновляем состояние цели как добавленной
+				const updatedGoal = {
+					...popularGoals[pendingGoalIndex],
+					addedByUser: true,
+					totalAdded: (popularGoals[pendingGoalIndex].totalAdded || 0) + 1,
+				};
+
+				const newGoals = [...popularGoals];
+				newGoals[pendingGoalIndex] = updatedGoal;
+				setPopularGoals(newGoals);
+
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Успех',
+					message: 'Регулярная цель успешно добавлена с вашими настройками!',
+				});
+
+				setShowRegularModal(false);
+				setRegularGoalData(null);
+				setPendingGoalIndex(null);
+			} else {
+				throw new Error(response.error || 'Ошибка при добавлении регулярной цели');
+			}
+		} catch (error) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: error instanceof Error ? error.message : 'Не удалось добавить регулярную цель',
+			});
+		} finally {
+			setIsRegularLoading(false);
 		}
 	};
 
@@ -184,6 +265,18 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 				/>
 				{!id && <AllCategories categories={categories} tag="h2" title="Категории" />}
 			</Loader>
+
+			{/* Модалка настройки регулярности */}
+			{showRegularModal && regularGoalData?.regular_settings && (
+				<RegularGoalSettingsModal
+					isOpen={showRegularModal}
+					onClose={handleRegularModalClose}
+					goalData={regularGoalData.goal}
+					originalSettings={regularGoalData.regular_settings}
+					onSave={handleRegularGoalSave}
+					isLoading={isRegularLoading}
+				/>
+			)}
 		</main>
 	);
 };

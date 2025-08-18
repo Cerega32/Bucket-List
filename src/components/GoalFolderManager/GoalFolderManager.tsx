@@ -1,5 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useState} from 'react';
+import {useNavigate, useParams, Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
 import {ICreateFolderData} from '@/typings/goal';
@@ -28,8 +29,14 @@ interface GoalFolderManagerProps {
 	className?: string;
 }
 
+// const FOLDER_ICONS = ['folder', 'bookmark', 'star', 'heart', 'fire', 'music', 'game', 'video', 'book', 'plane', 'map', 'camera'];
+
+// const FOLDER_COLORS = ['#3A89D8', '#7C3AED', '#10B981', '#F59E0B', '#EF4444', '#0EA5E9', '#8B5CF6', '#14B8A6', '#F97316'];
+
 export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({className}) => {
 	const [block, element] = useBem('goal-folder-manager', className);
+	const navigate = useNavigate();
+	const {folderId} = useParams<{folderId: string}>();
 
 	const [folders, setFolders] = useState<IGoalFolder[]>([]);
 	const [selectedFolder, setSelectedFolder] = useState<IGoalFolder | null>(null);
@@ -59,9 +66,9 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		setIsLoading(false);
 	}, []);
 
-	const loadFolderGoals = useCallback(async (folderId: number) => {
+	const loadFolderGoals = useCallback(async (folderIdNumber: number) => {
 		try {
-			const response = await getFolderGoals(folderId);
+			const response = await getFolderGoals(folderIdNumber);
 			if (response.success && response.data) {
 				setFolderGoals(response.data.items || []);
 			}
@@ -73,6 +80,18 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	useEffect(() => {
 		loadFolders();
 	}, [loadFolders]);
+
+	useEffect(() => {
+		if (!folders.length) return;
+		if (folderId) {
+			const id = Number(folderId);
+			const found = folders.find((f) => f.id === id);
+			if (found) {
+				setSelectedFolder(found);
+				loadFolderGoals(found.id);
+			}
+		}
+	}, [folders, folderId, loadFolderGoals]);
 
 	const handleCreateFolder = async () => {
 		if (!formData.name.trim()) return;
@@ -106,14 +125,15 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		}
 	};
 
-	const handleDeleteFolder = async (folderId: number) => {
+	const handleDeleteFolder = async (folderIdNumber: number) => {
 		try {
-			const response = await deleteGoalFolder(folderId);
+			const response = await deleteGoalFolder(folderIdNumber);
 			if (response.success) {
 				await loadFolders();
 				if (selectedFolder?.id === folderId) {
 					setSelectedFolder(null);
 					setFolderGoals([]);
+					navigate('/user/self/folders', {replace: true});
 				}
 			}
 		} catch (error) {
@@ -123,6 +143,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 
 	const handleSelectFolder = async (folder: IGoalFolder) => {
 		setSelectedFolder(folder);
+		navigate(`/user/self/folders/${folder.id}`);
 		await loadFolderGoals(folder.id);
 	};
 
@@ -194,6 +215,9 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 									tabIndex={0}
 									aria-label={`Выбрать папку ${folder.name}`}
 								>
+									<div className={element('folder-badge')} style={{backgroundColor: folder.color}}>
+										{/* <span className={element('icon', {[folder.icon || 'folder']: true})} /> */}
+									</div>
 									<div className={element('folder-info')}>
 										<h4 className={element('folder-name')}>
 											{folder.name}
@@ -234,7 +258,12 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 
 				{selectedFolder && (
 					<div className={element('folder-content')}>
-						<h3>Цели в папке &quot;{selectedFolder.name}&quot;</h3>
+						<h3>
+							<span className={element('folder-badge', {inline: true})} style={{backgroundColor: selectedFolder.color}}>
+								{/* <span className={element('icon', {[selectedFolder.icon || 'folder']: true})} /> */}
+							</span>
+							Цели в папке &quot;{selectedFolder.name}&quot;
+						</h3>
 						{folderGoals.length === 0 ? (
 							<div className={element('empty')}>
 								<p>В этой папке пока нет целей</p>
@@ -244,7 +273,13 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 							<div className={element('goals')}>
 								{folderGoals.map((folderGoal) => (
 									<div key={folderGoal.id} className={element('goal-item')}>
-										<ItemGoal img={folderGoal.image || '/public/svg/goal-default.svg'} title={folderGoal.title} />
+										<Link to={`/goals/${folderGoal.code}`} className={element('goal-link')}>
+											<ItemGoal
+												img={folderGoal.image || '/public/svg/goal-default.svg'}
+												title={folderGoal.title}
+												className={element('goal-card')}
+											/>
+										</Link>
 										<Button
 											theme="red"
 											icon="trash"
@@ -287,6 +322,33 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 						placeholder="Краткое описание папки"
 						type="textarea"
 					/>
+					{/* <div className={element('icon-picker')}>
+						{['folder', 'bookmark', 'star', 'heart', 'fire', 'music', 'game', 'video', 'book', 'plane', 'map', 'camera'].map(
+							(ico) => (
+								<button
+									key={ico}
+									type="button"
+									className={element('icon-option', {active: formData.icon === ico})}
+									onClick={() => setFormData({...formData, icon: ico})}
+									aria-label={`Выбрать иконку ${ico}`}
+								>
+									<span className={element('icon', {[ico]: true})} />
+								</button>
+							)
+						)}
+					</div> */}
+					<div className={element('color-picker')}>
+						{['#3A89D8', '#7C3AED', '#10B981', '#F59E0B', '#EF4444', '#0EA5E9', '#8B5CF6', '#14B8A6', '#F97316'].map((clr) => (
+							<button
+								key={clr}
+								type="button"
+								style={{backgroundColor: clr}}
+								className={element('color-option', {active: formData.color === clr})}
+								onClick={() => setFormData({...formData, color: clr})}
+								aria-label={`Выбрать цвет ${clr}`}
+							/>
+						))}
+					</div>
 					<FieldCheckbox
 						id="folder-private"
 						text="Приватная папка (видна только вам)"
@@ -337,6 +399,33 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 						placeholder="Краткое описание папки"
 						type="textarea"
 					/>
+					{/* <div className={element('icon-picker')}>
+						{['folder', 'bookmark', 'star', 'heart', 'fire', 'music', 'game', 'video', 'book', 'plane', 'map', 'camera'].map(
+							(ico) => (
+								<button
+									key={ico}
+									type="button"
+									className={element('icon-option', {active: formData.icon === ico})}
+									onClick={() => setFormData({...formData, icon: ico})}
+									aria-label={`Выбрать иконку ${ico}`}
+								>
+									<span className={element('icon', {[ico]: true})} />
+								</button>
+							)
+						)}
+					</div> */}
+					<div className={element('color-picker')}>
+						{['#3A89D8', '#7C3AED', '#10B981', '#F59E0B', '#EF4444', '#0EA5E9', '#8B5CF6', '#14B8A6', '#F97316'].map((clr) => (
+							<button
+								key={clr}
+								type="button"
+								style={{backgroundColor: clr}}
+								className={element('color-option', {active: formData.color === clr})}
+								onClick={() => setFormData({...formData, color: clr})}
+								aria-label={`Выбрать цвет ${clr}`}
+							/>
+						))}
+					</div>
 					<FieldCheckbox
 						id="edit-folder-private"
 						text="Приватная папка (видна только вам)"

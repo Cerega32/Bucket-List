@@ -43,8 +43,7 @@
 
 	&__folder {
 		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
+		align-items: center;
 		padding: 16px;
 		background: var(--color-white);
 		border: 1px solid var(--color-border);
@@ -60,6 +59,81 @@
 		&--active {
 			background: rgb(var(--color-primary-rgb) / 5%);
 			border-color: var(--color-primary);
+		}
+	}
+
+	&__folder-badge {
+		display: inline-flex;
+		justify-content: center;
+		align-items: center;
+		width: 40px;
+		height: 40px;
+		margin-right: 12px;
+		border-radius: 10px;
+		box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+
+		&.inline {
+			width: 28px;
+			height: 28px;
+			margin-right: 8px;
+		}
+	}
+
+	&__icon {
+		width: 18px;
+		height: 18px;
+		background: currentcolor;
+		mask-size: contain;
+		mask-repeat: no-repeat;
+		mask-position: center;
+		color: var(--color-white);
+
+		&.folder {
+			mask-image: url('/public/svg/folder.svg');
+		}
+
+		&.bookmark {
+			mask-image: url('/public/svg/bookmark.svg');
+		}
+
+		&.star {
+			mask-image: url('/public/svg/star.svg');
+		}
+
+		&.heart {
+			mask-image: url('/public/svg/heart.svg');
+		}
+
+		&.fire {
+			mask-image: url('/public/svg/fire.svg');
+		}
+
+		&.music {
+			mask-image: url('/public/svg/music.svg');
+		}
+
+		&.game {
+			mask-image: url('/public/svg/game.svg');
+		}
+
+		&.video {
+			mask-image: url('/public/svg/video.svg');
+		}
+
+		&.book {
+			mask-image: url('/public/svg/book.svg');
+		}
+
+		&.plane {
+			mask-image: url('/public/svg/plane.svg');
+		}
+
+		&.map {
+			mask-image: url('/public/svg/map.svg');
+		}
+
+		&.camera {
+			mask-image: url('/public/svg/camera.svg');
 		}
 	}
 
@@ -160,6 +234,48 @@
 		display: flex;
 		flex-direction: column;
 		gap: 20px;
+	}
+
+	&__icon-picker,
+	&__color-picker {
+		display: grid;
+		grid-template-columns: repeat(6, minmax(0, 1fr));
+		gap: 8px;
+	}
+
+	&__icon-option {
+		display: inline-flex;
+		justify-content: center;
+		align-items: center;
+		padding: 8px;
+		background: var(--color-white);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		cursor: pointer;
+
+		&--active {
+			border-color: var(--color-primary);
+			box-shadow: 0 0 0 2px rgb(var(--color-primary-rgb) / 15%);
+		}
+	}
+
+	&__color-option {
+		width: 28px;
+		height: 28px;
+		box-shadow: 0 0 0 1px var(--color-border);
+		border: 2px solid var(--color-white);
+		border-radius: 50%;
+		cursor: pointer;
+
+		&--active {
+			box-shadow: 0 0 0 2px var(--color-primary);
+		}
+	}
+
+	&__goal-card {
+		border: none;
+		box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+		border-radius: 12px;
 	}
 
 	&__form-actions {

@@ -1133,7 +1133,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 						<div className={element('regular-section')}>
 							<FieldCheckbox
 								id="is-regular"
-								text="Это регулярная цель"
+								text="Этоь"
 								checked={isRegular}
 								setChecked={setIsRegular}
 								className={element('field')}
