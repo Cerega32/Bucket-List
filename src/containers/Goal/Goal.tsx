@@ -7,21 +7,17 @@ import {ContentGoal} from '@/components/ContentGoal/ContentGoal';
 import {EditGoal} from '@/components/EditGoal/EditGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
 import {Loader} from '@/components/Loader/Loader';
-import {RegularGoalSettingsModal} from '@/components/RegularGoalSettingsModal/RegularGoalSettingsModal';
 import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {GoalStore} from '@/store/GoalStore';
 import {ModalStore} from '@/store/ModalStore';
-import {NotificationStore} from '@/store/NotificationStore';
 import {ThemeStore} from '@/store/ThemeStore';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
 import {canEditGoal} from '@/utils/api/get/canEditGoal';
 import {getGoal} from '@/utils/api/get/getGoal';
-import {getRegularGoalSettings} from '@/utils/api/get/getRegularGoalSettings';
 import {addGoal} from '@/utils/api/post/addGoal';
-import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 
@@ -42,14 +38,6 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		can_edit: false,
 		checked: false,
 	});
-
-	// Состояния для модалки регулярных целей
-	const [showRegularModal, setShowRegularModal] = useState(false);
-	const [regularGoalData, setRegularGoalData] = useState<any>(null);
-	const [isRegularLoading, setIsRegularLoading] = useState(false);
-
-	// Отладка состояний модалки
-	console.log('🔄 Состояния модалки:', {showRegularModal, regularGoalData, isRegularLoading});
 
 	const {setIsOpen, setWindow} = ModalStore;
 	const {setHeader} = ThemeStore;
@@ -112,29 +100,6 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			return;
 		}
 
-		// Специальная обработка для добавления цели - проверяем на регулярность
-		if (operation === 'add') {
-			console.log('🔍 Проверяем регулярность цели:', code);
-			try {
-				// Проверяем, является ли цель регулярной
-				const regularSettings = await getRegularGoalSettings(code);
-				console.log('📡 Ответ API регулярности:', regularSettings);
-
-				if (regularSettings.success && regularSettings.data) {
-					console.log('✅ Цель регулярная, показываем модалку', regularSettings.data);
-					// Цель регулярная - показываем модалку настройки
-					setRegularGoalData(regularSettings.data);
-					setShowRegularModal(true);
-					console.log('🎯 Состояния установлены, должна открыться модалка');
-					return; // Выходим из функции, добавление будет происходить в модалке
-				}
-				console.log('❌ Цель не регулярная или нет данных:', regularSettings);
-			} catch (error) {
-				// Если API регулярности не отвечает или цель не регулярная, продолжаем обычное добавление
-				console.log('❌ Цель не является регулярной или ошибка API:', error);
-			}
-		}
-
 		const res = await (operation === 'add'
 			? addGoal(code)
 			: operation === 'delete'
@@ -186,53 +151,6 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				...goal,
 				completedByUser: true,
 			});
-		}
-	};
-
-	// Обработчики для модалки регулярных целей
-	const handleRegularModalClose = () => {
-		setShowRegularModal(false);
-		setRegularGoalData(null);
-	};
-
-	const handleRegularGoalSave = async (settings: any) => {
-		if (!goal) return;
-
-		setIsRegularLoading(true);
-		try {
-			const response = await addRegularGoalToUser(goal.code, {
-				goal_code: goal.code,
-				...settings,
-			});
-
-			if (response.success) {
-				// Обновляем состояние цели как добавленной
-				const updatedGoal = {
-					...goal,
-					addedByUser: true,
-					totalAdded: (goal.totalAdded || 0) + 1,
-				};
-				setGoal(updatedGoal);
-
-				NotificationStore.addNotification({
-					type: 'success',
-					title: 'Успех',
-					message: 'Регулярная цель успешно добавлена с вашими настройками!',
-				});
-
-				setShowRegularModal(false);
-				setRegularGoalData(null);
-			} else {
-				throw new Error(response.error || 'Ошибка при добавлении регулярной цели');
-			}
-		} catch (error) {
-			NotificationStore.addNotification({
-				type: 'error',
-				title: 'Ошибка',
-				message: error instanceof Error ? error.message : 'Не удалось добавить регулярную цель',
-			});
-		} finally {
-			setIsRegularLoading(false);
 		}
 	};
 
@@ -334,27 +252,6 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				</div>
 			</section>
 			<ScrollToTop />
-
-			{/* Модалка настройки регулярности */}
-			{(() => {
-				const shouldShow = showRegularModal && regularGoalData?.regular_settings;
-				console.log('🎭 Проверка рендера модалки:', {
-					showRegularModal,
-					hasRegularSettings: !!regularGoalData?.regular_settings,
-					regularGoalData,
-					shouldShow,
-				});
-				return shouldShow;
-			})() && (
-				<RegularGoalSettingsModal
-					isOpen={showRegularModal}
-					onClose={handleRegularModalClose}
-					goalData={regularGoalData.goal}
-					originalSettings={regularGoalData.regular_settings}
-					onSave={handleRegularGoalSave}
-					isLoading={isRegularLoading}
-				/>
-			)}
 		</main>
 	);
 });

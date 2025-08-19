@@ -237,6 +237,7 @@ export interface IGoalFolder {
 	goalsCount: number;
 	createdAt: string;
 	updatedAt: string;
+	rules?: IGoalFolderRule[];
 }
 
 export interface IGoalFolderItem {
@@ -250,6 +251,47 @@ export interface IGoalFolderItem {
 	title: string;
 	category: string;
 	complexity: string;
+}
+
+export interface IGoalFolderRule {
+	id?: number;
+	folder: number;
+	ruleType: string;
+	ruleTypeDisplay?: string;
+	category?: number;
+	categoryName?: string;
+	complexity?: string;
+	keywords?: string;
+	removeFromFolder?: number;
+	removeFromFolderName?: string;
+	daysBeforeDeadline?: number;
+	progressThreshold?: number;
+	daysWithoutProgress?: number;
+	isActive: boolean;
+	createdAt?: string;
+	updatedAt?: string;
+}
+
+export interface IRuleOptions {
+	ruleTypes: Array<{
+		value: string;
+		label: string;
+		description: string;
+	}>;
+	categories: Array<{
+		id: number;
+		name: string;
+		nameEn: string;
+	}>;
+	complexities: Array<{
+		value: string;
+		label: string;
+	}>;
+	folders: Array<{
+		id: number;
+		name: string;
+		color: string;
+	}>;
 }
 
 // Получить папки пользователя (полная информация с целями)
@@ -345,6 +387,11 @@ export const deleteGoalFolder = async (
 	try {
 		const response = await DELETE(`goals/folders/${folderId}`, {
 			auth: true,
+			success: {
+				type: 'success',
+				title: 'Папка удалена',
+				message: 'Папка целей успешно удалена',
+			},
 		});
 		return response;
 	} catch (error) {
@@ -372,7 +419,7 @@ export const addGoalToFolder = (folderId: number, goalId: number, order?: number
 	});
 
 export const removeGoalFromFolder = (folderId: number, goalId: number) =>
-	DELETE(`goals/folders/${folderId}/remove-goal/${goalId}`, {
+	DELETE(`goals/folders/${folderId}/remove-goal/${goalId}/`, {
 		auth: true,
 		success: {
 			type: 'success',
@@ -675,6 +722,141 @@ export const resetRegularGoal = async (
 }> => {
 	try {
 		const response = await POST(`goals/regular/${regularGoalId}/reset`, {
+			auth: true,
+		});
+		return response;
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
+// ========== FOLDER RULES API ==========
+
+// Получить параметры для создания правил
+export const getFolderRuleOptions = async (): Promise<{
+	success: boolean;
+	data?: IRuleOptions;
+	error?: string;
+}> => {
+	try {
+		const response = await GET('goals/folders/rules/options', {
+			auth: true,
+		});
+		return response;
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
+// Создать правило папки
+export const createFolderRule = async (
+	folderId: number,
+	data: Partial<IGoalFolderRule>
+): Promise<{
+	success: boolean;
+	data?: IGoalFolderRule;
+	error?: string;
+}> => {
+	try {
+		// Создаем базовый объект с обязательными полями
+		const body: any = {
+			rule_type: data.ruleType,
+			is_active: data.isActive ?? true,
+		};
+
+		// Добавляем поля только если они нужны для данного типа правила
+		if (data.category !== undefined) body.category = data.category;
+		if (data.complexity !== undefined) body.complexity = data.complexity;
+		if (data.keywords !== undefined) body.keywords = data.keywords;
+		if (data.removeFromFolder !== undefined) body.remove_from_folder = data.removeFromFolder;
+
+		// Добавляем числовые параметры только для соответствующих типов правил
+		if (data.ruleType === 'ON_DEADLINE_APPROACHING_ADD' && data.daysBeforeDeadline !== undefined) {
+			body.days_before_deadline = data.daysBeforeDeadline;
+		}
+		if (data.ruleType === 'ON_HIGH_PROGRESS_ADD' && data.progressThreshold !== undefined) {
+			body.progress_threshold = data.progressThreshold;
+		}
+		if (data.ruleType === 'ON_STALLED_PROGRESS_ADD' && data.daysWithoutProgress !== undefined) {
+			body.days_without_progress = data.daysWithoutProgress;
+		}
+
+		const response = await POST(`goals/folders/${folderId}/rules/create`, {
+			body,
+			auth: true,
+		});
+		return response;
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
+// Обновить правило папки
+export const updateFolderRule = async (
+	folderId: number,
+	ruleId: number,
+	data: Partial<IGoalFolderRule>
+): Promise<{
+	success: boolean;
+	data?: IGoalFolderRule;
+	error?: string;
+}> => {
+	try {
+		// Создаем базовый объект с обязательными полями
+		const body: any = {
+			rule_type: data.ruleType,
+			is_active: data.isActive ?? true,
+		};
+
+		// Добавляем поля только если они нужны для данного типа правила
+		if (data.category !== undefined) body.category = data.category;
+		if (data.complexity !== undefined) body.complexity = data.complexity;
+		if (data.keywords !== undefined) body.keywords = data.keywords;
+		if (data.removeFromFolder !== undefined) body.remove_from_folder = data.removeFromFolder;
+
+		// Добавляем числовые параметры только для соответствующих типов правил
+		if (data.ruleType === 'ON_DEADLINE_APPROACHING_ADD' && data.daysBeforeDeadline !== undefined) {
+			body.days_before_deadline = data.daysBeforeDeadline;
+		}
+		if (data.ruleType === 'ON_HIGH_PROGRESS_ADD' && data.progressThreshold !== undefined) {
+			body.progress_threshold = data.progressThreshold;
+		}
+		if (data.ruleType === 'ON_STALLED_PROGRESS_ADD' && data.daysWithoutProgress !== undefined) {
+			body.days_without_progress = data.daysWithoutProgress;
+		}
+
+		const response = await PUT(`goals/folders/${folderId}/rules/${ruleId}/update`, {
+			body,
+			auth: true,
+		});
+		return response;
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
+// Удалить правило папки
+export const deleteFolderRule = async (
+	folderId: number,
+	ruleId: number
+): Promise<{
+	success: boolean;
+	error?: string;
+}> => {
+	try {
+		const response = await DELETE(`goals/folders/${folderId}/rules/${ruleId}/delete`, {
 			auth: true,
 		});
 		return response;

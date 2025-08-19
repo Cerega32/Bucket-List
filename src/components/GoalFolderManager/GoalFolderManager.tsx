@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useState} from 'react';
-import {useNavigate, useParams, Link} from 'react-router-dom';
+import {Link, useNavigate, useParams} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
 import {ICreateFolderData} from '@/typings/goal';
@@ -18,6 +18,7 @@ import {
 import {Button} from '../Button/Button';
 import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '../FieldInput/FieldInput';
+import {FolderRulesManager} from '../FolderRulesManager/FolderRulesManager';
 import {ItemGoal} from '../ItemGoal/ItemGoal';
 import {Loader} from '../Loader/Loader';
 import {Modal} from '../Modal/Modal';
@@ -44,6 +45,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	const [isLoading, setIsLoading] = useState(true);
 	const [isCreating, setIsCreating] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
+	const [activeTab, setActiveTab] = useState<'goals' | 'rules'>('goals');
 	const [formData, setFormData] = useState<ICreateFolderData>({
 		name: '',
 		description: '',
@@ -51,7 +53,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		icon: 'folder',
 		is_private: false,
 	});
-	const [isDeleteFolderOpen, setIsDeleteFolderOpen] = useState(false);
+	const [deletingFolder, setDeletingFolder] = useState<IGoalFolder | null>(null);
 
 	const loadFolders = useCallback(async () => {
 		setIsLoading(true);
@@ -130,7 +132,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 			const response = await deleteGoalFolder(folderIdNumber);
 			if (response.success) {
 				await loadFolders();
-				if (selectedFolder?.id === folderId) {
+				if (selectedFolder?.id === folderIdNumber) {
 					setSelectedFolder(null);
 					setFolderGoals([]);
 					navigate('/user/self/folders', {replace: true});
@@ -235,20 +237,16 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 												e.stopPropagation();
 												handleEditFolder(folder);
 											}}
-										>
-											Редактировать
-										</Button>
+										/>
 										<Button
 											theme="red"
 											icon="trash"
 											size="small"
 											onClick={(e) => {
 												e.stopPropagation();
-												handleDeleteFolder(folder.id);
+												setDeletingFolder(folder);
 											}}
-										>
-											Удалить
-										</Button>
+										/>
 									</div>
 								</div>
 							))}
@@ -258,38 +256,72 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 
 				{selectedFolder && (
 					<div className={element('folder-content')}>
-						<h3>
-							<span className={element('folder-badge', {inline: true})} style={{backgroundColor: selectedFolder.color}}>
-								{/* <span className={element('icon', {[selectedFolder.icon || 'folder']: true})} /> */}
-							</span>
-							Цели в папке &quot;{selectedFolder.name}&quot;
-						</h3>
-						{folderGoals.length === 0 ? (
-							<div className={element('empty')}>
-								<p>В этой папке пока нет целей</p>
-								<p>Добавьте цели в папку из страницы цели</p>
+						<div className={element('folder-header')}>
+							<h3>
+								<span className={element('folder-badge', {inline: true})} style={{backgroundColor: selectedFolder.color}}>
+									{/* <span className={element('icon', {[selectedFolder.icon || 'folder']: true})} /> */}
+								</span>
+								Папка &quot;{selectedFolder.name}&quot;
+							</h3>
+							<div className={element('folder-tabs')}>
+								<button
+									type="button"
+									className={element('tab', {active: activeTab === 'goals'})}
+									onClick={() => setActiveTab('goals')}
+								>
+									Цели ({folderGoals.length})
+								</button>
+								<button
+									type="button"
+									className={element('tab', {active: activeTab === 'rules'})}
+									onClick={() => setActiveTab('rules')}
+								>
+									Правила ({selectedFolder.rules?.length || 0})
+								</button>
 							</div>
-						) : (
-							<div className={element('goals')}>
-								{folderGoals.map((folderGoal) => (
-									<div key={folderGoal.id} className={element('goal-item')}>
-										<Link to={`/goals/${folderGoal.code}`} className={element('goal-link')}>
-											<ItemGoal
-												img={folderGoal.image || '/public/svg/goal-default.svg'}
-												title={folderGoal.title}
-												className={element('goal-card')}
-											/>
-										</Link>
-										<Button
-											theme="red"
-											icon="trash"
-											size="small"
-											onClick={() => handleRemoveGoalFromFolder(folderGoal.id)}
-										>
-											Удалить из папки
-										</Button>
+						</div>
+
+						{activeTab === 'goals' && (
+							<div className={element('tab-content')}>
+								{folderGoals.length === 0 ? (
+									<div className={element('empty')}>
+										<p>В этой папке пока нет целей</p>
+										<p>Добавьте цели в папку из страницы цели</p>
 									</div>
-								))}
+								) : (
+									<div className={element('goals')}>
+										{folderGoals.map((folderGoal) => (
+											<div key={folderGoal.id} className={element('goal-item')}>
+												<Link to={`/goals/${folderGoal.code}`} className={element('goal-link')}>
+													<ItemGoal
+														img={folderGoal.image || '/public/svg/goal-default.svg'}
+														title={folderGoal.title}
+														className={element('goal-card')}
+													/>
+												</Link>
+												<Button
+													theme="red"
+													icon="trash"
+													size="small"
+													onClick={() => handleRemoveGoalFromFolder(folderGoal.goal)}
+												>
+													Удалить из папки
+												</Button>
+											</div>
+										))}
+									</div>
+								)}
+							</div>
+						)}
+
+						{activeTab === 'rules' && (
+							<div className={element('tab-content')}>
+								<FolderRulesManager
+									folder={selectedFolder}
+									rules={selectedFolder.rules || []}
+									onRulesUpdate={loadFolders}
+									className={element('rules-manager')}
+								/>
 							</div>
 						)}
 					</div>
@@ -451,11 +483,16 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 			</Modal>
 			<ModalConfirm
 				title="Удалить папку?"
-				isOpen={isDeleteFolderOpen}
-				onClose={() => setIsDeleteFolderOpen(false)}
-				handleBtn={() => handleDeleteFolder(selectedFolder?.id || 0)}
+				isOpen={deletingFolder !== null}
+				onClose={() => setDeletingFolder(null)}
+				handleBtn={() => {
+					if (deletingFolder) {
+						handleDeleteFolder(deletingFolder.id);
+						setDeletingFolder(null);
+					}
+				}}
 				textBtn="Удалить папку"
-				text="Вы уверены, что хотите удалить эту папку? Цели не будут удалены."
+				text={`Вы уверены, что хотите удалить папку "${deletingFolder?.name}"? Цели не будут удалены.`}
 				themeBtn="red"
 			/>
 		</div>
