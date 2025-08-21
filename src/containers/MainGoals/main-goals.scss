@@ -17,6 +17,32 @@
 		max-width: 576px;
 	}
 
+	&__all-completed-container {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		max-width: 975px;
+		margin: 0 auto;
+		margin-bottom: 24px;
+	}
+
+	&__all-completed {
+		font-size: 24px;
+		line-height: var(--line-height-24);
+		text-align: center;
+	}
+
+	&__all-completed-image {
+		max-width: 450px;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	&__filter {
+		margin-bottom: 24px;
+	}
+
 	&__goals {
 		margin-bottom: 56px;
 

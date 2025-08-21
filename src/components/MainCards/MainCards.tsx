@@ -2,7 +2,7 @@ import {FC} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import {IComplexity, IGoal} from '@/typings/goal';
-import {getComplexityCategory} from '@/utils/values/complexity';
+import {getComplexityCategory, getComplexityCategoryPlural} from '@/utils/values/complexity';
 
 import {CardMain} from '../CardMain/CardMain';
 import {Svg} from '../Svg/Svg';
@@ -30,16 +30,20 @@ export const MainCards: FC<MainCardsProps> = (props) => {
 				{getComplexityCategory[complexity]}
 			</Title>
 			<section className={element('cards')}>
-				{goals?.map((goal, i) => (
-					<CardMain
-						key={goal.code}
-						goal={goal}
-						className={element('card', {big: i < 3})}
-						big={i < 3}
-						withBtn={withBtn}
-						updateGoal={() => updateGoal && updateGoal(i, complexity, goal.code, goal.completedByUser)}
-					/>
-				))}
+				{goals.length > 0 ? (
+					goals?.map((goal, i) => (
+						<CardMain
+							key={goal.code}
+							goal={goal}
+							className={element('card', {big: i < 3})}
+							big={i < 3}
+							withBtn={withBtn}
+							updateGoal={() => updateGoal && updateGoal(i, complexity, goal.code, goal.completedByUser)}
+						/>
+					))
+				) : (
+					<p className={element('empty')}>{getComplexityCategoryPlural[complexity]}</p>
+				)}
 			</section>
 		</section>
 	);
