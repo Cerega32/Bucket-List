@@ -12,6 +12,7 @@ import {NotificationStore} from '@/store/NotificationStore';
 import {ICategory, IGoal} from '@/typings/goal';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {debounce} from '@/utils/time/debounce';
+import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {selectComplexity} from '@/utils/values/complexity';
 
 import {Loader} from '../Loader/Loader';
@@ -134,40 +135,9 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 
 	// Обработчик изменения предполагаемого времени
 	const handleEstimatedTimeChange = (value: string) => {
-		// Разрешаем цифры, двоеточия, пробелы и русские буквы
-		const cleanValue = value.replace(/[^0-9:дчмдней ыячасовминут\s]/gi, '');
-
-		// Проверяем различные форматы:
-		// 1. HH:MM
-		const timePattern = /^(\d{0,2}):?(\d{0,2})$/;
-		// 2. Простое число (часы)
-		const simpleNumberPattern = /^\d+$/;
-		// 3. X дней, X д, X дня
-		const daysPattern = /^(\d+)\s*(д|дн|дня|дней)?$/i;
-		// 4. X часов, X ч
-		const hoursPattern = /^(\d+)\s*(ч|час|часа|часов)?$/i;
-		// 5. X минут, X м, X мин
-		const minutesPattern = /^(\d+)\s*(м|мин|минут|минуты)?$/i;
-		// 6. Комбинированные форматы: "3д5ч", "3д 5ч", "3д5 ч", "3д 5 ч"
-		const combinedPattern = /^(\d+)\s*д\s*(\d+)?\s*ч?$/i;
-		// 7. Более сложные комбинации с минутами: "3д5ч30м"
-		const fullCombinedPattern = /^(\d+)?\s*д?\s*(\d+)?\s*ч?\s*(\d+)?\s*м?$/i;
-
-		// Разрешаем ввод, если поле пустое или соответствует одному из паттернов
-		if (
-			cleanValue === '' ||
-			timePattern.test(cleanValue) ||
-			simpleNumberPattern.test(cleanValue) ||
-			daysPattern.test(cleanValue) ||
-			hoursPattern.test(cleanValue) ||
-			minutesPattern.test(cleanValue) ||
-			combinedPattern.test(cleanValue) ||
-			fullCombinedPattern.test(cleanValue) ||
-			cleanValue.includes('д') ||
-			cleanValue.includes('ч') ||
-			cleanValue.includes('м')
-		) {
-			setEstimatedTime(cleanValue);
+		// Используем универсальную функцию валидации времени
+		if (validateTimeInput(value)) {
+			setEstimatedTime(value);
 		}
 	};
 

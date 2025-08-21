@@ -62,12 +62,12 @@ export const Card: FC<CardListProps | CardGoalProps> = (props) => {
 					<Tags
 						complexity={goal.complexity}
 						added={goal.totalAdded}
-						time="7 дней" // TODO добавить время
+						estimatedTime={goal.estimatedTime}
 						theme="integrate"
 						className={element('tags', {
 							added: goal.addedByUser,
 						})}
-						separator={['complexity', !!goal.totalAdded && 'added']}
+						showSeparator
 					/>
 					{isList && <Progress done={goal.userCompletedGoals} all={goal.goalsCount} />}
 					<div className={element('buttons')}>

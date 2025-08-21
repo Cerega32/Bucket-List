@@ -18,10 +18,11 @@ interface TitleWithTagsProps {
 	short?: boolean;
 	categoryRank?: number;
 	userFolders?: IGoalFolderTag[];
+	estimatedTime?: string;
 }
 
 export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
-	const {className, title, theme, category, complexity, totalCompleted, isList, short, categoryRank, userFolders} = props;
+	const {className, title, theme, category, complexity, totalCompleted, isList, short, categoryRank, userFolders, estimatedTime} = props;
 
 	const [block, element] = useBem('title-with-tags', className);
 
@@ -38,6 +39,7 @@ export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
 					done={totalCompleted}
 					theme={theme}
 					userFolders={userFolders}
+					estimatedTime={estimatedTime}
 				/>
 			)}
 		</div>

@@ -51,10 +51,10 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 							<Tags
 								complexity={comment.goalInfo.complexity}
 								added={comment.goalInfo.totalAdded}
-								time="7 дней" // TODO добавить время
+								estimatedTime={comment.goalInfo.estimatedTime}
 								theme="integrate"
 								className={element('tags')}
-								separator={['complexity', !!comment.goalInfo.totalAdded && 'added']}
+								showSeparator
 							/>
 						</div>
 					) : (

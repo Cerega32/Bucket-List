@@ -12,6 +12,7 @@ import {ICategory, IGoal} from '@/typings/goal';
 import {deleteGoal} from '@/utils/api/delete/deleteGoal';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {updateGoal} from '@/utils/api/put/updateGoal';
+import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {selectComplexity} from '@/utils/values/complexity';
 
 import {Loader} from '../Loader/Loader';
@@ -332,31 +333,9 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 
 	// Обработчик изменения предполагаемого времени
 	const handleEstimatedTimeChange = (value: string) => {
-		// Разрешаем цифры, двоеточия, пробелы и русские буквы
-		const cleanValue = value.replace(/[^0-9:дчмдней часовминут\s]/gi, '');
-
-		// Проверяем различные форматы:
-		// 1. HH:MM
-		const timePattern = /^(\d{0,2}):?(\d{0,2})$/;
-		// 2. X дней, X д, X дня
-		const daysPattern = /^(\d+)\s*(д|дн|дня|дней)?$/i;
-		// 3. X часов, X ч
-		const hoursPattern = /^(\d+)\s*(ч|час|часа|часов)?$/i;
-		// 4. X минут, X м, X мин
-		const minutesPattern = /^(\d+)\s*(м|мин|минут|минуты)?$/i;
-
-		// Разрешаем ввод, если поле пустое или соответствует одному из паттернов
-		if (
-			cleanValue === '' ||
-			timePattern.test(cleanValue) ||
-			daysPattern.test(cleanValue) ||
-			hoursPattern.test(cleanValue) ||
-			minutesPattern.test(cleanValue) ||
-			cleanValue.includes('д') ||
-			cleanValue.includes('ч') ||
-			cleanValue.includes('м')
-		) {
-			setEstimatedTime(cleanValue);
+		// Используем универсальную функцию валидации времени
+		if (validateTimeInput(value)) {
+			setEstimatedTime(value);
 		}
 	};
 
@@ -478,7 +457,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 
 							<div className={element('time-field-container')}>
 								<FieldInput
-									placeholder="Например: 2:30, 3 дня, 5 часов, 30 минут"
+									placeholder="Например: 5, 2:30, 3д5ч, 3д 5 ч, 3 дня, 5 часов"
 									id="goal-estimated-time"
 									text="Предполагаемое время выполнения"
 									value={estimatedTime}
@@ -487,7 +466,8 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 									type="text"
 								/>
 								<small className={element('format-hint')}>
-									Укажите время в одном из форматов: ЧЧ:ММ (02:30), X дней (3 дня), X часов (5 часов), X минут (30 минут)
+									Укажите время: просто число (часы), ЧЧ:ММ (02:30), комбинации (3д5ч, 3д 5ч), или словами (3 дня, 5
+									часов, 30 минут)
 								</small>
 							</div>
 

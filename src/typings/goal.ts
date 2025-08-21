@@ -35,6 +35,7 @@ export interface IShortList {
 	totalAdded: number;
 	userCompletedGoals: number;
 	goalsCount: number;
+	estimatedTime?: never;
 }
 
 export interface IGoal {
@@ -117,6 +118,7 @@ export interface IShortGoal {
 	totalAdded: number;
 	addedByUser: boolean;
 	location?: ILocation;
+	estimatedTime?: string;
 }
 
 // Типы для работы с картами

@@ -44,6 +44,7 @@ export const HeaderGoal = forwardRef<HTMLElement, HeaderGoalProps>((props, ref) 
 				short={shrink}
 				categoryRank={goal.categoryRank}
 				userFolders={goal.userFolders}
+				estimatedTime={goal?.estimatedTime}
 			/>
 		</header>
 	);

@@ -1,7 +1,8 @@
-import {FC} from 'react';
+import {FC, Fragment} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import {ICategory, IComplexity, IGoalFolderTag} from '@/typings/goal';
+import {formatDjangoDurationShort} from '@/utils/time/formatEstimatedTime';
 import {getComplexity} from '@/utils/values/complexity';
 
 import {Line} from '../Line/Line';
@@ -17,39 +18,60 @@ interface TagsProps {
 	added?: number;
 	medal?: string;
 	time?: string;
-	separator?: Array<string | boolean>;
+	estimatedTime?: string;
+	showSeparator?: boolean;
 	userFolders?: IGoalFolderTag[];
 }
 
 export const Tags: FC<TagsProps> = (props) => {
-	const {className, theme, category, complexity, done, added, medal, time, separator, userFolders} = props;
+	const {className, theme, category, complexity, done, added, medal, time, estimatedTime, showSeparator, userFolders} = props;
 
 	const [block] = useBem('tags', className);
 
+	// Определяем какое время показывать - либо переданное время, либо форматированное estimatedTime
+	const displayTime = time || (estimatedTime ? formatDjangoDurationShort(estimatedTime) : null);
+
+	// Создаем массив элементов для правильного отображения линий
+	const elements: Array<JSX.Element> = [];
+
+	// Добавляем элементы в массив
+	if (category) {
+		elements.push(<Tag category={category.nameEn} text={category.name} theme={theme} />);
+	}
+
+	if (medal) {
+		elements.push(<Tag text={medal} theme={theme} icon="medal" />);
+	}
+
+	elements.push(<Tag text={getComplexity[complexity]} theme={theme} icon={complexity} />);
+
+	if (added) {
+		elements.push(<Tag text={added} theme={theme} icon="people" />);
+	}
+
+	if (done) {
+		elements.push(<Tag text={done} theme={theme} icon="done" />);
+	}
+
+	if (displayTime) {
+		elements.push(<Tag text={displayTime} theme={theme} icon="watch" />);
+	}
+
+	// Добавляем папки пользователя
+	if (userFolders && userFolders.length > 0) {
+		userFolders.forEach((folder) => {
+			elements.push(<Tag text={folder.name} theme={theme} icon={folder.icon} style={{backgroundColor: folder.color}} />);
+		});
+	}
+
 	return (
 		<section className={block()}>
-			{category && <Tag category={category.nameEn} text={category.name} theme={theme} />}
-			{separator?.some((el) => el === 'category') && <Line vertical />}
-			{medal && <Tag text={medal} theme={theme} icon="medal" />}
-			{separator?.some((el) => el === 'medal') && <Line vertical />}
-			<Tag text={getComplexity[complexity]} theme={theme} icon={complexity} />
-			{separator?.some((el) => el === 'complexity') && <Line vertical />}
-			{!!added && <Tag text={added} theme={theme} icon="people" />}
-			{separator?.some((el) => el === 'added') && <Line vertical />}
-			{!!done && <Tag text={done} theme={theme} icon="done" />}
-			{separator?.some((el) => el === 'done') && <Line vertical />}
-			{!!time && <Tag text={time} theme={theme} icon="watch" />}
-			{userFolders && userFolders.length > 0 && (
-				<>
-					<Line vertical />
-					{userFolders.map((folder, index) => (
-						<span key={folder.id} style={{display: 'inline-flex', alignItems: 'center', gap: '8px'}}>
-							<Tag text={folder.name} theme={theme} icon={folder.icon} style={{backgroundColor: folder.color}} />
-							{index < userFolders.length - 1 && <Line vertical />}
-						</span>
-					))}
-				</>
-			)}
+			{elements.map((item, index) => (
+				<Fragment key={index}>
+					{item}
+					{showSeparator && index < elements.length - 1 && <Line vertical />}
+				</Fragment>
+			))}
 		</section>
 	);
 };

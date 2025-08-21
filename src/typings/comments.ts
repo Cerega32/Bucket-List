@@ -12,6 +12,7 @@ export interface ICommentGoal {
 	title: string;
 	totalAdded: number;
 	image: string | null;
+	estimatedTime?: string;
 }
 
 export interface IComment {
