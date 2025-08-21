@@ -37,6 +37,10 @@ export const MainGoals: FC<IPage> = () => {
 	}, []);
 
 	useEffect(() => {
+		if (mainGoals.easyGoals.data.length === 0) {
+			return;
+		}
+
 		setAllGoalsCompleted(
 			mainGoals.easyGoals.countCompleted === mainGoals.easyGoals.data.length &&
 				mainGoals.mediumGoals.countCompleted === mainGoals.mediumGoals.data.length &&
@@ -130,6 +134,7 @@ export const MainGoals: FC<IPage> = () => {
 						complexity="easy"
 						withBtn
 						updateGoal={updateGoal}
+						allGoalsCompleted={allGoalsCompleted}
 					/>
 					<MainCards
 						className={element('goals')}
@@ -139,6 +144,7 @@ export const MainGoals: FC<IPage> = () => {
 						complexity="medium"
 						withBtn
 						updateGoal={updateGoal}
+						allGoalsCompleted={allGoalsCompleted}
 					/>
 					<MainCards
 						className={element('goals')}
@@ -146,6 +152,7 @@ export const MainGoals: FC<IPage> = () => {
 						complexity="hard"
 						withBtn
 						updateGoal={updateGoal}
+						allGoalsCompleted={allGoalsCompleted}
 					/>
 				</>
 			</Loader>

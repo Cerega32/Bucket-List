@@ -16,10 +16,11 @@ interface MainCardsProps {
 	complexity: IComplexity;
 	withBtn?: boolean;
 	updateGoal?: (i: number, complexity: IComplexity, code: string, done: boolean) => void;
+	allGoalsCompleted?: boolean;
 }
 
 export const MainCards: FC<MainCardsProps> = (props) => {
-	const {className, goals, complexity, withBtn, updateGoal} = props;
+	const {className, goals, complexity, withBtn, updateGoal, allGoalsCompleted} = props;
 
 	const [block, element] = useBem('main-cards', className);
 
@@ -30,7 +31,7 @@ export const MainCards: FC<MainCardsProps> = (props) => {
 				{getComplexityCategory[complexity]}
 			</Title>
 			<section className={element('cards')}>
-				{goals.length > 0 ? (
+				{goals.length > 0 &&
 					goals?.map((goal, i) => (
 						<CardMain
 							key={goal.code}
@@ -40,10 +41,8 @@ export const MainCards: FC<MainCardsProps> = (props) => {
 							withBtn={withBtn}
 							updateGoal={() => updateGoal && updateGoal(i, complexity, goal.code, goal.completedByUser)}
 						/>
-					))
-				) : (
-					<p className={element('empty')}>{getComplexityCategoryPlural[complexity]}</p>
-				)}
+					))}
+				{allGoalsCompleted && <p className={element('empty')}>{getComplexityCategoryPlural[complexity]}</p>}
 			</section>
 		</section>
 	);
