@@ -1,5 +1,6 @@
 import {FC, useEffect, useRef, useState} from 'react';
-import {useParams} from 'react-router-dom';
+import {useParams, useSearchParams} from 'react-router-dom';
+import {scroller} from 'react-scroll';
 
 import {AllCategories} from '@/components/AllCategories/AllCategories';
 import {Button} from '@/components/Button/Button';
@@ -45,6 +46,23 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 	const [isRegularLoading, setIsRegularLoading] = useState(false);
 
 	const {id} = useParams();
+	const [searchParams] = useSearchParams();
+	const searchQuery = searchParams.get('search') || '';
+
+	useEffect(() => {
+		// Скроллим к каталогу при наличии поискового запроса
+		if (searchQuery && !id) {
+			// Добавляем небольшую задержку для загрузки страницы
+			setTimeout(() => {
+				scroller.scrollTo('catalog-items-goals', {
+					duration: 800,
+					delay: 100,
+					smooth: 'easeInOutQuart',
+					offset: -150,
+				});
+			}, 500);
+		}
+	}, [searchQuery, id]);
 
 	useEffect(() => {
 		(async () => {
@@ -262,6 +280,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 					category={category}
 					beginUrl={id ? '/categories/' : '/categories/all'}
 					categories={categories}
+					initialSearch={searchQuery}
 				/>
 				{!id && <AllCategories categories={categories} tag="h2" title="Категории" />}
 			</Loader>

@@ -190,6 +190,21 @@
 		}
 	}
 
+	&--theme-integrate {
+		width: min-content;
+		padding: 0;
+		color: inherit;
+
+		&:hover,
+		&:active {
+			color: inherit;
+		}
+
+		&:focus {
+			@include focus-outline;
+		}
+	}
+
 	&--size-small {
 		width: auto;
 		height: 32px;

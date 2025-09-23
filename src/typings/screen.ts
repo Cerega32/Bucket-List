@@ -4,8 +4,17 @@ interface WasModeChange {
 	isWasModeChange: boolean;
 }
 
+interface ScreenModeSmallMobile {
+	isScreenSmallMobile: true;
+	isScreenMobile: true;
+	isScreenSmallTablet: false;
+	isScreenTablet: false;
+	isScreenDesktop: false;
+}
+
 interface ScreenModeMobile {
 	isScreenMobile: true;
+	isScreenSmallMobile: false;
 	isScreenSmallTablet: false;
 	isScreenTablet: false;
 	isScreenDesktop: false;
@@ -13,6 +22,7 @@ interface ScreenModeMobile {
 
 interface ScreenModeTablet {
 	isScreenMobile: false;
+	isScreenSmallMobile: false;
 	isScreenSmallTablet: false;
 	isScreenTablet: true;
 	isScreenDesktop: false;
@@ -20,6 +30,7 @@ interface ScreenModeTablet {
 
 interface ScreenModeSmallTablet {
 	isScreenMobile: false;
+	isScreenSmallMobile: false;
 	isScreenSmallTablet: true;
 	isScreenTablet: true;
 	isScreenDesktop: false;
@@ -27,12 +38,13 @@ interface ScreenModeSmallTablet {
 
 interface ScreenModeDesktop {
 	isScreenMobile: false;
+	isScreenSmallMobile: false;
 	isScreenSmallTablet: false;
 	isScreenTablet: false;
 	isScreenDesktop: true;
 }
 
-export type ScreenMode = ScreenModeMobile | ScreenModeTablet | ScreenModeSmallTablet | ScreenModeDesktop;
+export type ScreenMode = ScreenModeMobile | ScreenModeTablet | ScreenModeSmallTablet | ScreenModeDesktop | ScreenModeSmallMobile;
 
 interface ScreenModeMobileWithSize extends ScreenModeMobile, WasModeChange {
 	mode: 'xs' | 'sm';

@@ -10,7 +10,7 @@
 // Добавляем минимальную ширину для всего приложения
 html,
 body {
-	min-width: 360px;
+	min-width: 320px;
 }
 
 /* Box-sizing rules */
@@ -41,7 +41,7 @@ dd {
 /* Set core body defaults */
 body {
 	min-height: 100vh;
-	font-family: 'Inter', sans-serif;
+	font-family: "Inter", sans-serif;
 	font-size: 14px;
 	line-height: 1.42;
 	scroll-behavior: smooth;

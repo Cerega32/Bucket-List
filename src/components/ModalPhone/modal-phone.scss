@@ -1,0 +1,120 @@
+.modal-phone {
+	$block: &;
+
+	&__window {
+		position: fixed;
+		z-index: 10001;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		width: 100vw;
+		height: 100vh;
+		background: var(--color-white);
+		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		transform: translateY(100%);
+		overflow: hidden;
+
+		&.modal-phone-enter {
+			transform: translateY(100%);
+		}
+
+		&.modal-phone-enter-active {
+			transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			transform: translateY(0);
+		}
+
+		&.modal-phone-exit {
+			transform: translateY(0);
+		}
+
+		&.modal-phone-exit-active {
+			transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			transform: translateY(100%);
+		}
+	}
+
+	&__header {
+		display: flex;
+		flex-shrink: 0;
+		justify-content: space-between;
+		align-items: center;
+		min-height: 64px;
+		padding: 16px 20px;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	&__title {
+		flex: 1;
+		padding-right: 16px;
+		margin: 0;
+		color: var(--color-text-primary);
+		font-size: 20px;
+		font-weight: var(--weight-semi-bold);
+		line-height: 1.2;
+	}
+
+	&__close {
+		display: flex;
+		flex-shrink: 0;
+		justify-content: center;
+		align-items: center;
+		width: 40px;
+		height: 40px;
+		padding: 8px;
+		background: transparent;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+
+		&:hover {
+			background: var(--color-gray-1);
+		}
+
+		&:active {
+			background: var(--color-gray-2);
+		}
+
+		svg {
+			width: 24px;
+			height: 24px;
+			color: var(--color-text-primary);
+		}
+	}
+
+	&__content {
+		flex: 1;
+		padding: 20px;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+
+		// Кастомный скроллбар
+		&::-webkit-scrollbar {
+			width: 4px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color-gray-4);
+			border-radius: 2px;
+
+			&:hover {
+				background: var(--color-gray-5);
+			}
+		}
+
+		// Для Firefox
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-gray-4) transparent;
+	}
+
+	// Состояние открытой модалки
+	&--isOpen {
+		#{$block}__window {
+			transform: translateY(0);
+		}
+	}
+}

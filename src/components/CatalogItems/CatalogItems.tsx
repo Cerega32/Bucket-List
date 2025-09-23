@@ -32,6 +32,7 @@ interface CatalogItemsProps {
 	subPage?: string;
 	beginUrl: string;
 	columns?: string;
+	initialSearch?: string;
 }
 
 interface CatalogItemsCategoriesProps extends CatalogItemsProps {
@@ -70,7 +71,7 @@ const sortBy: Array<OptionSelect> = [
 ];
 
 export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersProps> = (props) => {
-	const {className, code = 'all', subPage, category, userId, completed, beginUrl, columns, categories} = props;
+	const {className, code = 'all', subPage, category, userId, completed, beginUrl, columns, categories, initialSearch = ''} = props;
 
 	const [block, element] = useBem('catalog-items', className);
 
@@ -83,7 +84,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		pagination: IPaginationPage;
 	}>({data: [], pagination: defaultPagination});
 	const [activeSort, setActiveSort] = useState(0);
-	const [search, setSearch] = useState('');
+	const [search, setSearch] = useState(initialSearch);
 	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 	const [get, setGet] = useState(userId ? {user_id: userId, completed} : {});
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -131,29 +132,37 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		(async () => {
 			const tempGet = userId ? {user_id: userId, completed} : {};
 			setGet(tempGet);
-			const res = await getAllGoals(code, tempGet);
+
+			// Добавляем поисковый запрос, если он есть
+			const searchParams = initialSearch ? {search: initialSearch} : {};
+
+			const res = await getAllGoals(code, {...tempGet, ...searchParams});
 			if (res.success) {
 				setGoals(res.data);
 			}
 		})();
-	}, [subPage, code, completed, userId]);
+	}, [subPage, code, completed, userId, initialSearch]);
 
 	useEffect(() => {
 		(async () => {
 			const tempGet = userId ? {user_id: userId, completed} : {};
 			setGet(tempGet);
-			const res = await getAllLists(code, tempGet);
+
+			// Добавляем поисковый запрос, если он есть
+			const searchParams = initialSearch ? {search: initialSearch} : {};
+
+			const res = await getAllLists(code, {...tempGet, ...searchParams});
 			if (res.success) {
 				setLists(res.data);
 			}
 		})();
-	}, [subPage, code, completed, userId]);
+	}, [subPage, code, completed, userId, initialSearch]);
 
 	useEffect(() => {
 		setActiveSort(0);
-		setSearch('');
+		setSearch(initialSearch); // Восстанавливаем начальный поисковый запрос
 		setSelectedCategories([]);
-	}, [subPage, beginUrl]);
+	}, [subPage, beginUrl, initialSearch]);
 
 	const fetchData = async (sortValue: string, page?: number, categoriesSort?: string[]): Promise<boolean> => {
 		try {

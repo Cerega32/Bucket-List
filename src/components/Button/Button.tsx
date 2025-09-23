@@ -9,7 +9,7 @@ import './button.scss';
 
 interface ButtonProps {
 	className?: string;
-	theme?: 'blue' | 'blue-light' | 'no-border' | 'green' | 'red' | 'gradient';
+	theme?: 'blue' | 'blue-light' | 'no-border' | 'green' | 'red' | 'gradient' | 'integrate';
 	width?: 'auto';
 	size?: 'small' | 'medium';
 	children?: ReactElement | string | number;

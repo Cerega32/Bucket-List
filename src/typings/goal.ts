@@ -22,6 +22,10 @@ export interface ICategoryWithSubcategories {
 	subcategories: Array<ICategoryDetailed>;
 }
 
+export interface ICategoryTree extends ICategoryDetailed {
+	children: ICategoryTree[];
+}
+
 export interface IShortList {
 	code: string;
 	image: string;

@@ -22,6 +22,8 @@ interface FieldInputProps {
 	onFocus?: () => void;
 	onBlur?: () => void;
 	onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+	iconEnd?: string;
+	theme?: 'transparent';
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -35,12 +37,14 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		setValue,
 		setValueTarget,
 		iconBegin,
+		iconEnd,
 		autoComplete = 'off',
 		error,
 		required,
 		onFocus,
 		onBlur,
 		onKeyDown,
+		theme,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -63,7 +67,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 	};
 
 	return (
-		<div className={block({error: !!error})}>
+		<div className={block({error: !!error, theme})}>
 			{text && (
 				<label className={element('label')} htmlFor={id}>
 					{text}
@@ -102,6 +106,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						{typeState === 'password' ? <Svg icon="eye" /> : <Svg icon="eye-closed" />}
 					</button>
 				)}
+				{iconEnd && <Svg icon={iconEnd} className={element('icon-end')} />}
 			</div>
 			{error?.map((er) => (
 				<p key={er} className={element('error')}>

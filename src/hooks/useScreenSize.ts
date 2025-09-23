@@ -68,13 +68,14 @@
 
 // export default useScreenSize;
 
-import {useEffect, useState, useCallback} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 
 import {ScreenMode, ScreenSizeCode} from '@/typings/screen';
 import {screenSizes} from '@/utils/values/screenSizes';
 
 const getScreenByMode = (mode: ScreenSizeCode): ScreenMode => {
 	const base = {
+		isScreenSmallMobile: false,
 		isScreenMobile: false,
 		isScreenSmallTablet: false,
 		isScreenTablet: false,
@@ -83,6 +84,7 @@ const getScreenByMode = (mode: ScreenSizeCode): ScreenMode => {
 
 	switch (mode) {
 		case 'xs':
+			return {...base, isScreenSmallMobile: true, isScreenMobile: true};
 		case 'sm':
 			return {...base, isScreenMobile: true};
 		case 'md':
@@ -98,9 +100,28 @@ const useScreenSize = (): ScreenMode => {
 	const [windowDimensions, setWindowDimensions] = useState<ScreenMode>(getScreenByMode('xl'));
 
 	const listener = useCallback(() => {
-		const nameScreen = screenSizes.find((el) => window.innerWidth >= el.size);
-		const screenSize = nameScreen?.name || 'xl';
-		setWindowDimensions(getScreenByMode(screenSize));
+		// Используем разные способы получения ширины для отладки
+		const windowInnerWidth = window.innerWidth;
+		const documentClientWidth = document.documentElement.clientWidth;
+
+		// Используем наиболее подходящий способ
+		const width = documentClientWidth || windowInnerWidth;
+		let screenSize: ScreenSizeCode = 'xs';
+
+		if (width >= 1464) {
+			screenSize = 'xl';
+		} else if (width >= 1200) {
+			screenSize = 'lg';
+		} else if (width >= 768) {
+			screenSize = 'md';
+		} else if (width >= 576) {
+			screenSize = 'sm';
+		} else {
+			screenSize = 'xs';
+		}
+
+		const result = getScreenByMode(screenSize);
+		setWindowDimensions(result);
 	}, []);
 
 	useEffect(() => {
