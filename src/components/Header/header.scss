@@ -216,6 +216,7 @@
 	&__category-link {
 		display: flex;
 		justify-content: flex-start;
+		gap: 8px;
 		width: 100%;
 		min-width: max-content;
 		color: var(--color-text-primary);
@@ -223,6 +224,11 @@
 		&--child {
 			padding: 10px 8px;
 		}
+	}
+
+	&__categories-icon-img {
+		width: 24px;
+		height: 24px;
 	}
 
 	&__categories-arrow {

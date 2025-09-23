@@ -273,7 +273,15 @@ export const Header: FC<HeaderProps> = observer((props) => {
 											onMouseLeave={() => setHoveredParentId(null)}
 										>
 											<Link className={element('category-link')} to={`/categories/${category.nameEn}`}>
-												<Svg icon={category?.icon || 'apps'} />
+												{category?.icon ? (
+													<img
+														src={category?.icon}
+														alt={category?.name}
+														className={element('categories-icon-img')}
+													/>
+												) : (
+													<Svg icon={category?.icon || 'apps'} />
+												)}
 												{category.name}
 												<Svg icon="arrow" className={element('categories-arrow')} />
 											</Link>
@@ -412,7 +420,11 @@ export const Header: FC<HeaderProps> = observer((props) => {
 								to={`/categories/${category.nameEn}`}
 								onClick={() => setIsCategoriesModalOpen(false)}
 							>
-								<Svg icon={category?.icon || 'apps'} />
+								{category?.icon ? (
+									<img src={category?.icon} alt={category?.name} className={element('categories-icon-img')} />
+								) : (
+									<Svg icon={category?.icon || 'apps'} />
+								)}
 								{category.name}
 							</Link>
 							{category.children.length > 0 && (
