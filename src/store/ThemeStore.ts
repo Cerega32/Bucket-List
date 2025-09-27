@@ -8,6 +8,7 @@ interface IThemeStore {
 
 class Store implements IThemeStore {
 	header: IHeaderTheme = 'transparent';
+	footer: boolean = true;
 
 	page = 'isMainPage';
 
@@ -27,6 +28,10 @@ class Store implements IThemeStore {
 
 	setFull = (full: boolean) => {
 		this.full = full;
+	};
+
+	setFooter = (footer: boolean) => {
+		this.footer = footer;
 	};
 }
 
