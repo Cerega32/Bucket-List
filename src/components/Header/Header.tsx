@@ -13,6 +13,7 @@ import {HeaderNotificationsStore} from '@/store/HeaderNotificationsStore';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
 import {getAllCategories} from '@/utils/api/get/getCategories';
+import {getUser} from '@/utils/api/get/getUser';
 
 import {ThemeStore} from '../../store/ThemeStore';
 import {Avatar} from '../Avatar/Avatar';
@@ -122,6 +123,12 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			setIsCategoriesOpen(!isCategoriesOpen);
 		}
 	};
+
+	useEffect(() => {
+		if (!userSelf?.id) {
+			getUser();
+		}
+	}, []);
 
 	// Добавляем обработчик клика вне элементов
 	useEffect(() => {

@@ -209,7 +209,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	}
 
 	if (!goal) {
-		return <Loader isLoading={isLoading} />;
+		return <Loader isLoading={isLoading} isPageLoader />;
 	}
 
 	return (

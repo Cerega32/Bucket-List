@@ -35,7 +35,7 @@ class Store {
 				result.push(node);
 			}
 		});
-		console.log(result, 'result');
+
 		this.categoriesTree = result;
 	}
 }

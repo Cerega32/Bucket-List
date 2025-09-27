@@ -8,16 +8,17 @@ interface LoaderProps {
 	isLoading: boolean;
 	children?: React.ReactNode;
 	className?: string;
+	isPageLoader?: boolean;
 }
 
-export const Loader: FC<LoaderProps> = ({isLoading, children, className}) => {
+export const Loader: FC<LoaderProps> = ({isLoading, children, className, isPageLoader}) => {
 	const [block, element] = useBem('loader');
 
 	if (!isLoading && !children) return null;
 
 	return (
-		<div className={block()}>
-			{children && <div className={element('content', {blurred: isLoading}, className)}>{children}</div>}
+		<div className={block({page: isPageLoader})}>
+			{children && <div className={element('content', {blurred: isLoading, page: isPageLoader}, className)}>{children}</div>}
 
 			{isLoading && (
 				<div className={element('overlay')}>

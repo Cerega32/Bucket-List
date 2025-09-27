@@ -92,7 +92,7 @@ export const ListGoalsContainer: FC = () => {
 	};
 
 	if (!list) {
-		return <Loader isLoading={isLoading} />;
+		return <Loader isLoading={isLoading} isPageLoader />;
 	}
 
 	// Собираем массив целей с локацией для карты
