@@ -18,6 +18,26 @@ interface IPage {
 	symbol: string | number;
 }
 
+const useIsMobile = (breakpoint = 576, miniBreakpoint = 430): {isMobile: boolean; isMiniMobile: boolean} => {
+	const [isMobile, setIsMobile] = useState(false);
+	const [isMiniMobile, setIsMiniMobile] = useState(false);
+
+	useEffect(() => {
+		const checkScreenSize = () => {
+			setIsMobile(window.innerWidth <= breakpoint);
+			setIsMiniMobile(window.innerWidth <= miniBreakpoint);
+		};
+
+		checkScreenSize();
+
+		window.addEventListener('resize', checkScreenSize);
+
+		return () => window.removeEventListener('resize', checkScreenSize);
+	}, [breakpoint]);
+
+	return {isMobile, isMiniMobile};
+};
+
 const generatePagination = (activePage: number, totalPages: number, visiblePages = 5): Array<IPage> => {
 	const pagination: Array<IPage> = [];
 
@@ -66,10 +86,12 @@ export const Pagination: FC<PaginationProps> = (props) => {
 	const {className, goToPage, currentPage, totalPages} = props;
 
 	const [current, setCurrent] = useState(currentPage);
+	const {isMobile, isMiniMobile} = useIsMobile();
 
 	const [block, element] = useBem('pagination', className);
 	const [loading, setLoading] = useState(false);
-	const pagination = generatePagination(current, totalPages);
+	const visiblePages = isMiniMobile ? 1 : isMobile ? 3 : 5;
+	const pagination = generatePagination(current, totalPages, visiblePages);
 
 	const onPageClick = async (page: number): Promise<void> => {
 		const oldPage = current;

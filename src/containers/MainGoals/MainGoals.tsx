@@ -91,8 +91,10 @@ export const MainGoals: FC<IPage> = () => {
 							<Title className={element('title')} tag="h1">
 								Твои 100 целей на жизнь!
 							</Title>
-							<p>
+							<p className={element('description-text')}>
 								Сколько всего вы бы хотели сделать, увидеть, испытать за свою жизнь, но мечты постоянно откладываются?
+							</p>
+							<p className={element('description-text')}>
 								Превратите свои мечты в цели, и скоро вы заметите, как ваша жизнь изменилась. Мы уже сделали это за вас -
 								дерзайте!
 							</p>

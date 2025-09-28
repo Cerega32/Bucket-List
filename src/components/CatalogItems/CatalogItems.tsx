@@ -388,24 +388,29 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		<section className={block()} key={code}>
 			<div className={element('filters')}>
 				<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage || ''} />
-				<FieldInput
-					className={element('search')}
-					placeholder="Поисковой запрос"
-					id="searching"
-					value={search}
-					setValue={onSearch}
-					iconBegin="search"
-				/>
-				{categories && categories.length > 0 && (
-					<FiltersCheckbox
-						head={{name: 'Все категории', code: 'all'}}
-						items={categoryFilters}
-						onFinish={handleCategoryFilter}
-						multipleSelectedText={['категория', 'категории', 'категорий']}
-						multipleThreshold={1}
+				<hr className={element('line')} />
+				<div className={element('search-wrapper')}>
+					<FieldInput
+						className={element('search')}
+						placeholder="Поисковой запрос"
+						id="searching"
+						value={search}
+						setValue={onSearch}
+						iconBegin="search"
 					/>
-				)}
-				<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} filter />
+					<div className={element('categories-wrapper')}>
+						{categories && categories.length > 0 && (
+							<FiltersCheckbox
+								head={{name: 'Все категории', code: 'all'}}
+								items={categoryFilters}
+								onFinish={handleCategoryFilter}
+								multipleSelectedText={['категория', 'категории', 'категорий']}
+								multipleThreshold={1}
+							/>
+						)}
+						<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} filter />
+					</div>
+				</div>
 			</div>
 			<Loader isLoading={loading}>
 				{subPage === 'goals' ? (

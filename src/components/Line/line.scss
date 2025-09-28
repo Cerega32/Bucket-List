@@ -9,6 +9,10 @@
 		width: 1px;
 		height: 100%;
 		margin: 0;
+
+		@include sm {
+			display: none;
+		}
 	}
 
 	&--withoutMargin {

@@ -13,6 +13,7 @@ import {RoutesAuth} from '../RoutesAuth/RoutesAuth';
 import '../../_commons/styles-supports/scaffolding.scss';
 
 import './layout.scss';
+import {Footer} from '@/components/Footer/Footer';
 
 const Layout: FC = observer(() => {
 	const [block] = useBem('layout');
@@ -26,6 +27,7 @@ const Layout: FC = observer(() => {
 				<Modal />
 				<NotificationContainer />
 			</div>
+			<Footer />
 		</BrowserRouter>
 	);
 });

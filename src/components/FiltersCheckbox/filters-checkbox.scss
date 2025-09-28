@@ -4,6 +4,10 @@
 
 	// max-width: 240px;
 
+	@include md {
+		width: 100%;
+	}
+
 	&__option {
 		display: flex;
 		align-items: center;
@@ -11,9 +15,14 @@
 		max-width: 240px;
 		padding: 10px 16px;
 		background: var(--color-secondary);
-		border-radius: 4px;
+		border-radius: 8px;
 		color: var(--color-text);
 		cursor: pointer;
+
+		@include md {
+			width: 100%;
+			max-width: 100%;
+		}
 	}
 
 	&__option-text {

@@ -36,8 +36,7 @@ export const MainCards: FC<MainCardsProps> = (props) => {
 						<CardMain
 							key={goal.code}
 							goal={goal}
-							className={element('card', {big: i < 3})}
-							big={i < 3}
+							className={element('card')}
 							withBtn={withBtn}
 							updateGoal={() => updateGoal && updateGoal(i, complexity, goal.code, goal.completedByUser)}
 						/>
