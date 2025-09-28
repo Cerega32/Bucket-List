@@ -74,6 +74,11 @@
 		justify-content: space-between;
 		align-items: center;
 		height: 32px;
+
+		@include sm {
+			flex-wrap: wrap;
+			height: auto;
+		}
 	}
 
 	&__buttons {
@@ -141,6 +146,10 @@
 			&__tags-wrapper {
 				justify-content: flex-end;
 				gap: 8px;
+
+				@include sm {
+					justify-content: space-between;
+				}
 			}
 
 			&__tags {

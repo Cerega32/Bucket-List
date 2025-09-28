@@ -6,6 +6,11 @@
 		justify-content: space-between;
 		max-width: var(--max-width);
 		margin: 0 auto 24px;
+
+		@include sm {
+			flex-direction: column;
+			gap: 12px;
+		}
 	}
 
 	&__title {
@@ -15,13 +20,26 @@
 
 	&__popular-goals {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 24px;
 		max-width: var(--max-width);
 		margin: 0 auto 56px;
+
+		@include md {
+			flex-direction: column;
+		}
 	}
 
 	&__popular-goal {
 		width: calc(100% / 4 - (24px * 3 / 4));
+
+		@include lg {
+			width: calc(100% / 2 - (24px * 1 / 2));
+		}
+
+		@include md {
+			width: 100%;
+		}
 	}
 
 	&__popular-lists {
@@ -30,10 +48,18 @@
 		gap: 24px;
 		max-width: var(--max-width);
 		margin: 0 auto 56px;
+
+		@include lg {
+			flex-direction: column;
+		}
 	}
 
 	&__popular-list {
 		width: calc(100% / 2 - (24px * 1 / 2));
+
+		@include lg {
+			width: 100%;
+		}
 	}
 
 	&__all-goals {
@@ -51,5 +77,9 @@
 
 	&--all {
 		padding: 56px;
+
+		@include lg {
+			padding: 56px 32px;
+		}
 	}
 }

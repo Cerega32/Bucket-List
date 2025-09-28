@@ -82,6 +82,10 @@
 	&--filter {
 		width: 200px;
 
+		@include md {
+			width: 100%;
+		}
+
 		#{$block} {
 			&__option {
 				flex-direction: row;
@@ -89,7 +93,7 @@
 				padding: 10px;
 				background: var(--color-secondary);
 				border: none;
-				border-radius: 4px;
+				border-radius: 8px;
 			}
 
 			&__list {
