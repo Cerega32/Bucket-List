@@ -104,3 +104,9 @@ $main-categories: (
 		@content;
 	}
 }
+
+@mixin xs {
+	@media (width <= 480px) {
+		@content;
+	}
+}
