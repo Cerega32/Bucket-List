@@ -4,6 +4,7 @@ import {BrowserRouter} from 'react-router-dom';
 
 import {Header} from '@/components/Header/Header';
 import {Modal} from '@/components/Modal/Modal';
+import {SEO} from '@/components/SEO/SEO';
 import {useBem} from '@/hooks/useBem';
 import {ThemeStore} from '@/store/ThemeStore';
 
@@ -25,6 +26,7 @@ const Layout: FC = observer(() => {
 				<RoutesAuth />
 				<Modal />
 				<NotificationContainer />
+				<SEO title="delting.ru - достигайте своих целей" />
 			</div>
 		</BrowserRouter>
 	);
