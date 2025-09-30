@@ -6,8 +6,8 @@ import {IList} from '@/typings/list';
 import {pluralize} from '@/utils/text/pluralize';
 
 interface UseOGImageProps {
-	goal?: IGoal;
-	list?: IList;
+	goal?: IGoal | null;
+	list?: IList | null;
 	width?: number;
 	height?: number;
 }
