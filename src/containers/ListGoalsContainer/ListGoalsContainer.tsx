@@ -136,6 +136,7 @@ export const ListGoalsContainer: FC = () => {
 						done={list.completedByUser}
 						canEdit={list.isCanEdit || list.isCanAddGoals}
 						location={goalsWithLocation}
+						list={list.goals}
 					/>
 					<div className={element('content-wrapper')}>
 						<ContentListGoals className={element('content')} list={list} updateGoal={updateGoal} />

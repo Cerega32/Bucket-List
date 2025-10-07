@@ -281,7 +281,7 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 				<div className={element('form-actions')}>
 					{isEditing ? (
 						<>
-							<Button theme="blue" onClick={handleUpdateRule} active={!formData.ruleType}>
+							<Button theme="blue" onClick={handleUpdateRule} disabled={!formData.ruleType}>
 								Сохранить изменения
 							</Button>
 							<Button
@@ -297,7 +297,7 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 						</>
 					) : (
 						<>
-							<Button theme="blue" onClick={handleCreateRule} active={!formData.ruleType}>
+							<Button theme="blue" onClick={handleCreateRule} disabled={!formData.ruleType}>
 								Создать правило
 							</Button>
 							<Button

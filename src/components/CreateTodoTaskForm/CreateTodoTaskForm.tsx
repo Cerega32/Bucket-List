@@ -388,7 +388,7 @@ export const CreateTodoTaskForm: FC<CreateTodoTaskFormProps> = ({className, defa
 					onClick={onCancel}
 					theme="blue-light"
 					size={isScreenMobile ? 'medium' : undefined}
-					active={isSubmitting}
+					disabled={isSubmitting}
 				>
 					Отмена
 				</Button>
@@ -396,7 +396,7 @@ export const CreateTodoTaskForm: FC<CreateTodoTaskFormProps> = ({className, defa
 					typeBtn="submit"
 					theme="blue"
 					size={isScreenMobile ? 'medium' : undefined}
-					active={isSubmitting || !formData.title.trim() || !formData.todoList}
+					disabled={isSubmitting || !formData.title.trim() || !formData.todoList}
 				>
 					{isSubmitting ? 'Создание...' : 'Создать задачу'}
 				</Button>

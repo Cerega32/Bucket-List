@@ -20,6 +20,7 @@ import {GoalMap} from '../GoalMap/GoalMap';
 import {GoalMapMulti} from '../GoalMap/GoalMapMulti';
 import LocationPicker from '../LocationPicker/LocationPicker';
 import {ProgressUpdateModal} from '../ProgressUpdateModal/ProgressUpdateModal';
+import {RandomGoalPicker} from '../RandomGoalPicker/RandomGoalPicker';
 import {Svg} from '../Svg/Svg';
 
 import './modal.scss';
@@ -191,6 +192,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 					onClose={closeWindow}
 				/>
 			)}
+			{window === 'random-goal-picker' && <RandomGoalPicker goals={modalProps?.goals || []} onClose={closeWindow} />}
 		</>
 	);
 

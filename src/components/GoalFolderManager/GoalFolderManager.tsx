@@ -388,7 +388,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 						setChecked={(checked: boolean) => setFormData({...formData, is_private: checked})}
 					/>
 					<div className={element('form-actions')}>
-						<Button theme="blue" onClick={handleCreateFolder} active={!formData.name.trim()}>
+						<Button theme="blue" onClick={handleCreateFolder} disabled={!formData.name.trim()}>
 							Создать папку
 						</Button>
 						<Button
@@ -465,7 +465,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 						setChecked={(checked: boolean) => setFormData({...formData, is_private: checked})}
 					/>
 					<div className={element('form-actions')}>
-						<Button theme="blue" onClick={handleUpdateFolder} active={!formData.name.trim()}>
+						<Button theme="blue" onClick={handleUpdateFolder} disabled={!formData.name.trim()}>
 							Сохранить изменения
 						</Button>
 						<Button

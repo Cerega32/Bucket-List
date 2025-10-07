@@ -217,8 +217,9 @@
 		padding: 10px 16px;
 	}
 
-	&--active {
+	&--disabled {
 		background: var(--color-white);
+		pointer-events: none;
 
 		&:hover,
 		&:active {

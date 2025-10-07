@@ -21,7 +21,7 @@ interface ButtonProps {
 	small?: boolean;
 	hoverContent?: ReactElement | string | number;
 	hoverIcon?: string;
-	active?: boolean;
+	disabled?: boolean;
 	loading?: boolean;
 	refInner?: React.RefObject<HTMLButtonElement>;
 	withBorder?: boolean;
@@ -41,7 +41,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		typeBtn = 'button',
 		hoverContent,
 		hoverIcon,
-		active,
+		disabled,
 		loading,
 		refInner,
 		withBorder,
@@ -80,7 +80,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		switch (type) {
 			case 'Link':
 				return (
-					<Link to={href} className={block({theme, small, size, active})}>
+					<Link to={href} className={block({theme, small, size, disabled})}>
 						{content}
 						{theme === 'gradient' && <div className={element('gradient-shadow')} />}
 					</Link>
@@ -91,7 +91,7 @@ export const Button: FC<ButtonProps> = (props) => {
 						className={block({close: true, withBorder})}
 						onClick={onClick}
 						type="button"
-						disabled={active}
+						disabled={disabled}
 						ref={refInner}
 						aria-label="закрыть"
 					>
@@ -102,12 +102,12 @@ export const Button: FC<ButtonProps> = (props) => {
 			default:
 				return (
 					<button
-						className={block({theme, small, size, active})}
+						className={block({theme, small, size, disabled})}
 						onClick={onClick}
 						type={typeBtn === 'button' ? 'button' : 'submit'}
 						onMouseEnter={() => onHover(true)}
 						onMouseLeave={() => onHover(false)}
-						disabled={active}
+						disabled={disabled}
 						ref={refInner}
 					>
 						{content}

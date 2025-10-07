@@ -3,7 +3,7 @@ import {FC, useEffect, useState} from 'react';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {ModalStore} from '@/store/ModalStore';
-import {ILocation, IRegularGoalConfig} from '@/typings/goal';
+import {ILocation, IRegularGoalConfig, IShortGoal} from '@/typings/goal';
 import {getGoalTimer, TimerInfo} from '@/utils/api/get/getGoalTimer';
 import {createGoalProgress, getGoalProgress, IGoalProgress, markRegularProgress, resetGoalProgress} from '@/utils/api/goals';
 import {GoalWithLocation} from '@/utils/mapApi';
@@ -36,6 +36,7 @@ interface AsideGoalProps extends AsideProps {
 	canEdit?: boolean;
 	location?: ILocation;
 	onGoalCompleted?: () => void; // Новый колбэк для уведомления о завершении цели
+	list?: never;
 }
 
 export interface AsideListsProps extends AsideProps {
@@ -45,6 +46,7 @@ export interface AsideListsProps extends AsideProps {
 	editGoal?: never;
 	canEdit?: boolean;
 	location?: GoalWithLocation[];
+	list?: IShortGoal[];
 }
 
 export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
@@ -64,6 +66,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		goalId,
 		userFolders,
 		regularConfig,
+		list,
 	} = props;
 	const {onGoalCompleted} = 'onGoalCompleted' in props ? props : {onGoalCompleted: undefined};
 	const [timer, setTimer] = useState<TimerInfo | null>(null);
@@ -129,6 +132,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 
 	const handleTimerUpdate = (updatedTimer: TimerInfo | null) => {
 		setTimer(updatedTimer);
+	};
+
+	const handleRandomPick = () => {
+		ModalStore.setWindow('random-goal-picker');
+		ModalStore.setModalProps({goals: list});
+		ModalStore.setIsOpen(true);
 	};
 
 	const handleStartProgress = async () => {
@@ -546,6 +555,11 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 					>
 						Редактировать
+					</Button>
+				)}
+				{isList && (
+					<Button theme="blue-light" className={element('btn')} onClick={handleRandomPick} icon="magic">
+						Случайная цель
 					</Button>
 				)}
 

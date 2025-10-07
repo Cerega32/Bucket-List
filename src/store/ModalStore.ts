@@ -14,7 +14,8 @@ type IWindow =
 	| 'create-todo-list'
 	| 'create-todo-task'
 	| 'folder-selector'
-	| 'progress-update';
+	| 'progress-update'
+	| 'random-goal-picker';
 
 export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 
