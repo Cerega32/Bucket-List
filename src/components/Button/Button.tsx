@@ -68,6 +68,46 @@ export const Button: FC<ButtonProps> = (props) => {
 		setText(children);
 	}, [children, icon]);
 
+	const createRipple = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+		const target = event.currentTarget as HTMLElement;
+		if (!target) return;
+
+		const ripple = document.createElement('span');
+		const diameter = Math.max(target.clientWidth, target.clientHeight);
+		const radius = diameter / 2;
+
+		ripple.style.width = ripple.style.height = `${diameter}px`;
+		ripple.style.left = `${event.clientX - target.getBoundingClientRect().left - radius}px`;
+		ripple.style.top = `${event.clientY - target.getBoundingClientRect().top - radius}px`;
+		ripple.classList.add('button__ripple');
+
+		// Удаляем предыдущие волны
+		const existingRipple = target.getElementsByClassName('ripple')[0];
+		if (existingRipple) {
+			existingRipple.remove();
+		}
+
+		target.appendChild(ripple);
+
+		// Автоматически удалить ripple после завершения анимации
+		setTimeout(() => ripple.remove(), 800);
+	};
+
+	const handleClickButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		if (disabled || loading) return;
+		createRipple(e);
+		onClick?.(e);
+	};
+
+	const handleClickLink = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+		if (disabled) {
+			e.preventDefault();
+			return;
+		}
+		createRipple(e);
+		onClick?.(e as unknown as React.MouseEvent<HTMLButtonElement, MouseEvent>);
+	};
+
 	const content = (
 		<>
 			{!loading && iconState && <Svg width="16px" height="16px" icon={iconState} className={element('icon')} />}
@@ -80,7 +120,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		switch (type) {
 			case 'Link':
 				return (
-					<Link to={href} className={block({theme, small, size, disabled})}>
+					<Link to={href} className={block({theme, small, size, disabled})} onClick={handleClickLink}>
 						{content}
 						{theme === 'gradient' && <div className={element('gradient-shadow')} />}
 					</Link>
@@ -89,7 +129,7 @@ export const Button: FC<ButtonProps> = (props) => {
 				return (
 					<button
 						className={block({close: true, withBorder})}
-						onClick={onClick}
+						onClick={handleClickButton}
 						type="button"
 						disabled={disabled}
 						ref={refInner}
@@ -103,7 +143,7 @@ export const Button: FC<ButtonProps> = (props) => {
 				return (
 					<button
 						className={block({theme, small, size, disabled})}
-						onClick={onClick}
+						onClick={handleClickButton}
 						type={typeBtn === 'button' ? 'button' : 'submit'}
 						onMouseEnter={() => onHover(true)}
 						onMouseLeave={() => onHover(false)}
