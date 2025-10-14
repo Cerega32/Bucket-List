@@ -73,6 +73,33 @@ $main-categories: (
 	background: linear-gradient(180deg, rgba(var(--color-#{$category}-rgb) / 90%) 0%, rgb(var(--color-black-rgb) / 80%) 100%);
 }
 
+@mixin scrollbar {
+	overflow-y: auto;
+
+	// Кастомный скроллбар для WebKit браузеров (Chrome, Safari, Edge)
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color-gray-5);
+		border-radius: 0 8px 8px 0;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color-gray-4);
+		border-radius: 3px;
+
+		&:hover {
+			background: var(--color-gray-3);
+		}
+	}
+
+	// Для Firefox
+	scrollbar-width: thin;
+	scrollbar-color: var(--color-gray-4) var(--color-gray-5);
+}
+
 // Media queries mixins
 
 @mixin retina {
