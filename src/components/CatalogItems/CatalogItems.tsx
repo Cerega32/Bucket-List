@@ -21,6 +21,7 @@ import {defaultPagination} from '@/utils/data/default';
 import {Card} from '../Card/Card';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
+import {Line} from '../Line/Line';
 import {Loader} from '../Loader/Loader';
 import {Pagination} from '../Pagination/Pagination';
 import Select, {OptionSelect} from '../Select/Select';
@@ -388,7 +389,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		<section className={block()} key={code}>
 			<div className={element('filters')}>
 				<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage || ''} />
-				<hr className={element('line')} />
+				<Line className={element('line')} />
 				<div className={element('search-wrapper')}>
 					<FieldInput
 						className={element('search')}

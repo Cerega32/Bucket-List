@@ -42,24 +42,25 @@ export const Footer: FC<FooterProps> = observer((props) => {
 				{to: '/news', label: 'Новости'},
 			],
 		},
-		{
-			title: 'Ресурсы',
-			links: [
-				{to: '/about', label: 'О проекте'},
-				{to: '/help', label: 'Помощь'},
-				{to: '/blog', label: 'Блог'},
-				{to: '/contacts', label: 'Контакты'},
-			],
-		},
-		{
-			title: 'Правовая информация',
-			links: [
-				{to: '/privacy', label: 'Политика конфиденциальности'},
-				{to: '/terms', label: 'Условия использования'},
-				{to: '/cookies', label: 'Cookie'},
-				{to: '/agreement', label: 'Пользовательское соглашение'},
-			],
-		},
+		// TODO: заполнить ссылки на ресурсы и правовую информацию
+		// {
+		// 	title: 'Ресурсы',
+		// 	links: [
+		// 		{to: '/about', label: 'О проекте'},
+		// 		{to: '/help', label: 'Помощь'},
+		// 		{to: '/blog', label: 'Блог'},
+		// 		{to: '/contacts', label: 'Контакты'},
+		// 	],
+		// },
+		// {
+		// 	title: 'Правовая информация',
+		// 	links: [
+		// 		{to: '/privacy', label: 'Политика конфиденциальности'},
+		// 		{to: '/terms', label: 'Условия использования'},
+		// 		{to: '/cookies', label: 'Cookie'},
+		// 		{to: '/agreement', label: 'Пользовательское соглашение'},
+		// 	],
+		// },
 	];
 
 	return (
@@ -80,7 +81,8 @@ export const Footer: FC<FooterProps> = observer((props) => {
 							Платформа для достижения целей и саморазвития. Ставьте цели, отслеживайте прогресс и вдохновляйтесь успехами
 							других пользователей.
 						</p>
-						<div className={element('social')}>
+						{/* TODO: Add ссылки на социальные сети */}
+						{/* <div className={element('social')}>
 							{socialLinks.map((social) => (
 								<a
 									key={social.icon}
@@ -93,7 +95,7 @@ export const Footer: FC<FooterProps> = observer((props) => {
 									<Svg icon={social.icon} className={element('social-icon')} />
 								</a>
 							))}
-						</div>
+						</div> */}
 					</div>
 
 					<nav className={element('navigation')}>
