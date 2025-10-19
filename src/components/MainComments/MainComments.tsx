@@ -11,6 +11,7 @@ import {Button} from '../Button/Button';
 import {CommentGoal} from '../CommentGoal/CommentGoal';
 import {Title} from '../Title/Title';
 import './main-comments.scss';
+import useScreenSize from '@/hooks/useScreenSize';
 
 interface MainCommentsProps {
 	className?: string;
@@ -20,6 +21,7 @@ interface MainCommentsProps {
 export const MainComments: FC<MainCommentsProps> = (props) => {
 	const {className, comments} = props;
 	const [block, element] = useBem('main-comments', className);
+	const {isScreenMobile} = useScreenSize();
 
 	if (!comments.length) {
 		return null;
@@ -33,7 +35,7 @@ export const MainComments: FC<MainCommentsProps> = (props) => {
 			<div className={element('slider-container')}>
 				<Swiper
 					modules={[Navigation]}
-					spaceBetween={24}
+					spaceBetween={isScreenMobile ? 12 : 24}
 					slidesPerView="auto"
 					navigation={{
 						nextEl: '.main-comments__next',
