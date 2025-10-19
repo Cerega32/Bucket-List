@@ -20,13 +20,13 @@ export const MainPopular: FC<MainPopularProps> = (props) => {
 
 	const [block, element] = useBem('main-popular', className);
 	const [active, setActive] = useState('top');
-	const {isScreenMobile, isScreenTablet} = useScreenSize();
+	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 
 	const bigCardsCount = useMemo(() => {
 		if (isScreenMobile) return 1;
-		if (isScreenTablet) return 2;
+		if (isScreenSmallTablet) return 2;
 		return 3;
-	}, [isScreenMobile, isScreenTablet]);
+	}, [isScreenMobile, isScreenSmallTablet]);
 
 	return (
 		<section className={block()}>

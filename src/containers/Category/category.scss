@@ -1,6 +1,10 @@
 .category {
 	padding: calc(380px + 56px) 0 0;
 
+	@include xl {
+		padding: calc(380px + 56px) 24px 0;
+	}
+
 	&__wrapper-title {
 		display: flex;
 		justify-content: space-between;
@@ -73,6 +77,10 @@
 
 	&--empty {
 		padding: calc(230px + 56px) 0 0;
+
+		@include xl {
+			padding: calc(230px + 56px) 24px 0;
+		}
 	}
 
 	&--all {
