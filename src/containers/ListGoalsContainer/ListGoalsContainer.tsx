@@ -8,6 +8,8 @@ import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
 import {SEO} from '@/components/SEO/SEO';
 import {useBem} from '@/hooks/useBem';
 import {useOGImage} from '@/hooks/useOGImage';
+import {ModalStore} from '@/store/ModalStore';
+import {UserStore} from '@/store/UserStore';
 import {IList} from '@/typings/list';
 import {getList} from '@/utils/api/get/getList';
 import {addGoal} from '@/utils/api/post/addGoal';
@@ -23,6 +25,8 @@ export const ListGoalsContainer: FC = () => {
 	const [block, element] = useBem('list-goals-container');
 	const [list, setList] = useState<IList | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const {isAuth} = UserStore;
+	const {setIsOpen, setWindow} = ModalStore;
 
 	// Генерируем динамическое OG изображение для списка
 	const {imageUrl: ogImageUrl} = useOGImage({
@@ -46,6 +50,12 @@ export const ListGoalsContainer: FC = () => {
 	}, [listId]);
 
 	const updateList = async (code: string, operation: 'add' | 'delete' | 'mark-all'): Promise<void | boolean> => {
+		if (!isAuth) {
+			setWindow('login');
+			setIsOpen(true);
+			return;
+		}
+
 		const res = await (operation === 'add'
 			? addListGoal(code)
 			: operation === 'delete'

@@ -43,23 +43,31 @@
 	--color-blue-rgb-5: 22 168 177; // #16A8B1
 	--color-blue-5: rgb(var(--color-blue-rgb-5)); // #16A8B1
 	--color-blue-rgb-6: 22 84 177; // #168491
-	--color-blue-6: rgb(var(--color-blue-rgb-6)); // #168491
+	--color-blue-6: rgb(var(--color-blue-rgb-6)); // #168491+
+	--color-blue-rgb-7: 15 163 173; // #15A3AD
+	--color-blue-7: rgb(var(--color-blue-rgb-7)); // #15A3AD
 	//////
 	//////
 	--color-pink-rgb: 199 53 202; // #C735CA
 	--color-pink: rgb(var(--color-pink-rgb)); // #C735CA
+	--color-pink-rgb-2: 216 27 96; // #D81B60
+	--color-pink-2: rgb(var(--color-pink-rgb-2)); // #D81B60
 	//////
 	//////
 	--color-orange-rgb: 255 107 0; // #FF6B00
 	--color-orange: rgb(var(--color-orange-rgb)); // #FF6B00
 	--color-orange-rgb-2: 247 144 9; // #F79009
 	--color-orange-2: rgb(var(--color-orange-rgb-2)); // #F79009
+	--color-orange-rgb-3: 245 124 0; // #F57C00
+	--color-orange-3: rgb(var(--color-orange-rgb-3)); // #F57C00
 	//////
 	//////
 	--color-purple-rgb: 135 0 198; // #8700C6
 	--color-purple: rgb(var(--color-purple-rgb)); // #8700C6
 	--color-purple-rgb-2: 118 22 177; // #7616B1
 	--color-purple-2: rgb(var(--color-purple-rgb-2)); // #7616B1
+	--color-purple-rgb-3: 113 69 219; // #7145DB
+	--color-purple-3: rgb(var(--color-purple-rgb-3)); // #7145DB
 	//////
 	//////
 	--color-brown-rgb: 255 234 222; // #FFEAD6
@@ -119,101 +127,56 @@
 
 	//////
 	//////
-	--color-education: var(--color-purple-2); // #7616B1
-	--color-education-rgb: var(--color-purple-rgb-2); // #7616B1
-	--color-travel: var(--color-green-5); // #64B116
-	--color-travel-rgb: var(--color-green-rgb-5); // #64B116
-	--color-health-and-sport: var(--color-blue-5); // #16A8B1
-	--color-health-and-sport-rgb: var(--color-blue-rgb-5); // #16A8B1
-	--color-relations: var(--color-red-3); // #B11616
-	--color-relations-rgb: var(--color-red-rgb-3); // #B11616
-	--color-entertainment: var(--color-yellow-3); // #B1A116
-	--color-entertainment-rgb: var(--color-yellow-rgb-3); // #B1A116
+	--color-education: var(--color-purple-3); // #7145DB
+	--color-education-rgb: var(--color-purple-rgb-3); // #7145DB
+	--color-travel: var(--color-green-1); // #0DA300
+	--color-travel-rgb: var(--color-green-rgb-1); // #0DA300
+	--color-health-and-sport: var(--color-blue-7); // #15A3AD
+	--color-health-and-sport-rgb: var(--color-blue-rgb-7); // #15A3AD
+	--color-relations: var(--color-pink-2); // #D81B60
+	--color-relations-rgb: var(--color-pink-rgb-2); // #D81B60
+	--color-entertainment: var(--color-orange-3); // #F57C00
+	--color-entertainment-rgb: var(--color-orange-rgb-3); // #F57C00
 
 	/* Подкатегории - Образование и профессиональный рост (education) */
-	--color-career-success: color-mix(
-		in srgb,
-		var(--color-education) 90%,
-		var(--color-white) 10%
-	); // Оттенок фиолетового для карьерного успеха
-
-	--color-career-success-rgb: 126 38 179; // #7E26B3
-	--color-intellectual-development: color-mix(
-		in srgb,
-		var(--color-education) 80%,
-		var(--color-white) 20%
-	); // Более светлый оттенок для интеллектуального развития
-
-	--color-intellectual-development-rgb: 133 53 186; // #8535BA
+	--color-career-success: var(--color-education); // Оттенок фиолетового для карьерного успеха
+	--color-career-success-rgb: var(--color-education-rgb); // #7145DB
+	--color-intellectual-development: var(--color-education); // Более светлый оттенок для интеллектуального развития
+	--color-intellectual-development-rgb: var(--color-education-rgb); // #7145DB
 
 	/* Подкатегории - Здоровье и физическое развитие (health-and-sport) */
-	--color-sport: color-mix(in srgb, var(--color-health-and-sport) 90%, var(--color-white) 10%); // Оттенок сине-зеленого для спорта
-	--color-sport-rgb: 35 173 178; // #23ADB2
-	--color-wellness-and-health: color-mix(
-		in srgb,
-		var(--color-health-and-sport) 80%,
-		var(--color-white) 20%
-	); // Более светлый оттенок для здоровья
-
-	--color-wellness-and-health-rgb: 49 179 183; // #31B3B7
+	--color-sport: var(--color-health-and-sport); // Оттенок сине-зеленого для спорта
+	--color-sport-rgb: var(--color-health-and-sport-rgb); // #15A3AD
+	--color-wellness-and-health: var(--color-health-and-sport); // Более светлый оттенок для здоровья
+	--color-wellness-and-health-rgb: var(--color-health-and-sport-rgb); // #15A3AD
 
 	/* Подкатегории - Развлечения, Искусство и Хобби (entertainment) */
-	--color-hobby: color-mix(in srgb, var(--color-entertainment) 95%, var(--color-white) 5%); // Оттенок желто-коричневого для хобби
-	--color-hobby-rgb: 180 165 39; // #B4A527
-	--color-musical-experiences: color-mix(
-		in srgb,
-		var(--color-entertainment) 90%,
-		var(--color-white) 10%
-	); // Оттенок для музыкальных впечатлений
-
-	--color-musical-experiences-rgb: 184 170 48; // #B8AA30
-	--color-creative-arts: color-mix(in srgb, var(--color-entertainment) 85%, var(--color-white) 15%); // Оттенок для творческих искусств
-	--color-creative-arts-rgb: 187 174 56; // #BBAE38
-	--color-gaming: color-mix(in srgb, var(--color-entertainment) 80%, var(--color-white) 20%); // Оттенок для игровых вселенных
-	--color-gaming-rgb: 191 178 65; // #BFB241
-	--color-cinema-art: color-mix(in srgb, var(--color-entertainment) 75%, var(--color-white) 25%); // Оттенок для киноискусства
-	--color-cinema-art-rgb: 195 182 73; // #C3B649
-	--color-books: color-mix(in srgb, var(--color-entertainment) 70%, var(--color-white) 30%); // Оттенок для литературных миров
-	--color-books-rgb: 198 186 82; // #C6BA52
+	--color-hobby: var(--color-entertainment); // Оттенок желто-коричневого для хобби
+	--color-hobby-rgb: var(--color-entertainment-rgb); // #F57C00
+	--color-musical-experiences: var(--color-entertainment); // Оттенок для музыкальных впечатлений
+	--color-musical-experiences-rgb: var(--color-entertainment-rgb); // #F57C00
+	--color-creative-arts: var(--color-entertainment); // Оттенок для творческих искусств
+	--color-creative-arts-rgb: var(--color-entertainment-rgb); // #F57C00
+	--color-gaming: var(--color-entertainment); // Оттенок для игровых вселенных
+	--color-gaming-rgb: var(--color-entertainment-rgb); // #F57C00
+	--color-cinema-art: var(--color-entertainment); // Оттенок для киноискусства
+	--color-cinema-art-rgb: var(--color-entertainment-rgb); // #F57C00
+	--color-books: var(--color-entertainment); // Оттенок для литературных миров
+	--color-books-rgb: var(--color-entertainment-rgb); // #F57C00
 
 	/* Подкатегории - Отношения и связи (relations) */
-	--color-community-contribution: color-mix(
-		in srgb,
-		var(--color-relations) 85%,
-		var(--color-white) 15%
-	); // Оттенок красного для общественного вклада
-
-	--color-community-contribution-rgb: 185 45 45; // #B92D2D
-	--color-romantic-moments: color-mix(
-		in srgb,
-		var(--color-relations) 75%,
-		var(--color-white) 25%
-	); // Более светлый оттенок для романтических моментов
-
-	--color-romantic-moments-rgb: 192 68 68; // #C04444
+	--color-community-contribution: var(--color-relations); // Оттенок красного для общественного вклада
+	--color-community-contribution-rgb: var(--color-relations-rgb); // #D81B60
+	--color-romantic-moments: var(--color-relations); // Более светлый оттенок для романтических моментов
+	--color-romantic-moments-rgb: var(--color-relations-rgb); // #D81B60
 
 	/* Подкатегории - Путешествия и открытия (travel) */
-	--color-cultural-immersion: color-mix(
-		in srgb,
-		var(--color-travel) 90%,
-		var(--color-white) 10%
-	); // Оттенок зеленого для культурного погружения
-
-	--color-cultural-immersion-rgb: 110 183 36; // #6EB724
-	--color-culinary-explorations: color-mix(
-		in srgb,
-		var(--color-travel) 80%,
-		var(--color-white) 20%
-	); // Более светлый оттенок для гастрономических открытий
-
-	--color-culinary-explorations-rgb: 120 189 50; // #78BD32
-	--color-unique-places: color-mix(
-		in srgb,
-		var(--color-travel) 70%,
-		var(--color-white) 30%
-	); // Еще более светлый оттенок для уникальных мест
-
-	--color-unique-places-rgb: 129 195 64; // #81C340
+	--color-cultural-immersion: var(--color-travel); // Оттенок зеленого для культурного погружения
+	--color-cultural-immersion-rgb: var(--color-travel-rgb); // #0DA300
+	--color-culinary-explorations: var(--color-travel); // Более светлый оттенок для гастрономических открытий
+	--color-culinary-explorations-rgb: var(--color-travel-rgb); // #0DA300
+	--color-unique-places: var(--color-travel); // Еще более светлый оттенок для уникальных мест
+	--color-unique-places-rgb: var(--color-travel-rgb); // #0DA300
 
 	/* Специальная категория */
 	--color-100-goals: var(--color-gold); // #FFD02C - Золотой цвет для 100 целей

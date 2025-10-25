@@ -51,7 +51,7 @@ export const InfoGoal: FC<InfoGoalProps> = (props) => {
 			</div>
 			{progress && progressData && progressData.total > 0 && (
 				<>
-					<Line vertical={horizontal} margin="5px 24px" height={-10} />
+					<Line vertical={horizontal} margin="5px 0" height={-10} />
 					<Progress done={progressData.completed} all={progressData.total} goal />
 				</>
 			)}

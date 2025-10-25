@@ -15,6 +15,7 @@ import useScreenSize from '@/hooks/useScreenSize';
 import {GoalStore} from '@/store/GoalStore';
 import {ModalStore} from '@/store/ModalStore';
 import {ThemeStore} from '@/store/ThemeStore';
+import {UserStore} from '@/store/UserStore';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
 import {canEditGoal} from '@/utils/api/get/canEditGoal';
@@ -29,6 +30,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const [block, element] = useBem('goal');
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 	const headerRef = useRef<HTMLElement | null>(null);
+	const {isAuth} = UserStore;
 
 	const {setId} = GoalStore;
 	const params = useParams();
@@ -99,6 +101,12 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		if (operation === 'partial') {
 			// Логика частичного выполнения обрабатывается в AsideGoal
 			// Здесь можем добавить дополнительную логику если нужно
+			return;
+		}
+
+		if (!isAuth) {
+			setWindow('login');
+			setIsOpen(true);
 			return;
 		}
 

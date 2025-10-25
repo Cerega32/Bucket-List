@@ -44,15 +44,11 @@ $main-categories: (
 	color: var(--color-white);
 }
 
-// Миксин для градиентов категорий
-@mixin category-gradient($category, $opacity-start: 0%, $opacity-step1: 10%, $opacity-step2: 20%, $opacity-step3: 30%) {
+@mixin category-gradient($category, $opacity-start: 16%, $opacity-step1: 90%) {
 	background: linear-gradient(
 		180deg,
-		rgb(var(--color-#{$category}-rgb) / #{$opacity-start}) 0%,
-		rgb(var(--color-#{$category}-rgb) / #{$opacity-step1}) 10%,
-		rgb(var(--color-#{$category}-rgb) / #{$opacity-step2}) 20%,
-		rgb(var(--color-#{$category}-rgb) / #{$opacity-step3}) 30%,
-		var(--color-black) 100%
+		rgba(var(--color-#{$category}-rgb) / #{$opacity-start}) 0%,
+		rgba(var(--color-#{$category}-rgb) / #{$opacity-step1}) 100%
 	);
 }
 
@@ -60,16 +56,12 @@ $main-categories: (
 	background: linear-gradient(180deg, rgb(var(--color-#{$category}-rgb) / 50%) 0%, rgb(var(--color-#{$category}-rgb) / 100%) 100%);
 }
 
+@mixin category-gradient-with-black($category) {
+	background: linear-gradient(180deg, rgba(var(--color-#{$category}-rgb) / 90%) 0%, rgb(var(--color-black-rgb) / 80%) 100%);
+}
+
 // Миксин для градиентов заголовков категорий
 @mixin category-header-gradient($category, $opacity-start: 50%, $opacity-step1: 55%, $opacity-step2: 60%, $opacity-step3: 65%) {
-	// background: linear-gradient(
-	// 	180deg,
-	// 	rgb(var(--color-#{$category}-rgb) / #{$opacity-start}) 0%,
-	// 	rgb(var(--color-#{$category}-rgb) / #{$opacity-step1}) 10%,
-	// 	rgb(var(--color-#{$category}-rgb) / #{$opacity-step2}) 20%,
-	// 	rgb(var(--color-#{$category}-rgb) / #{$opacity-step3}) 30%,
-	// 	var(--color-black) 100%
-	// );
 	background: linear-gradient(180deg, rgba(var(--color-#{$category}-rgb) / 90%) 0%, rgb(var(--color-black-rgb) / 80%) 100%);
 }
 

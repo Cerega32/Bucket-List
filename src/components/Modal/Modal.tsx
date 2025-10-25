@@ -122,13 +122,13 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			}, 50);
 
 			// Отключаем прокрутку body при открытии модального окна
-			document.body.style.overflow = 'hidden';
+			// document.body.style.overflow = 'hidden';
 		} else {
 			document.removeEventListener('keyup', handleKeyUp);
 			document.removeEventListener('keydown', handleTabKey);
 
 			// Включаем прокрутку body при закрытии модального окна
-			document.body.style.overflow = '';
+			// document.body.style.overflow = '';
 		}
 
 		// Cleanup при размонтировании компонента
