@@ -46,6 +46,12 @@
 			flex-direction: column;
 			gap: 16px;
 		}
+
+		&--wrap-on-lg {
+			@include lg {
+				flex-wrap: wrap;
+			}
+		}
 	}
 
 	&__search {
@@ -72,10 +78,22 @@
 		gap: 24px;
 		margin-bottom: 24px;
 
+		@include lg {
+			gap: 16px;
+		}
+
 		&--columns-3 {
 			#{$block} {
 				&__goal {
 					width: calc(100% / 3 - (24px * 2 / 3));
+
+					@include lg {
+						width: calc(100% / 2 - (24px * 1 / 2));
+					}
+
+					@include sm {
+						width: 100%;
+					}
 				}
 			}
 		}

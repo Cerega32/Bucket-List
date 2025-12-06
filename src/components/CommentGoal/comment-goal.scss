@@ -125,7 +125,7 @@
 		background: rgb(var(--color-white-rgb) / 40%);
 		border-radius: 8px;
 		backdrop-filter: blur(4px);
-		transition: opacity 0.3s ease, background 0.2s ease;
+		transition: opacity 0.3s ease 0.5s, background 0.2s ease;
 		transform: translateY(-50%);
 	}
 
@@ -140,11 +140,16 @@
 	&__prev:hover,
 	&__next:hover {
 		background: rgb(var(--color-white-rgb) / 70%);
+	}
 
-		&--hidden {
-			pointer-events: none;
-			opacity: 0;
-		}
+	&__prev--disabled,
+	&__next--disabled {
+		opacity: 0;
+	}
+
+	&__prev--hard-disabled,
+	&__next--hard-disabled {
+		pointer-events: none;
 	}
 
 	&__score {

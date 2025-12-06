@@ -34,6 +34,7 @@ interface CatalogItemsProps {
 	beginUrl: string;
 	columns?: string;
 	initialSearch?: string;
+	searchWrapperWrap?: boolean;
 }
 
 interface CatalogItemsCategoriesProps extends CatalogItemsProps {
@@ -72,7 +73,19 @@ const sortBy: Array<OptionSelect> = [
 ];
 
 export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersProps> = (props) => {
-	const {className, code = 'all', subPage, category, userId, completed, beginUrl, columns, categories, initialSearch = ''} = props;
+	const {
+		className,
+		code = 'all',
+		subPage,
+		category,
+		userId,
+		completed,
+		beginUrl,
+		columns,
+		categories,
+		initialSearch = '',
+		searchWrapperWrap = false,
+	} = props;
 
 	const [block, element] = useBem('catalog-items', className);
 
@@ -390,7 +403,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			<div className={element('filters')}>
 				<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage || ''} />
 				<Line className={element('line')} />
-				<div className={element('search-wrapper')}>
+				<div className={element('search-wrapper', {'wrap-on-lg': searchWrapperWrap})}>
 					<FieldInput
 						className={element('search')}
 						placeholder="Поисковой запрос"

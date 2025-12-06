@@ -309,20 +309,7 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 	);
 
 	// Ширина недели в пикселях (соответствует CSS)
-	const [weekWidth, setWeekWidth] = useState(window.innerWidth <= 768 ? 10 : 19);
-
-	// Обновляем ширину недели при изменении размера окна
-	useEffect(() => {
-		const handleResize = () => {
-			setWeekWidth(window.innerWidth <= 768 ? 10 : 19);
-		};
-
-		window.addEventListener('resize', handleResize);
-
-		return () => {
-			window.removeEventListener('resize', handleResize);
-		};
-	}, []);
+	const weekWidth = 19;
 
 	// Функция рендеринга ячейки для дня
 	const renderDayCell = (day: IActivityDay | null, dayIndex: number, weekId: string) => {
@@ -591,41 +578,43 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 						</div>
 
 						<div className={element('container')}>
-							<div className={element('months')}>
-								{monthPositions.map(
-									(mp) =>
-										mp.month && (
-											<div
-												key={`month-${mp.month.year}-${mp.month.month}`}
-												className={element('month-label')}
-												style={{
-													left: `${mp.startWeek * weekWidth}px`,
-													width: `${mp.weekSpan * weekWidth}px`,
-												}}
-											>
-												{mp.month.name}
-											</div>
-										)
-								)}
-							</div>
-
-							<div className={element('grid')}>
-								{/* Метки дней недели */}
-								<div className={element('weekdays')}>
-									{weekdayLabels.map((day) => (
-										<div key={`weekday-${day}`} className={element('weekday-label')}>
-											{day}
-										</div>
-									))}
+							<div className={element('scrollable-wrapper')}>
+								<div className={element('months')}>
+									{monthPositions.map(
+										(mp) =>
+											mp.month && (
+												<div
+													key={`month-${mp.month.year}-${mp.month.month}`}
+													className={element('month-label')}
+													style={{
+														left: `${mp.startWeek * weekWidth}px`,
+														width: `${mp.weekSpan * weekWidth}px`,
+													}}
+												>
+													{mp.month.name}
+												</div>
+											)
+									)}
 								</div>
 
-								{/* Сетка активности */}
-								<div className={element('cells')}>
-									{gridData.map((weekData) => (
-										<div key={weekData.id} className={element('week')} data-testid={`week-${weekData.id}`}>
-											{weekData.days.map((day, dayIndex) => renderDayCell(day, dayIndex, weekData.id))}
-										</div>
-									))}
+								<div className={element('grid')}>
+									{/* Метки дней недели */}
+									<div className={element('weekdays')}>
+										{weekdayLabels.map((day) => (
+											<div key={`weekday-${day}`} className={element('weekday-label')}>
+												{day}
+											</div>
+										))}
+									</div>
+
+									{/* Сетка активности */}
+									<div className={element('cells')}>
+										{gridData.map((weekData) => (
+											<div key={weekData.id} className={element('week')} data-testid={`week-${weekData.id}`}>
+												{weekData.days.map((day, dayIndex) => renderDayCell(day, dayIndex, weekData.id))}
+											</div>
+										))}
+									</div>
 								</div>
 							</div>
 

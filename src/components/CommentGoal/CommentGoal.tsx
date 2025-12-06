@@ -1,4 +1,4 @@
-import {FC, useState} from 'react';
+import {FC, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -35,12 +35,49 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [photoIndex, setPhotoIndex] = useState(0);
 
-	// Состояния для управления видимостью стрелок
-	const [isBeginning, setIsBeginning] = useState(true);
-	const [isEnd, setIsEnd] = useState(false);
+	// Состояния для управления доступностью стрелок
+	const [canScroll, setCanScroll] = useState(false);
+	const [isAtStart, setIsAtStart] = useState(true);
+	const [isAtEnd, setIsAtEnd] = useState(false);
+
+	// блокировка клика с задержкой
+	const [isPrevHardDisabled, setIsPrevHardDisabled] = useState(false);
+	const [isNextHardDisabled, setIsNextHardDisabled] = useState(false);
 
 	// Получаем массив URL изображений в формате, необходимом для библиотеки
 	const slides = comment.photos ? comment.photos.map((photo) => ({src: photo.image})) : [];
+
+	const updateSwiperState = (swiper: any) => {
+		const scrollable = !swiper.isLocked && swiper.slides.length > 1;
+
+		setCanScroll(scrollable);
+		setIsAtStart(swiper.isBeginning);
+		setIsAtEnd(swiper.isEnd);
+	};
+
+	const isPrevDisabled = !canScroll || isAtStart;
+	const isNextDisabled = !canScroll || isAtEnd;
+
+	// Через 0.5 c после логического disabled блокируем клики
+	useEffect(() => {
+		if (!isPrevDisabled) {
+			setIsPrevHardDisabled(false);
+			return;
+		}
+
+		const timer = setTimeout(() => setIsPrevHardDisabled(true), 500);
+		return () => clearTimeout(timer);
+	}, [isPrevDisabled]);
+
+	useEffect(() => {
+		if (!isNextDisabled) {
+			setIsNextHardDisabled(false);
+			return;
+		}
+
+		const timer = setTimeout(() => setIsNextHardDisabled(true), 500);
+		return () => clearTimeout(timer);
+	}, [isNextDisabled]);
 
 	return (
 		<article className={block()}>
@@ -93,12 +130,18 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 							<Button
 								theme="blue-light"
 								icon="arrow--bottom"
-								className={`${element('prev', {hidden: isBeginning})} comment-goal__prev-${comment.id}`}
+								className={`${element('prev', {
+									disabled: isPrevDisabled,
+									'hard-disabled': isPrevHardDisabled,
+								})} comment-goal__prev-${comment.id}`}
 							/>
 							<Button
 								theme="blue-light"
 								icon="arrow"
-								className={`${element('next', {hidden: isEnd})} comment-goal__next-${comment.id}`}
+								className={`${element('next', {
+									disabled: isNextDisabled,
+									'hard-disabled': isNextHardDisabled,
+								})} comment-goal__next-${comment.id}`}
 							/>
 						</>
 					)}
@@ -111,20 +154,12 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 							nextEl: `.comment-goal__next-${comment.id}`,
 							prevEl: `.comment-goal__prev-${comment.id}`,
 						}}
-						onSwiper={(swiper) => {
-							setIsBeginning(swiper.isBeginning);
-							setIsEnd(swiper.isEnd);
-						}}
-						onSlideChange={(swiper) => {
-							setIsBeginning(swiper.isBeginning);
-							setIsEnd(swiper.isEnd);
-						}}
-						onReachEnd={() => setIsEnd(true)}
-						onReachBeginning={() => setIsBeginning(true)}
-						onFromEdge={() => {
-							setIsBeginning(false);
-							setIsEnd(false);
-						}}
+						onSwiper={updateSwiperState}
+						onSlideChange={updateSwiperState}
+						onResize={updateSwiperState}
+						onReachEnd={updateSwiperState}
+						onReachBeginning={updateSwiperState}
+						onFromEdge={updateSwiperState}
 						className={element('comment-images')}
 					>
 						{comment.photos.map((el, index) => (
