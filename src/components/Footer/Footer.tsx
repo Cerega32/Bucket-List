@@ -6,6 +6,7 @@ import {Link} from 'react-router-dom';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {ThemeStore} from '@/store/ThemeStore';
+import {UserStore} from '@/store/UserStore';
 
 import {Svg} from '../Svg/Svg';
 
@@ -19,18 +20,12 @@ export const Footer: FC<FooterProps> = observer((props) => {
 	const {className} = props;
 
 	const {footer} = ThemeStore;
+	const {isAuth} = UserStore;
 	const {isScreenMobile, isScreenTablet} = useScreenSize();
 
 	const [block, element] = useBem('footer', className);
 
 	const currentYear = new Date().getFullYear();
-
-	const socialLinks = [
-		{icon: 'telegram', href: 'https://t.me/delting', label: 'Telegram'},
-		{icon: 'vk', href: 'https://vk.com/delting', label: 'VKontakte'},
-		{icon: 'youtube', href: 'https://youtube.com/delting', label: 'YouTube'},
-		{icon: 'dzen', href: 'https://dzen.ru/delting', label: 'Дзен'},
-	];
 
 	const navigationSections = [
 		{
@@ -42,25 +37,42 @@ export const Footer: FC<FooterProps> = observer((props) => {
 				{to: '/news', label: 'Новости'},
 			],
 		},
-		// TODO: заполнить ссылки на ресурсы и правовую информацию
-		// {
-		// 	title: 'Ресурсы',
-		// 	links: [
-		// 		{to: '/about', label: 'О проекте'},
-		// 		{to: '/help', label: 'Помощь'},
-		// 		{to: '/blog', label: 'Блог'},
-		// 		{to: '/contacts', label: 'Контакты'},
-		// 	],
-		// },
-		// {
-		// 	title: 'Правовая информация',
-		// 	links: [
-		// 		{to: '/privacy', label: 'Политика конфиденциальности'},
-		// 		{to: '/terms', label: 'Условия использования'},
-		// 		{to: '/cookies', label: 'Cookie'},
-		// 		{to: '/agreement', label: 'Пользовательское соглашение'},
-		// 	],
-		// },
+		...(isAuth
+			? [
+					{
+						title: 'Мой профиль',
+						links: [
+							{to: '/user/self', label: 'Дашборд'},
+							{to: '/user/self/active-goals', label: 'Активные цели и списки'},
+							{to: '/user/self/done-goals', label: 'Выполненные'},
+							{to: '/user/self/achievements', label: 'Достижения'},
+							{to: '/user/self/friends', label: 'Друзья'},
+							{to: '/user/self/maps', label: 'Мои карты'},
+							{to: '/user/self/folders', label: 'Папки целей'},
+							{to: '/user/self/progress', label: 'Прогресс целей'},
+							{to: '/user/self/regular', label: 'Регулярные цели'},
+							{to: '/user/self/settings', label: 'Настройки'},
+						],
+					},
+			  ]
+			: []),
+		{
+			title: 'Ресурсы',
+			links: [
+				{to: '/about', label: 'О проекте'},
+				{to: '/help', label: 'Помощь'},
+				{to: '/contacts', label: 'Контакты'},
+			],
+		},
+		{
+			title: 'Правовая информация',
+			links: [
+				{to: '/privacy', label: 'Политика конфиденциальности'},
+				{to: '/agreement', label: 'Пользовательское соглашение'},
+				{to: '/terms', label: 'Условия использования'},
+				{to: '/cookies', label: 'Cookie'},
+			],
+		},
 	];
 
 	return (
@@ -81,21 +93,6 @@ export const Footer: FC<FooterProps> = observer((props) => {
 							Платформа для достижения целей и саморазвития. Ставьте цели, отслеживайте прогресс и вдохновляйтесь успехами
 							других пользователей.
 						</p>
-						{/* TODO: Add ссылки на социальные сети */}
-						{/* <div className={element('social')}>
-							{socialLinks.map((social) => (
-								<a
-									key={social.icon}
-									href={social.href}
-									target="_blank"
-									rel="noopener noreferrer"
-									className={element('social-link')}
-									aria-label={social.label}
-								>
-									<Svg icon={social.icon} className={element('social-icon')} />
-								</a>
-							))}
-						</div> */}
 					</div>
 
 					<nav className={element('navigation')}>

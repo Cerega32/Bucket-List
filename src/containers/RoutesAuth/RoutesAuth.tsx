@@ -4,19 +4,26 @@ import {Navigate, Route, Routes} from 'react-router-dom';
 
 import {NewsDetailPage} from '@/pages/NewsDetailPage/NewsDetailPage';
 import {NewsPage} from '@/pages/NewsPage/NewsPage';
+import {PageAbout} from '@/pages/PageAbout/PageAbout';
+import {PageAgreement} from '@/pages/PageAgreement/PageAgreement';
 import {PageCategories} from '@/pages/PageCategories/PageCategories';
 import {PageCategory} from '@/pages/PageCategory/PageCategory';
+import {PageContacts} from '@/pages/PageContacts/PageContacts';
+import {PageCookies} from '@/pages/PageCookies/PageCookies';
 import {PageCreateGoal} from '@/pages/PageCreateGoal/PageCreateGoal';
 import {PageCreateGoalList} from '@/pages/PageCreateGoalList/PageCreateGoalList';
 import {PageDetailGoal} from '@/pages/PageDetailGoal/PageDetailGoal';
 import {PageDetailList} from '@/pages/PageDetailList/PageDetailList';
 import {PageEditGoalList} from '@/pages/PageEditGoalList/PageEditGoalList';
+import {PageHelp} from '@/pages/PageHelp/PageHelp';
 import {PageLeaders} from '@/pages/PageLeaders/PageLeaders';
 import {PageLogin} from '@/pages/PageLogin/PageLogin';
 import {PageMain} from '@/pages/PageMain/PageMain';
 import {PageMainGoals} from '@/pages/PageMainGoals/PageMainGoals';
 import {PageNotFound} from '@/pages/PageNotFound/PageNotFound';
+import {PagePrivacy} from '@/pages/PagePrivacy/PagePrivacy';
 import {PageRegistration} from '@/pages/PageRegistration/PageRegistration';
+import {PageTerms} from '@/pages/PageTerms/PageTerms';
 import {PageUser} from '@/pages/PageUser/PageUser';
 import {PageUserSelf} from '@/pages/PageUserSelf/PageUserSelf';
 import UserMapPage from '@/pages/UserMapPage/UserMapPage';
@@ -53,6 +60,17 @@ export const RoutesAuth: FC = observer(() => {
 				{/* Маршруты для новостей */}
 				<Route path="/news" element={<NewsPage />} />
 				<Route path="/news/:id" element={<NewsDetailPage />} />
+
+				{/* Информационные страницы */}
+				<Route path="/about" element={<PageAbout page="isAbout" />} />
+				<Route path="/help" element={<PageHelp page="isHelp" />} />
+				<Route path="/contacts" element={<PageContacts page="isContacts" />} />
+
+				{/* Правовые документы */}
+				<Route path="/privacy" element={<PagePrivacy page="isPrivacy" />} />
+				<Route path="/terms" element={<PageTerms page="isTerms" />} />
+				<Route path="/agreement" element={<PageAgreement page="isAgreement" />} />
+				<Route path="/cookies" element={<PageCookies page="isCookies" />} />
 
 				{/* Остальные маршруты остаются без изменений */}
 				<Route path="/list/:id" element={<PageDetailList page="isList" />} />
