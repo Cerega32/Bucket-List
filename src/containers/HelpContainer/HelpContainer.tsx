@@ -1,5 +1,6 @@
 import {motion} from 'framer-motion';
 import {FC, useState} from 'react';
+import {Link} from 'react-router-dom';
 
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
@@ -127,21 +128,22 @@ export const HelpContainer: FC = () => {
 					</Title>
 					<div className={element('quick-links')}>
 						{quickLinks.map((link, index) => (
-							<motion.a
+							<motion.div
 								key={link.title}
-								href={link.href}
 								className={element('quick-link-card')}
 								initial={{opacity: 0, y: 20}}
 								whileInView={{opacity: 1, y: 0}}
 								transition={{duration: 0.5, delay: index * 0.1}}
 								viewport={{once: true}}
 							>
-								<div className={element('quick-link-icon')}>
-									<Svg icon={link.icon} width="24px" height="24px" />
-								</div>
-								<h3 className={element('quick-link-title')}>{link.title}</h3>
-								<p className={element('quick-link-description')}>{link.description}</p>
-							</motion.a>
+								<Link to={link.href} className={element('quick-link-link')}>
+									<div className={element('quick-link-icon')}>
+										<Svg icon={link.icon} width="24px" height="24px" />
+									</div>
+									<h3 className={element('quick-link-title')}>{link.title}</h3>
+									<p className={element('quick-link-description')}>{link.description}</p>
+								</Link>
+							</motion.div>
 						))}
 					</div>
 				</section>
@@ -191,9 +193,9 @@ export const HelpContainer: FC = () => {
 					<h2 className={element('cta-title')}>Не нашли ответ?</h2>
 					<p className={element('cta-description')}>
 						Если у вас остались вопросы, свяжитесь с нами через раздел{' '}
-						<a href="/contacts" className={element('link')}>
+						<Link to="/contacts" className={element('link')}>
 							Контакты
-						</a>
+						</Link>
 						. Мы всегда рады помочь!
 					</p>
 				</motion.section>

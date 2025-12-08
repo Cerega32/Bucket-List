@@ -11,6 +11,7 @@ import {getTotalCompleted} from '@/utils/api/get/getTotalCompleted';
 import {pluralize} from '@/utils/text/pluralize';
 
 import './about-container.scss';
+import { Link } from 'react-router-dom';
 
 export const AboutContainer: FC = () => {
 	const [block, element] = useBem('about-container');
@@ -167,9 +168,9 @@ export const AboutContainer: FC = () => {
 						</p>
 						<p>
 							Если у вас есть идеи или предложения, мы всегда рады их услышать! Свяжитесь с нами через раздел{' '}
-							<a href="/contacts" className={element('link')}>
+							<Link to="/contacts" className={element('link')}>
 								Контакты
-							</a>
+							</Link>
 							.
 						</p>
 					</div>

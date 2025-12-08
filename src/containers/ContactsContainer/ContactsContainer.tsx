@@ -10,20 +10,30 @@ import './contacts-container.scss';
 export const ContactsContainer: FC = () => {
 	const [block, element] = useBem('contacts-container');
 
-	const contactMethods = [
+	const supportMethods = [
 		{
 			icon: 'telegram',
-			title: 'Telegram',
-			description: 'Напишите нам в Telegram',
-			href: 'https://t.me/delting',
-			label: '@delting',
+			title: 'Telegram поддержка',
+			description: 'Напишите нам для получения помощи',
+			href: 'https://t.me/delting_help_bot',
+			label: '@delting_help_bot',
 		},
 		{
 			icon: 'email',
 			title: 'Email',
 			description: 'Напишите нам на почту',
-			href: 'mailto:delting_help@gmail.com',
-			label: 'delting_help@gmail.com',
+			href: 'mailto:delting-help@yandex.com',
+			label: 'delting-help@yandex.com',
+		},
+	];
+
+	const socialLinks = [
+		{
+			icon: 'telegram',
+			title: 'Telegram канал',
+			description: 'Новости, советы и истории пользователей',
+			href: 'https://t.me/delting_go',
+			label: '@delting_go',
 		},
 	];
 
@@ -50,8 +60,11 @@ export const ContactsContainer: FC = () => {
 					<Title tag="h2" className={element('section-title')}>
 						Свяжитесь с нами
 					</Title>
+					<p className={element('section-description')}>
+						Нужна помощь или есть вопросы? Выберите удобный способ связи, и мы обязательно ответим.
+					</p>
 					<div className={element('contacts')}>
-						{contactMethods.map((contact, index) => (
+						{supportMethods.map((contact, index) => (
 							<motion.a
 								key={contact.title}
 								href={contact.href}
@@ -78,12 +91,31 @@ export const ContactsContainer: FC = () => {
 					<Title tag="h2" className={element('section-title')}>
 						Мы в социальных сетях
 					</Title>
-					<div className={element('social-content')}>
-						<p>
-							Присоединяйтесь к нашему сообществу в социальных сетях! Там мы публикуем новости, полезные советы, истории
-							пользователей и многое другое.
-						</p>
-						<p>Подписывайтесь, чтобы быть в курсе всех обновлений платформы и не пропустить интересные события!</p>
+					<p className={element('section-description')}>
+						Присоединяйтесь к нашему сообществу! В канале мы публикуем новости, полезные советы, истории пользователей и многое
+						другое.
+					</p>
+					<div className={element('contacts')}>
+						{socialLinks.map((contact, index) => (
+							<motion.a
+								key={contact.title}
+								href={contact.href}
+								target={contact.href.startsWith('http') ? '_blank' : undefined}
+								rel={contact.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+								className={element('contact-card')}
+								initial={{opacity: 0, y: 20}}
+								whileInView={{opacity: 1, y: 0}}
+								transition={{duration: 0.5, delay: index * 0.1}}
+								viewport={{once: true}}
+							>
+								<div className={element('contact-icon')}>
+									<Svg icon={contact.icon} />
+								</div>
+								<h3 className={element('contact-title')}>{contact.title}</h3>
+								<p className={element('contact-label')}>{contact.label}</p>
+								<p className={element('contact-description')}>{contact.description}</p>
+							</motion.a>
+						))}
 					</div>
 				</section>
 

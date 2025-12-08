@@ -46,6 +46,7 @@
 	&__logo {
 		display: inline-block;
 		height: 32px;
+		transform-origin: left center;
 		transition: transform 0.2s ease;
 
 		&:hover {

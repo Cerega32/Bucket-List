@@ -68,6 +68,10 @@
 
 		background: var(--color-white);
 
+		@include xs {
+			padding: 20px;
+		}
+
 		&--cta {
 			background: linear-gradient(135deg, rgb(var(--color-primary-rgb) / 10%) 0%, rgb(var(--color-primary-rgb) / 5%) 100%);
 			border-color: var(--color-primary);
@@ -106,7 +110,6 @@
 		background: var(--color-gray-11);
 		border: 1px solid var(--color-border);
 		border-radius: 16px;
-		text-decoration: none;
 		transition: all 0.3s ease;
 
 		&:hover {
@@ -114,6 +117,14 @@
 			transform: translateY(-4px);
 			box-shadow: 0 8px 24px rgb(var(--color-primary-rgb) / 15%);
 		}
+	}
+
+	&__quick-link-link {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		color: inherit;
+		text-decoration: none;
 	}
 
 	&__quick-link-icon {
