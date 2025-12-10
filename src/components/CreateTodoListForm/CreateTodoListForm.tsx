@@ -175,7 +175,7 @@ export const CreateTodoListForm: FC<CreateTodoListFormProps> = ({className, onSu
 					onClick={onCancel}
 					theme="blue-light"
 					size={isScreenMobile ? 'medium' : undefined}
-					active={isSubmitting}
+					disabled={isSubmitting}
 				>
 					Отмена
 				</Button>
@@ -183,7 +183,7 @@ export const CreateTodoListForm: FC<CreateTodoListFormProps> = ({className, onSu
 					typeBtn="submit"
 					theme="blue"
 					size={isScreenMobile ? 'medium' : undefined}
-					active={isSubmitting || !formData.title.trim()}
+					disabled={isSubmitting || !formData.title.trim()}
 				>
 					{isSubmitting ? 'Создание...' : 'Создать список'}
 				</Button>

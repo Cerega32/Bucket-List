@@ -92,16 +92,16 @@ export const FriendRequestCard: React.FC<FriendRequestCardProps> = observer(({re
 
 				{isIncoming ? (
 					<>
-						<Button theme="green" size="small" onClick={handleAccept} active={isProcessing}>
+						<Button theme="green" size="small" onClick={handleAccept} disabled={isProcessing}>
 							Принять
 						</Button>
 
-						<Button theme="red" size="small" onClick={handleReject} active={isProcessing}>
+						<Button theme="red" size="small" onClick={handleReject} disabled={isProcessing}>
 							Отклонить
 						</Button>
 					</>
 				) : (
-					<Button theme="blue-light" size="small" active>
+					<Button theme="blue-light" size="small" disabled>
 						Ожидает ответа
 					</Button>
 				)}

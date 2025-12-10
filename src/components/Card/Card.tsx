@@ -2,6 +2,8 @@ import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
+import {ModalStore} from '@/store/ModalStore';
+import {UserStore} from '@/store/UserStore';
 import {IShortGoal, IShortList} from '@/typings/goal';
 
 import {Button} from '../Button/Button';
@@ -39,6 +41,18 @@ export const Card: FC<CardListProps | CardGoalProps> = (props) => {
 
 	const [block, element] = useBem('card', className);
 
+	const {isAuth} = UserStore;
+	const {setIsOpen, setWindow} = ModalStore;
+
+	const onClickAddHandler = () => {
+		if (!isAuth) {
+			setIsOpen(true);
+			setWindow('login');
+			return;
+		}
+		onClickAdd();
+	};
+
 	return (
 		<section className={block({horizontal})}>
 			<Link to={`/${isList ? 'list' : 'goals'}/${goal.code}`} className={element('gradient')}>
@@ -72,7 +86,7 @@ export const Card: FC<CardListProps | CardGoalProps> = (props) => {
 					<div className={element('buttons-wrapper')}>
 						{isList && <Progress done={goal.userCompletedGoals} all={goal.goalsCount} />}
 						<div className={element('buttons')}>
-							{!goal.addedByUser && <Button theme="blue" icon="plus" size="small" onClick={onClickAdd} />}
+							{!goal.addedByUser && <Button theme="blue" icon="plus" size="small" onClick={onClickAddHandler} />}
 							{goal.addedByUser && <Button theme="blue-light" icon="trash" size="small" onClick={onClickDelete} />}
 							{(goal.addedByUser || goal.completedByUser) && !isList && (
 								<Button theme={goal.completedByUser ? 'green' : 'blue-light'} size="small" onClick={onClickMark}>

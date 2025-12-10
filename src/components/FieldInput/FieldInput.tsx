@@ -24,6 +24,7 @@ interface FieldInputProps {
 	onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 	iconEnd?: string;
 	theme?: 'transparent';
+	focusBorder?: 'white';
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -45,6 +46,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		onBlur,
 		onKeyDown,
 		theme,
+		focusBorder,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -77,7 +79,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 				{iconBegin && <Svg icon={iconBegin} className={element('icon-begin')} />}
 				{typeState === 'textarea' ? (
 					<textarea
-						className={element('input', {iconBegin: !!iconBegin, textarea: true})}
+						className={element('input', {iconBegin: !!iconBegin, textarea: true, iconEnd: !!iconEnd})}
 						id={id}
 						placeholder={placeholder}
 						value={value}
@@ -88,7 +90,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 					/>
 				) : (
 					<input
-						className={element('input', {iconBegin: !!iconBegin})}
+						className={element('input', {iconBegin: !!iconBegin, focusBorder, iconEnd: !!iconEnd || type === 'password'})}
 						id={id}
 						type={typeState}
 						placeholder={placeholder}

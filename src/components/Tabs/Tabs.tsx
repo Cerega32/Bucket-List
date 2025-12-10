@@ -35,9 +35,9 @@ export const Tabs: FC<TabsProps> = (props) => {
 		if (!scrollContainerRef.current || vertical) return;
 
 		const container = scrollContainerRef.current;
-		const scrollLeft = container.scrollLeft;
-		const scrollWidth = container.scrollWidth;
-		const clientWidth = container.clientWidth;
+		const {scrollLeft} = container;
+		const {scrollWidth} = container;
+		const {clientWidth} = container;
 
 		// Если контент не требует прокрутки, скрываем оба градиента
 		if (scrollWidth <= clientWidth) {

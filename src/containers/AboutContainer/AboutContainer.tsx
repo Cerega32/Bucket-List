@@ -1,5 +1,6 @@
 import {motion} from 'framer-motion';
 import {FC, useEffect, useState} from 'react';
+import {Link} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
 import {Svg} from '@/components/Svg/Svg';
@@ -11,7 +12,6 @@ import {getTotalCompleted} from '@/utils/api/get/getTotalCompleted';
 import {pluralize} from '@/utils/text/pluralize';
 
 import './about-container.scss';
-import { Link } from 'react-router-dom';
 
 export const AboutContainer: FC = () => {
 	const [block, element] = useBem('about-container');

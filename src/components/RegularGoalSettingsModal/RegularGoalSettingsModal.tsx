@@ -314,7 +314,7 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 				<Button theme="blue-light" className={element('btn')} onClick={onClose} type="button">
 					Отмена
 				</Button>
-				<Button theme="blue" className={element('btn')} onClick={handleSave} type="button" active={isLoading}>
+				<Button theme="blue" className={element('btn')} onClick={handleSave} type="button" disabled={isLoading}>
 					{isLoading ? 'Сохранение...' : 'Добавить цель'}
 				</Button>
 			</div>

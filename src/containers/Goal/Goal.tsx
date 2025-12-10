@@ -8,11 +8,14 @@ import {EditGoal} from '@/components/EditGoal/EditGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
 import {Loader} from '@/components/Loader/Loader';
 import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
+import {SEO} from '@/components/SEO/SEO';
 import {useBem} from '@/hooks/useBem';
+import {useOGImage} from '@/hooks/useOGImage';
 import useScreenSize from '@/hooks/useScreenSize';
 import {GoalStore} from '@/store/GoalStore';
 import {ModalStore} from '@/store/ModalStore';
 import {ThemeStore} from '@/store/ThemeStore';
+import {UserStore} from '@/store/UserStore';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
 import {canEditGoal} from '@/utils/api/get/canEditGoal';
@@ -27,6 +30,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const [block, element] = useBem('goal');
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 	const headerRef = useRef<HTMLElement | null>(null);
+	const {isAuth} = UserStore;
 
 	const {setId} = GoalStore;
 	const params = useParams();
@@ -100,6 +104,12 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			return;
 		}
 
+		if (!isAuth) {
+			setWindow('login');
+			setIsOpen(true);
+			return;
+		}
+
 		const res = await (operation === 'add'
 			? addGoal(code)
 			: operation === 'delete'
@@ -157,6 +167,13 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const [shrink, setShrink] = useState(false);
 	const [headerHeight, setHeaderHeight] = useState<number>(340);
 
+	// Генерируем динамическое OG изображение
+	const {imageUrl: ogImageUrl} = useOGImage({
+		goal,
+		width: 1200,
+		height: 630,
+	});
+
 	const updateHeaderHeight = () => {
 		if (headerRef.current) {
 			setHeaderHeight(headerRef.current.offsetHeight);
@@ -209,49 +226,57 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	}
 
 	if (!goal) {
-		return <Loader isLoading={isLoading} />;
+		return <Loader isLoading={isLoading} isPageLoader />;
 	}
 
 	return (
-		<main className={block()}>
-			<HeaderGoal
-				ref={headerRef}
+		<>
+			<SEO
 				title={goal.title}
-				category={goal.category}
-				image={goal.image}
-				background={goal.image}
-				goal={goal}
-				shrink={shrink}
-				onImageLoad={updateHeaderHeight}
+				description={goal.description || `Достигните цель "${goal.title}" на платформе Delting`}
+				dynamicImage={ogImageUrl}
+				type="article"
 			/>
-			<section
-				className={element('wrapper')}
-				style={{
-					paddingTop: isScreenMobile ? headerHeight : 0,
-				}}
-			>
-				<AsideGoal
-					className={element('aside', {shrink})}
+			<main className={block()}>
+				<HeaderGoal
+					ref={headerRef}
 					title={goal.title}
-					image={goal.image || ''}
-					added={goal.addedByUser}
-					updateGoal={updateGoal}
-					code={goal.code}
-					goalId={goal.id}
-					done={goal.completedByUser}
-					openAddReview={openAddReview}
-					editGoal={goal.createdByUser && goal.isCanEdit ? () => setIsEditing(true) : undefined}
-					canEdit={goal?.isCanEdit}
-					location={goal?.location}
-					onGoalCompleted={handleGoalCompleted}
-					userFolders={goal.userFolders}
-					regularConfig={goal.regularConfig}
+					category={goal.category}
+					image={goal.image}
+					background={goal.image}
+					goal={goal}
+					shrink={shrink}
+					onImageLoad={updateHeaderHeight}
 				/>
-				<div className={element('content-wrapper')}>
-					<ContentGoal page={page} goal={goal} className={element('content')} />
-				</div>
-			</section>
-			<ScrollToTop />
-		</main>
+				<section
+					className={element('wrapper')}
+					style={{
+						paddingTop: isScreenMobile ? headerHeight : 0,
+					}}
+				>
+					<AsideGoal
+						className={element('aside', {shrink})}
+						title={goal.title}
+						image={goal.image || ''}
+						added={goal.addedByUser}
+						updateGoal={updateGoal}
+						code={goal.code}
+						goalId={goal.id}
+						done={goal.completedByUser}
+						openAddReview={openAddReview}
+						editGoal={goal.createdByUser && goal.isCanEdit ? () => setIsEditing(true) : undefined}
+						canEdit={goal?.isCanEdit}
+						location={goal?.location}
+						onGoalCompleted={handleGoalCompleted}
+						userFolders={goal.userFolders}
+						regularConfig={goal.regularConfig}
+					/>
+					<div className={element('content-wrapper')}>
+						<ContentGoal page={page} goal={goal} className={element('content')} />
+					</div>
+				</section>
+				<ScrollToTop />
+			</main>
+		</>
 	);
 });

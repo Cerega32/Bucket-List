@@ -18,7 +18,7 @@ export const CardShort: FC<CardShortProps> = (props) => {
 	const {className, goal} = props;
 
 	const [block, element] = useBem('card-short', className);
-	console.log(goal);
+
 	return (
 		<section className={block()}>
 			<Link to={`/goals/${goal.code}`} className={element('link')}>

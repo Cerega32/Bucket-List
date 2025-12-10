@@ -27,7 +27,8 @@ export const CookieBanner: FC = () => {
 				setIsVisible(true);
 			}, 500);
 			return () => clearTimeout(timer);
-		} else if (consent === 'accepted') {
+		}
+		if (consent === 'accepted') {
 			// TODO: Инициализировать аналитические сервисы при загрузке страницы, если согласие уже дано
 			// 1. Проверить, не инициализированы ли уже аналитические сервисы
 			// 2. Загрузить скрипты Яндекс.Метрики (если используется)

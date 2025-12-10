@@ -8,7 +8,8 @@ interface IThemeStore {
 
 class Store implements IThemeStore {
 	header: IHeaderTheme = 'transparent';
-	footer: boolean = true;
+
+	footer = true;
 
 	page = 'isMainPage';
 

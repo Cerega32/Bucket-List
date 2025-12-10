@@ -35,7 +35,7 @@
 		width: 100%;
 		min-width: 150px;
 		height: 100%;
-		padding: 10px 50px 10px 16px;
+		padding: 10px 16px;
 		border: 1px solid var(--color-gray-4);
 		border-radius: 8px;
 		transition: outline 0.15s ease-in-out, border 0.15s ease-in-out;
@@ -45,7 +45,8 @@
 			border: 1px solid var(--color-primary-hover);
 		}
 
-		&:focus {
+		&:focus,
+		&:focus-visible {
 			@include focus-outline;
 
 			border: 1px solid var(--color-primary-hover);
@@ -53,6 +54,10 @@
 
 		&--iconBegin {
 			padding-left: 40px;
+		}
+
+		&--iconEnd {
+			padding-right: 50px;
 		}
 	}
 
@@ -85,6 +90,17 @@
 
 			&::placeholder {
 				color: rgba(var(--color-white-rgb) / 78%);
+			}
+
+			&--focusBorder-white {
+				border: 1px solid transparent;
+				outline: none;
+
+				&:focus,
+				&:focus-visible {
+					border: 1px solid rgba(var(--color-white-rgb) / 72%);
+					box-shadow: 0 0 0 2px rgba(var(--color-white-rgb) / 40%);
+				}
 			}
 		}
 

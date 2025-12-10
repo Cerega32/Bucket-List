@@ -20,6 +20,7 @@ import {GoalMap} from '../GoalMap/GoalMap';
 import {GoalMapMulti} from '../GoalMap/GoalMapMulti';
 import LocationPicker from '../LocationPicker/LocationPicker';
 import {ProgressUpdateModal} from '../ProgressUpdateModal/ProgressUpdateModal';
+import {RandomGoalPicker} from '../RandomGoalPicker/RandomGoalPicker';
 import {Svg} from '../Svg/Svg';
 
 import './modal.scss';
@@ -121,13 +122,13 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			}, 50);
 
 			// Отключаем прокрутку body при открытии модального окна
-			document.body.style.overflow = 'hidden';
+			// document.body.style.overflow = 'hidden';
 		} else {
 			document.removeEventListener('keyup', handleKeyUp);
 			document.removeEventListener('keydown', handleTabKey);
 
 			// Включаем прокрутку body при закрытии модального окна
-			document.body.style.overflow = '';
+			// document.body.style.overflow = '';
 		}
 
 		// Cleanup при размонтировании компонента
@@ -191,6 +192,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 					onClose={closeWindow}
 				/>
 			)}
+			{window === 'random-goal-picker' && <RandomGoalPicker goals={modalProps?.goals || []} onClose={closeWindow} />}
 		</>
 	);
 

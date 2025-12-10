@@ -5,13 +5,13 @@ import {Navigation} from 'swiper/modules';
 import {Swiper, SwiperSlide} from 'swiper/react';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {IComment} from '@/typings/comments';
 
 import {Button} from '../Button/Button';
 import {CommentGoal} from '../CommentGoal/CommentGoal';
 import {Title} from '../Title/Title';
 import './main-comments.scss';
-import useScreenSize from '@/hooks/useScreenSize';
 
 interface MainCommentsProps {
 	className?: string;

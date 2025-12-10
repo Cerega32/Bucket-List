@@ -55,9 +55,10 @@
 		margin: 0;
 		background: var(--color-white);
 		border-radius: 8px;
-		overflow-y: scroll;
 		list-style: none;
 		box-shadow: 0 0 20px -2px rgb(var(--color-gray-rgb-8) / 8%);
+
+		@include scrollbar;
 	}
 
 	&__item {

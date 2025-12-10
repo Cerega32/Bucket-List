@@ -114,7 +114,7 @@ export const UserSearch: React.FC<UserSearchProps> = observer(({placeholder = 'Ð
 						theme={buttonTheme as any}
 						size="small"
 						onClick={() => handleSendFriendRequest(user.id)}
-						active={isButtonDisabled}
+						disabled={isButtonDisabled}
 					>
 						{buttonText}
 					</Button>

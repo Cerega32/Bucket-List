@@ -108,7 +108,7 @@ export const Pagination: FC<PaginationProps> = (props) => {
 						onClick={() => onPageClick(page.number)}
 						key={page.number}
 						className={element('page')}
-						active={page.number === current}
+						disabled={page.number === current}
 						loading={loading && current === page.number}
 					>
 						{page.symbol}

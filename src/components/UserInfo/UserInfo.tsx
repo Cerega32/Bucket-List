@@ -119,7 +119,7 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 										theme="blue"
 										icon="plus"
 										onClick={isAddingFriend ? undefined : handleAddFriend}
-										active={isAddingFriend}
+										disabled={isAddingFriend}
 									>
 										{isAddingFriend ? 'Отправка...' : 'Добавить в друзья'}
 									</Button>
@@ -130,7 +130,7 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 									</Button>
 								)}
 								{hasPendingRequest && !isFriend && (
-									<Button theme="blue-light" active>
+									<Button theme="blue-light" disabled>
 										Заявка отправлена
 									</Button>
 								)}

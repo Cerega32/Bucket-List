@@ -21,7 +21,7 @@ export const Footer: FC<FooterProps> = observer((props) => {
 
 	const {footer} = ThemeStore;
 	const {isAuth} = UserStore;
-	const {isScreenMobile, isScreenTablet} = useScreenSize();
+	const {isScreenMobile} = useScreenSize();
 
 	const [block, element] = useBem('footer', className);
 
@@ -130,7 +130,7 @@ export const Footer: FC<FooterProps> = observer((props) => {
 					<div className={element('divider')} />
 					<div className={element('bottom-content')}>
 						<div className={element('copyright')}>
-							<Svg icon="copyright" className={element('copyright-icon')} />
+							<span>©</span>
 							<span>{currentYear} Delting. Все права защищены.</span>
 						</div>
 						{!isScreenMobile && (
