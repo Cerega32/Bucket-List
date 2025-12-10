@@ -21,6 +21,7 @@ import {defaultPagination} from '@/utils/data/default';
 import {Card} from '../Card/Card';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
+import {Line} from '../Line/Line';
 import {Loader} from '../Loader/Loader';
 import {Pagination} from '../Pagination/Pagination';
 import Select, {OptionSelect} from '../Select/Select';
@@ -33,6 +34,7 @@ interface CatalogItemsProps {
 	beginUrl: string;
 	columns?: string;
 	initialSearch?: string;
+	searchWrapperWrap?: boolean;
 }
 
 interface CatalogItemsCategoriesProps extends CatalogItemsProps {
@@ -71,7 +73,19 @@ const sortBy: Array<OptionSelect> = [
 ];
 
 export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersProps> = (props) => {
-	const {className, code = 'all', subPage, category, userId, completed, beginUrl, columns, categories, initialSearch = ''} = props;
+	const {
+		className,
+		code = 'all',
+		subPage,
+		category,
+		userId,
+		completed,
+		beginUrl,
+		columns,
+		categories,
+		initialSearch = '',
+		searchWrapperWrap = false,
+	} = props;
 
 	const [block, element] = useBem('catalog-items', className);
 
@@ -388,24 +402,29 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		<section className={block()} key={code}>
 			<div className={element('filters')}>
 				<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage || ''} />
-				<FieldInput
-					className={element('search')}
-					placeholder="Поисковой запрос"
-					id="searching"
-					value={search}
-					setValue={onSearch}
-					iconBegin="search"
-				/>
-				{categories && categories.length > 0 && (
-					<FiltersCheckbox
-						head={{name: 'Все категории', code: 'all'}}
-						items={categoryFilters}
-						onFinish={handleCategoryFilter}
-						multipleSelectedText={['категория', 'категории', 'категорий']}
-						multipleThreshold={1}
+				<Line className={element('line')} />
+				<div className={element('search-wrapper', {'wrap-on-lg': searchWrapperWrap})}>
+					<FieldInput
+						className={element('search')}
+						placeholder="Поисковой запрос"
+						id="searching"
+						value={search}
+						setValue={onSearch}
+						iconBegin="search"
 					/>
-				)}
-				<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} filter />
+					<div className={element('categories-wrapper')}>
+						{categories && categories.length > 0 && (
+							<FiltersCheckbox
+								head={{name: 'Все категории', code: 'all'}}
+								items={categoryFilters}
+								onFinish={handleCategoryFilter}
+								multipleSelectedText={['категория', 'категории', 'категорий']}
+								multipleThreshold={1}
+							/>
+						)}
+						<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} filter />
+					</div>
+				</div>
 			</div>
 			<Loader isLoading={loading}>
 				{subPage === 'goals' ? (

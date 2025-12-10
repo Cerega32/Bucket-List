@@ -32,7 +32,7 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 
 	return (
 		<section className={block()}>
-			<div className={element('slider')}>
+			<div className={element('slider slider-left')}>
 				{leftPhotos.length > 0 && (
 					<VerticalSlider
 						slides={leftPhotos.map((photo) => (
@@ -68,7 +68,7 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 					<span className={element('completed-number')}>{pluralize(totalCompleted, ['цель', 'цели', 'целей'])}</span>
 				</p>
 			</div>
-			<div className={element('slider')}>
+			<div className={element('slider slider-right')}>
 				{rightPhotos.length > 0 && (
 					<VerticalSlider
 						slides={rightPhotos.map((photo) => (
