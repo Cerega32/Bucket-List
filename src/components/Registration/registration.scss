@@ -30,6 +30,21 @@
 		margin-left: 4px;
 	}
 
+	&__consent {
+		margin-bottom: 16px;
+		font-size: 13px;
+	}
+
+	&__consent-link {
+		color: var(--color-primary);
+		text-decoration: underline;
+		transition: color 0.2s ease;
+
+		&:hover {
+			color: var(--color-primary-hover);
+		}
+	}
+
 	&--page {
 		display: flex;
 		flex-direction: column;

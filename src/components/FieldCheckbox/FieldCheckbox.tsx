@@ -1,4 +1,4 @@
-import {FC} from 'react';
+import {FC, ReactNode} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 
@@ -9,7 +9,7 @@ import './field-checkbox.scss';
 interface FieldCheckboxProps {
 	className?: string;
 	id: string;
-	text: string;
+	text: string | ReactNode;
 	setChecked: (value: boolean) => void;
 	checked: boolean;
 }
@@ -37,7 +37,13 @@ export const FieldCheckbox: FC<FieldCheckboxProps> = (props) => {
 				checked={checked}
 			/>
 			<label className={`${element('label')} ${className}`} htmlFor={id}>
-				<span className={element('checkbox')} role="button" tabIndex={0} onKeyDown={handleKeyDown} aria-label={text}>
+				<span
+					className={element('checkbox')}
+					role="button"
+					tabIndex={0}
+					onKeyDown={handleKeyDown}
+					aria-label={typeof text === 'string' ? text : 'Согласие'}
+				>
 					<Svg icon="done" className={element('icon')} />
 				</span>
 				{text}

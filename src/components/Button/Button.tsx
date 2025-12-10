@@ -22,6 +22,7 @@ interface ButtonProps {
 	hoverContent?: ReactElement | string | number;
 	hoverIcon?: string;
 	active?: boolean;
+	disabled?: boolean;
 	loading?: boolean;
 	refInner?: React.RefObject<HTMLButtonElement>;
 	withBorder?: boolean;
@@ -42,6 +43,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		hoverContent,
 		hoverIcon,
 		active,
+		disabled,
 		loading,
 		refInner,
 		withBorder,
@@ -102,12 +104,12 @@ export const Button: FC<ButtonProps> = (props) => {
 			default:
 				return (
 					<button
-						className={block({theme, small, size, active})}
+						className={block({theme, small, size, active, disabled})}
 						onClick={onClick}
 						type={typeBtn === 'button' ? 'button' : 'submit'}
 						onMouseEnter={() => onHover(true)}
 						onMouseLeave={() => onHover(false)}
-						disabled={active}
+						disabled={disabled || active}
 						ref={refInner}
 					>
 						{content}
