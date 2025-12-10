@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite';
 import {FC} from 'react';
 import {BrowserRouter} from 'react-router-dom';
 
+import {CookieBanner} from '@/components/CookieBanner/CookieBanner';
 import {Header} from '@/components/Header/Header';
 import {Modal} from '@/components/Modal/Modal';
 import {useBem} from '@/hooks/useBem';
@@ -12,8 +13,8 @@ import {RoutesAuth} from '../RoutesAuth/RoutesAuth';
 
 import '../../_commons/styles-supports/scaffolding.scss';
 
-import './layout.scss';
 import {Footer} from '@/components/Footer/Footer';
+import './layout.scss';
 
 const Layout: FC = observer(() => {
 	const [block] = useBem('layout');
@@ -28,6 +29,7 @@ const Layout: FC = observer(() => {
 				<NotificationContainer />
 			</div>
 			<Footer />
+			<CookieBanner />
 		</BrowserRouter>
 	);
 });

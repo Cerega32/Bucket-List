@@ -1,7 +1,7 @@
 import {FC} from 'react';
 
-import {LegalDocument} from '../LegalDocument/LegalDocument';
 import {Link} from 'react-router-dom';
+import {LegalDocument} from '../LegalDocument/LegalDocument';
 
 export const CookiesContainer: FC = () => {
 	return (
