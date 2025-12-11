@@ -4,6 +4,11 @@
 	max-width: var(--max-width);
 	margin: 40px auto 0;
 
+	@include md {
+		flex-direction: column-reverse;
+		align-items: flex-end;
+	}
+
 	&__lists {
 		margin-bottom: 40px;
 	}

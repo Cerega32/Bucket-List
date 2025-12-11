@@ -372,9 +372,16 @@
 		padding: 8px;
 		border-radius: 6px;
 		color: var(--color-text-primary);
+		transition: all 0.15s ease-in-out;
 
 		&:hover {
 			background: var(--color-secondary-hover);
+		}
+
+		&--active {
+			background: var(--color-secondary);
+			color: var(--color-text-primary);
+			font-weight: var(--weight-medium);
 		}
 
 		@include md {
