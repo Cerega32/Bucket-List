@@ -16,6 +16,7 @@ import {
 } from '@/utils/api/goals';
 
 import {Button} from '../Button/Button';
+import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FolderRulesManager} from '../FolderRulesManager/FolderRulesManager';
@@ -199,10 +200,10 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 				<div className={element('folders-list')}>
 					<h3>Мои папки ({folders.length})</h3>
 					{folders.length === 0 ? (
-						<div className={element('empty')}>
-							<p>У вас пока нет папок для целей</p>
-							<p>Создайте первую папку, чтобы организовать свои цели</p>
-						</div>
+						<EmptyState
+							title="У вас пока нет папок для целей"
+							description="Создайте первую папку, чтобы организовать свои цели"
+						/>
 					) : (
 						<div className={element('folders')}>
 							{folders.map((folder) => (
@@ -284,10 +285,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 						{activeTab === 'goals' && (
 							<div className={element('tab-content')}>
 								{folderGoals.length === 0 ? (
-									<div className={element('empty')}>
-										<p>В этой папке пока нет целей</p>
-										<p>Добавьте цели в папку из страницы цели</p>
-									</div>
+									<EmptyState title="В этой папке пока нет целей" description="Добавьте цели в папку из страницы цели" />
 								) : (
 									<div className={element('goals')}>
 										{folderGoals.map((folderGoal) => (

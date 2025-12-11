@@ -5,6 +5,7 @@ import {useBem} from '@/hooks/useBem';
 import {addGoalToFolder, getGoalFoldersLight, IGoalFolder} from '@/utils/api/goals';
 
 import {Button} from '../Button/Button';
+import {EmptyState} from '../EmptyState/EmptyState';
 import {Loader} from '../Loader/Loader';
 
 import './folder-selector.scss';
@@ -88,10 +89,10 @@ export const FolderSelector: FC<FolderSelectorProps> = observer(
 				</div>
 
 				{folders.length === 0 ? (
-					<div className={element('empty')}>
-						<p>У вас пока нет папок для целей</p>
-						{showCreateButton && <p>Создайте первую папку в разделе &quot;Папки целей&quot;</p>}
-					</div>
+					<EmptyState
+						title="У вас пока нет папок для целей"
+						description={showCreateButton ? 'Создайте первую папку в разделе "Папки целей"' : undefined}
+					/>
 				) : (
 					<div className={element('folders')}>
 						{folders.map((folder) => {

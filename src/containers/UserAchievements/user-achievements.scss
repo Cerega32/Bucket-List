@@ -18,4 +18,9 @@
 		gap: 16px;
 		margin: 24px auto 0;
 	}
+
+	&--empty {
+		display: flex;
+		justify-content: center;
+	}
 }

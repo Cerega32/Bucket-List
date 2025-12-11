@@ -24,6 +24,8 @@ interface FieldInputProps {
 	onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 	iconEnd?: string;
 	theme?: 'transparent';
+	focusBorder?: 'white';
+	rows?: number;
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -45,6 +47,8 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		onBlur,
 		onKeyDown,
 		theme,
+		focusBorder,
+		rows = 2,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -85,6 +89,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onFocus={onFocus}
 						onBlur={onBlur}
 						onKeyDown={onKeyDown}
+						rows={rows}
 					/>
 				) : (
 					<input

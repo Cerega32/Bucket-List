@@ -1,6 +1,7 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect} from 'react';
 
+import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {FriendRequestCard} from '@/components/FriendRequestCard/FriendRequestCard';
 import {useBem} from '@/hooks/useBem';
 import {FriendsStore} from '@/store/FriendsStore';
@@ -52,11 +53,10 @@ export const FriendsRequests: FC = observer(() => {
 			</div>
 
 			{FriendsStore.isEmptyRequests ? (
-				<div className={element('empty-state')}>
-					<div className={element('empty-icon')}>📮</div>
-					<h3 className={element('empty-title')}>Нет новых заявок</h3>
-					<p className={element('empty-text')}>Когда другие пользователи отправят вам заявки в друзья, они появятся здесь</p>
-				</div>
+				<EmptyState
+					title="Нет новых заявок"
+					description="Когда другие пользователи отправят вам заявки в друзья, они появятся здесь"
+				/>
 			) : (
 				<div className={element('requests-list')}>
 					{FriendsStore.friendRequests.map((request) => (

@@ -7,6 +7,7 @@ import {formatNotificationTime} from '@/utils/date/formatNotificationTime';
 
 import {Avatar} from '../Avatar/Avatar';
 import {Button} from '../Button/Button';
+import {EmptyState} from '../EmptyState/EmptyState';
 import './notification-dropdown.scss';
 
 interface NotificationDropdownProps {
@@ -83,9 +84,7 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 
 			<div className={element('content')}>
 				{!HeaderNotificationsStore.notifications || HeaderNotificationsStore.notifications.length === 0 ? (
-					<div className={element('empty')}>
-						<p>Нет уведомлений</p>
-					</div>
+					<EmptyState title="Нет уведомлений" size="small" className={element('empty')} />
 				) : (
 					<div className={element('list')}>
 						{HeaderNotificationsStore.notifications.map((notification) => {

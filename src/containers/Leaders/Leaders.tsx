@@ -1,5 +1,6 @@
 import {FC, useEffect, useState} from 'react';
 
+import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {InfoGoal} from '@/components/InfoGoal/InfoGoal';
 import {LeaderBoard} from '@/components/LeaderBoard/LeaderBoard';
 import {LeaderPedestal} from '@/components/Leaders/LeaderPedestal';
@@ -54,7 +55,7 @@ export const Leaders: FC = () => {
 					<LeaderBoard className={element('board')} users={leaders} />
 				</>
 			) : (
-				<div className={element('empty')}>Никто еще не стал лидером недели. Но вы можете стать им!</div>
+				<EmptyState title="Никто еще не стал лидером недели. Но вы можете стать им!" />
 			)}
 		</Loader>
 	);
