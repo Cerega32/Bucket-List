@@ -1245,6 +1245,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							setValue={setDescription}
 							className={element('field')}
 							type="textarea"
+							rows={4}
 						/>
 
 						<div className={element('time-field-container')}>

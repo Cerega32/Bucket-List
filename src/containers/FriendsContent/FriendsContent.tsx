@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite';
 import {FC, useEffect} from 'react';
 
 import {Button} from '@/components/Button/Button';
+import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {FriendCard} from '@/components/FriendCard/FriendCard';
 import {useBem} from '@/hooks/useBem';
 import {FriendsStore} from '@/store/FriendsStore';
@@ -87,14 +88,14 @@ export const FriendsContent: FC = observer(() => {
 			</div>
 
 			{FriendsStore.isEmptyFriends ? (
-				<div className={element('empty-state')}>
-					<div className={element('empty-icon')}>👥</div>
-					<h3 className={element('empty-title')}>У вас пока нет друзей</h3>
-					<p className={element('empty-text')}>Найдите единомышленников среди пользователей Bucket List и добавьте их в друзья</p>
+				<EmptyState
+					title="У вас пока нет друзей"
+					description="Найдите единомышленников среди пользователей Bucket List и добавьте их в друзья"
+				>
 					<Button theme="blue" type="Link" href="/user/self/friends/search">
 						Найти друзей
 					</Button>
-				</div>
+				</EmptyState>
 			) : (
 				<div className={element('friends-list')}>
 					{FriendsStore.friends.map((friend) => (

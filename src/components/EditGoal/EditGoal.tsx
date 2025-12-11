@@ -453,6 +453,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								className={element('field')}
 								type="textarea"
 								required
+								rows={4}
 							/>
 
 							<div className={element('time-field-container')}>

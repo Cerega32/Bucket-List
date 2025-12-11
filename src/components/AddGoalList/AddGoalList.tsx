@@ -865,6 +865,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 							className={element('field')}
 							type="textarea"
 							required
+							rows={4}
 						/>
 
 						{/* Поля источника списка */}

@@ -19,6 +19,7 @@ import {removeListGoal} from '@/utils/api/post/removeListGoal';
 import {defaultPagination} from '@/utils/data/default';
 
 import {Card} from '../Card/Card';
+import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
 import {Line} from '../Line/Line';
@@ -428,18 +429,38 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			</div>
 			<Loader isLoading={loading}>
 				{subPage === 'goals' ? (
-					<section className={element('goals', {columns})} id="catalog-items-goals">
-						{goals.data.map((goal, i) => (
-							<Card
-								className={element('goal')}
-								goal={goal}
-								key={goal.code}
-								onClickAdd={() => updateGoal(goal.code, i, 'add')}
-								onClickDelete={() => updateGoal(goal.code, i, 'delete')}
-								onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
-							/>
-						))}
-					</section>
+					goals.data.length === 0 ? (
+						<EmptyState
+							title={completed ? 'У вас пока нет выполненных целей' : 'У вас пока нет активных целей'}
+							description={
+								completed
+									? 'Начните выполнять цели, чтобы они появились в списке выполненных'
+									: 'Добавьте цели из каталога, чтобы они появились в списке активных'
+							}
+						/>
+					) : (
+						<section className={element('goals', {columns})} id="catalog-items-goals">
+							{goals.data.map((goal, i) => (
+								<Card
+									className={element('goal')}
+									goal={goal}
+									key={goal.code}
+									onClickAdd={() => updateGoal(goal.code, i, 'add')}
+									onClickDelete={() => updateGoal(goal.code, i, 'delete')}
+									onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
+								/>
+							))}
+						</section>
+					)
+				) : lists.data.length === 0 ? (
+					<EmptyState
+						title={completed ? 'У вас пока нет выполненных списков' : 'У вас пока нет активных списков'}
+						description={
+							completed
+								? 'Начните выполнять списки целей, чтобы они появились в списке выполненных'
+								: 'Добавьте списки из каталога, чтобы они появились в списке активных'
+						}
+					/>
 				) : (
 					<section className={element('goals', {columns})} id="catalog-items-lists">
 						{lists.data.map((goal, i) => (
@@ -456,9 +477,10 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					</section>
 				)}
 			</Loader>
-			{subPage === 'lists' ? (
+			{subPage === 'lists' && lists.data.length > 0 && (
 				<Pagination currentPage={lists.pagination.page} totalPages={lists.pagination.totalPages} goToPage={goToPage} />
-			) : (
+			)}
+			{subPage === 'goals' && goals.data.length > 0 && (
 				<Pagination currentPage={goals.pagination.page} totalPages={goals.pagination.totalPages} goToPage={goToPage} />
 			)}
 

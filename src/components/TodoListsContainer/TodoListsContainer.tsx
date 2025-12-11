@@ -5,6 +5,7 @@ import useScreenSize from '@/hooks/useScreenSize';
 import {TodoList} from '@/typings/todo';
 
 import {Button} from '../Button/Button';
+import {EmptyState} from '../EmptyState/EmptyState';
 
 import './todo-lists-container.scss';
 
@@ -31,13 +32,14 @@ export const TodoListsContainer: FC<TodoListsContainerProps> = ({className, list
 	if (lists.length === 0) {
 		return (
 			<div className={block()}>
-				<div className={element('empty')}>
-					<h3 className={element('empty-title')}>У вас пока нет списков задач</h3>
-					<p className={element('empty-text')}>Создайте свой первый список, чтобы начать организовывать задачи</p>
+				<EmptyState
+					title="У вас пока нет списков задач"
+					description="Создайте свой первый список, чтобы начать организовывать задачи"
+				>
 					<Button onClick={onCreateList} theme="blue" size={isScreenMobile ? 'medium' : undefined}>
 						+ Создать первый список
 					</Button>
-				</div>
+				</EmptyState>
 			</div>
 		);
 	}
