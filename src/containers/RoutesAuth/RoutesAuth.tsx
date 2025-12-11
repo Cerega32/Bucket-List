@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite';
 import {FC} from 'react';
 import {Navigate, Route, Routes} from 'react-router-dom';
 
+import {ScrollToTopOnRouteChange} from '@/components/ScrollToTopOnRouteChange/ScrollToTopOnRouteChange';
 import {NewsDetailPage} from '@/pages/NewsDetailPage/NewsDetailPage';
 import {NewsPage} from '@/pages/NewsPage/NewsPage';
 import {PageAbout} from '@/pages/PageAbout/PageAbout';
@@ -49,6 +50,7 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({element}) => {
 export const RoutesAuth: FC = observer(() => {
 	return (
 		<main className="main">
+			<ScrollToTopOnRouteChange />
 			<Routes>
 				{/* Новый маршрут для дашборда (главной страницы) */}
 				{/* <Route path="/" element={<PageDashboard page="isDashboard" />} /> */}
