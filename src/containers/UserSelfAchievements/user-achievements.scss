@@ -1,11 +1,14 @@
 .user-self-achievements {
 	display: flex;
 	flex-wrap: wrap;
-
+	gap: 24px;
 	width: 100%;
 	max-width: var(--max-width);
 	margin: 0 auto;
-	gap: 24px;
+
+	&--empty {
+		justify-content: center;
+	}
 
 	&__achievement {
 		width: calc(33% - 24px * 2 / 3);

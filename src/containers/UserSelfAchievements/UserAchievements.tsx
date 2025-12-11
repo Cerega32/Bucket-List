@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
 import {Achievement} from '@/components/Achievement/Achievement';
+import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
 import {IAchievement} from '@/typings/achievements';
@@ -29,10 +30,14 @@ export const UserSelfAchievements: FC = observer(() => {
 	}, []);
 
 	return (
-		<Loader isLoading={isLoading} className={block()}>
-			{achievements.map((achievement) => (
-				<Achievement key={achievement.id} className={element('achievement')} achievement={achievement} />
-			))}
+		<Loader isLoading={isLoading} className={block({empty: achievements.length === 0})}>
+			{achievements.length === 0 ? (
+				<EmptyState title="У вас пока нет достижений" description="Выполняйте цели и получайте достижения за свой прогресс" />
+			) : (
+				achievements.map((achievement) => (
+					<Achievement key={achievement.id} className={element('achievement')} achievement={achievement} />
+				))
+			)}
 		</Loader>
 	);
 });

@@ -3,6 +3,7 @@ import {FC, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
+import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {Loader} from '@/components/Loader/Loader';
 import {Progress} from '@/components/Progress/Progress';
 import {useBem} from '@/hooks/useBem';
@@ -108,14 +109,11 @@ export const UserSelfProgress: FC = observer(() => {
 				</div>
 
 				{goals.length === 0 ? (
-					<div className={element('empty')}>
-						<div className={element('empty-icon')}>📈</div>
-						<h3 className={element('empty-title')}>Нет целей в процессе</h3>
-						<p className={element('empty-text')}>Начните выполнение целей, чтобы отслеживать прогресс здесь</p>
+					<EmptyState title="Нет целей в процессе" description="Начните выполнение целей, чтобы отслеживать прогресс здесь">
 						<Button theme="blue" type="Link" href="/user/self/active-goals">
 							Перейти к активным целям
 						</Button>
-					</div>
+					</EmptyState>
 				) : (
 					<div className={element('goals')}>
 						{goals.map((goal) => (
