@@ -46,7 +46,9 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 					setMainGoals(goalsRes.data);
 				}
 				if (achievementsRes.success) {
-					setAchievements(achievementsRes.data.data);
+					// Фильтруем только полученные достижения и берем первые 3
+					const achieved = achievementsRes.data.data.filter((achievement: IAchievement) => achievement.isAchieved).slice(0, 3);
+					setAchievements(achieved);
 				}
 				if (commentsRes.success) {
 					setComments(commentsRes.data.data);

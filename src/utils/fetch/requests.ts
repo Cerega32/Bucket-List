@@ -139,7 +139,7 @@ export const GET = async (url: string, params?: IFetchParams): Promise<any> => {
 	}
 
 	try {
-		const response = await fetch(`/api/${url}${queryString ? `?${queryString}` : ''}`, {
+		const response = await fetch(`/api/${url}/${queryString ? `?${queryString}` : ''}`, {
 			headers,
 		});
 
