@@ -25,7 +25,9 @@ export const UserAchievements: FC<UserAchievementsProps> = observer((props) => {
 			setIsLoading(true);
 			const res = await GET('achievements', {get: {user_id: id}});
 			if (res.success) {
-				setAchievements(res.data.data);
+				// Фильтруем только выполненные достижения
+				const achieved = res.data.data.filter((achievement: IAchievement) => achievement.isAchieved);
+				setAchievements(achieved);
 			}
 			setIsLoading(false);
 		})();

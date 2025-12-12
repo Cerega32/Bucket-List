@@ -17,7 +17,7 @@ export const Achievement: FC<AchievementProps> = (props) => {
 	const [block, element] = useBem('achievement', className);
 
 	return (
-		<div className={block()}>
+		<div className={block({unlocked: achievement.isAchieved})}>
 			<span className={element('image-wrapper')}>
 				<img className={element('image')} src={achievement.image} alt={achievement.title} />
 			</span>

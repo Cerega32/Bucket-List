@@ -22,7 +22,12 @@ const Layout: FC = observer(() => {
 	const {full} = ThemeStore;
 
 	return (
-		<BrowserRouter>
+		<BrowserRouter
+			future={{
+				v7_startTransition: true,
+				v7_relativeSplatPath: true,
+			}}
+		>
 			<Header />
 			<div className={block({full})}>
 				<RoutesAuth />

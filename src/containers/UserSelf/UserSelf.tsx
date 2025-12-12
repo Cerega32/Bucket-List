@@ -6,7 +6,7 @@ import {useBem} from '@/hooks/useBem';
 import {IPage} from '@/typings/page';
 import {getUser} from '@/utils/api/get/getUser';
 
-import {UserSelfAchievements} from '../UserSelfAchievements/UserAchievements';
+import {UserSelfAchievements} from '../UserSelfAchievements/UserSelfAchievements';
 import {UserSelfDashboard} from '../UserSelfDashboard/UserSelfDashboard';
 import {UserSelfFolders} from '../UserSelfFolders/UserSelfFolders';
 import {UserSelfFriends} from '../UserSelfFriends/UserSelfFriends';
