@@ -1,8 +1,11 @@
+import {format} from 'date-fns';
 import {FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {FileDrop} from 'react-file-drop';
 import {useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
+import {DatePicker} from '@/components/DatePicker/DatePicker';
+import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
@@ -15,10 +18,12 @@ import {updateGoal} from '@/utils/api/put/updateGoal';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {selectComplexity} from '@/utils/values/complexity';
 
+import {AllowCustomSettingsField} from '../AddGoal/components/AllowCustomSettingsField';
 import {Loader} from '../Loader/Loader';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
 import Select from '../Select/Select';
 import {Title} from '../Title/Title';
+import {WeekDaySchedule, WeekDaySelector} from '../WeekDaySelector/WeekDaySelector';
 
 import '../AddGoal/add-goal.scss';
 
@@ -50,6 +55,26 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const {setHeader} = ThemeStore;
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
+	const [customSchedule, setCustomSchedule] = useState<WeekDaySchedule>({
+		monday: false,
+		tuesday: false,
+		wednesday: false,
+		thursday: false,
+		friday: false,
+		saturday: false,
+		sunday: false,
+	});
+
+	// Состояния для регулярности
+	const [isRegular, setIsRegular] = useState(false);
+	const [allowCustomSettings, setAllowCustomSettings] = useState(true);
+	const [regularFrequency, setRegularFrequency] = useState<'daily' | 'weekly' | 'custom'>('daily');
+	const [weeklyFrequency, setWeeklyFrequency] = useState(3);
+	const [durationType, setDurationType] = useState<'days' | 'weeks' | 'until_date' | 'indefinite'>('days');
+	const [durationValue, setDurationValue] = useState(30);
+	const [regularEndDate, setRegularEndDate] = useState('');
+	const [allowSkipDays, setAllowSkipDays] = useState(0);
+	const [resetOnSkip, setResetOnSkip] = useState(false);
 
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
@@ -106,6 +131,65 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 						if (complexityIndex !== -1) {
 							setActiveComplexity(complexityIndex);
 						}
+					}
+
+					// Инициализируем состояния регулярности из goal.regularConfig
+					if (goal.regularConfig) {
+						setIsRegular(true);
+
+						// Если есть статистика с пользовательскими настройками, используем их
+						// Иначе используем базовые настройки из regularConfig
+						const userSettings = goal.regularConfig.statistics?.regularGoalData;
+						const baseSettings = goal.regularConfig;
+
+						const frequency = userSettings?.frequency || baseSettings.frequency;
+						const weeklyFrequencyBase = userSettings?.weeklyFrequency ?? baseSettings.weeklyFrequency ?? 3;
+
+						// Для customSchedule проверяем наличие в userSettings, если есть - используем его
+						// Иначе используем baseSettings, иначе дефолтные значения
+						let customScheduleBase: WeekDaySchedule;
+						if (
+							userSettings?.customSchedule &&
+							typeof userSettings.customSchedule === 'object' &&
+							Object.keys(userSettings.customSchedule).length > 0
+						) {
+							// Используем пользовательские настройки из статистики
+							customScheduleBase = userSettings.customSchedule;
+						} else if (
+							baseSettings.customSchedule &&
+							typeof baseSettings.customSchedule === 'object' &&
+							Object.keys(baseSettings.customSchedule).length > 0
+						) {
+							// Используем базовые настройки из regularConfig
+							customScheduleBase = baseSettings.customSchedule;
+						} else {
+							// Дефолтные значения
+							customScheduleBase = {
+								monday: false,
+								tuesday: false,
+								wednesday: false,
+								thursday: false,
+								friday: false,
+								saturday: false,
+								sunday: false,
+							};
+						}
+
+						const durationTypeBase = userSettings?.durationType || baseSettings.durationType;
+						const durationValueBase = userSettings?.durationValue ?? baseSettings.durationValue ?? 30;
+						const endDate = userSettings?.endDate || baseSettings.endDate || '';
+						const allowSkipDaysBase = userSettings?.allowSkipDays ?? baseSettings.allowSkipDays ?? 0;
+						const resetOnSkipBase = userSettings?.resetOnSkip ?? baseSettings.resetOnSkip ?? false;
+
+						setRegularFrequency(frequency);
+						setWeeklyFrequency(weeklyFrequencyBase);
+						setCustomSchedule(customScheduleBase);
+						setDurationType(durationTypeBase);
+						setDurationValue(durationValueBase);
+						setRegularEndDate(endDate);
+						setAllowSkipDays(allowSkipDaysBase);
+						setResetOnSkip(resetOnSkipBase);
+						setAllowCustomSettings(baseSettings.allowCustomSettings ?? true);
 					}
 				}
 			} catch (error) {
@@ -270,6 +354,36 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 			if (estimatedTime) {
 				const standardTime = convertTimeToStandardFormat(estimatedTime);
 				formData.append('estimated_time', standardTime);
+			}
+
+			// Добавляем данные о регулярности, если это регулярная цель
+			if (isRegular) {
+				formData.append('is_regular', 'true');
+				formData.append('regular_frequency', regularFrequency);
+
+				if (regularFrequency === 'weekly') {
+					formData.append('weekly_frequency', weeklyFrequency.toString());
+				}
+
+				if (regularFrequency === 'custom' && customSchedule) {
+					formData.append('custom_schedule', JSON.stringify(customSchedule));
+				}
+
+				formData.append('duration_type', durationType);
+
+				if (durationType === 'days' || durationType === 'weeks') {
+					formData.append('duration_value', durationValue.toString());
+				}
+
+				if (durationType === 'until_date' && regularEndDate) {
+					formData.append('end_date', regularEndDate);
+				}
+
+				formData.append('allow_skip_days', allowSkipDays.toString());
+				formData.append('reset_on_skip', resetOnSkip.toString());
+				formData.append('allow_custom_settings', allowCustomSettings.toString());
+			} else if (goal.regularConfig) {
+				formData.append('is_regular', 'false');
 			}
 
 			const response = await updateGoal(goal.code, formData);
@@ -471,6 +585,156 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 									часов, 30 минут)
 								</small>
 							</div>
+
+							{/* Секция регулярности выполнения */}
+							{/* Показываем секцию только если пользователь создатель или может редактировать параметры */}
+							{(goal.createdByUser || (goal.regularConfig && goal.regularConfig.allowCustomSettings)) && (
+								<div className={element('regular-section')}>
+									<FieldCheckbox
+										id="is-regular"
+										text="Это регулярная цель?"
+										checked={isRegular}
+										setChecked={setIsRegular}
+										className={element('field')}
+									/>
+
+									{isRegular && (
+										<div className={element('regular-config')}>
+											<div className={element('regular-field-group')}>
+												<Select
+													className={element('field')}
+													placeholder="Выберите периодичность"
+													options={[
+														{name: 'Ежедневно', value: 'daily'},
+														{name: 'N раз в неделю', value: 'weekly'},
+														{name: 'Пользовательский график', value: 'custom'},
+													]}
+													activeOption={regularFrequency === 'daily' ? 0 : regularFrequency === 'weekly' ? 1 : 2}
+													onSelect={(index) => {
+														const frequencies = ['daily', 'weekly', 'custom'] as const;
+														setRegularFrequency(frequencies[index]);
+													}}
+													text="Периодичность"
+												/>
+
+												{regularFrequency === 'weekly' && (
+													<FieldInput
+														placeholder="Например: 3"
+														id="weekly-frequency"
+														text="Сколько раз в неделю"
+														value={weeklyFrequency.toString()}
+														setValue={(value) => {
+															const num = parseInt(value, 10) || 1;
+															setWeeklyFrequency(Math.min(7, Math.max(1, num)));
+														}}
+														className={element('field')}
+														type="number"
+													/>
+												)}
+
+												{regularFrequency === 'custom' && (
+													<div className={element('custom-schedule-selector')}>
+														<p className={element('field-title')}>Выберите дни недели</p>
+														<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
+													</div>
+												)}
+											</div>
+
+											<div className={element('regular-field-group')}>
+												<Select
+													className={element('field')}
+													placeholder="Выберите тип длительности"
+													options={[
+														{name: 'Дни', value: 'days'},
+														{name: 'Недели', value: 'weeks'},
+														{name: 'До даты', value: 'until_date'},
+														{name: 'Бессрочно', value: 'indefinite'},
+													]}
+													activeOption={
+														durationType === 'days'
+															? 0
+															: durationType === 'weeks'
+															? 1
+															: durationType === 'until_date'
+															? 2
+															: 3
+													}
+													onSelect={(index) => {
+														const types = ['days', 'weeks', 'until_date', 'indefinite'] as const;
+														setDurationType(types[index]);
+													}}
+													text="Длительность"
+												/>
+
+												{(durationType === 'days' || durationType === 'weeks') && (
+													<FieldInput
+														placeholder={durationType === 'days' ? 'Количество дней' : 'Количество недель'}
+														id="duration-value"
+														text={durationType === 'days' ? 'Количество дней' : 'Количество недель'}
+														value={durationValue.toString()}
+														setValue={(value) => {
+															const num = parseInt(value, 10) || 1;
+															setDurationValue(Math.max(1, num));
+														}}
+														className={element('field')}
+														type="number"
+													/>
+												)}
+
+												{durationType === 'until_date' && (
+													<div className={element('date-field-container')}>
+														<p className={element('field-title')}>Дата окончания</p>
+														<DatePicker
+															selected={regularEndDate ? new Date(regularEndDate) : null}
+															onChange={(date) => {
+																if (date) {
+																	setRegularEndDate(format(date, 'yyyy-MM-dd'));
+																} else {
+																	setRegularEndDate('');
+																}
+															}}
+															className={element('date-input')}
+															placeholderText="ДД.ММ.ГГГГ"
+															minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
+														/>
+													</div>
+												)}
+											</div>
+
+											<div className={element('regular-field-group')}>
+												<FieldInput
+													placeholder="0"
+													id="allow-skip-days"
+													text="Разрешенные пропуски"
+													value={allowSkipDays.toString()}
+													setValue={(value) => {
+														const num = parseInt(value, 10) || 0;
+														setAllowSkipDays(Math.max(0, num));
+													}}
+													className={element('field')}
+													type="number"
+												/>
+
+												<FieldCheckbox
+													id="reset-on-skip"
+													text="Сбрасывать прогресс при превышении лимита пропусков"
+													checked={resetOnSkip}
+													setChecked={setResetOnSkip}
+													className={element('field')}
+												/>
+											</div>
+
+											{goal.createdByUser && (
+												<AllowCustomSettingsField
+													checked={allowCustomSettings}
+													setChecked={setAllowCustomSettings}
+													className={element('field')}
+												/>
+											)}
+										</div>
+									)}
+								</div>
+							)}
 
 							<div className={element('btns-wrapper')}>
 								<Button theme="red" className={element('btn')} onClick={() => setIsDeleteModalOpen(true)} type="button">

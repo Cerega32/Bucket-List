@@ -12,7 +12,7 @@ import {getAllLists} from '@/utils/api/get/getAllLists';
 import {getRegularGoalSettings} from '@/utils/api/get/getRegularGoalSettings';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {addListGoal} from '@/utils/api/post/addListGoal';
-import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
+import {addRegularGoalToUser, RegularGoalSettings} from '@/utils/api/post/addRegularGoalToUser';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
@@ -297,11 +297,40 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 				const regularSettings = await getRegularGoalSettings(codeGoal);
 
 				if (regularSettings.success && regularSettings.data) {
-					// Цель регулярная - показываем модалку настройки
-					setRegularGoalData(regularSettings.data);
-					setPendingGoalIndex(i); // Запоминаем индекс цели для последующего обновления
-					setShowRegularModal(true);
-					return; // Выходим из функции, добавление будет происходить в модалке
+					// Если настройки можно изменить, показываем модалку
+					if (regularSettings.data.regular_settings?.allowCustomSettings) {
+						setRegularGoalData(regularSettings.data);
+						setPendingGoalIndex(i); // Запоминаем индекс цели для последующего обновления
+						setShowRegularModal(true);
+						return; // Выходим из функции, добавление будет происходить в модалке
+					}
+					// Если настройки нельзя изменить, добавляем с базовыми настройками
+					const response = await addRegularGoalToUser(codeGoal, {
+						frequency: regularSettings.data.regular_settings.frequency,
+						weeklyFrequency: regularSettings.data.regular_settings.weeklyFrequency,
+						durationType: regularSettings.data.regular_settings.durationType,
+						durationValue: regularSettings.data.regular_settings.durationValue,
+						endDate: regularSettings.data.regular_settings.endDate || undefined,
+						resetOnSkip: regularSettings.data.regular_settings.resetOnSkip,
+						allowSkipDays: regularSettings.data.regular_settings.allowSkipDays,
+					});
+
+					if (response.success) {
+						const updatedGoal = {
+							...goals.data[i],
+							addedByUser: true,
+							totalAdded: (goals.data[i].totalAdded || 0) + 1,
+						};
+						const newGoals = [...goals.data];
+						newGoals[i] = updatedGoal;
+						setGoals({...goals, data: newGoals});
+						NotificationStore.addNotification({
+							type: 'success',
+							title: 'Успех',
+							message: 'Регулярная цель успешно добавлена!',
+						});
+						return;
+					}
 				}
 			} catch (error) {
 				// Если API регулярности не отвечает или цель не регулярная, продолжаем обычное добавление
@@ -354,15 +383,32 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		setPendingGoalIndex(null);
 	};
 
-	const handleRegularGoalSave = async (settings: any) => {
+	const handleRegularGoalSave = async (settings: RegularGoalSettings) => {
 		if (!regularGoalData?.goal || pendingGoalIndex === null) return;
 
 		setIsRegularLoading(true);
 		try {
-			const response = await addRegularGoalToUser(regularGoalData.goal.code, {
-				goal_code: regularGoalData.goal.code,
-				...settings,
-			});
+			// Явно передаем все поля, включая customSchedule
+			const requestData: RegularGoalSettings = {
+				frequency: settings.frequency,
+				durationType: settings.durationType,
+				allowSkipDays: settings.allowSkipDays,
+				resetOnSkip: settings.resetOnSkip,
+				...(settings.frequency === 'weekly' && settings.weeklyFrequency !== undefined
+					? {weeklyFrequency: settings.weeklyFrequency}
+					: {}),
+				...(settings.frequency === 'custom' && settings.customSchedule !== undefined
+					? {customSchedule: settings.customSchedule}
+					: {}),
+				...(settings.durationType === 'days' || settings.durationType === 'weeks'
+					? settings.durationValue !== undefined
+						? {durationValue: settings.durationValue}
+						: {}
+					: {}),
+				...(settings.durationType === 'until_date' && settings.endDate !== undefined ? {endDate: settings.endDate} : {}),
+			};
+
+			const response = await addRegularGoalToUser(regularGoalData.goal.code, requestData);
 
 			if (response.success) {
 				// Обновляем состояние цели как добавленной

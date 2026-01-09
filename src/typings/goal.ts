@@ -202,6 +202,7 @@ export interface IRegularGoalConfig {
 	allowSkipDays: number;
 	resetOnSkip: boolean;
 	isActive: boolean;
+	allowCustomSettings: boolean;
 	createdAt: string;
 	statistics?: IRegularGoalStatistics;
 }
@@ -244,13 +245,23 @@ export interface IRegularGoalStatistics {
 	isPaused: boolean;
 	resetCount: number;
 	currentPeriodProgress?: {
-		type: 'daily' | 'weekly';
+		type: 'daily' | 'weekly' | 'custom';
 		completedToday?: boolean;
 		streak?: number;
 		currentWeekCompletions?: number;
 		requiredPerWeek?: number;
 		weekProgress?: number;
 		weekStart?: string;
+		weekEnd?: string;
+		customSchedule?: any;
+		weekDays?: Array<{
+			dayIndex: number;
+			dayName: string;
+			isAllowed: boolean;
+			isBlocked: boolean;
+			isCompleted: boolean;
+			date: string;
+		}>;
 	};
 	nextTargetDate?: string;
 	canCompleteToday: boolean;

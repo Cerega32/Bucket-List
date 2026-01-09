@@ -1,12 +1,21 @@
 .aside-goal {
 	$block: &;
 
+	display: flex;
+	flex-direction: column;
 	min-width: 336px;
 	max-width: 336px;
 
 	@include lg {
+		flex-direction: row;
+		justify-content: space-between;
+		gap: 24px;
 		min-width: 100%;
 		max-width: 100%;
+	}
+
+	@include md {
+		flex-direction: column;
 	}
 
 	&__image {
@@ -19,6 +28,84 @@
 		@include lg {
 			display: none;
 		}
+	}
+
+	&__regular-info-header {
+		padding: 16px 24px;
+		margin-bottom: 16px;
+		background: var(--color-white);
+		border: 1px solid var(--color-gray-9);
+		border-radius: 8px;
+
+		@include lg {
+			width: 100%;
+		}
+	}
+
+	&__regular-info-title {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		color: var(--color-text-primary);
+		font-size: 16px;
+		font-weight: var(--weight-semi-bold);
+	}
+
+	&__regular-info-streak {
+		margin-left: auto;
+		color: var(--color-text-secondary);
+		font-size: 16px;
+		font-weight: var(--weight-medium);
+
+		&--active {
+			color: var(--color-text-primary);
+		}
+	}
+
+	&__regular-info-icon {
+		flex-shrink: 0;
+		width: 20px;
+		height: 20px;
+	}
+
+	&__regular-info-text {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 8px;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+		text-align: center;
+	}
+
+	&__regular-info-details {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin-top: 16px;
+	}
+
+	&__regular-info-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 12px;
+	}
+
+	&__regular-info-label {
+		color: var(--color-text-secondary);
+		font-size: 14px;
+	}
+
+	&__regular-info-value {
+		color: var(--color-text-primary);
+		font-size: 14px;
+		font-weight: var(--weight-medium);
+		text-align: right;
+	}
+
+	&__line {
+		margin: 16px 0;
 	}
 
 	&__btn {
@@ -40,97 +127,149 @@
 	&__info {
 		width: 100%;
 		max-width: 400px;
-		padding: 16px;
+		padding: 16px 24px;
 		background: var(--color-white);
 		border: 1px solid var(--color-gray-9);
 		border-radius: 8px;
 
 		@include lg {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 8px;
-			max-width: 100%;
+			flex: 1;
+			width: 100%;
+			min-width: 336px;
+			height: min-content;
 		}
 
 		@include md {
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
+			max-width: 100%;
+		}
+
+		@include xs {
+			min-width: 100%;
 		}
 	}
 
-	// Стили для секции регулярных целей
-	&__regular-section {
-		padding: 16px;
-		margin-bottom: 16px;
-		background: rgb(52 152 219 / 5%);
-		border: 1px solid rgb(52 152 219 / 20%);
-		border-radius: 12px;
-	}
-
-	&__regular-header {
+	&__regular-series-days {
 		display: flex;
-		align-items: center;
+		justify-content: space-between;
 		gap: 8px;
-		margin-bottom: 8px;
+		margin: 16px 0;
 	}
 
-	&__regular-icon {
-		width: 16px;
-		height: 16px;
-		color: var(--color-primary);
-	}
-
-	&__regular-title {
-		color: var(--color-primary);
-		font-size: 14px;
-		font-weight: var(--weight-semi-bold);
-	}
-
-	&__regular-frequency {
-		margin: 0 0 12px;
-		color: var(--color-text-secondary);
-		font-size: 14px;
-	}
-
-	&__regular-progress {
-		margin-bottom: 12px;
-	}
-
-	&__progress-text {
-		margin-bottom: 8px;
-		color: var(--color-text-secondary);
-		font-size: 13px;
-	}
-
-	&__daily-status {
+	&__regular-series-day-wrapper {
 		display: flex;
+		flex: 1;
+		flex-direction: column;
 		align-items: center;
-		gap: 8px;
-		padding: 8px 12px;
+		gap: 4px;
+	}
+
+	&__regular-series-day {
+		position: relative;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 100%;
+		max-width: 40px;
+		max-height: 24px;
+		aspect-ratio: 1;
 		background: var(--color-gray-11);
 		border: 1px solid var(--color-border);
 		border-radius: 8px;
-		color: var(--color-text-secondary);
-		font-size: 13px;
+		transition: all 0.2s ease;
+
+		&--selected {
+			background: var(--color-gray-11);
+			border-color: var(--color-primary);
+
+			#{$block}__regular-series-day-icon {
+				svg {
+					fill: var(--color-primary);
+				}
+
+				path {
+					fill: var(--color-primary);
+				}
+			}
+		}
 
 		&--completed {
-			background: rgb(46 204 113 / 10%);
-			border-color: rgb(46 204 113 / 30%);
-			color: var(--color-success);
+			background: var(--color-sentiment-positive);
+			border: none;
+		}
+
+		&--blocked {
+			background: rgb(var(--color-white));
 		}
 	}
 
-	&__status-icon {
-		flex-shrink: 0;
-		width: 14px;
-		height: 14px;
+	&__regular-series-day-icon {
+		width: 16px;
+		height: 16px;
+
+		svg {
+			fill: var(--color-gray-1);
+		}
+
+		path {
+			fill: var(--color-gray-1);
+		}
 	}
 
-	&__streak {
-		margin-left: auto;
-		color: var(--color-text-muted);
-		font-size: 11px;
+	&__regular-series-day-icon-selected {
+		width: 16px;
+		height: 16px;
+
+		svg {
+			fill: var(--color-white);
+		}
+
+		path {
+			fill: var(--color-white);
+		}
+	}
+
+	&__regular-series-day-name {
+		font-size: 12px;
+		text-align: center;
+
+		&--selected {
+			color: var(--color-primary);
+			text-decoration: underline;
+		}
+	}
+
+	&__regular-series-progress {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-top: 16px;
+		margin-bottom: 16px;
+	}
+
+	&__regular-series-progress-label {
+		color: var(--color-text-secondary);
+		font-size: 14px;
+		white-space: nowrap;
+	}
+
+	&__regular-series-progress-bar {
+		flex: 1;
+	}
+
+	&__regular-series-progress-value {
+		padding: 2px 8px;
+		background: var(--color-gray-11);
+		border: 1px solid var(--color-border);
+		border-radius: 4px;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+		white-space: nowrap;
+	}
+
+	&__regular-series-actions {
+		@include lg {
+			width: 100%;
+		}
 	}
 
 	&__progress-section {

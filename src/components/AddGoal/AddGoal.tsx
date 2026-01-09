@@ -9,6 +9,7 @@ import {ExternalGoalSearch} from '@/components/ExternalGoalSearch/ExternalGoalSe
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
+import {WeekDaySchedule, WeekDaySelector} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
@@ -25,6 +26,7 @@ import {Loader} from '../Loader/Loader';
 import Select from '../Select/Select';
 import {SimilarGoalItem} from '../SimilarGoalItem/SimilarGoalItem';
 import {Title} from '../Title/Title';
+import {AllowCustomSettingsField} from './components/AllowCustomSettingsField';
 
 import './add-goal.scss';
 
@@ -84,12 +86,23 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 	// Регулярность
 	const [isRegular, setIsRegular] = useState(false);
+	const [allowCustomSettings, setAllowCustomSettings] = useState(true);
 	const [regularFrequency, setRegularFrequency] = useState<'daily' | 'weekly' | 'custom'>('daily');
 	const [weeklyFrequency, setWeeklyFrequency] = useState(3);
+	const [customSchedule, setCustomSchedule] = useState<WeekDaySchedule>({
+		monday: false,
+		tuesday: false,
+		wednesday: false,
+		thursday: false,
+		friday: false,
+		saturday: false,
+		sunday: false,
+	});
 	const [durationType, setDurationType] = useState<'days' | 'weeks' | 'until_date' | 'indefinite'>('days');
 	const [durationValue, setDurationValue] = useState(30);
 	const [regularEndDate, setRegularEndDate] = useState('');
 	const [allowSkipDays, setAllowSkipDays] = useState(0);
+	const [allowSkipDaysThrough, setAllowSkipDaysThrough] = useState(0);
 	const [resetOnSkip, setResetOnSkip] = useState(false);
 
 	// Похожие цели
@@ -120,11 +133,22 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		setIsRegular(false);
 		setRegularFrequency('daily');
 		setWeeklyFrequency(3);
+		setCustomSchedule({
+			monday: false,
+			tuesday: false,
+			wednesday: false,
+			thursday: false,
+			friday: false,
+			saturday: false,
+			sunday: false,
+		});
 		setDurationType('days');
 		setDurationValue(30);
 		setRegularEndDate('');
 		setAllowSkipDays(0);
+		setAllowSkipDaysThrough(0);
 		setResetOnSkip(false);
+		setAllowCustomSettings(true);
 		setSimilarGoals([]);
 		setShowSimilarGoals(false);
 	};
@@ -579,6 +603,10 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					formData.append('weekly_frequency', weeklyFrequency.toString());
 				}
 
+				if (regularFrequency === 'custom') {
+					formData.append('custom_schedule', JSON.stringify(customSchedule));
+				}
+
 				formData.append('duration_type', durationType);
 
 				if (durationType === 'days' || durationType === 'weeks') {
@@ -732,6 +760,10 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 				if (regularFrequency === 'weekly') {
 					formData.append('weekly_frequency', weeklyFrequency.toString());
+				}
+
+				if (regularFrequency === 'custom') {
+					formData.append('custom_schedule', JSON.stringify(customSchedule));
 				}
 
 				formData.append('duration_type', durationType);
@@ -1144,8 +1176,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 										)}
 
 										{regularFrequency === 'custom' && (
-											<div className={element('custom-schedule-info')}>
-												<p>Пользовательский график будет доступен в следующих версиях</p>
+											<div className={element('custom-schedule-selector')}>
+												<p className={element('field-title')}>Выберите дни недели</p>
+												<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
 											</div>
 										)}
 									</div>
@@ -1233,6 +1266,35 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 											className={element('field')}
 										/>
 									</div>
+
+									<div className={element('regular-field-group')}>
+										<div className={element('input-with-suffix')}>
+											<FieldInput
+												placeholder="0"
+												id="allow-skip-days-through"
+												text="Начисление разрешенного пропуска через"
+												value={allowSkipDaysThrough.toString()}
+												setValue={(value) => {
+													const num = parseInt(value, 10);
+													setAllowSkipDaysThrough(Math.max(0, num));
+												}}
+												className={element('field')}
+												type="number"
+											/>
+											<span className={element('input-suffix')}>
+												{durationType === 'days' ? 'дней' : durationType === 'weeks' ? 'недель' : 'дней'}
+											</span>
+										</div>
+										<small className={element('format-hint')}>
+											Если установлено 0, то дополнительные пропуски не начисляются
+										</small>
+									</div>
+
+									<AllowCustomSettingsField
+										checked={allowCustomSettings}
+										setChecked={setAllowCustomSettings}
+										className={element('field')}
+									/>
 								</div>
 							)}
 						</div>

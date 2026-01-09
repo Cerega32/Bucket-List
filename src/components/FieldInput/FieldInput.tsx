@@ -26,6 +26,7 @@ interface FieldInputProps {
 	theme?: 'transparent';
 	focusBorder?: 'white';
 	rows?: number;
+	disabled?: boolean;
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -49,6 +50,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		theme,
 		focusBorder,
 		rows = 2,
+		disabled = false,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -90,6 +92,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onBlur={onBlur}
 						onKeyDown={onKeyDown}
 						rows={rows}
+						disabled={disabled}
 					/>
 				) : (
 					<input
@@ -104,6 +107,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onFocus={onFocus}
 						onBlur={onBlur}
 						onKeyDown={onKeyDown}
+						disabled={disabled}
 					/>
 				)}
 				{type === 'password' && (

@@ -21,6 +21,7 @@ import {GoalMapMulti} from '../GoalMap/GoalMapMulti';
 import LocationPicker from '../LocationPicker/LocationPicker';
 import {ProgressUpdateModal} from '../ProgressUpdateModal/ProgressUpdateModal';
 import {RandomGoalPicker} from '../RandomGoalPicker/RandomGoalPicker';
+import {SetRegularGoalModal} from '../SetRegularGoalModal/SetRegularGoalModal';
 import {Svg} from '../Svg/Svg';
 
 import './modal.scss';
@@ -193,6 +194,15 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				/>
 			)}
 			{window === 'random-goal-picker' && <RandomGoalPicker goals={modalProps?.goals || []} onClose={closeWindow} />}
+			{window === 'set-regular-goal' && (
+				<SetRegularGoalModal
+					onSave={async (settings) => {
+						await modalProps?.onSave?.(settings);
+					}}
+					onCancel={closeWindow}
+					initialSettings={modalProps?.initialSettings}
+				/>
+			)}
 		</>
 	);
 
@@ -205,9 +215,9 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				})}
 				ref={modalRef}
 			>
-				{title && (
+				{(title || modalProps?.title) && (
 					<div className={element('header')}>
-						<h2 className={element('title')}>{title}</h2>
+						<h2 className={element('title')}>{title || modalProps?.title}</h2>
 					</div>
 				)}
 				<div className={element('content')}>{modalContent}</div>
