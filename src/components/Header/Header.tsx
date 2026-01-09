@@ -145,7 +145,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const menuProfile = (
 		<div className={element('profile-menu')}>
-			<Link className={element('menu-item')} to={`/user/${userSelf?.id}/showcase/`}>
+			<Link className={element('menu-item')} to={`/user/${userSelf?.id || Cookies.get('user-id') || 0}/showcase/`}>
 				Мой профиль
 			</Link>
 			<Link className={element('menu-item')} to="/user/self">

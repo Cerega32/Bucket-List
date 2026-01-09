@@ -64,7 +64,7 @@ class Store implements IUserStore {
 		avatar: Cookies.get('avatar') || '',
 		email: '',
 		name: '',
-		id: +(Cookies.get('id') || 0),
+		id: +(Cookies.get('user-id') || 0),
 		username: '',
 		firstName: '',
 		lastName: '',
