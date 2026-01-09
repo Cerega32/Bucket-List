@@ -2,13 +2,13 @@
 	display: flex;
 	padding: 2px;
 	background: var(--color-secondary);
-	border-radius: 4px;
+	border-radius: 6px;
 
 	&__link {
 		display: flex;
 		align-items: center;
 		padding: 6px 16px;
-		border-radius: 4px;
+		border-radius: 6px;
 		color: var(--color-text-primary);
 		font-weight: var(--weight-medium);
 
@@ -24,7 +24,7 @@
 		margin-left: 4px;
 		background: var(--color-gray-3);
 		border: 1px solid var(--color-border);
-		border-radius: 4px;
+		border-radius: 6px;
 		color: var(--color-text);
 	}
 }

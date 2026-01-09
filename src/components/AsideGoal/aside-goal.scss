@@ -22,6 +22,7 @@
 	}
 
 	&__btn {
+		width: 100%;
 		margin-bottom: 8px;
 
 		&:has(+ :not(#{$block}__btn)) {

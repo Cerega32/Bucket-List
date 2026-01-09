@@ -8,7 +8,7 @@
 	gap: 4px;
 	width: 100%;
 	padding: 8px 16px;
-	border-radius: 4px;
+	border-radius: 6px;
 	transition: all 0.15s ease-in-out;
 	overflow: hidden;
 
@@ -199,7 +199,7 @@
 			var(--color-gradient-turquoise)
 		);
 		background-size: 600%;
-		border-radius: 4px;
+		border-radius: 6px;
 		color: rgb(var(--color-white-rgb) / 90%);
 		opacity: 0.8;
 		animation: anime 16s linear infinite;
@@ -230,6 +230,7 @@
 		width: auto;
 		padding: 0;
 		color: var(--color-primary);
+		font-weight: var(--weight-medium);
 
 		&:hover,
 		&:active {
@@ -274,6 +275,7 @@
 		width: auto;
 		height: 40px;
 		padding: 10px 16px;
+		border-radius: 8px;
 	}
 
 	&--disabled {

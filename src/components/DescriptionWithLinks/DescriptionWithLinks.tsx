@@ -1,4 +1,4 @@
-import {FC, useMemo, useState} from 'react';
+import {FC, useEffect, useMemo, useRef, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import {IGoal} from '@/typings/goal';
@@ -35,11 +35,26 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 
 	const [block, element] = useBem('description-with-links', className);
 
-	const [isShortDesc, setIsShortDesc] = useState(true);
+	const [isExpanded, setIsExpanded] = useState(false);
+	const [showMoreButton, setShowMoreButton] = useState(false);
+	const textRef = useRef<HTMLParagraphElement>(null);
 
-	const handleToggleMore = () => {
-		setIsShortDesc(!isShortDesc);
+	const handleShowMore = () => {
+		setIsExpanded(true);
 	};
+
+	// Проверяем, нужна ли кнопка "Читать подробнее"
+	useEffect(() => {
+		if (textRef.current) {
+			const elementText = textRef.current;
+
+			// Проверяем, обрезается ли текст при ограничении в 3 строки
+			// Если scrollHeight больше clientHeight, значит текст обрезается
+			const isTextTruncated = elementText.scrollHeight > elementText.clientHeight;
+
+			setShowMoreButton(isTextTruncated);
+		}
+	}, [goal.description]);
 
 	const tabs: Array<ITabs> = useMemo(
 		() =>
@@ -66,10 +81,12 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 		<div className={block({list: isList})}>
 			<div className={element('wrapper')}>
 				<div className={element('text')}>
-					<p className={element('short-text')}>{isShortDesc ? goal.shortDescription : goal.description}</p>
-					{goal.shortDescription !== goal.description && (
-						<Button icon="download" theme="blue-light" className={element('btn-more')} onClick={handleToggleMore}>
-							{isShortDesc ? 'Читать подробнее' : 'Скрыть'}
+					<p ref={textRef} className={element('description', {expanded: isExpanded})}>
+						{goal.description}
+					</p>
+					{!isExpanded && showMoreButton && (
+						<Button theme="no-border" className={element('btn-more')} onClick={handleShowMore}>
+							Читать подробнее
 						</Button>
 					)}
 				</div>
@@ -79,7 +96,6 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 						{title: 'Добавили к себе', value: goal.totalAdded},
 						{title: 'Выполнили', value: goal.totalCompleted},
 					]}
-					progress
 					progressData={{
 						completed: goal.totalCompleted,
 						total: goal.totalAdded,

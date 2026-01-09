@@ -399,13 +399,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 							regularConfig.frequency === 'daily' &&
 							!isRegularGoalCompletedToday &&
 							!regularConfig.statistics?.currentPeriodProgress?.completedToday && (
-								<Button
-									theme="green"
-									onClick={handleMarkRegularGoal}
-									icon="plus"
-									className={element('btn')}
-									size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-								>
+								<Button theme="green" onClick={handleMarkRegularGoal} icon="plus" className={element('btn')} size="medium">
 									Отметить сегодня
 								</Button>
 							)}
@@ -438,7 +432,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 								onClick={openProgressModal}
 								icon="trending-up"
 								className={element('btn')}
-								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+								size="medium"
 							>
 								Изменить прогресс
 							</Button>
@@ -452,13 +446,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					!isCompleted &&
 					(!progress || (progress.progressPercentage === 0 && !progress.dailyNotes)) &&
 					!regularConfig && (
-						<Button
-							theme="green"
-							onClick={handleStartProgress}
-							icon="play"
-							className={element('btn')}
-							size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-						>
+						<Button theme="green" onClick={handleStartProgress} icon="play" className={element('btn')} size="medium">
 							Начать выполнение
 						</Button>
 					)}
@@ -472,75 +460,39 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						className={element('btn', {done: true})}
 						hoverContent={isCompleted ? 'Отменить выполнение' : ''}
 						hoverIcon={isCompleted ? 'cross' : ''}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+						size="medium"
 					>
 						{isCompleted ? 'Выполнено' : 'Выполнить'}
 					</Button>
 				)}
 				{!isList && added && (
-					<Button
-						theme="blue-light"
-						onClick={openFolderSelector}
-						icon="folder"
-						className={element('btn')}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
+					<Button theme="blue-light" onClick={openFolderSelector} icon="folder" className={element('btn')} size="medium">
 						Добавить в папку
 					</Button>
 				)}
 				{isList && added && !isCompleted && (
-					<Button
-						theme="blue"
-						onClick={openMarkAll}
-						icon="done"
-						className={element('btn')}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
+					<Button theme="blue" onClick={openMarkAll} icon="done" className={element('btn')} size="medium">
 						Выполнить все цели
 					</Button>
 				)}
 				{((location && !isList) || (isList && !!location?.length)) && (
-					<Button
-						theme="blue-light"
-						icon="map"
-						onClick={openMapModal}
-						className={element('btn')}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
+					<Button theme="blue-light" icon="map" onClick={openMapModal} className={element('btn')} size="medium">
 						Открыть карту
 					</Button>
 				)}
 
 				{!added && (
-					<Button
-						onClick={() => updateGoal(code, 'add')}
-						icon="plus"
-						className={element('btn')}
-						theme="blue"
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
+					<Button onClick={() => updateGoal(code, 'add')} icon="plus" className={element('btn')} theme="blue" size="medium">
 						Добавить к себе
 					</Button>
 				)}
 				{!isList && isCompleted && (
-					<Button
-						theme="blue-light"
-						onClick={openAddReview}
-						icon="comment"
-						className={element('btn')}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
+					<Button theme="blue-light" onClick={openAddReview} icon="comment" className={element('btn')} size="medium">
 						Написать отзыв
 					</Button>
 				)}
 				{added && (
-					<Button
-						theme="blue-light"
-						onClick={deleteGoal}
-						icon="trash"
-						className={element('btn')}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
+					<Button theme="blue-light" onClick={deleteGoal} icon="trash" className={element('btn')} size="medium">
 						Удалить
 					</Button>
 				)}
@@ -552,7 +504,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						className={element('btn')}
 						type={editGoal ? 'button' : 'Link'}
 						href={editGoal ? undefined : `/edit-list/${code}`}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+						size="medium"
 					>
 						Редактировать
 					</Button>

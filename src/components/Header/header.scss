@@ -50,7 +50,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		gap: 16px;
+		gap: 8px;
 
 		@include lg {
 			position: absolute;
@@ -115,7 +115,7 @@
 	&__item-link {
 		display: inline-block;
 		padding: 6px 8px;
-		border-radius: 16px;
+		border-radius: 6px;
 		color: var(--color-white);
 
 		// font-weight: var(--weight-medium);

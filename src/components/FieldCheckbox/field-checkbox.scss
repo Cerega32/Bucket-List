@@ -6,13 +6,13 @@
 
 	input:checked + {
 		#{$block}__label > #{$block}__checkbox {
-			border: 1px solid var(--color-primary);
 			background: var(--color-primary);
+			border: 1px solid var(--color-primary);
 		}
 
 		#{$block}__label:hover > #{$block}__checkbox {
-			border: 1px solid var(--color-primary-hover);
 			background: var(--color-primary-hover);
+			border: 1px solid var(--color-primary-hover);
 		}
 	}
 
@@ -24,15 +24,12 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-
 		width: 16px;
 		height: 16px;
-
-		transition: all 0.15s ease-in-out;
-
-		border: 1px solid var(--color-gray-4);
-		border-radius: 4px;
 		background: var(--color-secondary);
+		border: 1px solid var(--color-gray-4);
+		border-radius: 6px;
+		transition: all 0.15s ease-in-out;
 
 		&:focus-visible {
 			@include focus-outline;
@@ -48,15 +45,12 @@
 		display: flex;
 		justify-content: flex-start;
 		align-items: center;
-
+		gap: 8px;
 		width: 100%;
 		height: 100%;
-
+		font-weight: 500;
 		cursor: pointer;
 		transition: all 0.15s ease-in-out;
-
-		font-weight: 500;
-		gap: 8px;
 
 		&:hover {
 			#{$block}__checkbox {

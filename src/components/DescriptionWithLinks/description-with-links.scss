@@ -27,8 +27,18 @@
 		width: initial;
 	}
 
-	&__short-text {
-		margin-bottom: 16px;
+	&__description {
+		display: -webkit-box;
+		margin-bottom: 4px;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+
+		&--expanded {
+			-webkit-line-clamp: unset;
+			line-clamp: unset;
+		}
 	}
 
 	&__info {

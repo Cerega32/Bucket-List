@@ -215,16 +215,10 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const buttonsAuth = (
 		<div className={element('profile')}>
-			<Button className={element('sign-in')} theme="blue-light" size={isScreenMobile ? 'medium' : 'small'} onClick={openLogin}>
+			<Button className={element('sign-in')} theme="blue-light" size="medium" onClick={openLogin}>
 				Войти
 			</Button>
-			<Button
-				className={element('registration')}
-				theme="blue"
-				size={isScreenMobile ? 'medium' : 'small'}
-				icon="rocket"
-				onClick={openRegistration}
-			>
+			<Button className={element('registration')} theme="blue" size="medium" onClick={openRegistration}>
 				Регистрация
 			</Button>
 		</div>
