@@ -14,6 +14,7 @@ import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {debounce} from '@/utils/time/debounce';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {selectComplexity} from '@/utils/values/complexity';
+import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
 
 import {Loader} from '../Loader/Loader';
 import Select from '../Select/Select';
@@ -80,8 +81,7 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 	// Инициализация начальных данных - только один раз при монтировании
 	useEffect(() => {
 		if (!initialized && goal && categories.length > 0) {
-			// Инициализируем базовые поля
-			setTitle(goal.title || '');
+			setTitle(goal.title ? goal.title.slice(0, GOAL_TITLE_MAX_LENGTH) : '');
 			setDescription(goal.description || '');
 			setDeadline(goal.deadline || '');
 			setEstimatedTime(goal.estimatedTime || '');
@@ -130,7 +130,9 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 
 	// Обработчик изменения названия цели
 	const handleTitleChange = (value: string) => {
-		setTitle(value);
+		if (value.length <= GOAL_TITLE_MAX_LENGTH) {
+			setTitle(value);
+		}
 	};
 
 	// Обработчик изменения предполагаемого времени
@@ -261,7 +263,7 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 
 	// Функция для заполнения полей формы данными из выбранной цели
 	const fillFormWithGoalData = (selectedGoal: IGoal) => {
-		setTitle(selectedGoal.title);
+		setTitle(selectedGoal.title ? selectedGoal.title.slice(0, GOAL_TITLE_MAX_LENGTH) : '');
 		setDescription(selectedGoal.description);
 		setEstimatedTime(selectedGoal.estimatedTime || '');
 
@@ -321,7 +323,7 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 		goalData: Partial<IGoal> & {imageUrl?: string; external_id?: string | number; externalType?: string; status?: string}
 	) => {
 		// Заполняем форму данными из внешней цели
-		setTitle(goalData.title || '');
+		setTitle(goalData.title ? goalData.title.slice(0, GOAL_TITLE_MAX_LENGTH) : '');
 		setDescription(goalData.description || '');
 		setCode(goalData.code || '');
 
@@ -532,6 +534,8 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 								required
 								onFocus={handleTitleFocus}
 								onBlur={handleTitleBlur}
+								maxLength={GOAL_TITLE_MAX_LENGTH}
+								showCharCount
 							/>
 
 							{showSimilarGoals && (

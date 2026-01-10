@@ -20,6 +20,7 @@ import {mapApi} from '@/utils/mapApi';
 import {debounce} from '@/utils/time/debounce';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {selectComplexity} from '@/utils/values/complexity';
+import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
 
 import {Loader} from '../Loader/Loader';
 import Select from '../Select/Select';
@@ -144,7 +145,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	};
 
 	const fillFormWithGoalData = (goal: IGoal) => {
-		setTitle(goal.title);
+		setTitle(goal.title ? goal.title.slice(0, GOAL_TITLE_MAX_LENGTH) : '');
 		setDescription(goal.description || '');
 		setEstimatedTime(goal.estimatedTime || '');
 
@@ -224,7 +225,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 	// Обработчик изменения названия цели
 	const handleTitleChange = (value: string) => {
-		setTitle(value);
+		if (value.length <= GOAL_TITLE_MAX_LENGTH) {
+			setTitle(value);
+		}
 	};
 
 	// Обработчик изменения предполагаемого времени
@@ -798,7 +801,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		goalData: Partial<IGoal> & {imageUrl?: string; external_id?: string | number; externalType?: string}
 	) => {
 		// Заполняем основные поля
-		if (goalData.title) setTitle(goalData.title);
+		if (goalData.title) setTitle(goalData.title.slice(0, GOAL_TITLE_MAX_LENGTH));
 		if (goalData.description) setDescription(goalData.description || '');
 		if (goalData.estimatedTime) setEstimatedTime(goalData.estimatedTime);
 
@@ -995,6 +998,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 								required
 								onFocus={handleTitleFocus}
 								onBlur={handleTitleBlur}
+								maxLength={GOAL_TITLE_MAX_LENGTH}
+								showCharCount
 							/>
 
 							{showSimilarGoals && (

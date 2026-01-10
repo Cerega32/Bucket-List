@@ -14,6 +14,7 @@ import {getAllCategories} from '@/utils/api/get/getCategories';
 import {updateGoal} from '@/utils/api/put/updateGoal';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {selectComplexity} from '@/utils/values/complexity';
+import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
 
 import {Loader} from '../Loader/Loader';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
@@ -34,7 +35,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	const navigate = useNavigate();
 
 	const [block, element] = useBem('add-goal', className); // Используем те же стили, что и для добавления
-	const [title, setTitle] = useState(goal.title || '');
+	const [title, setTitle] = useState(goal.title ? goal.title.slice(0, GOAL_TITLE_MAX_LENGTH) : '');
 	const [description, setDescription] = useState(goal.description || '');
 	const [estimatedTime, setEstimatedTime] = useState(goal.estimatedTime || '');
 	const [activeComplexity, setActiveComplexity] = useState<number | null>(null);
@@ -410,9 +411,15 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								id="goal-title"
 								text="Название цели *"
 								value={title}
-								setValue={setTitle}
+								setValue={(value: string) => {
+									if (value.length <= GOAL_TITLE_MAX_LENGTH) {
+										setTitle(value);
+									}
+								}}
 								className={element('field')}
 								required
+								maxLength={GOAL_TITLE_MAX_LENGTH}
+								showCharCount
 							/>
 
 							<Select

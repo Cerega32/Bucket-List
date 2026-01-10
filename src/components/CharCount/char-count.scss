@@ -1,0 +1,15 @@
+.char-count {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 4px;
+
+	&__text {
+		color: var(--color-text-secondary);
+		font-size: 12px;
+		transition: color 0.15s ease-in-out;
+
+		&--error {
+			color: var(--color-sentiment-negative);
+		}
+	}
+}
