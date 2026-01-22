@@ -114,16 +114,8 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 						setShowRegularModal(true);
 						return; // Выходим из функции, добавление будет происходить в модалке
 					}
-					// Если настройки нельзя изменить, добавляем с базовыми настройками
-					const response = await addRegularGoalToUser(code, {
-						frequency: regularSettings.data.regular_settings.frequency,
-						weeklyFrequency: regularSettings.data.regular_settings.weeklyFrequency,
-						durationType: regularSettings.data.regular_settings.durationType,
-						durationValue: regularSettings.data.regular_settings.durationValue,
-						endDate: regularSettings.data.regular_settings.endDate || undefined,
-						resetOnSkip: regularSettings.data.regular_settings.resetOnSkip,
-						allowSkipDays: regularSettings.data.regular_settings.allowSkipDays,
-					});
+					// Если настройки нельзя изменить, используем обычный endpoint /add/ с базовыми настройками
+					const response = await addGoal(code);
 
 					if (response.success) {
 						const updatedGoal = {

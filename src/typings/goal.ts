@@ -205,6 +205,7 @@ export interface IRegularGoalConfig {
 	allowCustomSettings: boolean;
 	createdAt: string;
 	statistics?: IRegularGoalStatistics;
+	completedSeriesCount?: number; // Количество завершенных серий из истории (показывается даже если цель удалена)
 }
 
 export interface IRegularGoalStatistics {
@@ -241,9 +242,19 @@ export interface IRegularGoalStatistics {
 	totalWeeks: number;
 	completedWeeks: number;
 	currentWeekCompletions: number;
+	earnedSkipDays?: number;
+	consecutiveCompletionsForSkip?: number;
+	usedSkipDays?: number;
+	remainingSkipDays?: number; // Количество использованных разрешенных пропусков
 	isActive: boolean;
 	isPaused: boolean;
 	resetCount: number;
+	isInterrupted?: boolean;
+	interruptedStreak?: number | null;
+	interruptedCompletionPercentage?: number | null;
+	isSeriesCompleted?: boolean;
+	completedSeriesCount?: number;
+	seriesCompletionDate?: string;
 	currentPeriodProgress?: {
 		type: 'daily' | 'weekly' | 'custom';
 		completedToday?: boolean;
@@ -258,8 +269,11 @@ export interface IRegularGoalStatistics {
 			dayIndex: number;
 			dayName: string;
 			isAllowed: boolean;
-			isBlocked: boolean;
-			isCompleted: boolean;
+			isBlocked: boolean; // Блокировка по расписанию (для weekly/custom - показываем крестик)
+			isBlockedByStartDate?: boolean; // Блокировка из-за даты начала (показываем пустым, серый фон)
+			isCompleted: boolean; // Зеленый фон (для всех дней, если неделя выполнена для weekly)
+			isCompletedDay?: boolean; // Реально выполненный день (с галочкой для weekly)
+			isSkipped?: boolean; // Использован разрешенный пропуск
 			date: string;
 		}>;
 	};
@@ -267,4 +281,40 @@ export interface IRegularGoalStatistics {
 	canCompleteToday: boolean;
 	createdAt: string;
 	updatedAt: string;
+}
+
+export interface IRegularGoalHistory {
+	id: number;
+	user: number;
+	userUsername: string;
+	regularGoal: number;
+	regularGoalData: {
+		id: number;
+		goal: number;
+		goalTitle: string;
+		goalCode: string;
+		goalImage: string;
+		goalCategory: string;
+		frequency: 'daily' | 'weekly' | 'custom';
+		weeklyFrequency?: number;
+		customSchedule?: any;
+		durationType: 'days' | 'weeks' | 'until_date' | 'indefinite';
+		durationValue?: number;
+		endDate?: string;
+		allowSkipDays: number;
+		daysForEarnedSkip?: number;
+		resetOnSkip: boolean;
+		isActive: boolean;
+		createdAt: string;
+		updatedAt: string;
+	};
+	status: 'completed' | 'interrupted';
+	statusDisplay: string;
+	streak: number;
+	completionPercentage?: number | null;
+	startDate?: string;
+	endDate: string;
+	totalCompletions: number;
+	totalDays: number;
+	createdAt: string;
 }

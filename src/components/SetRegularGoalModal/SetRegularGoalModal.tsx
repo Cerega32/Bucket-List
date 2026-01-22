@@ -20,6 +20,7 @@ export interface RegularGoalSettings {
 	endDate?: string;
 	resetOnSkip: boolean;
 	allowSkipDays?: number;
+	daysForEarnedSkip?: number;
 	markAsCompletedAfterSeries: boolean;
 }
 
@@ -53,6 +54,7 @@ export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCan
 	const [endDate, setEndDate] = useState(initialSettings?.endDate || '');
 	const [resetOnSkip, setResetOnSkip] = useState(initialSettings?.resetOnSkip || false);
 	const [allowSkipDays, setAllowSkipDays] = useState(initialSettings?.allowSkipDays || 0);
+	const [daysForEarnedSkip, setDaysForEarnedSkip] = useState(initialSettings?.daysForEarnedSkip || 0);
 	const [markAsCompletedAfterSeries] = useState(initialSettings?.markAsCompletedAfterSeries || false);
 
 	const handleSave = () => {
@@ -64,7 +66,8 @@ export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCan
 			durationValue: durationType === 'days' || durationType === 'weeks' ? durationValue : undefined,
 			endDate: durationType === 'until_date' ? endDate : undefined,
 			resetOnSkip,
-			allowSkipDays: resetOnSkip ? allowSkipDays : undefined,
+			allowSkipDays: resetOnSkip ? allowSkipDays : 0, // Всегда передаем значение, даже если resetOnSkip = false
+			daysForEarnedSkip: resetOnSkip ? daysForEarnedSkip : 0, // Всегда передаем значение, даже если resetOnSkip = false
 			markAsCompletedAfterSeries,
 		};
 
@@ -180,18 +183,33 @@ export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCan
 						/>
 
 						{resetOnSkip && (
-							<FieldInput
-								placeholder="0"
-								id="allow-skip-days"
-								text="Разрешенные пропуски"
-								value={allowSkipDays.toString()}
-								setValue={(value) => {
-									const num = parseInt(value, 10) || 0;
-									setAllowSkipDays(Math.max(0, num));
-								}}
-								className={element('field')}
-								type="number"
-							/>
+							<>
+								<FieldInput
+									placeholder="0"
+									id="allow-skip-days"
+									text="Разрешенные пропуски"
+									value={allowSkipDays.toString()}
+									setValue={(value) => {
+										const num = parseInt(value, 10) || 0;
+										setAllowSkipDays(Math.max(0, num));
+									}}
+									className={element('field')}
+									type="number"
+								/>
+								<FieldInput
+									placeholder="0"
+									id="days-for-earned-skip"
+									text="Начисление разрешенного пропуска через"
+									value={daysForEarnedSkip.toString()}
+									setValue={(value) => {
+										const num = parseInt(value, 10) || 0;
+										setDaysForEarnedSkip(Math.max(0, num));
+									}}
+									className={element('field')}
+									type="number"
+									suffix={frequency === 'weekly' ? 'недель' : 'дней'}
+								/>
+							</>
 						)}
 						{/* TODO: Пока под вопросом, нужно или нет эта опция */}
 						{/* <FieldCheckbox

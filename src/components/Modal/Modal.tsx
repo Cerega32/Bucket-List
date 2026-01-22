@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
 import {FC, ReactNode, useEffect, useRef} from 'react';
+import {createPortal} from 'react-dom';
 
 import {Button} from '@/components/Button/Button';
 import {Login} from '@/components/Login/Login';
@@ -206,7 +207,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		</>
 	);
 
-	return (
+	const modalElement = (
 		<section className={block({isOpen})}>
 			<div
 				className={element('window', {
@@ -233,4 +234,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			<button aria-label="Закрыть окно" type="button" className={element('base')} onClick={closeWindow} />
 		</section>
 	);
+
+	// Рендерим модалку в document.body через Portal, чтобы она всегда была на верхнем уровне
+	return createPortal(modalElement, document.body);
 });

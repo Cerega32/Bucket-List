@@ -197,6 +197,11 @@
 			border: none;
 		}
 
+		&--skipped {
+			background: var(--color-text-secondary);
+			border: none;
+		}
+
 		&--blocked {
 			background: rgb(var(--color-white));
 		}
@@ -262,7 +267,26 @@
 		border: 1px solid var(--color-border);
 		border-radius: 4px;
 		color: var(--color-text-secondary);
+	}
+
+	&__regular-series-completed-count {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 16px;
+		margin-bottom: 16px;
+	}
+
+	&__regular-series-completed-count-label {
+		color: var(--color-text-secondary);
 		font-size: 14px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__regular-series-completed-count-value {
+		color: var(--color-text-primary);
+		font-size: 14px;
+		font-weight: var(--weight-semi-bold);
 		white-space: nowrap;
 	}
 
