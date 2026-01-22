@@ -33,6 +33,7 @@
 
 	&__input {
 		width: 100%;
+		min-width: 150px;
 		height: 100%;
 		min-height: 42px;
 		padding: 10px 16px;
@@ -45,7 +46,8 @@
 			border: 1px solid var(--color-primary-hover);
 		}
 
-		&:focus {
+		&:focus,
+		&:focus-visible {
 			@include focus-outline;
 
 			border: 1px solid var(--color-primary-hover);
@@ -53,6 +55,10 @@
 
 		&--iconBegin {
 			padding-left: 40px;
+		}
+
+		&--iconEnd {
+			padding-right: 50px;
 		}
 	}
 
@@ -85,6 +91,17 @@
 
 			&::placeholder {
 				color: rgba(var(--color-white-rgb) / 78%);
+			}
+
+			&--focusBorder-white {
+				border: 1px solid transparent;
+				outline: none;
+
+				&:focus,
+				&:focus-visible {
+					border: 1px solid rgba(var(--color-white-rgb) / 72%);
+					box-shadow: 0 0 0 2px rgba(var(--color-white-rgb) / 40%);
+				}
 			}
 		}
 

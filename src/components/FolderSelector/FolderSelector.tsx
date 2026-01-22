@@ -142,7 +142,7 @@ export const FolderSelector: FC<FolderSelectorProps> = observer(
 
 				{folders.length > 0 && (
 					<div className={element('actions')}>
-						<Button theme="blue" onClick={handleAddToFolder} active={!selectedFolderId || isAdding} loading={isAdding}>
+						<Button theme="blue" onClick={handleAddToFolder} disabled={!selectedFolderId || isAdding} loading={isAdding}>
 							Добавить в папку
 						</Button>
 					</div>

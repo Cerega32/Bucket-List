@@ -41,26 +41,48 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 		setIsShortDesc(!isShortDesc);
 	};
 
-	const tabs: Array<ITabs> = useMemo(
-		() =>
-			isList
-				? []
-				: [
-						{
-							url: '/',
-							name: 'Отметки',
-							page: 'isGoal',
-							count: goal.totalComments,
-						},
-						{
-							url: '/lists',
-							name: 'Списки с целью',
-							page: 'isGoalLists',
-							count: goal.totalLists,
-						},
-				  ],
-		[goal, isList]
-	);
+	const tabs: Array<ITabs> = useMemo(() => {
+		if (isList) {
+			return [];
+		}
+
+		const baseTabs: Array<ITabs> = [
+			{
+				url: '/',
+				name: 'Отметки',
+				page: 'isGoal',
+				count: goal.totalComments,
+			},
+			{
+				url: '/lists',
+				name: 'Списки с целью',
+				page: 'isGoalLists',
+				count: goal.totalLists,
+			},
+		];
+
+		// Добавляем вкладку "История выполнения" только если цель регулярная,
+		// добавлена пользователем и у неё есть статистика (цель начата)
+		// История может быть пустой, но вкладка должна быть доступна для просмотра
+		if (goal.regularConfig && goal.addedByUser && goal.regularConfig.statistics && goal.regularConfig.id) {
+			baseTabs.push({
+				url: '/history',
+				name: 'История выполнения',
+				page: 'isGoalHistory',
+			});
+		}
+
+		// Добавляем вкладку "Рейтинг" только если цель регулярная, бессрочная и добавлена пользователем
+		if (goal.regularConfig && goal.addedByUser && goal.regularConfig.id && goal.regularConfig.durationType === 'indefinite') {
+			baseTabs.push({
+				url: '/rating',
+				name: 'Рейтинг',
+				page: 'isGoalRating',
+			});
+		}
+
+		return baseTabs;
+	}, [goal, isList]);
 
 	return (
 		<div className={block({list: isList})}>

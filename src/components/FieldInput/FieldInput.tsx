@@ -26,9 +26,11 @@ interface FieldInputProps {
 	iconEnd?: string;
 	theme?: 'transparent';
 	// focusBorder?: 'white';
-	rows?: number;
 	maxLength?: number;
 	showCharCount?: boolean;
+	focusBorder?: 'white';
+	rows?: number;
+	disabled?: boolean;
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -51,9 +53,11 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		onKeyDown,
 		theme,
 		// focusBorder,
-		rows = 2,
 		maxLength,
 		showCharCount = false,
+		focusBorder,
+		rows = 2,
+		disabled = false,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -86,7 +90,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 				{iconBegin && <Svg icon={iconBegin} className={element('icon-begin')} />}
 				{typeState === 'textarea' ? (
 					<textarea
-						className={element('input', {iconBegin: !!iconBegin, textarea: true})}
+						className={element('input', {iconBegin: !!iconBegin, textarea: true, iconEnd: !!iconEnd})}
 						id={id}
 						placeholder={placeholder}
 						value={value}
@@ -96,10 +100,11 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onKeyDown={onKeyDown}
 						rows={rows}
 						maxLength={maxLength}
+						disabled={disabled}
 					/>
 				) : (
 					<input
-						className={element('input', {iconBegin: !!iconBegin})}
+						className={element('input', {iconBegin: !!iconBegin, focusBorder, iconEnd: !!iconEnd || type === 'password'})}
 						id={id}
 						type={typeState}
 						placeholder={placeholder}
@@ -111,6 +116,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onBlur={onBlur}
 						onKeyDown={onKeyDown}
 						maxLength={maxLength}
+						disabled={disabled}
 					/>
 				)}
 				{type === 'password' && (

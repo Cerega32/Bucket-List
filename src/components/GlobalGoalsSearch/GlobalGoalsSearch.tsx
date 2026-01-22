@@ -173,27 +173,51 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 
 	return (
 		<div className={block({isModal, theme})} ref={searchRef}>
-			<div className={element('input-wrapper')}>
-				<FieldInput
-					className={element('input')}
-					placeholder="Поиск целей"
-					id="global-search"
-					value={query}
-					setValue={handleSearchChange}
-					iconEnd="search"
-					onFocus={handleInputFocus}
-					onKeyDown={handleKeyDown}
-					theme={!isModal && theme === 'transparent' ? 'transparent' : undefined}
-				/>
-				{isSearching && (
-					<div className={element('loading')}>
-						<Loader isLoading />
-					</div>
-				)}
-			</div>
+			{!isModal && (
+				<div className={element('input-wrapper')}>
+					<FieldInput
+						className={element('input')}
+						placeholder="Поиск целей"
+						id="global-search"
+						value={query}
+						setValue={handleSearchChange}
+						iconEnd="search"
+						onFocus={handleInputFocus}
+						onKeyDown={handleKeyDown}
+						theme={!isModal && theme === 'transparent' ? 'transparent' : undefined}
+						focusBorder="white"
+					/>
+					{isSearching && (
+						<div className={element('loading')}>
+							<Loader isLoading />
+						</div>
+					)}
+				</div>
+			)}
 
-			{isDropdownOpen && (
+			{(isDropdownOpen || isModal) && (
 				<div className={element('dropdown')}>
+					{isModal && (
+						<div className={element('input-wrapper')}>
+							<FieldInput
+								className={element('input')}
+								placeholder="Поиск целей"
+								id="global-search"
+								value={query}
+								setValue={handleSearchChange}
+								iconEnd="search"
+								onFocus={handleInputFocus}
+								onKeyDown={handleKeyDown}
+								theme={!isModal && theme === 'transparent' ? 'transparent' : undefined}
+								focusBorder="white"
+							/>
+							{isSearching && (
+								<div className={element('loading')}>
+									<Loader isLoading />
+								</div>
+							)}
+						</div>
+					)}
 					{results.length > 0 ? (
 						<>
 							<ScrollableResults />

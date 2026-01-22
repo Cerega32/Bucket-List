@@ -6,17 +6,69 @@
 	padding: 56px 0 0;
 	grid-template-columns: 1fr 1fr;
 
+	@include xl {
+		padding: 56px 24px 0;
+	}
+
+	@include md {
+		gap: 40px 30px;
+		padding: 40px 24px 0;
+	}
+
+	@include sm {
+		gap: 30px;
+	}
+
+	&__wrapper {
+		grid-column: 1 / 2;
+		grid-row: 1 / 3;
+
+		@include sm {
+			grid-column: 1 / 3;
+			grid-row: 1 / 2;
+		}
+	}
+
 	&__title {
 		margin-bottom: 16px;
 	}
 
 	&__description {
 		max-width: 576px;
-		margin-bottom: 40px;
+	}
+
+	&__info {
+		grid-column: 1 / 3;
+		grid-row: 3 / 4;
+
+		@include md {
+			grid-column: 1 / 3;
+		}
+
+		@include sm {
+			grid-row: 3 / 4;
+		}
+	}
+
+	&__pedestal {
+		height: min-content;
+		grid-column: 2 / 3;
+		grid-row: 1 / 4;
+
+		@include md {
+			grid-row: 1 / 3;
+		}
+
+		@include sm {
+			grid-column: 1 / 3;
+			grid-row: 2 / 3;
+		}
 	}
 
 	&__board {
 		grid-column: 1 / 3;
+		grid-row: 4/ 5;
+		overflow-x: auto;
 	}
 
 	&__empty {

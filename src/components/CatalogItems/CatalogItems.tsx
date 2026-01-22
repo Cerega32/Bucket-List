@@ -12,7 +12,7 @@ import {getAllLists} from '@/utils/api/get/getAllLists';
 import {getRegularGoalSettings} from '@/utils/api/get/getRegularGoalSettings';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {addListGoal} from '@/utils/api/post/addListGoal';
-import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
+import {addRegularGoalToUser, RegularGoalSettings} from '@/utils/api/post/addRegularGoalToUser';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
@@ -22,6 +22,7 @@ import {Card} from '../Card/Card';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
+import {Line} from '../Line/Line';
 import {Loader} from '../Loader/Loader';
 import {Pagination} from '../Pagination/Pagination';
 import Select, {OptionSelect} from '../Select/Select';
@@ -34,6 +35,7 @@ interface CatalogItemsProps {
 	beginUrl: string;
 	columns?: string;
 	initialSearch?: string;
+	searchWrapperWrap?: boolean;
 }
 
 interface CatalogItemsCategoriesProps extends CatalogItemsProps {
@@ -72,7 +74,19 @@ const sortBy: Array<OptionSelect> = [
 ];
 
 export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersProps> = (props) => {
-	const {className, code = 'all', subPage, category, userId, completed, beginUrl, columns, categories, initialSearch = ''} = props;
+	const {
+		className,
+		code = 'all',
+		subPage,
+		category,
+		userId,
+		completed,
+		beginUrl,
+		columns,
+		categories,
+		initialSearch = '',
+		searchWrapperWrap = false,
+	} = props;
 
 	const [block, element] = useBem('catalog-items', className);
 
@@ -283,11 +297,32 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 				const regularSettings = await getRegularGoalSettings(codeGoal);
 
 				if (regularSettings.success && regularSettings.data) {
-					// Цель регулярная - показываем модалку настройки
-					setRegularGoalData(regularSettings.data);
-					setPendingGoalIndex(i); // Запоминаем индекс цели для последующего обновления
-					setShowRegularModal(true);
-					return; // Выходим из функции, добавление будет происходить в модалке
+					// Если настройки можно изменить, показываем модалку
+					if (regularSettings.data.regular_settings?.allowCustomSettings) {
+						setRegularGoalData(regularSettings.data);
+						setPendingGoalIndex(i); // Запоминаем индекс цели для последующего обновления
+						setShowRegularModal(true);
+						return; // Выходим из функции, добавление будет происходить в модалке
+					}
+					// Если настройки нельзя изменить, используем обычный endpoint /add/ с базовыми настройками
+					const response = await addGoal(codeGoal);
+
+					if (response.success) {
+						const updatedGoal = {
+							...goals.data[i],
+							addedByUser: true,
+							totalAdded: (goals.data[i].totalAdded || 0) + 1,
+						};
+						const newGoals = [...goals.data];
+						newGoals[i] = updatedGoal;
+						setGoals({...goals, data: newGoals});
+						NotificationStore.addNotification({
+							type: 'success',
+							title: 'Успех',
+							message: 'Регулярная цель успешно добавлена!',
+						});
+						return;
+					}
 				}
 			} catch (error) {
 				// Если API регулярности не отвечает или цель не регулярная, продолжаем обычное добавление
@@ -340,15 +375,32 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		setPendingGoalIndex(null);
 	};
 
-	const handleRegularGoalSave = async (settings: any) => {
+	const handleRegularGoalSave = async (settings: RegularGoalSettings) => {
 		if (!regularGoalData?.goal || pendingGoalIndex === null) return;
 
 		setIsRegularLoading(true);
 		try {
-			const response = await addRegularGoalToUser(regularGoalData.goal.code, {
-				goal_code: regularGoalData.goal.code,
-				...settings,
-			});
+			// Явно передаем все поля, включая customSchedule
+			const requestData: RegularGoalSettings = {
+				frequency: settings.frequency,
+				durationType: settings.durationType,
+				allowSkipDays: settings.allowSkipDays,
+				resetOnSkip: settings.resetOnSkip,
+				...(settings.frequency === 'weekly' && settings.weeklyFrequency !== undefined
+					? {weeklyFrequency: settings.weeklyFrequency}
+					: {}),
+				...(settings.frequency === 'custom' && settings.customSchedule !== undefined
+					? {customSchedule: settings.customSchedule}
+					: {}),
+				...(settings.durationType === 'days' || settings.durationType === 'weeks'
+					? settings.durationValue !== undefined
+						? {durationValue: settings.durationValue}
+						: {}
+					: {}),
+				...(settings.durationType === 'until_date' && settings.endDate !== undefined ? {endDate: settings.endDate} : {}),
+			};
+
+			const response = await addRegularGoalToUser(regularGoalData.goal.code, requestData);
 
 			if (response.success) {
 				// Обновляем состояние цели как добавленной
@@ -389,24 +441,29 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		<section className={block()} key={code}>
 			<div className={element('filters')}>
 				<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage || ''} />
-				<FieldInput
-					className={element('search')}
-					placeholder="Поисковой запрос"
-					id="searching"
-					value={search}
-					setValue={onSearch}
-					iconBegin="search"
-				/>
-				{categories && categories.length > 0 && (
-					<FiltersCheckbox
-						head={{name: 'Все категории', code: 'all'}}
-						items={categoryFilters}
-						onFinish={handleCategoryFilter}
-						multipleSelectedText={['категория', 'категории', 'категорий']}
-						multipleThreshold={1}
+				<Line className={element('line')} />
+				<div className={element('search-wrapper', {'wrap-on-lg': searchWrapperWrap})}>
+					<FieldInput
+						className={element('search')}
+						placeholder="Поисковой запрос"
+						id="searching"
+						value={search}
+						setValue={onSearch}
+						iconBegin="search"
 					/>
-				)}
-				<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} filter />
+					<div className={element('categories-wrapper')}>
+						{categories && categories.length > 0 && (
+							<FiltersCheckbox
+								head={{name: 'Все категории', code: 'all'}}
+								items={categoryFilters}
+								onFinish={handleCategoryFilter}
+								multipleSelectedText={['категория', 'категории', 'категорий']}
+								multipleThreshold={1}
+							/>
+						)}
+						<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} filter />
+					</div>
+				</div>
 			</div>
 			<Loader isLoading={loading}>
 				{subPage === 'goals' ? (

@@ -135,7 +135,7 @@
 	}
 
 	&__form {
-		.regular-goal-settings-modal__section-title {
+		&__section-title {
 			margin-bottom: 16px;
 		}
 	}
@@ -161,24 +161,35 @@
 		background-color: var(--color-bg-secondary);
 		border: 1px solid var(--color-border-light);
 		border-radius: 6px;
+	}
 
-		p {
-			margin: 0;
-			color: var(--color-text-secondary);
-			font-size: 14px;
-			font-style: italic;
-		}
+	&__custom-schedule-text {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+		font-style: italic;
+	}
+
+	&__custom-schedule-selector {
+		margin-top: 8px;
+	}
+
+	&__field-title {
+		margin: 0 0 8px;
+		color: var(--color-text-primary);
+		font-size: 14px;
+		font-weight: 500;
 	}
 
 	&__date-field-container {
-		.regular-goal-settings-modal__field-title {
+		&__field-title {
 			margin: 0 0 8px;
 			color: var(--color-text-primary);
 			font-size: 14px;
 			font-weight: 500;
 		}
 
-		.regular-goal-settings-modal__date-input {
+		&__date-input {
 			width: 100%;
 		}
 	}

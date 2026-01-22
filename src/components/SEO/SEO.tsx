@@ -7,17 +7,23 @@ interface SEOProps {
 	image?: string;
 	url?: string;
 	type?: 'website' | 'article';
+	dynamicImage?: string; // Для динамически сгенерированных изображений
 }
 
 export const SEO: FC<SEOProps> = ({
 	title,
 	description = 'Delting - платформа для достижения целей и составления списков желаний',
-	image = '/og-image.jpg', // Путь к изображению по умолчанию
+	image = '/delting.jpg', // Путь к изображению по умолчанию
 	url = window.location.href,
 	type = 'website',
+	dynamicImage,
 }) => {
+	// Приоритет: динамическое изображение > обычное изображение > изображение по умолчанию
+	const finalImage = dynamicImage || image;
+
 	// Убедимся, что image — это полный URL
-	const fullImageUrl = image.startsWith('http') ? image : `${window.location.origin}${image}`;
+	const fullImageUrl =
+		finalImage.startsWith('http') || finalImage.startsWith('data:') ? finalImage : `${window.location.origin}${finalImage}`;
 
 	return (
 		<Helmet>

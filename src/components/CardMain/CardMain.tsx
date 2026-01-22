@@ -39,6 +39,7 @@ export const CardMain: FC<CardMainProps> = (props) => {
 					img={{src: goal.image, alt: goal.title}}
 					category={goal.category.nameEn}
 					blacked={!colored && !goal.completedByUser}
+					withBlack={goal.completedByUser}
 				>
 					<div className={element('info')}>
 						<div className={element('img-tags')}>

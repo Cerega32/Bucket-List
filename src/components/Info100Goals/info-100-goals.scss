@@ -7,6 +7,19 @@
 		display: flex;
 		gap: 24px;
 
+		@include xl {
+			gap: 16px;
+		}
+
+		@include lg {
+			gap: 24px;
+		}
+
+		@include sm {
+			flex-direction: column;
+			gap: 8px;
+		}
+
 		&--column {
 			flex-direction: column;
 			gap: 16px;
