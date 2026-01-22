@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" clip-rule="evenodd" id="ninja">
+  <g transform="translate(-20 -64)">
+    <path fill="#F79009" d="M39.949,70.316L40.949,67.316L39.051,66.684L38.051,69.684L39.949,70.316Z"></path>
+    <path fill="#F79009" d="M39,71L42,71L42,69L39,69L39,71Z"></path>
+    <circle cx="32" cy="76" r="10" fill="#F79009"></circle>
+    <path fill="#43576A" d="M77.095,35.25C77.428,33.956 78.603,33 80,33C80.259,33 80.511,33.033 80.75,33.095L81.25,31.158C80.85,31.055 80.431,31 80,31C77.672,31 75.714,32.595 75.158,34.75L77.095,35.25Z" transform="translate(-45 47)"></path>
+    <path fill="#E05A4F" d="M39.139,69L24.861,69C23.092,70.804 22,73.276 22,76C22,76.337 22.017,76.671 22.05,77L41.95,77C41.983,76.671 42,76.337 42,76C42,73.276 40.908,70.804 39.139,69Z"></path>
+    <path fill="#43576A" d="M34,29L36,29L36,27L34,27L34,29Z" transform="translate(0 45)"></path>
+    <path fill="#43576A" d="M34,29L36,29L36,27L34,27L34,29Z" transform="translate(-6 45)"></path>
+  </g>
+</svg>

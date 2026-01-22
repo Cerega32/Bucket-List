@@ -45,7 +45,7 @@ export const MainInfo: FC<MainInfoProps> = (props) => {
 						description: 'Выполнить хотя бы 1 цель из категории «Путешествия»',
 						image: '/svg/map.svg',
 						isAchieved: false,
-						category: 'first_steps',
+						category: 'progress',
 					}}
 				/>
 				<Info100Goals

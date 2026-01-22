@@ -2,6 +2,7 @@ import {FC, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 
+import {CharCount} from '../CharCount/CharCount';
 import {Svg} from '../Svg/Svg';
 
 import './field-input.scss';
@@ -24,6 +25,9 @@ interface FieldInputProps {
 	onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 	iconEnd?: string;
 	theme?: 'transparent';
+	// focusBorder?: 'white';
+	maxLength?: number;
+	showCharCount?: boolean;
 	focusBorder?: 'white';
 	rows?: number;
 	disabled?: boolean;
@@ -48,6 +52,9 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		onBlur,
 		onKeyDown,
 		theme,
+		// focusBorder,
+		maxLength,
+		showCharCount = false,
 		focusBorder,
 		rows = 2,
 		disabled = false,
@@ -92,6 +99,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onBlur={onBlur}
 						onKeyDown={onKeyDown}
 						rows={rows}
+						maxLength={maxLength}
 						disabled={disabled}
 					/>
 				) : (
@@ -107,6 +115,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onFocus={onFocus}
 						onBlur={onBlur}
 						onKeyDown={onKeyDown}
+						maxLength={maxLength}
 						disabled={disabled}
 					/>
 				)}
@@ -117,6 +126,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 				)}
 				{iconEnd && <Svg icon={iconEnd} className={element('icon-end')} />}
 			</div>
+			{showCharCount && maxLength !== undefined && <CharCount current={value.length} max={maxLength} />}
 			{error?.map((er) => (
 				<p key={er} className={element('error')}>
 					{er}
