@@ -38,6 +38,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const [goal, setGoal] = useState<IGoal | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
+	const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0); // Триггер для обновления истории
 	const [canEditCheck, setCanEditCheck] = useState<{can_edit: boolean; checked: boolean}>({
 		can_edit: false,
 		checked: false,
@@ -139,6 +140,14 @@ export const Goal: FC<IPage> = observer(({page}) => {
 
 			setGoal({...goal, ...updatedGoal});
 
+			// Если удалена или добавлена регулярная цель, перезагружаем данные цели, чтобы обновить regularConfig.statistics
+			if ((operation === 'delete' || operation === 'add') && goal.regularConfig && listId) {
+				const reloadRes = await getGoal(listId);
+				if (reloadRes.success && reloadRes.data.goal) {
+					setGoal(reloadRes.data.goal);
+				}
+			}
+
 			// Прогресс заданий обновляется автоматически на бэкенде
 		}
 	};
@@ -149,19 +158,50 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		setIsEditing(false);
 	};
 
+	const handleGoalUpdate = async (updatedGoal?: IGoal) => {
+		// Если передан обновленный goal из API, используем его
+		if (updatedGoal) {
+			setGoal(updatedGoal);
+		} else if (goal && listId) {
+			// Иначе перезагружаем цель из API
+			setIsLoading(true);
+			const res = await getGoal(listId);
+			if (res.success && res.data.goal) {
+				setGoal(res.data.goal);
+			}
+			setIsLoading(false);
+		}
+	};
+
 	const handleCancelEdit = () => {
 		setHeader('transparent');
 		setIsEditing(false);
 	};
 
-	const handleGoalCompleted = () => {
-		// Обновляем состояние цели как выполненной
-		if (goal) {
+	const handleGoalCompleted = async () => {
+		// Если цель регулярная, перезагружаем её для обновления статистики
+		if (goal?.regularConfig) {
+			try {
+				const res = await getGoal(listId || '');
+				if (res.success && res.data?.goal) {
+					setGoal(res.data.goal);
+					setId(res.data.goal.id);
+				}
+			} catch (error) {
+				console.error('Ошибка при перезагрузке цели:', error);
+			}
+		} else if (goal) {
+			// Для обычных целей обновляем состояние как выполненной
 			setGoal({
 				...goal,
 				completedByUser: true,
 			});
 		}
+	};
+
+	// Функция для обновления истории выполнения регулярной цели
+	const handleHistoryRefresh = () => {
+		setHistoryRefreshTrigger((prev) => prev + 1);
 	};
 
 	const [shrink, setShrink] = useState(false);
@@ -255,6 +295,9 @@ export const Goal: FC<IPage> = observer(({page}) => {
 					}}
 				>
 					<AsideGoal
+						key={`aside-${goal.id}-${goal.regularConfig?.statistics?.updatedAt || ''}-${goal.regularConfig?.frequency || ''}-${
+							goal.regularConfig?.durationValue || 0
+						}-${goal.regularConfig?.allowSkipDays || 0}`}
 						className={element('aside', {shrink})}
 						title={goal.title}
 						image={goal.image || ''}
@@ -268,11 +311,14 @@ export const Goal: FC<IPage> = observer(({page}) => {
 						canEdit={goal?.isCanEdit}
 						location={goal?.location}
 						onGoalCompleted={handleGoalCompleted}
+						onHistoryRefresh={handleHistoryRefresh}
+						onGoalUpdate={handleGoalUpdate}
+						page={page}
 						userFolders={goal.userFolders}
 						regularConfig={goal.regularConfig}
 					/>
 					<div className={element('content-wrapper')}>
-						<ContentGoal page={page} goal={goal} className={element('content')} />
+						<ContentGoal page={page} goal={goal} className={element('content')} historyRefreshTrigger={historyRefreshTrigger} />
 					</div>
 				</section>
 				<ScrollToTop />

@@ -1,11 +1,26 @@
 .user-achievements {
-	display: flex;
-	flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
 	gap: 24px;
 	max-width: var(--max-width);
 	margin: 40px auto 0;
 
-	&__achievement {
-		width: calc(25% - 24px * 3 / 4);
+	@include lg {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	@include md {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	@include sm {
+		grid-template-columns: repeat(1, 1fr);
+		gap: 16px;
+		margin: 24px auto 0;
+	}
+
+	&--empty {
+		display: flex;
+		justify-content: center;
 	}
 }

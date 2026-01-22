@@ -4,8 +4,9 @@
 	max-width: var(--max-width);
 	margin: 40px auto 0;
 
-	@include xs {
-		gap: 0;
+	@include md {
+		flex-direction: column-reverse;
+		align-items: flex-end;
 	}
 
 	&__lists {
@@ -38,5 +39,9 @@
 		&:last-child {
 			margin-bottom: 0;
 		}
+	}
+
+	&__empty-achievements {
+		margin-bottom: 0;
 	}
 }

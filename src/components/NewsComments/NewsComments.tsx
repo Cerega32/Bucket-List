@@ -6,6 +6,7 @@ import {newsStore} from '@/store/NewsStore';
 
 import {CommentForm} from './CommentForm';
 import {CommentItem} from './CommentItem';
+import {EmptyState} from '../EmptyState/EmptyState';
 
 import './NewsComments.scss';
 
@@ -72,7 +73,7 @@ export const NewsComments = observer(({newsId}: NewsCommentsProps) => {
 				{newsStore.commentsLoading && newsStore.comments.length === 0 ? (
 					<div className={element('loading')}>Загрузка комментариев...</div>
 				) : newsStore.comments.length === 0 ? (
-					<div className={element('empty')}>Комментариев пока нет. Будьте первым!</div>
+					<EmptyState title="Комментариев пока нет. Будьте первым!" className={element('empty')} />
 				) : (
 					<>
 						{newsStore.comments.map((comment) => (

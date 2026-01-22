@@ -9,6 +9,7 @@ import {Modal} from '@/components/Modal/Modal';
 import Select from '@/components/Select/Select';
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
+import {WeekDaySchedule, WeekDaySelector} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
 
@@ -28,7 +29,7 @@ interface RegularGoalData {
 interface RegularSettings {
 	frequency: 'daily' | 'weekly' | 'custom';
 	weeklyFrequency?: number;
-	customSchedule?: any;
+	customSchedule?: WeekDaySchedule;
 	durationType: 'days' | 'weeks' | 'until_date' | 'indefinite';
 	durationValue?: number;
 	endDate?: string;
@@ -58,6 +59,17 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 	// Состояния формы
 	const [frequency, setFrequency] = useState<'daily' | 'weekly' | 'custom'>(originalSettings.frequency);
 	const [weeklyFrequency, setWeeklyFrequency] = useState(originalSettings.weeklyFrequency || 3);
+	const [customSchedule, setCustomSchedule] = useState<WeekDaySchedule>(
+		originalSettings.customSchedule || {
+			monday: false,
+			tuesday: false,
+			wednesday: false,
+			thursday: false,
+			friday: false,
+			saturday: false,
+			sunday: false,
+		}
+	);
 	const [durationType, setDurationType] = useState<'days' | 'weeks' | 'until_date' | 'indefinite'>(originalSettings.durationType);
 	const [durationValue, setDurationValue] = useState(originalSettings.durationValue || 30);
 	const [endDate, setEndDate] = useState(originalSettings.endDate || '');
@@ -68,6 +80,17 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 	useEffect(() => {
 		setFrequency(originalSettings.frequency);
 		setWeeklyFrequency(originalSettings.weeklyFrequency || 3);
+		setCustomSchedule(
+			originalSettings.customSchedule || {
+				monday: false,
+				tuesday: false,
+				wednesday: false,
+				thursday: false,
+				friday: false,
+				saturday: false,
+				sunday: false,
+			}
+		);
 		setDurationType(originalSettings.durationType);
 		setDurationValue(originalSettings.durationValue || 30);
 		setEndDate(originalSettings.endDate || '');
@@ -107,7 +130,7 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 		const settings: RegularSettings = {
 			frequency,
 			weeklyFrequency: frequency === 'weekly' ? weeklyFrequency : undefined,
-			customSchedule: frequency === 'custom' ? {} : undefined,
+			customSchedule: frequency === 'custom' ? customSchedule : undefined,
 			durationType,
 			durationValue: durationType === 'days' || durationType === 'weeks' ? durationValue : undefined,
 			endDate: durationType === 'until_date' ? endDate : undefined,
@@ -121,6 +144,17 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 	const handleReset = () => {
 		setFrequency(originalSettings.frequency);
 		setWeeklyFrequency(originalSettings.weeklyFrequency || 3);
+		setCustomSchedule(
+			originalSettings.customSchedule || {
+				monday: false,
+				tuesday: false,
+				wednesday: false,
+				thursday: false,
+				friday: false,
+				saturday: false,
+				sunday: false,
+			}
+		);
 		setDurationType(originalSettings.durationType);
 		setDurationValue(originalSettings.durationValue || 30);
 		setEndDate(originalSettings.endDate || '');
@@ -221,8 +255,9 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 						)}
 
 						{frequency === 'custom' && (
-							<div className={element('custom-schedule-info')}>
-								<p>Пользовательский график будет доступен в следующих версиях</p>
+							<div className={element('custom-schedule-selector')}>
+								<p className={element('field-title')}>Выберите дни для выполнения цели</p>
+								<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
 							</div>
 						)}
 					</div>

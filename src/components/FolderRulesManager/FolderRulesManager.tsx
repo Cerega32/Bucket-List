@@ -13,6 +13,7 @@ import {
 } from '@/utils/api/goals';
 
 import {Button} from '../Button/Button';
+import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FieldSelect} from '../FieldSelect/FieldSelect';
@@ -331,10 +332,10 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 
 			<div className={element('rules-list')}>
 				{rules.length === 0 ? (
-					<div className={element('empty')}>
-						<p>У этой папки пока нет автоматических правил</p>
-						<p>Создайте правило, чтобы автоматизировать управление целями</p>
-					</div>
+					<EmptyState
+						title="У этой папки пока нет автоматических правил"
+						description="Создайте правило, чтобы автоматизировать управление целями"
+					/>
 				) : (
 					<div className={element('rules')}>
 						{rules.map((rule) => (

@@ -2,7 +2,7 @@ import {AnimatePresence, motion} from 'framer-motion';
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useRef, useState} from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+import {Link, NavLink, useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
 import {NotificationDropdown} from '@/components/NotificationDropdown/NotificationDropdown';
@@ -92,19 +92,25 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	// Обработчик клика вне элементов для закрытия меню
 	const handleClickOutside = useCallback((event: MouseEvent) => {
+		const target = event.target as Node;
+		const modalPhone = (event.target as HTMLElement)?.closest('.modal-phone');
+		if (modalPhone) {
+			return;
+		}
+
 		// Закрытие меню
-		if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+		if (menuRef.current && !menuRef.current.contains(target)) {
 			setIsMenuOpen(false);
 		}
 
 		// Закрытие меню категорий
-		if (categoriesRef.current && !categoriesRef.current.contains(event.target as Node)) {
+		if (categoriesRef.current && !categoriesRef.current.contains(target)) {
 			setIsCategoriesOpen(false);
 			setHoveredParentId(null);
 		}
 
 		// Закрытие уведомлений
-		if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+		if (notificationsRef.current && !notificationsRef.current.contains(target)) {
 			setIsNotificationsOpen(false);
 		}
 	}, []);
@@ -145,30 +151,46 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const menuProfile = (
 		<div className={element('profile-menu')}>
-			<Link className={element('menu-item')} to={`/user/${userSelf?.id}/showcase/`}>
+			<NavLink
+				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
+				to={`/user/${userSelf?.id}/showcase/`}
+				end={false}
+			>
 				Мой профиль
-			</Link>
-			<Link className={element('menu-item')} to="/user/self">
+			</NavLink>
+			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self" end>
 				Дашборд
-			</Link>
-			<Link className={element('menu-item')} to="/user/self/achievements">
+			</NavLink>
+			<NavLink
+				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
+				to="/user/self/achievements"
+				end
+			>
 				Достижения
-			</Link>
-			<Link className={element('menu-item')} to="/user/self/friends">
+			</NavLink>
+			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/friends" end>
 				Друзья
-			</Link>
-			<Link className={element('menu-item')} to="/user/self/maps">
+			</NavLink>
+			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/maps" end>
 				Мои карты
-			</Link>
-			<Link className={element('menu-item')} to="/user/self/active-goals">
+			</NavLink>
+			<NavLink
+				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
+				to="/user/self/active-goals"
+				end
+			>
 				Активные цели и списки
-			</Link>
-			<Link className={element('menu-item')} to="/user/self/done-goals">
+			</NavLink>
+			<NavLink
+				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
+				to="/user/self/done-goals"
+				end
+			>
 				Выполненные
-			</Link>
-			<Link className={element('menu-item')} to="/user/self/settings">
+			</NavLink>
+			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/settings" end>
 				Настройки
-			</Link>
+			</NavLink>
 			{!isScreenMobile && <Line margin="8px 0" />}
 			<button type="button" className={element('menu-item')} onClick={handleLogout}>
 				Выход

@@ -1,6 +1,7 @@
 import {observer} from 'mobx-react-lite';
 import React, {useEffect, useState} from 'react';
 
+import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {GoalMapMulti} from '@/components/GoalMap/GoalMapMulti';
 import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
@@ -99,10 +100,10 @@ const UserMapPage: React.FC<IPage> = observer(({page}) => {
 										}))}
 								/>
 							) : (
-								<div className={element('empty-state')}>
-									<h3>У вас пока нет целей с местами</h3>
-									<p>Добавьте цели с географическими местами, чтобы увидеть их на карте</p>
-								</div>
+								<EmptyState
+									title="У вас пока нет целей с местами"
+									description="Добавьте цели с географическими местами, чтобы увидеть их на карте"
+								/>
 							)}
 						</div>
 

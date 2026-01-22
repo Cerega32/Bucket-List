@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite';
 import {FC} from 'react';
 import {Navigate, Route, Routes} from 'react-router-dom';
 
+import {ScrollToTopOnRouteChange} from '@/components/ScrollToTopOnRouteChange/ScrollToTopOnRouteChange';
 import {NewsDetailPage} from '@/pages/NewsDetailPage/NewsDetailPage';
 import {NewsPage} from '@/pages/NewsPage/NewsPage';
 import {PageAbout} from '@/pages/PageAbout/PageAbout';
@@ -49,6 +50,7 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({element}) => {
 export const RoutesAuth: FC = observer(() => {
 	return (
 		<main className="main">
+			<ScrollToTopOnRouteChange />
 			<Routes>
 				{/* Новый маршрут для дашборда (главной страницы) */}
 				{/* <Route path="/" element={<PageDashboard page="isDashboard" />} /> */}
@@ -83,6 +85,8 @@ export const RoutesAuth: FC = observer(() => {
 				<Route path="/categories/:categories/:id/" element={<PageCategory page="isSubCategories" subPage="goals" />} />
 				<Route path="/categories/:id/lists" element={<PageCategory page="isCategories" subPage="lists" />} />
 				<Route path="/categories/:categories/:id/lists" element={<PageCategory page="isSubCategories" subPage="lists" />} />
+				<Route path="/goals/:id/history" element={<PageDetailGoal page="isGoalHistory" />} />
+				<Route path="/goals/:id/rating" element={<PageDetailGoal page="isGoalRating" />} />
 				<Route path="/goals/:id/lists" element={<PageDetailGoal page="isGoalLists" />} />
 				<Route path="/goals/:id" element={<PageDetailGoal page="isGoal" />} />
 				<Route path="/sign-in" element={<PageLogin page="isLogin" />} />

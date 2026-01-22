@@ -4,6 +4,7 @@ import {FC, useEffect, useState} from 'react';
 import {Achievement} from '@/components/Achievement/Achievement';
 import {Button} from '@/components/Button/Button';
 import {CommentsGoal} from '@/components/CommentsGoal/CommentsGoal';
+import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
 import {Loader} from '@/components/Loader/Loader';
 import {Title} from '@/components/Title/Title';
@@ -45,7 +46,9 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 					setMainGoals(goalsRes.data);
 				}
 				if (achievementsRes.success) {
-					setAchievements(achievementsRes.data.data);
+					// Фильтруем только полученные достижения и берем первые 3
+					const achieved = achievementsRes.data.data.filter((achievement: IAchievement) => achievement.isAchieved).slice(0, 3);
+					setAchievements(achieved);
 				}
 				if (commentsRes.success) {
 					setComments(commentsRes.data.data);
@@ -83,9 +86,18 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 						Смотреть все
 					</Button>
 				</div>
-				{achievements.map((achievement) => (
-					<Achievement key={achievement.id} className={element('achievement')} achievement={achievement} />
-				))}
+				{achievements.length === 0 ? (
+					<EmptyState
+						title="Пока нет достижений"
+						description="Выполняйте цели, чтобы получать достижения"
+						size="small"
+						className={element('empty-achievements')}
+					/>
+				) : (
+					achievements.map((achievement) => (
+						<Achievement key={achievement.id} className={element('achievement')} achievement={achievement} />
+					))
+				)}
 			</aside>
 		</Loader>
 	);

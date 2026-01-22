@@ -6,6 +6,7 @@ import {IComment} from '@/typings/comments';
 import {postLikeComment} from '@/utils/api/post/postLikeComment';
 
 import {CommentGoal} from '../CommentGoal/CommentGoal';
+import {EmptyState} from '../EmptyState/EmptyState';
 import './comments-goal.scss';
 
 interface CommentsGoalProps {
@@ -37,8 +38,7 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 		<div className={block()}>
 			{/* TODO Добавить слайдер для фоток */}
 			<section className={element('items')}>
-				{comments &&
-					!!comments.length &&
+				{comments && !!comments.length ? (
 					comments.map((comment, i) => (
 						<CommentGoal
 							className={element('comment')}
@@ -47,7 +47,10 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 							comment={comment}
 							onClickScore={putScore(i)}
 						/>
-					))}
+					))
+				) : (
+					<EmptyState title="Пока нет комментариев" description="Оставьте отметку о выполнении цели" />
+				)}
 			</section>
 		</div>
 	);

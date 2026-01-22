@@ -7,6 +7,7 @@ import {TodoStore} from '@/store/TodoStore';
 import {TodoTask} from '@/typings/todo';
 
 import {Button} from '../Button/Button';
+import {EmptyState} from '../EmptyState/EmptyState';
 import {MarkdownRenderer} from '../MarkdownRenderer/MarkdownRenderer';
 
 import './todo-tasks-container.scss';
@@ -200,13 +201,14 @@ export const TodoTasksContainer: FC<TodoTasksContainerProps> = observer(({classN
 	if (tasks.length === 0) {
 		return (
 			<div className={block()}>
-				<div className={element('empty')}>
-					<h3 className={element('empty-title')}>{title ? `Нет задач в разделе "${title}"` : 'В этом списке пока нет задач'}</h3>
-					<p className={element('empty-text')}>Добавьте задачи, чтобы начать планирование и достижение целей</p>
+				<EmptyState
+					title={title ? `Нет задач в разделе "${title}"` : 'В этом списке пока нет задач'}
+					description="Добавьте задачи, чтобы начать планирование и достижение целей"
+				>
 					<Button onClick={onCreateTask} theme="blue" size={isScreenMobile ? 'medium' : undefined}>
 						+ Добавить задачу
 					</Button>
-				</div>
+				</EmptyState>
 			</div>
 		);
 	}

@@ -4,6 +4,7 @@ import {FC, useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
+import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {Loader} from '@/components/Loader/Loader';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
@@ -133,10 +134,10 @@ const GoalTimers: FC = () => {
 					))}
 				</div>
 			) : (
-				<div className={element('empty')}>
-					<p>У вас пока нет активных таймеров</p>
-					<p>Установите таймер для своих целей, чтобы не пропустить дедлайн</p>
-				</div>
+				<EmptyState
+					title="У вас пока нет активных таймеров"
+					description="Установите таймер для своих целей, чтобы не пропустить дедлайн"
+				/>
 			)}
 		</div>
 	);

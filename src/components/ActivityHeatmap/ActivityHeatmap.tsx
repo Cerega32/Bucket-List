@@ -435,7 +435,7 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 				{activitiesByType['daily_goal'] && (
 					<div className={element('activity-section')}>
 						<div className={element('activity-header')}>
-							<Svg icon="calender" width="16px" height="16px" className={element('activity-icon')} />
+							<Svg icon="calendar" width="16px" height="16px" className={element('activity-icon')} />
 							<span>
 								{pluralize(activitiesByType['daily_goal'].length, [
 									'ежедневная цель',

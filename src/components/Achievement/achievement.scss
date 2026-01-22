@@ -9,14 +9,25 @@
 	&__image-wrapper {
 		@include block-radius(7px);
 
+		display: flex;
 		flex-shrink: 0;
+		justify-content: center;
+		align-items: center;
 		width: 40px;
 		height: 40px;
 	}
 
 	&__image {
-		width: 24px;
-		height: 24px;
+		height: 20px;
 		object-fit: cover;
+	}
+
+	&--unlocked {
+		opacity: 1;
+	}
+
+	&:not(&--unlocked) {
+		opacity: 0.5;
+		filter: grayscale(100%);
 	}
 }
