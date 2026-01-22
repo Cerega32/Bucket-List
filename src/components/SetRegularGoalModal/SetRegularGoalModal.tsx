@@ -196,19 +196,21 @@ export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCan
 									className={element('field')}
 									type="number"
 								/>
-								<FieldInput
-									placeholder="0"
-									id="days-for-earned-skip"
-									text="Начисление разрешенного пропуска через"
-									value={daysForEarnedSkip.toString()}
-									setValue={(value) => {
-										const num = parseInt(value, 10) || 0;
-										setDaysForEarnedSkip(Math.max(0, num));
-									}}
-									className={element('field')}
-									type="number"
-									suffix={frequency === 'weekly' ? 'недель' : 'дней'}
-								/>
+								<div className={element('field-with-suffix')}>
+									<FieldInput
+										placeholder="0"
+										id="days-for-earned-skip"
+										text="Начисление разрешенного пропуска через"
+										value={daysForEarnedSkip.toString()}
+										setValue={(value) => {
+											const num = parseInt(value, 10) || 0;
+											setDaysForEarnedSkip(Math.max(0, num));
+										}}
+										className={element('field')}
+										type="number"
+									/>
+									<span className={element('field-suffix')}>{frequency === 'weekly' ? 'недель' : 'дней'}</span>
+								</div>
 							</>
 						)}
 						{/* TODO: Пока под вопросом, нужно или нет эта опция */}

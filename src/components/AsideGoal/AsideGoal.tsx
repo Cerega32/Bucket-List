@@ -319,6 +319,86 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		}
 	};
 
+	// Получение информации о текущем прогрессе регулярной цели
+	const getRegularProgress = () => {
+		if (!regularConfig) return null;
+
+		// Используем локальную статистику, если она есть, иначе из пропсов
+		const statsCurrent = localStatistics || regularConfig.statistics;
+
+		// Если есть статистика, используем её
+		if (statsCurrent?.currentPeriodProgress) {
+			const regularProgressData = statsCurrent.currentPeriodProgress;
+
+			if (regularProgressData.type === 'daily') {
+				// Используем данные из обновленной статистики, если есть локальная статистика
+				// Иначе используем локальное состояние для немедленного обновления UI
+				const completedToday = localStatistics
+					? regularProgressData.completedToday || false
+					: isRegularGoalCompletedToday || regularProgressData.completedToday || false;
+				return {
+					text: completedToday ? 'Выполнено сегодня' : 'Не выполнено сегодня',
+					completed: completedToday,
+					streak: statsCurrent.currentStreak || 0,
+				};
+			}
+
+			if (regularProgressData.type === 'weekly') {
+				return {
+					text: `${regularProgressData.currentWeekCompletions || 0} из ${
+						regularProgressData.requiredPerWeek || 1
+					} на этой неделе`,
+					progress: regularProgressData.weekProgress || 0,
+				};
+			}
+		}
+
+		// Если статистики нет, показываем базовую информацию
+		if (regularConfig.frequency === 'daily') {
+			// Используем данные из локальной статистики, если она есть
+			const completedToday = localStatistics
+				? localStatistics.currentPeriodProgress?.completedToday || false
+				: isRegularGoalCompletedToday;
+			return {
+				text: completedToday ? 'Выполнено сегодня' : 'Не выполнено сегодня',
+				completed: completedToday,
+				streak: statsCurrent?.currentStreak || 0,
+			};
+		}
+
+		if (regularConfig.frequency === 'weekly') {
+			return {
+				text: `${statsCurrent?.currentWeekCompletions || 0} из ${regularConfig.weeklyFrequency || 1} на этой неделе`,
+				progress: 0,
+			};
+		}
+
+		// Для custom частоты используем weekly логику, если есть статистика
+		if (regularConfig.frequency === 'custom' && statsCurrent?.currentPeriodProgress) {
+			const regularProgressData = statsCurrent.currentPeriodProgress;
+			if (regularProgressData.type === 'weekly') {
+				return {
+					text: `${regularProgressData.currentWeekCompletions || 0} из ${
+						regularProgressData.requiredPerWeek || 1
+					} на этой неделе`,
+					progress: regularProgressData.weekProgress || 0,
+				};
+			}
+		}
+
+		if (regularConfig.frequency === 'custom') {
+			return {
+				text: '0 на этой неделе',
+				progress: 0,
+			};
+		}
+
+		return null;
+	};
+
+	// Пересчитываем regularProgress при каждом рендере (функция легковесная)
+	const regularProgress = getRegularProgress();
+
 	// Обработчик для отметки/отмены регулярной цели
 	const handleMarkRegularGoal = async () => {
 		if (!regularConfig || !isAdded) return;
@@ -334,84 +414,6 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		// Определяем текущее состояние выполнения на основе актуальных данных
 		// Приоритет: локальная статистика > локальное состояние > статистика из пропсов
 		let currentlyCompleted = false;
-		// Получение информации о текущем прогрессе регулярной цели
-		const getRegularProgress = () => {
-			if (!regularConfig) return null;
-
-			// Используем локальную статистику, если она есть, иначе из пропсов
-			const statsCurrent = localStatistics || regularConfig.statistics;
-
-			// Если есть статистика, используем её
-			if (statsCurrent?.currentPeriodProgress) {
-				const regularProgressData = statsCurrent.currentPeriodProgress;
-
-				if (regularProgressData.type === 'daily') {
-					// Используем данные из обновленной статистики, если есть локальная статистика
-					// Иначе используем локальное состояние для немедленного обновления UI
-					const completedToday = localStatistics
-						? regularProgressData.completedToday || false
-						: isRegularGoalCompletedToday || regularProgressData.completedToday || false;
-					return {
-						text: completedToday ? 'Выполнено сегодня' : 'Не выполнено сегодня',
-						completed: completedToday,
-						streak: statsCurrent.currentStreak || 0,
-					};
-				}
-
-				if (regularProgressData.type === 'weekly') {
-					return {
-						text: `${regularProgressData.currentWeekCompletions || 0} из ${
-							regularProgressData.requiredPerWeek || 1
-						} на этой неделе`,
-						progress: regularProgressData.weekProgress || 0,
-					};
-				}
-			}
-
-			// Если статистики нет, показываем базовую информацию
-			if (regularConfig.frequency === 'daily') {
-				// Используем данные из локальной статистики, если она есть
-				const completedToday = localStatistics
-					? localStatistics.currentPeriodProgress?.completedToday || false
-					: isRegularGoalCompletedToday;
-				return {
-					text: completedToday ? 'Выполнено сегодня' : 'Не выполнено сегодня',
-					completed: completedToday,
-					streak: statsCurrent?.currentStreak || 0,
-				};
-			}
-
-			if (regularConfig.frequency === 'weekly') {
-				return {
-					text: `${statsCurrent?.currentWeekCompletions || 0} из ${regularConfig.weeklyFrequency || 1} на этой неделе`,
-					progress: 0,
-				};
-			}
-
-			// Для custom частоты используем weekly логику, если есть статистика
-			if (regularConfig.frequency === 'custom' && statsCurrent?.currentPeriodProgress) {
-				const regularProgressData = statsCurrent.currentPeriodProgress;
-				if (regularProgressData.type === 'weekly') {
-					return {
-						text: `${regularProgressData.currentWeekCompletions || 0} из ${
-							regularProgressData.requiredPerWeek || 1
-						} на этой неделе`,
-						progress: regularProgressData.weekProgress || 0,
-					};
-				}
-			}
-
-			if (regularConfig.frequency === 'custom') {
-				return {
-					text: '0 на этой неделе',
-					progress: 0,
-				};
-			}
-
-			return null;
-		};
-		// Пересчитываем regularProgress при каждом рендере (функция легковесная)
-		const regularProgress = getRegularProgress();
 
 		if (stats?.currentPeriodProgress?.type === 'daily') {
 			currentlyCompleted = stats.currentPeriodProgress.completedToday || false;

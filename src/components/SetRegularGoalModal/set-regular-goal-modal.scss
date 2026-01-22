@@ -82,4 +82,21 @@
 			width: 100%;
 		}
 	}
+
+	&__field-with-suffix {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+
+		.set-regular-goal-modal__field {
+			flex: 1;
+		}
+	}
+
+	&__field-suffix {
+		color: var(--color-text-secondary);
+		font-size: 14px;
+		white-space: nowrap;
+	}
 }
