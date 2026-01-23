@@ -184,6 +184,9 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/settings" end>
 				Настройки
 			</NavLink>
+			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/subs" end>
+				Подписка
+			</NavLink>
 			{!isScreenMobile && <Line margin="8px 0" />}
 			<button type="button" className={element('menu-item')} onClick={handleLogout}>
 				Выход

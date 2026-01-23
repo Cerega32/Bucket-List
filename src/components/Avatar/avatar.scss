@@ -12,6 +12,16 @@
 	border-radius: 50%;
 	overflow: hidden;
 
+	&__inner {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		border-radius: 50%;
+	}
+
 	&__image {
 		width: 100%;
 		height: 100%;
@@ -69,6 +79,35 @@
 		#{$block}__icon {
 			width: 16px;
 			height: 16px;
+		}
+	}
+
+	&--premium {
+		position: relative;
+		overflow: visible;
+		border: 2px solid var(--color-gold);
+		box-shadow: 0 0 8px var(--color-gold);
+	}
+
+	&__premium-badge {
+		position: absolute;
+		z-index: 10;
+		top: -6px;
+		right: -6px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	&__premium-icon {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		color: var(--color-gold);
+
+		svg {
+			fill: var(--color-gold);
+			stroke: var(--color-gold);
 		}
 	}
 }

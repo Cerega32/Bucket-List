@@ -31,6 +31,11 @@
 		transform: translate(-50%, -50%);
 		overflow: hidden;
 
+		&--type-login {
+			width: 100%;
+			max-width: 900px;
+		}
+
 		&--type-add-review {
 			width: 696px;
 		}

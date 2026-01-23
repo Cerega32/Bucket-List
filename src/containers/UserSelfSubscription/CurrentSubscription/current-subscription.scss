@@ -1,0 +1,40 @@
+@import '../../../_commons/styles-supports/mixins';
+
+.current-subscription {
+	@include block-radius(12px);
+
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 16px;
+	margin-bottom: 20px;
+	background: var(--color-secondary);
+
+	&__icon {
+		flex-shrink: 0;
+		width: 20px;
+		height: 20px;
+		margin-top: 2px;
+		color: var(--color-primary);
+	}
+
+	&__content {
+		flex: 1;
+	}
+
+	&__text {
+		color: var(--color-text-primary);
+		font-size: 14px;
+		line-height: 1.5;
+
+		strong {
+			font-weight: 600;
+		}
+	}
+
+	&__auto-renew-control {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 12px;
+	}
+}
