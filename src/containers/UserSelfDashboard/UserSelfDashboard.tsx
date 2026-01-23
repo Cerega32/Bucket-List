@@ -30,39 +30,41 @@ export const UserSelfDashboard: FC = observer(() => {
 	return (
 		<section className={block()}>
 			<div className={element('info-wrapper')}>
-				<Link to="/list/100-goals" className={element('info')}>
-					<h3 className={element('info-title')}>Невыполненных целей в &quot;100 целей&quot;</h3>
-					<span className={element('info-count')}>
-						<Svg icon="star" />
-						{userStatistics &&
-							userStatistics.hundredGoals.easy.total +
-								userStatistics.hundredGoals.medium.total +
-								userStatistics.hundredGoals.hard.total -
-								userStatistics.hundredGoals.easy.completed -
-								userStatistics.hundredGoals.medium.completed -
-								userStatistics.hundredGoals.hard.completed}
-					</span>
-				</Link>
-				<Link to="/leaders" className={element('info')}>
-					<h3 className={element('info-title')}>Место в рейтинге недели</h3>
-					<span className={element('info-count')}>
-						<Svg icon="award" />
-						{userStatistics?.currentStats.weeklyRank}
-					</span>
-				</Link>
-				<Link to="/user/self/active-goals" className={element('info')}>
-					<h3 className={element('info-title')}>Активные цели и списки</h3>
-					<p className={element('info-count-wrapper')}>
+				<div className={element('info-group')}>
+					<Link to="/list/100-goals" className={element('info')}>
+						<h3 className={element('info-title')}>Невыполненных целей в &quot;100 целей&quot;</h3>
 						<span className={element('info-count')}>
-							<Svg icon="rocket" />
-							{userStatistics?.currentStats.activeGoals}
+							<Svg icon="star" />
+							{userStatistics &&
+								userStatistics.hundredGoals.easy.total +
+									userStatistics.hundredGoals.medium.total +
+									userStatistics.hundredGoals.hard.total -
+									userStatistics.hundredGoals.easy.completed -
+									userStatistics.hundredGoals.medium.completed -
+									userStatistics.hundredGoals.hard.completed}
 						</span>
+					</Link>
+					<Link to="/leaders" className={element('info')}>
+						<h3 className={element('info-title')}>Место в рейтинге недели</h3>
 						<span className={element('info-count')}>
-							<Svg icon="apps" />
-							{userStatistics?.currentStats.activeLists}
+							<Svg icon="award" />
+							{userStatistics?.currentStats.weeklyRank}
 						</span>
-					</p>
-				</Link>
+					</Link>
+					<Link to="/user/self/active-goals" className={element('info')}>
+						<h3 className={element('info-title')}>Активные цели и списки</h3>
+						<p className={element('info-count-wrapper')}>
+							<span className={element('info-count')}>
+								<Svg icon="rocket" />
+								{userStatistics?.currentStats.activeGoals}
+							</span>
+							<span className={element('info-count')}>
+								<Svg icon="apps" />
+								{userStatistics?.currentStats.activeLists}
+							</span>
+						</p>
+					</Link>
+				</div>
 				{userStatistics && (
 					<Info100Goals
 						totalAddedEasy={userStatistics.hundredGoals.easy.total}

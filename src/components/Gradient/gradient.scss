@@ -36,17 +36,15 @@
 				&#{$block}__color--withoutBlack {
 					@include category-gradient-without-black($category);
 				}
+
+				&#{$block}__color--withBlack {
+					@include category-gradient-with-black($category);
+				}
 			}
 		}
 
 		&--blacked {
-			background: linear-gradient(
-				180deg,
-				rgb(var(--color-black-rgb) 0.1) 0%,
-				rgb(var(--color-black-rgb) 0.2) 20%,
-				rgb(var(--color-black-rgb) 0.3) 30%,
-				var(--color-black) 100%
-			);
+			background: linear-gradient(180deg, rgba(var(--color-black-rgb) / 16%) 0%, var(--color-black) 100%);
 		}
 
 		&--show {

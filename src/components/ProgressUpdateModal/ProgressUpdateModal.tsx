@@ -130,10 +130,10 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 				</div>
 
 				<div className={element('actions')}>
-					<Button theme="blue" onClick={handleSave} active={isLoading} loading={isLoading}>
+					<Button theme="blue" onClick={handleSave} disabled={isLoading} loading={isLoading}>
 						Сохранить прогресс
 					</Button>
-					<Button theme="blue-light" onClick={onClose} active={isLoading}>
+					<Button theme="blue-light" onClick={onClose} disabled={isLoading}>
 						Отмена
 					</Button>
 				</div>

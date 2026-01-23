@@ -1,6 +1,8 @@
 import {FC, FormEvent, useState} from 'react';
+import {Link} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
+import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
@@ -23,6 +25,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [repeatPassword, setRepeatPassword] = useState('');
+	const [privacyConsent, setPrivacyConsent] = useState(false);
 	const [error, setError] = useState<{email?: Array<string>; password?: Array<string>}>({});
 
 	const signUp = async (e: FormEvent) => {
@@ -82,7 +85,23 @@ export const Registration: FC<RegistrationProps> = (props) => {
 					autoComplete="new-password"
 					required
 				/>
-				<Button icon="rocket" theme="blue" className={element('btn')} typeBtn="submit">
+				<div className={element('consent')}>
+					<FieldCheckbox
+						id="privacy-consent"
+						text={
+							<div>
+								Даю согласие на обработку моих персональных данных в соответствии с{' '}
+								<Link to="/privacy" className={element('consent-link')} target="_blank" rel="noopener noreferrer">
+									Политикой конфиденциальности
+								</Link>
+							</div>
+						}
+						checked={privacyConsent}
+						setChecked={setPrivacyConsent}
+						className={element('consent-checkbox')}
+					/>
+				</div>
+				<Button icon="rocket" theme="blue" className={element('btn')} typeBtn="submit" disabled={!privacyConsent}>
 					Зарегистрироваться
 				</Button>
 				<p className={element('sign-in')}>

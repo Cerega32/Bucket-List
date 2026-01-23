@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
 import {FC, ReactNode, useEffect, useRef} from 'react';
+import {createPortal} from 'react-dom';
 
 import {Button} from '@/components/Button/Button';
 import {Login} from '@/components/Login/Login';
@@ -20,6 +21,8 @@ import {GoalMap} from '../GoalMap/GoalMap';
 import {GoalMapMulti} from '../GoalMap/GoalMapMulti';
 import LocationPicker from '../LocationPicker/LocationPicker';
 import {ProgressUpdateModal} from '../ProgressUpdateModal/ProgressUpdateModal';
+import {RandomGoalPicker} from '../RandomGoalPicker/RandomGoalPicker';
+import {SetRegularGoalModal} from '../SetRegularGoalModal/SetRegularGoalModal';
 import {Svg} from '../Svg/Svg';
 
 import './modal.scss';
@@ -121,13 +124,13 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			}, 50);
 
 			// Отключаем прокрутку body при открытии модального окна
-			document.body.style.overflow = 'hidden';
+			// document.body.style.overflow = 'hidden';
 		} else {
 			document.removeEventListener('keyup', handleKeyUp);
 			document.removeEventListener('keydown', handleTabKey);
 
 			// Включаем прокрутку body при закрытии модального окна
-			document.body.style.overflow = '';
+			// document.body.style.overflow = '';
 		}
 
 		// Cleanup при размонтировании компонента
@@ -191,10 +194,20 @@ export const Modal: FC<ModalProps> = observer((props) => {
 					onClose={closeWindow}
 				/>
 			)}
+			{window === 'random-goal-picker' && <RandomGoalPicker goals={modalProps?.goals || []} onClose={closeWindow} />}
+			{window === 'set-regular-goal' && (
+				<SetRegularGoalModal
+					onSave={async (settings) => {
+						await modalProps?.onSave?.(settings);
+					}}
+					onCancel={closeWindow}
+					initialSettings={modalProps?.initialSettings}
+				/>
+			)}
 		</>
 	);
 
-	return (
+	const modalElement = (
 		<section className={block({isOpen})}>
 			<div
 				className={element('window', {
@@ -203,9 +216,9 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				})}
 				ref={modalRef}
 			>
-				{title && (
+				{(title || modalProps?.title) && (
 					<div className={element('header')}>
-						<h2 className={element('title')}>{title}</h2>
+						<h2 className={element('title')}>{title || modalProps?.title}</h2>
 					</div>
 				)}
 				<div className={element('content')}>{modalContent}</div>
@@ -221,4 +234,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			<button aria-label="Закрыть окно" type="button" className={element('base')} onClick={closeWindow} />
 		</section>
 	);
+
+	// Рендерим модалку в document.body через Portal, чтобы она всегда была на верхнем уровне
+	return createPortal(modalElement, document.body);
 });

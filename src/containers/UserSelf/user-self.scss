@@ -6,9 +6,30 @@
 	margin: 56px auto 102px;
 	background: var(--color-gray-3);
 
+	@include xl {
+		margin: 56px 30px 102px;
+	}
+
+	@include lg {
+		gap: 16px;
+	}
+
+	@include md {
+		flex-direction: column;
+		margin: 24px 30px 102px;
+	}
+
+	@include xs {
+		margin: 0 20px 24px;
+	}
+
 	&__sidebar {
 		flex-shrink: 0;
 		width: 336px;
+
+		@include lg {
+			width: 286px;
+		}
 	}
 }
 
@@ -50,7 +71,7 @@
 		}
 	}
 
-	@media (width <= 768px) {
+	@include md {
 		padding: 16px;
 		margin-left: 0;
 

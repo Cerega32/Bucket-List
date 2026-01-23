@@ -2,8 +2,11 @@ import {observer} from 'mobx-react-lite';
 import {FC} from 'react';
 import {BrowserRouter} from 'react-router-dom';
 
+import {CookieBanner} from '@/components/CookieBanner/CookieBanner';
+import {Footer} from '@/components/Footer/Footer';
 import {Header} from '@/components/Header/Header';
 import {Modal} from '@/components/Modal/Modal';
+import {SEO} from '@/components/SEO/SEO';
 import {useBem} from '@/hooks/useBem';
 import {ThemeStore} from '@/store/ThemeStore';
 
@@ -22,7 +25,6 @@ const Layout: FC = observer(() => {
 		<BrowserRouter
 			future={{
 				v7_startTransition: true,
-				v7_relativeSplatPath: true,
 			}}
 		>
 			<Header />
@@ -30,7 +32,10 @@ const Layout: FC = observer(() => {
 				<RoutesAuth />
 				<Modal />
 				<NotificationContainer />
+				<SEO title="delting.ru - достигайте своих целей" />
 			</div>
+			<Footer />
+			<CookieBanner />
 		</BrowserRouter>
 	);
 });

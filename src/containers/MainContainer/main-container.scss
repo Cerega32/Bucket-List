@@ -5,4 +5,8 @@
 	flex-direction: column;
 	gap: 96px;
 	padding: 56px 0 96px;
+
+	@include xl {
+		padding: 24px;
+	}
 }

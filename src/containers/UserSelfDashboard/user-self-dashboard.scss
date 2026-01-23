@@ -1,11 +1,41 @@
 .user-self-dashboard {
-	@include max-width;
+	flex: 1;
+	min-width: 0;
 
 	&__info-wrapper {
 		display: grid;
 		gap: 24px;
 		margin-bottom: 56px;
 		grid-template-columns: 1fr 1fr 1fr;
+
+		@include xl {
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+		}
+
+		@include lg {
+			grid-template-columns: 1fr;
+		}
+
+		@include md {
+			margin-bottom: 24px;
+		}
+	}
+
+	&__info-group {
+		display: grid;
+		gap: 24px;
+		grid-template-columns: 1fr 1fr 1fr;
+		grid-column: 1 / -1;
+
+		@include lg {
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+		}
+
+		@include md {
+			grid-template-columns: 1fr;
+		}
 	}
 
 	&__info {

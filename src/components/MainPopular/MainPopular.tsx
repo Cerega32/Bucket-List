@@ -1,6 +1,7 @@
-import {FC, useState} from 'react';
+import {FC, useMemo, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {IGoal} from '@/typings/goal';
 
 import {Button} from '../Button/Button';
@@ -19,6 +20,13 @@ export const MainPopular: FC<MainPopularProps> = (props) => {
 
 	const [block, element] = useBem('main-popular', className);
 	const [active, setActive] = useState('top');
+	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
+
+	const bigCardsCount = useMemo(() => {
+		if (isScreenMobile) return 1;
+		if (isScreenSmallTablet) return 2;
+		return 3;
+	}, [isScreenMobile, isScreenSmallTablet]);
 
 	return (
 		<section className={block()}>
@@ -38,11 +46,23 @@ export const MainPopular: FC<MainPopularProps> = (props) => {
 			<div className={element('content')}>
 				{active === 'top' &&
 					goalsForAllTime?.map((goal, i) => (
-						<CardMain key={goal.code} goal={goal} className={element('card', {big: i < 3})} big={i < 3} colored />
+						<CardMain
+							key={goal.code}
+							goal={goal}
+							className={element('card', {big: i < bigCardsCount})}
+							big={i < bigCardsCount}
+							colored
+						/>
 					))}
 				{active === 'today' &&
 					goalsForDay?.map((goal, i) => (
-						<CardMain key={goal.code} goal={goal} className={element('card', {big: i < 3})} big={i < 3} colored />
+						<CardMain
+							key={goal.code}
+							goal={goal}
+							className={element('card', {big: i < bigCardsCount})}
+							big={i < bigCardsCount}
+							colored
+						/>
 					))}
 			</div>
 		</section>

@@ -10,6 +10,7 @@ interface RegularSettings {
 	endDate?: string;
 	allowSkipDays: number;
 	resetOnSkip: boolean;
+	allowCustomSettings: boolean;
 }
 
 interface RegularGoalData {

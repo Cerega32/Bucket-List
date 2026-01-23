@@ -1,14 +1,41 @@
 .button {
 	$block: &;
 
+	position: relative;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	gap: 4px;
 	width: 100%;
 	padding: 8px 16px;
-	border-radius: 4px;
+	border-radius: 8px;
 	transition: all 0.15s ease-in-out;
+	overflow: hidden;
+
+	&:active {
+		transform: scale(0.97);
+	}
+
+	&__ripple {
+		position: absolute;
+		background-color: rgba(var(--color-white-rgb) / 40%);
+		border-radius: 50%;
+		pointer-events: none;
+		transform: scale(0);
+		animation: ripple-animation 800ms ease-out;
+	}
+
+	@keyframes ripple-animation {
+		0% {
+			opacity: 1;
+			transform: scale(0);
+		}
+
+		100% {
+			opacity: 0;
+			transform: scale(4);
+		}
+	}
 
 	&__loading {
 		width: 16px;
@@ -37,6 +64,10 @@
 		* {
 			fill: var(--color-text);
 		}
+
+		#{$block}__ripple {
+			background-color: rgba(var(--color-text-rgb) / 40%);
+		}
 	}
 
 	&--withBorder {
@@ -59,6 +90,10 @@
 		#{$block}__icon * {
 			fill: var(--color-white);
 		}
+
+		#{$block}__ripple {
+			background-color: rgba(var(--color-white-rgb) / 40%);
+		}
 	}
 
 	&--theme-blue-light {
@@ -76,6 +111,10 @@
 
 		path {
 			fill: var(--color-text-primary);
+		}
+
+		#{$block}__ripple {
+			background-color: rgba(var(--color-text-primary-rgb) / 40%);
 		}
 	}
 
@@ -95,6 +134,10 @@
 		#{$block}__icon * {
 			fill: var(--color-white);
 		}
+
+		#{$block}__ripple {
+			background-color: rgba(var(--color-white-rgb) / 40%);
+		}
 	}
 
 	&--theme-red {
@@ -112,6 +155,10 @@
 
 		#{$block}__icon * {
 			fill: var(--color-white);
+		}
+
+		#{$block}__ripple {
+			background-color: rgba(var(--color-white-rgb) / 40%);
 		}
 	}
 
@@ -131,6 +178,10 @@
 
 		#{$block}__icon * {
 			fill: var(--color-white);
+		}
+
+		#{$block}__ripple {
+			background-color: rgba(var(--color-white-rgb) / 40%);
 		}
 	}
 
@@ -188,6 +239,10 @@
 		&:focus {
 			@include focus-outline;
 		}
+
+		#{$block}__ripple {
+			background-color: transparent;
+		}
 	}
 
 	&--theme-integrate {
@@ -203,6 +258,10 @@
 		&:focus {
 			@include focus-outline;
 		}
+
+		#{$block}__ripple {
+			background-color: transparent;
+		}
 	}
 
 	&--size-small {
@@ -212,7 +271,7 @@
 	}
 
 	&--size-medium {
-		width: auto;
+		width: 100%;
 		height: 40px;
 		padding: 10px 16px;
 	}
@@ -226,6 +285,7 @@
 		&:active {
 			background: var(--color-white);
 			cursor: initial;
+			opacity: 0.6;
 		}
 	}
 

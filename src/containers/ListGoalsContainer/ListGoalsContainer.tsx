@@ -5,7 +5,11 @@ import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {ContentListGoals} from '@/components/ContentListGoals/ContentListGoals';
 import {Loader} from '@/components/Loader/Loader';
 import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
+import {SEO} from '@/components/SEO/SEO';
 import {useBem} from '@/hooks/useBem';
+import {useOGImage} from '@/hooks/useOGImage';
+import {ModalStore} from '@/store/ModalStore';
+import {UserStore} from '@/store/UserStore';
 import {IList} from '@/typings/list';
 import {getList} from '@/utils/api/get/getList';
 import {addGoal} from '@/utils/api/post/addGoal';
@@ -21,6 +25,15 @@ export const ListGoalsContainer: FC = () => {
 	const [block, element] = useBem('list-goals-container');
 	const [list, setList] = useState<IList | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const {isAuth} = UserStore;
+	const {setIsOpen, setWindow} = ModalStore;
+
+	// Генерируем динамическое OG изображение для списка
+	const {imageUrl: ogImageUrl} = useOGImage({
+		list,
+		width: 1200,
+		height: 630,
+	});
 
 	const params = useParams();
 	const listId = params?.['id'];
@@ -37,6 +50,12 @@ export const ListGoalsContainer: FC = () => {
 	}, [listId]);
 
 	const updateList = async (code: string, operation: 'add' | 'delete' | 'mark-all'): Promise<void | boolean> => {
+		if (!isAuth) {
+			setWindow('login');
+			setIsOpen(true);
+			return;
+		}
+
 		const res = await (operation === 'add'
 			? addListGoal(code)
 			: operation === 'delete'
@@ -92,7 +111,7 @@ export const ListGoalsContainer: FC = () => {
 	};
 
 	if (!list) {
-		return <Loader isLoading={isLoading} />;
+		return <Loader isLoading={isLoading} isPageLoader />;
 	}
 
 	// Собираем массив целей с локацией для карты
@@ -107,25 +126,34 @@ export const ListGoalsContainer: FC = () => {
 		})) as GoalWithLocation[];
 
 	return (
-		<main className={block()}>
-			<article className={element('wrapper')}>
-				<AsideGoal
-					className={element('aside')}
-					title={list.title}
-					image={list.image}
-					updateGoal={updateList}
-					added={list.addedByUser}
-					code={list.code}
-					isList
-					done={list.completedByUser}
-					canEdit={list.isCanEdit || list.isCanAddGoals}
-					location={goalsWithLocation}
-				/>
-				<div className={element('content-wrapper')}>
-					<ContentListGoals className={element('content')} list={list} updateGoal={updateGoal} />
-				</div>
-			</article>
-			<ScrollToTop />
-		</main>
+		<>
+			<SEO
+				title={list.title}
+				description={list.description || `Список целей "${list.title}" на платформе Delting`}
+				dynamicImage={ogImageUrl}
+				type="article"
+			/>
+			<main className={block()}>
+				<article className={element('wrapper')}>
+					<AsideGoal
+						className={element('aside')}
+						title={list.title}
+						image={list.image}
+						updateGoal={updateList}
+						added={list.addedByUser}
+						code={list.code}
+						isList
+						done={list.completedByUser}
+						canEdit={list.isCanEdit || list.isCanAddGoals}
+						location={goalsWithLocation}
+						list={list.goals}
+					/>
+					<div className={element('content-wrapper')}>
+						<ContentListGoals className={element('content')} list={list} updateGoal={updateGoal} />
+					</div>
+				</article>
+				<ScrollToTop />
+			</main>
+		</>
 	);
 };

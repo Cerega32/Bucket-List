@@ -3,10 +3,44 @@
 
 	margin-top: 56px;
 
+	@include xl {
+		margin-top: 40px;
+		margin-right: 24px;
+		margin-left: 24px;
+	}
+
+	@include lg {
+		margin-top: 32px;
+	}
+
+	@include md {
+		margin-top: 24px;
+	}
+
+	@include sm {
+		margin-top: 16px;
+	}
+
 	&__info {
 		display: flex;
 		justify-content: space-between;
+		gap: 40px;
 		margin-bottom: 56px;
+
+		@include lg {
+			flex-direction: column;
+			gap: 32px;
+			margin-bottom: 40px;
+		}
+
+		@include md {
+			gap: 24px;
+			margin-bottom: 32px;
+		}
+
+		@include sm {
+			gap: 16px;
+		}
 	}
 
 	&__title {
@@ -15,6 +49,10 @@
 
 	&__description {
 		max-width: 576px;
+
+		@include lg {
+			max-width: 100%;
+		}
 	}
 
 	&__all-completed-container {
@@ -48,6 +86,14 @@
 
 		&:last-child {
 			margin-bottom: 0;
+		}
+	}
+
+	&__stats {
+		min-width: 600px;
+
+		@include lg {
+			min-width: 100%;
 		}
 	}
 }

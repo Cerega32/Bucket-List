@@ -6,6 +6,10 @@
 	transition: all 0.2s ease;
 	box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 
+	@include md {
+		padding: 16px;
+	}
+
 	&:hover {
 		box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
 		transform: translateY(-2px);
@@ -16,6 +20,11 @@
 		align-items: center;
 		gap: 16px;
 		margin-bottom: 20px;
+
+		@include md {
+			gap: 12px;
+			margin-bottom: 16px;
+		}
 	}
 
 	&__image {
@@ -24,6 +33,11 @@
 		height: 60px;
 		border-radius: 8px;
 		object-fit: cover;
+
+		@include md {
+			width: 50px;
+			height: 50px;
+		}
 	}
 
 	&__info {
@@ -37,7 +51,9 @@
 		font-size: 18px;
 		font-weight: 600;
 
-		// @include text-overflow;
+		@include md {
+			font-size: 16px;
+		}
 	}
 
 	&__frequency {
@@ -107,12 +123,25 @@
 		margin-left: auto;
 		color: var(--text-muted-color);
 		font-size: 12px;
+		text-wrap: nowrap;
 	}
 
 	&__stats {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
 		gap: 16px;
+
+		@include lg {
+			gap: 14px;
+		}
+
+		@include md {
+			gap: 12px;
+		}
+
+		@include xs {
+			grid-template-columns: 1fr;
+		}
 	}
 
 	&__stat {
@@ -120,6 +149,10 @@
 		background: var(--background-secondary);
 		border-radius: 8px;
 		text-align: center;
+
+		@include md {
+			padding: 8px;
+		}
 	}
 
 	&__stat-value {
@@ -128,6 +161,10 @@
 		color: var(--primary-color);
 		font-size: 20px;
 		font-weight: 700;
+
+		@include md {
+			font-size: 18px;
+		}
 	}
 
 	&__stat-label {
@@ -140,54 +177,15 @@
 	&__actions {
 		display: flex;
 		gap: 12px;
-	}
 
-	&__mark-button,
-	&__view-button {
-		flex: 1;
-	}
-
-	// Мобильная версия
-	@include md {
-		padding: 16px;
-
-		&__header {
-			gap: 12px;
-			margin-bottom: 16px;
-		}
-
-		&__image {
-			width: 50px;
-			height: 50px;
-		}
-
-		&__title {
-			font-size: 16px;
-		}
-
-		&__stats {
-			gap: 12px;
-		}
-
-		&__stat {
-			padding: 8px;
-		}
-
-		&__stat-value {
-			font-size: 18px;
-		}
-
-		&__actions {
+		@include md {
 			flex-direction: column;
 			gap: 8px;
 		}
 	}
 
-	// Планшетная версия
-	@include lg {
-		&__stats {
-			grid-template-columns: repeat(3, 1fr);
-			gap: 14px;
-		}
+	&__mark-button,
+	&__view-button {
+		flex: 1;
 	}
 }

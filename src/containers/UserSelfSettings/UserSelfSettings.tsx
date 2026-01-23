@@ -186,33 +186,41 @@ export const UserSelfSettings: FC = observer(() => {
 				</div>
 				<section className={element('avatar-wrapper')}>
 					<Avatar avatar={user.avatar} className={element('avatar')} size="large" />
-					<div
-						onClick={handleAvatarClick}
-						role="button"
-						tabIndex={0}
-						aria-label="Изменить фотографию"
-						onKeyPress={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') {
-								handleAvatarClick();
-							}
-						}}
-					>
-						<FileDrop onDrop={(files) => files && handleAvatarDrop(files)}>
-							<input
-								type="file"
-								style={{display: 'none'}}
-								ref={avatarInputRef}
-								onChange={handleAvatarChange}
-								accept="image/*"
-							/>
-							<Button icon="image-edit" theme="blue" size="small">
-								Изменить фотографию
-							</Button>
-						</FileDrop>
+					<div className={element('avatar-buttons')}>
+						<div
+							onClick={handleAvatarClick}
+							role="button"
+							tabIndex={0}
+							aria-label="Изменить фотографию"
+							onKeyPress={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									handleAvatarClick();
+								}
+							}}
+						>
+							<FileDrop onDrop={(files) => files && handleAvatarDrop(files)}>
+								<input
+									type="file"
+									style={{display: 'none'}}
+									ref={avatarInputRef}
+									onChange={handleAvatarChange}
+									accept="image/*"
+								/>
+								<Button icon="image-edit" theme="blue" size="small">
+									Изменить фото
+								</Button>
+							</FileDrop>
+						</div>
+						<Button
+							className={element('delete-avatar')}
+							icon="trash"
+							theme="blue-light"
+							onClick={handleDeleteAvatar}
+							size="small"
+						>
+							Удалить фото
+						</Button>
 					</div>
-					<Button className={element('delete-avatar')} icon="trash" theme="blue-light" onClick={handleDeleteAvatar} size="small">
-						Удалить фото
-					</Button>
 				</section>
 				<Line margin="24px 0" />
 				<section className={element('info')}>

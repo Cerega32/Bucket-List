@@ -55,6 +55,8 @@
 		"function-paren-newline": "off",
 		"jsx-a11y/label-has-associated-control": "off",
 		"react/no-array-index-key": "warn",
+		"no-multi-assign": "off",
+		"react/jsx-wrap-multilines": "off",
 		"import/order": [
 			"error",
 			{

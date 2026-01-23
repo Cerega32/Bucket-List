@@ -973,7 +973,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 										<Button
 											theme="blue-light"
 											onClick={handleParseText}
-											active={isParsingText || !autoText.trim() || activeCategory === null}
+											disabled={isParsingText || !autoText.trim() || activeCategory === null}
 											className={element('auto-parse-btn')}
 											icon="plus"
 										>

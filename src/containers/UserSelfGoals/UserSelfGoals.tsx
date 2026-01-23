@@ -45,6 +45,7 @@ export const UserSelfGoals: FC<UserSelfGoalsProps> = observer((props) => {
 				subPage={subPage}
 				columns="3"
 				categories={categories}
+				searchWrapperWrap
 			/>
 		</Loader>
 	);
