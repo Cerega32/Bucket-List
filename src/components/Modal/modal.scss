@@ -21,6 +21,7 @@
 		top: 50%;
 		left: 50%;
 		display: none;
+		flex-direction: column;
 		width: 456px;
 		max-height: 90vh;
 		padding: 24px;
@@ -80,6 +81,21 @@
 			padding: 0;
 		}
 
+		&--small {
+			width: 90%;
+			max-width: 420px;
+		}
+
+		&--medium {
+			width: 600px;
+			max-width: 90vw;
+		}
+
+		&--large {
+			width: 90%;
+			max-width: 900px;
+		}
+
 		@media (width <= 768px) {
 			width: 95vw;
 			max-width: 95vw;
@@ -88,14 +104,19 @@
 			&--type-add-review {
 				width: 95vw;
 			}
+
+			&--small {
+				width: 90%;
+				max-width: 420px;
+			}
 		}
 	}
 
 	&__content {
 		position: relative;
+		flex: 1;
+		min-height: 0;
 		max-height: calc(90vh - 48px);
-
-		// overflow: hidden auto;
 
 		// Кастомный скроллбар
 		&::-webkit-scrollbar {

@@ -3,6 +3,7 @@ import {FC} from 'react';
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 
 import './subscription-plan-card.scss';
 
@@ -17,20 +18,21 @@ interface SubscriptionPlanCardProps {
 
 export const SubscriptionPlanCard: FC<SubscriptionPlanCardProps> = ({type, title, subtitle, features, isCurrent, isRecommended}) => {
 	const [block, element] = useBem('subscription-plan-card');
+	const {isScreenSmallMobile} = useScreenSize();
 
 	return (
 		<div className={block({type, current: isCurrent})}>
 			{isCurrent && (
 				<div className={element('badge', {current: true})}>
 					<Svg icon="done" className={element('badge-icon')} />
-					Текущий тариф
+					{isScreenSmallMobile ? '' : 'Текущий тариф'}
 				</div>
 			)}
 
 			{!isCurrent && isRecommended && (
 				<div className={element('badge', {recommended: true})}>
 					<Svg icon="star" className={element('badge-icon')} />
-					Рекомендуем
+					{isScreenSmallMobile ? '' : 'Рекомендуем'}
 				</div>
 			)}
 

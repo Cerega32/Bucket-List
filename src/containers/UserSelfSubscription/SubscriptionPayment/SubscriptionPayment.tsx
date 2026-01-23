@@ -93,14 +93,13 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(({peri
 							}
 						}}
 					/>
-					{/* TODO: добавить ссылки на страницы термов и политики конфиденциальности */}
 					<label htmlFor="terms" className={element('terms-label')}>
 						Я согласен с{' '}
-						<Link to="/terms" className={element('link')}>
+						<Link to="/terms" target="_blank" className={element('link')}>
 							условиями использования
 						</Link>{' '}
 						и{' '}
-						<Link to="/privacy" className={element('link')}>
+						<Link to="/privacy" target="_blank" className={element('link')}>
 							политикой конфиденциальности
 						</Link>
 					</label>
@@ -114,7 +113,7 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(({peri
 				</div>
 			)}
 
-			<Button theme="blue" className={element('button')} onClick={handlePayment} active={!agreedToTerms}>
+			<Button theme="blue" className={element('button')} onClick={handlePayment} disabled={!agreedToTerms}>
 				{`Оплатить ${String(selectedPeriodData.price)}₽`}
 			</Button>
 		</div>

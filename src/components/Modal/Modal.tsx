@@ -33,10 +33,11 @@ interface ModalProps {
 	isOpen?: boolean;
 	onClose?: () => void;
 	title?: string;
+	size?: 'small' | 'medium' | 'large' | 'fullscreen';
 }
 
 export const Modal: FC<ModalProps> = observer((props) => {
-	const {className, children, isOpen: externalIsOpen, onClose: externalOnClose, title} = props;
+	const {className, children, isOpen: externalIsOpen, onClose: externalOnClose, title, size} = props;
 	const [block, element] = useBem('modal', className);
 	const {isOpen: storeIsOpen, setIsOpen, window, setWindow, funcModal, modalProps} = ModalStore;
 	const {setIsAuth, setName, setAvatar} = UserStore;
@@ -123,17 +124,23 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				}
 			}, 50);
 
-			// Отключаем прокрутку body при открытии модального окна
-			// document.body.style.overflow = 'hidden';
-		} else {
-			document.removeEventListener('keyup', handleKeyUp);
-			document.removeEventListener('keydown', handleTabKey);
+			// Сохраняем текущее значение overflow и отключаем прокрутку body при открытии модального окна
+			const originalOverflow = document.body.style.overflow;
+			document.body.style.overflow = 'hidden';
 
-			// Включаем прокрутку body при закрытии модального окна
-			// document.body.style.overflow = '';
+			// Cleanup при размонтировании компонента или закрытии модалки
+			return () => {
+				document.removeEventListener('keyup', handleKeyUp);
+				document.removeEventListener('keydown', handleTabKey);
+				// Восстанавливаем исходное значение overflow
+				document.body.style.overflow = originalOverflow;
+			};
 		}
 
-		// Cleanup при размонтировании компонента
+		// Если модалка закрыта, убеждаемся что прокрутка включена
+		document.body.style.overflow = '';
+
+		// Cleanup функция для случая когда модалка закрыта
 		return () => {
 			document.body.style.overflow = '';
 		};
@@ -213,6 +220,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				className={element('window', {
 					type: window,
 					fullscreen: window === 'goal-map' || window === 'goal-map-multi' || window === 'goal-map-add',
+					...(size ? {[size]: true} : {}),
 				})}
 				ref={modalRef}
 			>

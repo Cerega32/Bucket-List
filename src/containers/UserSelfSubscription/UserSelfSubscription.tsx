@@ -1,27 +1,17 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useState} from 'react';
+import {FC, useEffect, useState} from 'react';
 
 import {Button} from '@/components/Button/Button';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {getUserSubscription, updateSubscription, createPayment, IPayment} from '@/utils/api/subscription';
 
 import {CurrentSubscription} from './CurrentSubscription/CurrentSubscription';
+import {QRPaymentModal} from './QRPaymentModal/QRPaymentModal';
 import {SubscriptionComparisonModal} from './SubscriptionComparisonModal/SubscriptionComparisonModal';
 import {SubscriptionPayment} from './SubscriptionPayment/SubscriptionPayment';
 import {SubscriptionPlanCard} from './SubscriptionPlanCard/SubscriptionPlanCard';
 import './user-self-subscription.scss';
-
-// Моковые данные текущей подписки для free и премиум
-// const MOCK_CURRENT_SUBSCRIPTION = {
-// 	type: 'free' as 'free' | 'premium',
-// 	expiresAt: null as string | null,
-// 	isAutoRenew: false,
-// };
-const MOCK_CURRENT_SUBSCRIPTION = {
-	type: 'premium' as 'free' | 'premium',
-	expiresAt: '2025-02-15T00:00:00Z' as string | null,
-	isAutoRenew: true,
-};
 
 // Периоды подписки
 const SUBSCRIPTION_PERIODS = [
@@ -56,17 +46,73 @@ const PREMIUM_FEATURES = [
 export const UserSelfSubscription: FC = observer(() => {
 	const [block, element] = useBem('user-self-subscription');
 	const [isComparisonOpen, setIsComparisonOpen] = useState(false);
+	const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+	const [currentPayment, setCurrentPayment] = useState<IPayment | null>(null);
+	const [subscription, setSubscription] = useState<{
+		type: 'free' | 'premium';
+		expiresAt: string | null;
+		isAutoRenew: boolean;
+	}>({
+		type: 'free',
+		expiresAt: null,
+		isAutoRenew: false,
+	});
+	const [isLoading, setIsLoading] = useState(true);
 
-	const handlePayment = (period: number, autoRenew: boolean) => {
-		const periodData = SUBSCRIPTION_PERIODS.find((p) => p.value === period);
-		console.log('Оплата:', {period, price: periodData?.price, autoRenew});
-		alert(`Оплата (мок): ${periodData?.price}₽ за ${periodData?.label}`);
+	useEffect(() => {
+		const loadSubscription = async () => {
+			setIsLoading(true);
+			const response = await getUserSubscription();
+			if (response.success && response.data) {
+				setSubscription({
+					type: response.data.subscriptionType,
+					expiresAt: response.data.subscriptionExpiresAt,
+					isAutoRenew: response.data.subscriptionAutoRenew,
+				});
+			}
+			setIsLoading(false);
+		};
+
+		loadSubscription();
+	}, []);
+
+	const handlePayment = async (period: number, autoRenew: boolean) => {
+		// Создаем платеж
+		const response = await createPayment(period, autoRenew);
+
+		if (response.success && response.data) {
+			setCurrentPayment(response.data);
+			setIsPaymentModalOpen(true);
+		} else {
+			alert(response.error || 'Не удалось создать платеж');
+		}
 	};
 
-	const handleToggleAutoRenew = (value: boolean) => {
-		console.log('Изменение автопродления:', value);
-		// TODO: реализовать API вызов для изменения автопродления
-		alert(`Автопродление ${value ? 'включено' : 'отключено'} (мок)`);
+	const handlePaymentSuccess = async () => {
+		// Обновляем информацию о подписке
+		const response = await getUserSubscription();
+		if (response.success && response.data) {
+			setSubscription({
+				type: response.data.subscriptionType,
+				expiresAt: response.data.subscriptionExpiresAt,
+				isAutoRenew: response.data.subscriptionAutoRenew,
+			});
+		}
+	};
+
+	const handleToggleAutoRenew = async (value: boolean) => {
+		const response = await updateSubscription({
+			subscription_auto_renew: value,
+		});
+
+		if (response.success) {
+			setSubscription((prev) => ({
+				...prev,
+				isAutoRenew: value,
+			}));
+		} else {
+			alert('Не удалось изменить настройки автопродления');
+		}
 	};
 
 	return (
@@ -80,34 +126,48 @@ export const UserSelfSubscription: FC = observer(() => {
 				</Button>
 			</div>
 
-			<CurrentSubscription
-				type={MOCK_CURRENT_SUBSCRIPTION.type}
-				expiresAt={MOCK_CURRENT_SUBSCRIPTION.expiresAt}
-				isAutoRenew={MOCK_CURRENT_SUBSCRIPTION.isAutoRenew}
-				onToggleAutoRenew={handleToggleAutoRenew}
-			/>
+			{!isLoading && (
+				<>
+					<CurrentSubscription
+						type={subscription.type}
+						expiresAt={subscription.expiresAt}
+						isAutoRenew={subscription.isAutoRenew}
+						onToggleAutoRenew={handleToggleAutoRenew}
+					/>
 
-			<div className={element('plans')}>
-				<SubscriptionPlanCard
-					type="free"
-					title="Базовый"
-					subtitle="Для тех, кто делает первые шаги в лучшую жизнь"
-					features={FREE_FEATURES}
-					isCurrent={MOCK_CURRENT_SUBSCRIPTION.type === 'free'}
-				/>
-				<SubscriptionPlanCard
-					type="premium"
-					title="Премиум"
-					subtitle="Максимум возможностей для ваших достижений"
-					features={PREMIUM_FEATURES}
-					isCurrent={MOCK_CURRENT_SUBSCRIPTION.type === 'premium'}
-					isRecommended={MOCK_CURRENT_SUBSCRIPTION.type !== 'premium'}
-				/>
-			</div>
+					<div className={element('plans')}>
+						<SubscriptionPlanCard
+							type="free"
+							title="Базовый"
+							subtitle="Для тех, кто делает первые шаги в лучшую жизнь"
+							features={FREE_FEATURES}
+							isCurrent={subscription.type === 'free'}
+						/>
+						<SubscriptionPlanCard
+							type="premium"
+							title="Премиум"
+							subtitle="Максимум возможностей для ваших достижений"
+							features={PREMIUM_FEATURES}
+							isCurrent={subscription.type === 'premium'}
+							isRecommended={subscription.type !== 'premium'}
+						/>
+					</div>
 
-			{MOCK_CURRENT_SUBSCRIPTION.type === 'free' && <SubscriptionPayment periods={SUBSCRIPTION_PERIODS} onPayment={handlePayment} />}
+					{subscription.type === 'free' && <SubscriptionPayment periods={SUBSCRIPTION_PERIODS} onPayment={handlePayment} />}
+				</>
+			)}
 
 			<SubscriptionComparisonModal isOpen={isComparisonOpen} onClose={() => setIsComparisonOpen(false)} />
+
+			<QRPaymentModal
+				isOpen={isPaymentModalOpen}
+				onClose={() => {
+					setIsPaymentModalOpen(false);
+					setCurrentPayment(null);
+				}}
+				payment={currentPayment}
+				onPaymentSuccess={handlePaymentSuccess}
+			/>
 		</section>
 	);
 });
