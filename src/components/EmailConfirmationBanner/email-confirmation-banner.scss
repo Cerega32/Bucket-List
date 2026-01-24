@@ -4,10 +4,10 @@
 	top: var(--height-header, 72px);
 	right: 0;
 	left: 0;
-	padding: 12px 20px;
-	background: var(--color-secondary);
+	padding: 8px 20px;
+	background: var(--color-white);
 	border-bottom: 1px solid var(--color-border);
-	box-shadow: 0 4px 20px rgb(var(--color-black) / 10%);
+	box-shadow: 0 4px 20px rgb(var(--color-black) / 50%);
 	color: var(--color-text-primary);
 	animation: slide-down 0.3s ease-out;
 
@@ -45,12 +45,6 @@
 	&__message {
 		margin: 0;
 		color: var(--color-text-primary);
-		font-size: 14px;
-		line-height: 1.5;
-
-		@include md {
-			font-size: 13px;
-		}
 
 		strong {
 			font-weight: var(--weight-semi-bold);
@@ -96,8 +90,6 @@
 		width: 32px;
 		height: 32px;
 		padding: 0;
-		border: none;
-		border-radius: 8px;
 		cursor: pointer;
 
 		svg {

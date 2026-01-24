@@ -83,7 +83,7 @@ export const EmailConfirmationBanner: FC = observer(() => {
 						{isSending ? 'Отправка...' : isSent ? 'Отправлено' : 'Отправить повторно'}
 					</Button>
 					<button type="button" className={element('close')} onClick={handleDismiss} aria-label="Закрыть">
-						<Svg icon="close" />
+						<Svg icon="cross" />
 					</button>
 				</div>
 			</div>

@@ -41,7 +41,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 	const {className, children, isOpen: externalIsOpen, onClose: externalOnClose, title, size} = props;
 	const [block, element] = useBem('modal', className);
 	const {isOpen: storeIsOpen, setIsOpen, window, setWindow, funcModal, modalProps} = ModalStore;
-	const {setIsAuth, setName, setAvatar} = UserStore;
+	const {setIsAuth, setName, setAvatar, setUserInfo, userInfo} = UserStore;
 
 	// Используем внешние пропсы если они переданы, иначе из store
 	const isOpen = externalIsOpen !== undefined ? externalIsOpen : storeIsOpen;
@@ -67,7 +67,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		setWindow('forgot-password');
 	};
 
-	const successAuth = (data: {name: string; email_confirmed?: boolean; email?: string}) => {
+	const successAuth = (data: {name?: string; email_confirmed?: boolean; email?: string}) => {
 		Cookies.set('name', data.name || '');
 		closeWindow();
 		setName(data.name || '');
@@ -79,6 +79,13 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		if (data.email) {
 			UserStore.setEmail(data.email);
 		}
+		setUserInfo({
+			...userInfo,
+			email: data.email || userInfo.email,
+			firstName: data.name || userInfo.firstName,
+			name: data.name || userInfo.name,
+			...(data.email_confirmed !== undefined && {isEmailConfirmed: data.email_confirmed}),
+		});
 	};
 
 	const handleKeyUp = (e: KeyboardEvent) => {

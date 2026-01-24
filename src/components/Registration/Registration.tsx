@@ -37,7 +37,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 		}
 		const res = await postRegistration(email, password);
 		if (res.success) {
-			successRegistration(res);
+			successRegistration(res.data ?? res);
 		} else {
 			setError(res.errors);
 		}

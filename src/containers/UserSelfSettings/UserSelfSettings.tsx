@@ -22,7 +22,7 @@ import {countriesArr} from '@/utils/data/countries';
 import './user-self-settings.scss';
 
 export const UserSelfSettings: FC = observer(() => {
-	const {userInfo: user, setUserInfo, setAvatar} = UserStore;
+	const {userInfo: user, setUserInfo, setAvatar, email: storeEmail} = UserStore;
 	const {setWindow, setIsOpen} = ModalStore;
 
 	const [name, setName] = useState(user.name);
@@ -244,13 +244,24 @@ export const UserSelfSettings: FC = observer(() => {
 						Информация пользователя
 					</Title>
 					<div className={element('input-group')}>
+						<FieldInput text="Имя" placeholder="Имя" id="name" value={name} setValueTarget={handleInputChange} />
+						<FieldInput text="Фамилия" placeholder="Фамилия" id="surname" value={surname} setValueTarget={handleInputChange} />
+						<div>
+							<Select
+								text="Страна"
+								options={countriesArr}
+								activeOption={activeCountry}
+								onSelect={setActiveCountry}
+								className={element('country')}
+							/>
+						</div>
 						<div className={element('email-field')}>
 							<FieldInput
 								text="Email"
 								placeholder="Email"
 								id="email"
 								type="email"
-								value={user.email}
+								value={user.email || storeEmail}
 								setValue={() => {}}
 								disabled
 								className={element('email-input')}
@@ -274,17 +285,6 @@ export const UserSelfSettings: FC = observer(() => {
 								)}
 							</div>
 						</div>
-						<FieldInput text="Имя" placeholder="Имя" id="name" value={name} setValueTarget={handleInputChange} />
-						<FieldInput text="Фамилия" placeholder="Фамилия" id="surname" value={surname} setValueTarget={handleInputChange} />
-						<div>
-							<Select
-								text="Страна"
-								options={countriesArr}
-								activeOption={activeCountry}
-								onSelect={setActiveCountry}
-								className={element('country')}
-							/>
-						</div>
 						<FieldInput
 							text="Обо мне"
 							type="textarea"
@@ -292,6 +292,7 @@ export const UserSelfSettings: FC = observer(() => {
 							id="about"
 							value={about}
 							setValueTarget={handleInputChange}
+							className={element('about')}
 						/>
 					</div>
 					<Button className={element('btn-save')} theme="blue" onClick={handleSaveChanges}>
