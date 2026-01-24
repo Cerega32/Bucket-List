@@ -17,6 +17,7 @@ import {CreateTodoListForm} from '../CreateTodoListForm/CreateTodoListForm';
 import {CreateTodoTaskForm} from '../CreateTodoTaskForm/CreateTodoTaskForm';
 import {DeleteGoal} from '../DeleteGoal/DeleteGoal';
 import {FolderSelector} from '../FolderSelector/FolderSelector';
+import {ForgotPassword} from '../ForgotPassword/ForgotPassword';
 import {GoalMap} from '../GoalMap/GoalMap';
 import {GoalMapMulti} from '../GoalMap/GoalMapMulti';
 import LocationPicker from '../LocationPicker/LocationPicker';
@@ -62,12 +63,22 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		setWindow('login');
 	};
 
-	const successAuth = (data: {name: string}) => {
+	const openForgotPassword = () => {
+		setWindow('forgot-password');
+	};
+
+	const successAuth = (data: {name: string; email_confirmed?: boolean; email?: string}) => {
 		Cookies.set('name', data.name || '');
 		closeWindow();
 		setName(data.name || '');
 		setIsAuth(true);
 		setAvatar(Cookies.get('avatar') || '');
+		if (data.email_confirmed !== undefined) {
+			UserStore.setEmailConfirmed(data.email_confirmed);
+		}
+		if (data.email) {
+			UserStore.setEmail(data.email);
+		}
 	};
 
 	const handleKeyUp = (e: KeyboardEvent) => {
@@ -152,8 +163,11 @@ export const Modal: FC<ModalProps> = observer((props) => {
 	// Если переданы children, используем их вместо стандартного контента
 	const modalContent = children || (
 		<>
-			{window === 'login' && <Login openRegistration={openRegistration} successLogin={successAuth} />}
+			{window === 'login' && (
+				<Login openRegistration={openRegistration} openForgotPassword={openForgotPassword} successLogin={successAuth} />
+			)}
 			{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
+			{window === 'forgot-password' && <ForgotPassword onBack={openLogin} />}
 			{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
 			{window === 'add-review' && <AddReview closeModal={closeWindow} />}
 			{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}

@@ -3,6 +3,7 @@ import {makeAutoObservable} from 'mobx';
 type IWindow =
 	| 'login'
 	| 'registration'
+	| 'forgot-password'
 	| 'change-password'
 	| 'add-review'
 	| 'delete-goal'

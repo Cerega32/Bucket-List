@@ -14,11 +14,17 @@ export const PageRegistration: FC<IPage> = ({page}) => {
 
 	const navigate = useNavigate();
 
-	const successRegistration = (data: {name: string}) => {
+	const successRegistration = (data: {name: string; email_confirmed?: boolean; email?: string}) => {
 		Cookies.set('name', data.name || '');
 		setName(data.name || '');
 		setIsAuth(true);
 		setAvatar(Cookies.get('avatar') || '');
+		if (data.email_confirmed !== undefined) {
+			UserStore.setEmailConfirmed(data.email_confirmed);
+		}
+		if (data.email) {
+			UserStore.setEmail(data.email);
+		}
 		navigate('/list/100-goals');
 	};
 

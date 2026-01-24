@@ -4,6 +4,7 @@ export interface IUserInfo {
 	country: string;
 	coverImage: string | null | undefined;
 	email: string;
+	isEmailConfirmed?: boolean;
 	firstName: string;
 	id: number;
 	name: string;

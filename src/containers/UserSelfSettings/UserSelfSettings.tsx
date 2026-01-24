@@ -16,6 +16,7 @@ import {IUserInfo} from '@/typings/user';
 import {deleteAvatar} from '@/utils/api/delete/deleteAvatar';
 import {postAvatar} from '@/utils/api/post/postAvatar';
 import {postCover} from '@/utils/api/post/postCover';
+import {postResendConfirmationEmail} from '@/utils/api/post/postResendConfirmationEmail';
 import {putUserInfo} from '@/utils/api/put/putUserInfo';
 import {countriesArr} from '@/utils/data/countries';
 import './user-self-settings.scss';
@@ -151,6 +152,21 @@ export const UserSelfSettings: FC = observer(() => {
 		setIsOpen(true);
 	};
 
+	const [isResendingEmail, setIsResendingEmail] = useState(false);
+	const [emailSent, setEmailSent] = useState(false);
+
+	const handleResendConfirmationEmail = async () => {
+		setIsResendingEmail(true);
+		const res = await postResendConfirmationEmail();
+		if (res.success) {
+			setEmailSent(true);
+			setTimeout(() => {
+				setEmailSent(false);
+			}, 3000);
+		}
+		setIsResendingEmail(false);
+	};
+
 	return (
 		<section className={block()}>
 			<Title tag="h2" className={element('title')}>
@@ -228,6 +244,36 @@ export const UserSelfSettings: FC = observer(() => {
 						Информация пользователя
 					</Title>
 					<div className={element('input-group')}>
+						<div className={element('email-field')}>
+							<FieldInput
+								text="Email"
+								placeholder="Email"
+								id="email"
+								type="email"
+								value={user.email}
+								setValue={() => {}}
+								disabled
+								className={element('email-input')}
+							/>
+							<div className={element('email-status')}>
+								{user.isEmailConfirmed ? (
+									<span className={element('email-confirmed')}>✓ Email подтвержден</span>
+								) : (
+									<div className={element('email-not-confirmed')}>
+										<span className={element('email-warning')}>⚠ Email не подтвержден</span>
+										<Button
+											theme="blue-light"
+											size="small"
+											onClick={handleResendConfirmationEmail}
+											disabled={isResendingEmail || emailSent}
+											className={element('resend-btn')}
+										>
+											{isResendingEmail ? 'Отправка...' : emailSent ? 'Отправлено!' : 'Отправить письмо'}
+										</Button>
+									</div>
+								)}
+							</div>
+						</div>
 						<FieldInput text="Имя" placeholder="Имя" id="name" value={name} setValueTarget={handleInputChange} />
 						<FieldInput text="Фамилия" placeholder="Фамилия" id="surname" value={surname} setValueTarget={handleInputChange} />
 						<div>

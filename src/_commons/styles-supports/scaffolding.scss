@@ -1,6 +1,5 @@
 @charset "UTF-8";
-@import 'custom-properties';
-@import 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
+@use 'custom-properties';
 
 :root {
 	box-sizing: border-box;
@@ -41,7 +40,7 @@ dd {
 /* Set core body defaults */
 body {
 	min-height: 100vh;
-	font-family: 'Inter', sans-serif;
+	font-family: "Inter", sans-serif;
 	font-size: 14px;
 	line-height: 1.42;
 	scroll-behavior: smooth;

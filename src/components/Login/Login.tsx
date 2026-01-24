@@ -13,12 +13,13 @@ import {Title} from '../Title/Title';
 interface LoginProps {
 	className?: string;
 	openRegistration: () => void;
+	openForgotPassword?: () => void;
 	successLogin: (data: any) => void;
 	isPage?: boolean;
 }
 
 export const Login: FC<LoginProps> = (props) => {
-	const {className, openRegistration, successLogin, isPage} = props;
+	const {className, openRegistration, openForgotPassword, successLogin, isPage} = props;
 
 	const [block, element] = useBem('login', className);
 	const [email, setEmail] = useState('');
@@ -69,7 +70,11 @@ export const Login: FC<LoginProps> = (props) => {
 				{error && <p className={element('error')}>{error}</p>}
 				<div className={element('move')}>
 					<FieldCheckbox id="remember" text="Запомнить меня" checked={rememberMe} setChecked={setRememberMe} />
-					{/* <Button theme="no-border">Забыли пароль</Button> */}
+					{openForgotPassword && (
+						<Button theme="no-border" className={element('forgot-password')} onClick={openForgotPassword} typeBtn="button">
+							Забыли пароль?
+						</Button>
+					)}
 				</div>
 				<Button typeBtn="submit" icon="sign-in" theme="blue" className={element('btn')} onClick={signIn}>
 					Войти

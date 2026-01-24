@@ -99,7 +99,7 @@
 		"postcss-preset-env": "^8.3.0",
 		"postcss-sort-media-queries": "^4.3.0",
 		"prettier": "^2.8.7",
-		"sass": "^1.61.0",
+		"sass": "^1.77.0",
 		"stylelint": "^15.11.0",
 		"stylelint-config-recommended-scss": "^9.0.1",
 		"stylelint-config-standard-scss": "^11.1.0",

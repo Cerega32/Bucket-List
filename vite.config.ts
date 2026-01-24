@@ -1,6 +1,6 @@
 import legacy from '@vitejs/plugin-legacy';
 import react from '@vitejs/plugin-react';
-import {defineConfig, loadEnv} from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
 const path = require('path');
 
@@ -24,6 +24,8 @@ export default defineConfig(({mode}) => {
 		css: {
 			preprocessorOptions: {
 				scss: {
+					// Vite 4 не поддерживает api: 'modern' (только с 5.4+). Подавляем предупреждение до перехода на Vite 5.4+.
+					silenceDeprecations: ['legacy-js-api'],
 					additionalData: `
 					@use "@/_commons/styles-supports/mixins" as *;
 				`,

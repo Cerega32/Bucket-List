@@ -3,6 +3,7 @@ import {FC} from 'react';
 import {BrowserRouter} from 'react-router-dom';
 
 import {CookieBanner} from '@/components/CookieBanner/CookieBanner';
+import {EmailConfirmationBanner} from '@/components/EmailConfirmationBanner/EmailConfirmationBanner';
 import {Footer} from '@/components/Footer/Footer';
 import {Header} from '@/components/Header/Header';
 import {Modal} from '@/components/Modal/Modal';
@@ -25,6 +26,7 @@ const Layout: FC = observer(() => {
 		<BrowserRouter
 			future={{
 				v7_startTransition: true,
+				v7_relativeSplatPath: true,
 			}}
 		>
 			<Header />
@@ -36,6 +38,7 @@ const Layout: FC = observer(() => {
 			</div>
 			<Footer />
 			<CookieBanner />
+			<EmailConfirmationBanner />
 		</BrowserRouter>
 	);
 });

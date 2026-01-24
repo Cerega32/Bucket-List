@@ -42,6 +42,10 @@ class Store implements IUserStore {
 
 	avatar = Cookies.get('avatar') || '';
 
+	emailConfirmed = Cookies.get('email_confirmed') === 'true';
+
+	email = Cookies.get('email') || '';
+
 	userInfo: IUserInfo = {
 		avatar: Cookies.get('avatar') || '',
 		email: '',
@@ -102,10 +106,22 @@ class Store implements IUserStore {
 
 	setUserInfo = (userInfo: IUserInfo) => {
 		this.userInfo = userInfo;
+		if (userInfo.isEmailConfirmed !== undefined) {
+			this.setEmailConfirmed(userInfo.isEmailConfirmed);
+		}
+		if (userInfo.email) {
+			this.setEmail(userInfo.email);
+		}
 	};
 
 	setUserSelf = (userSelf: IUserInfo) => {
 		this.userSelf = userSelf;
+		if (userSelf.isEmailConfirmed !== undefined) {
+			this.setEmailConfirmed(userSelf.isEmailConfirmed);
+		}
+		if (userSelf.email) {
+			this.setEmail(userSelf.email);
+		}
 	};
 
 	setAddedGoals = (addedGoals: IAddedGoals) => {
@@ -122,6 +138,24 @@ class Store implements IUserStore {
 
 	setAvatar = (avatar: string) => {
 		this.avatar = avatar;
+	};
+
+	setEmailConfirmed = (emailConfirmed: boolean) => {
+		this.emailConfirmed = emailConfirmed;
+		if (emailConfirmed) {
+			Cookies.set('email_confirmed', 'true');
+		} else {
+			Cookies.remove('email_confirmed');
+		}
+	};
+
+	setEmail = (email: string) => {
+		this.email = email;
+		if (email) {
+			Cookies.set('email', email);
+		} else {
+			Cookies.remove('email');
+		}
 	};
 }
 

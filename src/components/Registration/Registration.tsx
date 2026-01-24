@@ -14,7 +14,7 @@ import './registration.scss';
 interface RegistrationProps {
 	className?: string;
 	openLogin: () => void;
-	successRegistration: (data: {name: string}) => void;
+	successRegistration: (data: {name: string; email_confirmed?: boolean; email?: string}) => void;
 	isPage?: boolean;
 }
 

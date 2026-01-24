@@ -49,7 +49,13 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 				body: params.body ? (params.file ? (params.body as FormData) : JSON.stringify(params.body)) : undefined,
 			});
 
-			const data = await response.json();
+			const contentType = response.headers.get('content-type');
+			let data;
+			if (contentType?.includes('application/json')) {
+				data = await response.json();
+			} else {
+				throw new Error(`Server returned non-JSON. Status: ${response.status}`);
+			}
 
 			if (!response.ok) {
 				if (response.status === 429 && enableRetry) {
@@ -97,12 +103,17 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 				data,
 			};
 		} catch (error) {
-			NotificationStore.addNotification({
-				type: 'error',
-				title: 'Ошибка сервера',
-				message: 'Что-то пошло не так',
-			});
-			return Promise.reject(error);
+			if (showErrorNotification) {
+				NotificationStore.addNotification({
+					type: 'error',
+					title: 'Ошибка сервера',
+					message: error instanceof Error ? error.message : 'Что-то пошло не так',
+				});
+			}
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'Ошибка при выполнении запроса',
+			};
 		}
 	};
 
@@ -143,12 +154,23 @@ export const GET = async (url: string, params?: IFetchParams): Promise<any> => {
 			headers,
 		});
 
-		const data = await response.json();
+		// Проверяем Content-Type перед парсингом JSON
+		const contentType = response.headers.get('content-type');
+		let data;
+
+		if (contentType && contentType.includes('application/json')) {
+			data = await response.json();
+		} else {
+			// Если пришел не JSON, читаем как текст для отладки
+			const text = await response.text();
+			console.error('Non-JSON response received:', text.substring(0, 500));
+			throw new Error(`Server returned non-JSON response. Status: ${response.status}`);
+		}
 
 		if (!response.ok) {
 			return {
 				success: false,
-				errors: data.error,
+				errors: data.error || data.errors || 'Ошибка сервера',
 			};
 		}
 
@@ -157,17 +179,15 @@ export const GET = async (url: string, params?: IFetchParams): Promise<any> => {
 			data,
 		};
 	} catch (error) {
-		return Promise.reject(error);
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Ошибка при выполнении запроса',
+		};
 	}
 };
 
 export const PUT = (url: string, params: IFetchParams): Promise<any> => fetchData(url, 'PUT', params);
 
-/**
- * Получение детальной информации о произведении из FantLab
- * @param workId - ID произведения или автора (для автора используется префикс "author_")
- * @returns Promise с детальной информацией о произведении
- */
 export const getFantLabWorkDetails = async (workId: string): Promise<any> => {
 	try {
 		const response = await fetch(`/api/goals/fantlab/${workId}/details/`, {
