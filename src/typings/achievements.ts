@@ -1,4 +1,4 @@
-export type AchievementCategory = 'first_steps' | 'progress' | 'activity' | 'achievements' | 'other';
+export type AchievementCategory = 'first_steps' | 'progress' | 'activity' | 'achievements' | 'premium' | 'other';
 
 export interface IAchievement {
 	id: number;
@@ -10,4 +10,5 @@ export interface IAchievement {
 	conditionType?: string;
 	condition?: Record<string, any>;
 	isSecret?: boolean;
+	isPremium?: boolean;
 }
