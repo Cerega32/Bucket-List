@@ -66,6 +66,7 @@ const COMPARISON_DATA = [
 			{feature: 'Базовая статистика', free: true, premium: true},
 			{feature: 'Активность выполнения целей и списков', free: '1 год', premium: 'Без ограничений'},
 			{feature: 'Уведомления в мессенджерах', free: false, premium: true},
+			{feature: 'Отсутствие рекламы', free: false, premium: true},
 		],
 	},
 ];

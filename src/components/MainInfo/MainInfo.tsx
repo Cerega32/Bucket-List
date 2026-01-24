@@ -3,6 +3,7 @@ import {FC} from 'react';
 import {useBem} from '@/hooks/useBem';
 
 import {Achievement} from '../Achievement/Achievement';
+import {Button} from '../Button/Button';
 import {Info100Goals} from '../Info100Goals/Info100Goals';
 import {Svg} from '../Svg/Svg';
 import {Title} from '../Title/Title';
@@ -21,10 +22,15 @@ export const MainInfo: FC<MainInfoProps> = (props) => {
 	return (
 		<section className={block()}>
 			<div className={element('item')}>
-				<Svg className={element('icon')} icon="question-circle" width="24px" height="24px" />
-				<Title tag="h2" className={element('title')}>
-					Почему это меняет жизнь?
-				</Title>
+				<div className={element('head')}>
+					<Svg className={element('icon')} icon="question-circle" width="24px" height="24px" />
+					<Title tag="h2" className={element('title')}>
+						Почему это меняет жизнь?
+					</Title>
+					<Button className={element('tariffs-btn')} type="Link" theme="blue" size="small" icon="award" href="/tariffs">
+						Тарифы
+					</Button>
+				</div>
 				<p>
 					Ты уже знаешь, куда двигаться — благодаря чёткой структуре. С помощью отслеживания прогресса и визуализации формируешь
 					новые привычки, которые меняют мышление и поведение. А самое главное — ты не один: наше сообщество всегда поддержит

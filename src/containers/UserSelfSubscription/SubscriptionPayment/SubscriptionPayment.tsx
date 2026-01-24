@@ -21,9 +21,10 @@ interface SubscriptionPeriod {
 interface SubscriptionPaymentProps {
 	periods: readonly SubscriptionPeriod[];
 	onPayment?: (period: number, autoRenew: boolean) => void;
+	variant?: 'full' | 'preview';
 }
 
-export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(({periods, onPayment}) => {
+export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(({periods, onPayment, variant = 'full'}) => {
 	const [block, element] = useBem('subscription-payment');
 	const [selectedPeriod, setSelectedPeriod] = useState<number>(12);
 	const [isAutoRenew, setIsAutoRenew] = useState(false);
@@ -31,6 +32,7 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(({peri
 	const [errorMessage, setErrorMessage] = useState<string>('');
 
 	const selectedPeriodData = periods.find((p) => p.value === selectedPeriod) || periods[0];
+	const isPreview = variant === 'preview';
 
 	const handlePayment = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
@@ -47,75 +49,99 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(({peri
 	return (
 		<div className={block()}>
 			<Title tag="h3" className={element('title')}>
-				Оформить Premium
+				{isPreview ? 'Стоимость Premium' : 'Оформить Premium'}
 			</Title>
 
 			<div className={element('periods')}>
-				{periods.map((period) => (
-					<button
-						key={period.value}
-						type="button"
-						className={element('period', {
-							active: selectedPeriod === period.value,
-						})}
-						onClick={() => setSelectedPeriod(period.value)}
-					>
-						{period.value === 12 && (
-							<div className={element('period-badge')}>
-								<Svg icon="star" />
+				{periods.map((period) =>
+					isPreview ? (
+						<div key={period.value} className={element('period')}>
+							{period.value === 12 && (
+								<div className={element('period-badge')}>
+									<Svg icon="star" />
+								</div>
+							)}
+							<div className={element('period-name')}>{period.label}</div>
+							<div className={element('period-price')}>
+								{period.price}₽{period.discount && <span className={element('period-discount')}>-{period.discount}%</span>}
 							</div>
-						)}
-						<div className={element('period-name')}>{period.label}</div>
-						<div className={element('period-price')}>
-							{period.price}₽{period.discount && <span className={element('period-discount')}>-{period.discount}%</span>}
+							<div className={element('period-per-month')}>{period.pricePerMonth}₽/мес</div>
 						</div>
-						<div className={element('period-per-month')}>{period.pricePerMonth}₽/мес</div>
-					</button>
-				))}
+					) : (
+						<button
+							key={period.value}
+							type="button"
+							className={element('period', {
+								active: selectedPeriod === period.value,
+							})}
+							onClick={() => setSelectedPeriod(period.value)}
+						>
+							{period.value === 12 && (
+								<div className={element('period-badge')}>
+									<Svg icon="star" />
+								</div>
+							)}
+							<div className={element('period-name')}>{period.label}</div>
+							<div className={element('period-price')}>
+								{period.price}₽{period.discount && <span className={element('period-discount')}>-{period.discount}%</span>}
+							</div>
+							<div className={element('period-per-month')}>{period.pricePerMonth}₽/мес</div>
+						</button>
+					)
+				)}
 			</div>
 
-			<div className={element('total')}>
-				<span className={element('total-label')}>К оплате:</span>
-				<span className={element('total-price')}>{selectedPeriodData.price}₽</span>
-			</div>
+			{!isPreview && (
+				<>
+					<div className={element('total')}>
+						<span className={element('total-label')}>К оплате:</span>
+						<span className={element('total-price')}>{selectedPeriodData.price}₽</span>
+					</div>
 
-			<div className={element('checkboxes')}>
-				<FieldCheckbox id="auto-renew" text="Автоматически продлевать подписку" checked={isAutoRenew} setChecked={setIsAutoRenew} />
-				<div className={element('terms')}>
-					<FieldCheckbox
-						id="terms"
-						text=""
-						checked={agreedToTerms}
-						setChecked={(value) => {
-							setAgreedToTerms(value);
-							if (value) {
-								setErrorMessage('');
-							}
-						}}
-					/>
-					<label htmlFor="terms" className={element('terms-label')}>
-						Я согласен с{' '}
-						<Link to="/terms" target="_blank" className={element('link')}>
-							условиями использования
-						</Link>{' '}
-						и{' '}
-						<Link to="/privacy" target="_blank" className={element('link')}>
-							политикой конфиденциальности
-						</Link>
-					</label>
-				</div>
-			</div>
+					<div className={element('checkboxes')}>
+						<FieldCheckbox
+							id="auto-renew"
+							text="Автоматически продлевать подписку"
+							checked={isAutoRenew}
+							setChecked={setIsAutoRenew}
+						/>
+						<div className={element('terms')}>
+							<FieldCheckbox
+								id="terms"
+								text=""
+								checked={agreedToTerms}
+								setChecked={(value) => {
+									setAgreedToTerms(value);
+									if (value) {
+										setErrorMessage('');
+									}
+								}}
+							/>
+							<label htmlFor="terms" className={element('terms-label')}>
+								Я согласен с{' '}
+								<Link to="/terms" target="_blank" className={element('link')}>
+									условиями использования
+								</Link>{' '}
+								и{' '}
+								<Link to="/privacy" target="_blank" className={element('link')}>
+									политикой конфиденциальности
+								</Link>
+							</label>
+						</div>
+					</div>
 
-			{errorMessage && (
-				<div className={element('error-message')}>
-					<Svg icon="cross" className={element('error-icon')} />
-					<span>{errorMessage}</span>
-				</div>
+					{errorMessage && (
+						<div className={element('error-message')}>
+							<Svg icon="cross" className={element('error-icon')} />
+							<span>{errorMessage}</span>
+						</div>
+					)}
+
+					<Button theme="blue" className={element('button')} onClick={handlePayment} disabled={!agreedToTerms}>
+						{`Оплатить ${String(selectedPeriodData.price)}₽`}
+					</Button>
+				</>
 			)}
-
-			<Button theme="blue" className={element('button')} onClick={handlePayment} disabled={!agreedToTerms}>
-				{`Оплатить ${String(selectedPeriodData.price)}₽`}
-			</Button>
 		</div>
 	);
 });

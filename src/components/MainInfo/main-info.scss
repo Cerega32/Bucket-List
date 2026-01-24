@@ -48,8 +48,21 @@
 		&:first-child {
 			grid-row: 1 / 4;
 
-			#{$block}__title {
+			#{$block}__head {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 12px 16px;
 				margin-bottom: 16px;
+
+				#{$block}__icon {
+					margin-bottom: 0;
+				}
+
+				#{$block}__title {
+					margin-right: auto;
+					margin-bottom: 0;
+				}
 			}
 
 			@include xl {
