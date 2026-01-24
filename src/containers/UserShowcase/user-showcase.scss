@@ -16,6 +16,10 @@
 	&__sidebar {
 		flex-shrink: 0;
 		width: 336px;
+
+		@include xs {
+			width: 100%;
+		}
 	}
 
 	&__title {

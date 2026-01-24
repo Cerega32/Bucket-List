@@ -23,12 +23,26 @@
 	}
 
 	&--size-large {
+		flex-shrink: 1;
 		width: 196px;
-		height: 196px;
+		min-width: 0;
+		max-width: 100%;
+		height: auto;
+		aspect-ratio: 1;
 
 		#{$block}__icon {
 			width: 96px;
 			height: 96px;
+		}
+
+		@include sm {
+			width: 160px;
+			height: 160px;
+
+			#{$block}__icon {
+				width: 80px;
+				height: 80px;
+			}
 		}
 	}
 

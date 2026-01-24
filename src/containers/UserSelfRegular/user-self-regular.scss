@@ -1,8 +1,20 @@
 .user-self-regular {
 	width: 100%;
 
+	@include lg {
+		padding: 20px;
+	}
+
+	@include md {
+		padding: 16px;
+	}
+
 	&__header {
 		margin-bottom: 32px;
+
+		@include md {
+			margin-bottom: 24px;
+		}
 	}
 
 	&__title {
@@ -11,9 +23,22 @@
 
 	&__overall-stats {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		grid-template-columns: repeat(4, 1fr);
 		gap: 16px;
 		margin-bottom: 32px;
+
+		@include lg {
+			grid-template-columns: repeat(2, 1fr);
+		}
+
+		@include md {
+			gap: 12px;
+			margin-bottom: 24px;
+		}
+
+		@include xs {
+			grid-template-columns: 1fr;
+		}
 	}
 
 	&__stat-card {
@@ -23,6 +48,10 @@
 		border-radius: 12px;
 		text-align: center;
 		transition: all 0.2s ease;
+
+		@include md {
+			padding: 16px;
+		}
 
 		&:hover {
 			box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
@@ -36,6 +65,10 @@
 		color: var(--primary-color);
 		font-size: 32px;
 		font-weight: 700;
+
+		@include md {
+			font-size: 24px;
+		}
 	}
 
 	&__stat-label {
@@ -49,6 +82,10 @@
 		display: flex;
 		flex-direction: column;
 		gap: 32px;
+
+		@include md {
+			gap: 24px;
+		}
 	}
 
 	&__section {
@@ -71,6 +108,11 @@
 		color: var(--text-color);
 		font-size: 24px;
 		font-weight: 600;
+
+		@include md {
+			margin-bottom: 16px;
+			font-size: 20px;
+		}
 	}
 
 	&__count {
@@ -84,8 +126,21 @@
 
 	&__goals-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
 		gap: 20px;
+
+		@include xl {
+			grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+		}
+
+		@include lg {
+			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			gap: 16px;
+		}
+
+		@include md {
+			grid-template-columns: 1fr;
+		}
 	}
 
 	&__empty-message {
@@ -101,80 +156,22 @@
 		border-radius: 12px;
 		text-align: center;
 
+		@include md {
+			padding: 40px 16px;
+		}
+
 		p {
 			margin: 0 0 12px;
 			color: var(--text-secondary-color);
 			font-size: 16px;
 
+			@include md {
+				font-size: 14px;
+			}
+
 			&:last-child {
 				margin-bottom: 0;
 			}
-		}
-	}
-
-	// Мобильная версия
-	@include md {
-		padding: 16px;
-
-		&__header {
-			margin-bottom: 24px;
-		}
-
-		&__overall-stats {
-			grid-template-columns: repeat(2, 1fr);
-			gap: 12px;
-			margin-bottom: 24px;
-		}
-
-		&__stat-card {
-			padding: 16px;
-		}
-
-		&__stat-value {
-			font-size: 24px;
-		}
-
-		&__content {
-			gap: 24px;
-		}
-
-		&__section-title {
-			margin-bottom: 16px;
-			font-size: 20px;
-		}
-
-		&__goals-grid {
-			grid-template-columns: 1fr;
-			gap: 16px;
-		}
-
-		&__empty-state {
-			padding: 40px 16px;
-
-			p {
-				font-size: 14px;
-			}
-		}
-	}
-
-	// Планшетная версия
-	@include lg {
-		padding: 20px;
-
-		&__overall-stats {
-			grid-template-columns: repeat(2, 1fr);
-		}
-
-		&__goals-grid {
-			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-			gap: 16px;
-		}
-	}
-
-	// Большие экраны
-	@media (width >= 1400px) {
-		&__goals-grid {
-			grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
 		}
 	}
 }

@@ -8,11 +8,14 @@ import {EditGoal} from '@/components/EditGoal/EditGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
 import {Loader} from '@/components/Loader/Loader';
 import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
+import {SEO} from '@/components/SEO/SEO';
 import {useBem} from '@/hooks/useBem';
+import {useOGImage} from '@/hooks/useOGImage';
 import useScreenSize from '@/hooks/useScreenSize';
 import {GoalStore} from '@/store/GoalStore';
 import {ModalStore} from '@/store/ModalStore';
 import {ThemeStore} from '@/store/ThemeStore';
+import {UserStore} from '@/store/UserStore';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
 import {canEditGoal} from '@/utils/api/get/canEditGoal';
@@ -27,6 +30,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const [block, element] = useBem('goal');
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 	const headerRef = useRef<HTMLElement | null>(null);
+	const {isAuth} = UserStore;
 
 	const {setId} = GoalStore;
 	const params = useParams();
@@ -34,6 +38,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const [goal, setGoal] = useState<IGoal | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
+	const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0); // Триггер для обновления истории
 	const [canEditCheck, setCanEditCheck] = useState<{can_edit: boolean; checked: boolean}>({
 		can_edit: false,
 		checked: false,
@@ -100,6 +105,12 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			return;
 		}
 
+		if (!isAuth) {
+			setWindow('login');
+			setIsOpen(true);
+			return;
+		}
+
 		const res = await (operation === 'add'
 			? addGoal(code)
 			: operation === 'delete'
@@ -129,6 +140,14 @@ export const Goal: FC<IPage> = observer(({page}) => {
 
 			setGoal({...goal, ...updatedGoal});
 
+			// Если удалена или добавлена регулярная цель, перезагружаем данные цели, чтобы обновить regularConfig.statistics
+			if ((operation === 'delete' || operation === 'add') && goal.regularConfig && listId) {
+				const reloadRes = await getGoal(listId);
+				if (reloadRes.success && reloadRes.data.goal) {
+					setGoal(reloadRes.data.goal);
+				}
+			}
+
 			// Прогресс заданий обновляется автоматически на бэкенде
 		}
 	};
@@ -139,14 +158,40 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		setIsEditing(false);
 	};
 
+	const handleGoalUpdate = async (updatedGoal?: IGoal) => {
+		// Если передан обновленный goal из API, используем его
+		if (updatedGoal) {
+			setGoal(updatedGoal);
+		} else if (goal && listId) {
+			// Иначе перезагружаем цель из API
+			setIsLoading(true);
+			const res = await getGoal(listId);
+			if (res.success && res.data.goal) {
+				setGoal(res.data.goal);
+			}
+			setIsLoading(false);
+		}
+	};
+
 	const handleCancelEdit = () => {
 		setHeader('transparent');
 		setIsEditing(false);
 	};
 
-	const handleGoalCompleted = () => {
-		// Обновляем состояние цели как выполненной
-		if (goal) {
+	const handleGoalCompleted = async () => {
+		// Если цель регулярная, перезагружаем её для обновления статистики
+		if (goal?.regularConfig) {
+			try {
+				const res = await getGoal(listId || '');
+				if (res.success && res.data?.goal) {
+					setGoal(res.data.goal);
+					setId(res.data.goal.id);
+				}
+			} catch (error) {
+				console.error('Ошибка при перезагрузке цели:', error);
+			}
+		} else if (goal) {
+			// Для обычных целей обновляем состояние как выполненной
 			setGoal({
 				...goal,
 				completedByUser: true,
@@ -154,8 +199,20 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		}
 	};
 
+	// Функция для обновления истории выполнения регулярной цели
+	const handleHistoryRefresh = () => {
+		setHistoryRefreshTrigger((prev) => prev + 1);
+	};
+
 	const [shrink, setShrink] = useState(false);
 	const [headerHeight, setHeaderHeight] = useState<number>(340);
+
+	// Генерируем динамическое OG изображение
+	const {imageUrl: ogImageUrl} = useOGImage({
+		goal,
+		width: 1200,
+		height: 630,
+	});
 
 	const updateHeaderHeight = () => {
 		if (headerRef.current) {
@@ -209,49 +266,63 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	}
 
 	if (!goal) {
-		return <Loader isLoading={isLoading} />;
+		return <Loader isLoading={isLoading} isPageLoader />;
 	}
 
 	return (
-		<main className={block()}>
-			<HeaderGoal
-				ref={headerRef}
+		<>
+			<SEO
 				title={goal.title}
-				category={goal.category}
-				image={goal.image}
-				background={goal.image}
-				goal={goal}
-				shrink={shrink}
-				onImageLoad={updateHeaderHeight}
+				description={goal.description || `Достигните цель "${goal.title}" на платформе Delting`}
+				dynamicImage={ogImageUrl}
+				type="article"
 			/>
-			<section
-				className={element('wrapper')}
-				style={{
-					paddingTop: isScreenMobile ? headerHeight : 0,
-				}}
-			>
-				<AsideGoal
-					className={element('aside', {shrink})}
+			<main className={block()}>
+				<HeaderGoal
+					ref={headerRef}
 					title={goal.title}
-					image={goal.image || ''}
-					added={goal.addedByUser}
-					updateGoal={updateGoal}
-					code={goal.code}
-					goalId={goal.id}
-					done={goal.completedByUser}
-					openAddReview={openAddReview}
-					editGoal={goal.createdByUser && goal.isCanEdit ? () => setIsEditing(true) : undefined}
-					canEdit={goal?.isCanEdit}
-					location={goal?.location}
-					onGoalCompleted={handleGoalCompleted}
-					userFolders={goal.userFolders}
-					regularConfig={goal.regularConfig}
+					category={goal.category}
+					image={goal.image}
+					background={goal.image}
+					goal={goal}
+					shrink={shrink}
+					onImageLoad={updateHeaderHeight}
 				/>
-				<div className={element('content-wrapper')}>
-					<ContentGoal page={page} goal={goal} className={element('content')} />
-				</div>
-			</section>
-			<ScrollToTop />
-		</main>
+				<section
+					className={element('wrapper')}
+					style={{
+						paddingTop: isScreenMobile ? headerHeight : 0,
+					}}
+				>
+					<AsideGoal
+						key={`aside-${goal.id}-${goal.regularConfig?.statistics?.updatedAt || ''}-${goal.regularConfig?.frequency || ''}-${
+							goal.regularConfig?.durationValue || 0
+						}-${goal.regularConfig?.allowSkipDays || 0}`}
+						className={element('aside', {shrink})}
+						title={goal.title}
+						image={goal.image || ''}
+						added={goal.addedByUser}
+						updateGoal={updateGoal}
+						code={goal.code}
+						goalId={goal.id}
+						done={goal.completedByUser}
+						openAddReview={openAddReview}
+						editGoal={goal.createdByUser && goal.isCanEdit ? () => setIsEditing(true) : undefined}
+						canEdit={goal?.isCanEdit}
+						location={goal?.location}
+						onGoalCompleted={handleGoalCompleted}
+						onHistoryRefresh={handleHistoryRefresh}
+						onGoalUpdate={handleGoalUpdate}
+						page={page}
+						userFolders={goal.userFolders}
+						regularConfig={goal.regularConfig}
+					/>
+					<div className={element('content-wrapper')}>
+						<ContentGoal page={page} goal={goal} className={element('content')} historyRefreshTrigger={historyRefreshTrigger} />
+					</div>
+				</section>
+				<ScrollToTop />
+			</main>
+		</>
 	);
 });

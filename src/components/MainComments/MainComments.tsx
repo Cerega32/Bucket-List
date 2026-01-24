@@ -5,6 +5,7 @@ import {Navigation} from 'swiper/modules';
 import {Swiper, SwiperSlide} from 'swiper/react';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {IComment} from '@/typings/comments';
 
 import {Button} from '../Button/Button';
@@ -20,6 +21,7 @@ interface MainCommentsProps {
 export const MainComments: FC<MainCommentsProps> = (props) => {
 	const {className, comments} = props;
 	const [block, element] = useBem('main-comments', className);
+	const {isScreenMobile} = useScreenSize();
 
 	if (!comments.length) {
 		return null;
@@ -33,7 +35,7 @@ export const MainComments: FC<MainCommentsProps> = (props) => {
 			<div className={element('slider-container')}>
 				<Swiper
 					modules={[Navigation]}
-					spaceBetween={24}
+					spaceBetween={isScreenMobile ? 12 : 24}
 					slidesPerView="auto"
 					navigation={{
 						nextEl: '.main-comments__next',

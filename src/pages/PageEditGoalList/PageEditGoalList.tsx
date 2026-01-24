@@ -66,7 +66,7 @@ export const PageEditGoalList: FC<IPage> = ({page}) => {
 	}, [id]);
 
 	if (isLoading) {
-		return <Loader isLoading={isLoading} />;
+		return <Loader isLoading={isLoading} isPageLoader />;
 	}
 
 	return <EditGoalList listData={listData} canEditAll={listData?.isCanEdit} />;

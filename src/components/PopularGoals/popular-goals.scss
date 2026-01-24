@@ -7,7 +7,7 @@
 		height: 100%;
 	}
 
-	@media (width <= 768px) {
+	@include md {
 		grid-template-columns: 1fr;
 	}
 }
