@@ -1837,7 +1837,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					<Button
 						theme="blue-light"
 						onClick={openFolderSelector}
-						icon="folder"
+						icon="folder-open"
 						className={element('btn')}
 						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 					>
