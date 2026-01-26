@@ -12,8 +12,7 @@
 	overflow: hidden;
 
 	&:hover {
-		outline: 1px solid var(--color-primary-hover);
-		outline-offset: -1px;
+		background-color: var(--color-secondary-hover);
 	}
 
 	&__gradient {
@@ -37,5 +36,55 @@
 	&__goals {
 		color: var(--color-white);
 		font-size: 14px;
+	}
+
+	// вариант minimal
+	&--variant-minimal {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		height: auto;
+		min-height: 80px;
+		padding: 16px;
+		background-color: var(--color-secondary);
+
+		#{$block}__link {
+			display: flex;
+			align-items: center;
+			gap: 16px;
+		}
+
+		#{$block}__icon-img {
+			width: 40px;
+			height: 40px;
+			object-fit: contain;
+		}
+
+		#{$block}__icon-svg {
+			width: 40px;
+			height: 40px;
+
+			svg {
+				width: 40px;
+				height: 40px;
+			}
+		}
+
+		#{$block}__content {
+			display: flex;
+			flex: 1;
+			flex-direction: column;
+			gap: 4px;
+		}
+
+		#{$block}__title {
+			margin-bottom: 0;
+			text-align: left;
+		}
+
+		#{$block}__goals {
+			color: var(--color-text);
+			font-size: 14px;
+		}
 	}
 }

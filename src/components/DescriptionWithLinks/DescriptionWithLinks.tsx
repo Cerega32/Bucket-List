@@ -1,11 +1,10 @@
-import {FC, useMemo, useState} from 'react';
+import {FC, useEffect, useMemo, useRef, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import {IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import './description-with-links.scss';
 
-import {Button} from '../Button/Button';
 import {InfoGoal} from '../InfoGoal/InfoGoal';
 import {Line} from '../Line/Line';
 import {ITabs, Tabs} from '../Tabs/Tabs';
@@ -36,6 +35,36 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 	const [block, element] = useBem('description-with-links', className);
 
 	const [isShortDesc, setIsShortDesc] = useState(true);
+	const [isTextOverflowing, setIsTextOverflowing] = useState(false);
+	const textRef = useRef<HTMLParagraphElement>(null);
+	const wasOverflowingRef = useRef<boolean>(false);
+
+	useEffect(() => {
+		wasOverflowingRef.current = false;
+		setIsTextOverflowing(false);
+	}, [goal.description]);
+
+	useEffect(() => {
+		const textElement = textRef.current;
+		if (!textElement || !isShortDesc) return;
+
+		const checkOverflow = () => {
+			const isOverflowing = textElement.scrollHeight > textElement.clientHeight;
+			setIsTextOverflowing(isOverflowing);
+			if (isOverflowing) {
+				wasOverflowingRef.current = true;
+			}
+		};
+
+		const timeoutId = setTimeout(() => {
+			requestAnimationFrame(checkOverflow);
+		}, 0);
+
+		return () => clearTimeout(timeoutId);
+	}, [isShortDesc, goal.description]);
+
+	const shouldShowButton =
+		goal.shortDescription !== goal.description && (isTextOverflowing || (!isShortDesc && wasOverflowingRef.current));
 
 	const handleToggleMore = () => {
 		setIsShortDesc(!isShortDesc);
@@ -88,11 +117,13 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 		<div className={block({list: isList})}>
 			<div className={element('wrapper')}>
 				<div className={element('text')}>
-					<p className={element('short-text')}>{isShortDesc ? goal.shortDescription : goal.description}</p>
-					{goal.shortDescription !== goal.description && (
-						<Button icon="download" theme="blue-light" className={element('btn-more')} onClick={handleToggleMore}>
-							{isShortDesc ? 'Читать подробнее' : 'Скрыть'}
-						</Button>
+					<p ref={textRef} className={element('short-text', {collapsed: isShortDesc})}>
+						{goal.description}
+					</p>
+					{shouldShowButton && (
+						<button type="button" className={element('toggle-button')} onClick={handleToggleMore}>
+							{isShortDesc ? 'Показать полностью' : 'Скрыть'}
+						</button>
 					)}
 				</div>
 				<InfoGoal
@@ -101,11 +132,6 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 						{title: 'Добавили к себе', value: goal.totalAdded},
 						{title: 'Выполнили', value: goal.totalCompleted},
 					]}
-					progress
-					progressData={{
-						completed: goal.totalCompleted,
-						total: goal.totalAdded,
-					}}
 				/>
 			</div>
 			{!isList && (
