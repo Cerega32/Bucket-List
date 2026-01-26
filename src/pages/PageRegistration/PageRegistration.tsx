@@ -10,15 +10,28 @@ import {IPage} from '@/typings/page';
 export const PageRegistration: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;
 
-	const {setName, setIsAuth, setAvatar} = UserStore;
+	const {setName, setIsAuth, setAvatar, setUserInfo, userInfo} = UserStore;
 
 	const navigate = useNavigate();
 
-	const successRegistration = (data: {name: string}) => {
+	const successRegistration = (data: {name?: string; email_confirmed?: boolean; email?: string}) => {
 		Cookies.set('name', data.name || '');
 		setName(data.name || '');
 		setIsAuth(true);
 		setAvatar(Cookies.get('avatar') || '');
+		if (data.email_confirmed !== undefined) {
+			UserStore.setEmailConfirmed(data.email_confirmed);
+		}
+		if (data.email) {
+			UserStore.setEmail(data.email);
+		}
+		setUserInfo({
+			...userInfo,
+			email: data.email || userInfo.email,
+			firstName: data.name || userInfo.firstName,
+			name: data.name || userInfo.name,
+			...(data.email_confirmed !== undefined && {isEmailConfirmed: data.email_confirmed}),
+		});
 		navigate('/list/100-goals');
 	};
 

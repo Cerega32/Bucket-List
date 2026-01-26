@@ -60,6 +60,7 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 					theme="gradient"
 					size="medium"
 					icon="rocket"
+					width="auto"
 					onClick={!isAuth ? handleButtonClick : undefined}
 					href="/categories/all"
 				>

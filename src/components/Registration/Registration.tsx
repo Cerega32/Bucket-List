@@ -14,7 +14,7 @@ import './registration.scss';
 interface RegistrationProps {
 	className?: string;
 	openLogin: () => void;
-	successRegistration: (data: {name: string}) => void;
+	successRegistration: (data: {name: string; email_confirmed?: boolean; email?: string}) => void;
 	isPage?: boolean;
 }
 
@@ -37,7 +37,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 		}
 		const res = await postRegistration(email, password);
 		if (res.success) {
-			successRegistration(res);
+			successRegistration(res.data ?? res);
 		} else {
 			setError(res.errors);
 		}
