@@ -14,6 +14,9 @@ export interface IUserInfo {
 	totalAddedLists: number;
 	totalCompletedLists: number;
 	totalAchievements: number;
+	subscriptionType?: 'free' | 'premium';
+	subscriptionExpiresAt?: string | null;
+	subscriptionAutoRenew?: boolean;
 }
 
 export interface IWeeklyLeader {

@@ -24,6 +24,7 @@ import {PageMainGoals} from '@/pages/PageMainGoals/PageMainGoals';
 import {PageNotFound} from '@/pages/PageNotFound/PageNotFound';
 import {PagePrivacy} from '@/pages/PagePrivacy/PagePrivacy';
 import {PageRegistration} from '@/pages/PageRegistration/PageRegistration';
+import {PageTariffs} from '@/pages/PageTariffs/PageTariffs';
 import {PageTerms} from '@/pages/PageTerms/PageTerms';
 import {PageUser} from '@/pages/PageUser/PageUser';
 import {PageUserSelf} from '@/pages/PageUserSelf/PageUserSelf';
@@ -67,6 +68,7 @@ export const RoutesAuth: FC = observer(() => {
 				<Route path="/about" element={<PageAbout page="isAbout" />} />
 				<Route path="/help" element={<PageHelp page="isHelp" />} />
 				<Route path="/contacts" element={<PageContacts page="isContacts" />} />
+				<Route path="/tariffs" element={<PageTariffs page="isTariffs" />} />
 
 				{/* Правовые документы */}
 				<Route path="/privacy" element={<PagePrivacy page="isPrivacy" />} />
@@ -111,6 +113,7 @@ export const RoutesAuth: FC = observer(() => {
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfAchievements" />} />}
 				/>
 				<Route path="/user/self/settings" element={<ProtectedRoute element={<PageUserSelf page="isUserSelfSettings" />} />} />
+				<Route path="/user/self/subs" element={<ProtectedRoute element={<PageUserSelf page="isUserSelfSubs" />} />} />
 				<Route
 					path="/user/self/active-goals"
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfActive" subPage="goals" />} />}

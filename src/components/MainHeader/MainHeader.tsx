@@ -25,9 +25,11 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 	const {setWindow, setIsOpen} = ModalStore;
 	const {isAuth} = UserStore;
 
-	const openLogin = () => {
-		setIsOpen(true);
-		setWindow('login');
+	const handleButtonClick = () => {
+		if (!isAuth) {
+			setIsOpen(true);
+			setWindow('login');
+		}
 	};
 
 	return (
@@ -58,7 +60,7 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 					theme="gradient"
 					size="medium"
 					icon="rocket"
-					onClick={openLogin}
+					onClick={!isAuth ? handleButtonClick : undefined}
 					href="/categories/all"
 				>
 					Начать путь

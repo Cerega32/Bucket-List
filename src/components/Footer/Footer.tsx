@@ -35,6 +35,7 @@ export const Footer: FC<FooterProps> = observer((props) => {
 				{to: '/categories/all', label: 'Каталог целей'},
 				{to: '/leaders', label: 'Лидеры'},
 				{to: '/news', label: 'Новости'},
+				...(isAuth ? [] : [{to: '/tariffs', label: 'Тарифы'}]),
 			],
 		},
 		...(isAuth
@@ -51,6 +52,7 @@ export const Footer: FC<FooterProps> = observer((props) => {
 							{to: '/user/self/folders', label: 'Папки целей'},
 							{to: '/user/self/progress', label: 'Прогресс целей'},
 							{to: '/user/self/regular', label: 'Регулярные цели'},
+							{to: '/user/self/subs', label: 'Подписка'},
 							{to: '/user/self/settings', label: 'Настройки'},
 						],
 					},
