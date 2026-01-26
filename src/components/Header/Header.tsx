@@ -283,10 +283,10 @@ export const Header: FC<HeaderProps> = observer((props) => {
 								<Svg icon="apps" className={element('categories-icon')} />
 							</Button>
 						) : (
-							<Link className={element('categories-link')} to="/categories">
+							<div className={element('categories-link')}>
 								<Svg icon="apps" className={element('categories-icon')} />
 								{isScreenDesktop ? 'Категории' : ''}
-							</Link>
+							</div>
 						)}
 						<AnimatePresence>
 							{isCategoriesOpen && (

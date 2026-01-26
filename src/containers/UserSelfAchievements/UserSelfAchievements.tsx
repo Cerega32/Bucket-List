@@ -17,10 +17,11 @@ const CATEGORY_NAMES: Record<AchievementCategory, string> = {
 	progress: 'Прогресс',
 	activity: 'Активность',
 	achievements: 'Достигатор',
-	other: 'Прочее', // TODO: Используется для тестовых достижений
+	premium: 'Premium',
+	other: 'Прочее',
 };
 
-const CATEGORY_ORDER: AchievementCategory[] = ['first_steps', 'progress', 'activity', 'achievements', 'other'];
+const CATEGORY_ORDER: AchievementCategory[] = ['first_steps', 'progress', 'activity', 'achievements', 'premium', 'other'];
 
 export const UserSelfAchievements: FC = observer(() => {
 	const [block, element] = useBem('user-self-achievements');
@@ -45,6 +46,7 @@ export const UserSelfAchievements: FC = observer(() => {
 			progress: [],
 			activity: [],
 			achievements: [],
+			premium: [],
 			other: [],
 		};
 

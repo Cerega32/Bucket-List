@@ -8,40 +8,11 @@ import {getUserSubscription, updateSubscription, createPayment, IPayment} from '
 
 import {CurrentSubscription} from './CurrentSubscription/CurrentSubscription';
 import {QRPaymentModal} from './QRPaymentModal/QRPaymentModal';
+import {FREE_FEATURES, PREMIUM_FEATURES, SUBSCRIPTION_PERIODS} from './subscription-constants';
 import {SubscriptionComparisonModal} from './SubscriptionComparisonModal/SubscriptionComparisonModal';
 import {SubscriptionPayment} from './SubscriptionPayment/SubscriptionPayment';
 import {SubscriptionPlanCard} from './SubscriptionPlanCard/SubscriptionPlanCard';
 import './user-self-subscription.scss';
-
-// Периоды подписки
-const SUBSCRIPTION_PERIODS = [
-	{value: 1, label: '1 месяц', price: 199, pricePerMonth: 199},
-	{value: 6, label: '6 месяцев', price: 1074, pricePerMonth: 179, discount: 10},
-	{value: 12, label: '1 год', price: 1990, pricePerMonth: 166, discount: 17},
-] as const;
-
-// Фичи тарифов
-const FREE_FEATURES = [
-	'Количество целей не ограничен',
-	'100 целей уже готовы к старту',
-	'Добавление готовых списков',
-	'До 3 регулярных целей',
-	'До 10 мест на карте',
-	'Базовые достижения',
-	'1 задание для получения опыта',
-	'Базовая статистика',
-];
-
-const PREMIUM_FEATURES = [
-	'Всё из Базового тарифа',
-	'До 20 регулярных целей',
-	'Кастомные расписания выполнения',
-	'Эксклюзивные Premium достижения',
-	'3 задания для получения опыта (×3 опыт)',
-	'Расширенная аналитика за год',
-	'Совместные папки и сравнение прогресса с друзьями',
-	'Уведомления в мессенджерах',
-];
 
 export const UserSelfSubscription: FC = observer(() => {
 	const [block, element] = useBem('user-self-subscription');

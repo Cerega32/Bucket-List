@@ -27,6 +27,7 @@ import {PagePremium} from '@/pages/PagePremium/PagePremium';
 import {PagePrivacy} from '@/pages/PagePrivacy/PagePrivacy';
 import {PageRegistration} from '@/pages/PageRegistration/PageRegistration';
 import {PageResetPassword} from '@/pages/PageResetPassword/PageResetPassword';
+import {PageTariffs} from '@/pages/PageTariffs/PageTariffs';
 import {PageTerms} from '@/pages/PageTerms/PageTerms';
 import {PageUser} from '@/pages/PageUser/PageUser';
 import {PageUserSelf} from '@/pages/PageUserSelf/PageUserSelf';
@@ -70,6 +71,7 @@ export const RoutesAuth: FC = observer(() => {
 				<Route path="/about" element={<PageAbout page="isAbout" />} />
 				<Route path="/help" element={<PageHelp page="isHelp" />} />
 				<Route path="/contacts" element={<PageContacts page="isContacts" />} />
+				<Route path="/tariffs" element={<PageTariffs page="isTariffs" />} />
 
 				{/* Правовые документы */}
 				<Route path="/privacy" element={<PagePrivacy page="isPrivacy" />} />

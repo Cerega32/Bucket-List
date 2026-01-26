@@ -320,7 +320,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 					categories={categories}
 					initialSearch={searchQuery}
 				/>
-				{!id && <AllCategories categories={categories} tag="h2" title="Категории" />}
+				{!id && <AllCategories categories={categories} tag="h2" title="Категории" variant="minimal" />}
 			</Loader>
 
 			{/* Модалка настройки регулярности */}
