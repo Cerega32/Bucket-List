@@ -31,6 +31,26 @@
 		justify-content: center;
 		gap: 24px;
 		width: 100%;
+
+		&--variant-minimal {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 24px;
+			width: 100%;
+
+			@include lg {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			@include md {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		&--variant-mixed {
+			flex-direction: column;
+			gap: 12px;
+		}
 	}
 
 	&__item {
