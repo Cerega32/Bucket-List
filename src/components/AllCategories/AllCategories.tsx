@@ -10,9 +10,10 @@ interface AllCategoriesProps {
 	categories: Array<ICategoryDetailed>;
 	tag: 'h1' | 'h2' | 'h3';
 	title: string;
+	variant?: 'default' | 'minimal';
 }
 
-export const AllCategories: FC<AllCategoriesProps> = ({categories, tag, title}) => {
+export const AllCategories: FC<AllCategoriesProps> = ({categories, tag, title, variant = 'default'}) => {
 	const [block, element] = useBem('categories');
 
 	return (
@@ -20,9 +21,11 @@ export const AllCategories: FC<AllCategoriesProps> = ({categories, tag, title}) 
 			<Title className={element('title', {tag})} tag={tag}>
 				{title}
 			</Title>
-			<section className={element('list')}>
+			<section className={element('list', {variant})}>
 				{!!categories.length &&
-					categories.map((category) => <CardCategory category={category} className={element('item')} key={category.id} />)}
+					categories.map((category) => (
+						<CardCategory category={category} className={element('item')} key={category.id} variant={variant} />
+					))}
 			</section>
 		</main>
 	);

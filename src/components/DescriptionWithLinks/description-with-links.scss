@@ -28,7 +28,28 @@
 	}
 
 	&__short-text {
-		margin-bottom: 16px;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+
+		&--collapsed {
+			display: -webkit-box;
+			-webkit-line-clamp: 3;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			word-break: break-word;
+		}
+	}
+
+	&__toggle-button {
+		margin-top: 4px;
+		color: var(--color-primary);
+		text-align: left;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--color-primary-hover);
+		}
 	}
 
 	&__info {
