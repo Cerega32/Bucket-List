@@ -1,4 +1,4 @@
-import {FC, useEffect, useMemo, useRef} from 'react';
+import {FC, useLayoutEffect, useMemo, useRef} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
@@ -39,7 +39,9 @@ export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
 
 	const MAX_HEIGHT = useMemo(() => (isScreenMobile ? 160 : 128), [isScreenMobile]);
 
-	useEffect(() => {
+	// useLayoutEffect выполняется синхронно после DOM-мутаций, но до отрисовки
+	// Это гарантирует, что все элементы уже отрендерены и их размеры можно точно измерить
+	useLayoutEffect(() => {
 		const container = containerRef.current;
 		if (!container) return;
 
@@ -105,7 +107,7 @@ export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
 
 						if (newScrollHeight > MAX_HEIGHT) {
 							const remainingOverflow = newScrollHeight - MAX_HEIGHT;
-							const maxShift = isScreenMobile ? 24 : 30;
+							const maxShift = isScreenMobile ? 24 : 40;
 							const shift = Math.min(remainingOverflow, maxShift);
 							container.style.transform = `translateY(-${shift}px)`;
 						} else {
