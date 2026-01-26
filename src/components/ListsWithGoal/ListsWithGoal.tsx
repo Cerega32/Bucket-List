@@ -8,6 +8,7 @@ import {addListGoal} from '@/utils/api/post/addListGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
 
 import {Card} from '../Card/Card';
+import {EmptyState} from '../EmptyState/EmptyState';
 import './lists-with-goal.scss';
 
 interface ListsWithGoalProps {
@@ -45,16 +46,20 @@ export const ListsWithGoal: FC<ListsWithGoalProps> = observer((props) => {
 
 	return (
 		<section className={block()}>
-			{lists.map((list, i) => (
-				<Card
-					goal={list}
-					isList
-					horizontal
-					onClickAdd={() => updateListGoal(list.code, i, 'add')}
-					onClickDelete={() => updateListGoal(list.code, i, 'delete')}
-					key={list.code}
-				/>
-			))}
+			{lists && lists.length > 0 ? (
+				lists.map((list, i) => (
+					<Card
+						goal={list}
+						isList
+						horizontal
+						onClickAdd={() => updateListGoal(list.code, i, 'add')}
+						onClickDelete={() => updateListGoal(list.code, i, 'delete')}
+						key={list.code}
+					/>
+				))
+			) : (
+				<EmptyState title="Пока нет списков с этой целью" description="Создайте список, чтобы включить в него эту цель" />
+			)}
 		</section>
 	);
 });

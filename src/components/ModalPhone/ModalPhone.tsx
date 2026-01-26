@@ -34,13 +34,24 @@ export const ModalPhone: FC<ModalPhoneProps> = observer((props) => {
 
 	// Обработчик кликов по ссылкам для автоматического закрытия модалки
 	const handleLinkClick = useCallback(
-		(event: Event) => {
+		(event: MouseEvent) => {
 			const target = event.target as HTMLElement;
-			if (target.tagName === 'A' || target.closest('a')) {
-				// Даем небольшую задержку для завершения навигации
-				setTimeout(() => {
+			const link = target.tagName === 'A' ? (target as HTMLAnchorElement) : (target.closest('a') as HTMLAnchorElement);
+
+			if (link) {
+				// Проверяем, не является ли ссылка внешней или с target="_blank"
+				const isExternal = link.target === '_blank' || link.hostname !== window.location.hostname;
+
+				// Для внутренних ссылок даем время на навигацию перед закрытием
+				if (!isExternal) {
+					// Предотвращаем немедленное закрытие, даем время на навигацию
+					setTimeout(() => {
+						closeWindow();
+					}, 150);
+				} else {
+					// Для внешних ссылок закрываем сразу
 					closeWindow();
-				}, 100);
+				}
 			}
 		},
 		[closeWindow]

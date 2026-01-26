@@ -1,6 +1,7 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
+import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {Loader} from '@/components/Loader/Loader';
 import {RegularGoalCard} from '@/components/RegularGoalCard/RegularGoalCard';
 import {Title} from '@/components/Title/Title';
@@ -147,9 +148,9 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	const renderGoalsList = (statsArray: IRegularGoalStatistics[], title: string, emptyMessage: string) => {
 		if (statsArray.length === 0) {
 			return (
-				<div className={element('empty-section')}>
+				<div className={element('section')}>
 					<h3 className={element('section-title')}>{title}</h3>
-					<p className={element('empty-message')}>{emptyMessage}</p>
+					<EmptyState title={emptyMessage} className={element('empty-section')} />
 				</div>
 			);
 		}
@@ -218,10 +219,10 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				<Title tag="h1" className={element('title')}>
 					Регулярные цели
 				</Title>
-				<div className={element('empty-state')}>
-					<p>У вас пока нет регулярных целей.</p>
-					<p>Создайте цель и настройте для неё регулярность выполнения!</p>
-				</div>
+				<EmptyState
+					title="У вас пока нет регулярных целей"
+					description="Создайте цель и настройте для неё регулярность выполнения!"
+				/>
 			</div>
 		);
 	}

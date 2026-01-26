@@ -18,7 +18,8 @@
 	}
 
 	&__slide {
-		width: 1020px;
+		width: 60vw;
+		max-width: calc(var(--max-width) - 180px * 2);
 		height: auto;
 	}
 

@@ -1,8 +1,53 @@
 .tabs {
 	$block: &;
 
-	display: flex;
-	gap: 32px;
+	position: relative;
+
+	&__scroll-container {
+		position: relative;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+
+	&__wrapper {
+		display: flex;
+		gap: 32px;
+	}
+
+	&::before,
+	&::after {
+		position: absolute;
+		z-index: 1;
+		top: 0;
+		bottom: 0;
+		width: 52px;
+		content: '';
+		pointer-events: none;
+	}
+
+	&::before {
+		left: 0;
+		background: linear-gradient(to right, rgb(var(--color-white-rgb) / 100%) 0%, rgb(var(--color-white-rgb) / 0%) 100%);
+		transition: opacity 0.2s ease;
+	}
+
+	&::after {
+		right: 0;
+		background: linear-gradient(to left, rgb(var(--color-white-rgb) / 100%) 0%, rgb(var(--color-white-rgb) / 0%) 100%);
+		transition: opacity 0.2s ease;
+	}
+
+	&--at-start {
+		&::before {
+			opacity: 0;
+		}
+	}
+
+	&--at-end {
+		&::after {
+			opacity: 0;
+		}
+	}
 
 	&__link {
 		position: relative;
@@ -52,9 +97,22 @@
 	&--vertical {
 		@include block-radius;
 
-		flex-direction: column;
-		gap: 8px;
 		padding: 16px 24px;
+
+		#{$block}__wrapper {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		&::before,
+		&::after {
+			display: none;
+		}
+
+		@include md {
+			display: none;
+		}
 
 		#{$block} {
 			&__link {

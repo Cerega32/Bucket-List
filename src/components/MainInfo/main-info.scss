@@ -3,8 +3,29 @@
 
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	grid-template-rows: 1fr 1fr 1fr;
+	grid-template-rows: repeat(3, 1fr);
 	gap: 24px;
+
+	@include xl {
+		grid-template-columns: repeat(5, 1fr);
+	}
+
+	@include lg {
+		grid-template-columns: 1fr;
+		grid-template-rows: repeat(5, 1fr);
+	}
+
+	@include md {
+		grid-template-rows: 200px 1fr 1fr 1fr;
+	}
+
+	@include sm {
+		grid-template-rows: 160px 1fr 1fr 1fr;
+	}
+
+	@include xs {
+		grid-template-rows: 50px 1fr 1fr 1fr;
+	}
 
 	&__title {
 		margin-bottom: 8px;
@@ -16,11 +37,45 @@
 
 		@include block-radius(24px, var(--color-gray-11));
 
+		@include xl {
+			grid-column: span 2;
+		}
+
+		@include lg {
+			grid-column: span 1;
+		}
+
 		&:first-child {
 			grid-row: 1 / 4;
 
-			#{$block}__title {
+			#{$block}__head {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 12px 16px;
 				margin-bottom: 16px;
+
+				#{$block}__icon {
+					margin-bottom: 0;
+				}
+
+				#{$block}__title {
+					margin-right: auto;
+					margin-bottom: 0;
+				}
+			}
+
+			@include xl {
+				grid-column: span 3;
+			}
+
+			@include lg {
+				grid-column: span 1;
+				grid-row: span 3;
+			}
+
+			@include xs {
+				padding: 12px;
 			}
 		}
 	}
@@ -45,6 +100,22 @@
 		width: 336px;
 		box-shadow: 0 0 20px -2px rgb(var(--color-text-primary-rgb) / 8%);
 		color: var(--color-text);
+
+		@include md {
+			right: 120px;
+			bottom: 290px;
+		}
+
+		@include sm {
+			right: 20px;
+			bottom: 250px;
+		}
+
+		@include xs {
+			right: 0;
+			bottom: 150px;
+			width: auto;
+		}
 	}
 
 	&__info-title {
@@ -53,6 +124,10 @@
 		font-size: 14px;
 		font-weight: var(--weight-regular);
 		line-height: var(--line-height-14);
+
+		@include xs {
+			display: none;
+		}
 	}
 
 	&__info-count {
@@ -71,6 +146,14 @@
 		bottom: 20%;
 		width: 336px;
 		box-shadow: 0 0 20px -2px rgb(var(--color-text-primary-rgb) / 8%);
+
+		@include md {
+			bottom: 240px;
+		}
+
+		@include sm {
+			display: none;
+		}
 	}
 
 	&__info-100-goals {
@@ -78,5 +161,9 @@
 		bottom: -15px;
 		width: 336px;
 		box-shadow: 0 0 20px -2px rgb(var(--color-text-primary-rgb) / 8%);
+
+		@include sm {
+			width: 280px;
+		}
 	}
 }

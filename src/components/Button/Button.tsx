@@ -38,6 +38,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		children,
 		small,
 		size,
+		width,
 		typeBtn = 'button',
 		hoverContent,
 		hoverIcon,
@@ -120,7 +121,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		switch (type) {
 			case 'Link':
 				return (
-					<Link to={href} className={block({theme, small, size, disabled})} onClick={handleClickLink}>
+					<Link to={href} className={block({theme, small, size, disabled, width})} onClick={handleClickLink}>
 						{content}
 						{theme === 'gradient' && <div className={element('gradient-shadow')} />}
 					</Link>
@@ -142,7 +143,7 @@ export const Button: FC<ButtonProps> = (props) => {
 			default:
 				return (
 					<button
-						className={block({theme, small, size, disabled})}
+						className={block({theme, small, size, disabled, width})}
 						onClick={handleClickButton}
 						type={typeBtn === 'button' ? 'button' : 'submit'}
 						onMouseEnter={() => onHover(true)}

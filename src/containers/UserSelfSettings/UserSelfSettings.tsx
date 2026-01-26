@@ -16,12 +16,13 @@ import {IUserInfo} from '@/typings/user';
 import {deleteAvatar} from '@/utils/api/delete/deleteAvatar';
 import {postAvatar} from '@/utils/api/post/postAvatar';
 import {postCover} from '@/utils/api/post/postCover';
+import {postResendConfirmationEmail} from '@/utils/api/post/postResendConfirmationEmail';
 import {putUserInfo} from '@/utils/api/put/putUserInfo';
 import {countriesArr} from '@/utils/data/countries';
 import './user-self-settings.scss';
 
 export const UserSelfSettings: FC = observer(() => {
-	const {userInfo: user, setUserInfo, setAvatar} = UserStore;
+	const {userInfo: user, setUserInfo, setAvatar, email: storeEmail} = UserStore;
 	const {setWindow, setIsOpen} = ModalStore;
 
 	const [name, setName] = useState(user.name);
@@ -151,6 +152,32 @@ export const UserSelfSettings: FC = observer(() => {
 		setIsOpen(true);
 	};
 
+	const [isResendingEmail, setIsResendingEmail] = useState(false);
+	const [emailSent, setEmailSent] = useState(false);
+	const [resendCooldown, setResendCooldown] = useState(0);
+
+	// Обратный отсчёт задержки повторной отправки (2 мин)
+	useEffect(() => {
+		if (resendCooldown <= 0) return;
+		const t = setInterval(() => setResendCooldown((c) => Math.max(0, c - 1)), 1000);
+		return () => clearInterval(t);
+	}, [resendCooldown]);
+
+	const handleResendConfirmationEmail = async () => {
+		setIsResendingEmail(true);
+		const res = await postResendConfirmationEmail();
+		setIsResendingEmail(false);
+		if (res.success && res.data) {
+			if (res.data.is_email_confirmed === true) {
+				setUserInfo({...user, isEmailConfirmed: true});
+				return;
+			}
+			setEmailSent(true);
+			setTimeout(() => setEmailSent(false), 3000);
+			setResendCooldown(res.data.retry_after_seconds ?? 120);
+		}
+	};
+
 	return (
 		<section className={block()}>
 			<Title tag="h2" className={element('title')}>
@@ -186,33 +213,41 @@ export const UserSelfSettings: FC = observer(() => {
 				</div>
 				<section className={element('avatar-wrapper')}>
 					<Avatar avatar={user.avatar} className={element('avatar')} size="large" />
-					<div
-						onClick={handleAvatarClick}
-						role="button"
-						tabIndex={0}
-						aria-label="Изменить фотографию"
-						onKeyPress={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') {
-								handleAvatarClick();
-							}
-						}}
-					>
-						<FileDrop onDrop={(files) => files && handleAvatarDrop(files)}>
-							<input
-								type="file"
-								style={{display: 'none'}}
-								ref={avatarInputRef}
-								onChange={handleAvatarChange}
-								accept="image/*"
-							/>
-							<Button icon="image-edit" theme="blue" size="small">
-								Изменить фотографию
-							</Button>
-						</FileDrop>
+					<div className={element('avatar-buttons')}>
+						<div
+							onClick={handleAvatarClick}
+							role="button"
+							tabIndex={0}
+							aria-label="Изменить фотографию"
+							onKeyPress={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									handleAvatarClick();
+								}
+							}}
+						>
+							<FileDrop onDrop={(files) => files && handleAvatarDrop(files)}>
+								<input
+									type="file"
+									style={{display: 'none'}}
+									ref={avatarInputRef}
+									onChange={handleAvatarChange}
+									accept="image/*"
+								/>
+								<Button icon="image-edit" theme="blue" size="small">
+									Изменить фото
+								</Button>
+							</FileDrop>
+						</div>
+						<Button
+							className={element('delete-avatar')}
+							icon="trash"
+							theme="blue-light"
+							onClick={handleDeleteAvatar}
+							size="small"
+						>
+							Удалить фото
+						</Button>
 					</div>
-					<Button className={element('delete-avatar')} icon="trash" theme="blue-light" onClick={handleDeleteAvatar} size="small">
-						Удалить фото
-					</Button>
 				</section>
 				<Line margin="24px 0" />
 				<section className={element('info')}>
@@ -231,6 +266,45 @@ export const UserSelfSettings: FC = observer(() => {
 								className={element('country')}
 							/>
 						</div>
+						<div className={element('email-field')}>
+							<FieldInput
+								text="Email"
+								placeholder="Email"
+								id="email"
+								type="email"
+								value={user.email || storeEmail}
+								setValue={() => {}}
+								disabled
+								className={element('email-input')}
+							/>
+							<div className={element('email-status')}>
+								{user.isEmailConfirmed ? (
+									<span className={element('email-confirmed')}>✓ Email подтвержден</span>
+								) : (
+									<div className={element('email-not-confirmed')}>
+										<span className={element('email-warning')}>⚠ Email не подтвержден</span>
+										<span className={element('email-hint')}>
+											Email будет подтверждён только после перехода по ссылке в письме.
+										</span>
+										<Button
+											theme="blue-light"
+											size="small"
+											onClick={handleResendConfirmationEmail}
+											disabled={isResendingEmail || resendCooldown > 0}
+											className={element('resend-btn')}
+										>
+											{isResendingEmail
+												? 'Отправка...'
+												: emailSent
+												? 'Отправлено!'
+												: resendCooldown > 0
+												? `Повтор через ${resendCooldown} с`
+												: 'Отправить письмо'}
+										</Button>
+									</div>
+								)}
+							</div>
+						</div>
 						<FieldInput
 							text="Обо мне"
 							type="textarea"
@@ -238,6 +312,7 @@ export const UserSelfSettings: FC = observer(() => {
 							id="about"
 							value={about}
 							setValueTarget={handleInputChange}
+							className={element('about')}
 						/>
 					</div>
 					<Button className={element('btn-save')} theme="blue" onClick={handleSaveChanges}>

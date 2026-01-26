@@ -712,9 +712,10 @@ export const getRegularProgressCalendar = async (
 	}
 };
 
-// Сбросить прогресс регулярной цели
+// Сбросить прогресс регулярной цели (прервать серию)
 export const resetRegularGoal = async (
-	regularGoalId: number
+	regularGoalId: number,
+	markAsCompleted = false
 ): Promise<{
 	success: boolean;
 	data?: IRegularGoalStatistics;
@@ -722,6 +723,143 @@ export const resetRegularGoal = async (
 }> => {
 	try {
 		const response = await POST(`goals/regular/${regularGoalId}/reset`, {
+			auth: true,
+			body: {
+				mark_as_completed: markAsCompleted,
+			},
+		});
+		return response;
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
+// Полный сброс прогресса регулярной цели - "Начать заново"
+export const restartRegularGoal = async (
+	regularGoalId: number
+): Promise<{
+	success: boolean;
+	data?: IRegularGoalStatistics;
+	error?: string;
+}> => {
+	try {
+		const response = await POST(`goals/regular/${regularGoalId}/restart`, {
+			auth: true,
+		});
+		return response;
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
+// Получение рейтинга бессрочной регулярной цели
+export const getRegularGoalRating = async (
+	regularGoalId: number
+): Promise<{
+	success: boolean;
+	data?: {
+		users: Array<{
+			id: number;
+			username: string;
+			name: string;
+			avatar: string | null;
+			level: number;
+			maxStreak: number;
+			completedSeriesCount: number;
+			place: number;
+		}>;
+	};
+	error?: string;
+}> => {
+	try {
+		const response = await GET(`goals/regular/${regularGoalId}/rating`, {
+			auth: true,
+		});
+		return response;
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
+// Получение истории выполнения регулярной цели
+export const getRegularGoalHistory = async (
+	regularGoalId: number
+): Promise<{
+	success: boolean;
+	data?: {
+		history: Array<{
+			id: number;
+			user: number;
+			userUsername: string;
+			regularGoal: number;
+			regularGoalData: any;
+			status: 'completed' | 'interrupted';
+			statusDisplay: string;
+			streak: number;
+			completionPercentage?: number | null;
+			startDate?: string;
+			endDate: string;
+			totalCompletions: number;
+			totalDays: number;
+			createdAt: string;
+		}>;
+		count: number;
+	};
+	error?: string;
+}> => {
+	try {
+		const response = await GET(`goals/regular/${regularGoalId}/history`, {
+			auth: true,
+		});
+		return response;
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
+// Сброс завершенной серии (отмена выполнения)
+export const resetCompletedSeries = async (
+	regularGoalId: number
+): Promise<{
+	success: boolean;
+	data?: IRegularGoalStatistics;
+	error?: string;
+}> => {
+	try {
+		const response = await POST(`goals/regular/${regularGoalId}/reset-completed`, {
+			auth: true,
+		});
+		return response;
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
+// Начало новой серии после завершения предыдущей
+export const restartAfterCompletion = async (
+	regularGoalId: number
+): Promise<{
+	success: boolean;
+	data?: IRegularGoalStatistics;
+	error?: string;
+}> => {
+	try {
+		const response = await POST(`goals/regular/${regularGoalId}/restart-after-completion`, {
 			auth: true,
 		});
 		return response;

@@ -3,6 +3,7 @@ import {makeAutoObservable} from 'mobx';
 type IWindow =
 	| 'login'
 	| 'registration'
+	| 'forgot-password'
 	| 'change-password'
 	| 'add-review'
 	| 'delete-goal'
@@ -15,7 +16,8 @@ type IWindow =
 	| 'create-todo-task'
 	| 'folder-selector'
 	| 'progress-update'
-	| 'random-goal-picker';
+	| 'random-goal-picker'
+	| 'set-regular-goal';
 
 export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 

@@ -1,5 +1,6 @@
 import {FC, useEffect, useState} from 'react';
 
+import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {InfoGoal} from '@/components/InfoGoal/InfoGoal';
 import {LeaderBoard} from '@/components/LeaderBoard/LeaderBoard';
 import {LeaderPedestal} from '@/components/Leaders/LeaderPedestal';
@@ -38,23 +39,23 @@ export const Leaders: FC = () => {
 					Выполняйте цели, пишите отзывы, зарабатывайте очки и попадайте в число лучших пользователей за неделю. Соревнуйтесь с
 					другими и зарабатывайте награды в свой профиль. Покажите всем, что вы живёте полной жизнью!
 				</p>
-				<InfoGoal
-					className={element('info')}
-					items={[
-						{title: 'Целей выполнено', value: infoStats.goalsCompleted},
-						{title: 'Добавлено отзывов', value: infoStats.reviewsAdded},
-						{title: 'Опыта заработано', value: infoStats.experienceEarned},
-					]}
-					backgroundOff
-				/>
 			</div>
+			<InfoGoal
+				className={element('info')}
+				items={[
+					{title: 'Целей выполнено', value: infoStats.goalsCompleted},
+					{title: 'Добавлено отзывов', value: infoStats.reviewsAdded},
+					{title: 'Опыта заработано', value: infoStats.experienceEarned},
+				]}
+				backgroundOff
+			/>
 			{leaders.length > 0 ? (
 				<>
-					<LeaderPedestal users={leaders.slice(0, 3)} />
+					<LeaderPedestal users={leaders.slice(0, 3)} className={element('pedestal')} />
 					<LeaderBoard className={element('board')} users={leaders} />
 				</>
 			) : (
-				<div className={element('empty')}>Никто еще не стал лидером недели. Но вы можете стать им!</div>
+				<EmptyState title="Никто еще не стал лидером недели. Но вы можете стать им!" />
 			)}
 		</Loader>
 	);

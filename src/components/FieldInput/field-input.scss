@@ -33,7 +33,9 @@
 
 	&__input {
 		width: 100%;
+		min-width: 150px;
 		height: 100%;
+		min-height: 42px;
 		padding: 10px 16px;
 		border: 1px solid var(--color-gray-4);
 		border-radius: 8px;

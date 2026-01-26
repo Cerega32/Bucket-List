@@ -27,17 +27,28 @@
 		width: initial;
 	}
 
-	&__description {
-		display: -webkit-box;
-		margin-bottom: 4px;
-		overflow: hidden;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 3;
-		line-clamp: 3;
+	&__short-text {
+		word-wrap: break-word;
+		overflow-wrap: break-word;
 
-		&--expanded {
-			-webkit-line-clamp: unset;
-			line-clamp: unset;
+		&--collapsed {
+			display: -webkit-box;
+			-webkit-line-clamp: 3;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			word-break: break-word;
+		}
+	}
+
+	&__toggle-button {
+		margin-top: 4px;
+		color: var(--color-primary);
+		text-align: left;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--color-primary-hover);
 		}
 	}
 

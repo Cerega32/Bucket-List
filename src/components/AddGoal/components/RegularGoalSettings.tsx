@@ -5,6 +5,7 @@ import {DatePicker} from '@/components/DatePicker/DatePicker';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import Select from '@/components/Select/Select';
+import {WeekDaySchedule, WeekDaySelector} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
 
 interface RegularGoalSettingsProps {
@@ -15,6 +16,8 @@ interface RegularGoalSettingsProps {
 	setRegularFrequency: (value: 'daily' | 'weekly' | 'custom') => void;
 	weeklyFrequency: number;
 	setWeeklyFrequency: (value: number) => void;
+	customSchedule: WeekDaySchedule;
+	setCustomSchedule: (value: WeekDaySchedule) => void;
 	durationType: 'days' | 'weeks' | 'until_date' | 'indefinite';
 	setDurationType: (value: 'days' | 'weeks' | 'until_date' | 'indefinite') => void;
 	durationValue: number;
@@ -36,6 +39,8 @@ export const RegularGoalSettings: FC<RegularGoalSettingsProps> = (props) => {
 		setRegularFrequency,
 		weeklyFrequency,
 		setWeeklyFrequency,
+		customSchedule,
+		setCustomSchedule,
 		durationType,
 		setDurationType,
 		durationValue,
@@ -95,8 +100,9 @@ export const RegularGoalSettings: FC<RegularGoalSettingsProps> = (props) => {
 						)}
 
 						{regularFrequency === 'custom' && (
-							<div className={element('custom-schedule-info')}>
-								<p>Пользовательский график будет доступен в следующих версиях</p>
+							<div className={element('custom-schedule-selector')}>
+								<p className={element('field-title')}>Выберите дни недели</p>
+								<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
 							</div>
 						)}
 					</div>

@@ -13,6 +13,11 @@
 		flex-wrap: wrap;
 		gap: 16px;
 		margin-bottom: 24px;
+
+		@include xs {
+			flex-direction: column;
+			gap: 12px;
+		}
 	}
 
 	&__stat-item {
@@ -47,14 +52,26 @@
 		display: flex;
 		flex-direction: column;
 		margin-bottom: 16px;
+	}
+
+	&__scrollable-wrapper {
 		overflow-x: auto;
+		min-width: 200px;
+
+		@include md {
+			max-width: calc(100vw - 100px); // 100px - отступ от края экрана 30+30 + отступы контейнера активности 20+20
+		}
+
+		@include xs {
+			max-width: calc(100vw - 80px); // 80px - отступ от края экрана 20+20 + отступы контейнера активности 20+20
+		}
 	}
 
 	&__months {
 		position: relative;
 		display: flex;
 		flex-direction: row;
-		min-width: 600px;
+		min-width: 200px;
 		height: 20px;
 		margin-bottom: 8px;
 		margin-left: 30px; // Отступ для меток дней недели
@@ -77,6 +94,7 @@
 	&__grid {
 		display: flex;
 		flex-direction: row;
+		min-width: 200px;
 	}
 
 	&__weekdays {
@@ -99,8 +117,7 @@
 		display: flex;
 		flex-direction: row;
 		flex-grow: 1;
-		overflow-x: auto;
-		min-width: 600px;
+		min-width: 200px;
 	}
 
 	&__week {
@@ -198,11 +215,20 @@
 		align-items: center;
 		gap: 20px;
 		margin-top: 16px;
+
+		@include xs {
+			flex-direction: column;
+			align-items: flex-start;
+		}
 	}
 
 	&__legend-section {
 		display: flex;
 		align-items: center;
+
+		@include xs {
+			flex-direction: column;
+		}
 	}
 
 	&__legend-label {
@@ -221,6 +247,10 @@
 		flex-wrap: wrap;
 		gap: 12px;
 		margin-left: 8px;
+
+		@include xs {
+			flex-direction: column;
+		}
 	}
 
 	&__legend-type {
@@ -474,82 +504,5 @@
 		display: flex;
 		align-items: center;
 		margin-bottom: 8px;
-	}
-
-	@media (width <= 768px) {
-		&__stats {
-			justify-content: space-between;
-		}
-
-		&__stat-item {
-			flex: 1 1 calc(50% - 8px);
-			min-width: unset;
-		}
-
-		&__day {
-			width: 8px;
-			height: 8px;
-			margin: 0 1px;
-		}
-
-		&__weekday-label {
-			height: 10px;
-			font-size: 10px;
-			line-height: 10px;
-		}
-
-		&__week {
-			width: 10px;
-		}
-
-		&__legend {
-			flex-direction: column;
-			align-items: flex-start;
-		}
-
-		&__legend-types {
-			flex-wrap: wrap;
-			gap: 8px;
-		}
-
-		&__month-label {
-			height: 16px;
-			font-size: 10px;
-			line-height: 16px;
-		}
-
-		&__activities-content {
-			gap: 12px;
-		}
-
-		&__activity-section {
-			padding: 8px;
-		}
-
-		&__activity-header {
-			font-size: 12px;
-		}
-
-		&__progress-info,
-		&__daily-info,
-		&__regular-info {
-			flex-direction: column;
-			align-items: flex-start;
-		}
-
-		&__progress-change,
-		&__regular-streak {
-			margin-top: 4px;
-		}
-	}
-
-	@media (width <= 480px) {
-		&__stat-item {
-			flex: 1 1 100%;
-		}
-
-		&__legend-types {
-			gap: 6px;
-		}
 	}
 }

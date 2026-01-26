@@ -83,22 +83,24 @@ export const Card: FC<CardListProps | CardGoalProps> = (props) => {
 						})}
 						showSeparator
 					/>
-					{isList && <Progress done={goal.userCompletedGoals} all={goal.goalsCount} />}
-					<div className={element('buttons')}>
-						{!goal.addedByUser && <Button theme="blue" icon="plus" size="small" onClick={onClickAddHandler} />}
-						{goal.addedByUser && <Button theme="blue-light" icon="trash" size="small" onClick={onClickDelete} />}
-						{(goal.addedByUser || goal.completedByUser) && !isList && (
-							<Button theme={goal.completedByUser ? 'green' : 'blue-light'} size="small" onClick={onClickMark}>
-								<Svg
-									icon="done"
-									width="16px"
-									height="16px"
-									className={element('btn-done', {
-										active: goal.completedByUser,
-									})}
-								/>
-							</Button>
-						)}
+					<div className={element('buttons-wrapper')}>
+						{isList && <Progress done={goal.userCompletedGoals} all={goal.goalsCount} />}
+						<div className={element('buttons')}>
+							{!goal.addedByUser && <Button theme="blue" icon="plus" size="small" onClick={onClickAddHandler} />}
+							{goal.addedByUser && <Button theme="blue-light" icon="trash" size="small" onClick={onClickDelete} />}
+							{(goal.addedByUser || goal.completedByUser) && !isList && (
+								<Button theme={goal.completedByUser ? 'green' : 'blue-light'} size="small" onClick={onClickMark}>
+									<Svg
+										icon="done"
+										width="16px"
+										height="16px"
+										className={element('btn-done', {
+											active: goal.completedByUser,
+										})}
+									/>
+								</Button>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>

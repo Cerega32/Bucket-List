@@ -1,6 +1,7 @@
 import {FC, useEffect, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 
 import {Button} from '../Button/Button';
 
@@ -66,10 +67,12 @@ export const Pagination: FC<PaginationProps> = (props) => {
 	const {className, goToPage, currentPage, totalPages} = props;
 
 	const [current, setCurrent] = useState(currentPage);
+	const {isScreenSmallMobile, isScreenMobile} = useScreenSize();
 
 	const [block, element] = useBem('pagination', className);
 	const [loading, setLoading] = useState(false);
-	const pagination = generatePagination(current, totalPages);
+	const visiblePages = isScreenSmallMobile ? 1 : isScreenMobile ? 3 : 5;
+	const pagination = generatePagination(current, totalPages, visiblePages);
 
 	const onPageClick = async (page: number): Promise<void> => {
 		const oldPage = current;

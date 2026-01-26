@@ -25,14 +25,16 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 	const {setWindow, setIsOpen} = ModalStore;
 	const {isAuth} = UserStore;
 
-	const openLogin = () => {
-		setIsOpen(true);
-		setWindow('login');
+	const handleButtonClick = () => {
+		if (!isAuth) {
+			setIsOpen(true);
+			setWindow('login');
+		}
 	};
 
 	return (
 		<section className={block()}>
-			<div className={element('slider')}>
+			<div className={element('slider slider-left')}>
 				{leftPhotos.length > 0 && (
 					<VerticalSlider
 						slides={leftPhotos.map((photo) => (
@@ -58,7 +60,8 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 					theme="gradient"
 					size="medium"
 					icon="rocket"
-					onClick={openLogin}
+					width="auto"
+					onClick={!isAuth ? handleButtonClick : undefined}
 					href="/categories/all"
 				>
 					Начать путь
@@ -68,7 +71,7 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 					<span className={element('completed-number')}>{pluralize(totalCompleted, ['цель', 'цели', 'целей'])}</span>
 				</p>
 			</div>
-			<div className={element('slider')}>
+			<div className={element('slider slider-right')}>
 				{rightPhotos.length > 0 && (
 					<VerticalSlider
 						slides={rightPhotos.map((photo) => (

@@ -8,7 +8,7 @@
 	gap: 4px;
 	width: 100%;
 	padding: 8px 16px;
-	border-radius: 6px;
+	border-radius: 8px;
 	transition: all 0.15s ease-in-out;
 	overflow: hidden;
 
@@ -199,7 +199,7 @@
 			var(--color-gradient-turquoise)
 		);
 		background-size: 600%;
-		border-radius: 6px;
+		border-radius: 4px;
 		color: rgb(var(--color-white-rgb) / 90%);
 		opacity: 0.8;
 		animation: anime 16s linear infinite;
@@ -230,7 +230,6 @@
 		width: auto;
 		padding: 0;
 		color: var(--color-primary);
-		font-weight: var(--weight-medium);
 
 		&:hover,
 		&:active {
@@ -265,6 +264,10 @@
 		}
 	}
 
+	&--width-auto {
+		width: auto;
+	}
+
 	&--size-small {
 		width: auto;
 		height: 32px;
@@ -272,20 +275,21 @@
 	}
 
 	&--size-medium {
-		width: auto;
+		width: 100%;
 		height: 40px;
 		padding: 10px 16px;
-		border-radius: 8px;
 	}
 
 	&--disabled {
-		background: var(--color-white);
+		cursor: not-allowed;
 		pointer-events: none;
+		opacity: 0.6;
 
 		&:hover,
 		&:active {
 			background: var(--color-white);
 			cursor: initial;
+			opacity: 0.6;
 		}
 	}
 

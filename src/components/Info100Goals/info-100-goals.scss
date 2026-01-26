@@ -1,11 +1,22 @@
-@import '../../_commons/styles-supports/mixins';
-
 .info-100-goals {
 	@include block-radius;
 
 	&__wrapper {
 		display: flex;
 		gap: 24px;
+
+		@include xl {
+			gap: 16px;
+		}
+
+		@include lg {
+			gap: 24px;
+		}
+
+		@include sm {
+			flex-direction: column;
+			gap: 8px;
+		}
 
 		&--column {
 			flex-direction: column;

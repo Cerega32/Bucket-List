@@ -5,7 +5,6 @@ import {IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import './description-with-links.scss';
 
-import {Button} from '../Button/Button';
 import {InfoGoal} from '../InfoGoal/InfoGoal';
 import {Line} from '../Line/Line';
 import {ITabs, Tabs} from '../Tabs/Tabs';
@@ -35,59 +34,96 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 
 	const [block, element] = useBem('description-with-links', className);
 
-	const [isExpanded, setIsExpanded] = useState(false);
-	const [showMoreButton, setShowMoreButton] = useState(false);
+	const [isShortDesc, setIsShortDesc] = useState(true);
+	const [isTextOverflowing, setIsTextOverflowing] = useState(false);
 	const textRef = useRef<HTMLParagraphElement>(null);
+	const wasOverflowingRef = useRef<boolean>(false);
 
-	const handleShowMore = () => {
-		setIsExpanded(true);
-	};
-
-	// Проверяем, нужна ли кнопка "Читать подробнее"
 	useEffect(() => {
-		if (textRef.current) {
-			const elementText = textRef.current;
-
-			// Проверяем, обрезается ли текст при ограничении в 3 строки
-			// Если scrollHeight больше clientHeight, значит текст обрезается
-			const isTextTruncated = elementText.scrollHeight > elementText.clientHeight;
-
-			setShowMoreButton(isTextTruncated);
-		}
+		wasOverflowingRef.current = false;
+		setIsTextOverflowing(false);
 	}, [goal.description]);
 
-	const tabs: Array<ITabs> = useMemo(
-		() =>
-			isList
-				? []
-				: [
-						{
-							url: '/',
-							name: 'Отметки',
-							page: 'isGoal',
-							count: goal.totalComments,
-						},
-						{
-							url: '/lists',
-							name: 'Списки с целью',
-							page: 'isGoalLists',
-							count: goal.totalLists,
-						},
-				  ],
-		[goal, isList]
-	);
+	useEffect(() => {
+		const textElement = textRef.current;
+		if (!textElement || !isShortDesc) return;
+
+		const checkOverflow = () => {
+			const isOverflowing = textElement.scrollHeight > textElement.clientHeight;
+			setIsTextOverflowing(isOverflowing);
+			if (isOverflowing) {
+				wasOverflowingRef.current = true;
+			}
+		};
+
+		const timeoutId = setTimeout(() => {
+			requestAnimationFrame(checkOverflow);
+		}, 0);
+
+		return () => clearTimeout(timeoutId);
+	}, [isShortDesc, goal.description]);
+
+	const shouldShowButton =
+		goal.shortDescription !== goal.description && (isTextOverflowing || (!isShortDesc && wasOverflowingRef.current));
+
+	const handleToggleMore = () => {
+		setIsShortDesc(!isShortDesc);
+	};
+
+	const tabs: Array<ITabs> = useMemo(() => {
+		if (isList) {
+			return [];
+		}
+
+		const baseTabs: Array<ITabs> = [
+			{
+				url: '/',
+				name: 'Отметки',
+				page: 'isGoal',
+				count: goal.totalComments,
+			},
+			{
+				url: '/lists',
+				name: 'Списки с целью',
+				page: 'isGoalLists',
+				count: goal.totalLists,
+			},
+		];
+
+		// Добавляем вкладку "История выполнения" только если цель регулярная,
+		// добавлена пользователем и у неё есть статистика (цель начата)
+		// История может быть пустой, но вкладка должна быть доступна для просмотра
+		if (goal.regularConfig && goal.addedByUser && goal.regularConfig.statistics && goal.regularConfig.id) {
+			baseTabs.push({
+				url: '/history',
+				name: 'История выполнения',
+				page: 'isGoalHistory',
+			});
+		}
+
+		// Добавляем вкладку "Рейтинг" только если цель регулярная, бессрочная и добавлена пользователем
+		if (goal.regularConfig && goal.addedByUser && goal.regularConfig.id && goal.regularConfig.durationType === 'indefinite') {
+			baseTabs.push({
+				url: '/rating',
+				name: 'Рейтинг',
+				page: 'isGoalRating',
+			});
+		}
+
+		return baseTabs;
+	}, [goal, isList]);
 
 	return (
 		<div className={block({list: isList})}>
 			<div className={element('wrapper')}>
 				<div className={element('text')}>
-					<p ref={textRef} className={element('description', {expanded: isExpanded})}>
+					<p ref={textRef} className={element('short-text', {collapsed: isShortDesc})}>
 						{goal.description}
 					</p>
-					{!isExpanded && showMoreButton && (
-						<Button theme="no-border" className={element('btn-more')} onClick={handleShowMore}>
-							Читать подробнее
-						</Button>
+					{shouldShowButton && (
+						<button type="button" className={element('toggle-button')} onClick={handleToggleMore}>
+							{isShortDesc ? 'Показать полностью' : 'Скрыть'}
+						</button>
 					)}
 				</div>
 				<InfoGoal
@@ -96,10 +132,6 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 						{title: 'Добавили к себе', value: goal.totalAdded},
 						{title: 'Выполнили', value: goal.totalCompleted},
 					]}
-					progressData={{
-						completed: goal.totalCompleted,
-						total: goal.totalAdded,
-					}}
 				/>
 			</div>
 			{!isList && (

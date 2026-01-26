@@ -430,6 +430,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 								className={element('field')}
 								type="textarea"
 								required
+								rows={4}
 							/>
 						</>
 					)}

@@ -11,11 +11,12 @@ import './leader-pedestal.scss';
 
 interface LeaderPedestalProps {
 	users: Array<IWeeklyLeader>;
+	className?: string;
 }
 
 export const LeaderPedestal: FC<LeaderPedestalProps> = (props) => {
-	const {users} = props;
-	const [block, element] = useBem('leader-pedestal');
+	const {users, className} = props;
+	const [block, element] = useBem('leader-pedestal', className);
 
 	return (
 		<section className={block()}>

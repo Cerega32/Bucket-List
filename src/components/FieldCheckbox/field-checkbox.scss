@@ -28,7 +28,7 @@
 		height: 16px;
 		background: var(--color-secondary);
 		border: 1px solid var(--color-gray-4);
-		border-radius: 6px;
+		border-radius: 4px;
 		transition: all 0.15s ease-in-out;
 
 		&:focus-visible {
@@ -67,6 +67,26 @@
 
 			#{$block}__checkbox {
 				@include focus-outline;
+			}
+		}
+	}
+
+	&--disabled {
+		cursor: not-allowed;
+		opacity: 0.6;
+
+		#{$block}__label {
+			cursor: not-allowed;
+
+			&:hover {
+				#{$block}__checkbox {
+					background: var(--color-secondary);
+					border-color: var(--color-gray-4);
+
+					& #{$block}__icon path {
+						fill: var(--color-secondary);
+					}
+				}
 			}
 		}
 	}

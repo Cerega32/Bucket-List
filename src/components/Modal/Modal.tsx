@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
 import {FC, ReactNode, useEffect, useRef} from 'react';
+import {createPortal} from 'react-dom';
 
 import {Button} from '@/components/Button/Button';
 import {Login} from '@/components/Login/Login';
@@ -16,11 +17,13 @@ import {CreateTodoListForm} from '../CreateTodoListForm/CreateTodoListForm';
 import {CreateTodoTaskForm} from '../CreateTodoTaskForm/CreateTodoTaskForm';
 import {DeleteGoal} from '../DeleteGoal/DeleteGoal';
 import {FolderSelector} from '../FolderSelector/FolderSelector';
+import {ForgotPassword} from '../ForgotPassword/ForgotPassword';
 import {GoalMap} from '../GoalMap/GoalMap';
 import {GoalMapMulti} from '../GoalMap/GoalMapMulti';
 import LocationPicker from '../LocationPicker/LocationPicker';
 import {ProgressUpdateModal} from '../ProgressUpdateModal/ProgressUpdateModal';
 import {RandomGoalPicker} from '../RandomGoalPicker/RandomGoalPicker';
+import {SetRegularGoalModal} from '../SetRegularGoalModal/SetRegularGoalModal';
 import {Svg} from '../Svg/Svg';
 
 import './modal.scss';
@@ -31,13 +34,14 @@ interface ModalProps {
 	isOpen?: boolean;
 	onClose?: () => void;
 	title?: string;
+	size?: 'small' | 'medium' | 'large' | 'fullscreen';
 }
 
 export const Modal: FC<ModalProps> = observer((props) => {
-	const {className, children, isOpen: externalIsOpen, onClose: externalOnClose, title} = props;
+	const {className, children, isOpen: externalIsOpen, onClose: externalOnClose, title, size} = props;
 	const [block, element] = useBem('modal', className);
 	const {isOpen: storeIsOpen, setIsOpen, window, setWindow, funcModal, modalProps} = ModalStore;
-	const {setIsAuth, setName, setAvatar} = UserStore;
+	const {setIsAuth, setName, setAvatar, setUserInfo, userInfo} = UserStore;
 
 	// Используем внешние пропсы если они переданы, иначе из store
 	const isOpen = externalIsOpen !== undefined ? externalIsOpen : storeIsOpen;
@@ -59,12 +63,29 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		setWindow('login');
 	};
 
-	const successAuth = (data: {name: string}) => {
+	const openForgotPassword = () => {
+		setWindow('forgot-password');
+	};
+
+	const successAuth = (data: {name?: string; email_confirmed?: boolean; email?: string}) => {
 		Cookies.set('name', data.name || '');
 		closeWindow();
 		setName(data.name || '');
 		setIsAuth(true);
 		setAvatar(Cookies.get('avatar') || '');
+		if (data.email_confirmed !== undefined) {
+			UserStore.setEmailConfirmed(data.email_confirmed);
+		}
+		if (data.email) {
+			UserStore.setEmail(data.email);
+		}
+		setUserInfo({
+			...userInfo,
+			email: data.email || userInfo.email,
+			firstName: data.name || userInfo.firstName,
+			name: data.name || userInfo.name,
+			...(data.email_confirmed !== undefined && {isEmailConfirmed: data.email_confirmed}),
+		});
 	};
 
 	const handleKeyUp = (e: KeyboardEvent) => {
@@ -121,17 +142,23 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				}
 			}, 50);
 
-			// Отключаем прокрутку body при открытии модального окна
-			// document.body.style.overflow = 'hidden';
-		} else {
-			document.removeEventListener('keyup', handleKeyUp);
-			document.removeEventListener('keydown', handleTabKey);
+			// Сохраняем текущее значение overflow и отключаем прокрутку body при открытии модального окна
+			const originalOverflow = document.body.style.overflow;
+			document.body.style.overflow = 'hidden';
 
-			// Включаем прокрутку body при закрытии модального окна
-			// document.body.style.overflow = '';
+			// Cleanup при размонтировании компонента или закрытии модалки
+			return () => {
+				document.removeEventListener('keyup', handleKeyUp);
+				document.removeEventListener('keydown', handleTabKey);
+				// Восстанавливаем исходное значение overflow
+				document.body.style.overflow = originalOverflow;
+			};
 		}
 
-		// Cleanup при размонтировании компонента
+		// Если модалка закрыта, убеждаемся что прокрутка включена
+		document.body.style.overflow = '';
+
+		// Cleanup функция для случая когда модалка закрыта
 		return () => {
 			document.body.style.overflow = '';
 		};
@@ -143,8 +170,11 @@ export const Modal: FC<ModalProps> = observer((props) => {
 	// Если переданы children, используем их вместо стандартного контента
 	const modalContent = children || (
 		<>
-			{window === 'login' && <Login openRegistration={openRegistration} successLogin={successAuth} />}
+			{window === 'login' && (
+				<Login openRegistration={openRegistration} openForgotPassword={openForgotPassword} successLogin={successAuth} />
+			)}
 			{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
+			{window === 'forgot-password' && <ForgotPassword onBack={openLogin} />}
 			{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
 			{window === 'add-review' && <AddReview closeModal={closeWindow} />}
 			{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
@@ -193,21 +223,31 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				/>
 			)}
 			{window === 'random-goal-picker' && <RandomGoalPicker goals={modalProps?.goals || []} onClose={closeWindow} />}
+			{window === 'set-regular-goal' && (
+				<SetRegularGoalModal
+					onSave={async (settings) => {
+						await modalProps?.onSave?.(settings);
+					}}
+					onCancel={closeWindow}
+					initialSettings={modalProps?.initialSettings}
+				/>
+			)}
 		</>
 	);
 
-	return (
+	const modalElement = (
 		<section className={block({isOpen})}>
 			<div
 				className={element('window', {
 					type: window,
 					fullscreen: window === 'goal-map' || window === 'goal-map-multi' || window === 'goal-map-add',
+					...(size ? {[size]: true} : {}),
 				})}
 				ref={modalRef}
 			>
-				{title && (
+				{(title || modalProps?.title) && (
 					<div className={element('header')}>
-						<h2 className={element('title')}>{title}</h2>
+						<h2 className={element('title')}>{title || modalProps?.title}</h2>
 					</div>
 				)}
 				<div className={element('content')}>{modalContent}</div>
@@ -223,4 +263,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			<button aria-label="Закрыть окно" type="button" className={element('base')} onClick={closeWindow} />
 		</section>
 	);
+
+	// Рендерим модалку в document.body через Portal, чтобы она всегда была на верхнем уровне
+	return createPortal(modalElement, document.body);
 });

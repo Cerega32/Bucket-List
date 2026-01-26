@@ -63,10 +63,6 @@ export const withRetry = async <T extends ApiResponse>(
 					delay = Math.max(delay, 0.3);
 				}
 
-				console.log(
-					`${apiName} rate limit exceeded, retrying in ${delay.toFixed(1)} seconds... (attempt ${retryCount + 1}/${maxRetries})`
-				);
-
 				// Ждем рассчитанное время
 				await sleep(delay * 1000);
 

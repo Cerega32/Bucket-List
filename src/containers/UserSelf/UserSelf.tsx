@@ -6,7 +6,7 @@ import {useBem} from '@/hooks/useBem';
 import {IPage} from '@/typings/page';
 import {getUser} from '@/utils/api/get/getUser';
 
-import {UserSelfAchievements} from '../UserSelfAchievements/UserAchievements';
+import {UserSelfAchievements} from '../UserSelfAchievements/UserSelfAchievements';
 import {UserSelfDashboard} from '../UserSelfDashboard/UserSelfDashboard';
 import {UserSelfFolders} from '../UserSelfFolders/UserSelfFolders';
 import {UserSelfFriends} from '../UserSelfFriends/UserSelfFriends';
@@ -14,6 +14,7 @@ import {UserSelfGoals} from '../UserSelfGoals/UserSelfGoals';
 import {UserSelfProgress} from '../UserSelfProgress/UserSelfProgress';
 import {UserSelfRegular} from '../UserSelfRegular/UserSelfRegular';
 import {UserSelfSettings} from '../UserSelfSettings/UserSelfSettings';
+import {UserSelfSubscription} from '../UserSelfSubscription/UserSelfSubscription';
 import './user-self.scss';
 
 export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
@@ -47,6 +48,8 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 				return <UserSelfProgress />;
 			case 'isUserSelfRegular':
 				return <UserSelfRegular />;
+			case 'isUserSelfSubs':
+				return <UserSelfSubscription />;
 			default:
 				return <UserSelfDashboard />;
 		}
@@ -98,6 +101,11 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 				url: '/user/self/settings',
 				name: 'Настройки',
 				page: 'isUserSelfSettings',
+			},
+			{
+				url: '/user/self/subs',
+				name: 'Подписка',
+				page: 'isUserSelfSubs',
 			},
 		];
 	}, []);

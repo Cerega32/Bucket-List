@@ -9,6 +9,7 @@ import {ExternalGoalSearch} from '@/components/ExternalGoalSearch/ExternalGoalSe
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
+import {WeekDaySchedule, WeekDaySelector} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
@@ -20,7 +21,9 @@ import {mapApi} from '@/utils/mapApi';
 import {debounce} from '@/utils/time/debounce';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {selectComplexity} from '@/utils/values/complexity';
+import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
 
+import {AllowCustomSettingsField} from './components/AllowCustomSettingsField';
 import {Loader} from '../Loader/Loader';
 import Select from '../Select/Select';
 import {SimilarGoalItem} from '../SimilarGoalItem/SimilarGoalItem';
@@ -84,12 +87,22 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 	// Регулярность
 	const [isRegular, setIsRegular] = useState(false);
+	const [allowCustomSettings, setAllowCustomSettings] = useState(true);
 	const [regularFrequency, setRegularFrequency] = useState<'daily' | 'weekly' | 'custom'>('daily');
 	const [weeklyFrequency, setWeeklyFrequency] = useState(3);
-	const [durationType, setDurationType] = useState<'days' | 'weeks' | 'until_date' | 'indefinite'>('days');
+	const [customSchedule, setCustomSchedule] = useState<WeekDaySchedule>({
+		monday: false,
+		tuesday: false,
+		wednesday: false,
+		thursday: false,
+		friday: false,
+		saturday: false,
+		sunday: false,
+	});
+	const [durationType, setDurationType] = useState<'days' | 'weeks' | 'indefinite'>('days');
 	const [durationValue, setDurationValue] = useState(30);
-	const [regularEndDate, setRegularEndDate] = useState('');
 	const [allowSkipDays, setAllowSkipDays] = useState(0);
+	const [allowSkipDaysThrough, setAllowSkipDaysThrough] = useState(0);
 	const [resetOnSkip, setResetOnSkip] = useState(false);
 
 	// Похожие цели
@@ -120,11 +133,21 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		setIsRegular(false);
 		setRegularFrequency('daily');
 		setWeeklyFrequency(3);
+		setCustomSchedule({
+			monday: false,
+			tuesday: false,
+			wednesday: false,
+			thursday: false,
+			friday: false,
+			saturday: false,
+			sunday: false,
+		});
 		setDurationType('days');
 		setDurationValue(30);
-		setRegularEndDate('');
 		setAllowSkipDays(0);
+		setAllowSkipDaysThrough(0);
 		setResetOnSkip(false);
+		setAllowCustomSettings(true);
 		setSimilarGoals([]);
 		setShowSimilarGoals(false);
 	};
@@ -144,7 +167,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	};
 
 	const fillFormWithGoalData = (goal: IGoal) => {
-		setTitle(goal.title);
+		setTitle(goal.title ? goal.title.slice(0, GOAL_TITLE_MAX_LENGTH) : '');
 		setDescription(goal.description || '');
 		setEstimatedTime(goal.estimatedTime || '');
 
@@ -224,7 +247,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 	// Обработчик изменения названия цели
 	const handleTitleChange = (value: string) => {
-		setTitle(value);
+		if (value.length <= GOAL_TITLE_MAX_LENGTH) {
+			setTitle(value);
+		}
 	};
 
 	// Обработчик изменения предполагаемого времени
@@ -579,18 +604,24 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					formData.append('weekly_frequency', weeklyFrequency.toString());
 				}
 
+				if (regularFrequency === 'custom') {
+					formData.append('custom_schedule', JSON.stringify(customSchedule));
+				}
+
 				formData.append('duration_type', durationType);
 
 				if (durationType === 'days' || durationType === 'weeks') {
 					formData.append('duration_value', durationValue.toString());
 				}
 
-				if (durationType === 'until_date' && regularEndDate) {
-					formData.append('end_date', regularEndDate);
-				}
+				// Если reset_on_skip = false, то пропуски не имеют смысла, отправляем 0
+				const finalAllowSkipDays = resetOnSkip ? allowSkipDays : 0;
+				const finalDaysForEarnedSkip = resetOnSkip ? allowSkipDaysThrough : 0;
 
-				formData.append('allow_skip_days', allowSkipDays.toString());
+				formData.append('allow_skip_days', finalAllowSkipDays.toString());
+				formData.append('days_for_earned_skip', finalDaysForEarnedSkip.toString());
 				formData.append('reset_on_skip', resetOnSkip.toString());
+				formData.append('allow_custom_settings', allowCustomSettings.toString());
 			}
 
 			// Добавляем дополнительные поля из внешних API, если они есть
@@ -734,18 +765,24 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					formData.append('weekly_frequency', weeklyFrequency.toString());
 				}
 
+				if (regularFrequency === 'custom') {
+					formData.append('custom_schedule', JSON.stringify(customSchedule));
+				}
+
 				formData.append('duration_type', durationType);
 
 				if (durationType === 'days' || durationType === 'weeks') {
 					formData.append('duration_value', durationValue.toString());
 				}
 
-				if (durationType === 'until_date' && regularEndDate) {
-					formData.append('end_date', regularEndDate);
-				}
+				// Если reset_on_skip = false, то пропуски не имеют смысла, отправляем 0
+				const finalAllowSkipDays = resetOnSkip ? allowSkipDays : 0;
+				const finalDaysForEarnedSkip = resetOnSkip ? allowSkipDaysThrough : 0;
 
-				formData.append('allow_skip_days', allowSkipDays.toString());
+				formData.append('allow_skip_days', finalAllowSkipDays.toString());
+				formData.append('days_for_earned_skip', finalDaysForEarnedSkip.toString());
 				formData.append('reset_on_skip', resetOnSkip.toString());
+				formData.append('allow_custom_settings', allowCustomSettings.toString());
 			}
 
 			// Добавляем дополнительные поля из внешних API, если они есть
@@ -798,7 +835,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		goalData: Partial<IGoal> & {imageUrl?: string; external_id?: string | number; externalType?: string}
 	) => {
 		// Заполняем основные поля
-		if (goalData.title) setTitle(goalData.title);
+		if (goalData.title) setTitle(goalData.title.slice(0, GOAL_TITLE_MAX_LENGTH));
 		if (goalData.description) setDescription(goalData.description || '');
 		if (goalData.estimatedTime) setEstimatedTime(goalData.estimatedTime);
 
@@ -995,6 +1032,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 								required
 								onFocus={handleTitleFocus}
 								onBlur={handleTitleBlur}
+								maxLength={GOAL_TITLE_MAX_LENGTH}
+								showCharCount
 							/>
 
 							{showSimilarGoals && (
@@ -1144,8 +1183,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 										)}
 
 										{regularFrequency === 'custom' && (
-											<div className={element('custom-schedule-info')}>
-												<p>Пользовательский график будет доступен в следующих версиях</p>
+											<div className={element('custom-schedule-selector')}>
+												<p className={element('field-title')}>Выберите дни недели</p>
+												<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
 											</div>
 										)}
 									</div>
@@ -1157,20 +1197,11 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 											options={[
 												{name: 'Дни', value: 'days'},
 												{name: 'Недели', value: 'weeks'},
-												{name: 'До даты', value: 'until_date'},
 												{name: 'Бессрочно', value: 'indefinite'},
 											]}
-											activeOption={
-												durationType === 'days'
-													? 0
-													: durationType === 'weeks'
-													? 1
-													: durationType === 'until_date'
-													? 2
-													: 3
-											}
+											activeOption={durationType === 'days' ? 0 : durationType === 'weeks' ? 1 : 2}
 											onSelect={(index) => {
-												const types = ['days', 'weeks', 'until_date', 'indefinite'] as const;
+												const types = ['days', 'weeks', 'indefinite'] as const;
 												setDurationType(types[index]);
 											}}
 											text="Длительность"
@@ -1190,49 +1221,68 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 												type="number"
 											/>
 										)}
-
-										{durationType === 'until_date' && (
-											<div className={element('date-field-container')}>
-												<p className={element('field-title')}>Дата окончания</p>
-												<DatePicker
-													selected={regularEndDate ? new Date(regularEndDate) : null}
-													onChange={(date) => {
-														if (date) {
-															setRegularEndDate(format(date, 'yyyy-MM-dd'));
-														} else {
-															setRegularEndDate('');
-														}
-													}}
-													className={element('date-input')}
-													placeholderText="ДД.ММ.ГГГГ"
-													minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
-												/>
-											</div>
-										)}
 									</div>
 
 									<div className={element('regular-field-group')}>
-										<FieldInput
-											placeholder="0"
-											id="allow-skip-days"
-											text="Разрешенные пропуски"
-											value={allowSkipDays.toString()}
-											setValue={(value) => {
-												const num = parseInt(value, 10) || 0;
-												setAllowSkipDays(Math.max(0, num));
-											}}
-											className={element('field')}
-											type="number"
-										/>
-
 										<FieldCheckbox
 											id="reset-on-skip"
 											text="Сбрасывать прогресс при превышении лимита пропусков"
 											checked={resetOnSkip}
-											setChecked={setResetOnSkip}
+											setChecked={(checked) => {
+												setResetOnSkip(checked);
+												// Сбрасываем значения при отключении
+												if (!checked) {
+													setAllowSkipDays(0);
+													setAllowSkipDaysThrough(0);
+												}
+											}}
 											className={element('field')}
 										/>
+
+										{resetOnSkip && (
+											<>
+												<FieldInput
+													placeholder="0"
+													id="allow-skip-days"
+													text="Разрешенные пропуски"
+													value={allowSkipDays.toString()}
+													setValue={(value) => {
+														const num = parseInt(value, 10) || 0;
+														setAllowSkipDays(Math.max(0, num));
+													}}
+													className={element('field')}
+													type="number"
+												/>
+
+												<div className={element('input-with-suffix')}>
+													<FieldInput
+														placeholder="0"
+														id="allow-skip-days-through"
+														text="Начисление разрешенного пропуска через"
+														value={allowSkipDaysThrough.toString()}
+														setValue={(value) => {
+															const num = parseInt(value, 10);
+															setAllowSkipDaysThrough(Math.max(0, num));
+														}}
+														className={element('field')}
+														type="number"
+													/>
+													<span className={element('input-suffix')}>
+														{durationType === 'days' ? 'дней' : durationType === 'weeks' ? 'недель' : 'дней'}
+													</span>
+												</div>
+												<small className={element('format-hint')}>
+													Если установлено 0, то дополнительные пропуски не начисляются
+												</small>
+											</>
+										)}
 									</div>
+
+									<AllowCustomSettingsField
+										checked={allowCustomSettings}
+										setChecked={setAllowCustomSettings}
+										className={element('field')}
+									/>
 								</div>
 							)}
 						</div>
@@ -1245,6 +1295,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							setValue={setDescription}
 							className={element('field')}
 							type="textarea"
+							rows={4}
 						/>
 
 						<div className={element('time-field-container')}>

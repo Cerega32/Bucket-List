@@ -16,6 +16,12 @@
 		gap: 16px;
 		margin-bottom: -40px;
 		transform: translateY(-64px);
+
+		@include sm {
+			flex-direction: column;
+			align-items: center;
+			gap: 8px;
+		}
 	}
 
 	&__wrapper {
@@ -24,6 +30,10 @@
 		justify-content: space-between;
 		align-items: center;
 		padding-top: 64px;
+
+		@include sm {
+			padding-top: 0;
+		}
 	}
 
 	&__goals {

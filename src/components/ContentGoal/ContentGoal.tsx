@@ -14,16 +14,19 @@ import {Button} from '../Button/Button';
 import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
 import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
 import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
+import {RegularGoalHistory} from '../RegularGoalHistory/RegularGoalHistory';
+import {RegularGoalRating} from '../RegularGoalRating/RegularGoalRating';
 import {Svg} from '../Svg/Svg';
 
 interface ContentGoalProps {
 	className?: string;
 	goal: IGoal;
 	page: string;
+	historyRefreshTrigger?: number; // Триггер для обновления истории выполнения
 }
 
 export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
-	const {className, goal, page} = props;
+	const {className, goal, page, historyRefreshTrigger} = props;
 
 	const [block, element] = useBem('content-goal', className);
 	const navigate = useNavigate();
@@ -50,6 +53,24 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 				return <CommentsGoal comments={comments} setComments={setComments} />;
 			case 'isGoalLists':
 				return <ListsWithGoal code={goal.code} />;
+			case 'isGoalHistory':
+				// Показываем историю только если цель регулярная и добавлена пользователем
+				if (goal.regularConfig && goal.addedByUser && goal.regularConfig.id) {
+					return (
+						<RegularGoalHistory
+							regularGoalId={goal.regularConfig.id}
+							refreshTrigger={historyRefreshTrigger}
+							allowCustomSettings={goal.regularConfig.allowCustomSettings}
+						/>
+					);
+				}
+				return null;
+			case 'isGoalRating':
+				// Показываем рейтинг только если цель регулярная, бессрочная и добавлена пользователем
+				if (goal.regularConfig && goal.addedByUser && goal.regularConfig.id && goal.regularConfig.durationType === 'indefinite') {
+					return <RegularGoalRating regularGoalId={goal.regularConfig.id} />;
+				}
+				return null;
 			default:
 				return null;
 		}

@@ -4,6 +4,7 @@ export interface IUserInfo {
 	country: string;
 	coverImage: string | null | undefined;
 	email: string;
+	isEmailConfirmed?: boolean;
 	firstName: string;
 	id: number;
 	name: string;
@@ -14,6 +15,9 @@ export interface IUserInfo {
 	totalAddedLists: number;
 	totalCompletedLists: number;
 	totalAchievements: number;
+	subscriptionType?: 'free' | 'premium';
+	subscriptionExpiresAt?: string | null;
+	subscriptionAutoRenew?: boolean;
 }
 
 export interface IWeeklyLeader {
