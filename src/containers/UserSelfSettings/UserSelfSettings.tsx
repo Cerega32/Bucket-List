@@ -154,17 +154,28 @@ export const UserSelfSettings: FC = observer(() => {
 
 	const [isResendingEmail, setIsResendingEmail] = useState(false);
 	const [emailSent, setEmailSent] = useState(false);
+	const [resendCooldown, setResendCooldown] = useState(0);
+
+	// Обратный отсчёт задержки повторной отправки (2 мин)
+	useEffect(() => {
+		if (resendCooldown <= 0) return;
+		const t = setInterval(() => setResendCooldown((c) => Math.max(0, c - 1)), 1000);
+		return () => clearInterval(t);
+	}, [resendCooldown]);
 
 	const handleResendConfirmationEmail = async () => {
 		setIsResendingEmail(true);
 		const res = await postResendConfirmationEmail();
-		if (res.success) {
-			setEmailSent(true);
-			setTimeout(() => {
-				setEmailSent(false);
-			}, 3000);
-		}
 		setIsResendingEmail(false);
+		if (res.success && res.data) {
+			if (res.data.is_email_confirmed === true) {
+				setUserInfo({...user, isEmailConfirmed: true});
+				return;
+			}
+			setEmailSent(true);
+			setTimeout(() => setEmailSent(false), 3000);
+			setResendCooldown(res.data.retry_after_seconds ?? 120);
+		}
 	};
 
 	return (
@@ -272,14 +283,23 @@ export const UserSelfSettings: FC = observer(() => {
 								) : (
 									<div className={element('email-not-confirmed')}>
 										<span className={element('email-warning')}>⚠ Email не подтвержден</span>
+										<span className={element('email-hint')}>
+											Email будет подтверждён только после перехода по ссылке в письме.
+										</span>
 										<Button
 											theme="blue-light"
 											size="small"
 											onClick={handleResendConfirmationEmail}
-											disabled={isResendingEmail || emailSent}
+											disabled={isResendingEmail || resendCooldown > 0}
 											className={element('resend-btn')}
 										>
-											{isResendingEmail ? 'Отправка...' : emailSent ? 'Отправлено!' : 'Отправить письмо'}
+											{isResendingEmail
+												? 'Отправка...'
+												: emailSent
+												? 'Отправлено!'
+												: resendCooldown > 0
+												? `Повтор через ${resendCooldown} с`
+												: 'Отправить письмо'}
 										</Button>
 									</div>
 								)}

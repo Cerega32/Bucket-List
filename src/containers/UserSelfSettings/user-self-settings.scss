@@ -111,6 +111,12 @@
 		font-weight: 500;
 	}
 
+	&__email-hint {
+		width: 100%;
+		color: var(--color-text-secondary);
+		font-size: 13px;
+	}
+
 	&__resend-btn {
 		flex-shrink: 0;
 	}

@@ -4,6 +4,7 @@ export const postResendConfirmationEmail = async () => {
 	const response = await POST('resend-confirmation-email', {
 		auth: true,
 		showErrorNotification: true,
+		showSuccessNotification: false,
 	});
 	return response;
 };

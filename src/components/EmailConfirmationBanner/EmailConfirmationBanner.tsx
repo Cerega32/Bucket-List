@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
@@ -11,6 +12,8 @@ import './email-confirmation-banner.scss';
 
 const EMAIL_BANNER_DISMISSED_KEY = 'email_confirmation_banner_dismissed';
 
+const shouldShowBanner = (): boolean => !Cookies.get(EMAIL_BANNER_DISMISSED_KEY);
+
 export const EmailConfirmationBanner: FC = observer(() => {
 	const [block, element] = useBem('email-confirmation-banner');
 	const [isVisible, setIsVisible] = useState(false);
@@ -22,10 +25,9 @@ export const EmailConfirmationBanner: FC = observer(() => {
 		// Показываем баннер только если:
 		// 1. Пользователь авторизован
 		// 2. Email не подтвержден
-		// 3. Баннер не был закрыт пользователем
+		// 3. Баннер не закрывали последние 24 ч (раз в сутки — показываем снова)
 		if (isAuth && !emailConfirmed) {
-			const dismissed = localStorage.getItem(EMAIL_BANNER_DISMISSED_KEY);
-			if (!dismissed) {
+			if (shouldShowBanner()) {
 				// Небольшая задержка для плавного появления
 				const timer = setTimeout(() => {
 					setIsVisible(true);
@@ -51,7 +53,7 @@ export const EmailConfirmationBanner: FC = observer(() => {
 	};
 
 	const handleDismiss = () => {
-		localStorage.setItem(EMAIL_BANNER_DISMISSED_KEY, 'true');
+		Cookies.set(EMAIL_BANNER_DISMISSED_KEY, '1', {expires: 1});
 		setIsVisible(false);
 	};
 

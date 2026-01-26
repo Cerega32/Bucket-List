@@ -1,0 +1,40 @@
+.page-email-confirmed {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	min-height: 100vh;
+	padding: 24px;
+
+	&__logo {
+		display: block;
+		width: 48px;
+		height: 48px;
+		margin: 0 auto 24px;
+	}
+
+	&__title {
+		margin-bottom: 16px;
+		text-align: center;
+	}
+
+	&__message {
+		margin: 0 0 24px;
+		text-align: center;
+		color: var(--color-text-secondary);
+		max-width: 400px;
+	}
+
+	&__actions {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		margin-top: 8px;
+	}
+
+	&__btn {
+		width: 100%;
+		max-width: 280px;
+	}
+}

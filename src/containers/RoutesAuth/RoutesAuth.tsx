@@ -16,14 +16,17 @@ import {PageCreateGoalList} from '@/pages/PageCreateGoalList/PageCreateGoalList'
 import {PageDetailGoal} from '@/pages/PageDetailGoal/PageDetailGoal';
 import {PageDetailList} from '@/pages/PageDetailList/PageDetailList';
 import {PageEditGoalList} from '@/pages/PageEditGoalList/PageEditGoalList';
+import {PageEmailConfirmed} from '@/pages/PageEmailConfirmed/PageEmailConfirmed';
 import {PageHelp} from '@/pages/PageHelp/PageHelp';
 import {PageLeaders} from '@/pages/PageLeaders/PageLeaders';
 import {PageLogin} from '@/pages/PageLogin/PageLogin';
 import {PageMain} from '@/pages/PageMain/PageMain';
 import {PageMainGoals} from '@/pages/PageMainGoals/PageMainGoals';
 import {PageNotFound} from '@/pages/PageNotFound/PageNotFound';
+import {PagePremium} from '@/pages/PagePremium/PagePremium';
 import {PagePrivacy} from '@/pages/PagePrivacy/PagePrivacy';
 import {PageRegistration} from '@/pages/PageRegistration/PageRegistration';
+import {PageResetPassword} from '@/pages/PageResetPassword/PageResetPassword';
 import {PageTerms} from '@/pages/PageTerms/PageTerms';
 import {PageUser} from '@/pages/PageUser/PageUser';
 import {PageUserSelf} from '@/pages/PageUserSelf/PageUserSelf';
@@ -71,6 +74,7 @@ export const RoutesAuth: FC = observer(() => {
 				{/* Правовые документы */}
 				<Route path="/privacy" element={<PagePrivacy page="isPrivacy" />} />
 				<Route path="/terms" element={<PageTerms page="isTerms" />} />
+				<Route path="/premium" element={<PagePremium />} />
 				<Route path="/agreement" element={<PageAgreement page="isAgreement" />} />
 				<Route path="/cookies" element={<PageCookies page="isCookies" />} />
 
@@ -91,6 +95,8 @@ export const RoutesAuth: FC = observer(() => {
 				<Route path="/goals/:id" element={<PageDetailGoal page="isGoal" />} />
 				<Route path="/sign-in" element={<PageLogin page="isLogin" />} />
 				<Route path="/sign-up" element={<PageRegistration page="isRegistration" />} />
+				<Route path="/reset-password" element={<PageResetPassword page="isResetPassword" />} />
+				<Route path="/email-confirmed" element={<PageEmailConfirmed page="isEmailConfirmed" />} />
 				<Route path="/leaders" element={<PageLeaders page="isLeaders" />} />
 				<Route path="/user/:id/showcase" element={<PageUser page="isUserShowcase" />} />
 				<Route path="/user/:id/100-goal" element={<PageUser page="isUser100Goals" />} />
