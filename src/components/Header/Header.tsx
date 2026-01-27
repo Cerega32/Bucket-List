@@ -6,6 +6,7 @@ import {Link, NavLink, useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
 import {NotificationDropdown} from '@/components/NotificationDropdown/NotificationDropdown';
+import {UserSelfProfile} from '@/containers/UserSelf/UserSelfProfile';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {CategoriesStore} from '@/store/CategoriesStore';
@@ -151,6 +152,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const menuProfile = (
 		<div className={element('profile-menu')}>
+			<UserSelfProfile hideSubscriptionButton noBorder />
 			<NavLink
 				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
 				to={`/user/${userSelf?.id}/showcase/`}
@@ -160,6 +162,29 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			</NavLink>
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self" end>
 				Дашборд
+			</NavLink>
+			<NavLink
+				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
+				to="/user/self/active-goals"
+				end
+			>
+				Активные цели и списки
+			</NavLink>
+			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/progress" end>
+				Прогресс целей
+			</NavLink>
+			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/regular" end>
+				Регулярные цели
+			</NavLink>
+			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/folders" end>
+				Папки целей
+			</NavLink>
+			<NavLink
+				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
+				to="/user/self/done-goals"
+				end
+			>
+				Выполненные
 			</NavLink>
 			<NavLink
 				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
@@ -174,30 +199,16 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/maps" end>
 				Мои карты
 			</NavLink>
-			<NavLink
-				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
-				to="/user/self/active-goals"
-				end
-			>
-				Активные цели и списки
-			</NavLink>
-			<NavLink
-				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
-				to="/user/self/done-goals"
-				end
-			>
-				Выполненные
+			{!isScreenMobile && <Line margin="8px 0" />}
+			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/subs" end>
+				Больше функционала
 			</NavLink>
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/settings" end>
 				Настройки
 			</NavLink>
-			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/subs" end>
-				Подписка
-			</NavLink>
-			{!isScreenMobile && <Line margin="8px 0" />}
-			<button type="button" className={element('menu-item')} onClick={handleLogout}>
+			<Button type="button" className={element('menu-item-red')} onClick={handleLogout}>
 				Выход
-			</button>
+			</Button>
 		</div>
 	);
 

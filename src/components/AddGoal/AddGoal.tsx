@@ -510,7 +510,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			return;
 		}
 
-		if (!title || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+		if (!title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -671,7 +671,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 	// Метод для программного создания цели
 	const createGoal = async () => {
-		if (!title || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+		if (!title || activeComplexity === null || activeCategory === null || (!image && !imageUrl) || !description) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -1290,12 +1290,13 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 						<FieldInput
 							placeholder="Опишите цель подробно"
 							id="goal-description"
-							text="Описание"
+							text="Описание *"
 							value={description}
 							setValue={setDescription}
 							className={element('field')}
 							type="textarea"
 							rows={4}
+							required
 						/>
 
 						<div className={element('time-field-container')}>

@@ -7,14 +7,16 @@
 	&__link {
 		display: flex;
 		align-items: center;
+		gap: 4px;
 		padding: 6px 16px;
 		border-radius: 8px;
 		color: var(--color-text-primary);
 		font-weight: var(--weight-medium);
+		text-wrap: nowrap;
 
 		@include md {
+			justify-content: space-between;
 			width: 100%;
-			text-wrap: nowrap;
 		}
 
 		&--active {

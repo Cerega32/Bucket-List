@@ -235,16 +235,18 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		</>
 	);
 
+	const windowModifiers: Record<string, boolean | string | undefined> = {
+		fullscreen: window === 'goal-map' || window === 'goal-map-multi' || window === 'goal-map-add',
+		...(size ? {[size]: true} : {}),
+	};
+
+	if (!children) {
+		windowModifiers['type'] = window;
+	}
+
 	const modalElement = (
 		<section className={block({isOpen})}>
-			<div
-				className={element('window', {
-					type: window,
-					fullscreen: window === 'goal-map' || window === 'goal-map-multi' || window === 'goal-map-add',
-					...(size ? {[size]: true} : {}),
-				})}
-				ref={modalRef}
-			>
+			<div className={element('window', windowModifiers)} ref={modalRef}>
 				{(title || modalProps?.title) && (
 					<div className={element('header')}>
 						<h2 className={element('title')}>{title || modalProps?.title}</h2>

@@ -28,8 +28,125 @@
 		width: 336px;
 
 		@include lg {
-			width: 286px;
+			width: 250px;
 		}
+
+		@include md {
+			display: none;
+		}
+	}
+
+	&__sidebar-inner {
+		display: flex;
+		flex-direction: column;
+		background: var(--color-white);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+	}
+
+	&__profile {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 16px 16px 8px;
+		margin-bottom: 20px;
+		background: var(--color-white);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+
+		&--noBorder {
+			padding: 0;
+			margin: 8px;
+			background: transparent;
+			border: none;
+			border-radius: 0;
+		}
+	}
+
+	&__profile-header {
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+		margin-bottom: 8px;
+	}
+
+	&__profile-avatar {
+		flex-shrink: 0;
+	}
+
+	&__profile-info {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		gap: 4px;
+		min-width: 0;
+	}
+
+	&__profile-name {
+		color: var(--color-text-primary);
+		font-weight: var(--weight-medium);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__profile-stats {
+		color: var(--color-text-secondary);
+		font-size: 13px;
+		line-height: 1.4;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__profile-subscription-badge {
+		flex-shrink: 0;
+
+		&--premium {
+			position: relative;
+			overflow: hidden;
+			border: 2px solid var(--color-gold);
+			color: var(--color-orange-3);
+
+			&::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(90deg, transparent 0%, rgb(var(--color-gold-rgb) / 20%) 90%, transparent 100%);
+				transform: translateX(-100%) skewX(-15deg);
+				animation: gold-shine 3s infinite;
+			}
+		}
+	}
+
+	@keyframes gold-shine {
+		0% {
+			transform: translateX(-100%) skewX(-15deg);
+		}
+
+		100% {
+			transform: translateX(100%) skewX(-15deg);
+		}
+	}
+
+	&__profile-line {
+		margin: 0;
+	}
+
+	&__profile-premium-btn {
+		width: 100%;
+	}
+
+	&__sidebar-line {
+		margin: 0 24px;
+	}
+
+	&__add-goal-btn {
+		width: calc(100% - 48px);
+		margin: 16px 24px;
 	}
 }
 

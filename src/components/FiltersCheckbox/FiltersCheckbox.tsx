@@ -52,6 +52,9 @@ export const FiltersCheckbox: FC<FiltersCheckboxProps> = (props) => {
 		const allFalse = Object.keys(activeItems).reduce((acc, key) => ({...acc, [key]: {value: false, name: activeItems[key].name}}), {});
 		setActiveItems(allFalse);
 		setActiveHead(true);
+		setTitle(head.name);
+		onFinish([]);
+		setIsOpen(false);
 	};
 
 	useEffect(() => {
@@ -124,6 +127,11 @@ export const FiltersCheckbox: FC<FiltersCheckboxProps> = (props) => {
 							/>
 						</li>
 					))}
+					<li className={element('actions')}>
+						<button type="button" className={element('apply-btn')} onClick={() => setIsOpen(false)}>
+							Применить
+						</button>
+					</li>
 				</ul>
 			)}
 		</div>

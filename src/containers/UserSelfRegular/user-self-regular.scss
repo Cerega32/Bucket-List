@@ -1,14 +1,6 @@
 .user-self-regular {
 	width: 100%;
 
-	@include lg {
-		padding: 20px;
-	}
-
-	@include md {
-		padding: 16px;
-	}
-
 	&__header {
 		margin-bottom: 32px;
 
@@ -126,16 +118,11 @@
 
 	&__goals-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-		gap: 20px;
-
-		@include xl {
-			grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-		}
+		grid-template-columns: repeat(3, 1fr);
+		gap: 24px;
 
 		@include lg {
-			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-			gap: 16px;
+			grid-template-columns: repeat(2, 1fr);
 		}
 
 		@include md {
