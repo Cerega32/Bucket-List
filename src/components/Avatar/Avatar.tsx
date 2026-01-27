@@ -1,6 +1,8 @@
+import {observer} from 'mobx-react-lite';
 import {FC} from 'react';
 
 import {useBem} from '@/hooks/useBem';
+import {UserStore} from '@/store/UserStore';
 
 import {Svg} from '../Svg/Svg';
 
@@ -14,9 +16,11 @@ interface AvatarProps {
 	isPremium?: boolean;
 }
 
-export const Avatar: FC<AvatarProps> = (props) => {
-	// TODO: isPremium - УДАЛИТЬ true после реализации backend
-	const {className, avatar, size = 'small', noBorder = false, isPremium} = props;
+export const Avatar: FC<AvatarProps> = observer((props) => {
+	const {className, avatar, size = 'small', noBorder = false, isPremium: isPremiumProp} = props;
+
+	const isPremiumFromStore = UserStore.userSelf?.subscriptionType === 'premium';
+	const isPremium = isPremiumProp ?? isPremiumFromStore;
 
 	const [block, element] = useBem('avatar', className);
 
@@ -35,6 +39,23 @@ export const Avatar: FC<AvatarProps> = (props) => {
 		}
 	};
 
+	const getPremiumBadgeSize = (): string => {
+		switch (size) {
+			case 'medium':
+				return '12px';
+			case 'medium-56':
+				return '14px';
+			case 'large-96':
+				return '24px';
+			case 'large':
+				return '48px';
+			default:
+				return '8px';
+		}
+	};
+
+	const badgeSize = getPremiumBadgeSize();
+
 	return (
 		<div className={block({size, noBorder, premium: isPremium})}>
 			<div className={element('inner')}>
@@ -46,9 +67,9 @@ export const Avatar: FC<AvatarProps> = (props) => {
 			</div>
 			{isPremium && (
 				<div className={element('premium-badge')}>
-					<Svg icon="star-full" className={element('premium-icon')} width="16px" height="16px" />
+					<Svg icon="star-full" className={element('premium-icon')} width={badgeSize} height={badgeSize} />
 				</div>
 			)}
 		</div>
 	);
-};
+});

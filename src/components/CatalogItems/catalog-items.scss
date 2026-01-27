@@ -38,9 +38,13 @@
 
 	&__search-wrapper {
 		display: flex;
-		justify-content: space-between;
+		justify-content: end;
 		gap: 8px;
 		width: 100%;
+
+		@include lg {
+			justify-content: space-between;
+		}
 
 		@include md {
 			flex-direction: column;
@@ -58,7 +62,7 @@
 		width: 100%;
 		max-width: 336px;
 
-		@include lg {
+		@include md {
 			max-width: 100%;
 		}
 	}
@@ -102,8 +106,16 @@
 	&__goal {
 		width: calc(100% / 4 - (24px * 3 / 4));
 
+		&--full {
+			width: 100%;
+		}
+
 		@include lg {
 			width: calc(100% / 2 - (24px * 1 / 2));
+
+			&--full {
+				width: 100%;
+			}
 		}
 
 		@include md {

@@ -475,8 +475,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					setIsRegularGoalCompletedToday(newCompletedState);
 				}
 
-				// Если есть колбэк для обновления родительского компонента, вызываем его
-				if (onGoalCompleted) {
+				// Если серия действительно завершена, уведомляем родителя о завершении цели
+				if (onGoalCompleted && statisticsData?.isSeriesCompleted) {
 					onGoalCompleted();
 				}
 
@@ -1453,7 +1453,6 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										isSkipped = false;
 									}
 								} else if (regularConfig.frequency === 'custom') {
-									// Для custom используем данные из weekDays
 									const stats = localStatistics || regularConfig.statistics;
 									const weekDays = stats?.currentPeriodProgress?.weekDays;
 									if (weekDays && weekDays.length > 0) {
@@ -1468,44 +1467,19 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 											}) => d.dayIndex === i
 										);
 										if (dayData) {
-											// Для custom целей: isBlocked - блокировка по расписанию (показываем крестик)
-											// isBlockedByStartDate - блокировка из-за даты начала (пустой день, не показываем крестик)
-											isBlockedByStartDate = dayData.isBlockedByStartDate || false;
-											isBlocked = !isBlockedByStartDate && (dayData.isBlocked || false); // Блокировка по расписанию, только если не заблокирован по дате начала
-											isSelected = dayData.isAllowed !== false;
-											isCompletedDay = !isBlockedByStartDate && !isBlocked && (dayData.isCompleted || false); // Выполнено, только если не заблокирован
-											isSkipped = !isBlockedByStartDate && !isBlocked && (dayData.isSkipped || false);
+											const daySelected = dayData.isAllowed !== false;
+											isSelected = daySelected;
+											isBlocked = !daySelected; // все невыбранные дни — с крестиками
+											isBlockedByStartDate = false;
+											isCompletedDay = daySelected && !isBlocked && (dayData.isCompleted || false);
+											isSkipped = daySelected && !isBlocked && (dayData.isSkipped || false);
 										}
 									} else {
-										// Fallback: определяем выбранные дни по общему графику
-										const fallbackStats = localStatistics || regularConfig.statistics;
-										const startDate = fallbackStats?.startDate ? new Date(`${fallbackStats.startDate}T00:00:00`) : null;
-										const today = new Date();
-										today.setHours(0, 0, 0, 0);
-
-										// Вычисляем понедельник текущей недели
-										const dayOfWeek = today.getDay();
-										const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-										const weekStart = new Date(today);
-										weekStart.setDate(today.getDate() - diff);
-										weekStart.setHours(0, 0, 0, 0);
-
-										const dayDate = new Date(weekStart);
-										dayDate.setDate(weekStart.getDate() + i);
-										dayDate.setHours(0, 0, 0, 0);
-
-										// Проверяем блокировку по дате начала
-										if (startDate) {
-											startDate.setHours(0, 0, 0, 0);
-											isBlockedByStartDate = dayDate < startDate;
-										} else {
-											isBlockedByStartDate = false;
-										}
-
-										// Определяем блокировку по расписанию (только если не заблокирован по дате начала)
+										// Fallback: определяем выбранные дни по общему графику, без учета startDate
 										const daySelected = isDaySelected(i);
-										isSelected = daySelected && !isBlockedByStartDate;
-										isBlocked = !isBlockedByStartDate && !daySelected; // Блокировка по расписанию, только если не заблокирован по дате начала
+										isSelected = daySelected;
+										isBlocked = !daySelected; // все невыбранные дни — с крестиками
+										isBlockedByStartDate = false;
 										isCompletedDay = false;
 										isSkipped = false;
 									}
@@ -1672,8 +1646,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										theme={
 											(regularConfig.frequency === 'daily' &&
 												(isRegularGoalCompletedToday || regularProgress?.completed)) ||
-											(regularConfig.frequency === 'weekly' && regularProgress?.progress === 100) ||
-											(regularConfig.frequency === 'custom' && regularProgress?.progress === 100)
+											((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
+												isRegularGoalCompletedToday)
 												? 'green'
 												: 'blue'
 										}
@@ -1684,16 +1658,16 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										hoverContent={
 											(regularConfig.frequency === 'daily' &&
 												(isRegularGoalCompletedToday || regularProgress?.completed)) ||
-											(regularConfig.frequency === 'weekly' && regularProgress?.progress === 100) ||
-											(regularConfig.frequency === 'custom' && regularProgress?.progress === 100)
+											((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
+												isRegularGoalCompletedToday)
 												? 'Отменить выполнение'
 												: undefined
 										}
 										hoverIcon={
 											(regularConfig.frequency === 'daily' &&
 												(isRegularGoalCompletedToday || regularProgress?.completed)) ||
-											(regularConfig.frequency === 'weekly' && regularProgress?.progress === 100) ||
-											(regularConfig.frequency === 'custom' && regularProgress?.progress === 100)
+											((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
+												isRegularGoalCompletedToday)
 												? 'cross'
 												: undefined
 										}
@@ -1702,7 +1676,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 											? 'Выполнено сегодня'
 											: regularConfig.frequency === 'daily'
 											? 'Выполнить сегодня'
-											: regularProgress?.progress === 100
+											: (regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
+											  isRegularGoalCompletedToday
 											? 'Выполнено сегодня'
 											: 'Выполнить сегодня'}
 									</Button>
@@ -1975,6 +1950,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 							isOpen={isEditSettingsModalOpen}
 							onClose={() => setIsEditSettingsModalOpen(false)}
 							title="Изменение регулярности цели"
+							size="medium"
 						>
 							<SetRegularGoalModal
 								onSave={handleSaveSettings}

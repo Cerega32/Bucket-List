@@ -31,6 +31,7 @@ interface FieldInputProps {
 	focusBorder?: 'white';
 	rows?: number;
 	disabled?: boolean;
+	suffix?: string;
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -58,6 +59,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		focusBorder,
 		rows = 2,
 		disabled = false,
+		suffix,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -104,7 +106,12 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 					/>
 				) : (
 					<input
-						className={element('input', {iconBegin: !!iconBegin, focusBorder, iconEnd: !!iconEnd || type === 'password'})}
+						className={element('input', {
+							iconBegin: !!iconBegin,
+							focusBorder,
+							iconEnd: !!iconEnd || type === 'password',
+							suffix: !!suffix,
+						})}
 						id={id}
 						type={typeState}
 						placeholder={placeholder}
@@ -119,6 +126,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						disabled={disabled}
 					/>
 				)}
+				{suffix && <span className={element('suffix')}>{suffix}</span>}
 				{type === 'password' && (
 					<button type="button" className={element('show-password')} onClick={toggleTypePassword} aria-label="Показать пароль">
 						{typeState === 'password' ? <Svg icon="eye" /> : <Svg icon="eye-closed" />}

@@ -22,10 +22,10 @@ import {countriesArr} from '@/utils/data/countries';
 import './user-self-settings.scss';
 
 export const UserSelfSettings: FC = observer(() => {
-	const {userInfo: user, setUserInfo, setAvatar, email: storeEmail} = UserStore;
+	const {userSelf: user, setUserSelf, setAvatar, email: storeEmail} = UserStore;
 	const {setWindow, setIsOpen} = ModalStore;
 
-	const [name, setName] = useState(user.name);
+	const [name, setName] = useState(user.firstName);
 	const [surname, setSurname] = useState(user.lastName);
 	const [about, setAbout] = useState(user.aboutMe);
 	const [activeCountry, setActiveCountry] = useState<number | null>(null);
@@ -67,7 +67,7 @@ export const UserSelfSettings: FC = observer(() => {
 			(async () => {
 				const res = await postAvatar(formData);
 				if (res.success) {
-					setUserInfo({...user, avatar: Cookies.get('avatar')});
+					setUserSelf({...user, avatar: Cookies.get('avatar') || ''});
 					setAvatar(Cookies.get('avatar') || '');
 				}
 			})();
@@ -81,7 +81,7 @@ export const UserSelfSettings: FC = observer(() => {
 			(async () => {
 				const res = await postCover(formData);
 				if (res.success) {
-					setUserInfo({...user, coverImage: Cookies.get('cover')});
+					setUserSelf({...user, coverImage: Cookies.get('cover') || null});
 				}
 			})();
 		}
@@ -114,7 +114,7 @@ export const UserSelfSettings: FC = observer(() => {
 	const handleDeleteAvatar = async () => {
 		const res = await deleteAvatar();
 		if (res.success) {
-			setUserInfo({...user, avatar: Cookies.get('avatar')});
+			setUserSelf({...user, avatar: Cookies.get('avatar') || ''});
 		}
 	};
 
@@ -141,8 +141,8 @@ export const UserSelfSettings: FC = observer(() => {
 			// Если есть изменения, вызываем функцию для обновления информации пользователя
 			const res = await putUserInfo(updatedData);
 
-			if (res.success) {
-				setUserInfo(res.data);
+			if (res.success && res.data) {
+				setUserSelf(res.data);
 			}
 		}
 	};
@@ -169,7 +169,7 @@ export const UserSelfSettings: FC = observer(() => {
 		setIsResendingEmail(false);
 		if (res.success && res.data) {
 			if (res.data.is_email_confirmed === true) {
-				setUserInfo({...user, isEmailConfirmed: true});
+				setUserSelf({...user, isEmailConfirmed: true});
 				return;
 			}
 			setEmailSent(true);
@@ -308,7 +308,7 @@ export const UserSelfSettings: FC = observer(() => {
 						<FieldInput
 							text="Обо мне"
 							type="textarea"
-							placeholder="Обо мне"
+							placeholder="Напишите пару слов о себе..."
 							id="about"
 							value={about}
 							setValueTarget={handleInputChange}

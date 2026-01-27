@@ -208,8 +208,8 @@ export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCan
 										}}
 										className={element('field')}
 										type="number"
+										suffix={frequency === 'weekly' ? 'недель' : 'дней'}
 									/>
-									<span className={element('field-suffix')}>{frequency === 'weekly' ? 'недель' : 'дней'}</span>
 								</div>
 							</>
 						)}

@@ -34,7 +34,7 @@
 	}
 
 	&__head {
-		padding: 8px;
+		padding: 4px 8px;
 		cursor: pointer;
 
 		&--active {
@@ -79,5 +79,20 @@
 	&__checkbox {
 		width: 100%;
 		padding: 8px;
+	}
+
+	&__actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 8px;
+	}
+
+	&__apply-btn {
+		width: 100%;
+		padding: 6px 12px;
+		background: var(--color-primary);
+		border-radius: 6px;
+		color: var(--color-white);
+		cursor: pointer;
 	}
 }

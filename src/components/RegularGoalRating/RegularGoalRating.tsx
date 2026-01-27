@@ -91,31 +91,33 @@ export const RegularGoalRating: FC<RegularGoalRatingProps> = ({regularGoalId, cl
 
 	return (
 		<section className={block()}>
-			<table className={element('table')}>
-				<thead className={element('header')}>
-					<tr>
-						<th className={element('head-item')}>#</th>
-						<th className={element('head-item')}>Пользователь</th>
-						<th className={element('head-item')}>Максимальная серия</th>
-						<th className={element('head-item')}>Выполнено раз</th>
-					</tr>
-				</thead>
-				<tbody>
-					{users.map((user) => (
-						<tr className={element('row')} key={user.id}>
-							<td className={element('item')}>{user.place}</td>
-							<td className={element('item')}>
-								<Link to={`/user/${user.id}/showcase`} className={element('row-link')}>
-									<Avatar noBorder className={element('avatar')} size="medium" avatar={user.avatar} />
-									<p>{user.name}</p>
-								</Link>
-							</td>
-							<td className={element('item')}>{user.maxStreak}</td>
-							<td className={element('item')}>{user.completedSeriesCount}</td>
+			<div className={element('board')}>
+				<table className={element('table')}>
+					<thead className={element('header')}>
+						<tr>
+							<th className={element('head-item')}>#</th>
+							<th className={element('head-item')}>Пользователь</th>
+							<th className={element('head-item')}>Максимальная серия</th>
+							<th className={element('head-item')}>Выполнено раз</th>
 						</tr>
-					))}
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+						{users.map((user) => (
+							<tr className={element('row')} key={user.id}>
+								<td className={element('item')}>{user.place}</td>
+								<td className={element('item')}>
+									<Link to={`/user/${user.id}/showcase`} className={element('row-link')}>
+										<Avatar noBorder className={element('avatar')} size="medium" avatar={user.avatar} />
+										<p>{user.name}</p>
+									</Link>
+								</td>
+								<td className={element('item')}>{user.maxStreak}</td>
+								<td className={element('item')}>{user.completedSeriesCount}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
 		</section>
 	);
 };
