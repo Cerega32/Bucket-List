@@ -245,6 +245,10 @@
 		}
 	}
 
+	&--theme-no-active {
+		color: var(--color-text-primary);
+	}
+
 	&--theme-integrate {
 		width: min-content;
 		padding: 0;
@@ -264,10 +268,6 @@
 		}
 	}
 
-	&--width-auto {
-		width: auto;
-	}
-
 	&--size-small {
 		width: auto;
 		height: 32px;
@@ -275,9 +275,12 @@
 	}
 
 	&--size-medium {
-		width: 100%;
 		height: 40px;
 		padding: 10px 16px;
+	}
+
+	&--width-auto {
+		width: auto;
 	}
 
 	&--disabled {

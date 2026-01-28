@@ -6,6 +6,7 @@ import {Button} from '@/components/Button/Button';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {Loader} from '@/components/Loader/Loader';
 import {Progress} from '@/components/Progress/Progress';
+import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {getGoalsInProgress, IGoalProgress, updateGoalProgress} from '@/utils/api/goals';
@@ -104,8 +105,9 @@ export const UserSelfProgress: FC = observer(() => {
 		<section className={block()}>
 			<div className={element('content')}>
 				<div className={element('header')}>
-					<h1 className={element('title')}>Прогресс целей</h1>
-					<p className={element('description')}>Здесь отображаются ваши цели, которые находятся в процессе выполнения</p>
+					<Title tag="h2" className={element('title')}>
+						Прогресс целей
+					</Title>
 				</div>
 
 				{goals.length === 0 ? (

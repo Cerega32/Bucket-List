@@ -99,8 +99,11 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 	}, [id, totalAchievements, totalAdded, totalAddedLists, totalCompleted, totalCompletedLists]);
 
 	return (
-		<article className={block()}>
-			{background && <div style={{backgroundImage: `url('${background}')`}} className={element('bg')} />}
+		<article className={block({noBackground: !background})}>
+			<div
+				style={background ? {backgroundImage: `url('${background}')`} : undefined}
+				className={element('bg', {placeholder: !background})}
+			/>
 			<section className={element('about')}>
 				<Avatar avatar={avatar} className={element('avatar')} size="large" />
 				<div className={element('wrapper')}>

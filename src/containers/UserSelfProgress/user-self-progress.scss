@@ -20,14 +20,7 @@
 	}
 
 	&__title {
-		margin: 0 0 8px;
-		color: var(--color-text-primary);
-		font-size: 32px;
-		font-weight: var(--weight-semi-bold);
-
-		@include md {
-			font-size: 24px;
-		}
+		margin-bottom: 24px;
 	}
 
 	&__description {

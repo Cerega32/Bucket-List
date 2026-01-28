@@ -1,19 +1,23 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useMemo, useState} from 'react';
 import {useLocation} from 'react-router-dom';
+import {scroller} from 'react-scroll';
 
-import {Card} from '@/components/Card/Card';
+import {RegularCard} from '@/components/Card/RegularCard';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {FiltersCheckbox} from '@/components/FiltersCheckbox/FiltersCheckbox';
 import {Line} from '@/components/Line/Line';
+import {BlurLoader} from '@/components/Loader/BlurLoader';
 import {Loader} from '@/components/Loader/Loader';
+import {Pagination} from '@/components/Pagination/Pagination';
 import Select, {OptionSelect} from '@/components/Select/Select';
 import {Switch} from '@/components/Switch/Switch';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {CategoriesStore} from '@/store/CategoriesStore';
 import {NotificationStore} from '@/store/NotificationStore';
+import {IPaginationPage} from '@/typings/request';
 import {getRegularGoalStatistics, IRegularGoalStatistics, markRegularProgress} from '@/utils/api/goals';
 import './user-self-regular.scss';
 
@@ -31,6 +35,8 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	const [search, setSearch] = useState('');
 	const [activeSort, setActiveSort] = useState(0);
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+	const [pagination, setPagination] = useState<IPaginationPage | null>(null);
+	const [currentPage, setCurrentPage] = useState(1);
 
 	const sortOptions: OptionSelect[] = [
 		{
@@ -47,12 +53,31 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		},
 	];
 
-	const loadRegularGoalStatistics = async () => {
+	const loadRegularGoalStatistics = async (page = 1) => {
 		setIsLoading(true);
 		try {
-			const response = await getRegularGoalStatistics();
+			const response = await getRegularGoalStatistics({page});
 			if (response.success && response.data) {
-				setStatisticsData(response.data);
+				const data = response.data as
+					| IRegularGoalStatistics[]
+					| {
+							pagination: IPaginationPage;
+							data: IRegularGoalStatistics[];
+					  };
+
+				if (Array.isArray(data)) {
+					setStatisticsData(data);
+					setPagination({
+						itemsPerPage: data.length,
+						page: 1,
+						totalPages: 1,
+						totalItems: data.length,
+					});
+				} else {
+					setStatisticsData(data.data);
+					setPagination(data.pagination);
+					setCurrentPage(data.pagination.page);
+				}
 			}
 		} catch (error) {
 			NotificationStore.addNotification({
@@ -124,11 +149,24 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		setSelectedCategories(selected);
 	};
 
-	const handleProgressUpdate = async (regularGoalId: number) => {
+	const handleProgressUpdate = async (stats: IRegularGoalStatistics) => {
 		try {
+			// Определяем текущее состояние выполнения по статистике
+			const progress = stats.currentPeriodProgress as any;
+			let currentlyCompleted = false;
+
+			if (progress?.type === 'daily') {
+				currentlyCompleted = progress.completedToday || false;
+			} else {
+				// Для weekly/custom: если нельзя выполнить сегодня, значит уже выполнено
+				currentlyCompleted = !stats.canCompleteToday || false;
+			}
+
+			const newCompletedState = !currentlyCompleted;
+
 			const response = await markRegularProgress({
-				regular_goal_id: regularGoalId,
-				completed: true,
+				regular_goal_id: stats.regularGoal,
+				completed: newCompletedState,
 				notes: '',
 			});
 
@@ -153,10 +191,23 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	};
 
 	const getTodayGoals = () => {
-		return filteredStatistics().filter(
-			(stats) =>
-				stats && (stats.canCompleteToday || stats.currentPeriodProgress?.completedToday || stats.nextTargetDate || stats.isActive)
-		);
+		// "На сегодня" — цели, которые можно выполнить сегодня (canCompleteToday) или уже выполнены сегодня (completedToday).
+		// сортируем - сначала шли НЕ выполненные сегодня, затем выполненные.
+		return filteredStatistics()
+			.filter((stats) => {
+				if (!stats) return false;
+
+				const completedToday = stats.currentPeriodProgress?.completedToday || false;
+
+				return stats.canCompleteToday || completedToday;
+			})
+			.sort((a, b) => {
+				const aCompleted = a.currentPeriodProgress?.completedToday || false;
+				const bCompleted = b.currentPeriodProgress?.completedToday || false;
+
+				if (aCompleted === bCompleted) return 0;
+				return aCompleted ? 1 : -1;
+			});
 	};
 
 	const getAllGoals = () => {
@@ -177,7 +228,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 			url: '#all',
 			name: 'Все цели',
 			page: 'all',
-			count: allGoals.length,
+			count: pagination?.totalItems ?? allGoals.length,
 		},
 	];
 
@@ -270,12 +321,11 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 					const goal = convertStatsToGoal(stats);
 
 					return (
-						<Card
+						<RegularCard
 							key={stats.regularGoal}
-							mode="regular"
 							regularGoal={goal}
 							statistics={stats}
-							onMarkRegular={() => handleProgressUpdate(stats.regularGoal)}
+							onMarkRegular={() => handleProgressUpdate(stats)}
 							className="catalog-items__goal catalog-items__goal--full"
 						/>
 					);
@@ -284,11 +334,23 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		);
 	};
 
-	if (isLoading) {
-		return <Loader isLoading />;
+	const goToPage = async (page: number): Promise<boolean> => {
+		await loadRegularGoalStatistics(page);
+		setCurrentPage(page);
+		scroller.scrollTo('user-self-regular-goals', {
+			duration: 800,
+			delay: 0,
+			smooth: 'easeInOutQuart',
+			offset: -150,
+		});
+		return true;
+	};
+
+	if (isLoading && statisticsData.length === 0) {
+		return <Loader isLoading isPageLoader />;
 	}
 
-	if (statisticsData.length === 0) {
+	if (!isLoading && statisticsData.length === 0) {
 		return (
 			<div className={block()}>
 				<Title tag="h2" className={element('title')}>
@@ -309,7 +371,6 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 					Регулярные цели
 				</Title>
 			</div>
-
 			<div className={element('content')}>
 				<div className="catalog-items__filters">
 					<Switch className="catalog-items__switch" buttons={buttonsSwitch} active={activeTab} />
@@ -337,10 +398,17 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 						</div>
 					</div>
 				</div>
+				<BlurLoader active={isLoading}>
+					<div id="user-self-regular-goals">
+						{activeTab === 'today'
+							? renderGoalsList(todayGoals, 'На сегодня нет регулярных целей')
+							: renderGoalsList(allGoals, 'Нет регулярных целей')}
+					</div>
+				</BlurLoader>
 
-				{activeTab === 'today'
-					? renderGoalsList(todayGoals, 'На сегодня нет регулярных целей')
-					: renderGoalsList(allGoals, 'Нет регулярных целей')}
+				{pagination && pagination.totalPages > 1 && (
+					<Pagination currentPage={currentPage} totalPages={pagination.totalPages} goToPage={goToPage} />
+				)}
 			</div>
 		</div>
 	);

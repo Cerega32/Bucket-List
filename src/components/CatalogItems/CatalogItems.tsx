@@ -131,6 +131,13 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 				page: 'lists',
 				count: lists.pagination.totalItems,
 			},
+			// TODO: добавить запрос на получение всех регулярных целей
+			// {
+			// 	url: `${beginUrl}${url}/regular`,
+			// 	name: 'Регулярные',
+			// 	page: 'regular',
+			// 	count: 0,
+			// },
 		];
 	}, [goals, lists, category, beginUrl]);
 

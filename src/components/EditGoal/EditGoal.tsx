@@ -475,20 +475,21 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 						<div className={element('image-section')}>
 							<p className={element('field-title')}>Изображение цели *</p>
 							{!image && !imageUrl ? (
-								<div className={element('dropzone')}>
+								<div
+									className={element('dropzone')}
+									onClick={handleFileInputClick}
+									role="button"
+									tabIndex={0}
+									aria-label="Добавить изображение"
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
+											handleFileInputClick();
+										}
+									}}
+								>
 									<FileDrop onDrop={(files) => files && onDrop(files)}>
-										<div
-											className={element('upload-placeholder')}
-											onClick={handleFileInputClick}
-											role="button"
-											tabIndex={0}
-											aria-label="Добавить изображение"
-											onKeyPress={(e) => {
-												if (e.key === 'Enter' || e.key === ' ') {
-													handleFileInputClick();
-												}
-											}}
-										>
+										<div className={element('upload-placeholder')}>
 											<input
 												type="file"
 												ref={fileInputRef}

@@ -9,8 +9,8 @@ import './button.scss';
 
 interface ButtonProps {
 	className?: string;
-	theme?: 'blue' | 'blue-light' | 'no-border' | 'green' | 'red' | 'gradient' | 'integrate';
-	width?: 'auto';
+	theme?: 'blue' | 'blue-light' | 'no-border' | 'green' | 'red' | 'gradient' | 'integrate' | 'no-active';
+	width?: 'full' | 'auto';
 	size?: 'small' | 'medium';
 	children?: ReactElement | string | number;
 	icon?: string;
@@ -38,7 +38,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		children,
 		small,
 		size,
-		width,
+		width = 'full',
 		typeBtn = 'button',
 		hoverContent,
 		hoverIcon,

@@ -16,15 +16,20 @@ import {
 } from '@/utils/api/goals';
 
 import {Button} from '../Button/Button';
+import {CharCount} from '../CharCount/CharCount';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '../FieldInput/FieldInput';
+import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
 import {FolderRulesManager} from '../FolderRulesManager/FolderRulesManager';
 import {ItemGoal} from '../ItemGoal/ItemGoal';
+import {Line} from '../Line/Line';
 import {Loader} from '../Loader/Loader';
 import {Modal} from '../Modal/Modal';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
-
+import Select, {OptionSelect} from '../Select/Select';
+import {Switch} from '../Switch/Switch';
+import {Title} from '../Title/Title';
 import './goal-folder-manager.scss';
 
 interface GoalFolderManagerProps {
@@ -55,6 +60,24 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		is_private: false,
 	});
 	const [deletingFolder, setDeletingFolder] = useState<IGoalFolder | null>(null);
+	const [search, setSearch] = useState('');
+	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+	const [activeSort, setActiveSort] = useState(0);
+
+	const sortOptions: OptionSelect[] = [
+		{
+			name: 'Новые',
+			value: 'created_at_desc',
+		},
+		{
+			name: 'Старые',
+			value: 'created_at_asc',
+		},
+		{
+			name: 'Больше целей',
+			value: 'goals_count_desc',
+		},
+	];
 
 	const loadFolders = useCallback(async () => {
 		setIsLoading(true);
@@ -68,6 +91,74 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		}
 		setIsLoading(false);
 	}, []);
+
+	const filteredFolders = folders
+		.filter((folder) => {
+			const query = search.trim().toLowerCase();
+			if (!query) return true;
+			return folder.name.toLowerCase().includes(query) || (folder.description || '').toLowerCase().includes(query);
+		})
+		.filter((folder) => {
+			if (selectedFilters.length === 0) return true;
+			const isPrivateFilter = selectedFilters.includes('private');
+			const isPublicFilter = selectedFilters.includes('public');
+
+			if (isPrivateFilter && !isPublicFilter) {
+				return folder.isPrivate;
+			}
+			if (isPublicFilter && !isPrivateFilter) {
+				return !folder.isPrivate;
+			}
+
+			return true;
+		})
+		.sort((a, b) => {
+			const sortKey = sortOptions[activeSort]?.value;
+
+			if (sortKey === 'created_at_desc') {
+				return (b.createdAt || '').localeCompare(a.createdAt || '');
+			}
+			if (sortKey === 'created_at_asc') {
+				return (a.createdAt || '').localeCompare(b.createdAt || '');
+			}
+			if (sortKey === 'goals_count_desc') {
+				return (b.goalsCount || 0) - (a.goalsCount || 0);
+			}
+
+			return 0;
+		});
+
+	const filterItems = [
+		{
+			name: 'Публичные',
+			code: 'public',
+		},
+		{
+			name: 'Приватные',
+			code: 'private',
+		},
+	];
+
+	const handleSearchChange = (value: string) => {
+		setSearch(value);
+	};
+
+	const handleFilterChange = async (selected: string[]) => {
+		setSelectedFilters(selected);
+	};
+
+	const handleSortSelect = async (active: number): Promise<void> => {
+		setActiveSort(active);
+	};
+
+	const buttonsSwitch = [
+		{
+			url: '#all',
+			name: 'Все папки',
+			page: 'all',
+			count: folders.length,
+		},
+	];
 
 	const loadFolderGoals = useCallback(async (folderIdNumber: number) => {
 		try {
@@ -190,23 +281,48 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	return (
 		<div className={block()}>
 			<div className={element('header')}>
-				<h2 className={element('title')}>Папки целей</h2>
-				<Button theme="blue" icon="plus" onClick={() => setIsCreating(true)} size="medium">
+				<Title tag="h2" className={element('title')}>
+					Папки целей
+				</Title>
+				<Button theme="blue" icon="plus" onClick={() => setIsCreating(true)} size="medium" width="auto">
 					Создать папку
 				</Button>
 			</div>
 
 			<div className={element('content')}>
 				<div className={element('folders-list')}>
-					<h3>Мои папки ({folders.length})</h3>
-					{folders.length === 0 ? (
+					<div className="catalog-items__filters">
+						<Switch className="catalog-items__switch" buttons={buttonsSwitch} active="all" />
+						<Line className="catalog-items__line" />
+						<div className="catalog-items__search-wrapper catalog-items__search-wrapper--wrap-on-lg">
+							<FieldInput
+								className="catalog-items__search"
+								placeholder="Поиск по названию или описанию папки"
+								id="goal-folders-search"
+								value={search}
+								setValue={handleSearchChange}
+								iconBegin="search"
+							/>
+							<div className="catalog-items__categories-wrapper">
+								<FiltersCheckbox
+									head={{name: 'Все папки', code: 'all'}}
+									items={filterItems}
+									onFinish={handleFilterChange}
+									multipleSelectedText={['тип', 'типа', 'типов']}
+									multipleThreshold={1}
+								/>
+								<Select options={sortOptions} activeOption={activeSort} onSelect={handleSortSelect} filter />
+							</div>
+						</div>
+					</div>
+					{filteredFolders.length === 0 ? (
 						<EmptyState
 							title="У вас пока нет папок для целей"
 							description="Создайте первую папку, чтобы организовать свои цели"
 						/>
 					) : (
 						<div className={element('folders')}>
-							{folders.map((folder) => (
+							{filteredFolders.map((folder) => (
 								<div
 									key={folder.id}
 									className={element('folder', {
@@ -230,24 +346,28 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 										<p className={element('folder-meta')}>Целей: {folder.goalsCount}</p>
 									</div>
 									<div className={element('folder-actions')}>
-										<Button
-											theme="blue-light"
-											icon="edit"
-											size="small"
-											onClick={(e) => {
-												e.stopPropagation();
-												handleEditFolder(folder);
-											}}
-										/>
-										<Button
-											theme="red"
-											icon="trash"
-											size="small"
-											onClick={(e) => {
-												e.stopPropagation();
-												setDeletingFolder(folder);
-											}}
-										/>
+										<div className={element('folder-action')}>
+											<Button
+												theme="blue-light"
+												icon="edit"
+												size="small"
+												onClick={(e) => {
+													e.stopPropagation();
+													handleEditFolder(folder);
+												}}
+											/>
+										</div>
+										<div className={element('folder-action')}>
+											<Button
+												theme="red"
+												icon="trash"
+												size="small"
+												onClick={(e) => {
+													e.stopPropagation();
+													setDeletingFolder(folder);
+												}}
+											/>
+										</div>
 									</div>
 								</div>
 							))}
@@ -258,12 +378,12 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 				{selectedFolder && (
 					<div className={element('folder-content')}>
 						<div className={element('folder-header')}>
-							<h3>
+							<Title tag="h3" className={element('folder-header-title')}>
 								<span className={element('folder-badge', {inline: true})} style={{backgroundColor: selectedFolder.color}}>
 									{/* <span className={element('icon', {[selectedFolder.icon || 'folder']: true})} /> */}
 								</span>
 								Папка &quot;{selectedFolder.name}&quot;
-							</h3>
+							</Title>
 							<div className={element('folder-tabs')}>
 								<button
 									type="button"
@@ -336,22 +456,28 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 				title="Создать новую папку"
 			>
 				<div className={element('form')}>
-					<FieldInput
-						id="folder-name"
-						text="Название папки"
-						value={formData.name}
-						setValue={(value: string) => setFormData({...formData, name: value})}
-						placeholder="Введите название папки"
-						required
-					/>
-					<FieldInput
-						id="folder-description"
-						text="Описание (необязательно)"
-						value={formData.description || ''}
-						setValue={(value: string) => setFormData({...formData, description: value})}
-						placeholder="Краткое описание папки"
-						type="textarea"
-					/>
+					<div>
+						<FieldInput
+							id="folder-name"
+							text="Название папки"
+							value={formData.name}
+							setValue={(value: string) => setFormData({...formData, name: value.slice(0, 50)})}
+							placeholder="Введите название папки"
+							required
+						/>
+						<CharCount current={formData.name.length} max={50} />
+					</div>
+					<div>
+						<FieldInput
+							id="folder-description"
+							text="Описание (необязательно)"
+							value={formData.description || ''}
+							setValue={(value: string) => setFormData({...formData, description: value.slice(0, 100)})}
+							placeholder="Краткое описание папки"
+							type="textarea"
+						/>
+						<CharCount current={(formData.description || '').length} max={100} />
+					</div>
 					{/* <div className={element('icon-picker')}>
 						{['folder', 'bookmark', 'star', 'heart', 'fire', 'music', 'game', 'video', 'book', 'plane', 'map', 'camera'].map(
 							(ico) => (
@@ -386,7 +512,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 						setChecked={(checked: boolean) => setFormData({...formData, is_private: checked})}
 					/>
 					<div className={element('form-actions')}>
-						<Button theme="blue" onClick={handleCreateFolder} disabled={!formData.name.trim()}>
+						<Button theme="blue" onClick={handleCreateFolder} disabled={!formData.name.trim()} width="auto">
 							Создать папку
 						</Button>
 						<Button
@@ -395,6 +521,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 								setIsCreating(false);
 								setFormData({name: '', description: '', color: '#3A89D8', icon: 'folder', is_private: false});
 							}}
+							width="auto"
 						>
 							Отмена
 						</Button>
@@ -413,22 +540,28 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 				title="Редактировать папку"
 			>
 				<div className={element('form')}>
-					<FieldInput
-						id="edit-folder-name"
-						text="Название папки"
-						value={formData.name}
-						setValue={(value: string) => setFormData({...formData, name: value})}
-						placeholder="Введите название папки"
-						required
-					/>
-					<FieldInput
-						id="edit-folder-description"
-						text="Описание (необязательно)"
-						value={formData.description || ''}
-						setValue={(value: string) => setFormData({...formData, description: value})}
-						placeholder="Краткое описание папки"
-						type="textarea"
-					/>
+					<div>
+						<FieldInput
+							id="edit-folder-name"
+							text="Название папки"
+							value={formData.name}
+							setValue={(value: string) => setFormData({...formData, name: value.slice(0, 50)})}
+							placeholder="Введите название папки"
+							required
+						/>
+						<CharCount current={formData.name.length} max={50} />
+					</div>
+					<div>
+						<FieldInput
+							id="edit-folder-description"
+							text="Описание (необязательно)"
+							value={formData.description || ''}
+							setValue={(value: string) => setFormData({...formData, description: value.slice(0, 100)})}
+							placeholder="Краткое описание папки"
+							type="textarea"
+						/>
+						<CharCount current={(formData.description || '').length} max={100} />
+					</div>
 					{/* <div className={element('icon-picker')}>
 						{['folder', 'bookmark', 'star', 'heart', 'fire', 'music', 'game', 'video', 'book', 'plane', 'map', 'camera'].map(
 							(ico) => (
@@ -463,7 +596,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 						setChecked={(checked: boolean) => setFormData({...formData, is_private: checked})}
 					/>
 					<div className={element('form-actions')}>
-						<Button theme="blue" onClick={handleUpdateFolder} disabled={!formData.name.trim()}>
+						<Button theme="blue" onClick={handleUpdateFolder} disabled={!formData.name.trim()} width="auto">
 							Сохранить изменения
 						</Button>
 						<Button
@@ -473,6 +606,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 								setSelectedFolder(null);
 								setFormData({name: '', description: '', color: '#3A89D8', icon: 'folder', is_private: false});
 							}}
+							width="auto"
 						>
 							Отмена
 						</Button>

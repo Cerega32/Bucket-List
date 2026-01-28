@@ -1,7 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC} from 'react';
 
-import {Title} from '@/components/Title/Title';
 import {UserSearch} from '@/components/UserSearch/UserSearch';
 import {useBem} from '@/hooks/useBem';
 import {FriendsStore} from '@/store/FriendsStore';
@@ -13,15 +12,8 @@ export const FriendsSearch: FC = observer(() => {
 
 	return (
 		<section className={block()}>
-			<div className={element('header')}>
-				<Title tag="h1" className={element('title')}>
-					Поиск пользователей
-				</Title>
-				<p className={element('subtitle')}>Найдите единомышленников и отправьте им заявки в друзья</p>
-			</div>
-
 			<div className={element('search-container')}>
-				<UserSearch />
+				<UserSearch placeholder="Найдите единомышленников и отправьте им заявки в друзья" />
 			</div>
 
 			{FriendsStore.searchResults.length > 0 && (

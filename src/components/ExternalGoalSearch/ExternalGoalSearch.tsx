@@ -341,6 +341,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 						icon="search"
 						onClick={searchExternalGoals}
 						size="medium"
+						width="auto"
 						className={`${element('search-button')} ${isSearchButtonDisabled ? 'disabled' : ''}`}
 					>
 						{loading ? 'Поиск...' : 'Найти'}

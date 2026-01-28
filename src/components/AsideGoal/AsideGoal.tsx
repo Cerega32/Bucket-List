@@ -399,6 +399,22 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	// Пересчитываем regularProgress при каждом рендере (функция легковесная)
 	const regularProgress = getRegularProgress();
 
+	// "Заблокировано сегодня"
+	const isRegularGoalBlockedTodayBySchedule = (() => {
+		if (!regularConfig || !isAdded) return false;
+		if (regularConfig.frequency !== 'custom') return false;
+
+		const stats = localStatistics || regularConfig.statistics;
+		const weekDays = stats?.currentPeriodProgress?.weekDays;
+		if (!Array.isArray(weekDays) || weekDays.length === 0) return false;
+
+		// Индекс дня
+		const todayIndex = (new Date().getDay() + 6) % 7;
+		const todayData = weekDays.find((d: any) => d?.dayIndex === todayIndex);
+
+		return todayData?.isAllowed === false;
+	})();
+
 	// Обработчик для отметки/отмены регулярной цели
 	const handleMarkRegularGoal = async () => {
 		if (!regularConfig || !isAdded) return;
@@ -1485,9 +1501,9 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 									}
 								}
 
-								// Синяя рамка только для текущего дня, если он выбран и не выполнен
-								// Не показываем рамку для заблокированных дней
-								const showBorder = isSelected && !isCompletedDay && !isBlocked && !isBlockedByStartDate && isCurrentDay;
+								// Синяя рамка и выделение всегда на текущем дне (isCurrentDay),
+								// Не показываем рамку только для блокировки по дате начала (isBlockedByStartDate).
+								const showBorder = isCurrentDay && !isBlockedByStartDate;
 
 								return (
 									<div key={i} className={element('regular-series-day-wrapper')}>
@@ -1513,7 +1529,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										</div>
 										<span
 											className={element('regular-series-day-name', {
-												selected: isSelected && !isBlocked && !isBlockedByStartDate && isCurrentDay,
+												selected: isCurrentDay && !isBlockedByStartDate,
 											})}
 										>
 											{dayName}
@@ -1644,35 +1660,45 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 									regularConfig.frequency === 'custom') && (
 									<Button
 										theme={
-											(regularConfig.frequency === 'daily' &&
-												(isRegularGoalCompletedToday || regularProgress?.completed)) ||
-											((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
-												isRegularGoalCompletedToday)
+											isRegularGoalBlockedTodayBySchedule
+												? 'no-active'
+												: (regularConfig.frequency === 'daily' &&
+														(isRegularGoalCompletedToday || regularProgress?.completed)) ||
+												  ((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
+														isRegularGoalCompletedToday)
 												? 'green'
 												: 'blue'
 										}
 										onClick={handleMarkRegularGoal}
-										icon="regular"
+										icon={isRegularGoalBlockedTodayBySchedule ? undefined : 'regular'}
 										className={element('btn')}
 										size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+										disabled={isRegularGoalBlockedTodayBySchedule}
 										hoverContent={
-											(regularConfig.frequency === 'daily' &&
-												(isRegularGoalCompletedToday || regularProgress?.completed)) ||
-											((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
-												isRegularGoalCompletedToday)
+											isRegularGoalBlockedTodayBySchedule
+												? undefined
+												: (regularConfig.frequency === 'daily' &&
+														(isRegularGoalCompletedToday || regularProgress?.completed)) ||
+												  ((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
+														isRegularGoalCompletedToday)
 												? 'Отменить выполнение'
 												: undefined
 										}
 										hoverIcon={
-											(regularConfig.frequency === 'daily' &&
-												(isRegularGoalCompletedToday || regularProgress?.completed)) ||
-											((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
-												isRegularGoalCompletedToday)
+											isRegularGoalBlockedTodayBySchedule
+												? undefined
+												: (regularConfig.frequency === 'daily' &&
+														(isRegularGoalCompletedToday || regularProgress?.completed)) ||
+												  ((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
+														isRegularGoalCompletedToday)
 												? 'cross'
 												: undefined
 										}
 									>
-										{regularConfig.frequency === 'daily' && (isRegularGoalCompletedToday || regularProgress?.completed)
+										{isRegularGoalBlockedTodayBySchedule
+											? 'Сегодня выполнить цель нельзя'
+											: regularConfig.frequency === 'daily' &&
+											  (isRegularGoalCompletedToday || regularProgress?.completed)
 											? 'Выполнено сегодня'
 											: regularConfig.frequency === 'daily'
 											? 'Выполнить сегодня'

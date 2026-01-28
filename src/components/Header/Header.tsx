@@ -153,13 +153,6 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const menuProfile = (
 		<div className={element('profile-menu')}>
 			<UserSelfProfile hideSubscriptionButton noBorder />
-			<NavLink
-				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
-				to={`/user/${userSelf?.id}/showcase/`}
-				end={false}
-			>
-				Мой профиль
-			</NavLink>
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self" end>
 				Дашборд
 			</NavLink>

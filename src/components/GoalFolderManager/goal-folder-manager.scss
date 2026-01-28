@@ -5,14 +5,6 @@
 		align-items: center;
 		padding-bottom: 16px;
 		margin-bottom: 24px;
-		border-bottom: 1px solid var(--color-border);
-	}
-
-	&__title {
-		margin: 0;
-		color: var(--color-text-primary);
-		font-size: 24px;
-		font-weight: var(--weight-semi-bold);
 	}
 
 	&__content {
@@ -42,41 +34,29 @@
 
 	&__folder {
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
+		gap: 12px;
 		padding: 16px;
 		background: var(--color-white);
-		border: 1px solid var(--color-border);
-		border-radius: 12px;
+		border: 1px solid transparent;
+		border-radius: 16px;
+		box-shadow: 0 1px 3px var(--color-border);
 		cursor: pointer;
-		transition: all 0.2s ease;
-
-		&:hover {
-			background: var(--color-secondary);
-			border-color: var(--color-primary);
-		}
 
 		&--active {
-			background: rgb(var(--color-primary-rgb) / 5%);
-			border-color: var(--color-primary);
+			box-shadow: 0 0 0 2px rgb(var(--color-primary) / 18%);
+			border: 1px solid var(--color-primary);
 		}
 	}
 
 	&__folder-badge {
-		display: inline-flex;
+		display: flex;
 		flex-shrink: 0;
 		justify-content: center;
 		align-items: center;
-		width: 40px;
-		height: 40px;
-		margin-right: 12px;
-		border-radius: 10px;
-		box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
-
-		&.inline {
-			width: 28px;
-			height: 28px;
-			margin-right: 8px;
-		}
+		width: 50px;
+		height: 50px;
+		border-radius: 12px;
 	}
 
 	&__icon {
@@ -138,17 +118,24 @@
 	}
 
 	&__folder-info {
+		display: flex;
 		flex: 1;
+		flex-direction: column;
+		gap: 4px;
+		height: 100%;
 	}
 
 	&__folder-name {
-		max-width: 180px;
-		text-overflow: ellipsis;
-		margin: 0 0 4px;
+		display: -webkit-box;
+		overflow: hidden;
+		overflow-wrap: anywhere;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 1;
+		line-clamp: 1;
+		margin-bottom: auto;
 		color: var(--color-text-primary);
 		font-size: 16px;
 		font-weight: var(--weight-semi-bold);
-		overflow: hidden;
 	}
 
 	&__private-badge {
@@ -162,10 +149,16 @@
 	}
 
 	&__folder-description {
-		margin: 0 0 8px;
+		display: -webkit-box;
+		margin-bottom: auto;
 		color: var(--color-text-secondary);
 		font-size: 14px;
 		line-height: 1.4;
+		overflow: hidden;
+		overflow-wrap: anywhere;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 1;
+		line-clamp: 1;
 	}
 
 	&__folder-meta {
@@ -176,6 +169,7 @@
 
 	&__folder-actions {
 		display: flex;
+		flex-direction: column;
 		gap: 8px;
 		opacity: 0;
 		transition: opacity 0.2s ease;
@@ -183,6 +177,18 @@
 
 	&__folder:hover &__folder-actions {
 		opacity: 1;
+	}
+
+	&__folder-action {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 4px;
+	}
+
+	&__folder-action-label {
+		color: var(--color-text-secondary);
+		font-size: 12px;
 	}
 
 	&__folder-content {
@@ -196,14 +202,12 @@
 
 	&__folder-header {
 		margin-bottom: 24px;
+	}
 
-		h3 {
-			overflow: hidden;
-			max-width: 1000px;
-			white-space: nowrap;
-			text-overflow: ellipsis;
-			margin: 0 0 16px;
-		}
+	&__folder-header-title {
+		display: flex;
+		align-items: center;
+		gap: 16px;
 	}
 
 	&__folder-tabs {
@@ -342,18 +346,18 @@
 
 	&__goal-card {
 		border: none;
-		box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+		box-shadow: 0 1px 3px var(--color-border);
 		border-radius: 12px;
 
 		// Обеспечиваем одинаковый размер картинок
-		.item-goal__image {
+		[class~='item-goal__image'] {
 			width: 100%;
 			height: 160px;
 			object-fit: cover;
 			border-radius: 8px;
 		}
 
-		.item-goal__title {
+		[class~='item-goal__title'] {
 			display: -webkit-box;
 			margin-top: 12px;
 			font-size: 16px;
@@ -370,34 +374,5 @@
 		justify-content: flex-end;
 		gap: 12px;
 		margin-top: 8px;
-	}
-}
-
-@media (width <= 768px) {
-	.goal-folder-manager {
-		&__header {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 16px;
-		}
-
-		&__content {
-			gap: 20px;
-		}
-
-		&__folder {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 12px;
-		}
-
-		&__folder-actions {
-			opacity: 1;
-			align-self: stretch;
-		}
-
-		&__form-actions {
-			flex-direction: column;
-		}
 	}
 }

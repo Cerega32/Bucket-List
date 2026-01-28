@@ -23,11 +23,11 @@ import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {selectComplexity} from '@/utils/values/complexity';
 import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
 
-import {AllowCustomSettingsField} from './components/AllowCustomSettingsField';
 import {Loader} from '../Loader/Loader';
 import Select from '../Select/Select';
 import {SimilarGoalItem} from '../SimilarGoalItem/SimilarGoalItem';
 import {Title} from '../Title/Title';
+import {AllowCustomSettingsField} from './components/AllowCustomSettingsField';
 
 import './add-goal.scss';
 
@@ -213,10 +213,14 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			}
 		}
 
-		// Сохраняем URL изображения, если он есть
+		// Сохраняем URL изображения, если он есть, иначе сбрасываем
 		if (goal.image) {
 			setImageUrl(goal.image);
 			setImage(null); // Сбрасываем локально загруженное изображение
+		} else {
+			// Если у новой цели нет изображения, удаляем старое
+			setImageUrl(null);
+			setImage(null);
 		}
 
 		setShowSimilarGoals(false);
@@ -889,13 +893,17 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			}
 		}
 
-		// Сохраняем URL изображения, если он есть
+		// Сохраняем URL изображения, если он есть, иначе сбрасываем
 		if (goalData.imageUrl) {
 			setImageUrl(goalData.imageUrl);
 			setImage(null); // Сбрасываем локально загруженное изображение
 		} else if (goalData.image) {
 			setImageUrl(goalData.image);
 			setImage(null); // Сбрасываем локально загруженное изображение
+		} else {
+			// Если у новой цели нет изображения, удаляем старое
+			setImageUrl(null);
+			setImage(null);
 		}
 
 		const additionalFields = {
@@ -975,20 +983,21 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					<div className={element('image-section')}>
 						<p className={element('field-title')}>Изображение цели *</p>
 						{!image && !imageUrl ? (
-							<div className={element('dropzone')}>
+							<div
+								className={element('dropzone')}
+								onClick={handleFileInputClick}
+								role="button"
+								tabIndex={0}
+								aria-label="Добавить изображение"
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault();
+										handleFileInputClick();
+									}
+								}}
+							>
 								<FileDrop onDrop={(files) => files && onDrop(files)}>
-									<div
-										className={element('upload-placeholder')}
-										onClick={handleFileInputClick}
-										role="button"
-										tabIndex={0}
-										aria-label="Добавить изображение"
-										onKeyPress={(e) => {
-											if (e.key === 'Enter' || e.key === ' ') {
-												handleFileInputClick();
-											}
-										}}
-									>
+									<div className={element('upload-placeholder')}>
 										<input
 											type="file"
 											ref={fileInputRef}

@@ -204,7 +204,18 @@
 		}
 
 		&--blocked {
-			background: rgb(var(--color-white));
+			background: var(--color-white);
+
+			#{$block}__regular-series-day-icon {
+				svg {
+					fill: var(--color-gray-1);
+				}
+			}
+		}
+
+		// Если день одновременно выбран (текущий) и заблокирован — рамка должна оставаться синей
+		&--selected#{&}--blocked {
+			border-color: var(--color-primary);
 		}
 	}
 

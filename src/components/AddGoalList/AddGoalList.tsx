@@ -441,6 +441,14 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					if (goal.estimatedTime) baseData.estimatedTime = goal.estimatedTime;
 					if (goal.deadline) baseData.deadline = goal.deadline;
 					if (goal.complexity) baseData.complexity = goal.complexity;
+					// Если у цели теперь нет изображения — сбрасываем старое из autoParserData
+					if (!goal.image) {
+						baseData.imageUrl = null;
+						// если ранее использовали поле для файла — убираем его
+						if ('imageField' in baseData) {
+							delete baseData.imageField;
+						}
+					}
 
 					return baseData;
 				});
@@ -780,20 +788,21 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					<div className={element('image-section')}>
 						<p className={element('field-title')}>Изображение списка *</p>
 						{!image ? (
-							<div className={element('dropzone')}>
+							<div
+								className={element('dropzone')}
+								onClick={handleFileInputClick}
+								role="button"
+								tabIndex={0}
+								aria-label="Добавить изображение"
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault();
+										handleFileInputClick();
+									}
+								}}
+							>
 								<FileDrop onDrop={(files) => files && onDrop(files)}>
-									<div
-										className={element('upload-placeholder')}
-										onClick={handleFileInputClick}
-										role="button"
-										tabIndex={0}
-										aria-label="Добавить изображение"
-										onKeyPress={(e) => {
-											if (e.key === 'Enter' || e.key === ' ') {
-												handleFileInputClick();
-											}
-										}}
-									>
+									<div className={element('upload-placeholder')}>
 										<input
 											type="file"
 											ref={fileInputRef}

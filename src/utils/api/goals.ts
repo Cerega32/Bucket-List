@@ -1,3 +1,4 @@
+import {IPaginationPage} from '@/typings/request';
 import {DELETE, GET, POST, PUT} from '@/utils/fetch/requests';
 
 // ========== PROGRESS API ==========
@@ -673,14 +674,25 @@ export const markRegularProgress = async (data: {
 };
 
 // Получить статистику регулярных целей
-export const getRegularGoalStatistics = async (): Promise<{
+// Поддерживает как обычный ответ (массив),
+// так и пагинированный ({ pagination, data }) — на случай,
+// если на бэкенде включена пагинация.
+export const getRegularGoalStatistics = async (params?: {
+	page?: number;
+}): Promise<{
 	success: boolean;
-	data?: IRegularGoalStatistics[];
+	data?:
+		| IRegularGoalStatistics[]
+		| {
+				pagination: IPaginationPage;
+				data: IRegularGoalStatistics[];
+		  };
 	error?: string;
 }> => {
 	try {
 		const response = await GET('goals/regular/statistics', {
 			auth: true,
+			...(params ? {get: params} : {}),
 		});
 		return response;
 	} catch (error) {

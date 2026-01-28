@@ -60,6 +60,12 @@
 	}
 
 	&__title {
+		display: -webkit-box;
+		overflow: hidden;
+		overflow-wrap: anywhere;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		margin-bottom: 8px;
 	}
 
@@ -272,6 +278,26 @@
 		&--completed {
 			background: var(--color-sentiment-positive);
 			border-color: transparent;
+		}
+
+		&--blocked {
+			background: var(--color-white);
+			border-color: var(--color-border);
+		}
+
+		// Если день одновременно выбран (текущий) и заблокирован — рамка должна оставаться синей
+		&--selected#{&}--blocked {
+			border-color: var(--color-primary);
+		}
+	}
+
+	&__series-day-icon {
+		width: 14px;
+		height: 14px;
+
+		svg,
+		path {
+			fill: var(--color-gray-1);
 		}
 	}
 

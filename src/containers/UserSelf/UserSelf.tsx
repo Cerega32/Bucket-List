@@ -5,6 +5,7 @@ import {Button} from '@/components/Button/Button';
 import {Line} from '@/components/Line/Line';
 import {ITabs, Tabs} from '@/components/Tabs/Tabs';
 import {useBem} from '@/hooks/useBem';
+import UserMapPage from '@/pages/UserMapPage/UserMapPage';
 import {FriendsStore} from '@/store/FriendsStore';
 import {UserStore} from '@/store/UserStore';
 import {IPage} from '@/typings/page';
@@ -21,7 +22,17 @@ import {UserSelfProgress} from '../UserSelfProgress/UserSelfProgress';
 import {UserSelfRegular} from '../UserSelfRegular/UserSelfRegular';
 import {UserSelfSettings} from '../UserSelfSettings/UserSelfSettings';
 import {UserSelfSubscription} from '../UserSelfSubscription/UserSelfSubscription';
+
+import type {IPaginationPage} from '@/typings/request';
+import type {IRegularGoalStatistics} from '@/utils/api/goals';
 import './user-self.scss';
+
+type RegularStatsResponse =
+	| IRegularGoalStatistics[]
+	| {
+			pagination: IPaginationPage;
+			data: IRegularGoalStatistics[];
+	  };
 
 export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 	const [block, element] = useBem('user-self');
@@ -36,7 +47,13 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 				const [regularRes, foldersRes] = await Promise.all([getRegularGoalStatistics(), getGoalFoldersLight()]);
 
 				if (regularRes.success && regularRes.data) {
-					setRegularGoalsCount(regularRes.data.length);
+					const data = regularRes.data as RegularStatsResponse;
+
+					if (Array.isArray(data)) {
+						setRegularGoalsCount(data.length);
+					} else {
+						setRegularGoalsCount(data.pagination.totalItems);
+					}
 				}
 
 				if (foldersRes.success && foldersRes.data) {
@@ -68,6 +85,8 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 				return <UserSelfFolders />;
 			case 'isUserSelfProgress':
 				return <UserSelfProgress />;
+			case 'isUserSelfMaps':
+				return <UserMapPage />;
 			case 'isUserSelfRegular':
 				return <UserSelfRegular />;
 			case 'isUserSelfSubs':
@@ -123,6 +142,11 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			count: completedGoalsAndListsCount,
 		},
 		{
+			url: '/user/self/maps',
+			name: 'Мои карты',
+			page: 'isUserSelfMaps',
+		},
+		{
 			url: '/user/self/achievements',
 			name: 'Достижения',
 			page: 'isUserSelfAchievements',
@@ -141,8 +165,8 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 		},
 	];
 
-	const mainTabs: Array<ITabs> = tabs.slice(0, 8);
-	const secondaryTabs: Array<ITabs> = tabs.slice(8);
+	const mainTabs: Array<ITabs> = tabs.slice(0, 9);
+	const secondaryTabs: Array<ITabs> = tabs.slice(9);
 
 	return (
 		<main className={block()}>
