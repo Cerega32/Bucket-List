@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
+import {Alert} from '@/components/Alert/Alert';
 import {Progress} from '@/components/Progress/Progress';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
@@ -192,10 +193,7 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 
 			{!compact && challengeItems.length > 0 && (
 				<div className={element('footer')}>
-					<div className={element('footer-info')}>
-						<Svg icon="info" className={element('info-icon')} />
-						<span className={element('footer-text')}>Выполните все задания, чтобы получить бонусный опыт!</span>
-					</div>
+					<Alert type="info" message="Выполните все задания, чтобы получить бонусный опыт!" />
 				</div>
 			)}
 		</div>

@@ -351,10 +351,6 @@
 		border-radius: 6px;
 		color: var(--color-white);
 		backdrop-filter: blur(8px);
-
-		&--allCompleted {
-			background: var(--color-sentiment-positive);
-		}
 	}
 
 	&__regular-goals-badge-icon {

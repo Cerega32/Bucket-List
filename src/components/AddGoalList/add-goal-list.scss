@@ -168,55 +168,11 @@
 	}
 
 	&__auto-info {
-		display: flex;
-		align-items: flex-start;
-		gap: 12px;
-		padding: 12px 16px;
 		margin-bottom: 16px;
-		background-color: var(--color-blue-light);
-		border-radius: 8px;
-	}
-
-	&__auto-info-icon {
-		flex-shrink: 0;
-		width: 20px;
-		height: 20px;
-		margin-top: 2px;
-		color: var(--color-blue);
-	}
-
-	&__auto-info-text {
-		margin: 0;
-		color: var(--color-text-secondary);
-		font-size: 14px;
-		line-height: 1.4;
 	}
 
 	&__error-info {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		padding: 12px 16px;
 		margin-bottom: 16px;
-		background-color: var(--color-red-light);
-		border-radius: 8px;
-	}
-
-	&__error-info-icon {
-		flex-shrink: 0;
-		width: 20px;
-		height: 20px;
-
-		* {
-			fill: var(--color-red-1);
-		}
-	}
-
-	&__error-info-text {
-		margin: 0;
-		color: var(--color-red-1);
-		font-size: 14px;
-		line-height: 1.4;
 	}
 
 	&__auto-textarea {
@@ -224,7 +180,7 @@
 
 		textarea {
 			min-height: 120px;
-			font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+			font-family: "Monaco", "Menlo", 'Ubuntu Mono', monospace;
 			font-size: 13px;
 			line-height: 1.4;
 		}

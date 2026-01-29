@@ -73,11 +73,12 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 		};
 	}, [isOpen, onClose]);
 
-	const handleQuickComplete = async (regularGoalId: number) => {
+	const handleQuickComplete = async (regularGoalId: number, currentlyCompleted: boolean) => {
 		setLoading(true);
 		try {
 			const response = await markRegularProgress({
 				regular_goal_id: regularGoalId,
+				completed: !currentlyCompleted,
 			});
 
 			if (response.success) {
@@ -118,7 +119,7 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 								<RegularGoalCompactCard
 									key={statistics.id}
 									statistics={statistics}
-									onQuickComplete={() => handleQuickComplete(statistics.regularGoal)}
+									onQuickComplete={(id, completed) => handleQuickComplete(id, completed)}
 								/>
 							))}
 						</div>

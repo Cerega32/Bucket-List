@@ -10,13 +10,12 @@ import {GoalStore} from '@/store/GoalStore';
 import {IGoal} from '@/typings/goal';
 import {getComments} from '@/utils/api/get/getComments';
 
-import {Button} from '../Button/Button';
+import {Alert} from '../Alert/Alert';
 import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
 import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
 import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
 import {RegularGoalHistory} from '../RegularGoalHistory/RegularGoalHistory';
 import {RegularGoalRating} from '../RegularGoalRating/RegularGoalRating';
-import {Svg} from '../Svg/Svg';
 
 interface ContentGoalProps {
 	className?: string;
@@ -90,11 +89,12 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 		<article className={block()}>
 			{goal.addedFromList && goal.addedFromList.length > 0 && (
 				<div className={element('goal-in-list')}>
-					<Svg icon="info" />
-					Цель включена в список и отображается вместе с ним
-					<Button className={element('goal-in-list-btn')} theme="no-border" type="button" onClick={scrollToComments}>
-						Смотреть списки
-					</Button>
+					<Alert
+						type="info"
+						message="Цель включена в список и отображается вместе с ним"
+						actionText="Смотреть списки"
+						onAction={scrollToComments}
+					/>
 				</div>
 			)}
 			<DescriptionWithLinks goal={goal} page={page} />

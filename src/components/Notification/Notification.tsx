@@ -5,8 +5,8 @@ import React from 'react';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
 
-import {Button} from '../Button/Button';
-import {Svg} from '../Svg/Svg';
+import {Alert, type AlertType} from '../Alert/Alert';
+
 import './notification.scss';
 
 interface NotificationProps {
@@ -18,28 +18,27 @@ interface NotificationProps {
 	action?: () => void;
 }
 
+const mapType = (t: NotificationProps['type']): AlertType => (t === 'error' ? 'danger' : t);
+
 const Notification: React.FC<NotificationProps> = observer(({id, type, title, message, actionText, action}) => {
-	const [block, element] = useBem('notification');
+	const [block] = useBem('notification');
 
 	return (
 		<motion.div
-			className={block({type})}
+			className={block()}
 			initial={{opacity: 0, y: -20, scale: 0.95}}
 			animate={{opacity: 1, y: 0, scale: 1}}
 			exit={{opacity: 0, y: -10, scale: 0.9}}
 			transition={{duration: 0.3}}
 		>
-			<Svg icon="info" className={element('info', {type})} />
-			<div className={element('content')}>
-				<h3 className={element('title')}>{title}</h3>
-				{typeof message === 'string' && <p>{message}</p>}
-				{actionText && (
-					<Button className={element('btn')} onClick={action} theme="no-border">
-						{actionText}
-					</Button>
-				)}
-			</div>
-			<Button type="button-close" onClick={() => NotificationStore.removeNotification(id)} />
+			<Alert
+				type={mapType(type)}
+				title={title}
+				message={typeof message === 'string' ? message : undefined}
+				actionText={actionText}
+				onAction={action}
+				onClose={() => NotificationStore.removeNotification(id)}
+			/>
 		</motion.div>
 	);
 });

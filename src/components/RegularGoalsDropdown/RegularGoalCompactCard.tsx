@@ -1,4 +1,4 @@
-import {FC} from 'react';
+import {FC, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import {IRegularGoalStatistics} from '@/typings/goal';
@@ -9,7 +9,7 @@ import {Svg} from '../Svg/Svg';
 
 interface RegularGoalCompactCardProps {
 	statistics: IRegularGoalStatistics;
-	onQuickComplete: () => void;
+	onQuickComplete: (regularGoalId: number, currentlyCompleted: boolean) => void;
 }
 
 type RegularDayState = 'completed' | 'active' | 'inactive' | 'blocked';
@@ -88,9 +88,12 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 
 export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statistics, onQuickComplete}) => {
 	const [block, element] = useBem('regular-goal-compact-card');
+	const [hovered, setHovered] = useState(false);
 	const currentDayIndex = getCurrentDayOfWeek();
 	const isCompletedToday = statistics.currentPeriodProgress?.completedToday ?? false;
 	const goalData = statistics.regularGoalData;
+
+	const actionIcon = isCompletedToday && hovered ? 'cross' : isCompletedToday ? 'regular' : 'regular-empty';
 
 	return (
 		<div className={block()}>
@@ -131,10 +134,12 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 			<button
 				type="button"
 				className={element('action-button', {completed: isCompletedToday})}
-				onClick={onQuickComplete}
+				onClick={() => onQuickComplete(statistics.regularGoal, isCompletedToday)}
+				onMouseEnter={() => setHovered(true)}
+				onMouseLeave={() => setHovered(false)}
 				aria-label={isCompletedToday ? 'Отменить выполнение' : 'Быстро выполнить'}
 			>
-				<Svg icon={isCompletedToday ? 'regular' : 'regular-empty'} className={element('action-icon')} />
+				<Svg icon={actionIcon} className={element('action-icon')} />
 			</button>
 		</div>
 	);

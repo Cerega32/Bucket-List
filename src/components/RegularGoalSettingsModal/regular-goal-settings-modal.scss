@@ -78,29 +78,7 @@
 	}
 
 	&__info-message {
-		display: flex;
-		align-items: flex-start;
-		gap: 12px;
-		padding: 16px;
 		margin-bottom: 24px;
-		background-color: var(--color-bg-info);
-		border: 1px solid var(--color-border-info);
-		border-radius: 8px;
-
-		p {
-			margin: 0;
-			color: var(--color-text-info);
-			font-size: 14px;
-			line-height: 1.5;
-		}
-	}
-
-	&__info-icon {
-		flex-shrink: 0;
-		width: 16px;
-		height: 16px;
-		margin-top: 2px;
-		fill: var(--color-text-info);
 	}
 
 	&__original-settings {

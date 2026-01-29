@@ -3,6 +3,7 @@ import {FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState} from '
 import {FileDrop} from 'react-file-drop';
 import {useLocation, useNavigate} from 'react-router-dom';
 
+import {Alert} from '@/components/Alert/Alert';
 import {Button} from '@/components/Button/Button';
 import {DatePicker} from '@/components/DatePicker/DatePicker';
 import {ExternalGoalSearch} from '@/components/ExternalGoalSearch/ExternalGoalSearch';
@@ -960,8 +961,10 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				<div className={element('content')}>
 					{/* Добавляем информационное сообщение */}
 					<div className={element('edit-info-message')}>
-						<Svg icon="info" className={element('info-icon')} />
-						<p>Вы сможете отредактировать или удалить цель в течение 24ч после создания, затем действие будет недоступно</p>
+						<Alert
+							type="info"
+							message="Вы сможете отредактировать или удалить цель в течение 24ч после создания, затем действие будет недоступно"
+						/>
 					</div>
 
 					{/* Добавляем компонент поиска внешних целей с учетом выбранной категории/подкатегории */}

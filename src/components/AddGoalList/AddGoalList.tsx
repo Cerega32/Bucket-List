@@ -3,6 +3,7 @@ import {FileDrop} from 'react-file-drop';
 import {useLocation, useNavigate} from 'react-router-dom';
 
 import {AddGoal} from '@/components/AddGoal/AddGoal';
+import {Alert} from '@/components/Alert/Alert';
 import {Button} from '@/components/Button/Button';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
@@ -945,18 +946,17 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 								{showAutoSection && (
 									<div className={element('auto-add-content')}>
 										<div className={element('auto-info')}>
-											<Svg icon="info" className={element('auto-info-icon')} />
-											<p className={element('auto-info-text')}>
-												Вставьте список целей (книги, фильмы, игры) — система автоматически найдет соответствия и
-												добавит их к уже выбранным целям.
-											</p>
+											<Alert
+												type="info"
+												message="Вставьте список целей (книги, фильмы, игры) — система автоматически найдет соответствия и добавит их к уже выбранным целям."
+											/>
 										</div>
 										{!(activeCategory === null) && (
 											<div className={element('error-info')}>
-												<Svg icon="info" className={element('error-info-icon')} />
-												<p className={element('error-info-text')}>
-													Для автоматического добавления целей из списка необходимо выбрать категорию списка.
-												</p>
+												<Alert
+													type="warning"
+													message="Для автоматического добавления целей из списка необходимо выбрать категорию списка."
+												/>
 											</div>
 										)}
 										<FieldInput
