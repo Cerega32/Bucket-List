@@ -6,11 +6,13 @@ import {Link, NavLink, useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
 import {NotificationDropdown} from '@/components/NotificationDropdown/NotificationDropdown';
+import {RegularGoalsDropdown} from '@/components/RegularGoalsDropdown/RegularGoalsDropdown';
 import {UserSelfProfile} from '@/containers/UserSelf/UserSelfProfile';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {CategoriesStore} from '@/store/CategoriesStore';
 import {HeaderNotificationsStore} from '@/store/HeaderNotificationsStore';
+import {HeaderRegularGoalsStore} from '@/store/HeaderRegularGoalsStore';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
 import {getAllCategories} from '@/utils/api/get/getCategories';
@@ -38,6 +40,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const {isScreenDesktop, isScreenSmallTablet, isScreenMobile, isScreenSmallMobile, isScreenTablet} = useScreenSize();
 	const {isAuth, name, avatar, setAvatar, setIsAuth, setName, userSelf} = UserStore;
 	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+	const [isRegularGoalsOpen, setIsRegularGoalsOpen] = useState(false);
 	const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
 	const [hoveredParentId, setHoveredParentId] = useState<number | null>(null);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -62,6 +65,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const menuRef = useRef<HTMLElement>(null);
 	const profileMenuRef = useRef<HTMLDivElement>(null);
 	const notificationsRef = useRef<HTMLDivElement>(null);
+	const regularGoalsRef = useRef<HTMLButtonElement>(null);
 	const categoriesRef = useRef<HTMLLIElement>(null);
 
 	const openLogin = () => {
@@ -83,12 +87,18 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		setIsAuth(false);
 		setName('');
 		HeaderNotificationsStore.clearNotifications();
+		HeaderRegularGoalsStore.clear();
 		navigate('/');
 	};
 
 	const toggleNotifications = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		setIsNotificationsOpen(!isNotificationsOpen);
+	};
+
+	const toggleRegularGoals = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		setIsRegularGoalsOpen(!isRegularGoalsOpen);
 	};
 
 	// Обработчик клика вне элементов для закрытия меню
@@ -114,6 +124,11 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		if (notificationsRef.current && !notificationsRef.current.contains(target)) {
 			setIsNotificationsOpen(false);
 		}
+
+		// Закрытие регулярных целей
+		if (regularGoalsRef.current && !regularGoalsRef.current.contains(target)) {
+			setIsRegularGoalsOpen(false);
+		}
 	}, []);
 
 	// Обработчик клика по аватару на мобильных устройствах
@@ -137,9 +152,18 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		}
 	}, []);
 
+	// Загрузка количества регулярных целей на сегодня для бейджа
+	useEffect(() => {
+		if (isAuth) {
+			HeaderRegularGoalsStore.loadTodayCount();
+		} else {
+			HeaderRegularGoalsStore.clear();
+		}
+	}, [isAuth]);
+
 	// Добавляем обработчик клика вне элементов
 	useEffect(() => {
-		if (isMenuOpen || isCategoriesOpen || isNotificationsOpen) {
+		if (isMenuOpen || isCategoriesOpen || isNotificationsOpen || isRegularGoalsOpen) {
 			document.addEventListener('mousedown', handleClickOutside);
 		} else {
 			document.removeEventListener('mousedown', handleClickOutside);
@@ -148,7 +172,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
-	}, [isMenuOpen, isCategoriesOpen, isNotificationsOpen, handleClickOutside]);
+	}, [isMenuOpen, isCategoriesOpen, isNotificationsOpen, isRegularGoalsOpen, handleClickOutside]);
 
 	const menuProfile = (
 		<div className={element('profile-menu')}>
@@ -389,6 +413,32 @@ export const Header: FC<HeaderProps> = observer((props) => {
 											</span>
 										)}
 									</button>
+									<button
+										type="button"
+										className={element('notifications-button', {
+											regularGoals: HeaderRegularGoalsStore.hasRegularGoalsToday,
+										})}
+										onClick={toggleRegularGoals}
+										aria-label="Регулярные цели"
+									>
+										{HeaderRegularGoalsStore.hasRegularGoalsToday ? (
+											<span
+												className={element('regular-goals-badge', {
+													allCompleted: HeaderRegularGoalsStore.allCompletedToday,
+												})}
+											>
+												<Svg
+													icon={HeaderRegularGoalsStore.allCompletedToday ? 'regular' : 'regular-empty'}
+													className={element('regular-goals-badge-icon', {theme: header})}
+												/>
+												<span className={element('regular-goals-badge-count', {theme: header})}>
+													{HeaderRegularGoalsStore.todayCount > 99 ? '99+' : HeaderRegularGoalsStore.todayCount}
+												</span>
+											</span>
+										) : (
+											<Svg icon="regular-empty" className={element('regular-goals-icon', {theme: header})} />
+										)}
+									</button>
 									<AnimatePresence>
 										{isNotificationsOpen && (
 											<motion.div
@@ -401,6 +451,22 @@ export const Header: FC<HeaderProps> = observer((props) => {
 												<NotificationDropdown
 													isOpen={isNotificationsOpen}
 													onClose={() => setIsNotificationsOpen(false)}
+												/>
+											</motion.div>
+										)}
+									</AnimatePresence>
+									<AnimatePresence>
+										{isRegularGoalsOpen && (
+											<motion.div
+												initial={{opacity: 0, y: -10}}
+												animate={{opacity: 1, y: 0}}
+												exit={{opacity: 0, y: -10}}
+												transition={{duration: 0.2, ease: 'easeOut'}}
+												className={element('regular-goals-dropdown')}
+											>
+												<RegularGoalsDropdown
+													isOpen={isRegularGoalsOpen}
+													onClose={() => setIsRegularGoalsOpen(false)}
 												/>
 											</motion.div>
 										)}
