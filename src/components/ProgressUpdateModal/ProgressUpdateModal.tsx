@@ -21,7 +21,7 @@ interface ProgressUpdateModalProps {
 }
 
 export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
-	({goalId, goalTitle, currentProgress, onProgressUpdate, onGoalCompleted, onClose}) => {
+	({goalId, currentProgress, onProgressUpdate, onGoalCompleted, onClose}) => {
 		const [block, element] = useBem('progress-update-modal');
 
 		const [newProgress, setNewProgress] = useState(currentProgress.progressPercentage.toString());
@@ -73,8 +73,7 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 		return (
 			<div className={block()}>
 				<div className={element('header')}>
-					<h3 className={element('title')}>Обновить прогресс цели</h3>
-					<p className={element('goal-title')}>&quot;{goalTitle}&quot;</p>
+					<h3 className={element('title')}>Прогресс цели</h3>
 				</div>
 
 				<div className={element('content')}>

@@ -64,8 +64,17 @@ export const Card: FC<CardProps> = (props) => {
 			<Link to={`/${isList ? 'list' : 'goals'}/${goal.code}`} className={element('gradient')}>
 				<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} show={goal.completedByUser}>
 					<div className={element('img-tags')}>
-						{goal.addedByUser && !goal.completedByUser && <Tag icon="watch" theme="light" />}
-						{goal.completedByUser && <Tag icon="done" theme="light" classNameIcon={element('img-tag-icon-done')} />}
+						{((goal.addedByUser && !goal.completedByUser) || (!isList && 'regularConfig' in goal && goal.regularConfig)) && (
+							<div className={element('img-tag-wrapper')}>
+								{goal.addedByUser && !goal.completedByUser && <Tag icon="watch" theme="light" title="В процессе" />}
+								{!isList && 'regularConfig' in goal && goal.regularConfig && (
+									<Tag icon="regular-empty" theme="light" title="Регулярная цель" />
+								)}
+							</div>
+						)}
+						{goal.completedByUser && (
+							<Tag icon="done" theme="light" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
+						)}
 						<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
 					</div>
 				</Gradient>

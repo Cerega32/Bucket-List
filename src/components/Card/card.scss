@@ -33,6 +33,7 @@
 
 	&__img-tags {
 		display: flex;
+		gap: 8px;
 		width: 100%;
 	}
 
@@ -90,6 +91,12 @@
 			align-items: end;
 			height: auto;
 		}
+	}
+
+	&__img-tag-wrapper {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
 	}
 
 	&__buttons-wrapper {
