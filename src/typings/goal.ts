@@ -123,6 +123,7 @@ export interface IShortGoal {
 	addedByUser: boolean;
 	location?: ILocation;
 	estimatedTime?: string;
+	regularConfig?: IRegularGoalConfig;
 }
 
 // Типы для работы с картами
