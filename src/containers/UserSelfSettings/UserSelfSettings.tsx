@@ -212,7 +212,12 @@ export const UserSelfSettings: FC = observer(() => {
 					</div>
 				</div>
 				<section className={element('avatar-wrapper')}>
-					<Avatar avatar={user.avatar} className={element('avatar')} size="large" />
+					<Avatar
+						avatar={user.avatar}
+						className={element('avatar')}
+						size="large"
+						isPremium={user.subscriptionType === 'premium'}
+					/>
 					<div className={element('avatar-buttons')}>
 						<div
 							onClick={handleAvatarClick}

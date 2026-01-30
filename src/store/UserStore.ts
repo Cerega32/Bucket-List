@@ -76,10 +76,12 @@ class Store implements IUserStore {
 		coverImage: '',
 		aboutMe: '',
 		totalAddedGoals: 0,
-		totalCompletedGoals: 0,
+		totalCompletedGoals: parseInt(Cookies.get('user_total_completed_goals') || '0', 10),
 		totalCompletedLists: 0,
 		totalAddedLists: 0,
 		totalAchievements: 0,
+		subscriptionType: (Cookies.get('subscription_type') as 'free' | 'premium') || undefined,
+		level: parseInt(Cookies.get('user_level') || '0', 10) || undefined,
 	};
 
 	addedGoals: IAddedGoals = {goals: [], totalAdded: 0};
@@ -121,6 +123,19 @@ class Store implements IUserStore {
 		}
 		if (userSelf.email) {
 			this.setEmail(userSelf.email);
+		}
+		// Сохраняем в куки для отображения до следующей загрузки профиля
+		if (userSelf.subscriptionType) {
+			Cookies.set('subscription_type', userSelf.subscriptionType);
+		} else {
+			Cookies.remove('subscription_type');
+		}
+		Cookies.set('user_total_completed_goals', String(userSelf.totalCompletedGoals ?? 0));
+		const {level} = userSelf;
+		if (level != null) {
+			Cookies.set('user_level', String(level));
+		} else {
+			Cookies.remove('user_level');
 		}
 	};
 

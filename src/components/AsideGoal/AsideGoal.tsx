@@ -5,6 +5,7 @@ import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
 import {IGoal, ILocation, IRegularGoalConfig, IRegularGoalStatistics, IShortGoal} from '@/typings/goal';
 import {getGoalTimer, TimerInfo} from '@/utils/api/get/getGoalTimer';
 import {
@@ -191,6 +192,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	}, [regularConfig, added]);
 
 	const {setIsOpen, setWindow, setFuncModal, setModalProps} = ModalStore;
+	const {isAuth} = UserStore;
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 
 	// Загрузка информации о таймере
@@ -958,6 +960,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	// Обработчик добавления цели с проверкой на регулярность
 	const handleAddGoal = async () => {
 		if (isList || isAdded) return;
+
+		if (!isAuth) {
+			setWindow('login');
+			setIsOpen(true);
+			return;
+		}
 
 		if (regularConfig) {
 			// Если настройки нельзя изменить, используем обычный endpoint /add/ с базовыми настройками

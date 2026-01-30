@@ -18,6 +18,7 @@ export interface IUserInfo {
 	subscriptionType?: 'free' | 'premium';
 	subscriptionExpiresAt?: string | null;
 	subscriptionAutoRenew?: boolean;
+	level?: number;
 }
 
 export interface IWeeklyLeader {

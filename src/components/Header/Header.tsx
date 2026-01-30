@@ -83,6 +83,9 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		Cookies.remove('avatar');
 		Cookies.remove('name');
 		Cookies.remove('user-id');
+		Cookies.remove('subscription_type');
+		Cookies.remove('user_level');
+		Cookies.remove('user_total_completed_goals');
 		setAvatar('');
 		setIsAuth(false);
 		setName('');
@@ -146,11 +149,12 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		}
 	};
 
+	// Загружаем полный профиль при авторизации, чтобы level и totalCompletedGoals были везде (в т.ч. в хедере)
 	useEffect(() => {
-		if (!userSelf?.id) {
+		if (isAuth) {
 			getUser();
 		}
-	}, []);
+	}, [isAuth]);
 
 	// Загрузка количества регулярных целей на сегодня для бейджа
 	useEffect(() => {
@@ -231,7 +235,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const menuList = (
 		<ul className={element('list', {open: isMenuOpen, noAuth: !isAuth})}>
-			{!isAuth && isScreenSmallTablet && (
+			{!isAuth && (isScreenSmallTablet || isScreenMobile) && (
 				<>
 					<Button theme="integrate" size="small" onClick={openLogin}>
 						Войти
@@ -486,7 +490,12 @@ export const Header: FC<HeaderProps> = observer((props) => {
 											}
 										}}
 									>
-										<Avatar avatar={avatar} size="small" noBorder />
+										<Avatar
+											avatar={avatar}
+											size="small"
+											noBorder
+											isPremium={userSelf?.subscriptionType === 'premium'}
+										/>
 										{/* <span className={element('nickname')}>{name}</span> */}
 										{!isScreenMobile && <Svg icon="arrow--right" className={element('profile-arrow')} />}
 									</div>
@@ -500,7 +509,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				<div className={element('menu-wrapper')}>
 					{isAuth && (
 						<div className={element('profile')}>
-							<Avatar avatar={avatar} size="small" noBorder />
+							<Avatar avatar={avatar} size="small" noBorder isPremium={userSelf?.subscriptionType === 'premium'} />
 							<span className={element('nickname')}>{name}</span>
 							{!isScreenMobile && <Svg icon="arrow--right" className={element('profile-arrow')} />}
 						</div>

@@ -101,7 +101,7 @@ export const RegularGoalSettings: FC<RegularGoalSettingsProps> = (props) => {
 
 						{regularFrequency === 'custom' && (
 							<div className={element('custom-schedule-selector')}>
-								<p className={element('field-title')}>Выберите дни недели</p>
+								<p className={element('field-title')}>Выберите дни недели (обязательно хотя бы один)</p>
 								<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
 							</div>
 						)}

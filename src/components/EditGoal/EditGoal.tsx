@@ -322,6 +322,15 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 			return;
 		}
 
+		if (isRegular && regularFrequency === 'custom' && !Object.values(customSchedule).some(Boolean)) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Выберите хотя бы один день недели для пользовательского графика',
+			});
+			return;
+		}
+
 		setIsLoading(true);
 
 		try {
@@ -642,7 +651,9 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 
 												{regularFrequency === 'custom' && (
 													<div className={element('custom-schedule-selector')}>
-														<p className={element('field-title')}>Выберите дни недели</p>
+														<p className={element('field-title')}>
+															Выберите дни недели (обязательно хотя бы один)
+														</p>
 														<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
 													</div>
 												)}
