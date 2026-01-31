@@ -1,4 +1,5 @@
 import {FC, useState} from 'react';
+import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
 import {IRegularGoalStatistics} from '@/typings/goal';
@@ -95,46 +96,54 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 
 	const actionIcon = isCompletedToday && hovered ? 'cross' : isCompletedToday ? 'regular' : 'regular-empty';
 
+	const handleActionClick = (e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		onQuickComplete(statistics.regularGoal, isCompletedToday);
+	};
+
 	return (
 		<div className={block()}>
-			<div className={element('image-wrapper')}>
-				<img src={goalData.goalImage} alt={goalData.goalTitle} className={element('image')} />
-			</div>
-			<div className={element('content')}>
-				<h4 className={element('title')}>{goalData.goalTitle}</h4>
-				<div className={element('days-row')}>
-					<div className={element('days')}>
-						{WEEK_DAYS.map((day, index) => {
-							const state = getWeekDayState(statistics, index);
-							const isToday = index === currentDayIndex;
-							const isCompleted = state === 'completed';
-							const isBlocked = state === 'blocked';
-							const isSelected = state === 'active' || (isBlocked && isToday);
-
-							return (
-								<div
-									key={day}
-									className={element('day', {
-										selected: isSelected && !isCompleted,
-										blocked: isBlocked,
-										completed: isCompleted,
-									})}
-									title={day}
-								>
-									{isCompleted && <Svg icon="done" className={element('day-icon')} />}
-									{!isCompleted && isBlocked && <Svg icon="cross" className={element('day-icon')} />}
-								</div>
-							);
-						})}
-					</div>
-					<Line vertical className={element('line')} />
-					<span className={element('duration')}>{getSeriesText(statistics)}</span>
+			<Link to={`/goals/${goalData.goalCode}`} className={element('link-area')}>
+				<div className={element('image-wrapper')}>
+					<img src={goalData.goalImage} alt={goalData.goalTitle} className={element('image')} />
 				</div>
-			</div>
+				<div className={element('content')}>
+					<h4 className={element('title')}>{goalData.goalTitle}</h4>
+					<div className={element('days-row')}>
+						<div className={element('days')}>
+							{WEEK_DAYS.map((day, index) => {
+								const state = getWeekDayState(statistics, index);
+								const isToday = index === currentDayIndex;
+								const isCompleted = state === 'completed';
+								const isBlocked = state === 'blocked';
+								const isSelected = state === 'active' || (isBlocked && isToday);
+
+								return (
+									<div
+										key={day}
+										className={element('day', {
+											selected: isSelected && !isCompleted,
+											blocked: isBlocked,
+											completed: isCompleted,
+										})}
+										title={day}
+									>
+										{isCompleted && <Svg icon="done" className={element('day-icon')} />}
+										{!isCompleted && isBlocked && <Svg icon="cross" className={element('day-icon')} />}
+									</div>
+								);
+							})}
+						</div>
+						<Line vertical className={element('line')} />
+						<span className={element('duration')}>{getSeriesText(statistics)}</span>
+					</div>
+				</div>
+			</Link>
 			<button
 				type="button"
 				className={element('action-button', {completed: isCompletedToday})}
-				onClick={() => onQuickComplete(statistics.regularGoal, isCompletedToday)}
+				onClick={handleActionClick}
 				onMouseEnter={() => setHovered(true)}
 				onMouseLeave={() => setHovered(false)}
 				aria-label={isCompletedToday ? 'Отменить выполнение' : 'Быстро выполнить'}
