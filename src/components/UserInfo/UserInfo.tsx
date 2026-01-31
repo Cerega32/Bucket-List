@@ -26,10 +26,23 @@ interface UserInfoProps {
 	totalCompletedLists: number;
 	totalAddedLists: number;
 	totalAchievements: number;
+	subscriptionType?: 'free' | 'premium';
 }
 
 export const UserInfo: FC<UserInfoProps> = observer((props) => {
-	const {background, avatar, name, totalAdded, totalCompleted, page, id, totalAddedLists, totalCompletedLists, totalAchievements} = props;
+	const {
+		background,
+		avatar,
+		name,
+		totalAdded,
+		totalCompleted,
+		page,
+		id,
+		totalAddedLists,
+		totalCompletedLists,
+		totalAchievements,
+		subscriptionType,
+	} = props;
 	const [block, element] = useBem('user-info');
 	const [isAddingFriend, setIsAddingFriend] = useState(false);
 
@@ -99,10 +112,13 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 	}, [id, totalAchievements, totalAdded, totalAddedLists, totalCompleted, totalCompletedLists]);
 
 	return (
-		<article className={block()}>
-			{background && <div style={{backgroundImage: `url('${background}')`}} className={element('bg')} />}
+		<article className={block({noBackground: !background})}>
+			<div
+				style={background ? {backgroundImage: `url('${background}')`} : undefined}
+				className={element('bg', {placeholder: !background})}
+			/>
 			<section className={element('about')}>
-				<Avatar avatar={avatar} className={element('avatar')} size="large" />
+				<Avatar avatar={avatar} className={element('avatar')} size="large" isPremium={subscriptionType === 'premium'} />
 				<div className={element('wrapper')}>
 					<Title tag="h2" className={element('name')}>
 						{name}

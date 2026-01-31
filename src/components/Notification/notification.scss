@@ -1,56 +1,5 @@
 .notification {
-	display: flex;
-	align-items: flex-start;
-	gap: 10px;
 	width: 100%;
-	padding: 8px 16px;
-	background: var(--color-white);
 	border-radius: 8px;
-	box-shadow: 0 2px 10px rgb(var(--color-black-rbg) / 10%);
-
-	// &--type-success {
-	// 	border-left: 4px solid green;
-	// }
-
-	// &--type-error {
-	// 	border-left: 4px solid red;
-	// }
-
-	// &--type-warning {
-	// 	border-left: 4px solid orange;
-	// }
-
-	&__info {
-		&--type-success * {
-			fill: var(--color-sentiment-positive);
-		}
-
-		&--type-error * {
-			fill: var(--color-sentiment-negative);
-		}
-
-		&--type-warning * {
-			fill: var(--color-sentiment-warning);
-		}
-	}
-
-	&__title {
-		color: var(--color-text-primary);
-		font-size: 14px;
-		font-weight: var(--weight-medium);
-		line-height: var(--line-height-14);
-	}
-
-	&__content {
-		flex-grow: 1;
-
-		p {
-			margin: 0;
-			color: var(--color-text-secondary);
-		}
-	}
-
-	&__btn {
-		margin: 16px 0 8px;
-	}
+	box-shadow: 0 2px 10px rgb(var(--color-black-rgb) / 10%);
 }

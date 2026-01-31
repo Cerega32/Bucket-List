@@ -96,6 +96,28 @@
 		}
 	}
 
+	&--theme-gray {
+		background: var(--color-gray-9);
+		color: var(--color-text-primary);
+
+		&:hover,
+		&:active {
+			background: var(--color-gray-4);
+		}
+
+		&:focus {
+			@include focus-outline;
+		}
+
+		path {
+			fill: var(--color-text-primary);
+		}
+
+		#{$block}__ripple {
+			background-color: rgba(var(--color-text-primary-rgb) / 20%);
+		}
+	}
+
 	&--theme-blue-light {
 		background: var(--color-secondary);
 		color: var(--color-text-primary);
@@ -245,6 +267,10 @@
 		}
 	}
 
+	&--theme-no-active {
+		color: var(--color-text-primary);
+	}
+
 	&--theme-integrate {
 		width: min-content;
 		padding: 0;
@@ -264,10 +290,6 @@
 		}
 	}
 
-	&--width-auto {
-		width: auto;
-	}
-
 	&--size-small {
 		width: auto;
 		height: 32px;
@@ -275,9 +297,12 @@
 	}
 
 	&--size-medium {
-		width: 100%;
 		height: 40px;
 		padding: 10px 16px;
+	}
+
+	&--width-auto {
+		width: auto;
 	}
 
 	&--disabled {

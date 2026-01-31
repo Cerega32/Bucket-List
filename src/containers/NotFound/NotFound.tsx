@@ -14,7 +14,7 @@ export const NotFound: FC = observer(() => {
 			<Title tag="h1">404</Title>
 			<Title tag="h2">Такой страницы не существует</Title>
 			<p>Возможно страница была удалена или перемещена. Попробуйте обновить запрос</p>
-			<Button className={element('link')} href="/" type="Link" theme="blue" size="medium">
+			<Button className={element('link')} href="/" type="Link" theme="blue" size="medium" width="auto">
 				Вернуться на главную
 			</Button>
 		</main>

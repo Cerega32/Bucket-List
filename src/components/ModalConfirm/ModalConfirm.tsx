@@ -137,7 +137,7 @@ export const ModalConfirm: FC<ModalProps> = observer(
 							</div>
 						)}
 						<div className={element('btns-wrapper')}>
-							<Button className={element('btn')} onClick={onClose} type="button">
+							<Button theme="gray" className={element('btn')} onClick={onClose} type="button">
 								{textBtnCancel}
 							</Button>
 							<Button theme={themeBtn} className={element('btn')} onClick={handleBtnClick} type="button">

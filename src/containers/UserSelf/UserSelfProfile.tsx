@@ -1,5 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC} from 'react';
+import {Link} from 'react-router-dom';
 
 import {Avatar} from '@/components/Avatar/Avatar';
 import {Button} from '@/components/Button/Button';
@@ -19,16 +20,23 @@ export const UserSelfProfile: FC<UserSelfProfileProps> = observer(({hideSubscrip
 	const {userSelf} = UserStore;
 
 	const displayName = userSelf.name || userSelf.firstName || userSelf.username || 'Пользователь';
-	const userLevel = (userSelf as any).level || 0;
+	const userLevel = userSelf.level ?? 0;
 	const completedGoals = userSelf.totalCompletedGoals || 0;
 	const isPremium = userSelf.subscriptionType === 'premium';
 
 	return (
 		<div className={element('profile', {noBorder})}>
 			<div className={element('profile-header')}>
-				<Avatar avatar={userSelf.avatar} size="medium" className={element('profile-avatar')} />
+				<Avatar
+					avatar={userSelf.avatar}
+					size="medium"
+					className={element('profile-avatar')}
+					isPremium={userSelf.subscriptionType === 'premium'}
+				/>
 				<div className={element('profile-info')}>
-					<div className={element('profile-name')}>{displayName}</div>
+					<Link to={`/user/${userSelf?.id}/showcase/`} className={element('profile-name')}>
+						{displayName}
+					</Link>
 					<div className={element('profile-stats')}>
 						{pluralize(userLevel, ['уровень', 'уровня', 'уровней'])} · {pluralize(completedGoals, ['цель', 'цели', 'целей'])}{' '}
 						выполнено

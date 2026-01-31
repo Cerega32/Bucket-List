@@ -322,6 +322,15 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 			return;
 		}
 
+		if (isRegular && regularFrequency === 'custom' && !Object.values(customSchedule).some(Boolean)) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Выберите хотя бы один день недели для пользовательского графика',
+			});
+			return;
+		}
+
 		setIsLoading(true);
 
 		try {
@@ -475,20 +484,21 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 						<div className={element('image-section')}>
 							<p className={element('field-title')}>Изображение цели *</p>
 							{!image && !imageUrl ? (
-								<div className={element('dropzone')}>
+								<div
+									className={element('dropzone')}
+									onClick={handleFileInputClick}
+									role="button"
+									tabIndex={0}
+									aria-label="Добавить изображение"
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
+											handleFileInputClick();
+										}
+									}}
+								>
 									<FileDrop onDrop={(files) => files && onDrop(files)}>
-										<div
-											className={element('upload-placeholder')}
-											onClick={handleFileInputClick}
-											role="button"
-											tabIndex={0}
-											aria-label="Добавить изображение"
-											onKeyPress={(e) => {
-												if (e.key === 'Enter' || e.key === ' ') {
-													handleFileInputClick();
-												}
-											}}
-										>
+										<div className={element('upload-placeholder')}>
 											<input
 												type="file"
 												ref={fileInputRef}
@@ -641,7 +651,9 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 
 												{regularFrequency === 'custom' && (
 													<div className={element('custom-schedule-selector')}>
-														<p className={element('field-title')}>Выберите дни недели</p>
+														<p className={element('field-title')}>
+															Выберите дни недели (обязательно хотя бы один)
+														</p>
 														<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
 													</div>
 												)}

@@ -261,25 +261,6 @@
 		border-top: 1px solid var(--color-blue-section-border);
 	}
 
-	&__footer-info {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-	}
-
-	&__info-icon {
-		flex-shrink: 0;
-		width: 16px;
-		height: 16px;
-		color: var(--color-blue-section-title);
-	}
-
-	&__footer-text {
-		color: var(--color-blue-section-title);
-		font-size: 14px;
-		font-weight: var(--weight-medium);
-	}
-
 	&__loading {
 		display: flex;
 		flex-direction: column;

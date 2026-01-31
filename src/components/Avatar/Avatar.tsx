@@ -1,8 +1,6 @@
-import {observer} from 'mobx-react-lite';
 import {FC} from 'react';
 
 import {useBem} from '@/hooks/useBem';
-import {UserStore} from '@/store/UserStore';
 
 import {Svg} from '../Svg/Svg';
 
@@ -16,11 +14,8 @@ interface AvatarProps {
 	isPremium?: boolean;
 }
 
-export const Avatar: FC<AvatarProps> = observer((props) => {
-	const {className, avatar, size = 'small', noBorder = false, isPremium: isPremiumProp} = props;
-
-	const isPremiumFromStore = UserStore.userSelf?.subscriptionType === 'premium';
-	const isPremium = isPremiumProp ?? isPremiumFromStore;
+export const Avatar: FC<AvatarProps> = (props) => {
+	const {className, avatar, size = 'small', noBorder = false, isPremium = false} = props;
 
 	const [block, element] = useBem('avatar', className);
 
@@ -72,4 +67,4 @@ export const Avatar: FC<AvatarProps> = observer((props) => {
 			)}
 		</div>
 	);
-});
+};

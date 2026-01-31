@@ -9,6 +9,11 @@
 		height: 256px;
 		margin: -16px -16px 16px;
 		background-size: cover;
+
+		&--placeholder {
+			height: 70px;
+			background: var(--color-secondary);
+		}
 	}
 
 	&__about {

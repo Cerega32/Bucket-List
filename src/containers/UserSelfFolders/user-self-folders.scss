@@ -5,12 +5,4 @@
 	&__content {
 		width: 100%;
 	}
-
-	@media (width <= 1024px) {
-		padding: 24px;
-	}
-
-	@media (width <= 768px) {
-		padding: 16px;
-	}
 }

@@ -33,6 +33,7 @@
 
 	&__img-tags {
 		display: flex;
+		gap: 8px;
 		width: 100%;
 	}
 
@@ -60,6 +61,12 @@
 	}
 
 	&__title {
+		display: -webkit-box;
+		overflow: hidden;
+		overflow-wrap: anywhere;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		margin-bottom: 8px;
 	}
 
@@ -84,6 +91,12 @@
 			align-items: end;
 			height: auto;
 		}
+	}
+
+	&__img-tag-wrapper {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
 	}
 
 	&__buttons-wrapper {
@@ -203,7 +216,12 @@
 	}
 
 	&__title-regular {
+		display: -webkit-box;
 		margin-bottom: auto;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
 	}
 
 	&__series {
@@ -222,19 +240,26 @@
 		align-items: center;
 		gap: 6px;
 		color: var(--color-text);
-		font-size: 13px;
-		font-weight: 500;
+		font-size: 14px;
+		font-weight: var(--weight-medium);
 	}
 
 	&__series-icon {
 		width: 16px;
 		height: 16px;
+
+		&--progress {
+			svg,
+			path {
+				fill: var(--color-primary);
+			}
+		}
 	}
 
 	&__series-value {
 		color: var(--color-text);
-		font-size: 13px;
-		font-weight: 500;
+		font-size: 14px;
+		font-weight: var(--weight-medium);
 	}
 
 	&__series-days {
@@ -272,6 +297,26 @@
 		&--completed {
 			background: var(--color-sentiment-positive);
 			border-color: transparent;
+		}
+
+		&--blocked {
+			background: var(--color-white);
+			border-color: var(--color-border);
+		}
+
+		// Если день одновременно выбран (текущий) и заблокирован — рамка должна оставаться синей
+		&--selected#{&}--blocked {
+			border-color: var(--color-primary);
+		}
+	}
+
+	&__series-day-icon {
+		width: 14px;
+		height: 14px;
+
+		svg,
+		path {
+			fill: var(--color-gray-1);
 		}
 	}
 

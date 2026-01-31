@@ -64,6 +64,10 @@
 				background-color: var(--color-white);
 				border: 1px solid var(--color-gray-9);
 				border-radius: 8px;
+
+				@include xs {
+					width: calc(100% - 30px);
+				}
 			}
 		}
 	}

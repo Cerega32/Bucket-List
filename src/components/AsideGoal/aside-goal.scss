@@ -59,6 +59,7 @@
 
 		&--active {
 			color: var(--color-text-primary);
+			font-weight: var(--weight-semi-bold);
 		}
 	}
 
@@ -66,6 +67,13 @@
 		flex-shrink: 0;
 		width: 20px;
 		height: 20px;
+
+		&--progress {
+			svg,
+			path {
+				fill: var(--color-primary);
+			}
+		}
 	}
 
 	&__regular-info-text {
@@ -112,9 +120,9 @@
 		width: 100%;
 		margin-bottom: 8px;
 
-		&:has(+ :not(#{$block}__btn)) {
-			margin-bottom: 0;
-		}
+		// &:has(+ :not(#{$block}__btn)) {
+		// 	margin-bottom: 0;
+		// }
 
 		&:last-child {
 			margin-bottom: 0;
@@ -204,7 +212,18 @@
 		}
 
 		&--blocked {
-			background: rgb(var(--color-white));
+			background: var(--color-white);
+
+			#{$block}__regular-series-day-icon {
+				svg {
+					fill: var(--color-gray-1);
+				}
+			}
+		}
+
+		// Если день одновременно выбран (текущий) и заблокирован — рамка должна оставаться синей
+		&--selected#{&}--blocked {
+			border-color: var(--color-primary);
 		}
 	}
 
@@ -298,39 +317,9 @@
 	}
 
 	&__progress-section {
-		padding: 16px;
-		margin-bottom: 16px;
-		background: var(--color-gray-11);
-		border: 1px solid var(--color-border);
-		border-radius: 12px;
-	}
-
-	&__progress-header {
 		display: flex;
-		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 12px;
-	}
-
-	&__progress-label {
-		color: var(--color-text-primary);
-		font-size: 14px;
-		font-weight: var(--weight-medium);
-	}
-
-	&__progress-value {
-		color: var(--color-primary);
-		font-size: 16px;
-		font-weight: var(--weight-semi-bold);
-	}
-
-	&__progress-bar {
-		margin-bottom: 12px;
-		transition: all 0.2s ease;
-
-		&:hover {
-			transform: translateY(-1px);
-			box-shadow: 0 2px 8px rgb(var(--color-primary-rgb) / 20%);
-		}
+		gap: 16px;
+		margin-bottom: 16px;
 	}
 }

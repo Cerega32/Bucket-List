@@ -102,7 +102,7 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 
 	useEffect(() => {
 		loadRuleOptions();
-	}, [loadRuleOptions]);
+	}, []);
 
 	const resetForm = () => {
 		setFormData({
@@ -325,7 +325,7 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 		<div className={block()}>
 			<div className={element('header')}>
 				<h3>Правила папки &quot;{folder.name}&quot;</h3>
-				<Button theme="blue" icon="plus" onClick={() => setIsCreating(true)} size="medium">
+				<Button theme="blue" icon="plus" width="auto" onClick={() => setIsCreating(true)} size="medium">
 					Добавить правило
 				</Button>
 			</div>

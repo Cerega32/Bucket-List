@@ -47,11 +47,6 @@ export const FriendsRequests: FC = observer(() => {
 
 	return (
 		<section className={block()}>
-			<div className={element('header')}>
-				<h1 className={element('title')}>Заявки в друзья ({FriendsStore.pendingRequestsCount})</h1>
-				<p className={element('subtitle')}>Принимайте или отклоняйте входящие заявки в друзья</p>
-			</div>
-
 			{FriendsStore.isEmptyRequests ? (
 				<EmptyState
 					title="Нет новых заявок"

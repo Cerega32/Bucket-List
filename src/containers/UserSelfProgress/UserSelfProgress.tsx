@@ -1,21 +1,78 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
-import {Link} from 'react-router-dom';
+import {FC, useEffect, useMemo, useState} from 'react';
+import {useLocation} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
+import {RegularCard} from '@/components/Card/RegularCard';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
+import {FieldInput} from '@/components/FieldInput/FieldInput';
+import {FiltersCheckbox} from '@/components/FiltersCheckbox/FiltersCheckbox';
+import {Line} from '@/components/Line/Line';
 import {Loader} from '@/components/Loader/Loader';
-import {Progress} from '@/components/Progress/Progress';
+import Select, {OptionSelect} from '@/components/Select/Select';
+import {Switch} from '@/components/Switch/Switch';
+import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {getGoalsInProgress, IGoalProgress, updateGoalProgress} from '@/utils/api/goals';
 
+import '@/components/CatalogItems/catalog-items.scss';
 import './user-self-progress.scss';
+
+const SORT_OPTIONS: OptionSelect[] = [
+	{name: 'По прогрессу (убыв.)', value: 'progress_desc'},
+	{name: 'По прогрессу (возр.)', value: 'progress_asc'},
+	{name: 'По названию', value: 'title_asc'},
+	{name: 'По дате обновления', value: 'last_updated_desc'},
+];
 
 export const UserSelfProgress: FC = observer(() => {
 	const [block, element] = useBem('user-self-progress');
+	const location = useLocation();
+	const activeTab = (location.hash === '#all' ? 'all' : 'today') as 'today' | 'all';
+
 	const [goals, setGoals] = useState<IGoalProgress[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [search, setSearch] = useState('');
+	const [activeSort, setActiveSort] = useState(0);
+	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+	const categoryFilters = useMemo(() => {
+		const map = new Map<string, string>();
+		goals.forEach((g) => {
+			if (g.goalCategory && !map.has(g.goalCategory)) map.set(g.goalCategory, g.goalCategory);
+		});
+		return Array.from(map.values()).map((name) => ({name, code: name}));
+	}, [goals]);
+
+	const filteredGoals = useMemo(() => {
+		let result = [...goals];
+		if (activeTab === 'today') {
+			result = result.filter((g) => g.isWorkingToday);
+		}
+		if (search.trim()) {
+			const q = search.trim().toLowerCase();
+			result = result.filter((g) => g.goalTitle.toLowerCase().includes(q));
+		}
+		if (selectedCategories.length > 0) {
+			result = result.filter((g) => selectedCategories.includes(g.goalCategory));
+		}
+		const sortKey = SORT_OPTIONS[activeSort]?.value;
+		if (sortKey === 'progress_desc') {
+			result.sort((a, b) => b.progressPercentage - a.progressPercentage);
+		} else if (sortKey === 'progress_asc') {
+			result.sort((a, b) => a.progressPercentage - b.progressPercentage);
+		} else if (sortKey === 'title_asc') {
+			result.sort((a, b) => a.goalTitle.localeCompare(b.goalTitle));
+		} else if (sortKey === 'last_updated_desc') {
+			result.sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''));
+		}
+		return result;
+	}, [goals, activeTab, search, selectedCategories, activeSort]);
+
+	const handleSearchChange = (value: string) => setSearch(value);
+	const handleCategoryFilter = (selected: string[]) => setSelectedCategories(selected);
+	const handleSortSelect = (index: number) => setActiveSort(index);
 
 	const {setIsOpen, setWindow, setModalProps} = ModalStore;
 
@@ -61,9 +118,24 @@ export const UserSelfProgress: FC = observer(() => {
 		});
 	};
 
+	const markToday = async (goal: IGoalProgress) => {
+		try {
+			const updateResponse = await updateGoalProgress(goal.goal, {
+				progress_percentage: goal.progressPercentage,
+				daily_notes: goal.dailyNotes || '',
+				is_working_today: !goal.isWorkingToday,
+			});
+
+			if (updateResponse.success && updateResponse.data) {
+				setGoals(goals.map((g) => (g.id === goal.id ? updateResponse.data! : g)));
+			}
+		} catch (error) {
+			console.error('Ошибка отметки «работаю сегодня»:', error);
+		}
+	};
+
 	const markGoalCompleted = async (goal: IGoalProgress) => {
 		try {
-			// Сначала обновляем прогресс до 100%
 			const updateResponse = await updateGoalProgress(goal.goal, {
 				progress_percentage: 100,
 				daily_notes: goal.dailyNotes || '',
@@ -71,41 +143,56 @@ export const UserSelfProgress: FC = observer(() => {
 			});
 
 			if (updateResponse.success) {
-				// Удаляем цель из списка в процессе выполнения
 				setGoals(goals.filter((g) => g.id !== goal.id));
-				// Прогресс заданий обновляется автоматически на бэкенде
 			}
 		} catch (error) {
 			console.error('Ошибка отметки цели как выполненной:', error);
 		}
 	};
 
-	const getProgressColor = (percentage: number) => {
-		if (percentage === 0) return 'var(--color-primary)';
-		if (percentage < 25) return 'var(--color-red-1)';
-		if (percentage < 50) return 'var(--color-orange)';
-		if (percentage < 75) return 'var(--color-yellow)';
-		return 'var(--color-green-1)';
-	};
-
-	const getProgressStatus = (percentage: number) => {
-		if (percentage === 0) return 'Начали выполнение';
-		if (percentage < 25) return 'Только начали';
-		if (percentage < 50) return 'В процессе';
-		if (percentage < 75) return 'Хороший прогресс';
-		return 'Почти готово';
-	};
-
 	if (isLoading) {
 		return <Loader isLoading />;
 	}
 
+	const todayCount = goals.filter((g) => g.isWorkingToday).length;
+	const buttonsSwitch = [
+		{url: '#today', name: 'Работаю сегодня', page: 'today' as const, count: todayCount},
+		{url: '#all', name: 'Все цели', page: 'all' as const, count: goals.length},
+	];
+
 	return (
 		<section className={block()}>
+			<div className={element('header')}>
+				<Title tag="h2" className={element('title')}>
+					Прогресс целей
+				</Title>
+			</div>
 			<div className={element('content')}>
-				<div className={element('header')}>
-					<h1 className={element('title')}>Прогресс целей</h1>
-					<p className={element('description')}>Здесь отображаются ваши цели, которые находятся в процессе выполнения</p>
+				<div className="catalog-items__filters">
+					<Switch className="catalog-items__switch" buttons={buttonsSwitch} active={activeTab} />
+					<Line className="catalog-items__line" />
+					<div className="catalog-items__search-wrapper catalog-items__search-wrapper--wrap-on-lg">
+						<FieldInput
+							className="catalog-items__search"
+							placeholder="Поиск по названию цели"
+							id="user-self-progress-search"
+							value={search}
+							setValue={handleSearchChange}
+							iconBegin="search"
+						/>
+						<div className="catalog-items__categories-wrapper">
+							{categoryFilters.length > 0 && (
+								<FiltersCheckbox
+									head={{name: 'Все категории', code: 'all'}}
+									items={categoryFilters}
+									onFinish={handleCategoryFilter}
+									multipleSelectedText={['категория', 'категории', 'категорий']}
+									multipleThreshold={1}
+								/>
+							)}
+							<Select options={SORT_OPTIONS} activeOption={activeSort} onSelect={handleSortSelect} filter />
+						</div>
+					</div>
 				</div>
 
 				{goals.length === 0 ? (
@@ -114,101 +201,23 @@ export const UserSelfProgress: FC = observer(() => {
 							Перейти к активным целям
 						</Button>
 					</EmptyState>
+				) : filteredGoals.length === 0 ? (
+					<EmptyState
+						title={activeTab === 'today' ? 'Нет целей «работаю сегодня»' : 'Нет целей по фильтрам'}
+						description="Измените фильтры или поиск"
+					/>
 				) : (
-					<div className={element('goals')}>
-						{goals.map((goal) => (
-							<div key={goal.id} className={element('goal-card')}>
-								<div className={element('goal-header')}>
-									{goal.goalImage && <img src={goal.goalImage} alt={goal.goalTitle} className={element('goal-image')} />}
-									<div className={element('goal-info')}>
-										<h3 className={element('goal-title')}>
-											<Link to={`/goals/${goal.goalCode}`} className={element('goal-link')}>
-												{goal.goalTitle}
-											</Link>
-										</h3>
-										<span className={element('goal-category')}>
-											{goal.goalCategory} ({goal.goalCategoryNameEn})
-										</span>
-									</div>
-								</div>
-
-								<div className={element('progress-section')}>
-									<div className={element('progress-header')}>
-										<span className={element('progress-label')}>{getProgressStatus(goal.progressPercentage)}</span>
-										<span
-											className={element('progress-value')}
-											style={{color: getProgressColor(goal.progressPercentage)}}
-										>
-											{goal.progressPercentage}%
-										</span>
-									</div>
-									<button
-										type="button"
-										className={element('progress-wrapper')}
-										onClick={() => openProgressModal(goal)}
-										style={
-											{
-												cursor: 'pointer',
-												border: 'none',
-												background: 'transparent',
-												padding: 0,
-												width: '100%',
-												'--progress-color': getProgressColor(goal.progressPercentage),
-											} as React.CSSProperties
-										}
-										aria-label="Изменить прогресс"
-									>
-										<Progress done={goal.progressPercentage} all={100} goal className={element('progress-bar')} />
-									</button>
-								</div>
-
-								{goal.dailyNotes && (
-									<div className={element('notes')}>
-										<p className={element('notes-text')}>{goal.dailyNotes}</p>
-									</div>
-								)}
-
-								<div className={element('goal-meta')}>
-									<span className={element('last-updated')}>
-										Обновлено: {new Date(goal.lastUpdated).toLocaleDateString('ru-RU')}
-									</span>
-									{goal.isWorkingToday && <span className={element('working-badge')}>Работаю сегодня</span>}
-								</div>
-
-								<div className={element('goal-actions')}>
-									<Button theme="blue-light" onClick={() => openProgressModal(goal)} icon="trending-up" size="small">
-										Изменить прогресс
-									</Button>
-									<Button theme="green" onClick={() => markGoalCompleted(goal)} icon="check" size="small">
-										Отметить выполненной
-									</Button>
-								</div>
-
-								{goal.recentEntries && goal.recentEntries.length > 0 && (
-									<div className={element('recent-activity')}>
-										<h4 className={element('activity-title')}>Последние изменения</h4>
-										<div className={element('activity-list')}>
-											{goal.recentEntries.map((entry) => (
-												<div key={entry.id} className={element('activity-item')}>
-													<span className={element('activity-date')}>
-														{new Date(entry.date).toLocaleDateString('ru-RU')}
-													</span>
-													<span
-														className={element('activity-change', {
-															positive: entry.percentageChange > 0,
-															negative: entry.percentageChange < 0,
-														})}
-													>
-														{entry.percentageChange > 0 ? '+' : ''}
-														{entry.percentageChange}%
-													</span>
-													{entry.notes && <span className={element('activity-notes')}>{entry.notes}</span>}
-												</div>
-											))}
-										</div>
-									</div>
-								)}
-							</div>
+					<div className={element('goals-grid')} id="user-self-progress-goals">
+						{filteredGoals.map((goal) => (
+							<RegularCard
+								key={goal.id}
+								variant="progress"
+								progressGoal={goal}
+								onOpenProgressModal={() => openProgressModal(goal)}
+								onMarkToday={() => markToday(goal)}
+								onMarkCompleted={() => markGoalCompleted(goal)}
+								className="catalog-items__goal catalog-items__goal--full"
+							/>
 						))}
 					</div>
 				)}

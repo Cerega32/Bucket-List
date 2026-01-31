@@ -3,6 +3,7 @@ import {FileDrop} from 'react-file-drop';
 import {useLocation, useNavigate} from 'react-router-dom';
 
 import {AddGoal} from '@/components/AddGoal/AddGoal';
+import {Alert} from '@/components/Alert/Alert';
 import {Button} from '@/components/Button/Button';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
@@ -441,6 +442,14 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					if (goal.estimatedTime) baseData.estimatedTime = goal.estimatedTime;
 					if (goal.deadline) baseData.deadline = goal.deadline;
 					if (goal.complexity) baseData.complexity = goal.complexity;
+					// Если у цели теперь нет изображения — сбрасываем старое из autoParserData
+					if (!goal.image) {
+						baseData.imageUrl = null;
+						// если ранее использовали поле для файла — убираем его
+						if ('imageField' in baseData) {
+							delete baseData.imageField;
+						}
+					}
 
 					return baseData;
 				});
@@ -780,20 +789,21 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					<div className={element('image-section')}>
 						<p className={element('field-title')}>Изображение списка *</p>
 						{!image ? (
-							<div className={element('dropzone')}>
+							<div
+								className={element('dropzone')}
+								onClick={handleFileInputClick}
+								role="button"
+								tabIndex={0}
+								aria-label="Добавить изображение"
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault();
+										handleFileInputClick();
+									}
+								}}
+							>
 								<FileDrop onDrop={(files) => files && onDrop(files)}>
-									<div
-										className={element('upload-placeholder')}
-										onClick={handleFileInputClick}
-										role="button"
-										tabIndex={0}
-										aria-label="Добавить изображение"
-										onKeyPress={(e) => {
-											if (e.key === 'Enter' || e.key === ' ') {
-												handleFileInputClick();
-											}
-										}}
-									>
+									<div className={element('upload-placeholder')}>
 										<input
 											type="file"
 											ref={fileInputRef}
@@ -936,18 +946,17 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 								{showAutoSection && (
 									<div className={element('auto-add-content')}>
 										<div className={element('auto-info')}>
-											<Svg icon="info" className={element('auto-info-icon')} />
-											<p className={element('auto-info-text')}>
-												Вставьте список целей (книги, фильмы, игры) — система автоматически найдет соответствия и
-												добавит их к уже выбранным целям.
-											</p>
+											<Alert
+												type="info"
+												message="Вставьте список целей (книги, фильмы, игры) — система автоматически найдет соответствия и добавит их к уже выбранным целям."
+											/>
 										</div>
 										{!(activeCategory === null) && (
 											<div className={element('error-info')}>
-												<Svg icon="info" className={element('error-info-icon')} />
-												<p className={element('error-info-text')}>
-													Для автоматического добавления целей из списка необходимо выбрать категорию списка.
-												</p>
+												<Alert
+													type="warning"
+													message="Для автоматического добавления целей из списка необходимо выбрать категорию списка."
+												/>
 											</div>
 										)}
 										<FieldInput
