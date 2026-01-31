@@ -130,36 +130,36 @@ export const Modal: FC<ModalProps> = observer((props) => {
 	};
 
 	useEffect(() => {
-		if (isOpen) {
-			document.addEventListener('keyup', handleKeyUp);
-			document.addEventListener('keydown', handleTabKey);
+		if (!isOpen) return;
 
-			// Устанавливаем начальный фокус на первый элемент
-			setTimeout(() => {
-				if (modalRef.current) {
-					const focusableElements = modalRef.current.querySelectorAll(
-						'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-					);
-					if (focusableElements.length > 0) {
-						(focusableElements[0] as HTMLElement).focus();
-					} else if (closeButtonRef.current) {
-						closeButtonRef.current.focus();
-					}
+		document.addEventListener('keyup', handleKeyUp);
+		document.addEventListener('keydown', handleTabKey);
+
+		// Устанавливаем начальный фокус на первый элемент
+		setTimeout(() => {
+			if (modalRef.current) {
+				const focusableElements = modalRef.current.querySelectorAll(
+					'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+				);
+				if (focusableElements.length > 0) {
+					(focusableElements[0] as HTMLElement).focus();
+				} else if (closeButtonRef.current) {
+					closeButtonRef.current.focus();
 				}
-			}, 50);
+			}
+		}, 50);
 
-			// Блокируем прокрутку через отмену событий — скроллбар не скрываем, контент не дёргается
-			const passive = false;
-			document.addEventListener('wheel', preventScroll, {passive});
-			document.addEventListener('touchmove', preventScroll, {passive});
+		// Блокируем прокрутку через отмену событий — скроллбар не скрываем, контент не дёргается
+		const passive = false;
+		document.addEventListener('wheel', preventScroll, {passive});
+		document.addEventListener('touchmove', preventScroll, {passive});
 
-			return () => {
-				document.removeEventListener('keyup', handleKeyUp);
-				document.removeEventListener('keydown', handleTabKey);
-				document.removeEventListener('wheel', preventScroll);
-				document.removeEventListener('touchmove', preventScroll);
-			};
-		}
+		return () => {
+			document.removeEventListener('keyup', handleKeyUp);
+			document.removeEventListener('keydown', handleTabKey);
+			document.removeEventListener('wheel', preventScroll);
+			document.removeEventListener('touchmove', preventScroll);
+		};
 	}, [isOpen]);
 
 	// Определяем нужен ли скролл для текущего типа окна

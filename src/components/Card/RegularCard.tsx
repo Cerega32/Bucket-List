@@ -37,7 +37,7 @@ interface RegularCardPropsProgress extends RegularCardPropsBase {
 	progressGoal: IGoalProgress;
 	onOpenProgressModal: () => void;
 	onMarkToday: () => void;
-	// onMarkCompleted: () => void;
+	onMarkCompleted?: () => void | Promise<void>;
 	regularGoal?: never;
 	statistics?: never;
 	onMarkRegular?: never;
