@@ -2029,80 +2029,109 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						Удалить
 					</Button>
 				)}
-				{isList && isAdded && !isCompleted && (
-					<Button
-						theme="blue"
-						onClick={openMarkAll}
-						icon="done"
-						className={element('btn')}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
-						Выполнить все цели
-					</Button>
-				)}
-				{((location && !isList) || (isList && !!location?.length)) && (
-					<Button
-						theme="blue-light"
-						icon="map"
-						onClick={openMapModal}
-						className={element('btn')}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
-						Открыть карту
-					</Button>
-				)}
-
-				{!isAdded && !isList && (
-					<Button
-						onClick={handleAddGoal}
-						icon="plus"
-						className={element('btn')}
-						theme="blue"
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-						disabled={isAddingRegularGoal}
-					>
-						{isAddingRegularGoal ? 'Добавление...' : 'Добавить к себе'}
-					</Button>
-				)}
-				{!isList && isCompleted && (
-					<Button
-						theme="blue-light"
-						onClick={openAddReview}
-						icon="comment"
-						className={element('btn')}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
-						Написать отзыв
-					</Button>
-				)}
-				{isAdded && !regularConfig && isList && (
-					<Button
-						theme="blue-light"
-						onClick={deleteGoal}
-						icon="trash"
-						className={element('btn')}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
-						Удалить
-					</Button>
-				)}
-				{canEdit && (
-					<Button
-						theme="blue-light"
-						onClick={editGoal}
-						icon="edit"
-						className={element('btn')}
-						type={editGoal ? 'button' : 'Link'}
-						href={editGoal ? undefined : `/edit-list/${code}`}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
-						Редактировать
-					</Button>
-				)}
+				{/* Кнопки для списков */}
 				{isList && (
-					<Button theme="blue-light" className={element('btn')} onClick={handleRandomPick} icon="magic">
-						Случайная цель
-					</Button>
+					<>
+						{!isAdded && (
+							<Button
+								onClick={() => updateGoal(code, 'add')}
+								icon="plus"
+								className={element('btn')}
+								theme="blue"
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								Добавить к себе
+							</Button>
+						)}
+						{isAdded && !isCompleted && (
+							<Button
+								theme="blue"
+								onClick={openMarkAll}
+								icon="done"
+								className={element('btn')}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								Выполнить все цели
+							</Button>
+						)}
+						{isAdded && (
+							<Button
+								theme="blue-light"
+								onClick={deleteGoal}
+								icon="trash"
+								className={element('btn')}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								Удалить
+							</Button>
+						)}
+						{canEdit && (
+							<Button
+								theme="blue-light"
+								onClick={editGoal}
+								icon="edit"
+								className={element('btn')}
+								type={editGoal ? 'button' : 'Link'}
+								href={editGoal ? undefined : `/edit-list/${code}`}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								Редактировать
+							</Button>
+						)}
+						{!!location?.length && (
+							<Button
+								theme="blue-light"
+								icon="map"
+								onClick={openMapModal}
+								className={element('btn')}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								Открыть карту
+							</Button>
+						)}
+						<Button theme="blue-light" className={element('btn')} onClick={handleRandomPick} icon="magic">
+							Случайная цель
+						</Button>
+					</>
+				)}
+				{/* Кнопки для одиночных целей */}
+				{!isList && (
+					<>
+						{location && (
+							<Button
+								theme="blue-light"
+								icon="map"
+								onClick={openMapModal}
+								className={element('btn')}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								Открыть карту
+							</Button>
+						)}
+						{!isAdded && (
+							<Button
+								onClick={handleAddGoal}
+								icon="plus"
+								className={element('btn')}
+								theme="blue"
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+								disabled={isAddingRegularGoal}
+							>
+								{isAddingRegularGoal ? 'Добавление...' : 'Добавить к себе'}
+							</Button>
+						)}
+						{isCompleted && (
+							<Button
+								theme="blue-light"
+								onClick={openAddReview}
+								icon="comment"
+								className={element('btn')}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								Написать отзыв
+							</Button>
+						)}
+					</>
 				)}
 
 				{!isList && !regularConfig && (
