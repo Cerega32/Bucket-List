@@ -1,14 +1,14 @@
-import { FC, FormEvent, useState } from 'react';
+import {FC, FormEvent, useState} from 'react';
 
-import { Button } from '@/components/Button/Button';
-import { FieldInput } from '@/components/FieldInput/FieldInput';
-import { Svg } from '@/components/Svg/Svg';
-import { useBem } from '@/hooks/useBem';
-import { postLogin } from '@/utils/api/post/postLogin';
+import {Button} from '@/components/Button/Button';
+import {FieldInput} from '@/components/FieldInput/FieldInput';
+import {Svg} from '@/components/Svg/Svg';
+import {useBem} from '@/hooks/useBem';
+import {postLogin} from '@/utils/api/post/postLogin';
 import './login.scss';
 
-import { FieldCheckbox } from '../FieldCheckbox/FieldCheckbox';
-import { Title } from '../Title/Title';
+import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
+import {Title} from '../Title/Title';
 
 interface LoginProps {
 	className?: string;
