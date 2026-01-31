@@ -96,6 +96,28 @@
 		}
 	}
 
+	&--theme-gray {
+		background: var(--color-gray-9);
+		color: var(--color-text-primary);
+
+		&:hover,
+		&:active {
+			background: var(--color-gray-4);
+		}
+
+		&:focus {
+			@include focus-outline;
+		}
+
+		path {
+			fill: var(--color-text-primary);
+		}
+
+		#{$block}__ripple {
+			background-color: rgba(var(--color-text-primary-rgb) / 20%);
+		}
+	}
+
 	&--theme-blue-light {
 		background: var(--color-secondary);
 		color: var(--color-text-primary);

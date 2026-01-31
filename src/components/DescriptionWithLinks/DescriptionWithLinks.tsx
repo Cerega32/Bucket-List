@@ -90,6 +90,15 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 			},
 		];
 
+		// Вкладка "История прогресса выполнения" — для целей с прогрессом (не регулярных),
+		if (goal.addedByUser && !goal.regularConfig) {
+			baseTabs.push({
+				url: '/progress-history',
+				name: 'История прогресса выполнения',
+				page: 'isGoalProgressHistory',
+			});
+		}
+
 		// Добавляем вкладку "История выполнения" только если цель регулярная,
 		// добавлена пользователем и у неё есть статистика (цель начата)
 		// История может быть пустой, но вкладка должна быть доступна для просмотра

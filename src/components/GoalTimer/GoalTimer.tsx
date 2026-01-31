@@ -226,8 +226,9 @@ export const GoalTimer: React.FC<GoalTimerProps> = ({goalCode, timer: initialTim
 							onClick={isLoading ? () => {} : () => setIsSettingTimer(true)}
 							theme="blue-light"
 							className={element('set-button')}
+							icon="stopwatch"
 						>
-							Установить срок выполнения
+							Установить срок
 						</Button>
 					)}
 				</div>

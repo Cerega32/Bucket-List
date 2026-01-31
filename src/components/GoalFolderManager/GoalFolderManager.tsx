@@ -40,6 +40,17 @@ interface GoalFolderManagerProps {
 
 // const FOLDER_COLORS = ['#3A89D8', '#7C3AED', '#10B981', '#F59E0B', '#EF4444', '#0EA5E9', '#8B5CF6', '#14B8A6', '#F97316'];
 
+const filterItems = [
+	{
+		name: 'Публичные',
+		code: 'public',
+	},
+	{
+		name: 'Приватные',
+		code: 'private',
+	},
+];
+
 export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({className}) => {
 	const [block, element] = useBem('goal-folder-manager', className);
 	const navigate = useNavigate();
@@ -128,17 +139,6 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 			return 0;
 		});
 
-	const filterItems = [
-		{
-			name: 'Публичные',
-			code: 'public',
-		},
-		{
-			name: 'Приватные',
-			code: 'private',
-		},
-	];
-
 	const handleSearchChange = (value: string) => {
 		setSearch(value);
 	};
@@ -173,7 +173,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 
 	useEffect(() => {
 		loadFolders();
-	}, [loadFolders]);
+	}, []);
 
 	useEffect(() => {
 		if (!folders.length) return;
@@ -185,7 +185,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 				loadFolderGoals(found.id);
 			}
 		}
-	}, [folders, folderId, loadFolderGoals]);
+	}, [folders, folderId]);
 
 	const handleCreateFolder = async () => {
 		if (!formData.name.trim()) return;

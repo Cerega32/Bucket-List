@@ -10,7 +10,7 @@ import {FriendsStore} from '@/store/FriendsStore';
 import {UserStore} from '@/store/UserStore';
 import {IPage} from '@/typings/page';
 import {getUser} from '@/utils/api/get/getUser';
-import {getGoalFoldersLight, getRegularGoalStatistics} from '@/utils/api/goals';
+import {getGoalFoldersLight, getGoalsInProgress, getRegularGoalStatistics} from '@/utils/api/goals';
 
 import {UserSelfProfile} from './UserSelfProfile';
 import {UserSelfAchievements} from '../UserSelfAchievements/UserSelfAchievements';
@@ -37,6 +37,7 @@ type RegularStatsResponse =
 export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 	const [block, element] = useBem('user-self');
 	const [regularGoalsCount, setRegularGoalsCount] = useState(0);
+	const [progressGoalsCount, setProgressGoalsCount] = useState(0);
 	const [foldersCount, setFoldersCount] = useState(0);
 
 	useEffect(() => {
@@ -44,7 +45,11 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			await getUser();
 
 			try {
-				const [regularRes, foldersRes] = await Promise.all([getRegularGoalStatistics(), getGoalFoldersLight()]);
+				const [regularRes, progressRes, foldersRes] = await Promise.all([
+					getRegularGoalStatistics(),
+					getGoalsInProgress(),
+					getGoalFoldersLight(),
+				]);
 
 				if (regularRes.success && regularRes.data) {
 					const data = regularRes.data as RegularStatsResponse;
@@ -54,6 +59,10 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 					} else {
 						setRegularGoalsCount(data.pagination.totalItems);
 					}
+				}
+
+				if (progressRes.success && progressRes.data) {
+					setProgressGoalsCount(progressRes.data.length);
 				}
 
 				if (foldersRes.success && foldersRes.data) {
@@ -122,6 +131,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			url: '/user/self/progress',
 			name: 'Прогресс целей',
 			page: 'isUserSelfProgress',
+			count: progressGoalsCount,
 		},
 		{
 			url: '/user/self/regular',

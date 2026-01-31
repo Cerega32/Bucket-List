@@ -91,6 +91,7 @@ export const RoutesAuth: FC = observer(() => {
 				<Route path="/categories/:id/lists" element={<PageCategory page="isCategories" subPage="lists" />} />
 				<Route path="/categories/:categories/:id/lists" element={<PageCategory page="isSubCategories" subPage="lists" />} />
 				<Route path="/goals/:id/history" element={<PageDetailGoal page="isGoalHistory" />} />
+				<Route path="/goals/:id/progress-history" element={<PageDetailGoal page="isGoalProgressHistory" />} />
 				<Route path="/goals/:id/rating" element={<PageDetailGoal page="isGoalRating" />} />
 				<Route path="/goals/:id/lists" element={<PageDetailGoal page="isGoalLists" />} />
 				<Route path="/goals/:id" element={<PageDetailGoal page="isGoal" />} />

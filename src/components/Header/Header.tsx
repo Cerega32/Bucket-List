@@ -12,6 +12,7 @@ import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {CategoriesStore} from '@/store/CategoriesStore';
 import {HeaderNotificationsStore} from '@/store/HeaderNotificationsStore';
+import {HeaderProgressGoalsStore} from '@/store/HeaderProgressGoalsStore';
 import {HeaderRegularGoalsStore} from '@/store/HeaderRegularGoalsStore';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
@@ -41,6 +42,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const {isAuth, name, avatar, setAvatar, setIsAuth, setName, userSelf} = UserStore;
 	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 	const [isRegularGoalsOpen, setIsRegularGoalsOpen] = useState(false);
+	const [isProgressOpen, setIsProgressOpen] = useState(false);
 	const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
 	const [hoveredParentId, setHoveredParentId] = useState<number | null>(null);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -66,6 +68,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const profileMenuRef = useRef<HTMLDivElement>(null);
 	const notificationsRef = useRef<HTMLDivElement>(null);
 	const regularGoalsRef = useRef<HTMLButtonElement>(null);
+	const progressRef = useRef<HTMLDivElement>(null);
 	const categoriesRef = useRef<HTMLLIElement>(null);
 
 	const openLogin = () => {
@@ -91,6 +94,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		setName('');
 		HeaderNotificationsStore.clearNotifications();
 		HeaderRegularGoalsStore.clear();
+		HeaderProgressGoalsStore.clear();
 		navigate('/');
 	};
 
@@ -102,6 +106,11 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const toggleRegularGoals = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		setIsRegularGoalsOpen(!isRegularGoalsOpen);
+	};
+
+	const toggleProgress = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		setIsProgressOpen(!isProgressOpen);
 	};
 
 	// Обработчик клика вне элементов для закрытия меню
@@ -131,6 +140,11 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		// Закрытие регулярных целей
 		if (regularGoalsRef.current && !regularGoalsRef.current.contains(target)) {
 			setIsRegularGoalsOpen(false);
+		}
+
+		// Закрытие всплывашки прогресса
+		if (progressRef.current && !progressRef.current.contains(target)) {
+			setIsProgressOpen(false);
 		}
 	}, []);
 
@@ -165,9 +179,18 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		}
 	}, [isAuth]);
 
+	// Загрузка целей в процессе для бейджа прогресса
+	useEffect(() => {
+		if (isAuth) {
+			HeaderProgressGoalsStore.loadGoalsInProgress();
+		} else {
+			HeaderProgressGoalsStore.clear();
+		}
+	}, [isAuth]);
+
 	// Добавляем обработчик клика вне элементов
 	useEffect(() => {
-		if (isMenuOpen || isCategoriesOpen || isNotificationsOpen || isRegularGoalsOpen) {
+		if (isMenuOpen || isCategoriesOpen || isNotificationsOpen || isRegularGoalsOpen || isProgressOpen) {
 			document.addEventListener('mousedown', handleClickOutside);
 		} else {
 			document.removeEventListener('mousedown', handleClickOutside);
@@ -176,7 +199,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
-	}, [isMenuOpen, isCategoriesOpen, isNotificationsOpen, isRegularGoalsOpen, handleClickOutside]);
+	}, [isMenuOpen, isCategoriesOpen, isNotificationsOpen, isRegularGoalsOpen, isProgressOpen, handleClickOutside]);
 
 	const menuProfile = (
 		<div className={element('profile-menu')}>
@@ -402,8 +425,8 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				{isAuth
 					? !isScreenSmallMobile && (
 							<div className={element('right-menu')}>
-								{/* Кнопка уведомлений */}
 								<div className={element('notifications-wrapper')} ref={notificationsRef}>
+									{/* Кнопка уведомлений */}
 									<button
 										type="button"
 										className={element('notifications-button')}
@@ -417,6 +440,54 @@ export const Header: FC<HeaderProps> = observer((props) => {
 											</span>
 										)}
 									</button>
+
+									{/* Кнопка прогресса */}
+									<div className={element('progress-wrapper')} ref={progressRef}>
+										<button
+											type="button"
+											className={element('notifications-button', {
+												progress: true,
+											})}
+											onClick={toggleProgress}
+											aria-label="Прогресс"
+										>
+											{HeaderProgressGoalsStore.hasRegularGoalsToday ? (
+												<span
+													className={element('regular-goals-badge', {
+														allCompleted: isProgressOpen,
+													})}
+												>
+													<Svg icon="signal" className={element('regular-goals-badge-icon', {theme: header})} />
+													<span className={element('regular-goals-badge-count', {theme: header})}>
+														{HeaderProgressGoalsStore.goalsCount > 99
+															? '99+'
+															: HeaderProgressGoalsStore.goalsCount}
+													</span>
+												</span>
+											) : (
+												<Svg icon="signal" className={element('regular-goals-icon', {theme: header})} />
+											)}
+										</button>
+										<AnimatePresence>
+											{isProgressOpen && (
+												<motion.div
+													initial={{opacity: 0, y: -10}}
+													animate={{opacity: 1, y: 0}}
+													exit={{opacity: 0, y: -10}}
+													transition={{duration: 0.2, ease: 'easeOut'}}
+													className={element('progress-dropdown')}
+												>
+													<RegularGoalsDropdown
+														variant="progress"
+														isOpen={isProgressOpen}
+														onClose={() => setIsProgressOpen(false)}
+													/>
+												</motion.div>
+											)}
+										</AnimatePresence>
+									</div>
+
+									{/* Кнопка регулярных целей */}
 									<button
 										type="button"
 										className={element('notifications-button', {

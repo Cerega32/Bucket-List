@@ -102,7 +102,7 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 
 	useEffect(() => {
 		loadRuleOptions();
-	}, [loadRuleOptions]);
+	}, []);
 
 	const resetForm = () => {
 		setFormData({

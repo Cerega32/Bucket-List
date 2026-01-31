@@ -25,16 +25,24 @@ export const Alert: React.FC<AlertProps> = ({type, title, message, actionText, o
 	return (
 		<div className={block({type})}>
 			<Svg icon="info" className={element('icon', {type})} />
-			<div className={element('content')}>
-				{title != null && <h3 className={element('title')}>{title}</h3>}
-				{message != null && (typeof message === 'string' ? <p className={element('message')}>{message}</p> : message)}
+			<div className={element('body')}>
+				<div className={element('header')}>
+					{title != null && <h3 className={element('title')}>{title}</h3>}
+					<div className={element('actions')}>
+						{actionText != null && onAction != null && (
+							<Button className={element('action')} theme="no-border" type="button" width="auto" onClick={onAction}>
+								{actionText}
+							</Button>
+						)}
+						{onClose != null && <Button type="button-close" onClick={onClose} className={element('close')} />}
+					</div>
+				</div>
+				{message != null && (
+					<div className={element('message-wrap')}>
+						{typeof message === 'string' ? <p className={element('message')}>{message}</p> : message}
+					</div>
+				)}
 			</div>
-			{actionText != null && onAction != null && (
-				<Button className={element('action')} theme="no-border" type="button" width="auto" onClick={onAction}>
-					{actionText}
-				</Button>
-			)}
-			{onClose != null && <Button type="button-close" onClick={onClose} className={element('close')} />}
 		</div>
 	);
 };

@@ -13,6 +13,7 @@ import {getComments} from '@/utils/api/get/getComments';
 import {Alert} from '../Alert/Alert';
 import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
 import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
+import {GoalProgressHistory} from '../GoalProgressHistory/GoalProgressHistory';
 import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
 import {RegularGoalHistory} from '../RegularGoalHistory/RegularGoalHistory';
 import {RegularGoalRating} from '../RegularGoalRating/RegularGoalRating';
@@ -52,6 +53,11 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 				return <CommentsGoal comments={comments} setComments={setComments} />;
 			case 'isGoalLists':
 				return <ListsWithGoal code={goal.code} />;
+			case 'isGoalProgressHistory':
+				if (goal.addedByUser && !goal.regularConfig) {
+					return <GoalProgressHistory goalId={goal.id} refreshTrigger={historyRefreshTrigger} />;
+				}
+				return null;
 			case 'isGoalHistory':
 				// Показываем историю только если цель регулярная и добавлена пользователем
 				if (goal.regularConfig && goal.addedByUser && goal.regularConfig.id) {
