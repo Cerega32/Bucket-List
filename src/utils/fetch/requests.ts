@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 
-import { INotification, NotificationStore } from '@/store/NotificationStore';
-import { withRetry } from '@/utils/api/apiRetry';
+import {INotification, NotificationStore} from '@/store/NotificationStore';
+import {withRetry} from '@/utils/api/apiRetry';
 
 export interface IRequestGet {
 	[key: string]: string | number | boolean | undefined;

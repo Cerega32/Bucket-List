@@ -1,13 +1,13 @@
-import { FC, useEffect, useState } from 'react';
+import {FC, useEffect, useState} from 'react';
 
-import { WeekDaySchedule } from '@/components/WeekDaySelector/WeekDaySelector';
-import { useBem } from '@/hooks/useBem';
+import {WeekDaySchedule} from '@/components/WeekDaySelector/WeekDaySelector';
+import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
-import { ModalStore } from '@/store/ModalStore';
-import { NotificationStore } from '@/store/NotificationStore';
-import { UserStore } from '@/store/UserStore';
-import { IGoal, ILocation, IRegularGoalConfig, IRegularGoalStatistics, IShortGoal } from '@/typings/goal';
-import { getGoalTimer, TimerInfo } from '@/utils/api/get/getGoalTimer';
+import {ModalStore} from '@/store/ModalStore';
+import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
+import {IGoal, ILocation, IRegularGoalConfig, IRegularGoalStatistics, IShortGoal} from '@/typings/goal';
+import {getGoalTimer, TimerInfo} from '@/utils/api/get/getGoalTimer';
 import {
 	createGoalProgress,
 	getGoalProgress,
@@ -20,19 +20,19 @@ import {
 	restartRegularGoal,
 	updateGoalProgress,
 } from '@/utils/api/goals';
-import { addRegularGoalToUser } from '@/utils/api/post/addRegularGoalToUser';
-import { updateRegularGoalSettings } from '@/utils/api/post/updateRegularGoalSettings';
-import { GoalWithLocation } from '@/utils/mapApi';
-import { pluralize } from '@/utils/text/pluralize';
+import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
+import {updateRegularGoalSettings} from '@/utils/api/post/updateRegularGoalSettings';
+import {GoalWithLocation} from '@/utils/mapApi';
+import {pluralize} from '@/utils/text/pluralize';
 
-import { Button } from '../Button/Button';
-import { GoalTimer } from '../GoalTimer/GoalTimer';
-import { Line } from '../Line/Line';
-import { Modal } from '../Modal/Modal';
-import { ModalConfirm } from '../ModalConfirm/ModalConfirm';
-import { Progress } from '../Progress/Progress';
-import { RegularGoalSettings, SetRegularGoalModal } from '../SetRegularGoalModal/SetRegularGoalModal';
-import { Svg } from '../Svg/Svg';
+import {Button} from '../Button/Button';
+import {GoalTimer} from '../GoalTimer/GoalTimer';
+import {Line} from '../Line/Line';
+import {Modal} from '../Modal/Modal';
+import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
+import {Progress} from '../Progress/Progress';
+import {RegularGoalSettings, SetRegularGoalModal} from '../SetRegularGoalModal/SetRegularGoalModal';
+import {Svg} from '../Svg/Svg';
 
 import './aside-goal.scss';
 
