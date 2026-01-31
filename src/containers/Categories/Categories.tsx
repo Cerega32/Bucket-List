@@ -27,7 +27,7 @@ export const Categories: FC<CategoriesProps> = ({tag = 'h1', title = 'Катег
 
 	return (
 		<Loader isLoading={isLoading}>
-			<AllCategories categories={categories} tag={tag} title={title} />
+			<AllCategories categories={categories} tag={tag} title={title} variant="minimal" />
 		</Loader>
 	);
 };

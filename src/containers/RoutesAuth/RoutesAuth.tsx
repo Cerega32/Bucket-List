@@ -31,7 +31,6 @@ import {PageTariffs} from '@/pages/PageTariffs/PageTariffs';
 import {PageTerms} from '@/pages/PageTerms/PageTerms';
 import {PageUser} from '@/pages/PageUser/PageUser';
 import {PageUserSelf} from '@/pages/PageUserSelf/PageUserSelf';
-import UserMapPage from '@/pages/UserMapPage/UserMapPage';
 import {UserStore} from '@/store/UserStore';
 
 import './routes-auth.scss';
@@ -92,6 +91,7 @@ export const RoutesAuth: FC = observer(() => {
 				<Route path="/categories/:id/lists" element={<PageCategory page="isCategories" subPage="lists" />} />
 				<Route path="/categories/:categories/:id/lists" element={<PageCategory page="isSubCategories" subPage="lists" />} />
 				<Route path="/goals/:id/history" element={<PageDetailGoal page="isGoalHistory" />} />
+				<Route path="/goals/:id/progress-history" element={<PageDetailGoal page="isGoalProgressHistory" />} />
 				<Route path="/goals/:id/rating" element={<PageDetailGoal page="isGoalRating" />} />
 				<Route path="/goals/:id/lists" element={<PageDetailGoal page="isGoalLists" />} />
 				<Route path="/goals/:id" element={<PageDetailGoal page="isGoal" />} />
@@ -113,7 +113,7 @@ export const RoutesAuth: FC = observer(() => {
 
 				{/* Защищенные маршруты пользователя */}
 				<Route path="/user/self" element={<ProtectedRoute element={<PageUserSelf page="isUserSelf" />} />} />
-				<Route path="/user/self/maps" element={<ProtectedRoute element={<UserMapPage page="isUserSelfMaps" />} />} />
+				<Route path="/user/self/maps" element={<ProtectedRoute element={<PageUserSelf page="isUserSelfMaps" />} />} />
 				<Route
 					path="/user/self/achievements"
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfAchievements" />} />}

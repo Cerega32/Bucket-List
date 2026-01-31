@@ -8,6 +8,7 @@ import {FieldInput} from '@/components/FieldInput/FieldInput';
 import Select from '@/components/Select/Select';
 import {WeekDaySchedule, WeekDaySelector} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
+import {NotificationStore} from '@/store/NotificationStore';
 
 import './set-regular-goal-modal.scss';
 
@@ -58,6 +59,15 @@ export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCan
 	const [markAsCompletedAfterSeries] = useState(initialSettings?.markAsCompletedAfterSeries || false);
 
 	const handleSave = () => {
+		if (frequency === 'custom' && !Object.values(customSchedule).some(Boolean)) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Выберите хотя бы один день недели для пользовательского графика',
+			});
+			return;
+		}
+
 		const settings: RegularGoalSettings = {
 			frequency,
 			weeklyFrequency: frequency === 'weekly' ? weeklyFrequency : undefined,
@@ -112,7 +122,7 @@ export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCan
 
 						{frequency === 'custom' && (
 							<div className={element('custom-schedule-selector')}>
-								<p className={element('field-title')}>Выберите дни недели</p>
+								<p className={element('field-title')}>Выберите дни недели (обязательно хотя бы один)</p>
 								<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
 							</div>
 						)}
@@ -208,8 +218,8 @@ export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCan
 										}}
 										className={element('field')}
 										type="number"
+										suffix={frequency === 'weekly' ? 'недель' : 'дней'}
 									/>
-									<span className={element('field-suffix')}>{frequency === 'weekly' ? 'недель' : 'дней'}</span>
 								</div>
 							</>
 						)}

@@ -287,6 +287,15 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 			}
 		}
 
+		// Картинка: если у новой цели нет изображения — сбрасываем старое
+		if (selectedGoal.image) {
+			setImageUrl(selectedGoal.image);
+			setImage(null);
+		} else {
+			setImageUrl(null);
+			setImage(null);
+		}
+
 		// Скрываем список похожих целей после выбора
 		setShowSimilarGoals(false);
 		setIsTitleFocused(false);
@@ -335,13 +344,16 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 			}
 		}
 
-		// Сохраняем URL изображения, если он есть
+		// Сохраняем URL изображения, если он есть, иначе сбрасываем старое
 		if (goalData.imageUrl) {
 			setImageUrl(goalData.imageUrl);
 			setImage(null); // Сбрасываем локально загруженное изображение
 		} else if (goalData.image) {
 			setImageUrl(goalData.image);
 			setImage(null); // Сбрасываем локально загруженное изображение
+		} else {
+			setImageUrl(null);
+			setImage(null);
 		}
 
 		// Сохраняем дополнительные поля для передачи на сервер
@@ -472,20 +484,21 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 					<div className={element('image-section')}>
 						<p className={element('field-title')}>Изображение цели *</p>
 						{!image && !imageUrl ? (
-							<div className={element('dropzone')}>
+							<div
+								className={element('dropzone')}
+								onClick={handleFileInputClick}
+								role="button"
+								tabIndex={0}
+								aria-label="Добавить изображение"
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault();
+										handleFileInputClick();
+									}
+								}}
+							>
 								<FileDrop onDrop={(files) => files && onDrop(files)}>
-									<div
-										className={element('upload-placeholder')}
-										onClick={handleFileInputClick}
-										role="button"
-										tabIndex={0}
-										aria-label="Добавить изображение"
-										onKeyPress={(e) => {
-											if (e.key === 'Enter' || e.key === ' ') {
-												handleFileInputClick();
-											}
-										}}
-									>
+									<div className={element('upload-placeholder')}>
 										<input
 											type="file"
 											ref={fileInputRef}

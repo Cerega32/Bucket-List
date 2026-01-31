@@ -94,6 +94,12 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		}
 	};
 
+	// Блокируем прокрутку страницы (wheel/touch), но не трогаем overflow — скроллбар остаётся видимым
+	const preventScroll = (e: WheelEvent | TouchEvent) => {
+		if (modalRef.current && modalRef.current.contains(e.target as Node)) return;
+		e.preventDefault();
+	};
+
 	// Обработчик для ловушки фокуса
 	const handleTabKey = (e: KeyboardEvent) => {
 		if (e.key !== 'Tab') return;
@@ -124,43 +130,35 @@ export const Modal: FC<ModalProps> = observer((props) => {
 	};
 
 	useEffect(() => {
-		if (isOpen) {
-			document.addEventListener('keyup', handleKeyUp);
-			document.addEventListener('keydown', handleTabKey);
+		if (!isOpen) return;
 
-			// Устанавливаем начальный фокус на первый элемент
-			setTimeout(() => {
-				if (modalRef.current) {
-					const focusableElements = modalRef.current.querySelectorAll(
-						'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-					);
-					if (focusableElements.length > 0) {
-						(focusableElements[0] as HTMLElement).focus();
-					} else if (closeButtonRef.current) {
-						closeButtonRef.current.focus();
-					}
+		document.addEventListener('keyup', handleKeyUp);
+		document.addEventListener('keydown', handleTabKey);
+
+		// Устанавливаем начальный фокус на первый элемент
+		setTimeout(() => {
+			if (modalRef.current) {
+				const focusableElements = modalRef.current.querySelectorAll(
+					'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+				);
+				if (focusableElements.length > 0) {
+					(focusableElements[0] as HTMLElement).focus();
+				} else if (closeButtonRef.current) {
+					closeButtonRef.current.focus();
 				}
-			}, 50);
+			}
+		}, 50);
 
-			// Сохраняем текущее значение overflow и отключаем прокрутку body при открытии модального окна
-			const originalOverflow = document.body.style.overflow;
-			document.body.style.overflow = 'hidden';
+		// Блокируем прокрутку через отмену событий — скроллбар не скрываем, контент не дёргается
+		const passive = false;
+		document.addEventListener('wheel', preventScroll, {passive});
+		document.addEventListener('touchmove', preventScroll, {passive});
 
-			// Cleanup при размонтировании компонента или закрытии модалки
-			return () => {
-				document.removeEventListener('keyup', handleKeyUp);
-				document.removeEventListener('keydown', handleTabKey);
-				// Восстанавливаем исходное значение overflow
-				document.body.style.overflow = originalOverflow;
-			};
-		}
-
-		// Если модалка закрыта, убеждаемся что прокрутка включена
-		document.body.style.overflow = '';
-
-		// Cleanup функция для случая когда модалка закрыта
 		return () => {
-			document.body.style.overflow = '';
+			document.removeEventListener('keyup', handleKeyUp);
+			document.removeEventListener('keydown', handleTabKey);
+			document.removeEventListener('wheel', preventScroll);
+			document.removeEventListener('touchmove', preventScroll);
 		};
 	}, [isOpen]);
 
@@ -235,16 +233,51 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		</>
 	);
 
+	// Окно «Прогресс цели»
+	if (!children && window === 'progress-update') {
+		return createPortal(
+			<Modal isOpen={isOpen} onClose={closeWindow} className="progress-update-modal" size="medium">
+				<ProgressUpdateModal
+					goalId={modalProps?.goalId ?? 0}
+					goalTitle={modalProps?.goalTitle ?? ''}
+					currentProgress={
+						modalProps?.currentProgress ?? {
+							progressPercentage: 0,
+							dailyNotes: '',
+							isWorkingToday: false,
+							id: 0,
+							goal: 0,
+							goalTitle: '',
+							goalCategory: '',
+							goalCategoryNameEn: '',
+							goalImage: '',
+							goalCode: '',
+							lastUpdated: '',
+							createdAt: '',
+							recentEntries: [],
+						}
+					}
+					onProgressUpdate={modalProps?.onProgressUpdate ?? (() => {})}
+					onGoalCompleted={modalProps?.onGoalCompleted}
+					onClose={closeWindow}
+				/>
+			</Modal>,
+			document.body
+		);
+	}
+
+	const windowModifiers: Record<string, boolean | string | undefined> = {
+		fullscreen: window === 'goal-map' || window === 'goal-map-multi' || window === 'goal-map-add',
+		...(size ? {[size]: true} : {}),
+	};
+
+	if (!children) {
+		windowModifiers['type'] = window;
+	}
+
 	const modalElement = (
 		<section className={block({isOpen})}>
-			<div
-				className={element('window', {
-					type: window,
-					fullscreen: window === 'goal-map' || window === 'goal-map-multi' || window === 'goal-map-add',
-					...(size ? {[size]: true} : {}),
-				})}
-				ref={modalRef}
-			>
+			<div className={element('window', windowModifiers)} ref={modalRef}>
 				{(title || modalProps?.title) && (
 					<div className={element('header')}>
 						<h2 className={element('title')}>{title || modalProps?.title}</h2>

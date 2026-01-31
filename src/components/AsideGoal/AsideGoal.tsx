@@ -5,6 +5,7 @@ import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
 import {IGoal, ILocation, IRegularGoalConfig, IRegularGoalStatistics, IShortGoal} from '@/typings/goal';
 import {getGoalTimer, TimerInfo} from '@/utils/api/get/getGoalTimer';
 import {
@@ -17,6 +18,7 @@ import {
 	resetRegularGoal,
 	restartAfterCompletion,
 	restartRegularGoal,
+	updateGoalProgress,
 } from '@/utils/api/goals';
 import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
 import {updateRegularGoalSettings} from '@/utils/api/post/updateRegularGoalSettings';
@@ -116,6 +118,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const [isConfirmResetSeriesModalOpen, setIsConfirmResetSeriesModalOpen] = useState(false);
 	const [pendingSettings, setPendingSettings] = useState<RegularGoalSettings | null>(null);
 	const [isAddRegularGoalModalOpen, setIsAddRegularGoalModalOpen] = useState(false);
+	const [isDeleteProgressModalOpen, setIsDeleteProgressModalOpen] = useState(false);
 
 	const [block, element] = useBem('aside-goal', className);
 
@@ -191,6 +194,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	}, [regularConfig, added]);
 
 	const {setIsOpen, setWindow, setFuncModal, setModalProps} = ModalStore;
+	const {isAuth} = UserStore;
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 
 	// Загрузка информации о таймере
@@ -237,26 +241,6 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		ModalStore.setWindow('random-goal-picker');
 		ModalStore.setModalProps({goals: list});
 		ModalStore.setIsOpen(true);
-	};
-
-	const handleStartProgress = async () => {
-		if (!isList && isAdded && goalId && (!progress || progress.progressPercentage === 0)) {
-			try {
-				const response = await createGoalProgress(goalId, {
-					progress_percentage: 0,
-					daily_notes: 'Начало выполнения цели',
-					is_working_today: true,
-				});
-
-				if (response.success && response.data) {
-					setProgress(response.data);
-					// Обновляем прогресс заданий для начала выполнения цели
-					// Прогресс заданий обновляется автоматически на бэкенде
-				}
-			} catch (error) {
-				console.error('Ошибка начала выполнения:', error);
-			}
-		}
 	};
 
 	// Обработчик сброса завершенной серии (открывает модалку)
@@ -399,6 +383,22 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	// Пересчитываем regularProgress при каждом рендере (функция легковесная)
 	const regularProgress = getRegularProgress();
 
+	// "Заблокировано сегодня"
+	const isRegularGoalBlockedTodayBySchedule = (() => {
+		if (!regularConfig || !isAdded) return false;
+		if (regularConfig.frequency !== 'custom') return false;
+
+		const stats = localStatistics || regularConfig.statistics;
+		const weekDays = stats?.currentPeriodProgress?.weekDays;
+		if (!Array.isArray(weekDays) || weekDays.length === 0) return false;
+
+		// Индекс дня
+		const todayIndex = (new Date().getDay() + 6) % 7;
+		const todayData = weekDays.find((d: any) => d?.dayIndex === todayIndex);
+
+		return todayData?.isAllowed === false;
+	})();
+
 	// Обработчик для отметки/отмены регулярной цели
 	const handleMarkRegularGoal = async () => {
 		if (!regularConfig || !isAdded) return;
@@ -475,8 +475,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					setIsRegularGoalCompletedToday(newCompletedState);
 				}
 
-				// Если есть колбэк для обновления родительского компонента, вызываем его
-				if (onGoalCompleted) {
+				// Если серия действительно завершена, уведомляем родителя о завершении цели
+				if (onGoalCompleted && statisticsData?.isSeriesCompleted) {
 					onGoalCompleted();
 				}
 
@@ -863,19 +863,23 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		}
 	};
 
-	const openProgressModal = () => {
-		if (!isList && goalId && progress) {
+	const openProgressModal = (progressOverride?: IGoalProgress) => {
+		const current = progressOverride ?? progress;
+		if (!isList && goalId && current) {
 			setWindow('progress-update');
 			setIsOpen(true);
 			setModalProps({
 				goalId,
 				goalTitle: title,
-				currentProgress: progress,
+				currentProgress: current,
 				onProgressUpdate: (updatedProgress: IGoalProgress) => {
 					setProgress(updatedProgress);
 					// Если прогресс достиг 100%, отмечаем как выполненную
 					if (updatedProgress.progressPercentage >= 100) {
 						setIsCompleted(true);
+					}
+					if (page === 'isGoalProgressHistory' && onHistoryRefresh) {
+						onHistoryRefresh();
 					}
 				},
 				onGoalCompleted: () => {
@@ -885,6 +889,27 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					}
 				},
 			});
+		}
+	};
+
+	const handleOpenProgressModalOrStart = async () => {
+		if (isList || !goalId || !isAdded || regularConfig) return;
+		if (!progress) {
+			try {
+				const response = await createGoalProgress(goalId, {
+					progress_percentage: 0,
+					daily_notes: '',
+					is_working_today: true,
+				});
+				if (response.success && response.data) {
+					setProgress(response.data);
+					openProgressModal(response.data);
+				}
+			} catch (error) {
+				console.error('Ошибка начала прогресса:', error);
+			}
+		} else {
+			openProgressModal();
 		}
 	};
 
@@ -943,6 +968,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const handleAddGoal = async () => {
 		if (isList || isAdded) return;
 
+		if (!isAuth) {
+			setWindow('login');
+			setIsOpen(true);
+			return;
+		}
+
 		if (regularConfig) {
 			// Если настройки нельзя изменить, используем обычный endpoint /add/ с базовыми настройками
 			if (!regularConfig.allowCustomSettings) {
@@ -983,6 +1014,28 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
 			openProgressModal();
+		}
+	};
+
+	const handleMarkToday = async () => {
+		if (!goalId || !progress) return;
+		const newWorkingToday = !progress.isWorkingToday;
+		try {
+			const response = await updateGoalProgress(goalId, {
+				progress_percentage: progress.progressPercentage,
+				daily_notes: progress.dailyNotes || '',
+				is_working_today: newWorkingToday,
+			});
+			if (response.success && response.data) {
+				setProgress(response.data);
+			}
+		} catch (error) {
+			console.error('Ошибка отметки сегодня:', error);
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: error instanceof Error ? error.message : 'Не удалось обновить отметку',
+			});
 		}
 	};
 
@@ -1102,6 +1155,59 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const getDayName = (index: number): string => {
 		const names = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 		return names[index];
+	};
+
+	// Хелперы для блока прогресса (цели с прогрессом, не регулярные)
+	const getProgressWeeksCount = (p: IGoalProgress): number => {
+		const start = new Date(p.createdAt);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		start.setHours(0, 0, 0, 0);
+		const diffMs = today.getTime() - start.getTime();
+		return Math.max(0, Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)));
+	};
+
+	const getProgressMaxStreak = (p: IGoalProgress): number => {
+		const entries = p.recentEntries || [];
+		if (entries.length === 0) return 0;
+		const dates = [...new Set(entries.map((e) => e.date))].sort();
+		let maxStreak = 1;
+		let currentStreak = 1;
+		for (let i = 1; i < dates.length; i++) {
+			const prev = new Date(dates[i - 1]);
+			const curr = new Date(dates[i]);
+			const diffDays = Math.round((curr.getTime() - prev.getTime()) / (24 * 60 * 60 * 1000));
+			if (diffDays === 1) {
+				currentStreak += 1;
+				maxStreak = Math.max(maxStreak, currentStreak);
+			} else {
+				currentStreak = 1;
+			}
+		}
+		return maxStreak;
+	};
+
+	const getProgressWeekDaysCompleted = (p: IGoalProgress): boolean[] => {
+		const today = new Date();
+		const dayOfWeek = today.getDay();
+		const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+		const monday = new Date(today);
+		monday.setDate(today.getDate() - diff);
+		monday.setHours(0, 0, 0, 0);
+		const entryDates = new Set((p.recentEntries || []).map((e) => e.date.split('T')[0]));
+		return Array.from({length: 7}, (_, i) => {
+			const d = new Date(monday);
+			d.setDate(monday.getDate() + i);
+			const dateStr = d.toISOString().split('T')[0];
+			return entryDates.has(dateStr);
+		});
+	};
+
+	/** Количество отмеченных дней (уникальные даты в recentEntries) */
+	const getProgressMarkedDaysCount = (p: IGoalProgress): number => {
+		const entries = p.recentEntries || [];
+		const uniqueDates = new Set(entries.map((e) => e.date.split('T')[0]));
+		return uniqueDates.size;
 	};
 
 	// Получение информации о серии (дни или недели)
@@ -1453,7 +1559,6 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										isSkipped = false;
 									}
 								} else if (regularConfig.frequency === 'custom') {
-									// Для custom используем данные из weekDays
 									const stats = localStatistics || regularConfig.statistics;
 									const weekDays = stats?.currentPeriodProgress?.weekDays;
 									if (weekDays && weekDays.length > 0) {
@@ -1468,52 +1573,27 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 											}) => d.dayIndex === i
 										);
 										if (dayData) {
-											// Для custom целей: isBlocked - блокировка по расписанию (показываем крестик)
-											// isBlockedByStartDate - блокировка из-за даты начала (пустой день, не показываем крестик)
-											isBlockedByStartDate = dayData.isBlockedByStartDate || false;
-											isBlocked = !isBlockedByStartDate && (dayData.isBlocked || false); // Блокировка по расписанию, только если не заблокирован по дате начала
-											isSelected = dayData.isAllowed !== false;
-											isCompletedDay = !isBlockedByStartDate && !isBlocked && (dayData.isCompleted || false); // Выполнено, только если не заблокирован
-											isSkipped = !isBlockedByStartDate && !isBlocked && (dayData.isSkipped || false);
+											const daySelected = dayData.isAllowed !== false;
+											isSelected = daySelected;
+											isBlocked = !daySelected; // все невыбранные дни — с крестиками
+											isBlockedByStartDate = false;
+											isCompletedDay = daySelected && !isBlocked && (dayData.isCompleted || false);
+											isSkipped = daySelected && !isBlocked && (dayData.isSkipped || false);
 										}
 									} else {
-										// Fallback: определяем выбранные дни по общему графику
-										const fallbackStats = localStatistics || regularConfig.statistics;
-										const startDate = fallbackStats?.startDate ? new Date(`${fallbackStats.startDate}T00:00:00`) : null;
-										const today = new Date();
-										today.setHours(0, 0, 0, 0);
-
-										// Вычисляем понедельник текущей недели
-										const dayOfWeek = today.getDay();
-										const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-										const weekStart = new Date(today);
-										weekStart.setDate(today.getDate() - diff);
-										weekStart.setHours(0, 0, 0, 0);
-
-										const dayDate = new Date(weekStart);
-										dayDate.setDate(weekStart.getDate() + i);
-										dayDate.setHours(0, 0, 0, 0);
-
-										// Проверяем блокировку по дате начала
-										if (startDate) {
-											startDate.setHours(0, 0, 0, 0);
-											isBlockedByStartDate = dayDate < startDate;
-										} else {
-											isBlockedByStartDate = false;
-										}
-
-										// Определяем блокировку по расписанию (только если не заблокирован по дате начала)
+										// Fallback: определяем выбранные дни по общему графику, без учета startDate
 										const daySelected = isDaySelected(i);
-										isSelected = daySelected && !isBlockedByStartDate;
-										isBlocked = !isBlockedByStartDate && !daySelected; // Блокировка по расписанию, только если не заблокирован по дате начала
+										isSelected = daySelected;
+										isBlocked = !daySelected; // все невыбранные дни — с крестиками
+										isBlockedByStartDate = false;
 										isCompletedDay = false;
 										isSkipped = false;
 									}
 								}
 
-								// Синяя рамка только для текущего дня, если он выбран и не выполнен
-								// Не показываем рамку для заблокированных дней
-								const showBorder = isSelected && !isCompletedDay && !isBlocked && !isBlockedByStartDate && isCurrentDay;
+								// Синяя рамка и выделение всегда на текущем дне (isCurrentDay),
+								// Не показываем рамку только для блокировки по дате начала (isBlockedByStartDate).
+								const showBorder = isCurrentDay && !isBlockedByStartDate;
 
 								return (
 									<div key={i} className={element('regular-series-day-wrapper')}>
@@ -1539,7 +1619,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										</div>
 										<span
 											className={element('regular-series-day-name', {
-												selected: isSelected && !isBlocked && !isBlockedByStartDate && isCurrentDay,
+												selected: isCurrentDay && !isBlockedByStartDate,
 											})}
 										>
 											{dayName}
@@ -1670,39 +1750,50 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 									regularConfig.frequency === 'custom') && (
 									<Button
 										theme={
-											(regularConfig.frequency === 'daily' &&
-												(isRegularGoalCompletedToday || regularProgress?.completed)) ||
-											(regularConfig.frequency === 'weekly' && regularProgress?.progress === 100) ||
-											(regularConfig.frequency === 'custom' && regularProgress?.progress === 100)
+											isRegularGoalBlockedTodayBySchedule
+												? 'no-active'
+												: (regularConfig.frequency === 'daily' &&
+														(isRegularGoalCompletedToday || regularProgress?.completed)) ||
+												  ((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
+														isRegularGoalCompletedToday)
 												? 'green'
 												: 'blue'
 										}
 										onClick={handleMarkRegularGoal}
-										icon="regular"
+										icon={isRegularGoalBlockedTodayBySchedule ? undefined : 'regular'}
 										className={element('btn')}
 										size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+										disabled={isRegularGoalBlockedTodayBySchedule}
 										hoverContent={
-											(regularConfig.frequency === 'daily' &&
-												(isRegularGoalCompletedToday || regularProgress?.completed)) ||
-											(regularConfig.frequency === 'weekly' && regularProgress?.progress === 100) ||
-											(regularConfig.frequency === 'custom' && regularProgress?.progress === 100)
+											isRegularGoalBlockedTodayBySchedule
+												? undefined
+												: (regularConfig.frequency === 'daily' &&
+														(isRegularGoalCompletedToday || regularProgress?.completed)) ||
+												  ((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
+														isRegularGoalCompletedToday)
 												? 'Отменить выполнение'
 												: undefined
 										}
 										hoverIcon={
-											(regularConfig.frequency === 'daily' &&
-												(isRegularGoalCompletedToday || regularProgress?.completed)) ||
-											(regularConfig.frequency === 'weekly' && regularProgress?.progress === 100) ||
-											(regularConfig.frequency === 'custom' && regularProgress?.progress === 100)
+											isRegularGoalBlockedTodayBySchedule
+												? undefined
+												: (regularConfig.frequency === 'daily' &&
+														(isRegularGoalCompletedToday || regularProgress?.completed)) ||
+												  ((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
+														isRegularGoalCompletedToday)
 												? 'cross'
 												: undefined
 										}
 									>
-										{regularConfig.frequency === 'daily' && (isRegularGoalCompletedToday || regularProgress?.completed)
+										{isRegularGoalBlockedTodayBySchedule
+											? 'Сегодня выполнить цель нельзя'
+											: regularConfig.frequency === 'daily' &&
+											  (isRegularGoalCompletedToday || regularProgress?.completed)
 											? 'Выполнено сегодня'
 											: regularConfig.frequency === 'daily'
 											? 'Выполнить сегодня'
-											: regularProgress?.progress === 100
+											: (regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
+											  isRegularGoalCompletedToday
 											? 'Выполнено сегодня'
 											: 'Выполнить сегодня'}
 									</Button>
@@ -1724,6 +1815,122 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				</div>
 			)}
 
+			{/* Блок прогресса показывается только если пользователь изменил прогресс (процент или заметка) или отметил цель выполненной */}
+			{!isList &&
+				isAdded &&
+				!regularConfig &&
+				progress &&
+				(progress.progressPercentage > 0 || !!progress.dailyNotes || isCompleted) && (
+					<div className={element('regular-info-header')}>
+						<div className={element('regular-info-title')}>
+							<Svg icon="signal" className={element('regular-info-icon', {progress: true})} />
+							<span>Прогресс</span>
+							<span className={element('regular-info-streak', {active: true})}>
+								{pluralize(getProgressMarkedDaysCount(progress), ['день', 'дня', 'дней'])}
+							</span>
+						</div>
+						<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+
+						{/* График дней недели по recentEntries */}
+						<div className={element('regular-series-days')}>
+							{Array.from({length: 7}, (_, i) => {
+								const dayName = getDayName(i);
+								const isCompletedDay = getProgressWeekDaysCompleted(progress)[i];
+								const isCurrentDay = i === currentDayIndex;
+								return (
+									<div key={i} className={element('regular-series-day-wrapper')}>
+										<div
+											className={element('regular-series-day', {
+												selected: isCurrentDay,
+												completed: isCompletedDay,
+											})}
+										>
+											{isCompletedDay && <Svg icon="done" className={element('regular-series-day-icon-selected')} />}
+										</div>
+										<span
+											className={element('regular-series-day-name', {
+												selected: isCurrentDay,
+											})}
+										>
+											{dayName}
+										</span>
+									</div>
+								);
+							})}
+						</div>
+						<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+
+						{/* Прогресс */}
+						<div
+							className={element('progress-bar')}
+							onClick={handleProgressBarClick}
+							onKeyDown={handleProgressBarKeyDown}
+							role="button"
+							tabIndex={0}
+							aria-label={`Изменить прогресс цели, текущий прогресс ${progress.progressPercentage}%`}
+							style={{cursor: 'pointer'}}
+						>
+							<div className={element('regular-series-progress')}>
+								<span className={element('regular-series-progress-label')}>Прогресс:</span>
+								<div className={element('regular-series-progress-bar')}>
+									<Progress done={progress.progressPercentage} all={100} goal />
+								</div>
+							</div>
+						</div>
+						<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+
+						{/* Количество недель и макс. серия */}
+						<div className={element('regular-info-details')}>
+							<div className={element('regular-info-row')}>
+								<span className={element('regular-info-label')}>Количество недель:</span>
+								<span className={element('regular-info-value')}>{getProgressWeeksCount(progress)}</span>
+							</div>
+							<div className={element('regular-info-row')}>
+								<span className={element('regular-info-label')}>Макс. серия без пропусков:</span>
+								<span className={element('regular-info-value')}>
+									{pluralize(getProgressMaxStreak(progress), ['день', 'дня', 'дней'])}
+								</span>
+							</div>
+						</div>
+						<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+
+						{/* Кнопки прогресса */}
+						<div className={element('regular-series-actions')}>
+							<Button
+								theme={progress.isWorkingToday ? 'green' : 'blue'}
+								onClick={handleMarkToday}
+								icon={progress.isWorkingToday ? 'regular-checked' : 'regular-empty'}
+								className={element('btn')}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+								hoverContent={progress.isWorkingToday ? 'Снять отметку' : undefined}
+								hoverIcon={progress.isWorkingToday ? 'cross' : undefined}
+							>
+								{progress.isWorkingToday ? 'Отмечено сегодня' : 'Отметить сегодня'}
+							</Button>
+							<Button
+								theme="blue-light"
+								onClick={handleOpenProgressModalOrStart}
+								icon="signal"
+								className={element('btn')}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								{progress.progressPercentage > 0 ? 'Изменить прогресс' : 'Задать прогресс'}
+							</Button>
+							{goalId && (
+								<Button
+									theme="blue-light"
+									onClick={() => setIsDeleteProgressModalOpen(true)}
+									icon="trash"
+									className={element('btn')}
+									size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+								>
+									Удалить прогресс
+								</Button>
+							)}
+						</div>
+					</div>
+				)}
+
 			<div className={element('info')}>
 				{/* Кнопки для регулярной цели */}
 				{regularConfig && isAdded && !isList && (
@@ -1743,7 +1950,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 							theme="blue-light"
 							onClick={openFolderSelector}
 							icon="folder-open"
-							className={element('btn')}
+							className={element('btn', {folder: true})}
 							size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 						>
 							Добавить в папку
@@ -1770,56 +1977,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					</>
 				)}
 
-				{/* Отображение прогресса для целей в процессе (только для невыполненных целей) */}
-				{!isList && isAdded && !isCompleted && progress && (progress.progressPercentage > 0 || progress.dailyNotes) && (
-					<div className={element('progress-section')}>
-						<div className={element('progress-header')}>
-							<span className={element('progress-label')}>Прогресс выполнения</span>
-							<span className={element('progress-value')}>{progress.progressPercentage}%</span>
-						</div>
-						<div
-							className={element('progress-bar')}
-							onClick={handleProgressBarClick}
-							onKeyDown={handleProgressBarKeyDown}
-							role="button"
-							tabIndex={0}
-							aria-label={`Изменить прогресс цели, текущий прогресс ${progress.progressPercentage}%`}
-							style={{cursor: 'pointer'}}
-						>
-							<Progress done={progress.progressPercentage} all={100} goal />
-						</div>
-						{progress.progressPercentage < 100 && (
-							<Button
-								theme="blue-light"
-								onClick={openProgressModal}
-								icon="trending-up"
-								className={element('btn')}
-								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-							>
-								Изменить прогресс
-							</Button>
-						)}
-					</div>
-				)}
-
-				{/* Кнопка "Начать выполнение" для добавленных целей с прогрессом 0% без заметок */}
-				{!isList &&
-					isAdded &&
-					!isCompleted &&
-					(!progress || (progress.progressPercentage === 0 && !progress.dailyNotes)) &&
-					!regularConfig && (
-						<Button
-							theme="green"
-							onClick={handleStartProgress}
-							icon="play"
-							className={element('btn')}
-							size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-						>
-							Начать выполнение
-						</Button>
-					)}
-
-				{/* Кнопка "Выполнить" для целей с прогрессом или без него */}
+				{/* Порядок кнопок для цели с прогрессом */}
 				{!isList && isAdded && !regularConfig && (
 					<Button
 						theme={isCompleted ? 'green' : 'blue'}
@@ -1838,10 +1996,37 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						theme="blue-light"
 						onClick={openFolderSelector}
 						icon="folder-open"
-						className={element('btn')}
+						className={element('btn', {folder: true})}
 						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 					>
 						Добавить в папку
+					</Button>
+				)}
+				{isAdded && !isCompleted && !isList && <GoalTimer timer={timer} goalCode={code} onTimerUpdate={handleTimerUpdate} />}
+				{!isList &&
+					isAdded &&
+					!isCompleted &&
+					!regularConfig &&
+					(!progress || (progress.progressPercentage === 0 && !progress.dailyNotes)) && (
+						<Button
+							theme="blue-light"
+							onClick={handleOpenProgressModalOrStart}
+							icon="signal"
+							className={element('btn')}
+							size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+						>
+							Задать прогресс
+						</Button>
+					)}
+				{isAdded && !regularConfig && !isList && (
+					<Button
+						theme="blue-light"
+						onClick={deleteGoal}
+						icon="trash"
+						className={element('btn')}
+						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+					>
+						Удалить
 					</Button>
 				)}
 				{isList && isAdded && !isCompleted && (
@@ -1890,7 +2075,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						Написать отзыв
 					</Button>
 				)}
-				{isAdded && !regularConfig && (
+				{isAdded && !regularConfig && isList && (
 					<Button
 						theme="blue-light"
 						onClick={deleteGoal}
@@ -1920,11 +2105,18 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					</Button>
 				)}
 
-				{/* Показываем таймер, если цель добавлена и не является списком */}
-				{isAdded && !isCompleted && !isList && (
+				{!isList && !regularConfig && (
 					<>
-						<Line className={element('line')} />
-						<GoalTimer timer={timer} goalCode={code} onTimerUpdate={handleTimerUpdate} />
+						<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+						<Button
+							theme="blue-light"
+							icon="share"
+							onClick={handleShare}
+							className={element('btn')}
+							size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+						>
+							Поделиться в Telegram
+						</Button>
 					</>
 				)}
 			</div>
@@ -1960,6 +2152,24 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					handleBtn={handleConfirmResetCompletedSeries}
 				/>
 			)}
+			{/* Модалка подтверждения удаления прогресса цели */}
+			<ModalConfirm
+				isOpen={isDeleteProgressModalOpen}
+				onClose={() => setIsDeleteProgressModalOpen(false)}
+				title="Удаление прогресса"
+				text="Вы действительно хотите удалить весь прогресс цели? Вся история прогресса выполнения будет сброшена."
+				textBtnCancel="Отмена"
+				textBtn="Удалить"
+				themeBtn="red"
+				handleBtn={async () => {
+					if (!goalId) return;
+					await resetGoalProgress(goalId);
+					setProgress(null);
+					if (onHistoryRefresh) {
+						onHistoryRefresh();
+					}
+				}}
+			/>
 			{/* Модалка редактирования настроек регулярной цели */}
 			{regularConfig &&
 				isAdded &&
@@ -1975,6 +2185,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 							isOpen={isEditSettingsModalOpen}
 							onClose={() => setIsEditSettingsModalOpen(false)}
 							title="Изменение регулярности цели"
+							size="medium"
 						>
 							<SetRegularGoalModal
 								onSave={handleSaveSettings}

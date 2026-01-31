@@ -1,5 +1,6 @@
 import {FC, useEffect, useState} from 'react';
 
+import {Alert} from '@/components/Alert/Alert';
 import {Button} from '@/components/Button/Button';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Loader} from '@/components/Loader/Loader';
@@ -341,6 +342,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 						icon="search"
 						onClick={searchExternalGoals}
 						size="medium"
+						width="auto"
 						className={`${element('search-button')} ${isSearchButtonDisabled ? 'disabled' : ''}`}
 					>
 						{loading ? 'Поиск...' : 'Найти'}
@@ -477,8 +479,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 
 					{results.length === 0 && searchWasPerformed && !loading && (
 						<div className={element('no-results')}>
-							<Svg icon="info" className={element('info-icon')} />
-							<p>Ничего не найдено. Попробуйте другой запрос.</p>
+							<Alert type="info" message="Ничего не найдено. Попробуйте другой запрос." />
 						</div>
 					)}
 				</Loader>

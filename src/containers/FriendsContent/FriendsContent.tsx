@@ -82,17 +82,12 @@ export const FriendsContent: FC = observer(() => {
 
 	return (
 		<section className={block()}>
-			<div className={element('header')}>
-				<h1 className={element('title')}>Мои друзья ({FriendsStore.friendsCount})</h1>
-				<p className={element('subtitle')}>Управляйте списком друзей и сравнивайте достижения</p>
-			</div>
-
 			{FriendsStore.isEmptyFriends ? (
 				<EmptyState
 					title="У вас пока нет друзей"
 					description="Найдите единомышленников среди пользователей Bucket List и добавьте их в друзья"
 				>
-					<Button theme="blue" type="Link" href="/user/self/friends/search">
+					<Button width="auto" theme="blue" type="Link" href="/user/self/friends/search">
 						Найти друзей
 					</Button>
 				</EmptyState>

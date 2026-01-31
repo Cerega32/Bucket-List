@@ -52,7 +52,9 @@
 	&__link {
 		position: relative;
 		display: flex;
+		justify-content: space-between;
 		align-items: center;
+		min-height: 42px;
 		text-wrap: nowrap;
 		padding: 16px 0;
 		color: var(--color-text);
@@ -97,12 +99,15 @@
 	&--vertical {
 		@include block-radius;
 
-		padding: 16px 24px;
+		padding: 8px 0;
+		background: transparent;
+		border: none;
+		box-shadow: none;
 
 		#{$block}__wrapper {
 			display: flex;
 			flex-direction: column;
-			gap: 8px;
+			gap: 0;
 		}
 
 		&::before,
@@ -117,11 +122,13 @@
 		#{$block} {
 			&__link {
 				gap: 8px;
-				padding: 10px 16px;
+				padding: 8px 24px;
 				border-radius: 6px;
 
 				&::after {
 					top: 4px;
+					right: 0;
+					left: auto;
 					width: 4px;
 					height: calc(100% - 8px);
 					border-radius: 0 4px 4px 0;
@@ -136,7 +143,7 @@
 				}
 
 				&--active {
-					background: var(--color-secondary);
+					color: var(--color-primary);
 				}
 			}
 		}

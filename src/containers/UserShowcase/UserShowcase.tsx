@@ -57,8 +57,7 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 				setIsLoading(false);
 			}
 		})();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [id]);
 
 	return (
 		<Loader isLoading={isLoading} className={block()}>

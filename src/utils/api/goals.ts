@@ -1,3 +1,4 @@
+import {IPaginationPage} from '@/typings/request';
 import {DELETE, GET, POST, PUT} from '@/utils/fetch/requests';
 
 // ========== PROGRESS API ==========
@@ -135,7 +136,59 @@ export const updateGoalProgress = async (
 	}
 };
 
-// Получить записи прогресса
+// Ответ бэкенда: CamelCaseJSONRenderer отдаёт camelCase
+interface IGoalProgressEntryRaw {
+	id: number;
+	date: string;
+	percentageChange?: number;
+	percentage_change?: number;
+	notes?: string;
+	workDone?: boolean;
+	work_done?: boolean;
+	createdAt?: string;
+	created_at?: string;
+}
+
+function mapProgressEntry(raw: IGoalProgressEntryRaw): IGoalProgressEntry {
+	const change = raw.percentageChange ?? raw.percentage_change ?? 0;
+	return {
+		id: raw.id,
+		goalProgress: 0,
+		date: raw.date ?? '',
+		percentageChange: typeof change === 'number' ? change : Number(change) || 0,
+		notes: raw.notes ?? '',
+		workDone: raw.workDone ?? raw.work_done ?? false,
+		createdAt: raw.createdAt ?? raw.created_at ?? '',
+	};
+}
+
+// Получить записи прогресса по ID цели (история изменений с заметками)
+export const getGoalProgressEntries = async (
+	goalId: number
+): Promise<{
+	success: boolean;
+	data?: {results: IGoalProgressEntry[]};
+	error?: string;
+}> => {
+	try {
+		const response = await GET(`goals/${goalId}/progress/entries`, {
+			auth: true,
+		});
+		if (!response.success || !response.data) {
+			return response;
+		}
+		const body = response.data as {results?: IGoalProgressEntryRaw[]};
+		const results = (body.results ?? []).map(mapProgressEntry);
+		return {success: true, data: {results}};
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
+// Получить записи прогресса по ID прогресса (legacy)
 export const getProgressEntries = async (
 	progressId: number
 ): Promise<{
@@ -499,7 +552,7 @@ export const resetGoalProgress = async (
 	error?: string;
 }> => {
 	try {
-		const response = await DELETE(`goals/${goalId}/progress`, {
+		const response = await DELETE(`goals/${goalId}/progress/reset`, {
 			auth: true,
 		});
 		return response;
@@ -673,14 +726,25 @@ export const markRegularProgress = async (data: {
 };
 
 // Получить статистику регулярных целей
-export const getRegularGoalStatistics = async (): Promise<{
+// Поддерживает как обычный ответ (массив),
+// так и пагинированный ({ pagination, data }) — на случай,
+// если на бэкенде включена пагинация.
+export const getRegularGoalStatistics = async (params?: {
+	page?: number;
+}): Promise<{
 	success: boolean;
-	data?: IRegularGoalStatistics[];
+	data?:
+		| IRegularGoalStatistics[]
+		| {
+				pagination: IPaginationPage;
+				data: IRegularGoalStatistics[];
+		  };
 	error?: string;
 }> => {
 	try {
 		const response = await GET('goals/regular/statistics', {
 			auth: true,
+			...(params ? {get: params} : {}),
 		});
 		return response;
 	} catch (error) {

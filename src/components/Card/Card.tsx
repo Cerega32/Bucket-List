@@ -17,29 +17,35 @@ import {Title} from '../Title/Title';
 
 import './card.scss';
 
-interface CardProps {
+interface BaseCardProps {
 	className?: string;
 	horizontal?: boolean;
-	onClickAdd: () => Promise<void>;
-	onClickDelete: () => Promise<void>;
 }
 
-interface CardListProps extends CardProps {
+interface CardListProps extends BaseCardProps {
 	isList: true;
 	goal: IShortList;
+	onClickAdd: () => Promise<void>;
+	onClickDelete: () => Promise<void>;
 	onClickMark?: never;
 }
 
-interface CardGoalProps extends CardProps {
+interface CardGoalProps extends BaseCardProps {
 	isList?: never;
 	goal: IShortGoal;
+	onClickAdd: () => Promise<void>;
+	onClickDelete: () => Promise<void>;
 	onClickMark: () => Promise<void>;
 }
 
-export const Card: FC<CardListProps | CardGoalProps> = (props) => {
-	const {className, goal, horizontal, isList, onClickAdd, onClickDelete, onClickMark} = props;
+type CardProps = CardListProps | CardGoalProps;
+
+export const Card: FC<CardProps> = (props) => {
+	const {className, horizontal, ...restProps} = props;
 
 	const [block, element] = useBem('card', className);
+
+	const {goal, isList, onClickAdd, onClickDelete, onClickMark} = restProps as CardListProps | CardGoalProps;
 
 	const {isAuth} = UserStore;
 	const {setIsOpen, setWindow} = ModalStore;
@@ -58,8 +64,15 @@ export const Card: FC<CardListProps | CardGoalProps> = (props) => {
 			<Link to={`/${isList ? 'list' : 'goals'}/${goal.code}`} className={element('gradient')}>
 				<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} show={goal.completedByUser}>
 					<div className={element('img-tags')}>
-						{goal.addedByUser && !goal.completedByUser && <Tag icon="watch" theme="light" />}
-						{goal.completedByUser && <Tag icon="done" theme="light" classNameIcon={element('img-tag-icon-done')} />}
+						{((goal.addedByUser && !goal.completedByUser) || (!isList && goal.regularConfig)) && (
+							<div className={element('img-tag-wrapper')}>
+								{goal.addedByUser && !goal.completedByUser && <Tag icon="watch" theme="light" title="В процессе" />}
+								{!isList && goal.regularConfig && <Tag icon="regular-empty" theme="light" title="Регулярная цель" />}
+							</div>
+						)}
+						{goal.completedByUser && (
+							<Tag icon="done" theme="light" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
+						)}
 						<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
 					</div>
 				</Gradient>
@@ -84,11 +97,13 @@ export const Card: FC<CardListProps | CardGoalProps> = (props) => {
 						showSeparator
 					/>
 					<div className={element('buttons-wrapper')}>
-						{isList && <Progress done={goal.userCompletedGoals} all={goal.goalsCount} />}
+						{isList && 'userCompletedGoals' in goal && 'goalsCount' in goal && (
+							<Progress done={goal.userCompletedGoals} all={goal.goalsCount} />
+						)}
 						<div className={element('buttons')}>
 							{!goal.addedByUser && <Button theme="blue" icon="plus" size="small" onClick={onClickAddHandler} />}
 							{goal.addedByUser && <Button theme="blue-light" icon="trash" size="small" onClick={onClickDelete} />}
-							{(goal.addedByUser || goal.completedByUser) && !isList && (
+							{(goal.addedByUser || goal.completedByUser) && !isList && onClickMark && (
 								<Button theme={goal.completedByUser ? 'green' : 'blue-light'} size="small" onClick={onClickMark}>
 									<Svg
 										icon="done"

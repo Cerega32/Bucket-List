@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
+import {Alert} from '@/components/Alert/Alert';
 import {Button} from '@/components/Button/Button';
 import {ExternalGoalSearch} from '@/components/ExternalGoalSearch/ExternalGoalSearch';
 import {Svg} from '@/components/Svg/Svg';
@@ -285,8 +286,7 @@ export const GoalListItem: React.FC<GoalListItemProps> = ({
 			{/* Предупреждение для новых целей */}
 			{needsEdit && (
 				<div className={element('edit-warning')}>
-					<Svg icon="info" className={element('warning-icon')} />
-					<span>Требуется редактирование: добавьте изображение и описание</span>
+					<Alert type="warning" message="Требуется редактирование: добавьте изображение и описание" />
 				</div>
 			)}
 

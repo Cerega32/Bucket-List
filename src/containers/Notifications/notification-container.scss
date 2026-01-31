@@ -1,12 +1,24 @@
 .notification-container {
 	position: fixed;
 	z-index: 10001;
-	top: 56px;
-	left: 50%;
+	top: 58px;
+	left: 75%;
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 	width: 100%;
 	max-width: 456px;
 	transform: translateX(-50%);
+
+	@include lg {
+		left: 69%;
+	}
+
+	@include md {
+		left: 50%;
+	}
+
+	@include xs {
+		width: 300px;
+	}
 }

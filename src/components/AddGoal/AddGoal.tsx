@@ -3,6 +3,7 @@ import {FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState} from '
 import {FileDrop} from 'react-file-drop';
 import {useLocation, useNavigate} from 'react-router-dom';
 
+import {Alert} from '@/components/Alert/Alert';
 import {Button} from '@/components/Button/Button';
 import {DatePicker} from '@/components/DatePicker/DatePicker';
 import {ExternalGoalSearch} from '@/components/ExternalGoalSearch/ExternalGoalSearch';
@@ -213,10 +214,14 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			}
 		}
 
-		// Сохраняем URL изображения, если он есть
+		// Сохраняем URL изображения, если он есть, иначе сбрасываем
 		if (goal.image) {
 			setImageUrl(goal.image);
 			setImage(null); // Сбрасываем локально загруженное изображение
+		} else {
+			// Если у новой цели нет изображения, удаляем старое
+			setImageUrl(null);
+			setImage(null);
 		}
 
 		setShowSimilarGoals(false);
@@ -510,11 +515,20 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			return;
 		}
 
-		if (!title || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+		if (!title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
 				message: 'Заполните все обязательные поля',
+			});
+			return;
+		}
+
+		if (isRegular && regularFrequency === 'custom' && !Object.values(customSchedule).some(Boolean)) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Выберите хотя бы один день недели для пользовательского графика',
 			});
 			return;
 		}
@@ -671,7 +685,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 	// Метод для программного создания цели
 	const createGoal = async () => {
-		if (!title || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+		if (!title || activeComplexity === null || activeCategory === null || (!image && !imageUrl) || !description) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -889,13 +903,17 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			}
 		}
 
-		// Сохраняем URL изображения, если он есть
+		// Сохраняем URL изображения, если он есть, иначе сбрасываем
 		if (goalData.imageUrl) {
 			setImageUrl(goalData.imageUrl);
 			setImage(null); // Сбрасываем локально загруженное изображение
 		} else if (goalData.image) {
 			setImageUrl(goalData.image);
 			setImage(null); // Сбрасываем локально загруженное изображение
+		} else {
+			// Если у новой цели нет изображения, удаляем старое
+			setImageUrl(null);
+			setImage(null);
 		}
 
 		const additionalFields = {
@@ -952,8 +970,10 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				<div className={element('content')}>
 					{/* Добавляем информационное сообщение */}
 					<div className={element('edit-info-message')}>
-						<Svg icon="info" className={element('info-icon')} />
-						<p>Вы сможете отредактировать или удалить цель в течение 24ч после создания, затем действие будет недоступно</p>
+						<Alert
+							type="info"
+							message="Вы сможете отредактировать или удалить цель в течение 24ч после создания, затем действие будет недоступно"
+						/>
 					</div>
 
 					{/* Добавляем компонент поиска внешних целей с учетом выбранной категории/подкатегории */}
@@ -975,20 +995,21 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					<div className={element('image-section')}>
 						<p className={element('field-title')}>Изображение цели *</p>
 						{!image && !imageUrl ? (
-							<div className={element('dropzone')}>
+							<div
+								className={element('dropzone')}
+								onClick={handleFileInputClick}
+								role="button"
+								tabIndex={0}
+								aria-label="Добавить изображение"
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault();
+										handleFileInputClick();
+									}
+								}}
+							>
 								<FileDrop onDrop={(files) => files && onDrop(files)}>
-									<div
-										className={element('upload-placeholder')}
-										onClick={handleFileInputClick}
-										role="button"
-										tabIndex={0}
-										aria-label="Добавить изображение"
-										onKeyPress={(e) => {
-											if (e.key === 'Enter' || e.key === ' ') {
-												handleFileInputClick();
-											}
-										}}
-									>
+									<div className={element('upload-placeholder')}>
 										<input
 											type="file"
 											ref={fileInputRef}
@@ -1184,7 +1205,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 										{regularFrequency === 'custom' && (
 											<div className={element('custom-schedule-selector')}>
-												<p className={element('field-title')}>Выберите дни недели</p>
+												<p className={element('field-title')}>Выберите дни недели (обязательно хотя бы один)</p>
 												<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
 											</div>
 										)}
@@ -1290,12 +1311,13 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 						<FieldInput
 							placeholder="Опишите цель подробно"
 							id="goal-description"
-							text="Описание"
+							text="Описание *"
 							value={description}
 							setValue={setDescription}
 							className={element('field')}
 							type="textarea"
 							rows={4}
+							required
 						/>
 
 						<div className={element('time-field-container')}>
