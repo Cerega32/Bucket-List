@@ -1,14 +1,14 @@
-import {FC, FormEvent, useState} from 'react';
+import { FC, FormEvent, useState } from 'react';
 
-import {Button} from '@/components/Button/Button';
-import {FieldInput} from '@/components/FieldInput/FieldInput';
-import {Svg} from '@/components/Svg/Svg';
-import {useBem} from '@/hooks/useBem';
-import {postLogin} from '@/utils/api/post/postLogin';
+import { Button } from '@/components/Button/Button';
+import { FieldInput } from '@/components/FieldInput/FieldInput';
+import { Svg } from '@/components/Svg/Svg';
+import { useBem } from '@/hooks/useBem';
+import { postLogin } from '@/utils/api/post/postLogin';
 import './login.scss';
 
-import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
-import {Title} from '../Title/Title';
+import { FieldCheckbox } from '../FieldCheckbox/FieldCheckbox';
+import { Title } from '../Title/Title';
 
 interface LoginProps {
 	className?: string;
@@ -25,10 +25,14 @@ export const Login: FC<LoginProps> = (props) => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
+	const [emailError, setEmailError] = useState<Array<string> | undefined>(undefined);
+	const [passwordError, setPasswordError] = useState<Array<string> | undefined>(undefined);
 	const [rememberMe, setRememberMe] = useState(false);
 
 	const signIn = async (e: FormEvent) => {
 		setError('');
+		setEmailError(undefined);
+		setPasswordError(undefined);
 		e.preventDefault();
 
 		const res = await postLogin(email, password, rememberMe);
@@ -37,7 +41,40 @@ export const Login: FC<LoginProps> = (props) => {
 
 			successLogin(res.data);
 		} else {
-			setError('Неправильные данные');
+			// Обрабатываем ошибки из API
+			if (res.errors) {
+				// Если ошибка в формате {email: [...], password: [...], non_field_errors: [...]}
+				if (typeof res.errors === 'object' && !Array.isArray(res.errors)) {
+					if (res.errors.email) {
+						setEmailError(Array.isArray(res.errors.email) ? res.errors.email : [res.errors.email]);
+					}
+					if (res.errors.password) {
+						setPasswordError(Array.isArray(res.errors.password) ? res.errors.password : [res.errors.password]);
+					}
+					if (res.errors.non_field_errors) {
+						const nonFieldErrors = Array.isArray(res.errors.non_field_errors)
+							? res.errors.non_field_errors
+							: [res.errors.non_field_errors];
+						setError(nonFieldErrors[0] || 'Неверный email или пароль');
+					} else if (!res.errors.email && !res.errors.password) {
+						// Если нет специфичных ошибок полей, показываем общую
+						setError('Неверный email или пароль');
+					}
+				} else if (typeof res.errors === 'string') {
+					// Если ошибка - строка
+					setError(res.errors);
+				} else if (Array.isArray(res.errors)) {
+					// Если ошибка - массив
+					setError(res.errors[0] || 'Неверный email или пароль');
+				} else {
+					setError('Неверный email или пароль');
+				}
+			} else if (res.error) {
+				// Если ошибка в формате {error: "..."}
+				setError(res.error);
+			} else {
+				setError('Неверный email или пароль');
+			}
 		}
 	};
 
@@ -56,6 +93,7 @@ export const Login: FC<LoginProps> = (props) => {
 					setValue={setEmail}
 					className={element('field')}
 					required
+					error={emailError}
 				/>
 				<FieldInput
 					placeholder="Пароль для входа"
@@ -66,6 +104,7 @@ export const Login: FC<LoginProps> = (props) => {
 					className={element('field')}
 					type="password"
 					required
+					error={passwordError}
 				/>
 				{error && <p className={element('error')}>{error}</p>}
 				<div className={element('move')}>

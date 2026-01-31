@@ -8,11 +8,78 @@
 
 	"editor.codeActionsOnSave": {
 		"source.organizeImports": "explicit",
-		"source.fixAll.stylelint": "explicit"
+		"source.fixAll.stylelint": "explicit",
+		"source.fixAll.eslint": "explicit"
 	},
+
+	// Настройки для TypeScript/JavaScript файлов
+	"[typescript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+	"[javascriptreact]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+
+	// Настройки для SCSS/CSS файлов
+	"[scss]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.fixAll.stylelint": "explicit"
+		}
+	},
+	"[css]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.fixAll.stylelint": "explicit"
+		}
+	},
+
+	// Настройки для JSON файлов
+	"[json]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+
+	// Настройки для Markdown файлов
+	"[markdown]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+
+	// Настройки для Python
 	"[python]": {
 		"editor.defaultFormatter": "ms-python.black-formatter"
 	},
 	"python.formatting.provider": "none",
-	"stylelint.validate": ["css", "scss"]
+
+	// Настройки Stylelint
+	"stylelint.enable": true,
+	"stylelint.validate": ["css", "scss"],
+	"stylelint.configFile": "stylelint.config.js",
+
+	// Настройки Prettier
+	"prettier.enable": true,
+	"prettier.configPath": ".prettierrc.json",
+	"prettier.requireConfig": true,
+
+	// Настройки для файлов проекта
+	"files.eol": "\n",
+	"files.insertFinalNewline": true,
+	"files.trimTrailingWhitespace": true
 }

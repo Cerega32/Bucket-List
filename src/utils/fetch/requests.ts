@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 
-import {INotification, NotificationStore} from '@/store/NotificationStore';
-import {withRetry} from '@/utils/api/apiRetry';
+import { INotification, NotificationStore } from '@/store/NotificationStore';
+import { withRetry } from '@/utils/api/apiRetry';
 
 export interface IRequestGet {
 	[key: string]: string | number | boolean | undefined;
@@ -37,7 +37,7 @@ const setHeaders = (params: IFetchParams = {}): Headers => {
 };
 
 const fetchData = async (url: string, method: string, params: IFetchParams = {}): Promise<any> => {
-	const {showErrorNotification = true, showSuccessNotification = true, enableRetry = false} = params;
+	const {showErrorNotification = true, showSuccessNotification = false, enableRetry = false} = params;
 
 	const makeRequest = async () => {
 		const headers = setHeaders(params);

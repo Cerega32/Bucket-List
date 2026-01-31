@@ -1,14 +1,14 @@
-import {observer} from 'mobx-react-lite';
-import {FC, useEffect} from 'react';
-import {Navigate, useSearchParams} from 'react-router-dom';
+import { observer } from 'mobx-react-lite';
+import { FC, useEffect } from 'react';
+import { Navigate, useSearchParams } from 'react-router-dom';
 
-import {Button} from '@/components/Button/Button';
-import {Svg} from '@/components/Svg/Svg';
-import {Title} from '@/components/Title/Title';
-import {useBem} from '@/hooks/useBem';
-import {ThemeStore} from '@/store/ThemeStore';
-import {UserStore} from '@/store/UserStore';
-import {IPage} from '@/typings/page';
+import { Button } from '@/components/Button/Button';
+import { Svg } from '@/components/Svg/Svg';
+import { Title } from '@/components/Title/Title';
+import { useBem } from '@/hooks/useBem';
+import { ThemeStore } from '@/store/ThemeStore';
+import { UserStore } from '@/store/UserStore';
+import { IPage } from '@/typings/page';
 
 import './PageEmailConfirmed.scss';
 
@@ -24,8 +24,13 @@ export const PageEmailConfirmed: FC<IPage> = observer(({page}) => {
 		setHeader('white');
 		setPage(page);
 		setFull(true);
+
+		// Если email успешно подтвержден, обновляем статус в UserStore
+		if (ok && UserStore.isAuth) {
+			UserStore.setEmailConfirmed(true);
+		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [ok]);
 
 	if (ok) {
 		if (UserStore.isAuth) {
