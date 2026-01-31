@@ -40,41 +40,41 @@ export const Login: FC<LoginProps> = (props) => {
 			// Прогресс заданий обновляется автоматически на бэкенде
 
 			successLogin(res.data);
-		} else {
-			// Обрабатываем ошибки из API
-			if (res.errors) {
-				// Если ошибка в формате {email: [...], password: [...], non_field_errors: [...]}
-				if (typeof res.errors === 'object' && !Array.isArray(res.errors)) {
-					if (res.errors.email) {
-						setEmailError(Array.isArray(res.errors.email) ? res.errors.email : [res.errors.email]);
-					}
-					if (res.errors.password) {
-						setPasswordError(Array.isArray(res.errors.password) ? res.errors.password : [res.errors.password]);
-					}
-					if (res.errors.non_field_errors) {
-						const nonFieldErrors = Array.isArray(res.errors.non_field_errors)
-							? res.errors.non_field_errors
-							: [res.errors.non_field_errors];
-						setError(nonFieldErrors[0] || 'Неверный email или пароль');
-					} else if (!res.errors.email && !res.errors.password) {
-						// Если нет специфичных ошибок полей, показываем общую
-						setError('Неверный email или пароль');
-					}
-				} else if (typeof res.errors === 'string') {
-					// Если ошибка - строка
-					setError(res.errors);
-				} else if (Array.isArray(res.errors)) {
-					// Если ошибка - массив
-					setError(res.errors[0] || 'Неверный email или пароль');
-				} else {
+			return;
+		}
+		// Обрабатываем ошибки из API
+		if (res.errors) {
+			// Если ошибка в формате {email: [...], password: [...], non_field_errors: [...]}
+			if (typeof res.errors === 'object' && !Array.isArray(res.errors)) {
+				if (res.errors.email) {
+					setEmailError(Array.isArray(res.errors.email) ? res.errors.email : [res.errors.email]);
+				}
+				if (res.errors.password) {
+					setPasswordError(Array.isArray(res.errors.password) ? res.errors.password : [res.errors.password]);
+				}
+				if (res.errors.non_field_errors) {
+					const nonFieldErrors = Array.isArray(res.errors.non_field_errors)
+						? res.errors.non_field_errors
+						: [res.errors.non_field_errors];
+					setError(nonFieldErrors[0] || 'Неверный email или пароль');
+				} else if (!res.errors.email && !res.errors.password) {
+					// Если нет специфичных ошибок полей, показываем общую
 					setError('Неверный email или пароль');
 				}
-			} else if (res.error) {
-				// Если ошибка в формате {error: "..."}
-				setError(res.error);
+			} else if (typeof res.errors === 'string') {
+				// Если ошибка - строка
+				setError(res.errors);
+			} else if (Array.isArray(res.errors)) {
+				// Если ошибка - массив
+				setError(res.errors[0] || 'Неверный email или пароль');
 			} else {
 				setError('Неверный email или пароль');
 			}
+		} else if (res.error) {
+			// Если ошибка в формате {error: "..."}
+			setError(res.error);
+		} else {
+			setError('Неверный email или пароль');
 		}
 	};
 

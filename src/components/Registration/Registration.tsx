@@ -1,14 +1,14 @@
-import { FC, FormEvent, useState } from 'react';
-import { Link } from 'react-router-dom';
+import {FC, FormEvent, useState} from 'react';
+import {Link} from 'react-router-dom';
 
-import { Button } from '@/components/Button/Button';
-import { FieldCheckbox } from '@/components/FieldCheckbox/FieldCheckbox';
-import { FieldInput } from '@/components/FieldInput/FieldInput';
-import { Svg } from '@/components/Svg/Svg';
-import { useBem } from '@/hooks/useBem';
-import { postRegistration } from '@/utils/api/post/postRegistration';
+import {Button} from '@/components/Button/Button';
+import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
+import {FieldInput} from '@/components/FieldInput/FieldInput';
+import {Svg} from '@/components/Svg/Svg';
+import {useBem} from '@/hooks/useBem';
+import {postRegistration} from '@/utils/api/post/postRegistration';
 
-import { Title } from '../Title/Title';
+import {Title} from '../Title/Title';
 import './registration.scss';
 
 interface RegistrationProps {
@@ -40,31 +40,31 @@ export const Registration: FC<RegistrationProps> = (props) => {
 		const res = await postRegistration(email, password);
 		if (res.success) {
 			successRegistration(res.data ?? res);
-		} else {
-			// Обрабатываем ошибки из API
-			if (res.errors) {
-				// Если ошибка в формате {email: [...], password: [...]}
-				if (typeof res.errors === 'object' && !Array.isArray(res.errors)) {
-					setError(res.errors);
-					// Если есть общие ошибки (non_field_errors), показываем их отдельно
-					if (res.errors.non_field_errors && Array.isArray(res.errors.non_field_errors)) {
-						setGeneralError(res.errors.non_field_errors[0]);
-					}
-				} else if (typeof res.errors === 'string') {
-					// Если ошибка - строка
-					setGeneralError(res.errors);
-				} else if (Array.isArray(res.errors)) {
-					// Если ошибка - массив
-					setGeneralError(res.errors[0] || 'Произошла ошибка при регистрации');
-				} else {
-					setGeneralError('Произошла ошибка при регистрации');
+			return;
+		}
+		// Обрабатываем ошибки из API
+		if (res.errors) {
+			// Если ошибка в формате {email: [...], password: [...]}
+			if (typeof res.errors === 'object' && !Array.isArray(res.errors)) {
+				setError(res.errors);
+				// Если есть общие ошибки (non_field_errors), показываем их отдельно
+				if (res.errors.non_field_errors && Array.isArray(res.errors.non_field_errors)) {
+					setGeneralError(res.errors.non_field_errors[0]);
 				}
-			} else if (res.error) {
-				// Если ошибка в формате {error: "..."}
-				setGeneralError(res.error);
+			} else if (typeof res.errors === 'string') {
+				// Если ошибка - строка
+				setGeneralError(res.errors);
+			} else if (Array.isArray(res.errors)) {
+				// Если ошибка - массив
+				setGeneralError(res.errors[0] || 'Произошла ошибка при регистрации');
 			} else {
 				setGeneralError('Произошла ошибка при регистрации');
 			}
+		} else if (res.error) {
+			// Если ошибка в формате {error: "..."}
+			setGeneralError(res.error);
+		} else {
+			setGeneralError('Произошла ошибка при регистрации');
 		}
 	};
 
