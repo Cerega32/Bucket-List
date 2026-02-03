@@ -86,7 +86,7 @@ export const SubscriptionComparisonModal: FC<SubscriptionComparisonModalProps> =
 	};
 
 	return (
-		<Modal isOpen={isOpen} onClose={onClose} title="Сравнение тарифов">
+		<Modal isOpen={isOpen} onClose={onClose} title="Сравнение тарифов" size="large">
 			<div className={block()}>
 				<div className={element('table-wrapper')}>
 					<table className={element('table')}>

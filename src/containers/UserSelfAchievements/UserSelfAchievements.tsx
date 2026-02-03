@@ -4,6 +4,7 @@ import {FC, useEffect, useMemo, useState} from 'react';
 import {Achievement} from '@/components/Achievement/Achievement';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {Loader} from '@/components/Loader/Loader';
+import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {AchievementCategory, IAchievement} from '@/typings/achievements';
 import {GET} from '@/utils/fetch/requests';
@@ -91,7 +92,9 @@ export const UserSelfAchievements: FC = observer(() => {
 
 						return (
 							<div key={category} className={element('group')}>
-								<h3 className={element('group-title')}>{CATEGORY_NAMES[category]}</h3>
+								<Title tag="h2" className={element('group-title')}>
+									{CATEGORY_NAMES[category]}
+								</Title>
 								<div className={element('group-content')}>
 									{categoryAchievements.map((achievement) => (
 										<Achievement key={achievement.id} className={element('achievement')} achievement={achievement} />

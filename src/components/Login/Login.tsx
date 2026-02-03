@@ -13,7 +13,7 @@ import {Title} from '../Title/Title';
 interface LoginProps {
 	className?: string;
 	openRegistration: () => void;
-	openForgotPassword?: () => void;
+	openForgotPassword?: (email?: string) => void;
 	successLogin: (data: any) => void;
 	isPage?: boolean;
 }
@@ -28,14 +28,16 @@ export const Login: FC<LoginProps> = (props) => {
 	const [emailError, setEmailError] = useState<Array<string> | undefined>(undefined);
 	const [passwordError, setPasswordError] = useState<Array<string> | undefined>(undefined);
 	const [rememberMe, setRememberMe] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const signIn = async (e: FormEvent) => {
 		setError('');
 		setEmailError(undefined);
 		setPasswordError(undefined);
 		e.preventDefault();
-
+		setIsLoading(true);
 		const res = await postLogin(email, password, rememberMe);
+		setIsLoading(false);
 		if (res.success) {
 			// Прогресс заданий обновляется автоматически на бэкенде
 
@@ -110,12 +112,26 @@ export const Login: FC<LoginProps> = (props) => {
 				<div className={element('move')}>
 					<FieldCheckbox id="remember" text="Запомнить меня" checked={rememberMe} setChecked={setRememberMe} />
 					{openForgotPassword && (
-						<Button theme="no-border" className={element('forgot-password')} onClick={openForgotPassword} typeBtn="button">
+						<Button
+							theme="no-border"
+							className={element('forgot-password')}
+							onClick={() => openForgotPassword(email)}
+							typeBtn="button"
+						>
 							Забыли пароль?
 						</Button>
 					)}
 				</div>
-				<Button typeBtn="submit" icon="sign-in" theme="blue" className={element('btn')} onClick={signIn}>
+				<Button
+					typeBtn="submit"
+					icon="sign-in"
+					theme="blue"
+					className={element('btn')}
+					onClick={signIn}
+					loading={isLoading}
+					loadingText="Вход..."
+					disabled={!email.trim() || !password.trim()}
+				>
 					Войти
 				</Button>
 				<p className={element('registration')}>

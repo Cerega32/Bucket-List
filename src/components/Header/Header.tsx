@@ -490,9 +490,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 									{/* Кнопка регулярных целей */}
 									<button
 										type="button"
-										className={element('notifications-button', {
-											regularGoals: HeaderRegularGoalsStore.hasRegularGoalsToday,
-										})}
+										className={element('notifications-button')}
 										onClick={toggleRegularGoals}
 										aria-label="Регулярные цели"
 									>

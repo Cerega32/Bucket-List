@@ -23,6 +23,7 @@ interface ButtonProps {
 	hoverIcon?: string;
 	disabled?: boolean;
 	loading?: boolean;
+	loadingText?: string;
 	refInner?: React.RefObject<HTMLButtonElement>;
 	withBorder?: boolean;
 }
@@ -44,6 +45,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		hoverIcon,
 		disabled,
 		loading,
+		loadingText,
 		refInner,
 		withBorder,
 	} = props;
@@ -113,7 +115,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		<>
 			{!loading && iconState && <Svg width="16px" height="16px" icon={iconState} className={element('icon')} />}
 			{loading && <span className={element('loading')} />}
-			{loading ? !iconState : text}
+			{loading ? loadingText ?? text : text}
 		</>
 	);
 

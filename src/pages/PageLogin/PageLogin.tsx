@@ -10,13 +10,14 @@ import {IPage} from '@/typings/page';
 
 export const PageLogin: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;
-	const {setWindow, setIsOpen} = ModalStore;
+	const {setWindow, setIsOpen, setModalProps} = ModalStore;
 
 	const {setName, setIsAuth, setAvatar} = UserStore;
 
 	const navigate = useNavigate();
 
-	const openForgotPassword = () => {
+	const openForgotPassword = (email?: string) => {
+		setModalProps({initialEmail: email ?? ''});
 		setWindow('forgot-password');
 		setIsOpen(true);
 	};

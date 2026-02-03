@@ -27,6 +27,7 @@ interface RegularCardPropsRegular extends RegularCardPropsBase {
 	regularGoal: IGoal;
 	statistics: IRegularGoalStatistics;
 	onMarkRegular: () => Promise<void> | void;
+	onRestart?: () => Promise<void> | void;
 	progressGoal?: never;
 	onOpenProgressModal?: never;
 	// onMarkCompleted?: never;
@@ -306,7 +307,8 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 		);
 	}
 
-	const {regularGoal: goal, statistics, onMarkRegular} = props;
+	const {regularGoal: goal, statistics, onMarkRegular, onRestart} = props;
+	const isInterrupted = !!statistics.isInterrupted;
 	const currentProgress = getCurrentProgress(statistics);
 	const isCompletedToday = !!currentProgress?.completed;
 	const completionPercent = Math.round(statistics.completionPercentage || 0);
@@ -376,15 +378,17 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 				<Line />
 				<div className={element('actions')}>
 					<Button
-						theme={isCompletedToday ? 'green' : isBlockedOrUnavailableToday ? 'blue-light' : 'blue'}
-						onClick={isBlockedOrUnavailableToday ? undefined : onMarkRegular}
-						icon={isBlockedOrUnavailableToday ? undefined : 'regular'}
+						theme={isInterrupted ? 'blue' : isCompletedToday ? 'green' : isBlockedOrUnavailableToday ? 'blue-light' : 'blue'}
+						onClick={isInterrupted && onRestart ? onRestart : isBlockedOrUnavailableToday ? undefined : onMarkRegular}
+						icon={isInterrupted && onRestart ? 'regular-empty' : isBlockedOrUnavailableToday ? undefined : 'regular'}
 						className={element('primary-button')}
-						disabled={isBlockedOrUnavailableToday}
-						hoverContent={isCompletedToday ? 'Отменить выполнение' : undefined}
-						hoverIcon={isCompletedToday ? 'cross' : undefined}
+						disabled={!isInterrupted && isBlockedOrUnavailableToday}
+						hoverContent={isCompletedToday && !isInterrupted ? 'Отменить выполнение' : undefined}
+						hoverIcon={isCompletedToday && !isInterrupted ? 'cross' : undefined}
 					>
-						{isCompletedToday
+						{isInterrupted && onRestart
+							? 'Начать заново'
+							: isCompletedToday
 							? 'Выполнено сегодня'
 							: isBlockedOrUnavailableToday
 							? 'Сегодня выполнить цель нельзя'
