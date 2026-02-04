@@ -313,10 +313,6 @@
 		border: none;
 		border-radius: 50%;
 		cursor: pointer;
-
-		&--regularGoals {
-			border-radius: 6px;
-		}
 	}
 
 	&__notifications-icon {
@@ -398,8 +394,14 @@
 		width: 20px;
 		height: 20px;
 
+		svg *,
+		path {
+			fill: var(--color-text-secondary);
+		}
+
 		&--theme-transparent {
-			svg * {
+			svg *,
+			path {
 				fill: var(--color-white);
 			}
 		}

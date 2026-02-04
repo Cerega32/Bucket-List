@@ -17,14 +17,6 @@
 		}
 	}
 
-	&__header {
-		margin-bottom: 32px;
-
-		@include md {
-			margin-bottom: 24px;
-		}
-	}
-
 	&__title {
 		margin-bottom: 24px;
 	}

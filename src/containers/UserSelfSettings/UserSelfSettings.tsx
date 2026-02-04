@@ -287,25 +287,26 @@ export const UserSelfSettings: FC = observer(() => {
 									<span className={element('email-confirmed')}>✓ Email подтвержден</span>
 								) : (
 									<div className={element('email-not-confirmed')}>
-										<span className={element('email-warning')}>⚠ Email не подтвержден</span>
-										<span className={element('email-hint')}>
-											Email будет подтверждён только после перехода по ссылке в письме.
-										</span>
-										<Button
-											theme="blue-light"
-											size="small"
-											onClick={handleResendConfirmationEmail}
-											disabled={isResendingEmail || resendCooldown > 0}
-											className={element('resend-btn')}
-										>
-											{isResendingEmail
-												? 'Отправка...'
-												: emailSent
-												? 'Отправлено!'
-												: resendCooldown > 0
-												? `Повтор через ${resendCooldown} с`
-												: 'Отправить письмо'}
-										</Button>
+										<div className={element('email-not-confirmed-row')}>
+											<span className={element('email-warning')}>
+												⚠ Email не подтвержден - отправьте письмо для подтверждения
+											</span>
+											<Button
+												theme="blue-light"
+												size="small"
+												onClick={handleResendConfirmationEmail}
+												disabled={isResendingEmail || resendCooldown > 0}
+												className={element('resend-btn')}
+											>
+												{isResendingEmail
+													? 'Отправка...'
+													: emailSent
+													? 'Отправлено!'
+													: resendCooldown > 0
+													? `Повтор через ${resendCooldown} с`
+													: 'Отправить письмо'}
+											</Button>
+										</div>
 									</div>
 								)}
 							</div>

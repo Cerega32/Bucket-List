@@ -50,10 +50,19 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({element}) => {
 	return element;
 };
 
+/** Не прокручивать наверх при переключении маршрутов */
+const shouldScrollOnRouteChange = (prevPathname: string, pathname: string): boolean => {
+	const base = (p: string) => p.replace(/\/lists$/, '');
+	if (base(prevPathname) === base(pathname) && prevPathname !== pathname) {
+		return false;
+	}
+	return true;
+};
+
 export const RoutesAuth: FC = observer(() => {
 	return (
 		<main className="main">
-			<ScrollToTopOnRouteChange />
+			<ScrollToTopOnRouteChange shouldScroll={shouldScrollOnRouteChange} />
 			<Routes>
 				{/* Новый маршрут для дашборда (главной страницы) */}
 				{/* <Route path="/" element={<PageDashboard page="isDashboard" />} /> */}

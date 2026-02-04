@@ -1,12 +1,24 @@
-import {FC, useEffect} from 'react';
+import {FC, useEffect, useRef} from 'react';
 import {useLocation} from 'react-router-dom';
 
-export const ScrollToTopOnRouteChange: FC = () => {
+/** Если передан — прокрутка выполняется только когда функция возвращает true. Иначе — всегда прокручиваем наверх. */
+export interface ScrollToTopOnRouteChangeProps {
+	shouldScroll?: (prevPathname: string, pathname: string) => boolean;
+}
+
+export const ScrollToTopOnRouteChange: FC<ScrollToTopOnRouteChangeProps> = ({shouldScroll}) => {
 	const {pathname} = useLocation();
+	const prevPathnameRef = useRef(pathname);
 
 	useEffect(() => {
-		window.scrollTo(0, 0);
-	}, [pathname]);
+		const prev = prevPathnameRef.current;
+		prevPathnameRef.current = pathname;
+
+		const doScroll = shouldScroll ? shouldScroll(prev, pathname) : true;
+		if (doScroll) {
+			window.scrollTo(0, 0);
+		}
+	}, [pathname, shouldScroll]);
 
 	return null;
 };

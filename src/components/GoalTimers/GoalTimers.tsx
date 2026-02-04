@@ -115,10 +115,10 @@ const GoalTimers: FC = () => {
 	return (
 		<div className={block()}>
 			<div className={element('header')}>
-				<Title tag="h1" className={element('title')}>
+				<Title tag="h2" className={element('title')}>
 					Мои таймеры
 				</Title>
-				<Button theme="blue-light" onClick={toggleShowExpired} className={element('toggle-button')} size="medium">
+				<Button theme="blue-light" onClick={toggleShowExpired} className={element('toggle-button')} size="medium" width="auto">
 					{showExpired ? 'Скрыть истекшие' : 'Показать истекшие'}
 				</Button>
 			</div>

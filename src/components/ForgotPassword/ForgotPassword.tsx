@@ -1,4 +1,4 @@
-import {FC, FormEvent, useState} from 'react';
+import {FC, FormEvent, useEffect, useState} from 'react';
 
 import {Button} from '@/components/Button/Button';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
@@ -12,14 +12,19 @@ import './forgot-password.scss';
 interface ForgotPasswordProps {
 	className?: string;
 	onBack?: () => void;
+	initialEmail?: string;
 }
 
 export const ForgotPassword: FC<ForgotPasswordProps> = (props) => {
-	const {className, onBack} = props;
+	const {className, onBack, initialEmail = ''} = props;
 
 	const [block, element] = useBem('forgot-password', className);
-	const [email, setEmail] = useState('');
+	const [email, setEmail] = useState(initialEmail);
 	const [error, setError] = useState('');
+
+	useEffect(() => {
+		setEmail(initialEmail);
+	}, [initialEmail]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isSent, setIsSent] = useState(false);
 
@@ -93,7 +98,7 @@ export const ForgotPassword: FC<ForgotPasswordProps> = (props) => {
 					autoComplete="email"
 				/>
 				{error && <p className={element('error')}>{error}</p>}
-				<Button typeBtn="submit" icon="email" theme="blue" className={element('btn')} disabled={isLoading}>
+				<Button typeBtn="submit" icon="email" theme="blue" className={element('btn')} disabled={isLoading} loading={isLoading}>
 					{isLoading ? 'Отправка...' : 'Отправить письмо'}
 				</Button>
 				{onBack && (

@@ -26,6 +26,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 	const [password, setPassword] = useState('');
 	const [repeatPassword, setRepeatPassword] = useState('');
 	const [privacyConsent, setPrivacyConsent] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<{email?: Array<string>; password?: Array<string>; non_field_errors?: Array<string>}>({});
 	const [generalError, setGeneralError] = useState<string>('');
 
@@ -37,7 +38,9 @@ export const Registration: FC<RegistrationProps> = (props) => {
 			setError({password: ['Пароли не совпадают']});
 			return;
 		}
+		setIsLoading(true);
 		const res = await postRegistration(email, password);
+		setIsLoading(false);
 		if (res.success) {
 			successRegistration(res.data ?? res);
 			return;
@@ -127,7 +130,15 @@ export const Registration: FC<RegistrationProps> = (props) => {
 						className={element('consent-checkbox')}
 					/>
 				</div>
-				<Button icon="rocket" theme="blue" className={element('btn')} typeBtn="submit" disabled={!privacyConsent}>
+				<Button
+					icon="rocket"
+					theme="blue"
+					className={element('btn')}
+					typeBtn="submit"
+					disabled={!email.trim() || !password.trim() || !repeatPassword.trim() || !privacyConsent}
+					loading={isLoading}
+					loadingText="Регистрация..."
+				>
 					Зарегистрироваться
 				</Button>
 				<p className={element('sign-in')}>

@@ -40,7 +40,7 @@ interface ModalProps {
 export const Modal: FC<ModalProps> = observer((props) => {
 	const {className, children, isOpen: externalIsOpen, onClose: externalOnClose, title, size} = props;
 	const [block, element] = useBem('modal', className);
-	const {isOpen: storeIsOpen, setIsOpen, window, setWindow, funcModal, modalProps} = ModalStore;
+	const {isOpen: storeIsOpen, setIsOpen, window, setWindow, funcModal, modalProps, setModalProps} = ModalStore;
 	const {setIsAuth, setName, setAvatar, setUserInfo, userInfo} = UserStore;
 
 	// Используем внешние пропсы если они переданы, иначе из store
@@ -63,7 +63,8 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		setWindow('login');
 	};
 
-	const openForgotPassword = () => {
+	const openForgotPassword = (email?: string) => {
+		setModalProps({initialEmail: email ?? ''});
 		setWindow('forgot-password');
 	};
 
@@ -92,12 +93,6 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		if (e.key === 'Escape') {
 			closeWindow();
 		}
-	};
-
-	// Блокируем прокрутку страницы (wheel/touch), но не трогаем overflow — скроллбар остаётся видимым
-	const preventScroll = (e: WheelEvent | TouchEvent) => {
-		if (modalRef.current && modalRef.current.contains(e.target as Node)) return;
-		e.preventDefault();
 	};
 
 	// Обработчик для ловушки фокуса
@@ -129,6 +124,57 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		}
 	};
 
+	function findScrollParent(node: HTMLElement | null, boundary: HTMLElement): HTMLElement | null {
+		let current = node;
+		while (current && current !== boundary) {
+			const {overflowY} = getComputedStyle(current);
+			if (/(auto|scroll|overlay)/.test(overflowY) && current.scrollHeight > current.clientHeight) {
+				return current;
+			}
+			current = current.parentElement;
+		}
+		return current && current !== boundary ? current : null;
+	}
+
+	// Блокировка прокрутки фона при открытой модалке (полоса прокрутки остаётся видимой)
+	useEffect(() => {
+		if (!isOpen) return;
+
+		const modal = modalRef.current;
+
+		const preventBackgroundScroll = (e: WheelEvent | TouchEvent) => {
+			const target = e.target as Node;
+			// Вне модалки — всегда блокируем
+			if (!modal?.contains(target)) {
+				e.preventDefault();
+				return;
+			}
+			// Внутри модалки — блокируем только scroll chaining (колёсико у границы)
+			const el = findScrollParent(e.target as HTMLElement, modal);
+			if (!el) {
+				e.preventDefault();
+				return;
+			}
+			if (e instanceof WheelEvent) {
+				const {scrollTop, scrollHeight, clientHeight} = el;
+				const atTop = scrollTop <= 0;
+				const atBottom = scrollTop + clientHeight >= scrollHeight;
+				if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) {
+					e.preventDefault();
+				}
+			}
+			// touchmove: overscroll-behavior: contain в CSS не даёт скроллу уйти на body
+		};
+
+		document.addEventListener('wheel', preventBackgroundScroll, {passive: false});
+		document.addEventListener('touchmove', preventBackgroundScroll, {passive: false});
+
+		return () => {
+			document.removeEventListener('wheel', preventBackgroundScroll);
+			document.removeEventListener('touchmove', preventBackgroundScroll);
+		};
+	}, [isOpen]);
+
 	useEffect(() => {
 		if (!isOpen) return;
 
@@ -149,16 +195,9 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			}
 		}, 50);
 
-		// Блокируем прокрутку через отмену событий — скроллбар не скрываем, контент не дёргается
-		const passive = false;
-		document.addEventListener('wheel', preventScroll, {passive});
-		document.addEventListener('touchmove', preventScroll, {passive});
-
 		return () => {
 			document.removeEventListener('keyup', handleKeyUp);
 			document.removeEventListener('keydown', handleTabKey);
-			document.removeEventListener('wheel', preventScroll);
-			document.removeEventListener('touchmove', preventScroll);
 		};
 	}, [isOpen]);
 
@@ -172,7 +211,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				<Login openRegistration={openRegistration} openForgotPassword={openForgotPassword} successLogin={successAuth} />
 			)}
 			{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
-			{window === 'forgot-password' && <ForgotPassword onBack={openLogin} />}
+			{window === 'forgot-password' && <ForgotPassword onBack={openLogin} initialEmail={modalProps?.initialEmail} />}
 			{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
 			{window === 'add-review' && <AddReview closeModal={closeWindow} />}
 			{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}

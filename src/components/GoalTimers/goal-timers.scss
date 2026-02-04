@@ -1,6 +1,10 @@
 .goal-timers {
 	padding: 20px;
 	margin: 0 auto;
+	background: var(--color-white);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgb(var(--color-black-rgb) / 8%);
+	margin-top: 56px;
 
 	&__header {
 		display: flex;
