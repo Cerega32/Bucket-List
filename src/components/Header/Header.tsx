@@ -21,6 +21,7 @@ import {getUser} from '@/utils/api/get/getUser';
 
 import {ThemeStore} from '../../store/ThemeStore';
 import {Avatar} from '../Avatar/Avatar';
+import {FeedbackModal} from '../FeedbackModal/FeedbackModal';
 import {GlobalGoalsSearch} from '../GlobalGoalsSearch/GlobalGoalsSearch';
 import {Line} from '../Line/Line';
 import {ModalPhone} from '../ModalPhone/ModalPhone';
@@ -44,10 +45,12 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const [isRegularGoalsOpen, setIsRegularGoalsOpen] = useState(false);
 	const [isProgressOpen, setIsProgressOpen] = useState(false);
 	const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+	const [isPreHeaderHidden, setIsPreHeaderHidden] = useState(false);
 	const [hoveredParentId, setHoveredParentId] = useState<number | null>(null);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
+	const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
 
 	const [block, element] = useBem('header', className);
 
@@ -170,6 +173,20 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		}
 	}, [isAuth]);
 
+	// Скрываем pre-header при прокрутке страницы
+	useEffect(() => {
+		const handleScroll = () => {
+			setIsPreHeaderHidden(window.scrollY > 0);
+		};
+
+		handleScroll();
+		window.addEventListener('scroll', handleScroll);
+
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+		};
+	}, []);
+
 	// Загрузка количества регулярных целей на сегодня для бейджа
 	useEffect(() => {
 		if (isAuth) {
@@ -290,6 +307,21 @@ export const Header: FC<HeaderProps> = observer((props) => {
 					Новости
 				</Link>
 			</li>
+			<li className={element('item')}>
+				<Link className={element('item-link', {active: page === 'isAbout'})} to="/about">
+					О проекте
+				</Link>
+			</li>
+			<li className={element('item')}>
+				<Link className={element('item-link', {active: page === 'isHelp'})} to="/help">
+					Помощь
+				</Link>
+			</li>
+			<li className={element('item')}>
+				<Link className={element('item-link', {active: page === 'isContacts'})} to="/contacts">
+					Контакты
+				</Link>
+			</li>
 		</ul>
 	);
 
@@ -311,7 +343,28 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	);
 
 	return (
-		<header className={block({theme: header})}>
+		<header className={block({theme: header, compact: isPreHeaderHidden})}>
+			<div className={element('wrapper-pre-header', {hidden: isPreHeaderHidden})}>
+				<nav className={element('nav')} ref={menuRef}>
+					{(isScreenSmallTablet || isScreenMobile) && (
+						<Button className={element('categories-link')} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+							<>
+								<Svg icon="bars" className={element('categories-icon')} />
+								{!isScreenSmallMobile ? 'Меню' : ''}
+							</>
+						</Button>
+					)}
+					{!isScreenMobile && menuList}
+				</nav>
+				{/* Оставить отзыв о платформе */}
+				<button
+					type="button"
+					className={element('item-link', {active: page === 'isReview'})}
+					onClick={() => setIsFeedbackModalOpen(true)}
+				>
+					Оставить отзыв
+				</button>
+			</div>
 			<div className={element('wrapper')}>
 				<Link className={element('logo')} to="/" aria-label="Главная">
 					{isScreenMobile ? <Svg icon="icon-logo" className={element('logo-icon')} /> : <Svg icon="delting" />}
@@ -411,20 +464,14 @@ export const Header: FC<HeaderProps> = observer((props) => {
 						)}
 					</li>
 				</ul>
-				<nav className={element('nav')} ref={menuRef}>
-					{(isScreenSmallTablet || isScreenMobile) && (
-						<Button className={element('categories-link')} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-							<>
-								<Svg icon="bars" className={element('categories-icon')} />
-								{!isScreenSmallMobile ? 'Меню' : ''}
-							</>
-						</Button>
-					)}
-					{!isScreenMobile && menuList}
-				</nav>
+
 				{isAuth
 					? !isScreenSmallMobile && (
 							<div className={element('right-menu')}>
+								{/* создать кнопка */}
+								<Button size="small" type="Link" theme="light" icon="plus" href="/goals/create">
+									Создать
+								</Button>
 								<div className={element('notifications-wrapper')} ref={notificationsRef}>
 									{/* Кнопка уведомлений */}
 									<button
@@ -625,6 +672,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 					))}
 				</div>
 			</ModalPhone>
+			<FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
 		</header>
 	);
 });

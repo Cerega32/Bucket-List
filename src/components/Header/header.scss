@@ -8,9 +8,35 @@
 	height: var(--height-header);
 	padding: 16px 0;
 	border-bottom: 1px solid rgb(var(--color-white-rgb) / 16%);
+	transition: height 0.25s ease-in-out, padding 0.25s ease-in-out;
 
 	@include xl {
 		padding: 16px 24px;
+	}
+
+	&__wrapper-pre-header {
+		@include max-width;
+
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 32px;
+		margin-bottom: 16px;
+		max-height: 40px; // примерная высота pre-header
+		overflow: hidden;
+		transition: max-height 0.25s ease-in-out, margin-bottom 0.25s ease-in-out, opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+
+		@include lg {
+			gap: 16px;
+		}
+
+		&--hidden {
+			max-height: 0;
+			margin-bottom: 0;
+			opacity: 0;
+			transform: translateY(-8px);
+			pointer-events: none;
+		}
 	}
 
 	&__wrapper {
@@ -616,5 +642,31 @@
 				}
 			}
 		}
+
+		// Кнопка "Создать" (theme=\"light\")
+		.button--theme-light {
+			color: var(--color-white);
+
+			svg *,
+			path {
+				fill: var(--color-white);
+			}
+
+			&:hover,
+			&:active {
+				background: rgb(var(--color-white-rgb) / 8%);
+				backdrop-filter: blur(8px);
+			}
+
+			// Волна на прозрачном фоне
+			.button__ripple {
+				background-color: rgba(var(--color-white-rgb) / 40%);
+			}
+		}
+	}
+
+	// Компактный режим (когда скрыт pre-header при прокрутке)
+	&--compact {
+		height: var(--height-header-compact);
 	}
 }
