@@ -17,7 +17,8 @@ type IWindow =
 	| 'folder-selector'
 	| 'progress-update'
 	| 'random-goal-picker'
-	| 'set-regular-goal';
+	| 'set-regular-goal'
+	| 'compare-friend';
 
 export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 

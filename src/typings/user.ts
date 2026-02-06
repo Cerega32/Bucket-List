@@ -150,3 +150,45 @@ export interface IFriendComparison {
 		};
 	};
 }
+
+/** Ответ API сравнения с другом: GET /api/friends/compare/:id/ */
+export interface IFriendCompareResponse {
+	user: {
+		id: number;
+		username: string;
+		firstName?: string;
+		lastName?: string;
+		first_name?: string;
+		last_name?: string;
+		activity: {
+			goalsCompleted?: number;
+			listsCompleted?: number;
+			totalCompleted?: number;
+			latestCompletion?: string | null;
+			goals_completed?: number;
+			lists_completed?: number;
+			total_completed?: number;
+			latest_completion?: string | null;
+		};
+		avatar?: string | null;
+	};
+	friend: {
+		id: number;
+		username: string;
+		firstName?: string;
+		lastName?: string;
+		first_name?: string;
+		last_name?: string;
+		activity: {
+			goalsCompleted?: number;
+			listsCompleted?: number;
+			totalCompleted?: number;
+			latestCompletion?: string | null;
+			goals_completed?: number;
+			lists_completed?: number;
+			total_completed?: number;
+			latest_completion?: string | null;
+		};
+		avatar?: string | null;
+	};
+}
