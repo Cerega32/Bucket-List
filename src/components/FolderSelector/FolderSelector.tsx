@@ -118,7 +118,6 @@ export const FolderSelector: FC<FolderSelectorProps> = observer(
 									<div className={element('folder-info')}>
 										<h4 className={element('folder-name')}>
 											{folder.name}
-											{folder.isPrivate && <span className={element('private-badge')}>Приватная</span>}
 											{isAlreadyInFolder && <span className={element('added-badge')}>Уже добавлена</span>}
 										</h4>
 										{folder.description && <p className={element('folder-description')}>{folder.description}</p>}
