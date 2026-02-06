@@ -1,6 +1,23 @@
 .title-with-tags {
 	$block: &;
 
+	&__title-copyable {
+		display: block;
+		width: 100%;
+		padding: 0;
+		margin: 0;
+		text-align: left;
+		background: none;
+		border: none;
+		cursor: pointer;
+		font: inherit;
+		color: inherit;
+
+		&:hover {
+			opacity: 0.9;
+		}
+	}
+
 	&__title {
 		margin-bottom: 16px;
 

@@ -239,7 +239,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 					if (window.scrollY < headerHeight - (headerRef.current?.offsetHeight || 0)) {
 						setShrink(false);
 					}
-				} else if (window.scrollY > headerHeight - 128) {
+				} else if (window.scrollY > headerHeight - 168) {
 					setShrink(true);
 				}
 			} else if (window.scrollY > threshold) {

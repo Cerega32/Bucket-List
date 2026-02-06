@@ -40,7 +40,8 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const {setIsOpen, setWindow} = ModalStore;
 	const {categoriesTree, setCategories} = CategoriesStore;
 	const {isScreenDesktop, isScreenSmallTablet, isScreenMobile, isScreenSmallMobile, isScreenTablet} = useScreenSize();
-	const {isAuth, name, avatar, setAvatar, setIsAuth, setName, userSelf} = UserStore;
+	const isCategoriesLabelVisible = isScreenDesktop || (isScreenTablet && !isScreenSmallTablet);
+	const {isAuth, avatar, setAvatar, setIsAuth, setName, userSelf} = UserStore;
 	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 	const [isRegularGoalsOpen, setIsRegularGoalsOpen] = useState(false);
 	const [isProgressOpen, setIsProgressOpen] = useState(false);
@@ -48,6 +49,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const [isPreHeaderHidden, setIsPreHeaderHidden] = useState(false);
 	const [hoveredParentId, setHoveredParentId] = useState<number | null>(null);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
 	const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -154,7 +156,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	// Обработчик клика по аватару на мобильных устройствах
 	const handleAvatarClick = () => {
 		if (isScreenMobile) {
-			setIsMenuOpen(true);
+			setIsUserMenuOpen(true);
 		}
 	};
 
@@ -221,6 +223,23 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const menuProfile = (
 		<div className={element('profile-menu')}>
 			<UserSelfProfile hideSubscriptionButton noBorder />
+			{isScreenMobile ? (
+				<>
+					<button
+						type="button"
+						className={element('menu-item')}
+						onClick={() => {
+							setIsUserMenuOpen(true);
+							setIsNotificationsOpen(true);
+						}}
+					>
+						Уведомления
+					</button>
+					<Line margin="8px 0" />
+				</>
+			) : (
+				<Line margin="8px 0" />
+			)}
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self" end>
 				Дашборд
 			</NavLink>
@@ -260,7 +279,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/maps" end>
 				Мои карты
 			</NavLink>
-			{!isScreenMobile && <Line margin="8px 0" />}
+			<Line margin="8px 0" />
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/subs" end>
 				Больше функционала
 			</NavLink>
@@ -275,7 +294,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const menuList = (
 		<ul className={element('list', {open: isMenuOpen, noAuth: !isAuth})}>
-			{!isAuth && (isScreenSmallTablet || isScreenMobile) && (
+			{!isAuth && isScreenMobile && (
 				<>
 					<Button theme="integrate" size="small" onClick={openLogin}>
 						Войти
@@ -346,14 +365,6 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		<header className={block({theme: header, compact: isPreHeaderHidden})}>
 			<div className={element('wrapper-pre-header', {hidden: isPreHeaderHidden})}>
 				<nav className={element('nav')} ref={menuRef}>
-					{(isScreenSmallTablet || isScreenMobile) && (
-						<Button className={element('categories-link')} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-							<>
-								<Svg icon="bars" className={element('categories-icon')} />
-								{!isScreenSmallMobile ? 'Меню' : ''}
-							</>
-						</Button>
-					)}
 					{!isScreenMobile && menuList}
 				</nav>
 				{/* Оставить отзыв о платформе */}
@@ -366,234 +377,22 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				</button>
 			</div>
 			<div className={element('wrapper')}>
-				<Link className={element('logo')} to="/" aria-label="Главная">
-					{isScreenMobile ? <Svg icon="icon-logo" className={element('logo-icon')} /> : <Svg icon="delting" />}
-				</Link>
-				<ul className={element('list-categories')}>
-					<li
-						ref={categoriesRef}
-						className={element('categories-item')}
-						onMouseEnter={() => isScreenDesktop && setIsCategoriesOpen(true)}
-						onMouseLeave={() => {
-							if (isScreenDesktop) {
-								setIsCategoriesOpen(false);
-								setHoveredParentId(null);
-							}
-						}}
-					>
-						{isScreenTablet ? (
-							<button type="button" className={element('categories-link')} onClick={handleCategoriesClick}>
-								<Svg icon="apps" className={element('categories-icon')} />
-								{isScreenDesktop ? 'Категории' : ''}
-							</button>
-						) : !isScreenDesktop ? (
-							<Button className={element('categories-link')} onClick={() => setIsCategoriesModalOpen(true)}>
-								<Svg icon="apps" className={element('categories-icon')} />
-							</Button>
-						) : (
-							<div className={element('categories-link')}>
-								<Svg icon="apps" className={element('categories-icon')} />
-								{isScreenDesktop ? 'Категории' : ''}
-							</div>
-						)}
-						<AnimatePresence>
-							{isCategoriesOpen && (
-								<motion.ul
-									className={element('categories-list', {open: true})}
-									initial={{opacity: 0, y: 8}}
-									animate={{opacity: 1, y: 0}}
-									exit={{opacity: 0, y: 8}}
-									transition={{duration: 0.15, ease: 'easeOut'}}
-								>
-									{categoriesTree.map((category) => (
-										<li
-											key={category.id}
-											className={element('categories-item-parent')}
-											onMouseEnter={() => setHoveredParentId(category.id)}
-											onMouseLeave={() => setHoveredParentId(null)}
-										>
-											<Link className={element('category-link')} to={`/categories/${category.nameEn}`}>
-												{category?.icon ? (
-													<img
-														src={category?.icon}
-														alt={category?.name}
-														className={element('categories-icon-img')}
-													/>
-												) : (
-													<Svg icon={category?.icon || 'apps'} />
-												)}
-												{category.name}
-												<Svg icon="arrow" className={element('categories-arrow')} />
-											</Link>
-											<AnimatePresence>
-												{category.children.length > 0 && hoveredParentId === category.id && (
-													<motion.ul
-														className={element('categories-list', {child: true, open: true})}
-														initial={{opacity: 0, x: 8}}
-														animate={{opacity: 1, x: 0}}
-														exit={{opacity: 0, x: 8}}
-														transition={{duration: 0.15, ease: 'easeOut'}}
-													>
-														{category.children.map((child) => (
-															<Link
-																key={child.id}
-																className={element('category-link', {child: true})}
-																to={`/categories/${child.nameEn}`}
-															>
-																{child.name}
-															</Link>
-														))}
-													</motion.ul>
-												)}
-											</AnimatePresence>
-										</li>
-									))}
-								</motion.ul>
-							)}
-						</AnimatePresence>
-					</li>
-
-					{/* Поиск по целям */}
-					<li className={element('search-item')}>
-						{isScreenMobile ? (
-							<Button className={element('categories-link')} icon="search" onClick={() => setIsSearchOpen(true)}>
-								Поиск
-							</Button>
-						) : (
-							<GlobalGoalsSearch className={element('search')} theme={header} />
-						)}
-					</li>
-				</ul>
-
-				{isAuth
-					? !isScreenSmallMobile && (
-							<div className={element('right-menu')}>
-								{/* создать кнопка */}
-								<Button size="small" type="Link" theme="light" icon="plus" href="/goals/create">
-									Создать
+				{isScreenSmallMobile ? (
+					<>
+						{/* Первая строка: меню, логотип, аватар (для ширины < 576px) */}
+						<div className={element('row-1')}>
+							<div className={element('menu-button-wrap')}>
+								<Button className={element('categories-link-menu')} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+									<Svg icon="bars" className={element('categories-icon')} width="24px" height="24px" />
 								</Button>
-								<div className={element('notifications-wrapper')} ref={notificationsRef}>
-									{/* Кнопка уведомлений */}
-									<button
-										type="button"
-										className={element('notifications-button')}
-										onClick={toggleNotifications}
-										aria-label="Уведомления"
-									>
-										<Svg icon="bell" className={element('notifications-icon', {theme: header})} />
-										{HeaderNotificationsStore.hasUnreadNotifications && (
-											<span className={element('notifications-badge')}>
-												{HeaderNotificationsStore.unreadCount > 99 ? '99+' : HeaderNotificationsStore.unreadCount}
-											</span>
-										)}
-									</button>
-
-									{/* Кнопка прогресса */}
-									<div className={element('progress-wrapper')} ref={progressRef}>
-										<button
-											type="button"
-											className={element('notifications-button', {
-												progress: true,
-											})}
-											onClick={toggleProgress}
-											aria-label="Прогресс"
-										>
-											{HeaderProgressGoalsStore.hasRegularGoalsToday ? (
-												<span
-													className={element('regular-goals-badge', {
-														allCompleted: isProgressOpen,
-													})}
-												>
-													<Svg icon="signal" className={element('regular-goals-badge-icon', {theme: header})} />
-													<span className={element('regular-goals-badge-count', {theme: header})}>
-														{HeaderProgressGoalsStore.goalsCount > 99
-															? '99+'
-															: HeaderProgressGoalsStore.goalsCount}
-													</span>
-												</span>
-											) : (
-												<Svg icon="signal" className={element('regular-goals-icon', {theme: header})} />
-											)}
-										</button>
-										<AnimatePresence>
-											{isProgressOpen && (
-												<motion.div
-													initial={{opacity: 0, y: -10}}
-													animate={{opacity: 1, y: 0}}
-													exit={{opacity: 0, y: -10}}
-													transition={{duration: 0.2, ease: 'easeOut'}}
-													className={element('progress-dropdown')}
-												>
-													<RegularGoalsDropdown
-														variant="progress"
-														isOpen={isProgressOpen}
-														onClose={() => setIsProgressOpen(false)}
-													/>
-												</motion.div>
-											)}
-										</AnimatePresence>
-									</div>
-
-									{/* Кнопка регулярных целей */}
-									<button
-										type="button"
-										className={element('notifications-button')}
-										onClick={toggleRegularGoals}
-										aria-label="Регулярные цели"
-									>
-										{HeaderRegularGoalsStore.hasRegularGoalsToday ? (
-											<span
-												className={element('regular-goals-badge', {
-													allCompleted: HeaderRegularGoalsStore.allCompletedToday,
-												})}
-											>
-												<Svg
-													icon={HeaderRegularGoalsStore.allCompletedToday ? 'regular' : 'regular-empty'}
-													className={element('regular-goals-badge-icon', {theme: header})}
-												/>
-												<span className={element('regular-goals-badge-count', {theme: header})}>
-													{HeaderRegularGoalsStore.todayCount > 99 ? '99+' : HeaderRegularGoalsStore.todayCount}
-												</span>
-											</span>
-										) : (
-											<Svg icon="regular-empty" className={element('regular-goals-icon', {theme: header})} />
-										)}
-									</button>
-									<AnimatePresence>
-										{isNotificationsOpen && (
-											<motion.div
-												initial={{opacity: 0, y: -10}}
-												animate={{opacity: 1, y: 0}}
-												exit={{opacity: 0, y: -10}}
-												transition={{duration: 0.2, ease: 'easeOut'}}
-												className={element('notifications-dropdown')}
-											>
-												<NotificationDropdown
-													isOpen={isNotificationsOpen}
-													onClose={() => setIsNotificationsOpen(false)}
-												/>
-											</motion.div>
-										)}
-									</AnimatePresence>
-									<AnimatePresence>
-										{isRegularGoalsOpen && (
-											<motion.div
-												initial={{opacity: 0, y: -10}}
-												animate={{opacity: 1, y: 0}}
-												exit={{opacity: 0, y: -10}}
-												transition={{duration: 0.2, ease: 'easeOut'}}
-												className={element('regular-goals-dropdown')}
-											>
-												<RegularGoalsDropdown
-													isOpen={isRegularGoalsOpen}
-													onClose={() => setIsRegularGoalsOpen(false)}
-												/>
-											</motion.div>
-										)}
-									</AnimatePresence>
-								</div>
-
-								<div className={element('profile-wrapper')} ref={profileMenuRef}>
+							</div>
+							<div className={element('logo-wrap')}>
+								<Link className={element('logo')} to="/" aria-label="Главная">
+									<Svg icon="delting" />
+								</Link>
+							</div>
+							{isAuth ? (
+								<div className={element('row-1-avatar')}>
 									<div
 										className={element('profile')}
 										role="button"
@@ -612,28 +411,349 @@ export const Header: FC<HeaderProps> = observer((props) => {
 											noBorder
 											isPremium={userSelf?.subscriptionType === 'premium'}
 										/>
-										{/* <span className={element('nickname')}>{name}</span> */}
-										{!isScreenMobile && <Svg icon="arrow--right" className={element('profile-arrow')} />}
 									</div>
-									{!isScreenMobile && menuProfile}
+								</div>
+							) : (
+								<div className={element('row-1-avatar')}>
+									<button
+										type="button"
+										className={element('profile')}
+										onClick={() => setIsUserMenuOpen(true)}
+										aria-label="Открыть меню пользователя"
+									>
+										<Svg icon="user" width="16px" height="16px" className={element('profile-icon')} />
+									</button>
+								</div>
+							)}
+						</div>
+						{/* Вторая строка: категории и поиск */}
+						<ul className={element('list-categories', {row2: true})}>
+							<li
+								ref={categoriesRef}
+								className={element('categories-item')}
+								onMouseEnter={() => isScreenDesktop && setIsCategoriesOpen(true)}
+								onMouseLeave={() => {
+									if (isScreenDesktop) {
+										setIsCategoriesOpen(false);
+										setHoveredParentId(null);
+									}
+								}}
+							>
+								<Button className={element('categories-link')} onClick={() => setIsCategoriesModalOpen(true)}>
+									<Svg icon="apps" className={element('categories-icon')} />
+								</Button>
+							</li>
+							<li className={element('search-item')}>
+								<GlobalGoalsSearch className={element('search')} theme={header} />
+							</li>
+						</ul>
+					</>
+				) : (
+					<>
+						<Link className={element('logo')} to="/" aria-label="Главная">
+							{isScreenMobile ? <Svg icon="icon-logo" className={element('logo-icon')} /> : <Svg icon="delting" />}
+						</Link>
+						{isScreenMobile && !isScreenSmallMobile && (
+							<Button width="auto" className={element('categories-link-menu')} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+								<Svg icon="bars" className={element('categories-icon')} width="24px" height="24px" />
+							</Button>
+						)}
+						<ul className={element('list-categories')}>
+							<li
+								ref={categoriesRef}
+								className={element('categories-item')}
+								onMouseEnter={() => isScreenDesktop && setIsCategoriesOpen(true)}
+								onMouseLeave={() => {
+									if (isScreenDesktop) {
+										setIsCategoriesOpen(false);
+										setHoveredParentId(null);
+									}
+								}}
+							>
+								{isScreenTablet ? (
+									<button type="button" className={element('categories-link')} onClick={handleCategoriesClick}>
+										<Svg icon="apps" className={element('categories-icon')} />
+										{isCategoriesLabelVisible ? 'Категории' : ''}
+									</button>
+								) : !isScreenDesktop ? (
+									<Button className={element('categories-link')} onClick={() => setIsCategoriesModalOpen(true)}>
+										<Svg icon="apps" className={element('categories-icon')} />
+									</Button>
+								) : (
+									<div className={element('categories-link')}>
+										<Svg icon="apps" className={element('categories-icon')} />
+										{isCategoriesLabelVisible ? 'Категории' : ''}
+									</div>
+								)}
+								<AnimatePresence>
+									{isCategoriesOpen && (
+										<motion.ul
+											className={element('categories-list', {open: true})}
+											initial={{opacity: 0, y: 8}}
+											animate={{opacity: 1, y: 0}}
+											exit={{opacity: 0, y: 8}}
+											transition={{duration: 0.15, ease: 'easeOut'}}
+										>
+											{categoriesTree.map((category) => (
+												<li
+													key={category.id}
+													className={element('categories-item-parent')}
+													onMouseEnter={() => setHoveredParentId(category.id)}
+													onMouseLeave={() => setHoveredParentId(null)}
+												>
+													<Link className={element('category-link')} to={`/categories/${category.nameEn}`}>
+														{category?.icon ? (
+															<img
+																src={category?.icon}
+																alt={category?.name}
+																className={element('categories-icon-img')}
+															/>
+														) : (
+															<Svg icon={category?.icon || 'apps'} />
+														)}
+														{category.name}
+														<Svg icon="arrow" className={element('categories-arrow')} />
+													</Link>
+													<AnimatePresence>
+														{category.children.length > 0 && hoveredParentId === category.id && (
+															<motion.ul
+																className={element('categories-list', {child: true, open: true})}
+																initial={{opacity: 0, x: 8}}
+																animate={{opacity: 1, x: 0}}
+																exit={{opacity: 0, x: 8}}
+																transition={{duration: 0.15, ease: 'easeOut'}}
+															>
+																{category.children.map((child) => (
+																	<Link
+																		key={child.id}
+																		className={element('category-link', {child: true})}
+																		to={`/categories/${child.nameEn}`}
+																	>
+																		{child.name}
+																	</Link>
+																))}
+															</motion.ul>
+														)}
+													</AnimatePresence>
+												</li>
+											))}
+										</motion.ul>
+									)}
+								</AnimatePresence>
+							</li>
+
+							{/* Поиск по целям */}
+							<li className={element('search-item')}>
+								<GlobalGoalsSearch className={element('search')} theme={header} />
+							</li>
+						</ul>
+
+						{isAuth ? (
+							!isScreenSmallMobile && (
+								<div className={element('right-menu')}>
+									{/* создать кнопка */}
+									{!isScreenMobile && (
+										<Button size="small" type="Link" theme="light" icon="plus" iconSize="24px" href="/goals/create">
+											{isScreenSmallTablet ? '' : 'Создать'}
+										</Button>
+									)}
+									<div className={element('notifications-wrapper')} ref={notificationsRef}>
+										{/* Кнопка уведомлений */}
+										<button
+											type="button"
+											className={element('notifications-button')}
+											onClick={toggleNotifications}
+											aria-label="Уведомления"
+										>
+											<Svg icon="bell" className={element('notifications-icon', {theme: header})} />
+											{HeaderNotificationsStore.hasUnreadNotifications && (
+												<span className={element('notifications-badge')}>
+													{HeaderNotificationsStore.unreadCount > 99
+														? '99+'
+														: HeaderNotificationsStore.unreadCount}
+												</span>
+											)}
+										</button>
+
+										{/* Кнопка прогресса */}
+										{!isScreenMobile && (
+											<div className={element('progress-wrapper')} ref={progressRef}>
+												<button
+													type="button"
+													className={element('notifications-button', {
+														progress: true,
+													})}
+													onClick={toggleProgress}
+													aria-label="Прогресс"
+												>
+													{HeaderProgressGoalsStore.hasRegularGoalsToday ? (
+														<span
+															className={element('regular-goals-badge', {
+																allCompleted: isProgressOpen,
+															})}
+														>
+															<Svg
+																icon="signal"
+																className={element('regular-goals-badge-icon', {theme: header})}
+															/>
+															<span className={element('regular-goals-badge-count', {theme: header})}>
+																{HeaderProgressGoalsStore.goalsCount > 99
+																	? '99+'
+																	: HeaderProgressGoalsStore.goalsCount}
+															</span>
+														</span>
+													) : (
+														<Svg icon="signal" className={element('regular-goals-icon', {theme: header})} />
+													)}
+												</button>
+												<AnimatePresence>
+													{isProgressOpen && (
+														<motion.div
+															initial={{opacity: 0, y: -10}}
+															animate={{opacity: 1, y: 0}}
+															exit={{opacity: 0, y: -10}}
+															transition={{duration: 0.2, ease: 'easeOut'}}
+															className={element('progress-dropdown')}
+														>
+															<RegularGoalsDropdown
+																variant="progress"
+																isOpen={isProgressOpen}
+																onClose={() => setIsProgressOpen(false)}
+															/>
+														</motion.div>
+													)}
+												</AnimatePresence>
+											</div>
+										)}
+
+										{/* Кнопка регулярных целей */}
+										{!isScreenMobile && (
+											<>
+												<button
+													type="button"
+													className={element('notifications-button')}
+													onClick={toggleRegularGoals}
+													aria-label="Регулярные цели"
+												>
+													{HeaderRegularGoalsStore.hasRegularGoalsToday ? (
+														<span
+															className={element('regular-goals-badge', {
+																allCompleted: HeaderRegularGoalsStore.allCompletedToday,
+															})}
+														>
+															<Svg
+																icon={
+																	HeaderRegularGoalsStore.allCompletedToday ? 'regular' : 'regular-empty'
+																}
+																className={element('regular-goals-badge-icon', {theme: header})}
+															/>
+															<span className={element('regular-goals-badge-count', {theme: header})}>
+																{HeaderRegularGoalsStore.todayCount > 99
+																	? '99+'
+																	: HeaderRegularGoalsStore.todayCount}
+															</span>
+														</span>
+													) : (
+														<Svg
+															icon="regular-empty"
+															className={element('regular-goals-icon', {theme: header})}
+														/>
+													)}
+												</button>
+												<AnimatePresence>
+													{isNotificationsOpen && (
+														<motion.div
+															initial={{opacity: 0, y: -10}}
+															animate={{opacity: 1, y: 0}}
+															exit={{opacity: 0, y: -10}}
+															transition={{duration: 0.2, ease: 'easeOut'}}
+															className={element('notifications-dropdown')}
+														>
+															<NotificationDropdown
+																isOpen={isNotificationsOpen}
+																onClose={() => setIsNotificationsOpen(false)}
+															/>
+														</motion.div>
+													)}
+												</AnimatePresence>
+												<AnimatePresence>
+													{isRegularGoalsOpen && (
+														<motion.div
+															initial={{opacity: 0, y: -10}}
+															animate={{opacity: 1, y: 0}}
+															exit={{opacity: 0, y: -10}}
+															transition={{duration: 0.2, ease: 'easeOut'}}
+															className={element('regular-goals-dropdown')}
+														>
+															<RegularGoalsDropdown
+																isOpen={isRegularGoalsOpen}
+																onClose={() => setIsRegularGoalsOpen(false)}
+															/>
+														</motion.div>
+													)}
+												</AnimatePresence>
+											</>
+										)}
+									</div>
+									<div className={element('profile-wrapper')} ref={profileMenuRef}>
+										<div
+											className={element('profile')}
+											role="button"
+											tabIndex={0}
+											onClick={handleAvatarClick}
+											onKeyDown={(e) => {
+												if (e.key === 'Enter' || e.key === ' ') {
+													e.preventDefault();
+													handleAvatarClick();
+												}
+											}}
+										>
+											<Avatar
+												avatar={avatar}
+												size="small"
+												noBorder
+												isPremium={userSelf?.subscriptionType === 'premium'}
+											/>
+											{!isScreenMobile && <Svg icon="arrow--right" className={element('profile-arrow')} />}
+										</div>
+										{!isScreenMobile && menuProfile}
+									</div>
+								</div>
+							)
+						) : isScreenMobile ? (
+							<div className={element('right-menu')}>
+								<div className={element('profile-wrapper')}>
+									<button
+										type="button"
+										className={element('profile')}
+										onClick={() => setIsUserMenuOpen(true)}
+										aria-label="Открыть меню пользователя"
+									>
+										<Svg icon="user" width="16px" height="16px" className={element('profile-icon')} />
+									</button>
 								</div>
 							</div>
-					  )
-					: !isScreenSmallTablet && !isScreenMobile && buttonsAuth}
+						) : (
+							buttonsAuth
+						)}
+					</>
+				)}
 			</div>
 			<ModalPhone title="Меню" isOpen={isScreenMobile && isMenuOpen} onClose={() => setIsMenuOpen(false)}>
 				<div className={element('menu-wrapper')}>
-					{isAuth && (
-						<div className={element('profile')}>
-							<Avatar avatar={avatar} size="small" noBorder isPremium={userSelf?.subscriptionType === 'premium'} />
-							<span className={element('nickname')}>{name}</span>
-							{!isScreenMobile && <Svg icon="arrow--right" className={element('profile-arrow')} />}
-						</div>
-					)}
 					{menuList}
 					<Line margin="0" />
-					{isAuth ? menuProfile : buttonsAuth}
+					<button
+						type="button"
+						className={element('item-link', {active: page === 'isReview'})}
+						onClick={() => setIsFeedbackModalOpen(true)}
+					>
+						Оставить отзыв
+					</button>
 				</div>
+			</ModalPhone>
+			<ModalPhone title="Пользователь" isOpen={isScreenMobile && isUserMenuOpen} onClose={() => setIsUserMenuOpen(false)}>
+				<div className={element('menu-wrapper')}>{isAuth ? menuProfile : buttonsAuth}</div>
 			</ModalPhone>
 			<ModalPhone title="Поиск" isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)}>
 				<GlobalGoalsSearch className={element('search')} isModal />
