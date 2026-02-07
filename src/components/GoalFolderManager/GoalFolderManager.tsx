@@ -336,6 +336,14 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 								>
 									<div className={element('folder-badge')} style={{backgroundColor: folder.color}}>
 										{/* <span className={element('icon', {[folder.icon || 'folder']: true})} /> */}
+										{folder.isPrivate && (
+											<img
+												src="/svg/eye-closed.svg"
+												alt="Приватная папка"
+												className={element('folder-badge-private-icon')}
+												title="Приватная"
+											/>
+										)}
 									</div>
 									<div className={element('folder-info')}>
 										<h4 className={element('folder-name')}>
@@ -379,10 +387,24 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 					<div className={element('folder-content')}>
 						<div className={element('folder-header')}>
 							<Title tag="h3" className={element('folder-header-title')}>
-								<span className={element('folder-badge', {inline: true})} style={{backgroundColor: selectedFolder.color}}>
-									{/* <span className={element('icon', {[selectedFolder.icon || 'folder']: true})} /> */}
+								<span
+									className={element('folder-badge', {inline: true})}
+									style={{backgroundColor: selectedFolder.color}}
+									aria-hidden="true"
+								>
+									{selectedFolder.isPrivate && (
+										<img
+											src="/svg/eye-closed.svg"
+											alt="Приватная папка"
+											className={element('folder-badge-private-icon')}
+											aria-hidden="true"
+										/>
+									)}
 								</span>
-								Папка &quot;{selectedFolder.name}&quot;
+								<span>
+									Папка &quot;{selectedFolder.name}&quot;
+									{selectedFolder.isPrivate && <span className={element('folder-private-label')}> (Приватная)</span>}
+								</span>
 							</Title>
 							<div className={element('folder-tabs')}>
 								<button
