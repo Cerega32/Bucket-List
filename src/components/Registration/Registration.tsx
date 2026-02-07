@@ -23,11 +23,17 @@ export const Registration: FC<RegistrationProps> = (props) => {
 
 	const [block, element] = useBem('registration', className);
 	const [email, setEmail] = useState('');
+	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [repeatPassword, setRepeatPassword] = useState('');
 	const [privacyConsent, setPrivacyConsent] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<{email?: Array<string>; password?: Array<string>; non_field_errors?: Array<string>}>({});
+	const [error, setError] = useState<{
+		email?: Array<string>;
+		username?: Array<string>;
+		password?: Array<string>;
+		non_field_errors?: Array<string>;
+	}>({});
 	const [generalError, setGeneralError] = useState<string>('');
 
 	const signUp = async (e: FormEvent) => {
@@ -39,7 +45,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 			return;
 		}
 		setIsLoading(true);
-		const res = await postRegistration(email, password);
+		const res = await postRegistration(email, password, username);
 		setIsLoading(false);
 		if (res.success) {
 			successRegistration(res.data ?? res);
@@ -82,13 +88,25 @@ export const Registration: FC<RegistrationProps> = (props) => {
 				<FieldInput
 					placeholder="E-mail"
 					type="email"
-					id="password"
+					id="email"
 					text="E-mail"
 					value={email}
 					setValue={setEmail}
 					className={element('field')}
 					autoComplete="email"
 					error={error?.email}
+					required
+				/>
+				<FieldInput
+					placeholder="Имя в системе, которое увидят другие"
+					type="text"
+					id="username"
+					text="Имя в системе"
+					value={username}
+					setValue={setUsername}
+					className={element('field')}
+					autoComplete="username"
+					error={error?.username}
 					required
 				/>
 				<FieldInput
@@ -135,7 +153,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 					theme="blue"
 					className={element('btn')}
 					typeBtn="submit"
-					disabled={!email.trim() || !password.trim() || !repeatPassword.trim() || !privacyConsent}
+					disabled={!email.trim() || !username.trim() || !password.trim() || !repeatPassword.trim() || !privacyConsent}
 					loading={isLoading}
 					loadingText="Регистрация..."
 				>
