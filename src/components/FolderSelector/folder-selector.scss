@@ -81,16 +81,6 @@
 		font-weight: var(--weight-semi-bold);
 	}
 
-	&__private-badge {
-		padding: 2px 8px;
-		background: var(--color-yellow-2);
-		border-radius: 12px;
-		color: var(--color-yellow-3);
-		font-size: 12px;
-		font-weight: var(--weight-medium);
-		text-transform: uppercase;
-	}
-
 	&__added-badge {
 		padding: 2px 6px;
 		background-color: var(--color-green-2);

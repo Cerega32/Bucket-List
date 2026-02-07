@@ -23,21 +23,19 @@ export const CardCategory: FC<CardCategoryProps> = (props) => {
 
 	if (variant === 'minimal') {
 		return (
-			<section className={block({variant: 'minimal'})}>
-				<Link to={`/categories/${category.nameEn}`} className={element('link')}>
-					{category?.icon ? (
-						<img src={category.icon} alt={category.name} className={element('icon-img')} />
-					) : (
-						<Svg icon={category?.icon || 'apps'} className={element('icon-svg')} />
-					)}
-					<div className={element('content')}>
-						<Title className={element('title')} tag="h3">
-							{category.name}
-						</Title>
-						<p className={element('goals')}>{pluralize(category.goalCount, ['цель', 'цели', 'целей'])}</p>
-					</div>
-				</Link>
-			</section>
+			<Link to={`/categories/${category.nameEn}`} className={block({variant: 'minimal'})}>
+				{category?.icon ? (
+					<img src={category.icon} alt={category.name} className={element('icon-img')} />
+				) : (
+					<Svg icon={category?.icon || 'apps'} className={element('icon-svg')} />
+				)}
+				<div className={element('content')}>
+					<Title className={element('title')} tag="h3">
+						{category.name}
+					</Title>
+					<p className={element('goals')}>{pluralize(category.goalCount, ['цель', 'цели', 'целей'])}</p>
+				</div>
+			</Link>
 		);
 	}
 

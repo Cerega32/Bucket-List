@@ -9,11 +9,12 @@ import './button.scss';
 
 interface ButtonProps {
 	className?: string;
-	theme?: 'blue' | 'blue-light' | 'gray' | 'no-border' | 'green' | 'red' | 'gradient' | 'integrate' | 'no-active';
+	theme?: 'blue' | 'blue-light' | 'light' | 'gray' | 'no-border' | 'green' | 'red' | 'gradient' | 'integrate' | 'no-active';
 	width?: 'full' | 'auto';
 	size?: 'small' | 'medium';
 	children?: ReactElement | string | number;
 	icon?: string;
+	iconSize?: string;
 	onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 	type?: 'button' | 'button-close' | 'Link';
 	typeBtn?: 'button' | 'submit';
@@ -23,6 +24,7 @@ interface ButtonProps {
 	hoverIcon?: string;
 	disabled?: boolean;
 	loading?: boolean;
+	loadingText?: string;
 	refInner?: React.RefObject<HTMLButtonElement>;
 	withBorder?: boolean;
 }
@@ -32,6 +34,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		className,
 		theme,
 		icon,
+		iconSize,
 		onClick,
 		type,
 		href = '',
@@ -44,6 +47,7 @@ export const Button: FC<ButtonProps> = (props) => {
 		hoverIcon,
 		disabled,
 		loading,
+		loadingText,
 		refInner,
 		withBorder,
 	} = props;
@@ -111,9 +115,11 @@ export const Button: FC<ButtonProps> = (props) => {
 
 	const content = (
 		<>
-			{!loading && iconState && <Svg width="16px" height="16px" icon={iconState} className={element('icon')} />}
+			{!loading && iconState && (
+				<Svg width={iconSize ?? '16px'} height={iconSize ?? '16px'} icon={iconState} className={element('icon')} />
+			)}
 			{loading && <span className={element('loading')} />}
-			{loading ? !iconState : text}
+			{loading ? loadingText ?? text : text}
 		</>
 	);
 

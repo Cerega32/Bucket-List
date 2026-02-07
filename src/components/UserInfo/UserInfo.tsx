@@ -19,6 +19,8 @@ interface UserInfoProps {
 	background?: string | null;
 	avatar: string | null;
 	name: string;
+	firstName?: string;
+	lastName?: string;
 	totalAdded: number;
 	totalCompleted: number;
 	page: string;
@@ -34,6 +36,8 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 		background,
 		avatar,
 		name,
+		firstName,
+		lastName,
 		totalAdded,
 		totalCompleted,
 		page,
@@ -120,9 +124,12 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 			<section className={element('about')}>
 				<Avatar avatar={avatar} className={element('avatar')} size="large" isPremium={subscriptionType === 'premium'} />
 				<div className={element('wrapper')}>
-					<Title tag="h2" className={element('name')}>
-						{name}
-					</Title>
+					<div className={element('name-block')}>
+						<Title tag="h2" className={element('name')}>
+							{name}
+						</Title>
+						{(firstName || lastName) && <p className={element('full-name')}>{`${firstName || ''} ${lastName || ''}`.trim()}</p>}
+					</div>
 					<div className={element('right')}>
 						{isOwnProfile ? (
 							<Button type="Link" theme="blue" icon="plus" href="/goals/create">

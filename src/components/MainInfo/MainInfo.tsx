@@ -23,13 +23,15 @@ export const MainInfo: FC<MainInfoProps> = (props) => {
 		<section className={block()}>
 			<div className={element('item')}>
 				<div className={element('head')}>
-					<Svg className={element('icon')} icon="question-circle" width="24px" height="24px" />
+					<div className={element('head-row')}>
+						<Svg className={element('icon')} icon="question-circle" width="24px" height="24px" />
+						<Button className={element('tariffs-btn')} type="Link" theme="blue" size="small" icon="award" href="/tariffs">
+							Тарифы
+						</Button>
+					</div>
 					<Title tag="h2" className={element('title')}>
 						Почему это меняет жизнь?
 					</Title>
-					<Button className={element('tariffs-btn')} type="Link" theme="blue" size="small" icon="award" href="/tariffs">
-						Тарифы
-					</Button>
 				</div>
 				<p>
 					Ты уже знаешь, куда двигаться — благодаря чёткой структуре. С помощью отслеживания прогресса и визуализации формируешь

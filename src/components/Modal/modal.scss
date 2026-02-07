@@ -117,6 +117,10 @@
 		flex: 1;
 		min-height: 0;
 		max-height: calc(90vh - 48px);
+		overflow-y: auto;
+		overflow-x: hidden;
+		overscroll-behavior: contain;
+		padding: 2px;
 
 		// Кастомный скроллбар
 		&::-webkit-scrollbar {
@@ -187,7 +191,7 @@
 
 	&--isOpen {
 		#{$block}__window {
-			display: block;
+			display: flex;
 		}
 
 		#{$block}__base {

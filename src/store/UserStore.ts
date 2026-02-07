@@ -108,11 +108,15 @@ class Store implements IUserStore {
 
 	setUserInfo = (userInfo: IUserInfo) => {
 		this.userInfo = userInfo;
-		if (userInfo.isEmailConfirmed !== undefined) {
-			this.setEmailConfirmed(userInfo.isEmailConfirmed);
-		}
-		if (userInfo.email) {
-			this.setEmail(userInfo.email);
+		const currentUserId = parseInt(Cookies.get('user-id') || '0', 10);
+		const isCurrentUser = userInfo.id && userInfo.id === currentUserId;
+		if (isCurrentUser) {
+			if (userInfo.isEmailConfirmed !== undefined) {
+				this.setEmailConfirmed(userInfo.isEmailConfirmed);
+			}
+			if (userInfo.email) {
+				this.setEmail(userInfo.email);
+			}
 		}
 	};
 

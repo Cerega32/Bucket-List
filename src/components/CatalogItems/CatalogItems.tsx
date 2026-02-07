@@ -104,6 +104,8 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	const [get, setGet] = useState(userId ? {user_id: userId, completed} : {});
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
+	const [goalsLoaded, setGoalsLoaded] = useState(false);
+	const [listsLoaded, setListsLoaded] = useState(false);
 
 	// Состояния для модалки регулярных целей
 	const [showRegularModal, setShowRegularModal] = useState(false);
@@ -151,6 +153,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	}, [categories]);
 
 	useEffect(() => {
+		setGoalsLoaded(false);
 		(async () => {
 			const tempGet = userId ? {user_id: userId, completed} : {};
 			setGet(tempGet);
@@ -162,10 +165,12 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			if (res.success) {
 				setGoals(res.data);
 			}
+			setGoalsLoaded(true);
 		})();
 	}, [subPage, code, completed, userId, initialSearch]);
 
 	useEffect(() => {
+		setListsLoaded(false);
 		(async () => {
 			const tempGet = userId ? {user_id: userId, completed} : {};
 			setGet(tempGet);
@@ -177,6 +182,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			if (res.success) {
 				setLists(res.data);
 			}
+			setListsLoaded(true);
 		})();
 	}, [subPage, code, completed, userId, initialSearch]);
 
@@ -472,9 +478,9 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					</div>
 				</div>
 			</div>
-			<Loader isLoading={loading}>
+			<Loader isLoading={loading || (subPage === 'goals' && !goalsLoaded) || (subPage === 'lists' && !listsLoaded)}>
 				{subPage === 'goals' ? (
-					goals.data.length === 0 ? (
+					!goalsLoaded ? null : goals.data.length === 0 ? (
 						<EmptyState
 							title={completed ? 'У вас пока нет выполненных целей' : 'У вас пока нет активных целей'}
 							description={
@@ -497,7 +503,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 							))}
 						</section>
 					)
-				) : lists.data.length === 0 ? (
+				) : !listsLoaded ? null : lists.data.length === 0 ? (
 					<EmptyState
 						title={completed ? 'У вас пока нет выполненных списков' : 'У вас пока нет активных списков'}
 						description={

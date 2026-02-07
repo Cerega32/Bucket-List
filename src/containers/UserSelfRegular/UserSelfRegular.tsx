@@ -18,7 +18,7 @@ import {useBem} from '@/hooks/useBem';
 import {CategoriesStore} from '@/store/CategoriesStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {IPaginationPage} from '@/typings/request';
-import {getRegularGoalStatistics, IRegularGoalStatistics, markRegularProgress} from '@/utils/api/goals';
+import {getRegularGoalStatistics, IRegularGoalStatistics, markRegularProgress, restartRegularGoal} from '@/utils/api/goals';
 import './user-self-regular.scss';
 
 interface UserSelfRegularProps {
@@ -190,6 +190,27 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		}
 	};
 
+	const handleRestart = async (stats: IRegularGoalStatistics) => {
+		try {
+			const response = await restartRegularGoal(stats.regularGoal);
+
+			if (response.success) {
+				await loadRegularGoalStatistics();
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Успешно!',
+					message: 'Серия начата заново',
+				});
+			}
+		} catch (error) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Не удалось начать серию заново',
+			});
+		}
+	};
+
 	const getTodayGoals = () => {
 		// "На сегодня" — цели, которые можно выполнить сегодня (canCompleteToday) или уже выполнены сегодня (completedToday).
 		// сортируем - сначала шли НЕ выполненные сегодня, затем выполненные.
@@ -326,6 +347,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 							regularGoal={goal}
 							statistics={stats}
 							onMarkRegular={() => handleProgressUpdate(stats)}
+							onRestart={() => handleRestart(stats)}
 							className="catalog-items__goal catalog-items__goal--full"
 						/>
 					);

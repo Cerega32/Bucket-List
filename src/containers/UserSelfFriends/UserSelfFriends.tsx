@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite';
 import {FC, useMemo} from 'react';
 
 import {Switch} from '@/components/Switch/Switch';
+import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 
 import {FriendsContent} from '../FriendsContent/FriendsContent';
@@ -51,7 +52,9 @@ export const UserSelfFriends: FC<UserSelfFriendsProps> = observer(({subPage = 'f
 	return (
 		<section className={block()}>
 			<div className={element('header')}>
-				<h1 className={element('title')}>Друзья</h1>
+				<Title tag="h2" className={element('title')}>
+					Друзья
+				</Title>
 				<Switch className={element('switch')} buttons={switchButtons} active={subPage} />
 			</div>
 			<div className={element('content')}>{getFriendsContent()}</div>

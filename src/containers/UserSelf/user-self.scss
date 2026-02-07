@@ -60,6 +60,10 @@
 			background: transparent;
 			border: none;
 			border-radius: 0;
+
+			@include md {
+				margin: 0 0 24px;
+			}
 		}
 	}
 
@@ -134,6 +138,10 @@
 
 	&__profile-line {
 		margin: 0;
+
+		@include md {
+			display: none;
+		}
 	}
 
 	&__profile-premium-btn {
