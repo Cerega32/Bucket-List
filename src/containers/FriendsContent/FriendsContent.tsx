@@ -2,10 +2,12 @@ import {observer} from 'mobx-react-lite';
 import {FC, useEffect} from 'react';
 
 import {Button} from '@/components/Button/Button';
+import {normalizeCompareResponse} from '@/components/CompareFriendModal/CompareFriendModal';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {FriendCard} from '@/components/FriendCard/FriendCard';
 import {useBem} from '@/hooks/useBem';
 import {FriendsStore} from '@/store/FriendsStore';
+import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {compareWithFriend, getFriends} from '@/utils/api/friends';
 
@@ -52,13 +54,10 @@ export const FriendsContent: FC = observer(() => {
 		try {
 			FriendsStore.setIsLoading(true);
 			const comparison = await compareWithFriend(friendId);
-			FriendsStore.setComparison(comparison);
-
-			NotificationStore.addNotification({
-				type: 'success',
-				title: 'Сравнение готово',
-				message: 'Данные для сравнения загружены',
-			});
+			const normalized = normalizeCompareResponse(comparison);
+			ModalStore.setModalProps({comparisonData: normalized});
+			ModalStore.setWindow('compare-friend');
+			ModalStore.setIsOpen(true);
 		} catch (error) {
 			NotificationStore.addNotification({
 				type: 'error',

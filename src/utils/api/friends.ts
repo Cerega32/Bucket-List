@@ -1,5 +1,5 @@
 import {HeaderNotificationsStore} from '@/store/HeaderNotificationsStore';
-import {IFriendComparison, IFriendRequestsResponse, IFriendSearchResponse, IFriendsResponse} from '@/typings/user';
+import {IFriendCompareResponse, IFriendRequestsResponse, IFriendSearchResponse, IFriendsResponse} from '@/typings/user';
 import {getNotifications} from '@/utils/api/notifications';
 import {DELETE, GET, POST} from '@/utils/fetch/requests';
 
@@ -142,7 +142,7 @@ export const searchUsers = async (query: string): Promise<IFriendSearchResponse>
 };
 
 // Сравнение с другом
-export const compareWithFriend = async (friendId: number): Promise<IFriendComparison> => {
+export const compareWithFriend = async (friendId: number): Promise<IFriendCompareResponse> => {
 	const response = await GET(`friends/compare/${friendId}`, {
 		showSuccessNotification: false,
 		auth: true,
