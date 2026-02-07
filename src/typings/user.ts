@@ -19,6 +19,13 @@ export interface IUserInfo {
 	subscriptionExpiresAt?: string | null;
 	subscriptionAutoRenew?: boolean;
 	level?: number;
+	counts?: {
+		regularGoals: number;
+		progressGoals: number;
+		folders: number;
+		friends: number;
+		goalsWithMap: number;
+	};
 }
 
 export interface IWeeklyLeader {

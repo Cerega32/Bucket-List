@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
+import {FC} from 'react';
 
 import {Button} from '@/components/Button/Button';
 import {Line} from '@/components/Line/Line';
@@ -9,8 +9,6 @@ import UserMapPage from '@/pages/UserMapPage/UserMapPage';
 import {FriendsStore} from '@/store/FriendsStore';
 import {UserStore} from '@/store/UserStore';
 import {IPage} from '@/typings/page';
-import {getUser} from '@/utils/api/get/getUser';
-import {getGoalFoldersLight, getGoalsInProgress, getRegularGoalStatistics} from '@/utils/api/goals';
 
 import {UserSelfProfile} from './UserSelfProfile';
 import {UserSelfAchievements} from '../UserSelfAchievements/UserSelfAchievements';
@@ -23,56 +21,10 @@ import {UserSelfRegular} from '../UserSelfRegular/UserSelfRegular';
 import {UserSelfSettings} from '../UserSelfSettings/UserSelfSettings';
 import {UserSelfSubscription} from '../UserSelfSubscription/UserSelfSubscription';
 
-import type {IPaginationPage} from '@/typings/request';
-import type {IRegularGoalStatistics} from '@/utils/api/goals';
 import './user-self.scss';
-
-type RegularStatsResponse =
-	| IRegularGoalStatistics[]
-	| {
-			pagination: IPaginationPage;
-			data: IRegularGoalStatistics[];
-	  };
 
 export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 	const [block, element] = useBem('user-self');
-	const [regularGoalsCount, setRegularGoalsCount] = useState(0);
-	const [progressGoalsCount, setProgressGoalsCount] = useState(0);
-	const [foldersCount, setFoldersCount] = useState(0);
-
-	useEffect(() => {
-		(async () => {
-			await getUser();
-
-			try {
-				const [regularRes, progressRes, foldersRes] = await Promise.all([
-					getRegularGoalStatistics(),
-					getGoalsInProgress(),
-					getGoalFoldersLight(),
-				]);
-
-				if (regularRes.success && regularRes.data) {
-					const data = regularRes.data as RegularStatsResponse;
-
-					if (Array.isArray(data)) {
-						setRegularGoalsCount(data.length);
-					} else {
-						setRegularGoalsCount(data.pagination.totalItems);
-					}
-				}
-
-				if (progressRes.success && progressRes.data) {
-					setProgressGoalsCount(progressRes.data.length);
-				}
-
-				if (foldersRes.success && foldersRes.data) {
-					setFoldersCount(foldersRes.data.length);
-				}
-			} catch {
-				// игнорируем ошибки счётчиков
-			}
-		})();
-	}, []);
 
 	const getUserContent = () => {
 		switch (page) {
@@ -113,7 +65,14 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 	const completedGoalsAndListsCount = userSelf.totalCompletedGoals + userSelf.totalCompletedLists;
 
 	const achievementsCount = userSelf.totalAchievements;
-	const {friendsCount} = FriendsStore;
+
+	// Используем счетчики из userSelf.counts, если они есть, иначе fallback на FriendsStore
+	const {counts} = userSelf;
+	const progressGoalsCount = counts?.progressGoals ?? 0;
+	const regularGoalsCount = counts?.regularGoals ?? 0;
+	const foldersCount = counts?.folders ?? 0;
+	const friendsCount = counts?.friends ?? FriendsStore.friendsCount;
+	const goalsWithMapCount = counts?.goalsWithMap ?? 0;
 
 	const tabs: Array<ITabs> = [
 		{
@@ -155,6 +114,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			url: '/user/self/maps',
 			name: 'Мои карты',
 			page: 'isUserSelfMaps',
+			count: goalsWithMapCount,
 		},
 		{
 			url: '/user/self/achievements',

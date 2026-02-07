@@ -1,6 +1,7 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useMemo, useState} from 'react';
 import {useLocation} from 'react-router-dom';
+import {scroller} from 'react-scroll';
 
 import {Button} from '@/components/Button/Button';
 import {RegularCard} from '@/components/Card/RegularCard';
@@ -8,12 +9,15 @@ import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {FiltersCheckbox} from '@/components/FiltersCheckbox/FiltersCheckbox';
 import {Line} from '@/components/Line/Line';
+import {BlurLoader} from '@/components/Loader/BlurLoader';
 import {Loader} from '@/components/Loader/Loader';
+import {Pagination} from '@/components/Pagination/Pagination';
 import Select, {OptionSelect} from '@/components/Select/Select';
 import {Switch} from '@/components/Switch/Switch';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
+import {IPaginationPage} from '@/typings/request';
 import {getGoalsInProgress, IGoalProgress, updateGoalProgress} from '@/utils/api/goals';
 
 import '@/components/CatalogItems/catalog-items.scss';
@@ -36,6 +40,10 @@ export const UserSelfProgress: FC = observer(() => {
 	const [search, setSearch] = useState('');
 	const [activeSort, setActiveSort] = useState(0);
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+	const [pagination, setPagination] = useState<IPaginationPage | null>(null);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [isPageLoading, setIsPageLoading] = useState(false);
+	const [todayCount, setTodayCount] = useState<number>(0);
 
 	const categoryFilters = useMemo(() => {
 		const map = new Map<string, string>();
@@ -76,19 +84,49 @@ export const UserSelfProgress: FC = observer(() => {
 
 	const {setIsOpen, setWindow, setModalProps} = ModalStore;
 
-	const loadGoalsInProgress = async () => {
-		setIsLoading(true);
+	const loadGoalsInProgress = async (page = 1) => {
+		setIsLoading(page === 1);
+		setIsPageLoading(page > 1);
 		try {
-			const response = await getGoalsInProgress();
+			const response = await getGoalsInProgress({page});
 			if (response.success && response.data) {
-				// Фильтруем цели с прогрессом < 100% - все цели в процессе выполнения
-				// Если цель есть в базе прогресса, значит она начата
-				setGoals(response.data);
+				const data = response.data as
+					| IGoalProgress[]
+					| {
+							pagination: IPaginationPage;
+							data: IGoalProgress[];
+							todayCount?: number;
+					  };
+
+				if (Array.isArray(data)) {
+					setGoals(data);
+					setPagination({
+						itemsPerPage: data.length,
+						page: 1,
+						totalPages: 1,
+						totalItems: data.length,
+					});
+					// Если нет пагинации, считаем на клиенте
+					setTodayCount(data.filter((g) => g.isWorkingToday).length);
+				} else {
+					setGoals(data.data);
+					setPagination(data.pagination);
+					setCurrentPage(data.pagination.page);
+					// Используем todayCount из ответа сервера, если есть
+					if (data.todayCount !== undefined) {
+						setTodayCount(data.todayCount);
+					} else {
+						// Fallback: считаем на клиенте из текущей страницы
+						setTodayCount(data.data.filter((g) => g.isWorkingToday).length);
+					}
+				}
 			}
 		} catch (error) {
 			console.error('Ошибка загрузки целей в процессе:', error);
+		} finally {
+			setIsLoading(false);
+			setIsPageLoading(false);
 		}
-		setIsLoading(false);
 	};
 
 	useEffect(() => {
@@ -143,21 +181,32 @@ export const UserSelfProgress: FC = observer(() => {
 			});
 
 			if (updateResponse.success) {
-				setGoals(goals.filter((g) => g.id !== goal.id));
+				// Перезагружаем данные для обновления пагинации
+				await loadGoalsInProgress(currentPage);
 			}
 		} catch (error) {
 			console.error('Ошибка отметки цели как выполненной:', error);
 		}
 	};
 
-	if (isLoading) {
-		return <Loader isLoading />;
+	const goToPage = async (page: number): Promise<boolean> => {
+		await loadGoalsInProgress(page);
+		scroller.scrollTo('user-self-progress-goals', {
+			duration: 800,
+			delay: 0,
+			smooth: 'easeInOutQuart',
+			offset: -150,
+		});
+		return true;
+	};
+
+	if (isLoading && goals.length === 0) {
+		return <Loader isLoading isPageLoader />;
 	}
 
-	const todayCount = goals.filter((g) => g.isWorkingToday).length;
 	const buttonsSwitch = [
 		{url: '#today', name: 'Работаю сегодня', page: 'today' as const, count: todayCount},
-		{url: '#all', name: 'Все цели', page: 'all' as const, count: goals.length},
+		{url: '#all', name: 'Все цели', page: 'all' as const, count: pagination?.totalItems ?? goals.length},
 	];
 
 	return (
@@ -195,31 +244,37 @@ export const UserSelfProgress: FC = observer(() => {
 					</div>
 				</div>
 
-				{goals.length === 0 ? (
-					<EmptyState title="Нет целей в процессе" description="Начните выполнение целей, чтобы отслеживать прогресс здесь">
-						<Button theme="blue" type="Link" href="/user/self/active-goals">
-							Перейти к активным целям
-						</Button>
-					</EmptyState>
-				) : filteredGoals.length === 0 ? (
-					<EmptyState
-						title={activeTab === 'today' ? 'Нет целей «работаю сегодня»' : 'Нет целей по фильтрам'}
-						description="Измените фильтры или поиск"
-					/>
-				) : (
-					<div className={element('goals-grid')} id="user-self-progress-goals">
-						{filteredGoals.map((goal) => (
-							<RegularCard
-								key={goal.id}
-								variant="progress"
-								progressGoal={goal}
-								onOpenProgressModal={() => openProgressModal(goal)}
-								onMarkToday={() => markToday(goal)}
-								onMarkCompleted={() => markGoalCompleted(goal)}
-								className="catalog-items__goal catalog-items__goal--full"
-							/>
-						))}
-					</div>
+				<BlurLoader active={isPageLoading}>
+					{goals.length === 0 ? (
+						<EmptyState title="Нет целей в процессе" description="Начните выполнение целей, чтобы отслеживать прогресс здесь">
+							<Button theme="blue" type="Link" href="/user/self/active-goals">
+								Перейти к активным целям
+							</Button>
+						</EmptyState>
+					) : filteredGoals.length === 0 ? (
+						<EmptyState
+							title={activeTab === 'today' ? 'Нет целей «работаю сегодня»' : 'Нет целей по фильтрам'}
+							description="Измените фильтры или поиск"
+						/>
+					) : (
+						<div className={element('goals-grid')} id="user-self-progress-goals">
+							{filteredGoals.map((goal) => (
+								<RegularCard
+									key={goal.id}
+									variant="progress"
+									progressGoal={goal}
+									onOpenProgressModal={() => openProgressModal(goal)}
+									onMarkToday={() => markToday(goal)}
+									onMarkCompleted={() => markGoalCompleted(goal)}
+									className="catalog-items__goal catalog-items__goal--full"
+								/>
+							))}
+						</div>
+					)}
+				</BlurLoader>
+
+				{pagination && pagination.totalPages > 1 && (
+					<Pagination currentPage={currentPage} totalPages={pagination.totalPages} goToPage={goToPage} />
 				)}
 			</div>
 		</section>

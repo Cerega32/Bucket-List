@@ -526,14 +526,23 @@ export const createMergeRequest = (data: {source_goal: number; target_goal: numb
 export const getMergeRequestById = (id: number) => GET(`goals/merge-requests/${id}`, {auth: true});
 
 // Получить цели в процессе выполнения
-export const getGoalsInProgress = async (): Promise<{
+// Поддерживает как обычный ответ (массив), так и пагинированный ({ pagination, data })
+export const getGoalsInProgress = async (params?: {
+	page?: number;
+}): Promise<{
 	success: boolean;
-	data?: IGoalProgress[];
+	data?:
+		| IGoalProgress[]
+		| {
+				pagination: IPaginationPage;
+				data: IGoalProgress[];
+		  };
 	error?: string;
 }> => {
 	try {
 		const response = await GET('goals/progress', {
 			auth: true,
+			...(params ? {get: params} : {}),
 		});
 		return response;
 	} catch (error) {

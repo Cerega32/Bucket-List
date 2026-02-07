@@ -173,7 +173,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 			if (response.success && response.data) {
 				// Полностью перезагружаем данные вместо частичного обновления
 				// чтобы избежать проблем с неполными объектами
-				await loadRegularGoalStatistics();
+				await loadRegularGoalStatistics(currentPage);
 
 				NotificationStore.addNotification({
 					type: 'success',
@@ -336,7 +336,6 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 
 	const goToPage = async (page: number): Promise<boolean> => {
 		await loadRegularGoalStatistics(page);
-		setCurrentPage(page);
 		scroller.scrollTo('user-self-regular-goals', {
 			duration: 800,
 			delay: 0,

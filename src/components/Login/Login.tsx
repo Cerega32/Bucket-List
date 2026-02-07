@@ -7,7 +7,6 @@ import {useBem} from '@/hooks/useBem';
 import {postLogin} from '@/utils/api/post/postLogin';
 import './login.scss';
 
-import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
 import {Title} from '../Title/Title';
 
 interface LoginProps {
@@ -27,7 +26,7 @@ export const Login: FC<LoginProps> = (props) => {
 	const [error, setError] = useState('');
 	const [emailError, setEmailError] = useState<Array<string> | undefined>(undefined);
 	const [passwordError, setPasswordError] = useState<Array<string> | undefined>(undefined);
-	const [rememberMe, setRememberMe] = useState(false);
+	// const [rememberMe, setRememberMe] = useState(false);
 
 	const signIn = async (e: FormEvent) => {
 		setError('');
@@ -35,7 +34,7 @@ export const Login: FC<LoginProps> = (props) => {
 		setPasswordError(undefined);
 		e.preventDefault();
 
-		const res = await postLogin(email, password, rememberMe);
+		const res = await postLogin(email, password, true);
 		if (res.success) {
 			// Прогресс заданий обновляется автоматически на бэкенде
 
@@ -108,7 +107,7 @@ export const Login: FC<LoginProps> = (props) => {
 				/>
 				{error && <p className={element('error')}>{error}</p>}
 				<div className={element('move')}>
-					<FieldCheckbox id="remember" text="Запомнить меня" checked={rememberMe} setChecked={setRememberMe} />
+					{/* <FieldCheckbox id="remember" text="Запомнить меня" checked={rememberMe} setChecked={setRememberMe} /> */}
 					{openForgotPassword && (
 						<Button theme="no-border" className={element('forgot-password')} onClick={openForgotPassword} typeBtn="button">
 							Забыли пароль?
