@@ -1,0 +1,118 @@
+.feedback-modal {
+	$block: &;
+
+	&__form {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	&__header {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	&__title {
+		margin: 0;
+	}
+
+	&__subtitle {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+	}
+
+	&__rating {
+		display: flex;
+		gap: 16px;
+		align-items: center;
+	}
+
+	&__rating-label {
+		font-size: 14px;
+		color: var(--color-text-secondary);
+	}
+
+	&__stars {
+		display: flex;
+		justify-content: center;
+		gap: 4px;
+	}
+
+	&__star {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		padding: 0;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		transition: transform 0.1s ease-in-out;
+
+		svg {
+			width: 24px;
+			height: 24px;
+
+			* {
+				transition: fill 0.2s ease-in-out;
+			}
+		}
+
+		&:hover {
+			transform: scale(1.05);
+		}
+
+		&--active {
+			svg * {
+				fill: var(--color-entertainment);
+			}
+		}
+	}
+
+	&__field {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	&__field-label {
+		font-size: 14px;
+		color: var(--color-text-secondary);
+	}
+
+	&__textarea {
+		width: 100%;
+		min-height: 120px;
+		padding: 10px 12px;
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		resize: vertical;
+		font-family: inherit;
+		font-size: 14px;
+		color: var(--color-text-primary);
+
+		&::placeholder {
+			color: var(--color-text-secondary);
+		}
+
+		&:focus {
+			outline: none;
+			border-color: var(--color-primary);
+			box-shadow: 0 0 0 1px rgb(var(--color-primary) / 40%);
+		}
+	}
+
+	&__footer {
+		display: flex;
+		justify-content: flex-end;
+		gap: 8px;
+		margin-top: 8px;
+	}
+
+	&__btn {
+		width: auto;
+	}
+}

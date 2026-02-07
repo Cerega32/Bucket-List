@@ -12,6 +12,7 @@ import {UserStore} from '@/store/UserStore';
 
 import {AddReview} from '../AddReview/AddReview';
 import {ChangePassword} from '../ChangePassword/ChangePassword';
+import {CompareFriendModal, CompareFriendData} from '../CompareFriendModal/CompareFriendModal';
 import {ConfirmExecutionAllGoal} from '../ConfirmExecutionAllGoal/ConfirmExecutionAllGoal';
 import {CreateTodoListForm} from '../CreateTodoListForm/CreateTodoListForm';
 import {CreateTodoTaskForm} from '../CreateTodoTaskForm/CreateTodoTaskForm';
@@ -269,6 +270,9 @@ export const Modal: FC<ModalProps> = observer((props) => {
 					initialSettings={modalProps?.initialSettings}
 				/>
 			)}
+			{window === 'compare-friend' && modalProps?.comparisonData && (
+				<CompareFriendModal data={modalProps.comparisonData as CompareFriendData} />
+			)}
 		</>
 	);
 
@@ -305,9 +309,10 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		);
 	}
 
+	const effectiveSize = size || (window === 'compare-friend' ? 'medium' : undefined);
 	const windowModifiers: Record<string, boolean | string | undefined> = {
 		fullscreen: window === 'goal-map' || window === 'goal-map-multi' || window === 'goal-map-add',
-		...(size ? {[size]: true} : {}),
+		...(effectiveSize ? {[effectiveSize]: true} : {}),
 	};
 
 	if (!children) {
