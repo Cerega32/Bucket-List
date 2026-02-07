@@ -56,6 +56,13 @@
 		width: 40px;
 		height: 40px;
 		border-radius: 6px;
+		position: relative;
+	}
+
+	&__folder-badge-private-icon {
+		width: 18px;
+		height: 18px;
+		filter: brightness(0) invert(1);
 	}
 
 	&__icon {
@@ -138,13 +145,7 @@
 	}
 
 	&__private-badge {
-		padding: 2px 8px;
-		background: var(--color-yellow-2);
-		border-radius: 12px;
-		color: var(--color-yellow-3);
-		font-size: 12px;
-		font-weight: var(--weight-medium);
-		text-transform: uppercase;
+		display: none;
 	}
 
 	&__folder-description {
@@ -207,6 +208,11 @@
 		display: flex;
 		align-items: center;
 		gap: 16px;
+	}
+
+	&__folder-private-label {
+		color: var(--color-text-secondary);
+		font-weight: var(--weight-regular);
 	}
 
 	&__folder-tabs {

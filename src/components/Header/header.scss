@@ -8,9 +8,46 @@
 	height: var(--height-header);
 	padding: 16px 0;
 	border-bottom: 1px solid rgb(var(--color-white-rgb) / 16%);
+	transition: height 0.25s ease-in-out, padding 0.25s ease-in-out;
+
+	@include md {
+		height: var(--height-header-compact);
+	}
 
 	@include xl {
 		padding: 16px 24px;
+	}
+
+	@include sm {
+		height: auto;
+		min-height: var(--height-header-compact);
+		padding-top: 12px;
+		padding-bottom: 12px;
+	}
+
+	&__wrapper-pre-header {
+		@include max-width;
+
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 32px;
+		margin-bottom: 16px;
+		max-height: 40px; // примерная высота pre-header
+		overflow: hidden;
+		transition: max-height 0.25s ease-in-out, margin-bottom 0.25s ease-in-out, opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+
+		@include md {
+			display: none;
+		}
+
+		&--hidden {
+			max-height: 0;
+			margin-bottom: 0;
+			opacity: 0;
+			transform: translateY(-8px);
+			pointer-events: none;
+		}
 	}
 
 	&__wrapper {
@@ -18,10 +55,61 @@
 
 		display: flex;
 		align-items: center;
-		gap: 32px;
+		gap: 24px;
 
-		@include lg {
+		@include md {
 			gap: 16px;
+		}
+
+		@include sm {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 16px;
+		}
+	}
+
+	&__row-1 {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+		width: 100%;
+		padding-left: 12px;
+	}
+
+	&__menu-button-wrap {
+		flex-shrink: 0;
+	}
+
+	&__logo-wrap {
+		flex: 1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	&__row-1-avatar {
+		flex-shrink: 0;
+	}
+
+	&__row-1-auth {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	&__list-categories--row2 {
+		display: flex;
+		flex-grow: 1;
+		width: 100%;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		gap: 8px;
+
+		.header__search-item {
+			flex-grow: 1;
 		}
 	}
 
@@ -52,20 +140,16 @@
 		align-items: center;
 		gap: 8px;
 
-		@include lg {
+		@include md {
 			position: absolute;
 			top: calc(100% + 4px);
 			flex-direction: column;
 			align-items: flex-start;
 			gap: 0;
 			width: max-content;
-			padding: 8px;
-			background: var(--color-white);
-			border-radius: 8px;
 			opacity: 0;
 			transition: all 0.15s ease-in-out;
 			visibility: hidden;
-			box-shadow: 0 0 20px -2px rgb(var(--color-gray-rgb-8) / 8%);
 
 			&--open {
 				visibility: visible;
@@ -89,7 +173,7 @@
 	}
 
 	&__list-line {
-		@include lg {
+		@include md {
 			width: 100%;
 		}
 	}
@@ -97,7 +181,7 @@
 	&__item {
 		list-style: none;
 
-		@include lg {
+		@include md {
 			display: inline-block;
 			width: 100%;
 		}
@@ -106,10 +190,6 @@
 	&__search-item {
 		list-style: none;
 		flex-grow: 1;
-
-		@include md {
-			flex-grow: 0;
-		}
 	}
 
 	&__item-link {
@@ -132,15 +212,16 @@
 			color: var(--color-text);
 		}
 
-		@include lg {
+		@include md {
 			display: inline-block;
 			width: 100%;
 			padding: 8px;
 			border-radius: 6px;
 			color: var(--color-text-primary);
+			text-align: left;
 		}
 
-		@include md {
+		@include sm {
 			padding: 10px 8px;
 			border-radius: 6px;
 			color: var(--color-text-primary);
@@ -176,6 +257,11 @@
 		svg * {
 			fill: var(--color-white);
 		}
+	}
+
+	&__categories-link-menu {
+		padding: 0;
+		min-width: auto;
 	}
 
 	&__categories-item-parent {
@@ -412,9 +498,21 @@
 		align-items: center;
 		gap: 4px;
 		cursor: pointer;
+	}
+
+	&__profile-icon {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		border-radius: 6px;
+		background: (var(--color-secondary));
 
 		@include md {
-			display: none;
+			padding: 12px 16px;
+		}
+
+		@include sm {
+			padding: 8px;
 		}
 	}
 
@@ -504,6 +602,10 @@
 		display: flex;
 		flex-direction: column;
 		gap: 24px;
+
+		@include md {
+			gap: 8px;
+		}
 	}
 
 	&__categories-modal {
@@ -615,6 +717,36 @@
 					fill: var(--color-white);
 				}
 			}
+		}
+
+		// Кнопка "Создать" (theme=\"light\")
+		.button--theme-light {
+			color: var(--color-white);
+
+			svg *,
+			path {
+				fill: var(--color-white);
+			}
+
+			&:hover,
+			&:active {
+				background: rgb(var(--color-white-rgb) / 8%);
+				backdrop-filter: blur(8px);
+			}
+
+			// Волна на прозрачном фоне
+			.button__ripple {
+				background-color: rgba(var(--color-white-rgb) / 40%);
+			}
+		}
+	}
+
+	// Компактный режим (когда скрыт pre-header при прокрутке)
+	&--compact {
+		height: var(--height-header-compact);
+
+		@include sm {
+			height: var(--height-header);
 		}
 	}
 }
