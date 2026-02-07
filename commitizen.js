@@ -4,6 +4,7 @@ module.exports = {
     { value: "feat", name: 'feat:      Добавление нового функционала' },
     { value: "fix", name: "fix:       Исправление ошибок" },
     { value: "design", name: "design:     Добавление дизайна или изменение" },
+    { value: "backend", name: "backend:   Изменения в бэкенде" },
     {
       value: "build",
       name: "build:     Сборка проекта или изменения внешних зависимостей",
