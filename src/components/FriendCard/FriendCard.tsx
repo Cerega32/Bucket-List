@@ -44,7 +44,8 @@ export const FriendCard: React.FC<FriendCardProps> = observer(({friend, onRemove
 		onCompare?.(friend.id);
 	};
 
-	const displayName = friend.firstName && friend.lastName ? `${friend.firstName} ${friend.lastName}` : friend.username;
+	const hasName = friend.firstName || friend.lastName;
+	const displayName = hasName ? `${friend.firstName || ''} ${friend.lastName || ''}`.trim() : friend.username;
 
 	// Форматируем дату более надежно
 	const formatFriendshipDate = (dateString: string) => {
@@ -72,7 +73,7 @@ export const FriendCard: React.FC<FriendCardProps> = observer(({friend, onRemove
 
 			<div className={element('info')}>
 				<h3 className={element('name')}>{displayName}</h3>
-				<p className={element('username')}>@{friend.username}</p>
+				{hasName && <p className={element('username')}>{friend.username}</p>}
 				<p className={element('since')}>Друзья с {formatFriendshipDate(friend.createdAt)}</p>
 			</div>
 

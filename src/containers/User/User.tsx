@@ -64,7 +64,9 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 			<Loader isLoading={isLoading}>
 				<UserInfo
 					avatar={userInfo.avatar || null}
-					name={userInfo.name}
+					name={userInfo.name || userInfo.username}
+					firstName={userInfo.firstName}
+					lastName={userInfo.lastName}
 					totalAdded={userInfo.totalAddedGoals}
 					totalCompleted={userInfo.totalCompletedGoals}
 					page={page}

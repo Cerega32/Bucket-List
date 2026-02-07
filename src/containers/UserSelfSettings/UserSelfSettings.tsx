@@ -22,11 +22,12 @@ import {countriesArr} from '@/utils/data/countries';
 import './user-self-settings.scss';
 
 export const UserSelfSettings: FC = observer(() => {
-	const {userSelf: user, setUserSelf, setAvatar, email: storeEmail} = UserStore;
+	const {userSelf: user, setUserSelf, setAvatar, setName, email: storeEmail} = UserStore;
 	const {setWindow, setIsOpen} = ModalStore;
 
-	const [name, setName] = useState(user.firstName);
+	const [firstName, setFirstName] = useState(user.firstName);
 	const [surname, setSurname] = useState(user.lastName);
+	const [username, setUsername] = useState(user.username ?? '');
 	const [about, setAbout] = useState(user.aboutMe);
 	const [activeCountry, setActiveCountry] = useState<number | null>(null);
 	const avatarInputRef = useRef<HTMLInputElement | null>(null);
@@ -35,8 +36,9 @@ export const UserSelfSettings: FC = observer(() => {
 	const [block, element] = useBem('user-self-settings');
 
 	useEffect(() => {
-		setName(user.firstName);
+		setFirstName(user.firstName);
 		setSurname(user.lastName);
+		setUsername(user.username ?? '');
 		setAbout(user.aboutMe);
 		if (user.country) {
 			setActiveCountry(countriesArr.findIndex((country) => country.value === user.country));
@@ -47,10 +49,13 @@ export const UserSelfSettings: FC = observer(() => {
 		const {id, value} = e.target;
 		switch (id) {
 			case 'name':
-				setName(value);
+				setFirstName(value);
 				break;
 			case 'surname':
 				setSurname(value);
+				break;
+			case 'username':
+				setUsername(value);
 				break;
 			case 'about':
 				setAbout(value);
@@ -123,11 +128,14 @@ export const UserSelfSettings: FC = observer(() => {
 		const updatedData: Partial<IUserInfo> = {};
 
 		// Проверяем каждое поле на изменение и добавляем его в объект updatedData при необходимости
-		if (name !== user.firstName) {
-			updatedData.firstName = name;
+		if (firstName !== user.firstName) {
+			updatedData.firstName = firstName;
 		}
 		if (surname !== user.lastName) {
 			updatedData.lastName = surname;
+		}
+		if (username !== (user.username ?? '')) {
+			updatedData.username = username.trim() || undefined;
 		}
 		if (activeCountry !== null && countriesArr[activeCountry].value !== user.country) {
 			updatedData.country = countriesArr[activeCountry].value;
@@ -143,6 +151,11 @@ export const UserSelfSettings: FC = observer(() => {
 
 			if (res.success && res.data) {
 				setUserSelf(res.data);
+				const displayName = res.data.name ?? res.data.username;
+				if (displayName) {
+					setName(displayName);
+					Cookies.set('name', displayName);
+				}
 			}
 		}
 	};
@@ -260,7 +273,14 @@ export const UserSelfSettings: FC = observer(() => {
 						Информация пользователя
 					</Title>
 					<div className={element('input-group')}>
-						<FieldInput text="Имя" placeholder="Имя" id="name" value={name} setValueTarget={handleInputChange} />
+						<FieldInput
+							text="Имя в системе"
+							placeholder="Имя в системе, которое увидят другие"
+							id="username"
+							value={username || user.username || ''}
+							setValueTarget={handleInputChange}
+						/>
+						<FieldInput text="Имя" placeholder="Имя" id="name" value={firstName} setValueTarget={handleInputChange} />
 						<FieldInput text="Фамилия" placeholder="Фамилия" id="surname" value={surname} setValueTarget={handleInputChange} />
 						<div>
 							<Select
