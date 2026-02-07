@@ -39,7 +39,7 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 				if (isProgress) {
 					const response = await getGoalsInProgress();
 					if (response.success && response.data) {
-						setProgressGoals(response.data);
+						setProgressGoals(response.data as IGoalProgress[]);
 					}
 				} else {
 					const response = await getRegularGoalStatistics();
