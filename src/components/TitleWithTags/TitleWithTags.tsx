@@ -156,17 +156,22 @@ export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
 
 	return (
 		<div ref={containerRef} className={block({theme})}>
-			<button
-				type="button"
-				className={element('title-copyable')}
-				title="Нажмите на название, чтобы скопировать его"
-				onClick={handleCopyTitle}
-				aria-label="Нажмите, чтобы скопировать название"
-			>
-				<Title className={element('title', {short})} tag="h1" theme={isList ? 'black' : 'white'}>
-					{title}
-				</Title>
-			</button>
+			<div className={element('header')}>
+				<button
+					type="button"
+					className={element('title-copyable')}
+					title="Нажмите на название, чтобы скопировать его"
+					onClick={handleCopyTitle}
+					aria-label="Нажмите на название, чтобы скопировать его"
+				>
+					<Title className={element('title', {short})} tag="h1" theme={isList ? 'black' : 'white'}>
+						{title}
+					</Title>
+				</button>
+				<button type="button" className={element('copy-button')} onClick={handleCopyTitle} aria-label="Скопировать название">
+					<span className={element('copy-icon')} aria-hidden="true" />
+				</button>
+			</div>
 			{!short && (
 				<Tags
 					category={category}

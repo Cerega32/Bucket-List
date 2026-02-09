@@ -1,8 +1,14 @@
 .title-with-tags {
 	$block: &;
 
+	&__header {
+		display: flex;
+		gap: 8px;
+	}
+
 	&__title-copyable {
 		display: block;
+		flex: 1 1 auto;
 		width: 100%;
 		padding: 0;
 		margin: 0;
@@ -40,6 +46,38 @@
 			&__title {
 				color: var(--color-text-primary);
 			}
+		}
+	}
+
+	&__copy-button {
+		display: none;
+		padding: 0;
+		margin-top: 4px;
+		border: none;
+		background: none;
+		cursor: pointer;
+		width: 32px;
+		height: 32px;
+		color: inherit;
+	}
+
+	&__copy-icon {
+		display: block;
+		width: 18px;
+		height: 18px;
+		background-color: var(--color-secondary);
+		mask-image: url('/public/svg/copy.svg');
+		mask-repeat: no-repeat;
+		mask-position: center;
+		mask-size: contain;
+	}
+
+	// Показываем отдельную кнопку копирования только на тач-устройствах
+	@media (hover: none) and (pointer: coarse) {
+		&__copy-button {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
 		}
 	}
 }
