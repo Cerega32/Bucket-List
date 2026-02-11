@@ -123,8 +123,8 @@ export const Goal: FC<IPage> = observer(({page}) => {
 								title: 'Цель успешно выполнена!',
 								type: 'success',
 								id: Math.random().toString(36).substring(2, 15),
-								message: 'Добавьте отзыв чтобы заработать больше очков',
-								actionText: 'Добавить отзыв',
+								message: 'Оставьте впечатление чтобы заработать больше очков',
+								actionText: 'Добавить впечатление',
 								action: openAddReview,
 						  }
 						: undefined

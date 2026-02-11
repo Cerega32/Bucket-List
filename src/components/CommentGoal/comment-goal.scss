@@ -25,6 +25,18 @@
 		height: 56px;
 		border-radius: 6px;
 		object-fit: cover;
+
+		&--placeholder {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: var(--color-gray-9);
+			color: var(--color-text-secondary);
+			font-weight: var(--weight-medium);
+			font-size: 20px;
+			line-height: 1;
+			flex-shrink: 0;
+		}
 	}
 
 	&__user-img {

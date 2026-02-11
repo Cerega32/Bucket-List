@@ -30,7 +30,7 @@ export const DeleteGoal: FC<DeleteGoalProps> = (props) => {
 			<Title tag="h2" className={element('title')}>
 				Удаление цели
 			</Title>
-			<p className={element('text')}>Вы действительно хотите удалить цель? Написанный отзыв будет будет удалён вместе с целью.</p>
+			<p className={element('text')}>Вы действительно хотите удалить цель? Оставленное впечатление будет удалено вместе с целью.</p>
 			<div className={element('btns-wrapper')}>
 				<Button theme="blue-light" className={element('btn')} onClick={closeModal}>
 					Отмена

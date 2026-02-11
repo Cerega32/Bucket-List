@@ -2128,7 +2128,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 								className={element('btn')}
 								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 							>
-								Написать отзыв
+								Оставьте впечатление
 							</Button>
 						)}
 					</>
