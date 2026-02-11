@@ -1,0 +1,212 @@
+.friends-news-feed {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+
+	&--empty {
+		justify-content: center;
+	}
+
+	&__list {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+
+		@include sm {
+			padding: 16px;
+		}
+	}
+
+	&__card {
+		display: flex;
+		justify-content: space-between;
+		gap: 16px;
+		align-items: center;
+		border: 1px solid var(--color-border);
+		background: var(--color-white);
+		padding: 16px;
+		border-radius: 8px;
+
+		@include sm {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		&:hover {
+			border-color: var(--color-primary);
+			box-shadow: 0 4px 12px rgb(var(--color-primary-rgb) / 0.1);
+		}
+	}
+
+	&__card--own {
+		background: var(--color-gray-6);
+	}
+
+	&__card-main {
+		display: flex;
+		gap: 16px;
+		align-items: center;
+		flex: 1;
+	}
+
+	&__icon-wrapper {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		width: 50px;
+		height: 50px;
+		background: var(--color-gray-6);
+		border-radius: 8px;
+		border: 1px solid var(--color-border);
+
+		&--green {
+			.friends-news-feed__icon {
+				svg * {
+					fill: var(--color-travel);
+				}
+			}
+		}
+
+		&--blue {
+			.friends-news-feed__icon {
+				svg * {
+					fill: var(--color-primary);
+				}
+			}
+		}
+
+		&--gold {
+			.friends-news-feed__icon {
+				svg * {
+					fill: var(--color-gold);
+				}
+			}
+		}
+	}
+
+	&__card--own &__icon-wrapper {
+		background: var(--color-white);
+	}
+
+	&__content {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	&__title {
+		margin: 0;
+		color: var(--color-text-primary);
+		font-size: 16px;
+		line-height: var(--line-height-16);
+	}
+
+	&__meta {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+		font-size: 13px;
+		line-height: var(--line-height-14);
+		color: var(--color-text-secondary);
+
+		@include sm {
+			flex-wrap: wrap;
+		}
+	}
+
+	&__date {
+		color: var(--color-text-secondary);
+	}
+
+	&__details {
+		margin-top: 2px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		font-size: 12px;
+		line-height: var(--line-height-12);
+		color: var(--color-gray-8);
+	}
+
+	&__details-row {
+		display: flex;
+		gap: 4px;
+	}
+
+	&__details-label {
+		font-weight: var(--weight-medium);
+	}
+
+	&__details-value {
+		flex: 1;
+	}
+
+	&__like-button {
+		display: flex;
+		gap: 6px;
+		align-items: center;
+		padding: 6px 10px;
+		border-radius: 8px;
+		font-size: 16px;
+		font-weight: var(--weight-bold);
+		cursor: pointer;
+
+		@include sm {
+			align-self: flex-end;
+		}
+
+		&:hover {
+			.friends-news-feed__like-icon {
+				transform: scale(1.06);
+
+				svg * {
+					fill: var(--color-entertainment);
+				}
+			}
+		}
+
+		&--active {
+			color: var(--color-entertainment);
+
+			.friends-news-feed__like-icon {
+				transform: scale(1.15);
+
+				svg * {
+					fill: var(--color-entertainment);
+				}
+			}
+		}
+	}
+
+	&__like-button[disabled] {
+		cursor: default;
+		pointer-events: none;
+	}
+
+	&__like-icon-wrapper {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+	}
+
+	&__like-icon {
+		transition: transform 0.15s ease;
+
+		svg * {
+			fill: var(--color-text-secondary);
+		}
+	}
+
+	&__like-count {
+		min-width: 18px;
+		text-align: right;
+		color: var(--color-text-secondary);
+	}
+
+	&__like-button--active &__like-count {
+		color: var(--color-entertainment);
+	}
+}

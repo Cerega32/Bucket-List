@@ -72,7 +72,9 @@ export const RoutesAuth: FC = observer(() => {
 				<Route path="/100-goals" element={<PageMainGoals page="isMainGoals" />} />
 
 				{/* Маршруты для новостей */}
-				<Route path="/news" element={<NewsPage />} />
+				<Route path="/news" element={<Navigate to="/news/friends" replace />} />
+				<Route path="/news/friends" element={<NewsPage />} />
+				<Route path="/news/project" element={<NewsPage />} />
 				<Route path="/news/:id" element={<NewsDetailPage />} />
 
 				{/* Информационные страницы */}

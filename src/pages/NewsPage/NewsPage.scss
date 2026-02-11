@@ -1,6 +1,5 @@
 .news-page {
 	min-height: 100vh;
-	background: var(--color-gray-6);
 
 	&__container {
 		max-width: 1200px;
@@ -13,7 +12,7 @@
 	}
 
 	&__header {
-		margin-bottom: 40px;
+		margin-bottom: 32px;
 		text-align: center;
 
 		h1 {
@@ -40,12 +39,49 @@
 		}
 	}
 
+	&__tabs {
+		display: flex;
+		justify-content: center;
+		gap: 32px;
+		margin-top: 28px;
+		padding-bottom: 4px;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	&__tab {
+		position: relative;
+		padding: 8px 0;
+		font-size: 15px;
+		font-weight: var(--weight-medium);
+		color: var(--color-text-secondary);
+		text-decoration: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transition: color 0.15s ease;
+
+		&:hover {
+			color: var(--color-text-primary);
+		}
+
+		&--active {
+			color: var(--color-primary);
+
+			&::after {
+				content: '';
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: -4px;
+				height: 2px;
+				border-radius: 999px;
+				background: var(--color-primary);
+			}
+		}
+	}
+
 	&__search {
-		padding: 24px;
-		margin-bottom: 32px;
-		background: var(--color-white);
-		border: 1px solid var(--color-border);
-		border-radius: 12px;
+		padding-bottom: 24px;
 	}
 
 	&__search-form {
@@ -132,9 +168,6 @@
 	}
 
 	&__content {
-		background: var(--color-white);
-		border: 1px solid var(--color-border);
-		border-radius: 12px;
 	}
 
 	&__loading,
@@ -152,19 +185,15 @@
 	}
 
 	&__news-list {
-		padding: 32px;
-
-		@media (width <= 768px) {
-			padding: 20px;
-		}
 	}
 
 	&__news-card {
 		padding: 24px;
 		margin-bottom: 24px;
 		border: 1px solid var(--color-border);
-		border-radius: 12px;
+		border-radius: 8px;
 		transition: all 0.2s ease;
+		background: var(--color-white);
 
 		&:last-child {
 			margin-bottom: 0;
@@ -200,10 +229,14 @@
 
 	&__news-card-content {
 		width: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		gap: 24px;
 	}
 
 	&__news-card-title {
-		margin: 0 0 12px;
+		margin: 0;
 
 		a {
 			color: var(--color-text-primary);
@@ -224,7 +257,7 @@
 	}
 
 	&__news-card-excerpt {
-		margin: 0 0 16px;
+		margin: 0 0 auto;
 		color: var(--color-text-secondary);
 		font-size: 16px;
 		line-height: var(--line-height-16);
