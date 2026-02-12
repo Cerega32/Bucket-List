@@ -98,7 +98,7 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 				url: `/user/${id}/active-goals`,
 				name: 'Активные цели и списки',
 				page: 'isUserActiveGoals',
-				count: totalAddedLists + totalAdded - (totalCompletedLists + totalCompleted),
+				count: Math.max(0, totalAddedLists + totalAdded - (totalCompletedLists + totalCompleted)),
 			},
 			{
 				url: `/user/${id}/done-goals`,

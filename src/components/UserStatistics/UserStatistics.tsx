@@ -42,7 +42,7 @@ export const UserStatistics: FC<UserStatisticsProps> = (props) => {
 				<span>{statistics.currentStats.nextLevelExperience - statistics.currentStats.currentExperience}</span>
 			</p>
 			<p className={element('text')}>
-				<span>Заработано за отзывы</span>
+				<span>Заработано за впечатления</span>
 				<span>{statistics.totalStats.reviewsCount}</span>
 			</p>
 			<p className={element('text')}>

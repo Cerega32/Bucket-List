@@ -1,6 +1,10 @@
 .catalog-items {
 	$block: &;
 
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+
 	&__filters {
 		display: flex;
 		justify-content: flex-end;
