@@ -67,7 +67,7 @@ const typeConfig: Record<
 		colorClass: 'friends-news-feed__icon-wrapper--gold',
 	},
 	level_up: {
-		icon: 'regular',
+		icon: 'hard',
 		colorClass: 'friends-news-feed__icon-wrapper--green',
 	},
 	streak: {
@@ -233,7 +233,12 @@ export const FriendsNewsFeed: FC = observer(() => {
 									disabled={isOwnEvent}
 								>
 									<span className={element('like-icon-wrapper')}>
-										<Svg icon="like-fire" className={element('like-icon')} width="20px" height="20px" />
+										<Svg
+											icon={event.likedByMe ? 'like-fire-full' : 'like-fire'}
+											className={element('like-icon')}
+											width="20px"
+											height="20px"
+										/>
 									</span>
 									<span className={element('like-count')}>{event.likesCount}</span>
 								</button>
