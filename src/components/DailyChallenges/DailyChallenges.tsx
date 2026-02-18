@@ -68,7 +68,7 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 			visit_profiles: 'users',
 			login_streak: 'calendar',
 			update_progress: 'trending-up',
-			create_folder: 'folder',
+			create_folder: 'folder-open',
 			share_goal: 'share',
 			like_comments: 'heart',
 			daily_goal_complete: 'target',

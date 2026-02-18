@@ -67,7 +67,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		name: '',
 		description: '',
 		color: '#3A89D8',
-		icon: 'folder',
+		icon: 'folder-open',
 		is_private: false,
 	});
 	const [deletingFolder, setDeletingFolder] = useState<IGoalFolder | null>(null);

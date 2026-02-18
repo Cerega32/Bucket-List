@@ -90,8 +90,8 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 			},
 		];
 
-		// Вкладка "История прогресса выполнения" — для целей с прогрессом (не регулярных),
-		if (goal.addedByUser && !goal.regularConfig) {
+		// Вкладка "История прогресса выполнения" — только если есть записи прогресса (не регулярные цели),
+		if (goal.addedByUser && !goal.regularConfig && (goal.progressEntriesCount ?? 0) > 0) {
 			baseTabs.push({
 				url: '/progress-history',
 				name: 'История прогресса выполнения',
