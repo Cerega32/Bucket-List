@@ -31,3 +31,6 @@ logs/
 
 docs/
 news/
+
+quick_logs.sh
+view_logs.sh
