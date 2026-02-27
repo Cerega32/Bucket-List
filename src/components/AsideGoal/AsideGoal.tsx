@@ -1786,7 +1786,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										}
 									>
 										{isRegularGoalBlockedTodayBySchedule
-											? 'Сегодня выполнить цель нельзя'
+											? 'Сегодня нельзя выполнить'
 											: regularConfig.frequency === 'daily' &&
 											  (isRegularGoalCompletedToday || regularProgress?.completed)
 											? 'Выполнено сегодня'

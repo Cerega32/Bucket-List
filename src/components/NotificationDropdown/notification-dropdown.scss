@@ -6,7 +6,7 @@
 	top: 100%;
 	right: 0;
 	width: 400px;
-	max-height: 500px;
+	max-height: 696px;
 	margin-top: 8px;
 	background: var(--color-white);
 	border: 1px solid var(--color-border-light);
@@ -18,15 +18,15 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 16px 20px;
+		padding: 16px 16px 8px;
 		border-bottom: 1px solid var(--color-border-light);
 	}
 
 	&__title {
 		margin: 0;
 		color: var(--color-text-primary);
-		font-size: 18px;
-		font-weight: var(--weight-medium);
+		font-size: 16px;
+		font-weight: var(--weight-semi-bold);
 	}
 
 	&__mark-all {
@@ -35,8 +35,12 @@
 	}
 
 	&__content {
-		max-height: 350px;
+		max-height: min(640px, 80vh);
 		overflow-y: auto;
+
+		@include lg {
+			max-height: min(640px, 70vh);
+		}
 
 		&::-webkit-scrollbar {
 			width: 4px;
@@ -57,7 +61,7 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		padding: 40px 20px;
+		padding: 8px;
 		text-align: center;
 	}
 

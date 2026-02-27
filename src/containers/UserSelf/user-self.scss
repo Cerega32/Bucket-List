@@ -109,8 +109,8 @@
 		&--premium {
 			position: relative;
 			overflow: hidden;
-			border: 2px solid var(--color-gold);
-			color: var(--color-orange-3);
+			background-color: var(--color-orange);
+			color: var(--color-white);
 
 			&::before {
 				content: '';

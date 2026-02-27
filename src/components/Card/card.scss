@@ -74,6 +74,7 @@
 		-webkit-line-clamp: 2;
 		line-clamp: 2;
 		margin-bottom: 8px;
+		min-height: calc(var(--line-height-16) * 2);
 	}
 
 	&__text {
@@ -187,6 +188,12 @@
 			&__tags {
 				margin-right: auto;
 			}
+		}
+	}
+
+	&--interrupted {
+		#{$block}__series-day-wrapper {
+			visibility: hidden;
 		}
 	}
 

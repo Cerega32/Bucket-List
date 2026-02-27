@@ -44,7 +44,9 @@ body {
 	font-size: 14px;
 	line-height: 1.42;
 	scroll-behavior: smooth;
-	text-rendering: optimizespeed;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
 }
 
 /* Remove list styles ul ol elements */

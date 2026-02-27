@@ -70,8 +70,8 @@ export const AboutContainer: FC = () => {
 	];
 
 	const stats = [
-		{value: '5+', label: 'Категорий целей'},
-		{value: '100+', label: 'Готовых целей'},
+		{value: '20+', label: 'Категорий и направлений целей'},
+		{value: '1000+', label: 'Готовых целей и списков'},
 		{value: '∞', label: 'Возможностей'},
 	];
 

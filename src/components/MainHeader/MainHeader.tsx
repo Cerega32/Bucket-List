@@ -52,7 +52,8 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 					</>
 				</Title>
 				<p className={element('description')}>
-					Мы уже сделали это за вас - 100 вдохновляющих целей для яркой и успешной жизни уже в вашем профиле
+					В вашем профиле уже есть 100 вдохновляющих целей, а полный каталог открывает доступ к более чем 1000 целям и готовым
+					спискам.
 				</p>
 				<Button
 					className={element('button')}
