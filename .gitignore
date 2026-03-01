@@ -63,6 +63,7 @@ ssl/
 deploy.sh.backup
 deploy.sh.save
 finish-deploy.sh
+deploy.sh
 1-30
 "ervice - Webhook Server for Automatic Deployment"
 "udo journalctl -u webhook"
