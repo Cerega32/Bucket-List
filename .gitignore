@@ -32,5 +32,43 @@ logs/
 docs/
 news/
 
-quick_logs.sh
-view_logs.sh
+# Python virtual environment
+venv/
+backend/venv/
+*.pyc
+__pycache__/
+
+# SSL certificates (NEVER commit these!)
+ssl/
+*.pem
+*.key
+*.crt
+
+# Temporary files and server-specific scripts
+deploy.sh.backup
+deploy.sh.save
+finish-deploy.sh
+1-30
+"ervice - Webhook Server for Automatic Deployment"
+"udo journalctl -u webhook"
+"udo systemctl status webhook"
+
+# SSL certificates (NEVER commit these!)
+ssl/
+*.pem
+*.key
+*.crt
+
+# Temporary files and scripts (server-specific)
+deploy.sh.backup
+deploy.sh.save
+finish-deploy.sh
+1-30
+"ervice - Webhook Server for Automatic Deployment"
+"udo journalctl -u webhook"
+"udo systemctl status webhook"
+
+# Logs and monitoring scripts (can be committed if needed)
+# quick_logs.sh
+# view_logs.sh
+# check_updates.sh
