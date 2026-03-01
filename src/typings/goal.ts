@@ -105,6 +105,9 @@ export interface IGoal {
 
 	// Поля для регулярных целей
 	regularConfig?: IRegularGoalConfig;
+
+	// Количество записей в истории прогресса (для нерегулярных целей)
+	progressEntriesCount?: number;
 }
 
 export interface IShortGoal {

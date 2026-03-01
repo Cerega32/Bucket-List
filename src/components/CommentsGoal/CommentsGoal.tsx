@@ -36,7 +36,6 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 
 	return (
 		<div className={block()}>
-			{/* TODO Добавить слайдер для фоток */}
 			<section className={element('items')}>
 				{comments && !!comments.length ? (
 					comments.map((comment, i) => (
@@ -49,7 +48,7 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 						/>
 					))
 				) : (
-					<EmptyState title="Пока нет комментариев" description="Оставьте отметку о выполнении цели" />
+					<EmptyState title="Пока нет впечатлений" description="Оставьте отметку о выполнении цели" />
 				)}
 			</section>
 		</div>

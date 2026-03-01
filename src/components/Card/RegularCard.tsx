@@ -316,7 +316,7 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 	const isBlockedOrUnavailableToday = !statistics.canCompleteToday && !isCompletedToday;
 
 	return (
-		<section className={block({horizontal, regular: true})}>
+		<section className={block({horizontal, regular: true, interrupted: isInterrupted})}>
 			<Link to={`/goals/${goal.code}`} className={element('image-wrapper')}>
 				<img src={goal.image} alt={goal.title} className={element('image')} />
 				<Tag text={goal.category.name} category={goal.category.nameEn} className={element('category-badge')} />
@@ -391,7 +391,7 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 							: isCompletedToday
 							? 'Выполнено сегодня'
 							: isBlockedOrUnavailableToday
-							? 'Сегодня выполнить цель нельзя'
+							? 'Сегодня нельзя выполнить'
 							: 'Выполнить сегодня'}
 					</Button>
 				</div>

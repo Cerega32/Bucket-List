@@ -92,6 +92,7 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 	const [hovered, setHovered] = useState(false);
 	const currentDayIndex = getCurrentDayOfWeek();
 	const isCompletedToday = statistics.currentPeriodProgress?.completedToday ?? false;
+	const isSeriesInterrupted = statistics.isInterrupted ?? false;
 	const goalData = statistics.regularGoalData;
 
 	const actionIcon = isCompletedToday && hovered ? 'cross' : isCompletedToday ? 'regular' : 'regular-empty';
@@ -111,29 +112,36 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 				<div className={element('content')}>
 					<h4 className={element('title')}>{goalData.goalTitle}</h4>
 					<div className={element('days-row')}>
-						<div className={element('days')}>
-							{WEEK_DAYS.map((day, index) => {
-								const state = getWeekDayState(statistics, index);
-								const isToday = index === currentDayIndex;
-								const isCompleted = state === 'completed';
-								const isBlocked = state === 'blocked';
-								const isSelected = state === 'active' || (isBlocked && isToday);
+						<div className={element('days', {interrupted: isSeriesInterrupted})}>
+							{isSeriesInterrupted ? (
+								<div className={element('interrupted')}>
+									<Svg icon="regular-cancel" className={element('interrupted-icon')} />
+									<span className={element('interrupted-text')}>Серия прервана</span>
+								</div>
+							) : (
+								WEEK_DAYS.map((day, index) => {
+									const state = getWeekDayState(statistics, index);
+									const isToday = index === currentDayIndex;
+									const isCompleted = state === 'completed';
+									const isBlocked = state === 'blocked';
+									const isSelected = state === 'active' || (isBlocked && isToday);
 
-								return (
-									<div
-										key={day}
-										className={element('day', {
-											selected: isSelected && !isCompleted,
-											blocked: isBlocked,
-											completed: isCompleted,
-										})}
-										title={day}
-									>
-										{isCompleted && <Svg icon="done" className={element('day-icon')} />}
-										{!isCompleted && isBlocked && <Svg icon="cross" className={element('day-icon')} />}
-									</div>
-								);
-							})}
+									return (
+										<div
+											key={day}
+											className={element('day', {
+												selected: isSelected && !isCompleted,
+												blocked: isBlocked,
+												completed: isCompleted,
+											})}
+											title={day}
+										>
+											{isCompleted && <Svg icon="done" className={element('day-icon')} />}
+											{!isCompleted && isBlocked && <Svg icon="cross" className={element('day-icon')} />}
+										</div>
+									);
+								})
+							)}
 						</div>
 						<Line vertical className={element('line')} />
 						<span className={element('duration')}>{getSeriesText(statistics)}</span>

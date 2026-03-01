@@ -141,7 +141,7 @@
 	}
 
 	&--theme-light {
-		color: var(--color-text-primary);
+		color: var(--color-text);
 
 		&:hover,
 		&:active {
@@ -154,7 +154,7 @@
 		}
 
 		path {
-			fill: var(--color-text-primary);
+			fill: var(--color-gray-1);
 		}
 
 		#{$block}__ripple {

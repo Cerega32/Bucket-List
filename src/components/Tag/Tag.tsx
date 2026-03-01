@@ -22,13 +22,17 @@ interface TagProps {
 export const Tag: FC<TagProps> = (props) => {
 	const {icon, className, text, title, category, theme, classNameIcon, complexity, style} = props;
 
-	const [block] = useBem('tag', className);
+	const [block, element] = useBem('tag', className);
 
 	return (
 		<span className={block({category, theme})} style={style} title={title}>
 			{icon && <Svg className={classNameIcon} icon={icon} width="16px" height="16px" />}
-			{text && text}
-			{complexity && getComplexity[complexity]}
+			{(text || complexity) && (
+				<span className={element('text')}>
+					{text}
+					{complexity && getComplexity[complexity]}
+				</span>
+			)}
 		</span>
 	);
 };

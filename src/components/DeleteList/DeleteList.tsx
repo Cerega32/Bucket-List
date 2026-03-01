@@ -31,7 +31,7 @@ export const DeleteList: FC<DeleteListProps> = (props) => {
 				Удаление списка целей
 			</Title>
 			<p className={element('text')}>
-				Вы действительно хотите удалить список? Цели внутри списка и отзывы к ним также будут удалены из профиля.
+				Вы действительно хотите удалить список? Цели внутри списка и впечатления к ним также будут удалены из профиля.
 			</p>
 			<div className={element('btns-wrapper')}>
 				<Button theme="blue-light" className={element('btn')} onClick={closeModal}>

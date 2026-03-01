@@ -26,7 +26,7 @@ export const LeaderBoard: FC<LeaderBoardProps> = (props) => {
 						<th className={element('head-item')}>#</th>
 						<th className={element('head-item')}>Пользователь</th>
 						<th className={element('head-item')}>Целей выполнено</th>
-						<th className={element('head-item')}>Добавлено отзывов</th>
+						<th className={element('head-item')}>Добавлено впечатлений</th>
 						<th className={element('head-item')}>Опыта заработано</th>
 					</tr>
 				</thead>

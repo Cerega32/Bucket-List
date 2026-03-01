@@ -20,6 +20,7 @@ import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
 import {canEditGoal} from '@/utils/api/get/canEditGoal';
 import {getGoal} from '@/utils/api/get/getGoal';
+import {getGoalProgress} from '@/utils/api/goals';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
@@ -81,6 +82,23 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		checkEditPermission();
 	}, [goal, listId, canEditCheck.checked]);
 
+	// Загружаем количество записей прогресса для отображения вкладки «История прогресса выполнения»
+	useEffect(() => {
+		const loadProgressEntriesCount = async () => {
+			if (goal?.addedByUser && !goal.regularConfig && goal.id) {
+				try {
+					const res = await getGoalProgress(goal.id);
+					const count = res.success && res.data?.recentEntries ? res.data.recentEntries.length : 0;
+					setGoal((prev) => (prev ? {...prev, progressEntriesCount: count} : prev));
+				} catch {
+					setGoal((prev) => (prev ? {...prev, progressEntriesCount: 0} : prev));
+				}
+			}
+		};
+
+		loadProgressEntriesCount();
+	}, [goal?.id, goal?.addedByUser, goal?.regularConfig, historyRefreshTrigger]);
+
 	const openAddReview = () => {
 		setWindow('add-review');
 		setIsOpen(true);
@@ -123,8 +141,8 @@ export const Goal: FC<IPage> = observer(({page}) => {
 								title: 'Цель успешно выполнена!',
 								type: 'success',
 								id: Math.random().toString(36).substring(2, 15),
-								message: 'Добавьте отзыв чтобы заработать больше очков',
-								actionText: 'Добавить отзыв',
+								message: 'Оставьте впечатление чтобы заработать больше очков',
+								actionText: 'Добавить впечатление',
 								action: openAddReview,
 						  }
 						: undefined

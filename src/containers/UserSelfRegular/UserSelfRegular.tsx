@@ -3,6 +3,7 @@ import {FC, useEffect, useMemo, useState} from 'react';
 import {useLocation} from 'react-router-dom';
 import {scroller} from 'react-scroll';
 
+import {Button} from '@/components/Button/Button';
 import {RegularCard} from '@/components/Card/RegularCard';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
@@ -37,6 +38,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [pagination, setPagination] = useState<IPaginationPage | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
+	const [isBulkTodayUpdating, setIsBulkTodayUpdating] = useState(false);
 
 	const sortOptions: OptionSelect[] = [
 		{
@@ -238,6 +240,16 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	const todayGoals = getTodayGoals();
 	const allGoals = getAllGoals();
 
+	const areAllTodayCompleted =
+		todayGoals.length > 0 &&
+		todayGoals.every((stats) => {
+			const progress = stats.currentPeriodProgress;
+			if (progress?.type === 'daily') {
+				return !!progress.completedToday;
+			}
+			return !stats.canCompleteToday;
+		});
+
 	const buttonsSwitch = [
 		{
 			url: '#today',
@@ -356,6 +368,43 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		);
 	};
 
+	const handleToggleCompleteAllToday = async () => {
+		if (todayGoals.length === 0 || isBulkTodayUpdating) {
+			return;
+		}
+
+		setIsBulkTodayUpdating(true);
+		const targetCompleted = !areAllTodayCompleted;
+
+		try {
+			await Promise.all(
+				todayGoals.map((stats) =>
+					markRegularProgress({
+						regular_goal_id: stats.regularGoal,
+						completed: targetCompleted,
+						notes: '',
+					})
+				)
+			);
+
+			await loadRegularGoalStatistics(currentPage);
+
+			NotificationStore.addNotification({
+				type: 'success',
+				title: 'Успешно!',
+				message: targetCompleted ? 'Все цели на сегодня отмечены' : 'Отметка о выполнении снята со всех целей',
+			});
+		} catch (error) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Не удалось обновить цели на сегодня',
+			});
+		} finally {
+			setIsBulkTodayUpdating(false);
+		}
+	};
+
 	const goToPage = async (page: number): Promise<boolean> => {
 		await loadRegularGoalStatistics(page);
 		scroller.scrollTo('user-self-regular-goals', {
@@ -396,28 +445,44 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				<div className="catalog-items__filters">
 					<Switch className="catalog-items__switch" buttons={buttonsSwitch} active={activeTab} />
 					<Line className="catalog-items__line" />
-					<div className="catalog-items__search-wrapper catalog-items__search-wrapper--wrap-on-lg">
-						<FieldInput
-							className="catalog-items__search"
-							placeholder="Поиск по названию цели"
-							id="user-self-regular-search"
-							value={search}
-							setValue={handleSearchChange}
-							iconBegin="search"
-						/>
-						<div className="catalog-items__categories-wrapper">
-							{categoryFilters.length > 0 && (
-								<FiltersCheckbox
-									head={{name: 'Все категории', code: 'all'}}
-									items={categoryFilters}
-									onFinish={handleCategoryFilter}
-									multipleSelectedText={['категория', 'категории', 'категорий']}
-									multipleThreshold={1}
-								/>
-							)}
-							<Select options={sortOptions} activeOption={activeSort} onSelect={handleSortSelect} filter />
+					{activeTab === 'today' ? (
+						<div className={element('bulk-today-wrapper')}>
+							<Button
+								theme="blue-light"
+								size="medium"
+								icon={areAllTodayCompleted ? 'regular' : 'regular-empty'}
+								hoverIcon={areAllTodayCompleted ? 'cross' : undefined}
+								onClick={handleToggleCompleteAllToday}
+								disabled={isBulkTodayUpdating || todayGoals.length === 0}
+								hoverContent={areAllTodayCompleted ? 'Снять выполнение всех' : undefined}
+							>
+								{areAllTodayCompleted ? 'Выполнено все сегодня' : 'Выполнить все сегодня'}
+							</Button>
 						</div>
-					</div>
+					) : (
+						<div className="catalog-items__search-wrapper catalog-items__search-wrapper--wrap-on-lg">
+							<FieldInput
+								className="catalog-items__search"
+								placeholder="Поиск по названию цели"
+								id="user-self-regular-search"
+								value={search}
+								setValue={handleSearchChange}
+								iconBegin="search"
+							/>
+							<div className="catalog-items__categories-wrapper">
+								{categoryFilters.length > 0 && (
+									<FiltersCheckbox
+										head={{name: 'Все категории', code: 'all'}}
+										items={categoryFilters}
+										onFinish={handleCategoryFilter}
+										multipleSelectedText={['категория', 'категории', 'категорий']}
+										multipleThreshold={1}
+									/>
+								)}
+								<Select options={sortOptions} activeOption={activeSort} onSelect={handleSortSelect} filter />
+							</div>
+						</div>
+					)}
 				</div>
 				<BlurLoader active={isLoading}>
 					<div id="user-self-regular-goals">

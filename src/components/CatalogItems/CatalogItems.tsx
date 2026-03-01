@@ -23,7 +23,7 @@ import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
 import {Line} from '../Line/Line';
-import {Loader} from '../Loader/Loader';
+import {BlurLoader} from '../Loader/BlurLoader';
 import {Pagination} from '../Pagination/Pagination';
 import Select, {OptionSelect} from '../Select/Select';
 import {Switch} from '../Switch/Switch';
@@ -193,6 +193,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	}, [subPage, beginUrl, initialSearch]);
 
 	const fetchData = async (sortValue: string, page?: number, categoriesSort?: string[]): Promise<boolean> => {
+		setLoading(true);
 		try {
 			let res;
 			const queryParams = {
@@ -219,6 +220,8 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			return false;
 		} catch (error) {
 			return false;
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -228,7 +231,6 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	};
 
 	const goToPage = async (active: number): Promise<boolean> => {
-		setLoading(true);
 		const success = await fetchData(sortBy[activeSort].value, active, selectedCategories);
 		scroller.scrollTo('catalog-items-goals', {
 			duration: 800,
@@ -236,7 +238,6 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			smooth: 'easeInOutQuart',
 			offset: -150,
 		});
-		setLoading(false);
 		return success;
 	};
 
@@ -478,7 +479,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					</div>
 				</div>
 			</div>
-			<Loader isLoading={loading || (subPage === 'goals' && !goalsLoaded) || (subPage === 'lists' && !listsLoaded)}>
+			<BlurLoader active={loading || (subPage === 'goals' && !goalsLoaded) || (subPage === 'lists' && !listsLoaded)}>
 				{subPage === 'goals' ? (
 					!goalsLoaded ? null : goals.data.length === 0 ? (
 						<EmptyState
@@ -527,7 +528,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						))}
 					</section>
 				)}
-			</Loader>
+			</BlurLoader>
 			{subPage === 'lists' && lists.data.length > 0 && (
 				<Pagination currentPage={lists.pagination.page} totalPages={lists.pagination.totalPages} goToPage={goToPage} />
 			)}

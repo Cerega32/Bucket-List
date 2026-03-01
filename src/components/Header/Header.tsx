@@ -238,7 +238,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 					<Line margin="8px 0" />
 				</>
 			) : (
-				<Line margin="8px 0" />
+				<div />
 			)}
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self" end>
 				Дашборд
@@ -346,16 +346,10 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const buttonsAuth = (
 		<div className={element('profile')}>
-			<Button className={element('sign-in')} theme="blue-light" size={isScreenMobile ? 'medium' : 'small'} onClick={openLogin}>
+			<Button className={element('sign-in')} theme="blue-light" size="medium" onClick={openLogin}>
 				Войти
 			</Button>
-			<Button
-				className={element('registration')}
-				theme="blue"
-				size={isScreenMobile ? 'medium' : 'small'}
-				icon="rocket"
-				onClick={openRegistration}
-			>
+			<Button className={element('registration')} theme="blue" size="medium" onClick={openRegistration}>
 				Регистрация
 			</Button>
 		</div>
@@ -373,7 +367,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 					className={element('item-link', {active: page === 'isReview'})}
 					onClick={() => setIsFeedbackModalOpen(true)}
 				>
-					Оставить отзыв
+					{isScreenSmallTablet ? 'Отзыв' : 'Оставить отзыв'}
 				</button>
 			</div>
 			<div className={element('wrapper')}>
@@ -562,7 +556,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 										{/* Кнопка уведомлений */}
 										<button
 											type="button"
-											className={element('notifications-button')}
+											className={element('notifications-button', {active: isNotificationsOpen})}
 											onClick={toggleNotifications}
 											aria-label="Уведомления"
 										>
@@ -583,6 +577,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 													type="button"
 													className={element('notifications-button', {
 														progress: true,
+														active: isProgressOpen,
 													})}
 													onClick={toggleProgress}
 													aria-label="Прогресс"
@@ -632,7 +627,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 											<>
 												<button
 													type="button"
-													className={element('notifications-button')}
+													className={element('notifications-button', {active: isRegularGoalsOpen})}
 													onClick={toggleRegularGoals}
 													aria-label="Регулярные цели"
 												>
@@ -646,7 +641,10 @@ export const Header: FC<HeaderProps> = observer((props) => {
 																icon={
 																	HeaderRegularGoalsStore.allCompletedToday ? 'regular' : 'regular-empty'
 																}
-																className={element('regular-goals-badge-icon', {theme: header})}
+																className={element('regular-goals-badge-icon', {
+																	theme: header,
+																	completed: HeaderRegularGoalsStore.allCompletedToday,
+																})}
 															/>
 															<span className={element('regular-goals-badge-count', {theme: header})}>
 																{HeaderRegularGoalsStore.todayCount > 99

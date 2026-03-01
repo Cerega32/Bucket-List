@@ -44,6 +44,7 @@ export const UserSelfProgress: FC = observer(() => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [isPageLoading, setIsPageLoading] = useState(false);
 	const [todayCount, setTodayCount] = useState<number>(0);
+	const [isBulkTodayUpdating, setIsBulkTodayUpdating] = useState(false);
 
 	const categoryFilters = useMemo(() => {
 		const map = new Map<string, string>();
@@ -189,6 +190,49 @@ export const UserSelfProgress: FC = observer(() => {
 		}
 	};
 
+	const todayWorkingGoals = goals.filter((g) => g.isWorkingToday);
+	const areAllTodayCompleted = todayWorkingGoals.length > 0 && todayWorkingGoals.every((g) => g.progressPercentage >= 100);
+
+	const handleToggleCompleteAllToday = async () => {
+		if (activeTab !== 'today' || todayWorkingGoals.length === 0 || isBulkTodayUpdating) {
+			return;
+		}
+
+		setIsBulkTodayUpdating(true);
+
+		try {
+			if (!areAllTodayCompleted) {
+				// Отметить все цели как «работаю сегодня»
+				await Promise.all(
+					todayWorkingGoals.map((goal) =>
+						updateGoalProgress(goal.goal, {
+							progress_percentage: goal.progressPercentage,
+							daily_notes: goal.dailyNotes || '',
+							is_working_today: true,
+						})
+					)
+				);
+			} else {
+				// Снять отметку "работаю сегодня" со всех
+				await Promise.all(
+					todayWorkingGoals.map((goal) =>
+						updateGoalProgress(goal.goal, {
+							progress_percentage: goal.progressPercentage,
+							daily_notes: goal.dailyNotes || '',
+							is_working_today: false,
+						})
+					)
+				);
+			}
+
+			await loadGoalsInProgress(currentPage);
+		} catch (error) {
+			console.error('Ошибка массового обновления целей «работаю сегодня»:', error);
+		} finally {
+			setIsBulkTodayUpdating(false);
+		}
+	};
+
 	const goToPage = async (page: number): Promise<boolean> => {
 		await loadGoalsInProgress(page);
 		scroller.scrollTo('user-self-progress-goals', {
@@ -220,28 +264,45 @@ export const UserSelfProgress: FC = observer(() => {
 				<div className="catalog-items__filters">
 					<Switch className="catalog-items__switch" buttons={buttonsSwitch} active={activeTab} />
 					<Line className="catalog-items__line" />
-					<div className="catalog-items__search-wrapper catalog-items__search-wrapper--wrap-on-lg">
-						<FieldInput
-							className="catalog-items__search"
-							placeholder="Поиск по названию цели"
-							id="user-self-progress-search"
-							value={search}
-							setValue={handleSearchChange}
-							iconBegin="search"
-						/>
-						<div className="catalog-items__categories-wrapper">
-							{categoryFilters.length > 0 && (
-								<FiltersCheckbox
-									head={{name: 'Все категории', code: 'all'}}
-									items={categoryFilters}
-									onFinish={handleCategoryFilter}
-									multipleSelectedText={['категория', 'категории', 'категорий']}
-									multipleThreshold={1}
-								/>
-							)}
-							<Select options={SORT_OPTIONS} activeOption={activeSort} onSelect={handleSortSelect} filter />
+					{activeTab === 'today' ? (
+						<div>
+							<Button
+								theme="blue-light"
+								size="medium"
+								width="full"
+								icon={areAllTodayCompleted ? 'regular' : 'regular-empty'}
+								onClick={handleToggleCompleteAllToday}
+								disabled={isBulkTodayUpdating || todayWorkingGoals.length === 0}
+								hoverContent={areAllTodayCompleted ? 'Снять отметку всех' : undefined}
+								hoverIcon={areAllTodayCompleted ? 'cross' : undefined}
+							>
+								{areAllTodayCompleted ? 'Отмечено все сегодня' : 'Отметить все сегодня'}
+							</Button>
 						</div>
-					</div>
+					) : (
+						<div className="catalog-items__search-wrapper catalog-items__search-wrapper--wrap-on-lg">
+							<FieldInput
+								className="catalog-items__search"
+								placeholder="Поиск по названию цели"
+								id="user-self-progress-search"
+								value={search}
+								setValue={handleSearchChange}
+								iconBegin="search"
+							/>
+							<div className="catalog-items__categories-wrapper">
+								{categoryFilters.length > 0 && (
+									<FiltersCheckbox
+										head={{name: 'Все категории', code: 'all'}}
+										items={categoryFilters}
+										onFinish={handleCategoryFilter}
+										multipleSelectedText={['категория', 'категории', 'категорий']}
+										multipleThreshold={1}
+									/>
+								)}
+								<Select options={SORT_OPTIONS} activeOption={activeSort} onSelect={handleSortSelect} filter />
+							</div>
+						</div>
+					)}
 				</div>
 
 				<BlurLoader active={isPageLoading}>

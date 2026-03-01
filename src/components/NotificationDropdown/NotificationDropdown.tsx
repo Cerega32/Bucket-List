@@ -9,6 +9,7 @@ import {Avatar} from '../Avatar/Avatar';
 import {Button} from '../Button/Button';
 import {EmptyState} from '../EmptyState/EmptyState';
 import './notification-dropdown.scss';
+import {Line} from '../Line/Line';
 
 interface NotificationDropdownProps {
 	isOpen: boolean;
@@ -81,6 +82,7 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 					</Button>
 				)}
 			</div>
+			<Line margin="8px" />
 
 			<div className={element('content')}>
 				{!HeaderNotificationsStore.notifications || HeaderNotificationsStore.notifications.length === 0 ? (

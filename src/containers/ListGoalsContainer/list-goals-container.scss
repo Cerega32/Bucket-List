@@ -30,6 +30,7 @@
 		max-width: 1440px;
 		padding-top: calc(var(--height-header) + 40px);
 		margin: 0 auto;
+		padding-bottom: 56px;
 
 		@include xl {
 			flex-direction: column;

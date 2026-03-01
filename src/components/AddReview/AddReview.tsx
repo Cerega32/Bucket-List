@@ -87,7 +87,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	return (
 		<form className={block()} onSubmit={onSubmit}>
 			<Title tag="h2" className={element('title')}>
-				Написать отзыв к цели
+				Оставить впечатление о цели
 			</Title>
 			<Select
 				className={element('field')}

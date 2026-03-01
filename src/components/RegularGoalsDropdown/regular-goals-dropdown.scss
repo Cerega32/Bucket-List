@@ -6,7 +6,7 @@
 	top: 100%;
 	right: 0;
 	width: 456px;
-	max-height: 600px;
+	max-height: 696px;
 	margin-top: 8px;
 	background: var(--color-white);
 	border: 1px solid var(--color-border-light);
@@ -24,8 +24,12 @@
 
 	&__content {
 		position: relative;
-		max-height: 250px;
+		max-height: min(640px, 80vh);
 		overflow-y: auto;
+
+		@include lg {
+			max-height: min(640px, 70vh);
+		}
 
 		.loader {
 			min-height: 0;
@@ -70,7 +74,7 @@
 	}
 
 	&__footer {
-		padding: 16px 8px 8px;
+		padding: 8px;
 		border-top: 1px solid var(--color-border-light);
 		background: var(--color-background-light);
 	}
@@ -156,6 +160,12 @@
 		gap: 4px;
 	}
 
+	&__days--interrupted {
+		align-items: center;
+		width: 136px;
+		gap: 6px;
+	}
+
 	&__day {
 		position: relative;
 		display: flex;
@@ -190,6 +200,22 @@
 		path {
 			fill: var(--color-white);
 		}
+	}
+
+	&__interrupted {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	&__interrupted-icon {
+		width: 14px;
+		height: 14px;
+	}
+
+	&__interrupted-text {
+		color: var(--color-text-secondary);
+		font-size: 12px;
 	}
 
 	&__line {
