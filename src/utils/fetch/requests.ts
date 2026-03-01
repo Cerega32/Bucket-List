@@ -188,9 +188,9 @@ export const GET = async (url: string, params?: IFetchParams): Promise<any> => {
 
 export const PUT = (url: string, params: IFetchParams): Promise<any> => fetchData(url, 'PUT', params);
 
-export const getFantLabWorkDetails = async (workId: string): Promise<any> => {
+export const getGoogleBooksVolumeDetails = async (volumeId: string): Promise<any> => {
 	try {
-		const response = await fetch(`/api/goals/fantlab/${workId}/details/`, {
+		const response = await fetch(`/api/goals/google-books/${volumeId}/details/`, {
 			headers: {
 				'Content-Type': 'application/json',
 			},

@@ -8,7 +8,7 @@ import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
 import {IComplexity, IGoal} from '@/typings/goal';
-import {GET, getFantLabWorkDetails} from '@/utils/fetch/requests';
+import {GET, getGoogleBooksVolumeDetails} from '@/utils/fetch/requests';
 import {selectComplexity} from '@/utils/values/complexity';
 
 import Select from '../Select/Select';
@@ -167,10 +167,10 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 		try {
 			let enhancedGoalData = goalData;
 
-			// Если это книга из FantLab, загружаем детальную информацию
-			if (goalData.type === 'book' && goalData.apiSource === 'fantlab' && !goalData.isOwnDatabase) {
+			// Если это книга из Google Books, загружаем детальную информацию
+			if (goalData.type === 'book' && goalData.apiSource === 'google_books' && !goalData.isOwnDatabase) {
 				try {
-					const detailsResponse = await getFantLabWorkDetails(String(goalData.externalId));
+					const detailsResponse = await getGoogleBooksVolumeDetails(String(goalData.externalId));
 
 					if (detailsResponse.success) {
 						// Исправляем двойную вложенность ответа
@@ -192,7 +192,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 						NotificationStore.addNotification({
 							type: 'success',
 							title: 'Информация загружена',
-							message: 'Получена детальная информация о произведении',
+							message: 'Получена детальная информация о книге',
 						});
 					} else {
 						NotificationStore.addNotification({
