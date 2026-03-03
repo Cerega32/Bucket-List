@@ -52,7 +52,7 @@ export const MainInfo: FC<MainInfoProps> = (props) => {
 						title: 'Путешественник 1го уровня',
 						description: 'Выполнить хотя бы 1 цель из категории «Путешествия»',
 						image: '/svg/map.svg',
-						isAchieved: false,
+						isAchieved: true,
 						category: 'progress',
 					}}
 				/>
