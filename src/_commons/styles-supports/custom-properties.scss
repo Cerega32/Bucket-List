@@ -137,6 +137,8 @@
 	--color-relations-rgb: var(--color-pink-rgb-2); // #D81B60
 	--color-entertainment: var(--color-orange-3); // #F57C00
 	--color-entertainment-rgb: var(--color-orange-rgb-3); // #F57C00
+	--color-entertainment-and-hobby: var(--color-gray-1); // #718395
+	--color-entertainment-and-hobby-rgb: var(--color-gray-1); // #718395
 
 	/* Подкатегории - Образование и профессиональный рост (education) */
 	--color-career-success: var(--color-education); // Оттенок фиолетового для карьерного успеха
@@ -150,19 +152,21 @@
 	--color-wellness-and-health: var(--color-health-and-sport); // Более светлый оттенок для здоровья
 	--color-wellness-and-health-rgb: var(--color-health-and-sport-rgb); // #15A3AD
 
-	/* Подкатегории - Развлечения, Искусство и Хобби (entertainment) */
-	--color-hobby: var(--color-entertainment); // Оттенок желто-коричневого для хобби
-	--color-hobby-rgb: var(--color-entertainment-rgb); // #F57C00
+	/* Подкатегории - Искусство и культура (entertainment) */
 	--color-musical-experiences: var(--color-entertainment); // Оттенок для музыкальных впечатлений
 	--color-musical-experiences-rgb: var(--color-entertainment-rgb); // #F57C00
 	--color-creative-arts: var(--color-entertainment); // Оттенок для творческих искусств
 	--color-creative-arts-rgb: var(--color-entertainment-rgb); // #F57C00
-	--color-gaming: var(--color-entertainment); // Оттенок для игровых вселенных
-	--color-gaming-rgb: var(--color-entertainment-rgb); // #F57C00
 	--color-cinema-art: var(--color-entertainment); // Оттенок для киноискусства
 	--color-cinema-art-rgb: var(--color-entertainment-rgb); // #F57C00
 	--color-books: var(--color-entertainment); // Оттенок для литературных миров
 	--color-books-rgb: var(--color-entertainment-rgb); // #F57C00
+
+	/* Подкатегории - Развлечения и хобби (entertainment-and-hobby) */
+	--color-hobby: var(--color-entertainment-and-hobby); // Оттенок серого для хобби
+	--color-hobby-rgb: var(--color-entertainment-and-hobby-rgb); // #718395
+	--color-gaming: var(--color-entertainment-and-hobby); // Оттенок для игровых вселенных
+	--color-gaming-rgb: var(--color-entertainment-and-hobby-rgb); // #718395
 
 	/* Подкатегории - Отношения и связи (relations) */
 	--color-community-contribution: var(--color-relations); // Оттенок красного для общественного вклада

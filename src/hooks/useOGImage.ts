@@ -21,6 +21,7 @@ const getCategoryColor = (categoryName: string): string => {
 		'health-and-sport': '22 168 177', // --color-health-and-sport-rgb
 		relations: '177 22 22', // --color-relations-rgb
 		entertainment: '177 161 22', // --color-entertainment-rgb
+		'entertainment-and-hobby': '71 131 149', // --color-entertainment-and-hobby-rgb
 		'100-goals': '255 208 44', // --color-100-goals-rgb
 
 		// Подкатегории образования
@@ -31,17 +32,21 @@ const getCategoryColor = (categoryName: string): string => {
 		sport: '35 173 178', // --color-sport-rgb
 		'wellness-and-health': '49 179 183', // --color-wellness-and-health-rgb
 
-		// Подкатегории развлечений
-		hobby: '180 165 39', // --color-hobby-rgb
+		// Подкатегории искусства и культуры
 		'musical-experiences': '184 170 48', // --color-musical-experiences-rgb
 		'creative-arts': '187 174 56', // --color-creative-arts-rgb
-		gaming: '191 178 65', // --color-gaming-rgb
 		'cinema-art': '195 182 73', // --color-cinema-art-rgb
 		books: '198 186 82', // --color-books-rgb
+
+		// Подкатегории развлечений и хобби
+		hobby: '180 165 39', // --color-hobby-rgb
+		gaming: '191 178 65', // --color-gaming-rgb
 
 		// Подкатегории отношений
 		'community-contribution': '185 45 45', // --color-community-contribution-rgb
 		'romantic-moments': '192 68 68', // --color-romantic-moments-rgb
+		'friendship-and-communication': '199 186 72', // --color-friendship-and-communication-rgb
+		'dating-and-openness': '206 193 81', // --color-dating-and-openness-rgb
 
 		// Подкатегории путешествий
 		'cultural-immersion': '110 183 36', // --color-cultural-immersion-rgb
