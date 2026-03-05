@@ -167,7 +167,7 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 					</div>
 				</div>
 			</section>
-			<Tabs tabs={tabs} active={page} />
+			<Tabs tabs={tabs} active={page} preventScrollReset />
 		</article>
 	);
 });

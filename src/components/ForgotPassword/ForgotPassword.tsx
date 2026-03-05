@@ -6,6 +6,7 @@ import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {postRequestPasswordReset} from '@/utils/api/post/postRequestPasswordReset';
+import {normalizeEmail} from '@/utils/text/normalizeEmail';
 
 import './forgot-password.scss';
 
@@ -30,16 +31,17 @@ export const ForgotPassword: FC<ForgotPasswordProps> = (props) => {
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
+		const normalizedEmail = normalizeEmail(email);
 		setError('');
 		setIsLoading(true);
 
-		if (!email) {
+		if (!normalizedEmail) {
 			setError('Введите email адрес');
 			setIsLoading(false);
 			return;
 		}
 
-		const res = await postRequestPasswordReset(email);
+		const res = await postRequestPasswordReset(normalizedEmail);
 		if (res.success) {
 			setIsSent(true);
 		} else {

@@ -25,14 +25,15 @@ export const UserSearch: React.FC<UserSearchProps> = observer(({placeholder = 'Ð
 	// Debounced search function
 	const debouncedSearch = useCallback(
 		debounce(async (searchQuery: string) => {
-			if (searchQuery.trim().length < 3) {
+			const normalizedQuery = searchQuery.trim().toLowerCase();
+			if (normalizedQuery.length < 3) {
 				FriendsStore.clearSearchResults();
 				return;
 			}
 
 			try {
 				FriendsStore.setIsSearching(true);
-				const response = await searchUsers(searchQuery);
+				const response = await searchUsers(normalizedQuery);
 				FriendsStore.setSearchResults(response.results);
 			} catch (error) {
 				NotificationStore.addNotification({

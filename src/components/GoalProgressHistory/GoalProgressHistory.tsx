@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
+import {FC, useEffect, useRef, useState} from 'react';
 
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {Loader} from '@/components/Loader/Loader';
@@ -19,6 +19,8 @@ export const GoalProgressHistory: FC<GoalProgressHistoryProps> = observer(({clas
 	const [block, element] = useBem('goal-progress-history', className);
 	const [entries, setEntries] = useState<IGoalProgressEntry[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [multilineMap, setMultilineMap] = useState<Record<number, boolean>>({});
+	const noteRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
 	useEffect(() => {
 		const load = async () => {
@@ -41,6 +43,32 @@ export const GoalProgressHistory: FC<GoalProgressHistoryProps> = observer(({clas
 			load();
 		}
 	}, [goalId, refreshTrigger]);
+
+	const recalcMultiline = () => {
+		const newMap: Record<number, boolean> = {};
+
+		entries.forEach((entry) => {
+			const el = noteRefs.current[entry.id];
+			if (el) {
+				const style = window.getComputedStyle(el);
+				const lineHeight = parseFloat(style.lineHeight);
+				const height = el.clientHeight;
+
+				if (!Number.isNaN(lineHeight) && lineHeight > 0) {
+					newMap[entry.id] = height > lineHeight * 1.2;
+				} else {
+					newMap[entry.id] = false;
+				}
+			}
+		});
+
+		setMultilineMap(newMap);
+	};
+
+	useEffect(() => {
+		recalcMultiline();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [entries]);
 
 	if (isLoading) {
 		return (
@@ -70,9 +98,21 @@ export const GoalProgressHistory: FC<GoalProgressHistoryProps> = observer(({clas
 					const dateStr = entry.date ? formatDateString(entry.date) : '';
 
 					return (
-						<li key={entry.id} className={element('item')}>
+						<li
+							key={entry.id}
+							className={element('item', {
+								multiline: multilineMap[entry.id],
+							})}
+						>
 							<span className={element('date')}>{dateStr}</span>
-							<div className={element('note')}>{note || 'Заметка отсутствует'}</div>
+							<div
+								className={element('note')}
+								ref={(el) => {
+									noteRefs.current[entry.id] = el;
+								}}
+							>
+								{note || 'Заметка отсутствует'}
+							</div>
 							<span
 								className={element('badge', {
 									positive: change > 0,

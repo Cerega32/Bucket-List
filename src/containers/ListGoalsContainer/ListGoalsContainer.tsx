@@ -6,8 +6,10 @@ import {ContentListGoals} from '@/components/ContentListGoals/ContentListGoals';
 import {Loader} from '@/components/Loader/Loader';
 import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
 import {SEO} from '@/components/SEO/SEO';
+import {TitleWithTags} from '@/components/TitleWithTags/TitleWithTags';
 import {useBem} from '@/hooks/useBem';
 import {useOGImage} from '@/hooks/useOGImage';
+import useScreenSize from '@/hooks/useScreenSize';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
 import {IList} from '@/typings/list';
@@ -27,6 +29,7 @@ export const ListGoalsContainer: FC = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const {isAuth} = UserStore;
 	const {setIsOpen, setWindow} = ModalStore;
+	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 
 	// Генерируем динамическое OG изображение для списка
 	const {imageUrl: ogImageUrl} = useOGImage({
@@ -135,6 +138,17 @@ export const ListGoalsContainer: FC = () => {
 			/>
 			<main className={block()}>
 				<article className={element('wrapper')}>
+					{(isScreenSmallTablet || isScreenMobile) && (
+						<TitleWithTags
+							title={list.title}
+							category={list.category}
+							complexity={list.complexity}
+							className={element('title')}
+							totalCompleted={list.totalCompleted}
+							isList
+							theme="light"
+						/>
+					)}
 					<AsideGoal
 						className={element('aside')}
 						title={list.title}

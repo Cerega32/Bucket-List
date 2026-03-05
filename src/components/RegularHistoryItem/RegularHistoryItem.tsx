@@ -99,12 +99,7 @@ export const RegularHistoryItem: FC<RegularHistoryItemProps> = (props) => {
 						{history.regularGoalData.resetOnSkip && (
 							<div className={element('setting-item')}>
 								<span className={element('setting-label')}>Разрешенные пропуски:</span>
-								<span className={element('setting-value')}>
-									{history.regularGoalData.allowSkipDays || 0}
-									{history.regularGoalData.daysForEarnedSkip && history.regularGoalData.daysForEarnedSkip > 0
-										? ` (начисление через ${history.regularGoalData.daysForEarnedSkip} ${isWeekly ? 'недель' : 'дней'})`
-										: ''}
-								</span>
+								<span className={element('setting-value')}>{history.regularGoalData.allowSkipDays || 0}</span>
 							</div>
 						)}
 					</div>

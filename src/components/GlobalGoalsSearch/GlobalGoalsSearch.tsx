@@ -238,9 +238,9 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 					) : (
 						<div className={element('no-results')}>
 							<div className={element('no-results-content')}>
-								<Svg icon="search" className={element('no-results-icon')} />
+								<Svg icon="empty" className={element('no-results-icon')} />
 								<span className={element('no-results-text')}>
-									{query.length < 2 ? 'Введите минимум 2 символа для поиска' : 'Цели не найдены'}
+									{query.length < 2 ? 'Введите минимум 2 символа для поиска' : 'Ничего не найдено'}
 								</span>
 							</div>
 						</div>

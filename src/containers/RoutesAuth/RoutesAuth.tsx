@@ -52,10 +52,38 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({element}) => {
 
 /** Не прокручивать наверх при переключении маршрутов */
 const shouldScrollOnRouteChange = (prevPathname: string, pathname: string): boolean => {
+	// Не скроллить при переключении вкладок одной и той же цели
+	const getGoalId = (p: string) => {
+		const match = p.match(/^\/goals\/([^/]+)/);
+		return match ? match[1] : null;
+	};
+
+	const prevGoalId = getGoalId(prevPathname);
+	const nextGoalId = getGoalId(pathname);
+
+	if (prevGoalId && nextGoalId && prevGoalId === nextGoalId && prevPathname !== pathname) {
+		return false;
+	}
+
+	// Не скроллить при переключении вкладок одного и того же профиля пользователя
+	const getUserId = (p: string) => {
+		const match = p.match(/^\/user\/([^/]+)/);
+		return match ? match[1] : null;
+	};
+
+	const prevUserId = getUserId(prevPathname);
+	const nextUserId = getUserId(pathname);
+
+	if (prevUserId && nextUserId && prevUserId === nextUserId && prevPathname !== pathname) {
+		return false;
+	}
+
+	// Старое правило для /lists
 	const base = (p: string) => p.replace(/\/lists$/, '');
 	if (base(prevPathname) === base(pathname) && prevPathname !== pathname) {
 		return false;
 	}
+
 	return true;
 };
 

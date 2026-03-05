@@ -322,4 +322,29 @@
 		gap: 16px;
 		margin-bottom: 16px;
 	}
+
+	&--isList {
+		#{$block} {
+			&__image {
+				@include lg {
+					display: block;
+					height: 160px;
+					flex: 1;
+					margin-bottom: 0;
+				}
+
+				@include md {
+					flex: none;
+					height: 336px;
+				}
+			}
+
+			&__info {
+				@include lg {
+					border: none;
+					padding: 8px;
+				}
+			}
+		}
+	}
 }

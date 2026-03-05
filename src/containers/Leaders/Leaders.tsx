@@ -53,7 +53,11 @@ export const Leaders: FC = () => {
 			{leaders.length > 0 ? (
 				<LeaderBoard className={element('board')} users={leaders} />
 			) : (
-				<EmptyState className={element('empty')} title="Никто еще не стал лидером недели. Но вы можете стать им!" />
+				<EmptyState
+					className={element('empty')}
+					title="Лидер недели ещё не определён"
+					description="У вас есть шанс занять первое место"
+				/>
 			)}
 		</Loader>
 	);

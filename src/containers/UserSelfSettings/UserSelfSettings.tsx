@@ -289,6 +289,7 @@ export const UserSelfSettings: FC = observer(() => {
 								activeOption={activeCountry}
 								onSelect={setActiveCountry}
 								className={element('country')}
+								searchInControl
 							/>
 						</div>
 						<FieldInput
