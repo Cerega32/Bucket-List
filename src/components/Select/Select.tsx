@@ -160,10 +160,21 @@ const Select: FC<SelectProps> = ({
 				aria-label={typeof activeOption === 'number' ? `Выбрано: ${options[activeOption]?.name}` : placeholder}
 				disabled={disabled}
 			>
-				<Svg icon={filter ? 'sort' : 'arrow--right'} />
-				<span className={element('option-text')}>
-					{typeof activeOption === 'number' ? options[activeOption]?.name : placeholder}
-				</span>
+				{filter ? (
+					<>
+						<Svg icon="sort" />
+						<span className={element('option-text')}>
+							{typeof activeOption === 'number' ? options[activeOption]?.name : placeholder}
+						</span>
+					</>
+				) : (
+					<>
+						<span className={element('option-text')}>
+							{typeof activeOption === 'number' ? options[activeOption]?.name : placeholder}
+						</span>
+						<Svg icon="arrow--right" className={element('option-icon')} />
+					</>
+				)}
 			</button>
 			{isOpen && !disabled && (
 				<ul id="select-options-list" className={element('list')} role="listbox" aria-label="Доступные опции">

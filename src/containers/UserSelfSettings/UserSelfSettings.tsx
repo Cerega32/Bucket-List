@@ -291,6 +291,21 @@ export const UserSelfSettings: FC = observer(() => {
 								className={element('country')}
 							/>
 						</div>
+						<FieldInput
+							text="Обо мне"
+							type="textarea"
+							placeholder="Напишите пару слов о себе..."
+							id="about"
+							value={about}
+							setValueTarget={handleInputChange}
+							className={element('about')}
+						/>
+					</div>
+					<Line margin="24px 0" />
+					<Title tag="h3" className={element('title')}>
+						Безопасность и вход
+					</Title>
+					<div className={element('safety-wrapper')}>
 						<div className={element('email-field')}>
 							<FieldInput
 								text="Email"
@@ -331,25 +346,13 @@ export const UserSelfSettings: FC = observer(() => {
 								)}
 							</div>
 						</div>
-						<FieldInput
-							text="Обо мне"
-							type="textarea"
-							placeholder="Напишите пару слов о себе..."
-							id="about"
-							value={about}
-							setValueTarget={handleInputChange}
-							className={element('about')}
-						/>
+						<Button className={element('btn-change')} theme="no-border" icon="lock" onClick={openChangePassword}>
+							Изменить пароль
+						</Button>
 					</div>
+					<Line margin="24px 0" />
 					<Button className={element('btn-save')} theme="blue" onClick={handleSaveChanges}>
 						Сохранить изменения
-					</Button>
-					<Line margin="24px 0" />
-					<Title tag="h3" className={element('title')}>
-						Безопасность и вход
-					</Title>
-					<Button theme="no-border" icon="lock" onClick={openChangePassword}>
-						Изменить пароль
 					</Button>
 				</section>
 			</section>

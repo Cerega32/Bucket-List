@@ -132,9 +132,7 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 					</div>
 					<div className={element('right')}>
 						{isOwnProfile ? (
-							<Button type="Link" theme="blue" icon="plus" href="/goals/create">
-								Добавить цель
-							</Button>
+							<div />
 						) : (
 							<div className={element('friend-actions')}>
 								{!isFriend && !hasPendingRequest && (

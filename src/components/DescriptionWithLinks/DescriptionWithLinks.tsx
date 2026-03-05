@@ -78,7 +78,7 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 		const baseTabs: Array<ITabs> = [
 			{
 				url: '/',
-				name: 'Отметки',
+				name: 'Впечатления',
 				page: 'isGoal',
 				count: goal.totalComments,
 			},

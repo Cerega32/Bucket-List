@@ -6,12 +6,12 @@
 
 	&__text {
 		margin-bottom: 4px;
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	&__option {
 		display: flex;
-		justify-content: flex-start;
+		justify-content: space-between;
 		align-items: center;
 		gap: 4px;
 		width: 100%;
@@ -52,19 +52,19 @@
 		display: block;
 		width: 100%;
 		max-height: 200px;
-		padding: 0;
+		padding: 8px;
 		margin: 0;
 		background: var(--color-white);
 		border-radius: 8px;
 		list-style: none;
-		box-shadow: 0 8px 20px rgb(var(--color-gray-rgb-8) / 18%), 0 0 1px rgb(var(--color-gray-rgb-8) / 40%);
+		box-shadow: 0 -2px 20px rgb(var(--color-gray-rgb-8) / 8%);
 
 		@include scrollbar;
 	}
 
 	&__item {
-		padding: 10px;
-		border-radius: 4px;
+		padding: 8px;
+		border-radius: 6px;
 		cursor: pointer;
 
 		&:hover {
@@ -75,14 +75,10 @@
 			background-color: var(--color-white);
 			color: var(--color-primary);
 		}
-
-		&--highlighted {
-			background-color: var(--color-gray-5);
-		}
 	}
 
 	&--filter {
-		width: 200px;
+		width: 210px;
 
 		@include md {
 			width: 100%;
@@ -92,16 +88,21 @@
 			&__option {
 				flex-direction: row;
 				justify-content: flex-start;
-				padding: 10px;
+				padding: 10px 16px;
 				background: var(--color-secondary);
 				border: none;
 				border-radius: 8px;
+
+				&--isOpen {
+					outline: 2px solid rgb(var(--color-primary-rgb) / 40%);
+				}
 			}
 
 			&__list {
 				width: max-content;
-				border-radius: 4px;
-				box-shadow: 0 2px 4px rgb(var(--color-black) / 10%);
+				border-radius: 8px;
+				padding: 8px;
+				// box-shadow: 0 2px 4px rgb(var(--color-black) / 8%);
 			}
 		}
 	}

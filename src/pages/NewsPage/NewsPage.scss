@@ -4,11 +4,11 @@
 
 	&__container {
 		max-width: 1200px;
-		padding: 40px 20px;
+		padding: 40px 20px 96px;
 		margin: 0 auto;
 
 		@media (width <= 768px) {
-			padding: 20px 16px;
+			padding: 20px 16px 96px;
 		}
 	}
 

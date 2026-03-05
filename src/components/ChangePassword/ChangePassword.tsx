@@ -72,10 +72,10 @@ export const ChangePassword: FC<ChangePasswordProps> = (props) => {
 				autoComplete="new-password"
 			/>
 			<div className={element('btns-wrapper')}>
-				<Button theme="blue-light" className={element('btn')} onClick={closeModal}>
+				<Button theme="blue-light" className={element('btn')} onClick={closeModal} size="medium">
 					Отмена
 				</Button>
-				<Button theme="blue" className={element('btn')} typeBtn="submit">
+				<Button theme="blue" className={element('btn')} typeBtn="submit" size="medium">
 					Изменить пароль
 				</Button>
 			</div>

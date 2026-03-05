@@ -68,7 +68,7 @@
 
 	&__all-goals {
 		max-width: var(--max-width);
-		padding-bottom: 24px;
+		padding-bottom: 72px;
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
@@ -88,10 +88,6 @@
 	}
 
 	&--all {
-		padding: 56px;
-
-		@include lg {
-			padding: 56px 32px;
-		}
+		padding: 56px 24px 96px;
 	}
 }

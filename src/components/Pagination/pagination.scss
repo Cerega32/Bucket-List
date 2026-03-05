@@ -7,11 +7,22 @@
 		display: flex;
 		padding: 2px;
 		background: var(--color-gray-5);
-		border-radius: 6px;
+		border-radius: 8px;
 	}
 
 	&__page {
 		width: 48px;
+		line-height: var(--line-height-14);
+	}
+
+	&__page--active {
+		&.button--theme-blue-light {
+			background: var(--color-secondary-hover);
+		}
+
+		&.button--disabled {
+			opacity: 1;
+		}
 	}
 
 	&__arrow {
@@ -19,19 +30,7 @@
 		transition: all 0.2s linear;
 
 		&--notShow {
-			background: transparent;
-			color: transparent;
-			cursor: initial;
-			transition: all 0.2s linear;
-
-			&:hover {
-				background: transparent;
-			}
-
-			* {
-				transition: all 0.2s linear;
-				fill: transparent;
-			}
+			display: none;
 		}
 	}
 }

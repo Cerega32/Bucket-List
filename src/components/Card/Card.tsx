@@ -100,22 +100,35 @@ export const Card: FC<CardProps> = (props) => {
 						{isList && 'userCompletedGoals' in goal && 'goalsCount' in goal && (
 							<Progress done={goal.userCompletedGoals} all={goal.goalsCount} />
 						)}
-						<div className={element('buttons')}>
-							{!goal.addedByUser && <Button theme="blue" icon="plus" size="small" onClick={onClickAddHandler} />}
-							{goal.addedByUser && <Button theme="blue-light" icon="trash" size="small" onClick={onClickDelete} />}
-							{(goal.addedByUser || goal.completedByUser) && !isList && onClickMark && (
-								<Button theme={goal.completedByUser ? 'green' : 'blue-light'} size="small" onClick={onClickMark}>
-									<Svg
-										icon="done"
-										width="16px"
-										height="16px"
-										className={element('btn-done', {
-											active: goal.completedByUser,
-										})}
-									/>
-								</Button>
-							)}
-						</div>
+						{(() => {
+							const showAddButton = !goal.addedByUser;
+							const showDeleteButton = goal.addedByUser && !(isList && goal.code === '100-goals');
+							const showMarkButton =
+								(goal.addedByUser || goal.completedByUser) && !isList && typeof onClickMark === 'function';
+
+							if (!showAddButton && !showDeleteButton && !showMarkButton) {
+								return null;
+							}
+
+							return (
+								<div className={element('buttons')}>
+									{showAddButton && <Button theme="blue" icon="plus" size="small" onClick={onClickAddHandler} />}
+									{showDeleteButton && <Button theme="blue-light" icon="trash" size="small" onClick={onClickDelete} />}
+									{showMarkButton && (
+										<Button theme={goal.completedByUser ? 'green' : 'blue-light'} size="small" onClick={onClickMark}>
+											<Svg
+												icon="done"
+												width="16px"
+												height="16px"
+												className={element('btn-done', {
+													active: goal.completedByUser,
+												})}
+											/>
+										</Button>
+									)}
+								</div>
+							);
+						})()}
 					</div>
 				</div>
 			</div>

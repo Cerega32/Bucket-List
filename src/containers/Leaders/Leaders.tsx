@@ -49,13 +49,11 @@ export const Leaders: FC = () => {
 				]}
 				backgroundOff
 			/>
+			{leaders.length > 0 && <LeaderPedestal users={leaders.slice(0, 3)} className={element('pedestal')} />}
 			{leaders.length > 0 ? (
-				<>
-					<LeaderPedestal users={leaders.slice(0, 3)} className={element('pedestal')} />
-					<LeaderBoard className={element('board')} users={leaders} />
-				</>
+				<LeaderBoard className={element('board')} users={leaders} />
 			) : (
-				<EmptyState title="Никто еще не стал лидером недели. Но вы можете стать им!" />
+				<EmptyState className={element('empty')} title="Никто еще не стал лидером недели. Но вы можете стать им!" />
 			)}
 		</Loader>
 	);

@@ -5,8 +5,10 @@ import {useParams} from 'react-router-dom';
 import {Loader} from '@/components/Loader/Loader';
 import {UserInfo} from '@/components/UserInfo/UserInfo';
 import {useBem} from '@/hooks/useBem';
+import {FriendsStore} from '@/store/FriendsStore';
 import {UserStore} from '@/store/UserStore';
 import {IPage} from '@/typings/page';
+import {getFriendRequests, getFriends} from '@/utils/api/friends';
 import {getUser} from '@/utils/api/get/getUser';
 import './user.scss';
 
@@ -31,6 +33,24 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 		(async () => {
 			setIsLoading(true);
 			await getUser(id);
+
+			// Ленивая загрузка списка друзей и заявок,
+			// чтобы корректно отображать состояние кнопки дружбы
+			try {
+				if (FriendsStore.friends.length === 0) {
+					const friendsResponse = await getFriends();
+					FriendsStore.setFriends(friendsResponse.results);
+				}
+
+				if (FriendsStore.friendRequests.length === 0) {
+					const requestsResponse = await getFriendRequests();
+					FriendsStore.setFriendRequests(requestsResponse.results);
+				}
+			} catch (error) {
+				// Если не удалось загрузить друзей/заявки, не блокируем загрузку профиля
+				// eslint-disable-next-line no-console
+				console.error('Не удалось загрузить список друзей или заявок:', error);
+			}
 
 			// Обновляем прогресс заданий при посещении профиля (только один раз за сессию)
 			if (!hasVisited) {

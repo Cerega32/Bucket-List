@@ -54,7 +54,7 @@
 		align-items: center;
 		gap: 12px;
 		width: 216px;
-		padding: 12px 0;
+		padding: 16px 24px;
 		background: rgb(var(--color-white-rgb) / 8%);
 		border: 1px solid rgb(var(--color-white-rgb) / 16%);
 		border-radius: 8px;
@@ -76,7 +76,7 @@
 	}
 
 	&--fixed {
-		padding: calc(var(--height-header) + 16px) 0 16px;
+		padding: calc(var(--height-header-compact) + 16px) 0 16px;
 		transition: all 0.3s linear;
 	}
 
