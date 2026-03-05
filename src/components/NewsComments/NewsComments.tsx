@@ -73,7 +73,11 @@ export const NewsComments = observer(({newsId}: NewsCommentsProps) => {
 				{newsStore.commentsLoading && newsStore.comments.length === 0 ? (
 					<div className={element('loading')}>Загрузка комментариев...</div>
 				) : newsStore.comments.length === 0 ? (
-					<EmptyState title="Комментариев пока нет. Будьте первым!" className={element('empty')} />
+					<EmptyState
+						title="Комментариев пока нет"
+						description="Будьте первым! Вы можете стать примером для других"
+						className={element('empty')}
+					/>
 				) : (
 					<>
 						{newsStore.comments.map((comment) => (

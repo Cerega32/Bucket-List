@@ -7,6 +7,7 @@ import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
 import {postRegistration} from '@/utils/api/post/postRegistration';
+import {normalizeEmail} from '@/utils/text/normalizeEmail';
 
 import {Title} from '../Title/Title';
 import './registration.scss';
@@ -45,7 +46,8 @@ export const Registration: FC<RegistrationProps> = (props) => {
 			return;
 		}
 		setIsLoading(true);
-		const res = await postRegistration(email, password, username);
+		const normalizedEmail = normalizeEmail(email);
+		const res = await postRegistration(normalizedEmail, password, username);
 		setIsLoading(false);
 		if (res.success) {
 			successRegistration(res.data ?? res);

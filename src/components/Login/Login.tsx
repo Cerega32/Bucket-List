@@ -5,6 +5,7 @@ import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
 import {postLogin} from '@/utils/api/post/postLogin';
+import {normalizeEmail} from '@/utils/text/normalizeEmail';
 import './login.scss';
 
 import {Title} from '../Title/Title';
@@ -30,12 +31,13 @@ export const Login: FC<LoginProps> = (props) => {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const signIn = async (e: FormEvent) => {
+		const normalizedEmail = normalizeEmail(email);
 		setError('');
 		setEmailError(undefined);
 		setPasswordError(undefined);
 		e.preventDefault();
 		setIsLoading(true);
-		const res = await postLogin(email, password, true);
+		const res = await postLogin(normalizedEmail, password, true);
 		setIsLoading(false);
 		if (res.success) {
 			// Прогресс заданий обновляется автоматически на бэкенде
@@ -114,7 +116,7 @@ export const Login: FC<LoginProps> = (props) => {
 						<Button
 							theme="no-border"
 							className={element('forgot-password')}
-							onClick={() => openForgotPassword(email)}
+							onClick={() => openForgotPassword(normalizeEmail(email) || undefined)}
 							typeBtn="button"
 						>
 							Забыли пароль?

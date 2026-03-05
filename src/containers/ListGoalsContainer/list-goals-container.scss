@@ -2,14 +2,6 @@
 	position: relative;
 	background: var(--color-gray-3);
 
-	@include xl {
-		padding: 0 24px 30px;
-	}
-
-	@include md {
-		padding: 0 16px;
-	}
-
 	&::before {
 		position: absolute;
 		z-index: -1;
@@ -30,15 +22,16 @@
 		max-width: 1440px;
 		padding-top: calc(var(--height-header) + 40px);
 		margin: 0 auto;
-		padding-bottom: 56px;
+		padding-bottom: 96px;
+		padding-left: 24px;
+		padding-right: 24px;
 
 		@include xl {
-			flex-direction: column;
 			align-items: stretch;
 		}
 
 		@include lg {
-			flex-wrap: nowrap;
+			flex-direction: column;
 		}
 
 		@include md {
@@ -55,6 +48,15 @@
 		@include xl {
 			position: static;
 			top: auto;
+		}
+
+		@include lg {
+			border: 1px solid var(--color-gray-9);
+			background: var(--color-white);
+			border-radius: 8px;
+			padding: 8px;
+			gap: 8px;
+			align-items: center;
 		}
 	}
 

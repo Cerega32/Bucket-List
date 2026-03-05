@@ -1345,7 +1345,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const progressPercentage = getProgressPercentage();
 
 	return (
-		<aside className={block()}>
+		<aside className={block({isList})}>
 			<img src={image} alt={title} className={element('image')} />
 			{/* Блок с информацией о регулярной цели - показывается только если цель не добавлена */}
 			{regularConfig && !isList && !isAdded && (

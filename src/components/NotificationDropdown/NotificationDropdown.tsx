@@ -86,7 +86,12 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 
 			<div className={element('content')}>
 				{!HeaderNotificationsStore.notifications || HeaderNotificationsStore.notifications.length === 0 ? (
-					<EmptyState title="Нет уведомлений" size="small" className={element('empty')} />
+					<EmptyState
+						title="Нет уведомлений"
+						description="Все уведомления появятся здесь"
+						size="small"
+						className={element('empty')}
+					/>
 				) : (
 					<div className={element('list')}>
 						{HeaderNotificationsStore.notifications.map((notification) => {

@@ -146,7 +146,7 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 			{!isList && (
 				<>
 					<Line margin="16px 0 0" />
-					<Tabs base={`/goals/${goal.code}`} tabs={tabs} active={page} />
+					<Tabs base={`/goals/${goal.code}`} tabs={tabs} active={page} preventScrollReset />
 				</>
 			)}
 		</div>

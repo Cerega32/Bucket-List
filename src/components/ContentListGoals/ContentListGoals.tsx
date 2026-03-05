@@ -1,6 +1,7 @@
 import {FC} from 'react';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {IList} from '@/typings/list';
 import './content-list-goals.scss';
 
@@ -18,19 +19,22 @@ interface ContentListGoalsProps {
 export const ContentListGoals: FC<ContentListGoalsProps> = (props) => {
 	const {className, list, updateGoal} = props;
 
+	const {isScreenTablet, isScreenDesktop, isScreenSmallTablet} = useScreenSize();
 	const [block, element] = useBem('content-list-goals', className);
 
 	return (
 		<article className={block()}>
-			<TitleWithTags
-				title={list.title}
-				category={list.category}
-				complexity={list.complexity}
-				className={element('title')}
-				totalCompleted={list.totalCompleted}
-				isList
-				theme="light"
-			/>
+			{(isScreenDesktop || (isScreenTablet && !isScreenSmallTablet)) && (
+				<TitleWithTags
+					title={list.title}
+					category={list.category}
+					complexity={list.complexity}
+					className={element('title')}
+					totalCompleted={list.totalCompleted}
+					isList
+					theme="light"
+				/>
+			)}
 			<DescriptionWithLinks isList goal={list} className={element('description')} />
 			{list.addedByUser && (
 				<InfoGoal

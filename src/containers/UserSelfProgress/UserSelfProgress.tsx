@@ -307,15 +307,22 @@ export const UserSelfProgress: FC = observer(() => {
 
 				<BlurLoader active={isPageLoading}>
 					{goals.length === 0 ? (
-						<EmptyState title="Нет целей в процессе" description="Начните выполнение целей, чтобы отслеживать прогресс здесь">
-							<Button theme="blue" type="Link" href="/user/self/active-goals">
+						<EmptyState
+							title="Прогресс для целей не установлен"
+							description="Задайте отслеживание прогресса выполнения в любой активной цели"
+						>
+							<Button theme="blue" width="auto" type="Link" href="/user/self/active-goals">
 								Перейти к активным целям
 							</Button>
 						</EmptyState>
 					) : filteredGoals.length === 0 ? (
 						<EmptyState
-							title={activeTab === 'today' ? 'Нет целей «работаю сегодня»' : 'Нет целей по фильтрам'}
-							description="Измените фильтры или поиск"
+							title={activeTab === 'today' ? 'Прогресс для целей не установлен' : 'Нет целей'}
+							description={
+								activeTab === 'today'
+									? 'Задайте отслеживание прогресса выполнения в любой активной цели'
+									: 'Не найдено ни одной цели с заданным прогрессом'
+							}
 						/>
 					) : (
 						<div className={element('goals-grid')} id="user-self-progress-goals">

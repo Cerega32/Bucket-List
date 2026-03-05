@@ -343,9 +343,9 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		};
 	};
 
-	const renderGoalsList = (statsArray: IRegularGoalStatistics[], emptyMessage: string) => {
+	const renderGoalsList = (statsArray: IRegularGoalStatistics[], emptyMessage: string, emptyDescription: string) => {
 		if (statsArray.length === 0) {
-			return <EmptyState title={emptyMessage} className={element('empty-section')} />;
+			return <EmptyState title={emptyMessage} description={emptyDescription} className={element('empty-section')} />;
 		}
 
 		return (
@@ -487,8 +487,16 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				<BlurLoader active={isLoading}>
 					<div id="user-self-regular-goals">
 						{activeTab === 'today'
-							? renderGoalsList(todayGoals, 'На сегодня нет регулярных целей')
-							: renderGoalsList(allGoals, 'Нет регулярных целей')}
+							? renderGoalsList(
+									todayGoals,
+									'На сегодня нет регулярных целей',
+									'Отметьте регулярные цели, которые хотите выполнить сегодня.'
+							  )
+							: renderGoalsList(
+									allGoals,
+									'Нет регулярных целей',
+									'Добавьте регулярные цели из каталога, чтобы отслеживать привычки и прогресс.'
+							  )}
 					</div>
 				</BlurLoader>
 

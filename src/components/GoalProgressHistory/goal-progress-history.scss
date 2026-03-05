@@ -10,12 +10,16 @@
 
 	&__item {
 		display: flex;
-		align-items: flex-start;
+		align-items: center;
 		gap: 16px;
-		padding: 16px;
+		padding: 16px 24px;
 		background: var(--color-white);
 		border: 1px solid var(--color-border);
 		border-radius: 8px;
+
+		&--multiline {
+			align-items: flex-start;
+		}
 	}
 
 	&__date {
@@ -38,7 +42,7 @@
 
 	&__badge {
 		flex: 0 0 auto;
-		padding: 4px 10px;
+		padding: 2px 8px;
 		border-radius: 6px;
 		color: var(--color-white);
 		white-space: nowrap;

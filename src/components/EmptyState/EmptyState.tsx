@@ -3,6 +3,7 @@ import {FC, ReactNode} from 'react';
 import {useBem} from '@/hooks/useBem';
 
 import './empty-state.scss';
+import {Svg} from '../Svg/Svg';
 
 interface EmptyStateProps {
 	className?: string;
@@ -35,9 +36,7 @@ export const EmptyState: FC<EmptyStateProps> = ({className, title, description, 
 
 	return (
 		<div className={block({small: size === 'small'})}>
-			<div className={element('logo-background')}>
-				<img src="/svg/logo.svg" alt="" aria-hidden="true" />
-			</div>
+			<Svg icon="empty" className={element('logo')} />
 			<div className={element('content')}>
 				{title && <h3 className={element('title')}>{title}</h3>}
 				{renderDescription()}

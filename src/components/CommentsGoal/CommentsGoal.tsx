@@ -48,7 +48,7 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 						/>
 					))
 				) : (
-					<EmptyState title="Пока нет впечатлений" description="Оставьте отметку о выполнении цели" />
+					<EmptyState title="Пока нет впечатлений" description="Но вы можете стать примером для других" />
 				)}
 			</section>
 		</div>

@@ -19,6 +19,7 @@ interface SelectProps {
 	filter?: boolean;
 	placeholder?: string;
 	disabled?: boolean;
+	searchInControl?: boolean;
 }
 
 const Select: FC<SelectProps> = ({
@@ -30,20 +31,32 @@ const Select: FC<SelectProps> = ({
 	filter,
 	placeholder = 'Сделайте выбор',
 	disabled = false,
+	searchInControl = false,
 }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
 	const selectRef = useRef<HTMLDivElement | null>(null);
 	const optionsRef = useRef<(HTMLLIElement | null)[]>([]);
+	const [search, setSearch] = useState('');
 
 	const [block, element] = useBem('select', className);
+
+	const visibleOptions = options
+		.map((option, index) => ({option, index}))
+		.filter(({option}) => (!searchInControl || search.trim() === '' ? true : option.name.toLowerCase().includes(search.toLowerCase())));
 
 	const toggleDropdown = () => {
 		if (disabled) return;
 
-		setIsOpen(!isOpen);
-		if (!isOpen && typeof activeOption === 'number') {
-			setHighlightedIndex(activeOption);
+		const nextIsOpen = !isOpen;
+		setIsOpen(nextIsOpen);
+		if (nextIsOpen) {
+			setSearch('');
+			if (typeof activeOption === 'number') {
+				setHighlightedIndex(activeOption);
+			} else {
+				setHighlightedIndex(0);
+			}
 		}
 	};
 
@@ -66,7 +79,12 @@ const Select: FC<SelectProps> = ({
 		if (!isOpen && (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown')) {
 			event.preventDefault();
 			setIsOpen(true);
-			setHighlightedIndex(activeOption !== null ? activeOption : 0);
+			if (activeOption !== null) {
+				const currentVisibleIndex = visibleOptions.findIndex(({index}) => index === activeOption);
+				setHighlightedIndex(currentVisibleIndex >= 0 ? currentVisibleIndex : 0);
+			} else {
+				setHighlightedIndex(0);
+			}
 			return;
 		}
 
@@ -80,24 +98,30 @@ const Select: FC<SelectProps> = ({
 			case 'ArrowDown':
 				event.preventDefault();
 				setHighlightedIndex((prevIndex) => {
-					const newIndex = prevIndex === null ? 0 : (prevIndex + 1) % options.length;
-					optionsRef.current[newIndex]?.scrollIntoView({block: 'nearest'});
+					const max = visibleOptions.length;
+					if (!max) return null;
+					const newIndex = prevIndex === null ? 0 : (prevIndex + 1) % max;
+					const originalIndex = visibleOptions[newIndex].index;
+					optionsRef.current[originalIndex]?.scrollIntoView({block: 'nearest'});
 					return newIndex;
 				});
 				break;
 			case 'ArrowUp':
 				event.preventDefault();
 				setHighlightedIndex((prevIndex) => {
-					const newIndex = prevIndex === null || prevIndex === 0 ? options.length - 1 : prevIndex - 1;
-					optionsRef.current[newIndex]?.scrollIntoView({block: 'nearest'});
+					const max = visibleOptions.length;
+					if (!max) return null;
+					const newIndex = prevIndex === null || prevIndex === 0 ? max - 1 : prevIndex - 1;
+					const originalIndex = visibleOptions[newIndex].index;
+					optionsRef.current[originalIndex]?.scrollIntoView({block: 'nearest'});
 					return newIndex;
 				});
 				break;
 			case 'Enter':
 			case ' ':
 				event.preventDefault();
-				if (highlightedIndex !== null) {
-					handleOptionClick(highlightedIndex);
+				if (highlightedIndex !== null && visibleOptions[highlightedIndex]) {
+					handleOptionClick(visibleOptions[highlightedIndex].index);
 				}
 				break;
 			default:
@@ -105,14 +129,10 @@ const Select: FC<SelectProps> = ({
 		}
 	};
 
-	// Обработчик для элемента выбора
+	// Обработчик для элемента выбора (делегирует общую клавиатурную логику)
 	const handleSelectKeyDown = (event: React.KeyboardEvent) => {
 		if (disabled) return;
-
-		if (event.key === 'Enter' || event.key === ' ') {
-			event.preventDefault();
-			toggleDropdown();
-		}
+		handleKeyDown(event);
 	};
 
 	// Обработчик для элементов списка
@@ -139,59 +159,67 @@ const Select: FC<SelectProps> = ({
 	}, [options.length]);
 
 	return (
-		<div
-			className={block({filter, disabled})}
-			ref={selectRef}
-			onKeyDown={handleKeyDown}
-			role="combobox"
-			aria-haspopup="listbox"
-			aria-expanded={isOpen}
-			aria-controls={isOpen ? 'select-options-list' : undefined}
-			aria-label={text || 'Выпадающий список'}
-			tabIndex={disabled ? -1 : 0}
-			aria-disabled={disabled}
-		>
+		<div className={block({filter, disabled})} ref={selectRef}>
 			{text && <p className={element('text')}>{text}</p>}
-			<button
-				type="button"
-				className={element('option', {isOpen, placeholder: typeof activeOption !== 'number', disabled})}
-				onClick={toggleDropdown}
-				onKeyDown={handleSelectKeyDown}
-				aria-label={typeof activeOption === 'number' ? `Выбрано: ${options[activeOption]?.name}` : placeholder}
-				disabled={disabled}
-			>
-				{filter ? (
-					<>
-						<Svg icon="sort" />
-						<span className={element('option-text')}>
-							{typeof activeOption === 'number' ? options[activeOption]?.name : placeholder}
-						</span>
-					</>
-				) : (
-					<>
-						<span className={element('option-text')}>
-							{typeof activeOption === 'number' ? options[activeOption]?.name : placeholder}
-						</span>
-						<Svg icon="arrow--right" className={element('option-icon')} />
-					</>
-				)}
-			</button>
+			{searchInControl && isOpen ? (
+				<div className={element('option', {isOpen, placeholder: typeof activeOption !== 'number', disabled})}>
+					{filter && <Svg icon="sort" />}
+					<input
+						type="text"
+						className={element('option-input')}
+						value={search}
+						onKeyDown={handleSelectKeyDown}
+						onChange={(e) => setSearch(e.target.value)}
+						placeholder={typeof activeOption === 'number' ? options[activeOption]?.name : placeholder}
+						onClick={(e) => e.stopPropagation()}
+					/>
+					{!filter && <Svg icon="arrow--right" className={element('option-icon')} />}
+				</div>
+			) : (
+				<button
+					type="button"
+					className={element('option', {isOpen, placeholder: typeof activeOption !== 'number', disabled})}
+					onClick={toggleDropdown}
+					onKeyDown={handleSelectKeyDown}
+					aria-haspopup="listbox"
+					aria-expanded={isOpen}
+					aria-controls={isOpen ? 'select-options-list' : undefined}
+					aria-label={typeof activeOption === 'number' ? `Выбрано: ${options[activeOption]?.name}` : placeholder}
+					disabled={disabled}
+				>
+					{filter ? (
+						<>
+							<Svg icon="sort" />
+							<span className={element('option-text')}>
+								{typeof activeOption === 'number' ? options[activeOption]?.name : placeholder}
+							</span>
+						</>
+					) : (
+						<>
+							<span className={element('option-text')}>
+								{typeof activeOption === 'number' ? options[activeOption]?.name : placeholder}
+							</span>
+							<Svg icon="arrow--right" className={element('option-icon')} />
+						</>
+					)}
+				</button>
+			)}
 			{isOpen && !disabled && (
 				<ul id="select-options-list" className={element('list')} role="listbox" aria-label="Доступные опции">
-					{options.map((option, i) => (
+					{visibleOptions.map(({option, index}, i) => (
 						<li
 							key={option.value}
 							ref={(el) => {
-								optionsRef.current[i] = el;
+								optionsRef.current[index] = el;
 							}}
 							className={element('item', {
-								active: activeOption === i,
+								active: activeOption === index,
 								highlighted: highlightedIndex === i,
 							})}
-							onClick={() => handleOptionClick(i)}
-							onKeyDown={(e) => handleOptionKeyDown(e, i)}
+							onClick={() => handleOptionClick(index)}
+							onKeyDown={(e) => handleOptionKeyDown(e, index)}
 							role="option"
-							aria-selected={activeOption === i}
+							aria-selected={activeOption === index}
 							tabIndex={0}
 						>
 							{option.name}

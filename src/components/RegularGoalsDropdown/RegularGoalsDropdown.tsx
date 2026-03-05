@@ -39,7 +39,13 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 				if (isProgress) {
 					const response = await getGoalsInProgress();
 					if (response.success && response.data) {
-						setProgressGoals(response.data as IGoalProgress[]);
+						const raw = response.data as
+							| IGoalProgress[]
+							| {
+									data: IGoalProgress[];
+							  };
+						const list = Array.isArray(raw) ? raw : raw.data;
+						setProgressGoals(list || []);
 					}
 				} else {
 					const response = await getRegularGoalStatistics();
@@ -171,7 +177,12 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 				<BlurLoader active={loading} className={element('loader')}>
 					{isProgress ? (
 						goals.length === 0 ? (
-							<EmptyState title="Нет целей в процессе" size="small" className={element('empty')} />
+							<EmptyState
+								title="Прогресс для целей не установлен"
+								description="Задайте отслеживание прогресса выполнения в любой активной цели"
+								size="small"
+								className={element('empty')}
+							/>
 						) : (
 							<div className={element('list')}>
 								{goals.map((progress) => (
@@ -185,7 +196,12 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 							</div>
 						)
 					) : regularList.length === 0 ? (
-						<EmptyState title="Нет регулярных целей на сегодня" size="small" className={element('empty')} />
+						<EmptyState
+							title="Регулярных целей нет"
+							description="Добавьте цели из каталога для отслеживания привычек"
+							size="small"
+							className={element('empty')}
+						/>
 					) : (
 						<div className={element('list')}>
 							{regularList.map((statistics) => (
