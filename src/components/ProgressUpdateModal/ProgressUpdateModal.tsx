@@ -82,6 +82,22 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 			setNewProgress(e.target.value);
 		};
 
+		const handleInputChange = (value: string) => {
+			if (value === '') {
+				setNewProgress('');
+				return;
+			}
+
+			const numeric = parseInt(value, 10);
+
+			if (Number.isNaN(numeric)) {
+				return;
+			}
+
+			const clamped = Math.min(100, Math.max(0, numeric));
+			setNewProgress(clamped.toString());
+		};
+
 		const progressValue = Math.min(100, Math.max(0, parseInt(newProgress, 10) || 0));
 
 		return (
@@ -123,8 +139,10 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 					<FieldInput
 						id="progress-input"
 						text="Точное значение"
+						max={100}
+						min={0}
 						value={newProgress}
-						setValue={setNewProgress}
+						setValue={handleInputChange}
 						placeholder="Введите процент (0-100)"
 						type="number"
 						suffix="%"

@@ -5,10 +5,6 @@
 	margin: 0 auto;
 	background: var(--color-gray-3);
 
-	@include xl {
-		padding: 40px 0;
-	}
-
 	&__title {
 		margin-bottom: 24px;
 	}

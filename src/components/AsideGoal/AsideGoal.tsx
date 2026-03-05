@@ -1972,24 +1972,37 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 							className={element('btn')}
 							size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 						>
-							Поделиться в Telegram
+							Поделиться
 						</Button>
 					</>
 				)}
 
 				{/* Порядок кнопок для цели с прогрессом */}
 				{!isList && isAdded && !regularConfig && (
-					<Button
-						theme={isCompleted ? 'green' : 'blue'}
-						onClick={() => handleMarkGoal(isCompleted)}
-						icon="plus"
-						className={element('btn', {done: true})}
-						hoverContent={isCompleted ? 'Отменить выполнение' : ''}
-						hoverIcon={isCompleted ? 'cross' : ''}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
-						{isCompleted ? 'Выполнено' : 'Выполнить'}
-					</Button>
+					<>
+						<Button
+							theme={isCompleted ? 'green' : 'blue'}
+							onClick={() => handleMarkGoal(isCompleted)}
+							icon={isCompleted ? 'done' : 'plus'}
+							className={element('btn', {done: true})}
+							hoverContent={isCompleted ? 'Отменить выполнение' : ''}
+							hoverIcon={isCompleted ? 'cross' : ''}
+							size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+						>
+							{isCompleted ? 'Выполнено' : 'Выполнить'}
+						</Button>
+						{isCompleted && (
+							<Button
+								theme="blue-light"
+								onClick={openAddReview}
+								icon="comment"
+								className={element('btn')}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								Добавить впечатление
+							</Button>
+						)}
+					</>
 				)}
 				{!isList && isAdded && !regularConfig && (
 					<Button
@@ -2120,17 +2133,6 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 								{isAddingRegularGoal ? 'Добавление...' : 'Добавить к себе'}
 							</Button>
 						)}
-						{isCompleted && (
-							<Button
-								theme="blue-light"
-								onClick={openAddReview}
-								icon="comment"
-								className={element('btn')}
-								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-							>
-								Оставьте впечатление
-							</Button>
-						)}
 					</>
 				)}
 
@@ -2144,7 +2146,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 							className={element('btn')}
 							size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 						>
-							Поделиться в Telegram
+							Поделиться
 						</Button>
 					</>
 				)}

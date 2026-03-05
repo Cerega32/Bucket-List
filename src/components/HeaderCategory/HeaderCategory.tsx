@@ -64,9 +64,10 @@ export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
 							to={`/categories/${category.category.nameEn}/${subcategory.nameEn}`}
 							key={subcategory.nameEn}
 						>
-							{subcategory.icon && (
+							{/* Дизайнер решил пока не использовать иконки подкатегорий */}
+							{/* {subcategory.icon && (
 								<img className={element('subcategory-icon')} src={subcategory.icon} alt={subcategory.name} />
-							)}
+							)} */}
 							{subcategory.name}
 						</Link>
 					))}

@@ -249,7 +249,7 @@ export const UserSelfProgress: FC = observer(() => {
 	}
 
 	const buttonsSwitch = [
-		{url: '#today', name: 'Работаю сегодня', page: 'today' as const, count: todayCount},
+		{url: '#today', name: 'На сегодня', page: 'today' as const, count: todayCount},
 		{url: '#all', name: 'Все цели', page: 'all' as const, count: pagination?.totalItems ?? goals.length},
 	];
 

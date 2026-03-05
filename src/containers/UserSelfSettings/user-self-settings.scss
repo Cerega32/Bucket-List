@@ -78,10 +78,25 @@
 		width: max-content;
 	}
 
+	&__safety-wrapper {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: 1fr min-content;
+		gap: 24px;
+	}
+
+	&__btn-change {
+		grid-column: 1 / 2;
+		grid-row: 2 / 3;
+		justify-content: start;
+	}
+
 	&__email-field {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+		grid-column: 1 / 2;
+		grid-row: 1 / 2;
 	}
 
 	&__email-status {

@@ -114,19 +114,17 @@
 
 	@include sm {
 		.title-with-tags__title {
-			margin-top: 6px;
+			margin-top: 8px;
 		}
 	}
 
 	&--shrink {
-		height: 128px;
-		padding: 80px 0 16px;
+		height: 136px;
+		padding: 88px 0 16px;
 		transition: all linear 0.3s;
 
 		@include md {
 			position: fixed;
-			height: 128px;
-			padding: 80px 0 16px;
 		}
 
 		@include sm {

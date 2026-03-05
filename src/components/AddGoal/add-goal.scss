@@ -1,6 +1,6 @@
 .add-goal {
 	max-width: 1200px;
-	padding: 20px;
+	padding: 56px 24px 96px;
 	margin: 0 auto;
 
 	@include md {
@@ -288,7 +288,7 @@
 
 	&__format-hint {
 		display: block;
-		margin-top: -16px;
+		margin-top: -6px;
 		color: var(--color-text-secondary);
 		font-size: 12px;
 	}

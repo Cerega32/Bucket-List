@@ -70,19 +70,16 @@ export const Pagination: FC<PaginationProps> = (props) => {
 	const {isScreenSmallMobile, isScreenMobile} = useScreenSize();
 
 	const [block, element] = useBem('pagination', className);
-	const [loading, setLoading] = useState(false);
 	const visiblePages = isScreenSmallMobile ? 1 : isScreenMobile ? 3 : 5;
 	const pagination = generatePagination(current, totalPages, visiblePages);
 
 	const onPageClick = async (page: number): Promise<void> => {
 		const oldPage = current;
-		setLoading(true);
 		setCurrent(page);
-		const newCurrent = await goToPage(page);
-		if (!newCurrent) {
+		const success = await goToPage(page);
+		if (!success) {
 			setCurrent(oldPage);
 		}
-		setLoading(false);
 	};
 
 	useEffect(() => {
@@ -98,8 +95,8 @@ export const Pagination: FC<PaginationProps> = (props) => {
 			<Button
 				theme="blue-light"
 				icon="arrow--bottom"
-				className={element('arrow', {notShow: !(currentPage > 1)})}
-				onClick={() => onPageClick(currentPage - 1)}
+				className={element('arrow', {notShow: current <= 1})}
+				onClick={() => onPageClick(current - 1)}
 			/>
 			<div className={element('pages')}>
 				{pagination.map((page) => (
@@ -107,9 +104,8 @@ export const Pagination: FC<PaginationProps> = (props) => {
 						theme="blue-light"
 						onClick={() => onPageClick(page.number)}
 						key={page.number}
-						className={element('page')}
+						className={element('page', {active: page.number === current})}
 						disabled={page.number === current}
-						loading={loading && current === page.number}
 					>
 						{page.symbol}
 					</Button>
@@ -119,8 +115,8 @@ export const Pagination: FC<PaginationProps> = (props) => {
 			<Button
 				theme="blue-light"
 				icon="arrow"
-				className={element('arrow', {notShow: !(currentPage < totalPages)})}
-				onClick={() => onPageClick(currentPage + 1)}
+				className={element('arrow', {notShow: current >= totalPages})}
+				onClick={() => onPageClick(current + 1)}
 			/>
 		</div>
 	);

@@ -105,6 +105,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 				setValue={setNewComment}
 				className={element('field')}
 				type="textarea"
+				rows={1}
 			/>
 			<p className={element('field-title')}>Фотографии</p>
 			<div className={element('dropzone')}>
@@ -149,10 +150,10 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 				))}
 			</div>
 			<div className={element('btns-wrapper')}>
-				<Button theme="blue-light" className={element('btn')} onClick={closeModal}>
+				<Button theme="blue-light" className={element('btn')} onClick={closeModal} size="medium">
 					Отмена
 				</Button>
-				<Button theme="blue" className={element('btn')} typeBtn="submit">
+				<Button theme="blue" className={element('btn')} typeBtn="submit" size="medium">
 					Опубликовать (+10 опыта)
 				</Button>
 			</div>

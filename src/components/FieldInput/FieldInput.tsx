@@ -32,6 +32,8 @@ interface FieldInputProps {
 	rows?: number;
 	disabled?: boolean;
 	suffix?: string;
+	max?: number;
+	min?: number;
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -60,6 +62,8 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		rows = 2,
 		disabled = false,
 		suffix,
+		max,
+		min,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -123,13 +127,19 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onBlur={onBlur}
 						onKeyDown={onKeyDown}
 						maxLength={maxLength}
+						min={min}
+						max={max}
 						disabled={disabled}
 					/>
 				)}
 				{suffix && <span className={element('suffix')}>{suffix}</span>}
 				{type === 'password' && (
 					<button type="button" className={element('show-password')} onClick={toggleTypePassword} aria-label="Показать пароль">
-						{typeState === 'password' ? <Svg icon="eye" /> : <Svg icon="eye-closed" />}
+						{typeState === 'password' ? (
+							<Svg width="16px" height="16px" icon="eye-closed" />
+						) : (
+							<Svg width="16px" height="16px" icon="eye" />
+						)}
 					</button>
 				)}
 				{iconEnd && <Svg icon={iconEnd} className={element('icon-end')} />}

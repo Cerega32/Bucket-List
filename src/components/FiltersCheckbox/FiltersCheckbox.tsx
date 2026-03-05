@@ -104,7 +104,7 @@ export const FiltersCheckbox: FC<FiltersCheckboxProps> = (props) => {
 
 	return (
 		<div className={block()} ref={selectRef}>
-			<button type="button" className={element('option')} onClick={toggleDropdown} aria-label="Выберите">
+			<button type="button" className={element('option', {isOpen})} onClick={toggleDropdown} aria-label="Выберите">
 				<Svg icon={icon} />
 				<span className={element('option-text')}>{title}</span>
 			</button>
@@ -122,7 +122,12 @@ export const FiltersCheckbox: FC<FiltersCheckboxProps> = (props) => {
 								id={item.code}
 								checked={activeItems[item.code]?.value || false}
 								setChecked={(value) => {
-									setActiveItems({...activeItems, [item.code]: {value, name: item.name}});
+									const updatedItems = {...activeItems, [item.code]: {value, name: item.name}};
+									setActiveItems(updatedItems);
+
+									// Если выбрана хотя бы одна категория — снимаем активность с "Все категории"
+									const hasAnySelected = Object.values(updatedItems).some((v) => v.value);
+									setActiveHead(!hasAnySelected);
 								}}
 							/>
 						</li>

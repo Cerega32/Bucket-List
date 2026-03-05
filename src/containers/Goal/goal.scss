@@ -32,10 +32,11 @@
 		align-items: flex-start;
 		gap: 24px;
 		max-width: 1440px;
-		margin: 0 auto;
+		margin: 0 auto 56px;
 
 		@include xl {
-			padding: 0 24px 30px;
+			padding: 0 24px 56px;
+			margin: 0 auto;
 		}
 
 		@include lg {

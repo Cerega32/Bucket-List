@@ -408,7 +408,6 @@
 		justify-content: center;
 		align-items: center;
 		width: min-content;
-		height: 28px;
 		padding: 4px;
 		border-radius: 8px;
 		background: transparent;
@@ -462,7 +461,6 @@
 		justify-content: center;
 		align-items: center;
 		gap: 2px;
-		height: 28px;
 		border: none;
 		border-radius: 6px;
 		color: var(--color-white);
@@ -504,9 +502,6 @@
 	}
 
 	&__regular-goals-icon {
-		width: 20px;
-		height: 20px;
-
 		svg *,
 		path {
 			fill: var(--color-text-secondary);
@@ -568,7 +563,7 @@
 		transform: translateY(-10px);
 		visibility: hidden;
 		box-shadow: 0 0 20px -2px rgb(var(--color-gray-rgb-8) / 8%);
-		z-index: 10;
+		z-index: 10000;
 
 		@include md {
 			position: relative;

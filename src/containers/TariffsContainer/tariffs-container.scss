@@ -3,16 +3,16 @@
 .tariffs-container {
 	width: 100%;
 	max-width: 1200px;
-	padding: 56px 24px 102px;
+	padding: 56px 24px 96px;
 	margin: 0 auto;
 	background: var(--color-gray-3);
 
 	@include xl {
-		padding: 56px 30px 102px;
+		padding: 56px 30px 96px;
 	}
 
 	@include md {
-		padding: 24px 20px 102px;
+		padding: 24px 20px 96px;
 	}
 
 	&__header {

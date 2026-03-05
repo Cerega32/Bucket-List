@@ -151,7 +151,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 						type="Link"
 						href="/goals/create"
 						theme="blue-light"
-						size="medium"
+						size="small"
 						icon="plus"
 						className={element('add-goal-btn')}
 					>
