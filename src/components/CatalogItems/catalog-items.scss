@@ -18,6 +18,16 @@
 		}
 	}
 
+	&__filters-wrapper {
+		display: flex;
+		gap: 16px;
+	}
+
+	&__goal-type-select {
+		width: max-content;
+		max-height: 40px;
+	}
+
 	&__switch {
 		margin-right: auto;
 
