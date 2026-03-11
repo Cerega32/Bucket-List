@@ -3,7 +3,6 @@ import {useParams, useSearchParams} from 'react-router-dom';
 import {scroller} from 'react-scroll';
 
 import {AllCategories} from '@/components/AllCategories/AllCategories';
-import {Button} from '@/components/Button/Button';
 import {Card} from '@/components/Card/Card';
 import {CatalogItems} from '@/components/CatalogItems/CatalogItems';
 import {HeaderCategory} from '@/components/HeaderCategory/HeaderCategory';
@@ -26,6 +25,7 @@ import {addRegularGoalToUser, RegularGoalSettings} from '@/utils/api/post/addReg
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 
 import './category.scss';
 
@@ -82,7 +82,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 			const [categoriesRes, goalsRes, listsRes] = await Promise.all(promises);
 
 			if (!id && categoriesRes.success) {
-				setCategories(categoriesRes.data);
+				setCategories(sortMainCategories(categoriesRes.data));
 			} else if (id && categoriesRes.success) {
 				setCategory(categoriesRes.data);
 			}
@@ -253,7 +253,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 					<>
 						<div className={element('wrapper-title')}>
 							<Title tag="h2">Популярные цели этой недели</Title>
-							<Button
+							{/* <Button
 								type="Link"
 								theme="blue"
 								icon="plus"
@@ -261,7 +261,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 								size="small"
 							>
 								Добавить цель
-							</Button>
+							</Button> */}
 						</div>
 
 						<section className={element('popular-goals')}>
@@ -282,7 +282,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 					<>
 						<div className={element('wrapper-title')}>
 							<Title tag="h2">Популярные списки этой недели</Title>
-							<Button
+							{/* <Button
 								type="Link"
 								theme="blue"
 								icon="plus"
@@ -290,7 +290,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 								size="small"
 							>
 								Добавить список целей
-							</Button>
+							</Button> */}
 						</div>
 						<section className={element('popular-lists')}>
 							{popularLists.map((list, i) => (

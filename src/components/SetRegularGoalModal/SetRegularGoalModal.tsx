@@ -11,6 +11,7 @@ import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
 
 import './set-regular-goal-modal.scss';
+import {Banner} from '../Banner/Banner';
 
 export interface RegularGoalSettings {
 	frequency: 'daily' | 'weekly' | 'custom';
@@ -29,9 +30,10 @@ interface SetRegularGoalModalProps {
 	onSave: (settings: RegularGoalSettings) => void;
 	onCancel: () => void;
 	initialSettings?: Partial<RegularGoalSettings>;
+	showResetWarning?: boolean;
 }
 
-export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCancel, initialSettings}) => {
+export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCancel, initialSettings, showResetWarning}) => {
 	const [block, element] = useBem('set-regular-goal-modal');
 
 	// Состояния формы
@@ -76,10 +78,47 @@ export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCan
 			durationValue: durationType === 'days' || durationType === 'weeks' ? durationValue : undefined,
 			endDate: durationType === 'until_date' ? endDate : undefined,
 			resetOnSkip,
-			allowSkipDays: resetOnSkip ? allowSkipDays : 0, // Всегда передаем значение, даже если resetOnSkip = false
-			daysForEarnedSkip: resetOnSkip ? daysForEarnedSkip : 0, // Всегда передаем значение, даже если resetOnSkip = false
+			allowSkipDays: resetOnSkip ? allowSkipDays : 0,
+			daysForEarnedSkip: resetOnSkip ? daysForEarnedSkip : 0,
 			markAsCompletedAfterSeries,
 		};
+
+		if (showResetWarning && initialSettings) {
+			const initial = {
+				frequency: initialSettings.frequency || 'daily',
+				weeklyFrequency: initialSettings.frequency === 'weekly' ? initialSettings.weeklyFrequency ?? 3 : undefined,
+				customSchedule: initialSettings.frequency === 'custom' ? initialSettings.customSchedule : undefined,
+				durationType: initialSettings.durationType || 'days',
+				durationValue:
+					initialSettings.durationType === 'days' || initialSettings.durationType === 'weeks'
+						? initialSettings.durationValue ?? 30
+						: undefined,
+				endDate: initialSettings.durationType === 'until_date' ? initialSettings.endDate ?? '' : undefined,
+				resetOnSkip: initialSettings.resetOnSkip ?? false,
+				allowSkipDays: initialSettings.resetOnSkip ?? false ? initialSettings.allowSkipDays ?? 0 : 0,
+				daysForEarnedSkip: initialSettings.resetOnSkip ?? false ? initialSettings.daysForEarnedSkip ?? 0 : 0,
+				markAsCompletedAfterSeries: initialSettings.markAsCompletedAfterSeries ?? false,
+			};
+			const isSame =
+				settings.frequency === initial.frequency &&
+				settings.durationType === initial.durationType &&
+				settings.resetOnSkip === initial.resetOnSkip &&
+				settings.markAsCompletedAfterSeries === initial.markAsCompletedAfterSeries &&
+				(settings.weeklyFrequency ?? 0) === (initial.weeklyFrequency ?? 0) &&
+				(settings.durationValue ?? 0) === (initial.durationValue ?? 0) &&
+				(settings.endDate ?? '') === (initial.endDate ?? '') &&
+				(settings.allowSkipDays ?? 0) === (initial.allowSkipDays ?? 0) &&
+				(settings.daysForEarnedSkip ?? 0) === (initial.daysForEarnedSkip ?? 0) &&
+				JSON.stringify(settings.customSchedule ?? {}) === JSON.stringify(initial.customSchedule ?? {});
+			if (isSame) {
+				NotificationStore.addNotification({
+					type: 'warning',
+					title: 'Нет изменений',
+					message: 'Ни один параметр не был изменён',
+				});
+				return;
+			}
+		}
 
 		onSave(settings);
 	};
@@ -87,6 +126,9 @@ export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCan
 	return (
 		<div className={block()}>
 			<div className={element('content')}>
+				{showResetWarning && (
+					<Banner type="warning" title="При изменении параметров текущая серия будет сброшена!" className={element('banner')} />
+				)}
 				<div className={element('form')}>
 					<div className={element('regular-field-group')}>
 						<Select

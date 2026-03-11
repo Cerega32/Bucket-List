@@ -20,8 +20,8 @@ const getCategoryColor = (categoryName: string): string => {
 		education: '118 22 177', // --color-education-rgb
 		'health-and-sport': '22 168 177', // --color-health-and-sport-rgb
 		relations: '177 22 22', // --color-relations-rgb
-		entertainment: '177 161 22', // --color-entertainment-rgb
-		'entertainment-and-hobby': '71 131 149', // --color-entertainment-and-hobby-rgb
+		'entertainment-and-hobby': '245 124 0', // --color-entertainment-and-hobby-rgb
+		'arts-and-culture': '194 24 184', // --color-arts-and-culture-rgb
 		'100-goals': '255 208 44', // --color-100-goals-rgb
 
 		// Подкатегории образования

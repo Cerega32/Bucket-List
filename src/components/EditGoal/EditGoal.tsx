@@ -16,6 +16,7 @@ import {deleteGoal} from '@/utils/api/delete/deleteGoal';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {updateGoal} from '@/utils/api/put/updateGoal';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {selectComplexity} from '@/utils/values/complexity';
 import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
 
@@ -77,6 +78,9 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	const [allowSkipDays, setAllowSkipDays] = useState(0);
 	const [resetOnSkip, setResetOnSkip] = useState(false);
 
+	// Состояние для подсветки обязательных полей
+	const [showErrors, setShowErrors] = useState(false);
+
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
 
@@ -98,7 +102,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 				// Загружаем категории
 				const categoriesResponse = await getAllCategories();
 				if (categoriesResponse.success) {
-					setCategories(categoriesResponse.data);
+					setCategories(sortMainCategories(categoriesResponse.data));
 
 					// Устанавливаем активную категорию
 					if (goal.category) {
@@ -310,15 +314,26 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 		return timeString; // Возвращаем исходную строку, если не удалось распознать формат
 	};
 
-	const handleUpdateGoal = async (e: FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
+	const validateRequiredFields = () => {
+		const hasError = !title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl);
 
-		if (!title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+		if (hasError) {
+			setShowErrors(true);
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
 				message: 'Заполните все обязательные поля',
 			});
+			return false;
+		}
+
+		return true;
+	};
+
+	const handleUpdateGoal = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+
+		if (!validateRequiredFields()) {
 			return;
 		}
 
@@ -481,11 +496,17 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 					</div>
 				) : (
 					<div className={element('content')}>
-						<div className={element('image-section')}>
+						<div
+							className={element('image-section', {
+								error: showErrors && !image && !imageUrl,
+							})}
+						>
 							<p className={element('field-title')}>Изображение цели *</p>
 							{!image && !imageUrl ? (
 								<div
-									className={element('dropzone')}
+									className={element('dropzone', {
+										error: showErrors && !image && !imageUrl,
+									})}
 									onClick={handleFileInputClick}
 									role="button"
 									tabIndex={0}
@@ -544,6 +565,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								required
 								maxLength={GOAL_TITLE_MAX_LENGTH}
 								showCharCount
+								error={showErrors && !title}
 							/>
 
 							<Select
@@ -553,6 +575,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								activeOption={activeCategory}
 								onSelect={setActiveCategory}
 								text="Категория *"
+								error={showErrors && activeCategory === null}
 							/>
 
 							{activeCategory !== null && subcategories.length > 0 && (
@@ -573,6 +596,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								activeOption={activeComplexity}
 								onSelect={setActiveComplexity}
 								text="Сложность *"
+								error={showErrors && activeComplexity === null}
 							/>
 
 							<FieldInput
@@ -585,6 +609,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								type="textarea"
 								required
 								rows={4}
+								error={showErrors && !description}
 							/>
 
 							<div className={element('time-field-container')}>

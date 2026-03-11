@@ -64,14 +64,19 @@ export const Card: FC<CardProps> = (props) => {
 			<Link to={`/${isList ? 'list' : 'goals'}/${goal.code}`} className={element('gradient')}>
 				<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} show={goal.completedByUser}>
 					<div className={element('img-tags')}>
-						{((goal.addedByUser && !goal.completedByUser) || (!isList && goal.regularConfig)) && (
-							<div className={element('img-tag-wrapper')}>
-								{goal.addedByUser && !goal.completedByUser && <Tag icon="watch" theme="light" title="В процессе" />}
-								{!isList && goal.regularConfig && <Tag icon="regular-empty" theme="light" title="Регулярная цель" />}
-							</div>
+						{goal.addedByUser && !goal.completedByUser && (
+							<Tag icon="watch" theme="blue" classNameIcon={element('img-tag-icon-done')} title="В процессе" />
 						)}
 						{goal.completedByUser && (
-							<Tag icon="done" theme="light" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
+							<Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
+						)}
+						{!isList && goal.regularConfig && (goal.addedByUser || goal.completedByUser) && (
+							<Tag
+								icon={goal.completedByUser ? 'regular' : 'regular-empty'}
+								theme="gold"
+								classNameIcon={element('img-tag-icon-done')}
+								title="Регулярная цель"
+							/>
 						)}
 						<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
 					</div>

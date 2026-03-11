@@ -76,14 +76,14 @@
 	}
 
 	&--sub {
-		padding: calc(230px + 56px) 0 0;
+		padding: calc(284px + 56px) 0 0;
 	}
 
 	&--empty {
-		padding: calc(230px + 56px) 0 0;
+		padding: calc(284px + 56px) 0 0;
 
 		@include xl {
-			padding: calc(230px + 56px) 24px 0;
+			padding: calc(284px + 56px) 24px 0;
 		}
 	}
 

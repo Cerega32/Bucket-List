@@ -11,6 +11,7 @@ import Select from '@/components/Select/Select';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
+import {NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
 import {IUserInfo} from '@/typings/user';
 import {deleteAvatar} from '@/utils/api/delete/deleteAvatar';
@@ -146,7 +147,6 @@ export const UserSelfSettings: FC = observer(() => {
 
 		// Проверяем, были ли какие-либо изменения
 		if (Object.keys(updatedData).length > 0) {
-			// Если есть изменения, вызываем функцию для обновления информации пользователя
 			const res = await putUserInfo(updatedData);
 
 			if (res.success && res.data) {
@@ -156,7 +156,24 @@ export const UserSelfSettings: FC = observer(() => {
 					setName(displayName);
 					Cookies.set('name', displayName);
 				}
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Успешно',
+					message: 'Ваши настройки профиля успешно изменены',
+				});
+			} else {
+				NotificationStore.addNotification({
+					type: 'error',
+					title: 'Ошибка',
+					message: (res as {error?: string}).error || 'Не удалось сохранить настройки',
+				});
 			}
+		} else {
+			NotificationStore.addNotification({
+				type: 'warning',
+				title: 'Нет изменений',
+				message: 'Ни один параметр не был изменён',
+			});
 		}
 	};
 

@@ -34,6 +34,12 @@
 		}
 	}
 
+	&--error {
+		#{$block}__option {
+			border-color: var(--color-red-border);
+		}
+	}
+
 	&__option-text {
 		display: -webkit-box;
 		overflow-wrap: anywhere;

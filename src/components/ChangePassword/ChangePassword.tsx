@@ -3,6 +3,7 @@ import {FC, FormEvent, useState} from 'react';
 import {Button} from '@/components/Button/Button';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {useBem} from '@/hooks/useBem';
+import {NotificationStore} from '@/store/NotificationStore';
 import {putChangePassword} from '@/utils/api/put/putChangePassword';
 
 import {Title} from '../Title/Title';
@@ -29,7 +30,18 @@ export const ChangePassword: FC<ChangePasswordProps> = (props) => {
 
 		const res = await putChangePassword({oldPassword: password, newPassword});
 		if (res.success) {
+			NotificationStore.addNotification({
+				type: 'success',
+				title: 'Успешно',
+				message: 'Ваш пароль успешно изменён',
+			});
 			closeModal();
+		} else {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: (res as {error?: string}).error || 'Не удалось изменить пароль',
+			});
 		}
 	};
 

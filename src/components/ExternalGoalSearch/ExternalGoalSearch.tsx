@@ -1,7 +1,7 @@
 import {FC, useEffect, useState} from 'react';
 
-import {Alert} from '@/components/Alert/Alert';
 import {Button} from '@/components/Button/Button';
+import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Loader} from '@/components/Loader/Loader';
 import {Svg} from '@/components/Svg/Svg';
@@ -479,7 +479,7 @@ export const ExternalGoalSearch: FC<ExternalGoalSearchProps> = ({onGoalSelected,
 
 					{results.length === 0 && searchWasPerformed && !loading && (
 						<div className={element('no-results')}>
-							<Alert type="info" message="Ничего не найдено. Попробуйте другой запрос." />
+							<EmptyState title="Ничего не найдено" description="Попробуйте другой запрос" size="small" />
 						</div>
 					)}
 				</Loader>

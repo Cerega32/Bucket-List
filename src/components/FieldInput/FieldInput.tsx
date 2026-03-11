@@ -18,7 +18,7 @@ interface FieldInputProps {
 	setValueTarget?: (value: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 	iconBegin?: string;
 	autoComplete?: string;
-	error?: Array<string>;
+	error?: boolean | Array<string>;
 	required?: boolean;
 	onFocus?: () => void;
 	onBlur?: () => void;
@@ -145,11 +145,12 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 				{iconEnd && <Svg icon={iconEnd} className={element('icon-end')} />}
 			</div>
 			{showCharCount && maxLength !== undefined && <CharCount current={value.length} max={maxLength} />}
-			{error?.map((er) => (
-				<p key={er} className={element('error')}>
-					{er}
-				</p>
-			))}
+			{Array.isArray(error) &&
+				error.map((er) => (
+					<p key={er} className={element('error')}>
+						{er}
+					</p>
+				))}
 		</div>
 	);
 };

@@ -14,6 +14,7 @@
 		@include lg {
 			flex-direction: column;
 			gap: 16px;
+			align-items: start;
 		}
 	}
 
@@ -128,5 +129,9 @@
 
 	&__list {
 		width: calc(100% / 2 - (24px * 1 / 2));
+
+		@include lg {
+			width: 100%;
+		}
 	}
 }

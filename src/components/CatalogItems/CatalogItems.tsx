@@ -117,6 +117,9 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	const [pendingGoalIndex, setPendingGoalIndex] = useState<number | null>(null);
 	const [isRegularLoading, setIsRegularLoading] = useState(false);
 
+	// Активен ли сейчас режим поиска
+	const isSearchMode = search.trim().length >= 3;
+
 	const buttonsSwitch = useMemo(() => {
 		let url = '';
 		if (category) {
@@ -487,9 +490,17 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 				{subPage === 'goals' ? (
 					!goalsLoaded ? null : goals.data.length === 0 ? (
 						<EmptyState
-							title={completed ? 'У вас пока нет выполненных целей' : 'У вас пока нет активных целей'}
+							title={
+								isSearchMode
+									? 'По запросу ничего не найдено'
+									: completed
+									? 'У вас пока нет выполненных целей'
+									: 'У вас пока нет активных целей'
+							}
 							description={
-								completed
+								isSearchMode
+									? 'Попробуйте изменить параметры поиска'
+									: completed
 									? 'Начните выполнять цели, чтобы они появились в списке выполненных'
 									: 'Добавьте цели из каталога, чтобы они появились в списке активных'
 							}
@@ -510,9 +521,17 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					)
 				) : !listsLoaded ? null : lists.data.length === 0 ? (
 					<EmptyState
-						title={completed ? 'У вас пока нет выполненных списков' : 'У вас пока нет активных списков'}
+						title={
+							isSearchMode
+								? 'По запросу ничего не найдено'
+								: completed
+								? 'У вас пока нет выполненных списков'
+								: 'У вас пока нет активных списков'
+						}
 						description={
-							completed
+							isSearchMode
+								? 'Попробуйте изменить параметры поиска'
+								: completed
 								? 'Начните выполнять списки целей, чтобы они появились в списке выполненных'
 								: 'Добавьте списки из каталога, чтобы они появились в списке активных'
 						}

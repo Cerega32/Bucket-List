@@ -3,7 +3,7 @@
 
 	position: relative;
 
-	// height: 100%;
+	min-height: 192px;
 	width: 100%;
 
 	&__img {
@@ -54,9 +54,16 @@
 	&__top-info {
 		position: absolute;
 		z-index: 10;
-		top: 16px;
-		left: 16px;
-		width: calc(100% - 32px);
-		height: calc(100% - 32px);
+		top: 8px;
+		left: 8px;
+		width: calc(100% - 16px);
+		height: calc(100% - 16px);
+
+		&--main-goals {
+			top: 16px;
+			left: 16px;
+			width: calc(100% - 32px);
+			height: calc(100% - 32px);
+		}
 	}
 }

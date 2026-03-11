@@ -27,6 +27,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	const [activeComplexity, setActiveComplexity] = useState<number | null>(null);
 	const [newComment, setNewComment] = useState('');
 	const [photos, setPhotos] = useState<File[]>([]);
+	const [showErrors, setShowErrors] = useState(false);
 	const {setComments, comments, id} = GoalStore;
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -48,9 +49,20 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		if (typeof activeComplexity !== 'number') {
+
+		const hasError = typeof activeComplexity !== 'number' || !newComment.trim() || photos.length === 0;
+
+		if (hasError) {
+			setShowErrors(true);
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Заполните все обязательные поля',
+			});
 			return;
 		}
+
+		setShowErrors(false);
 
 		const formData = new FormData();
 		formData.append('complexity', selectComplexity[activeComplexity].value);
@@ -63,8 +75,19 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 		const res = await postAddReview(formData);
 
 		if (res.success) {
+			NotificationStore.addNotification({
+				type: 'success',
+				title: 'Успешно',
+				message: 'Отзыв успешно опубликован',
+			});
 			closeModal();
 			setComments([res.data, ...comments]);
+		} else {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: (res as {error?: string}).error || 'Не удалось опубликовать отзыв',
+			});
 		}
 	};
 
@@ -95,17 +118,19 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 				options={selectComplexity}
 				activeOption={activeComplexity}
 				onSelect={setActiveComplexity}
-				text="Сложность"
+				text="Сложность *"
+				error={showErrors && typeof activeComplexity !== 'number'}
 			/>
 			<FieldInput
 				placeholder="Опишите свои впечатления о выполнении"
 				id="new-comment"
-				text="Комментарий"
+				text="Комментарий *"
 				value={newComment}
 				setValue={setNewComment}
 				className={element('field')}
 				type="textarea"
 				rows={1}
+				error={showErrors && !newComment.trim()}
 			/>
 			<p className={element('field-title')}>Фотографии</p>
 			<div className={element('dropzone')}>

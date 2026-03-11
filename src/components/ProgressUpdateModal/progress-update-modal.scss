@@ -28,6 +28,7 @@
 
 	&__slider-wrap {
 		position: relative;
+		padding: 0 4px;
 	}
 
 	&__slider-tooltip {
@@ -48,6 +49,16 @@
 		&--visible {
 			opacity: 1;
 			visibility: visible;
+		}
+
+		&--align-left {
+			left: 0;
+			transform: translateX(0);
+		}
+
+		&--align-right {
+			left: 100%;
+			transform: translateX(-100%);
 		}
 	}
 

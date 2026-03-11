@@ -20,6 +20,7 @@ interface SelectProps {
 	placeholder?: string;
 	disabled?: boolean;
 	searchInControl?: boolean;
+	error?: boolean;
 }
 
 const Select: FC<SelectProps> = ({
@@ -32,6 +33,7 @@ const Select: FC<SelectProps> = ({
 	placeholder = 'Сделайте выбор',
 	disabled = false,
 	searchInControl = false,
+	error = false,
 }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
@@ -159,7 +161,7 @@ const Select: FC<SelectProps> = ({
 	}, [options.length]);
 
 	return (
-		<div className={block({filter, disabled})} ref={selectRef}>
+		<div className={block({filter, disabled, error})} ref={selectRef}>
 			{text && <p className={element('text')}>{text}</p>}
 			{searchInControl && isOpen ? (
 				<div className={element('option', {isOpen, placeholder: typeof activeOption !== 'number', disabled})}>

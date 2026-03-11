@@ -18,6 +18,7 @@ import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getUser} from '@/utils/api/get/getUser';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 
 import {ThemeStore} from '../../store/ThemeStore';
 import {Avatar} from '../Avatar/Avatar';
@@ -63,7 +64,9 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 		const loadCategories = async () => {
 			const data = await getAllCategories();
-			setCategories(data.data);
+			if (data.success) {
+				setCategories(sortMainCategories(data.data));
+			}
 		};
 		loadCategories();
 	}, []);

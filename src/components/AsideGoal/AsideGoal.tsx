@@ -509,9 +509,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		const seriesStarted = localStatistics?.startDate && localStatistics.currentStreak > 0;
 
 		if (seriesStarted) {
-			// Сохраняем настройки и показываем подтверждение
+			// Сохраняем настройки и показываем подтверждение поверх модалки редактирования
 			setPendingSettings(settings);
-			setIsEditSettingsModalOpen(false);
 			setIsConfirmResetSeriesModalOpen(true);
 		} else {
 			// Если серия не начата, сохраняем сразу
@@ -524,6 +523,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		if (!pendingSettings) return;
 
 		setIsConfirmResetSeriesModalOpen(false);
+		setIsEditSettingsModalOpen(false);
 		await handleUpdateSettings(pendingSettings);
 		setPendingSettings(null);
 	};
@@ -1646,15 +1646,10 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 
 					{/* Строка "Выполнено раз: X" - показывается если серия была выполнена хотя бы раз (даже если цель удалена) */}
 					{regularConfig.completedSeriesCount !== undefined && regularConfig.completedSeriesCount > 0 && (
-						<>
-							<div className={element('regular-series-completed-count')}>
-								<span className={element('regular-series-completed-count-label')}>Выполнено раз:</span>
-								<span className={element('regular-series-completed-count-value')}>
-									{regularConfig.completedSeriesCount}
-								</span>
-							</div>
-							<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
-						</>
+						<div className={element('regular-series-completed-count')}>
+							<span className={element('regular-series-completed-count-label')}>Выполнено раз:</span>
+							<span className={element('regular-series-completed-count-value')}>{regularConfig.completedSeriesCount}</span>
+						</div>
 					)}
 					{/* Строка "Макс. серия: X" - показывается если серия прервана или выполнена */}
 					{(seriesInfo.isCompleted || seriesInfo.isInterrupted) && (
@@ -2015,7 +2010,9 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						Добавить в папку
 					</Button>
 				)}
-				{isAdded && !isCompleted && !isList && <GoalTimer timer={timer} goalCode={code} onTimerUpdate={handleTimerUpdate} />}
+				{isAdded && !isCompleted && !isList && !regularConfig && (
+					<GoalTimer timer={timer} goalCode={code} onTimerUpdate={handleTimerUpdate} />
+				)}
 				{!isList &&
 					isAdded &&
 					!isCompleted &&
@@ -2221,6 +2218,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 							<SetRegularGoalModal
 								onSave={handleSaveSettings}
 								onCancel={() => setIsEditSettingsModalOpen(false)}
+								showResetWarning
 								initialSettings={{
 									frequency: settingsData.frequency,
 									weeklyFrequency: settingsData.weeklyFrequency,
