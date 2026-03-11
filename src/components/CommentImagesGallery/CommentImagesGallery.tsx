@@ -98,6 +98,7 @@ export const CommentImagesGallery: FC<CommentImagesGalleryProps> = ({images, nav
 				close={() => setIsOpen(false)}
 				slides={slides}
 				index={photoIndex}
+				className="comment-images-gallery__lightbox"
 				carousel={{finite: true, padding: '16px'}}
 				controller={{closeOnBackdropClick: true}}
 				animation={{fade: 300}}
