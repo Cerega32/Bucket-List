@@ -43,14 +43,6 @@ export const MainComments: FC<MainCommentsProps> = (props) => {
 					}}
 					centeredSlides
 					loop
-					// breakpoints={{
-					// 	768: {
-					// 		slidesPerView: 2,
-					// 	},
-					// 	1200: {
-					// 		slidesPerView: 3,
-					// 	},
-					// }}
 					className={element('slider')}
 				>
 					{comments.map((comment, index) => (
