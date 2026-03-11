@@ -13,7 +13,7 @@ interface RegularGoalCompactCardProps {
 	onQuickComplete: (regularGoalId: number, currentlyCompleted: boolean) => void;
 }
 
-type RegularDayState = 'completed' | 'active' | 'inactive' | 'blocked';
+type RegularDayState = 'completed' | 'allowedSkip' | 'active' | 'inactive' | 'blocked';
 
 const WEEK_DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
@@ -55,8 +55,12 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 		const isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false);
 		const isCurrent = index === currentDayIndex;
 
-		if (isCompleted || isSkipped) {
+		if (isCompleted) {
 			return 'completed';
+		}
+
+		if (isSkipped) {
+			return 'allowedSkip';
 		}
 
 		if (isBlocked && !isBlockedByStartDate) {
@@ -123,6 +127,7 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 									const state = getWeekDayState(statistics, index);
 									const isToday = index === currentDayIndex;
 									const isCompleted = state === 'completed';
+									const isAllowedSkip = state === 'allowedSkip';
 									const isBlocked = state === 'blocked';
 									const isSelected = state === 'active' || (isBlocked && isToday);
 
@@ -133,10 +138,11 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 												selected: isSelected && !isCompleted,
 												blocked: isBlocked,
 												completed: isCompleted,
+												allowedSkip: isAllowedSkip,
 											})}
 											title={day}
 										>
-											{isCompleted && <Svg icon="done" className={element('day-icon')} />}
+											{(isCompleted || isAllowedSkip) && <Svg icon="done" className={element('day-icon')} />}
 											{!isCompleted && isBlocked && <Svg icon="cross" className={element('day-icon')} />}
 										</div>
 									);

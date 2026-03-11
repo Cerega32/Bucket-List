@@ -8,6 +8,7 @@ import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ICategoryDetailed} from '@/typings/goal';
 import {getCategories} from '@/utils/api/get/getCategories';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import './user-self-goals.scss';
 
 interface UserSelfGoalsProps {
@@ -27,7 +28,7 @@ export const UserSelfGoals: FC<UserSelfGoalsProps> = observer((props) => {
 			setIsLoading(true);
 			const res = await getCategories();
 			if (res.success) {
-				setCategories(res.data);
+				setCategories(sortMainCategories(res.data));
 			}
 			setIsLoading(false);
 		})();

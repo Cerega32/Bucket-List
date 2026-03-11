@@ -52,10 +52,12 @@
 		display: -webkit-box;
 		overflow-wrap: anywhere;
 		overflow: hidden;
-		color: var(--color-white);
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2; /* number of lines to show */
 		line-clamp: 2;
+		line-height: var(--line-height-14);
+		font-weight: var(--weight-regular);
+		color: rgba(var(--color-white-rgb) / 70%);
 	}
 
 	&__line {

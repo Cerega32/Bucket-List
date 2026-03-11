@@ -19,9 +19,10 @@ interface CardMainProps {
 	withBtn?: boolean;
 	updateGoal?: () => void;
 	colored?: boolean;
+	topInfoClassName?: string;
 }
 export const CardMain: FC<CardMainProps> = (props) => {
-	const {className, goal, big, withBtn, updateGoal, colored} = props;
+	const {className, goal, big, withBtn, updateGoal, colored, topInfoClassName} = props;
 
 	const [block, element] = useBem('card-main', className);
 
@@ -40,11 +41,16 @@ export const CardMain: FC<CardMainProps> = (props) => {
 					category={goal.category.nameEn}
 					blacked={!colored && !goal.completedByUser}
 					withBlack={goal.completedByUser}
+					topInfoClassName={topInfoClassName}
 				>
 					<div className={element('info')}>
 						<div className={element('img-tags')}>
 							{goal.completedByUser && <Tag icon="done" theme="light" classNameIcon={element('img-tag-icon-done')} />}
-							<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
+							{goal.completedByUser ? (
+								<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
+							) : (
+								<Tag text={goal.category.name} theme="gray" className={element('img-tag-category')} />
+							)}
 						</div>
 						<div>
 							<Title tag="h3" className={element('title')} theme="white">

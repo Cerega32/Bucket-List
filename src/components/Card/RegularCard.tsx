@@ -56,7 +56,7 @@ const getCurrentDayOfWeek = (): number => {
 
 const getSeriesText = (statistics: IRegularGoalStatistics): string => {
 	const value = statistics.currentStreak || 0;
-	const isWeekly = statistics.currentPeriodProgress?.type === 'weekly';
+	const isWeekly = statistics.currentPeriodProgress?.type === 'weekly' || statistics.regularGoalData?.durationType === 'weeks';
 
 	if (isWeekly) {
 		return pluralize(value, ['неделя', 'недели', 'недель']);

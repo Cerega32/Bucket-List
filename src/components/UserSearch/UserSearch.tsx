@@ -9,6 +9,7 @@ import {IFriendSearchResult} from '@/typings/user';
 import {searchUsers, sendFriendRequest} from '@/utils/api/friends';
 import {debounce} from '@/utils/time/debounce';
 
+import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {Loader} from '../Loader/Loader';
 import './user-search.scss';
@@ -138,9 +139,7 @@ export const UserSearch: React.FC<UserSearchProps> = observer(({placeholder = '�
 			)}
 
 			{query.trim().length >= 2 && !FriendsStore.isSearching && !FriendsStore.hasSearchResults && (
-				<div className={element('no-results')}>
-					<p>Пользователи не найдены</p>
-				</div>
+				<EmptyState title="Пользователи не найдены" description="Попробуйте изменить параметры поиска" size="small" />
 			)}
 		</div>
 	);

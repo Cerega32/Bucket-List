@@ -3,7 +3,7 @@ import {FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState} from '
 import {FileDrop} from 'react-file-drop';
 import {useLocation, useNavigate} from 'react-router-dom';
 
-import {Alert} from '@/components/Alert/Alert';
+import {Banner} from '@/components/Banner/Banner';
 import {Button} from '@/components/Button/Button';
 import {DatePicker} from '@/components/DatePicker/DatePicker';
 import {ExternalGoalSearch} from '@/components/ExternalGoalSearch/ExternalGoalSearch';
@@ -21,14 +21,15 @@ import {postCreateGoal} from '@/utils/api/post/postCreateGoal';
 import {mapApi} from '@/utils/mapApi';
 import {debounce} from '@/utils/time/debounce';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {selectComplexity} from '@/utils/values/complexity';
 import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
 
-import {AllowCustomSettingsField} from './components/AllowCustomSettingsField';
 import {Loader} from '../Loader/Loader';
 import Select from '../Select/Select';
 import {SimilarGoalItem} from '../SimilarGoalItem/SimilarGoalItem';
 import {Title} from '../Title/Title';
+import {AllowCustomSettingsField} from './components/AllowCustomSettingsField';
 
 import './add-goal.scss';
 
@@ -114,6 +115,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const [subcategories, setSubcategories] = useState<ICategory[]>([]);
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 	const {setWindow, setModalProps, setIsOpen} = ModalStore;
+
+	// Состояние для подсветки обязательных полей при ошибке валидации
+	const [showErrors, setShowErrors] = useState(false);
 
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat: ICategory) => !cat.parentCategory), [categories]);
@@ -335,14 +339,14 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	useEffect(() => {
 		const loadCategories = async () => {
 			try {
-				// Если переданы готовые категории, используем их
+				// Если переданы готовые категории, используем их (с сортировкой)
 				if (preloadedCategories) {
-					setCategories(preloadedCategories);
+					setCategories(sortMainCategories(preloadedCategories));
 				} else {
 					// Иначе загружаем категории с сервера
 					const data = await getAllCategories();
 					if (data.success) {
-						setCategories(data.data);
+						setCategories(sortMainCategories(data.data));
 					}
 				}
 			} catch (error) {
@@ -506,6 +510,22 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		}
 	};
 
+	const validateRequiredFields = () => {
+		const hasError = !title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl);
+
+		if (hasError) {
+			setShowErrors(true);
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Заполните все обязательные поля',
+			});
+			return false;
+		}
+
+		return true;
+	};
+
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
@@ -515,12 +535,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			return;
 		}
 
-		if (!title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
-			NotificationStore.addNotification({
-				type: 'error',
-				title: 'Ошибка',
-				message: 'Заполните все обязательные поля',
-			});
+		if (!validateRequiredFields()) {
 			return;
 		}
 
@@ -685,12 +700,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 	// Метод для программного создания цели
 	const createGoal = async () => {
-		if (!title || activeComplexity === null || activeCategory === null || (!image && !imageUrl) || !description) {
-			NotificationStore.addNotification({
-				type: 'error',
-				title: 'Ошибка',
-				message: 'Заполните все обязательные поля',
-			});
+		if (!validateRequiredFields()) {
 			return;
 		}
 
@@ -970,9 +980,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				<div className={element('content')}>
 					{/* Добавляем информационное сообщение */}
 					<div className={element('edit-info-message')}>
-						<Alert
-							type="info"
-							message="Вы сможете отредактировать или удалить цель в течение 24ч после создания, затем действие будет недоступно"
+						<Banner
+							type="warning"
+							title="Вы сможете отредактировать или удалить цель в течение 24ч после создания, затем действие будет недоступно"
 						/>
 					</div>
 
@@ -992,11 +1002,17 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					</div>
 
 					{/* Блок с изображением */}
-					<div className={element('image-section')}>
+					<div
+						className={element('image-section', {
+							error: showErrors && !image && !imageUrl,
+						})}
+					>
 						<p className={element('field-title')}>Изображение цели *</p>
 						{!image && !imageUrl ? (
 							<div
-								className={element('dropzone')}
+								className={element('dropzone', {
+									error: showErrors && !image && !imageUrl,
+								})}
 								onClick={handleFileInputClick}
 								role="button"
 								tabIndex={0}
@@ -1055,6 +1071,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 								onBlur={handleTitleBlur}
 								maxLength={GOAL_TITLE_MAX_LENGTH}
 								showCharCount
+								error={showErrors && !title}
 							/>
 
 							{showSimilarGoals && (
@@ -1090,6 +1107,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							onSelect={setActiveCategory}
 							text="Категория *"
 							disabled={lockCategory}
+							error={showErrors && activeCategory === null}
 						/>
 
 						{activeCategory !== null && subcategories.length > 0 && (
@@ -1157,6 +1175,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							activeOption={activeComplexity}
 							onSelect={setActiveComplexity}
 							text="Сложность *"
+							error={showErrors && activeComplexity === null}
 						/>
 
 						{/* Секция регулярности выполнения */}
@@ -1318,6 +1337,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							type="textarea"
 							rows={4}
 							required
+							error={showErrors && !description}
 						/>
 
 						<div className={element('time-field-container')}>

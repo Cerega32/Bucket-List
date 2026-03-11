@@ -56,6 +56,9 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 	// Добавляем состояние для перехода к созданию цели
 	const [canCreateGoal, setCanCreateGoal] = useState(false);
 
+	// Состояние для подсветки обязательных полей
+	const [showErrors, setShowErrors] = useState(false);
+
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
 
@@ -246,20 +249,31 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 		// Обработка будет происходить внутри компонента AddGoal
 	};
 
+	const validateRequiredFields = () => {
+		if (!canEditAll) return true;
+
+		const hasError = !title || !description || activeComplexity === null || activeCategory === null;
+
+		if (hasError) {
+			setShowErrors(true);
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Заполните все обязательные поля',
+			});
+			return false;
+		}
+
+		return true;
+	};
+
 	// Отправка формы обновления списка целей
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		// Проверка полей только если редактирование полное
-		if (canEditAll) {
-			if (!title || !description || activeComplexity === null || activeCategory === null) {
-				NotificationStore.addNotification({
-					type: 'error',
-					title: 'Ошибка',
-					message: 'Заполните все обязательные поля',
-				});
-				return;
-			}
+		if (!validateRequiredFields()) {
+			return;
 		}
 
 		if (selectedGoals.length === 0) {
@@ -389,6 +403,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 									setValue={handleTitleChange}
 									className={element('field')}
 									required
+									error={showErrors && !title}
 								/>
 							</div>
 
@@ -399,6 +414,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 								activeOption={activeCategory}
 								onSelect={setActiveCategory}
 								text="Категория *"
+								error={showErrors && activeCategory === null}
 							/>
 
 							{activeCategory !== null && subcategories.length > 0 && (
@@ -419,6 +435,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 								activeOption={activeComplexity}
 								onSelect={setActiveComplexity}
 								text="Сложность *"
+								error={showErrors && activeComplexity === null}
 							/>
 
 							<FieldInput
@@ -431,6 +448,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 								type="textarea"
 								required
 								rows={4}
+								error={showErrors && !description}
 							/>
 						</>
 					)}

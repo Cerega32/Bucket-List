@@ -1,15 +1,12 @@
-.alert {
-	position: relative;
+.banner {
 	display: flex;
 	align-items: flex-start;
 	gap: 8px;
 	width: 100%;
-	padding: 8px 16px;
+	padding: 16px;
 	background: var(--color-white);
 	border: 1px solid transparent;
 	border-radius: 8px;
-	box-shadow: 0 -2px 20px rgb(var(--color-gray-rgb-8) / 8%);
-	max-width: 456px;
 
 	&__icon {
 		flex-shrink: 0;
@@ -20,11 +17,10 @@
 	&__content {
 		flex: 1;
 		display: flex;
-		flex-direction: column;
-		gap: 4px;
+		align-items: center;
+		gap: 8px;
 		min-width: 0;
 		min-height: 24px;
-		max-width: 360px;
 	}
 
 	&__title {
@@ -49,44 +45,72 @@
 		}
 	}
 
+	&--type-success {
+		border-color: var(--color-sentiment-positive);
+	}
+
 	&--type-success &__icon * {
 		fill: var(--color-sentiment-positive);
+	}
+
+	&--type-success &__title {
+		color: var(--color-sentiment-positive);
+	}
+
+	&--type-info {
+		border-color: var(--color-gray-9);
+	}
+
+	&--type-info &__icon * {
+		fill: var(--color-primary);
+	}
+
+	&--type-info &__title {
+		color: var(--color-gray-8);
+	}
+
+	&--type-warning {
+		border-color: var(--color-sentiment-warning);
 	}
 
 	&--type-warning &__icon * {
 		fill: var(--color-sentiment-warning);
 	}
 
+	&--type-warning &__title {
+		color: var(--color-sentiment-warning);
+	}
+
+	&--type-warning &__message {
+		color: var(--color-sentiment-warning);
+	}
+
+	&--type-danger {
+		border-color: var(--color-sentiment-negative);
+	}
+
 	&--type-danger &__icon * {
 		fill: var(--color-sentiment-negative);
 	}
 
-	&__actions {
-		display: flex;
-		flex-shrink: 0;
-		gap: 16px;
-		align-self: flex-start;
-		margin-top: 12px;
+	&--type-danger &__title {
+		color: var(--color-sentiment-negative);
+	}
+
+	&--type-danger &__message {
+		color: var(--color-sentiment-negative);
 	}
 
 	&__action {
 		flex-shrink: 0;
+		margin-left: auto;
 		color: var(--color-primary);
 		font-size: 14px;
 		font-weight: var(--weight-medium);
 		line-height: var(--line-height-14);
-
-		&--secondary {
-			color: var(--color-gray-7);
-		}
 	}
 
 	&__close {
-		position: absolute;
-		top: 8px;
-		right: 16px;
-		width: 24px;
-		height: 24px;
 		flex-shrink: 0;
 	}
 }

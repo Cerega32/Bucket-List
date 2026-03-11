@@ -99,6 +99,8 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 		};
 
 		const progressValue = Math.min(100, Math.max(0, parseInt(newProgress, 10) || 0));
+		const isAtStart = progressValue <= 4;
+		const isAtEnd = progressValue >= 95;
 
 		return (
 			<div className={block()}>
@@ -116,8 +118,12 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 						</div>
 						<div className={element('slider-wrap')}>
 							<div
-								className={element('slider-tooltip', {visible: isSliderDragging})}
-								style={{left: `${progressValue}%`}}
+								className={element('slider-tooltip', {
+									visible: isSliderDragging,
+									'align-left': isAtStart,
+									'align-right': isAtEnd,
+								})}
+								style={!isAtStart && !isAtEnd ? {left: `${progressValue}%`} : undefined}
 								aria-hidden
 							>
 								{progressValue}%

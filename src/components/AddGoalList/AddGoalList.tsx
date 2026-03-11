@@ -3,7 +3,6 @@ import {FileDrop} from 'react-file-drop';
 import {useLocation, useNavigate} from 'react-router-dom';
 
 import {AddGoal} from '@/components/AddGoal/AddGoal';
-import {Alert} from '@/components/Alert/Alert';
 import {Button} from '@/components/Button/Button';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
@@ -17,9 +16,11 @@ import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {postCreateGoalList} from '@/utils/api/post/postCreateGoalList';
 import {POST_WITH_RETRY} from '@/utils/fetch/requests';
 import {debounce} from '@/utils/time/debounce';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {selectComplexity} from '@/utils/values/complexity';
 
 import '../GoalListItem/goal-list-item.scss';
+import {Banner} from '../Banner/Banner';
 import {GoalListItem} from '../GoalListItem/GoalListItem';
 import {GoalSearchItem} from '../GoalSearchItem/GoalSearchItem';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
@@ -93,6 +94,9 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 
 	// Добавляем состояния для подтверждения целей
 	const [hideConfirmedGoals, setHideConfirmedGoals] = useState(false);
+
+	// Состояние для подсветки обязательных полей
+	const [showErrors, setShowErrors] = useState(false);
 
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
@@ -185,7 +189,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 			try {
 				const data = await getAllCategories();
 				if (data.success) {
-					setCategories(data.data);
+					setCategories(sortMainCategories(data.data));
 				}
 			} catch (error) {
 				NotificationStore.addNotification({
@@ -341,16 +345,27 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 		// Обработка будет происходить внутри компонента AddGoal
 	};
 
-	// Отправка формы создания списка целей
-	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
+	const validateRequiredFields = () => {
+		const hasError = !title || !description || activeComplexity === null || activeCategory === null || !image;
 
-		if (!title || !description || activeComplexity === null || activeCategory === null || !image) {
+		if (hasError) {
+			setShowErrors(true);
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
 				message: 'Заполните все обязательные поля',
 			});
+			return false;
+		}
+
+		return true;
+	};
+
+	// Отправка формы создания списка целей
+	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+
+		if (!validateRequiredFields()) {
 			return;
 		}
 
@@ -786,11 +801,17 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 
 				{/* Объединенный интерфейс */}
 				<div className={element('content')}>
-					<div className={element('image-section')}>
+					<div
+						className={element('image-section', {
+							error: showErrors && !image,
+						})}
+					>
 						<p className={element('field-title')}>Изображение списка *</p>
 						{!image ? (
 							<div
-								className={element('dropzone')}
+								className={element('dropzone', {
+									error: showErrors && !image,
+								})}
 								onClick={handleFileInputClick}
 								role="button"
 								tabIndex={0}
@@ -834,6 +855,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 								setValue={handleTitleChange}
 								className={element('field')}
 								required
+								error={showErrors && !title}
 							/>
 						</div>
 
@@ -844,6 +866,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 							activeOption={activeCategory}
 							onSelect={setActiveCategory}
 							text="Категория *"
+							error={showErrors && activeCategory === null}
 						/>
 
 						{activeCategory !== null && subcategories.length > 0 && (
@@ -864,6 +887,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 							activeOption={activeComplexity}
 							onSelect={setActiveComplexity}
 							text="Сложность *"
+							error={showErrors && activeComplexity === null}
 						/>
 
 						<FieldInput
@@ -876,6 +900,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 							type="textarea"
 							required
 							rows={4}
+							error={showErrors && !description}
 						/>
 
 						{/* Поля источника списка */}
@@ -946,14 +971,14 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 								{showAutoSection && (
 									<div className={element('auto-add-content')}>
 										<div className={element('auto-info')}>
-											<Alert
+											<Banner
 												type="info"
 												message="Вставьте список целей (книги, фильмы, игры) — система автоматически найдет соответствия и добавит их к уже выбранным целям."
 											/>
 										</div>
 										{!(activeCategory === null) && (
 											<div className={element('error-info')}>
-												<Alert
+												<Banner
 													type="warning"
 													message="Для автоматического добавления целей из списка необходимо выбрать категорию списка."
 												/>

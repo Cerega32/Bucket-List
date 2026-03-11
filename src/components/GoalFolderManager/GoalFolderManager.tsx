@@ -75,6 +75,8 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 	const [activeSort, setActiveSort] = useState(0);
 
+	const isSearchMode = search.trim().length > 0;
+
 	const sortOptions: OptionSelect[] = [
 		{
 			name: 'Новые',
@@ -317,8 +319,12 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 					</div>
 					{filteredFolders.length === 0 ? (
 						<EmptyState
-							title="У вас пока нет папок для целей"
-							description="Создайте первую папку, чтобы организовать свои цели"
+							title={isSearchMode ? 'По запросу ничего не найдено' : 'У вас пока нет папок для целей'}
+							description={
+								isSearchMode
+									? 'Попробуйте изменить параметры поиска'
+									: 'Создайте первую папку, чтобы организовать свои цели'
+							}
 						/>
 					) : (
 						<div className={element('folders')}>

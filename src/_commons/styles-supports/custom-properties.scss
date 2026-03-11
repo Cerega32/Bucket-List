@@ -52,6 +52,9 @@
 	--color-pink: rgb(var(--color-pink-rgb)); // #C735CA
 	--color-pink-rgb-2: 216 27 96; // #D81B60
 	--color-pink-2: rgb(var(--color-pink-rgb-2)); // #D81B60
+	--color-pink-rgb-3: 194 24 184; // #C218B8
+	--color-pink-3: rgb(var(--color-pink-rgb-3)); // #C218B8
+
 	//////
 	//////
 	--color-orange-rgb: 255 107 0; // #FF6B00
@@ -135,10 +138,10 @@
 	--color-health-and-sport-rgb: var(--color-blue-rgb-7); // #15A3AD
 	--color-relations: var(--color-pink-2); // #D81B60
 	--color-relations-rgb: var(--color-pink-rgb-2); // #D81B60
-	--color-entertainment: var(--color-orange-3); // #F57C00
-	--color-entertainment-rgb: var(--color-orange-rgb-3); // #F57C00
-	--color-entertainment-and-hobby: var(--color-gray-1); // #718395
-	--color-entertainment-and-hobby-rgb: var(--color-gray-rgb-1); // #718395
+	--color-arts-and-culture: var(--color-pink-3); // #C218B8
+	--color-arts-and-culture-rgb: var(--color-pink-rgb-3); // #C218B8
+	--color-entertainment-and-hobby: var(--color-orange-3); // #F57C00
+	--color-entertainment-and-hobby-rgb: var(--color-orange-rgb-3); // #F57C00
 
 	/* Подкатегории - Образование и профессиональный рост (education) */
 	--color-career-success: var(--color-education); // Оттенок фиолетового для карьерного успеха
@@ -152,21 +155,21 @@
 	--color-wellness-and-health: var(--color-health-and-sport); // Более светлый оттенок для здоровья
 	--color-wellness-and-health-rgb: var(--color-health-and-sport-rgb); // #15A3AD
 
-	/* Подкатегории - Искусство и культура (entertainment) */
-	--color-musical-experiences: var(--color-entertainment); // Оттенок для музыкальных впечатлений
-	--color-musical-experiences-rgb: var(--color-entertainment-rgb); // #F57C00
-	--color-creative-arts: var(--color-entertainment); // Оттенок для творческих искусств
-	--color-creative-arts-rgb: var(--color-entertainment-rgb); // #F57C00
-	--color-cinema-art: var(--color-entertainment); // Оттенок для киноискусства
-	--color-cinema-art-rgb: var(--color-entertainment-rgb); // #F57C00
-	--color-books: var(--color-entertainment); // Оттенок для литературных миров
-	--color-books-rgb: var(--color-entertainment-rgb); // #F57C00
+	/* Подкатегории - Искусство и культура (arts-and-culture) */
+	--color-musical-experiences: var(--color-arts-and-culture); // Оттенок для музыкальных впечатлений
+	--color-musical-experiences-rgb: var(--color-arts-and-culture-rgb); // #C218B8
+	--color-creative-arts: var(--color-arts-and-culture); // Оттенок для творческих искусств
+	--color-creative-arts-rgb: var(--color-arts-and-culture-rgb); // #C218B8
+	--color-cinema-art: var(--color-arts-and-culture); // Оттенок для киноискусства
+	--color-cinema-art-rgb: var(--color-arts-and-culture-rgb); // #C218B8
+	--color-books: var(--color-arts-and-culture); // Оттенок для литературных миров
+	--color-books-rgb: var(--color-arts-and-culture-rgb); // #C218B8
 
 	/* Подкатегории - Развлечения и хобби (entertainment-and-hobby) */
-	--color-hobby: var(--color-entertainment-and-hobby); // Оттенок серого для хобби
-	--color-hobby-rgb: var(--color-entertainment-and-hobby-rgb); // #718395
+	--color-hobby: var(--color-entertainment-and-hobby); // Оттенок оранжевого для хобби
+	--color-hobby-rgb: var(--color-entertainment-and-hobby-rgb); // #F57C00
 	--color-gaming: var(--color-entertainment-and-hobby); // Оттенок для игровых вселенных
-	--color-gaming-rgb: var(--color-entertainment-and-hobby-rgb); // #718395
+	--color-gaming-rgb: var(--color-entertainment-and-hobby-rgb); // #F57C00
 
 	/* Подкатегории - Отношения и связи (relations) */
 	--color-community-contribution: var(--color-relations); // Оттенок красного для общественного вклада

@@ -1,9 +1,9 @@
 .modal-confirm {
 	$block: &;
 
-	// Корневой элемент должен быть fixed и покрывать всю страницу
+	// Корневой элемент должен быть fixed и покрывать всю страницу (10002 — поверх Modal 10001)
 	position: fixed;
-	z-index: 10000;
+	z-index: 10002;
 	top: 0;
 	left: 0;
 	display: none;
@@ -21,7 +21,7 @@
 
 	&__window {
 		position: fixed;
-		z-index: 10001;
+		z-index: 10003;
 		top: 50%;
 		left: 50%;
 		display: none;
@@ -68,7 +68,7 @@
 
 	&__base {
 		position: fixed;
-		z-index: 10000;
+		z-index: 10002;
 		top: 0;
 		left: 0;
 		display: none;

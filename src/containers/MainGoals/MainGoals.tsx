@@ -134,6 +134,7 @@ export const MainGoals: FC<IPage> = () => {
 						className={element('goals')}
 						goals={hideCompleted ? mainGoals.easyGoals.data.filter((goal) => !goal.completedByUser) : mainGoals.easyGoals.data}
 						complexity="easy"
+						topInfoClassName="gradient__top-info--main-goals"
 						withBtn
 						updateGoal={updateGoal}
 						allGoalsCompleted={allGoalsCompleted}
@@ -144,6 +145,7 @@ export const MainGoals: FC<IPage> = () => {
 							hideCompleted ? mainGoals.mediumGoals.data.filter((goal) => !goal.completedByUser) : mainGoals.mediumGoals.data
 						}
 						complexity="medium"
+						topInfoClassName="gradient__top-info--main-goals"
 						withBtn
 						updateGoal={updateGoal}
 						allGoalsCompleted={allGoalsCompleted}
@@ -152,6 +154,7 @@ export const MainGoals: FC<IPage> = () => {
 						className={element('goals')}
 						goals={hideCompleted ? mainGoals.hardGoals.data.filter((goal) => !goal.completedByUser) : mainGoals.hardGoals.data}
 						complexity="hard"
+						topInfoClassName="gradient__top-info--main-goals"
 						withBtn
 						updateGoal={updateGoal}
 						allGoalsCompleted={allGoalsCompleted}

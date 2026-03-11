@@ -12,10 +12,11 @@ interface GradientProps {
 	blacked?: boolean;
 	withoutBlack?: boolean;
 	withBlack?: boolean;
+	topInfoClassName?: string;
 }
 
 export const Gradient: FC<GradientProps> = (props) => {
-	const {className, img, children, category, show = true, blacked, withoutBlack, withBlack} = props;
+	const {className, img, children, category, show = true, blacked, withoutBlack, withBlack, topInfoClassName} = props;
 
 	const [block, element] = useBem('gradient', className);
 
@@ -23,7 +24,7 @@ export const Gradient: FC<GradientProps> = (props) => {
 		<div className={block()}>
 			<img src={img.src} alt={img.alt} className={element('img', {blacked})} />
 			<div className={element('color', {category, show, blacked, withoutBlack, withBlack})} />
-			<div className={element('top-info')}>{children}</div>
+			<div className={`${element('top-info')} ${topInfoClassName || ''}`.trim()}>{children}</div>
 		</div>
 	);
 };

@@ -1,7 +1,7 @@
 import {format} from 'date-fns';
 import {FC, useEffect, useState} from 'react';
 
-import {Alert} from '@/components/Alert/Alert';
+import {Banner} from '@/components/Banner/Banner';
 import {Button} from '@/components/Button/Button';
 import {DatePicker} from '@/components/DatePicker/DatePicker';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
@@ -185,7 +185,7 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 
 			<div className={element('content')}>
 				<div className={element('info-message')}>
-					<Alert
+					<Banner
 						type="info"
 						message={
 							'Эта цель была создана как регулярная. Вы можете настроить параметры регулярности ' +

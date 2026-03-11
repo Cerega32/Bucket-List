@@ -41,6 +41,9 @@
 
 	&__form {
 		flex: 1;
+		display: flex;
+		gap: 20px;
+		flex-direction: column;
 	}
 
 	&__image-section {
@@ -58,11 +61,15 @@
 
 	&__field-container {
 		position: relative;
-		margin-bottom: 20px;
 	}
 
 	&__field {
-		margin-bottom: 20px;
+		margin-bottom: 4px;
+	}
+
+	// Ошибки валидации обязательных полей
+	&__image-section--error &__dropzone {
+		border-color: var(--color-red-border);
 	}
 
 	&__searching {
@@ -137,7 +144,7 @@
 
 	&__field-title {
 		display: block;
-		margin-bottom: 8px;
+		margin-bottom: 4px;
 		font-size: 14px;
 		font-weight: 500;
 	}
@@ -264,14 +271,6 @@
 		}
 	}
 
-	&__date-field-container {
-		margin-bottom: 24px;
-	}
-
-	&__time-field-container {
-		margin-bottom: 24px;
-	}
-
 	&__date-input {
 		width: 100%;
 
@@ -288,7 +287,6 @@
 
 	&__format-hint {
 		display: block;
-		margin-top: -6px;
 		color: var(--color-text-secondary);
 		font-size: 12px;
 	}
@@ -442,15 +440,9 @@
 	}
 
 	&__regular-section {
-		margin-bottom: 20px;
-
-		.field-checkbox {
-			margin-bottom: 16px;
-		}
 	}
 
 	&__regular-config {
-		padding: 20px 0;
 		margin-top: 16px;
 		background: var(--background-light);
 		border: 1px solid var(--border-color);
@@ -470,11 +462,6 @@
 	}
 
 	&__regular-field-group {
-		margin-bottom: 20px;
-
-		&:last-child {
-			margin-bottom: 0;
-		}
 	}
 
 	&__input-with-suffix {

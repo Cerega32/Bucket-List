@@ -1,4 +1,6 @@
 .add-review {
+	$block: &;
+
 	&__title {
 		margin-bottom: 24px;
 	}
@@ -37,6 +39,12 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 8px;
+
+		&--error {
+			#{$block}__btn-add {
+				border-color: var(--color-red-border);
+			}
+		}
 	}
 
 	&__photos {

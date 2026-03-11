@@ -10,7 +10,7 @@ import {GoalStore} from '@/store/GoalStore';
 import {IGoal} from '@/typings/goal';
 import {getComments} from '@/utils/api/get/getComments';
 
-import {Alert} from '../Alert/Alert';
+import {Banner} from '../Banner/Banner';
 import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
 import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
 import {GoalProgressHistory} from '../GoalProgressHistory/GoalProgressHistory';
@@ -95,7 +95,7 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 		<article className={block()}>
 			{goal.addedFromList && goal.addedFromList.length > 0 && (
 				<div className={element('goal-in-list')}>
-					<Alert
+					<Banner
 						type="info"
 						message="Цель включена в список и отображается вместе с ним"
 						actionText="Смотреть списки"
