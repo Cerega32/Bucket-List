@@ -70,7 +70,7 @@ export const Card: FC<CardProps> = (props) => {
 						{goal.completedByUser && (
 							<Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
 						)}
-						{!isList && goal.regularConfig && (goal.addedByUser || goal.completedByUser) && (
+						{!isList && goal.regularConfig && (
 							<Tag
 								icon={goal.completedByUser ? 'regular' : 'regular-empty'}
 								theme="gold"

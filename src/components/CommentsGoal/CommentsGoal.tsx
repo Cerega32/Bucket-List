@@ -15,11 +15,12 @@ interface CommentsGoalProps {
 	className?: string;
 	comments: Array<IComment>;
 	isUser?: boolean;
+	canAddReview?: boolean;
 	setComments(comments: Array<IComment>): void;
 }
 
 export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
-	const {className, comments, isUser, setComments} = props;
+	const {className, comments, isUser, canAddReview, setComments} = props;
 
 	const [block, element] = useBem('comments-goal', className);
 	const {setIsOpen, setWindow} = ModalStore;
@@ -57,9 +58,11 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 					))
 				) : (
 					<EmptyState title="Пока нет впечатлений" description="Но вы можете стать примером для других">
-						<Button theme="blue" size="small" icon="comment" onClick={openAddReview}>
-							Добавить впечатление
-						</Button>
+						{canAddReview && (
+							<Button theme="blue" size="small" icon="comment" onClick={openAddReview}>
+								Добавить впечатление
+							</Button>
+						)}
 					</EmptyState>
 				)}
 			</section>
