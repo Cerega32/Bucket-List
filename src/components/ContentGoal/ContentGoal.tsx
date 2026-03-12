@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
@@ -7,8 +8,12 @@ import './content-goal.scss';
 
 import {useBem} from '@/hooks/useBem';
 import {GoalStore} from '@/store/GoalStore';
+import {ModalStore} from '@/store/ModalStore';
+import {IComment} from '@/typings/comments';
 import {IGoal} from '@/typings/goal';
+import {deleteReview} from '@/utils/api/delete/deleteReview';
 import {getCommentsWithImages} from '@/utils/api/get/getComments';
+import {postLikeComment} from '@/utils/api/post/postLikeComment';
 
 import {Banner} from '../Banner/Banner';
 import {CommentImagesGallery} from '../CommentImagesGallery/CommentImagesGallery';
@@ -18,6 +23,7 @@ import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks
 import {GoalProgressHistory} from '../GoalProgressHistory/GoalProgressHistory';
 import {InfoGoal} from '../InfoGoal/InfoGoal';
 import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
+import {MyReview} from '../MyReview/MyReview';
 import {RegularGoalHistory} from '../RegularGoalHistory/RegularGoalHistory';
 import {RegularGoalRating} from '../RegularGoalRating/RegularGoalRating';
 
@@ -35,6 +41,11 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 	const navigate = useNavigate();
 
 	const {comments, setComments, setInfoPaginationComments, commentPhotos, setCommentPhotos} = GoalStore;
+	const {setIsOpen, setWindow, setModalProps, setFuncModal} = ModalStore;
+
+	const currentUserId = parseInt(Cookies.get('user-id') || '0', 10);
+	const myComment = comments.find((c) => c.user === currentUserId) ?? null;
+	const otherComments = myComment ? comments.filter((c) => c.id !== myComment.id) : comments;
 
 	useEffect(() => {
 		if (page === 'isGoal') {
@@ -54,10 +65,57 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [goal.code, page]);
 
+	const handleEditMyReview = (comment: IComment) => {
+		setModalProps({editComment: comment});
+		setWindow('add-review');
+		setIsOpen(true);
+	};
+
+	const handleDeleteMyReview = (comment: IComment) => {
+		setFuncModal(async () => {
+			const res = await deleteReview(comment.id);
+			if (res.success) {
+				setComments(comments.filter((c) => c.id !== comment.id));
+				return true;
+			}
+			return false;
+		});
+		setModalProps({});
+		setWindow('delete-review');
+		setIsOpen(true);
+	};
+
+	const handleScoreMyReview = async (id: number, like: boolean) => {
+		if (!myComment) return;
+		const res = await postLikeComment(id, like);
+		if (res.success) {
+			const idx = comments.findIndex((c) => c.id === myComment.id);
+			if (idx !== -1) {
+				const next = [...comments];
+				next[idx] = {...next[idx], ...res.data};
+				setComments(next);
+			}
+		}
+	};
+
 	const getGoalContent = () => {
 		switch (page) {
 			case 'isGoal':
-				return <CommentsGoal comments={comments} setComments={setComments} />;
+				return (
+					<>
+						{myComment && (
+							<div className={element('my-review-wrap')}>
+								<MyReview
+									comment={myComment}
+									onEdit={handleEditMyReview}
+									onDelete={handleDeleteMyReview}
+									onClickScore={handleScoreMyReview}
+								/>
+							</div>
+						)}
+						<CommentsGoal comments={otherComments} setComments={setComments} hasAnyComments={!!myComment} />
+					</>
+				);
 			case 'isGoalLists':
 				return <ListsWithGoal code={goal.code} />;
 			case 'isGoalProgressHistory':

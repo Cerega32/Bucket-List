@@ -19,10 +19,11 @@ interface CommentsGoalProps {
 	comments: Array<IComment>;
 	isUser?: boolean;
 	setComments(comments: Array<IComment>): void;
+	hasAnyComments?: boolean;
 }
 
 export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
-	const {className, comments, isUser, setComments} = props;
+	const {className, comments, isUser, setComments, hasAnyComments} = props;
 
 	const [block, element] = useBem('comments-goal', className);
 	const {setIsOpen, setWindow} = ModalStore;
@@ -73,13 +74,13 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 							</div>
 						)}
 					</>
-				) : (
+				) : !hasAnyComments ? (
 					<EmptyState title="Пока нет впечатлений" description="Но вы можете стать примером для других">
 						<Button theme="blue" size="small" icon="comment" onClick={openAddReview}>
 							Добавить впечатление
 						</Button>
 					</EmptyState>
-				)}
+				) : null}
 			</section>
 		</div>
 	);

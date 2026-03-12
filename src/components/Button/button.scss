@@ -323,6 +323,30 @@
 		padding: 10px 16px;
 	}
 
+	&--theme-blue-edit {
+		color: var(--color-primary);
+		border: none;
+		font-weight: var(--weight-medium);
+		padding: 0;
+		height: min-content;
+
+		path {
+			fill: var(--color-primary);
+		}
+	}
+
+	&--theme-red-delete {
+		color: var(--color-sentiment-negative);
+		border: none;
+		font-weight: var(--weight-medium);
+		padding: 0;
+		height: min-content;
+
+		path {
+			fill: var(--color-sentiment-negative);
+		}
+	}
+
 	&--width-auto {
 		width: auto;
 	}

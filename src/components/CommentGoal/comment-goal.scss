@@ -105,7 +105,6 @@
 	&__comment-images-container {
 		position: relative;
 		overflow: hidden;
-		margin-bottom: 16px;
 	}
 
 	&__comment-images {
@@ -174,5 +173,6 @@
 	&__score {
 		display: flex;
 		gap: 4px;
+		margin-top: 16px;
 	}
 }
