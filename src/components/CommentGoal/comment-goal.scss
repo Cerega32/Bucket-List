@@ -105,7 +105,6 @@
 	&__comment-images-container {
 		position: relative;
 		overflow: hidden;
-		margin-bottom: 16px;
 	}
 
 	&__comment-images {
@@ -122,6 +121,11 @@
 		border-radius: 8px;
 		cursor: pointer;
 		object-fit: cover;
+
+		&--big {
+			width: 76px;
+			height: 76px;
+		}
 
 		&:focus {
 			@include focus-outline;
@@ -169,5 +173,6 @@
 	&__score {
 		display: flex;
 		gap: 4px;
+		margin-top: 16px;
 	}
 }

@@ -929,6 +929,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		setFuncModal(() => updateGoal(code, 'delete'));
 	};
 
+	const deleteList = () => {
+		setWindow('delete-list');
+		setIsOpen(true);
+		setFuncModal(() => updateGoal(code, 'delete'));
+	};
+
 	const openMapModal = () => {
 		if (!isList) {
 			setWindow('goal-map');
@@ -1978,7 +1984,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						<Button
 							theme={isCompleted ? 'green' : 'blue'}
 							onClick={() => handleMarkGoal(isCompleted)}
-							icon={isCompleted ? 'done' : 'plus'}
+							icon="done"
 							className={element('btn', {done: true})}
 							hoverContent={isCompleted ? 'Отменить выполнение' : ''}
 							hoverIcon={isCompleted ? 'cross' : ''}
@@ -2067,7 +2073,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						{isAdded && (
 							<Button
 								theme="blue-light"
-								onClick={deleteGoal}
+								onClick={deleteList}
 								icon="trash"
 								className={element('btn')}
 								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}

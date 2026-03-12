@@ -5,21 +5,21 @@ import {useBem} from '@/hooks/useBem';
 import {IFuncModal} from '@/store/ModalStore';
 
 import {Title} from '../Title/Title';
-import './delete-list.scss';
+import './delete-review.scss';
 
-interface DeleteListProps {
+interface DeleteReviewProps {
 	className?: string;
 	closeModal: () => void;
 	funcModal: IFuncModal;
 }
 
-export const DeleteList: FC<DeleteListProps> = (props) => {
+export const DeleteReview: FC<DeleteReviewProps> = (props) => {
 	const {className, closeModal, funcModal} = props;
 
-	const [block, element] = useBem('delete-list', className);
+	const [block, element] = useBem('delete-review', className);
 
-	const handleDeleteList = async () => {
-		const res = funcModal(); // TODO
+	const handleDeleteReview = async () => {
+		const res = funcModal();
 		if (res) {
 			closeModal();
 		}
@@ -28,16 +28,14 @@ export const DeleteList: FC<DeleteListProps> = (props) => {
 	return (
 		<section className={block()}>
 			<Title tag="h2" className={element('title')}>
-				Удаление списка целей
+				Удаление впечатления
 			</Title>
-			<p className={element('text')}>
-				Вы действительно хотите удалить список? Будут удалены список, все цели в нём и все оставленные впечатления.
-			</p>
+			<p className={element('text')}>Вы действительно хотите удалить своё впечатление о цели?</p>
 			<div className={element('btns-wrapper')}>
 				<Button theme="blue-light" className={element('btn')} onClick={closeModal}>
 					Отмена
 				</Button>
-				<Button theme="red" className={element('btn')} onClick={handleDeleteList}>
+				<Button theme="red" className={element('btn')} onClick={handleDeleteReview}>
 					Удалить
 				</Button>
 			</div>

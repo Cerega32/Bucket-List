@@ -17,6 +17,10 @@
 		margin-top: 24px;
 	}
 
+	&__my-review-wrap {
+		margin-bottom: 16px;
+	}
+
 	&__btn-more {
 		width: initial;
 	}
@@ -32,5 +36,15 @@
 
 	&__section {
 		margin-bottom: 40px;
+	}
+
+	&__impressions {
+		display: flex;
+		gap: 8px;
+		margin-top: 24px;
+
+		@include xs {
+			flex-direction: column;
+		}
 	}
 }
