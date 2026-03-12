@@ -24,6 +24,7 @@ interface FieldInputProps {
 	onBlur?: () => void;
 	onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 	iconEnd?: string;
+	iconEndClick?: () => void;
 	theme?: 'transparent';
 	// focusBorder?: 'white';
 	maxLength?: number;
@@ -48,6 +49,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		setValueTarget,
 		iconBegin,
 		iconEnd,
+		iconEndClick,
 		autoComplete = 'off',
 		error,
 		required,
@@ -142,7 +144,19 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						)}
 					</button>
 				)}
-				{iconEnd && <Svg icon={iconEnd} className={element('icon-end')} />}
+				{iconEnd &&
+					(iconEndClick ? (
+						<button
+							type="button"
+							className={element('icon-end', {clickable: true})}
+							onClick={iconEndClick}
+							aria-label="Выполнить поиск"
+						>
+							<Svg icon={iconEnd} />
+						</button>
+					) : (
+						<Svg icon={iconEnd} className={element('icon-end')} />
+					))}
 			</div>
 			{showCharCount && maxLength !== undefined && <CharCount current={value.length} max={maxLength} />}
 			{Array.isArray(error) &&

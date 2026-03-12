@@ -17,6 +17,8 @@
 
 	&__text {
 		flex-basis: 67%;
+		display: flex;
+		flex-direction: column;
 
 		@include md {
 			flex-basis: 100%;
@@ -42,14 +44,8 @@
 	}
 
 	&__toggle-button {
-		margin-top: 4px;
-		color: var(--color-primary);
-		text-align: left;
-		cursor: pointer;
-
-		&:hover {
-			color: var(--color-primary-hover);
-		}
+		margin-top: 16px;
+		align-self: flex-start;
 	}
 
 	&__info {

@@ -1,18 +1,22 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useRef, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate, useSearchParams} from 'react-router-dom';
 import {scroller} from 'react-scroll';
 
 import {useBem} from '@/hooks/useBem';
-import {IGoal} from '@/typings/goal';
+import {IShortGoal, IShortList} from '@/typings/goal';
 import {getAllGoals} from '@/utils/api/get/getAllGoals';
+import {getAllLists} from '@/utils/api/get/getAllLists';
 
 import {Button} from '../Button/Button';
 import {CardShort} from '../CardShort/CardShort';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {Loader} from '../Loader/Loader';
 import {Svg} from '../Svg/Svg';
+
 import './global-goals-search.scss';
+
+type SearchResultItem = {type: 'goal'; item: IShortGoal} | {type: 'list'; item: IShortList};
 
 interface GlobalGoalsSearchProps {
 	className?: string;
@@ -25,15 +29,23 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 
 	const [block, element] = useBem('global-goals-search', className);
 	const navigate = useNavigate();
+	const location = useLocation();
+	const [searchParams, setSearchParams] = useSearchParams();
 
 	const [query, setQuery] = useState('');
 	const [isSearching, setIsSearching] = useState(false);
-	const [results, setResults] = useState<IGoal[]>([]);
+	const [results, setResults] = useState<SearchResultItem[]>([]);
 	const [totalCount, setTotalCount] = useState(0);
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const [searchTimer, setSearchTimer] = useState<NodeJS.Timeout | null>(null);
 
 	const searchRef = useRef<HTMLDivElement>(null);
+
+	// Синхронизация поля с URL (когда зашли на страницу с search)
+	useEffect(() => {
+		const urlSearch = searchParams.get('search') || '';
+		setQuery(urlSearch);
+	}, [location.pathname, location.search]);
 
 	// Закрыть дропдаун при клике вне компонента
 	useEffect(() => {
@@ -48,7 +60,7 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 		return () => document.removeEventListener('mousedown', handleClickOutside);
 	}, [isModal]);
 
-	// Обработка поиска с дебаунсом
+	// Обработка поиска с дебаунсом (цели + списки)
 	const performSearch = useCallback(async (searchQuery: string) => {
 		if (searchQuery.length < 2) {
 			setResults([]);
@@ -60,17 +72,36 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 		setIsSearching(true);
 
 		try {
-			const response = await getAllGoals('all', {
-				search: searchQuery,
-				page: 1,
-				limit: 6, // Показываем максимум 6 результатов
-			});
+			const [goalsRes, listsRes] = await Promise.all([
+				getAllGoals('all', {
+					search: searchQuery,
+					page: 1,
+					items_per_page: 3,
+				}),
+				getAllLists('all', {
+					search: searchQuery,
+					page: 1,
+					items_per_page: 3,
+				}),
+			]);
 
-			if (response.success) {
-				setResults(response.data.data);
-				setTotalCount(response.data.pagination.totalItems);
-				setIsDropdownOpen(true);
+			const combined: SearchResultItem[] = [];
+			let total = 0;
+
+			if (goalsRes.success && goalsRes.data?.data) {
+				goalsRes.data.data.forEach((goal: IShortGoal) => combined.push({type: 'goal', item: goal}));
+				const pag = goalsRes.data.pagination;
+				total += pag?.totalItems ?? pag?.total_items ?? 0;
 			}
+			if (listsRes.success && listsRes.data?.data) {
+				listsRes.data.data.forEach((list: IShortList) => combined.push({type: 'list', item: list}));
+				const pag = listsRes.data.pagination;
+				total += pag?.totalItems ?? pag?.total_items ?? 0;
+			}
+
+			setResults(combined);
+			setTotalCount(total);
+			setIsDropdownOpen(true);
 		} catch (error) {
 			setResults([]);
 			setTotalCount(0);
@@ -82,6 +113,14 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 	// Обработчик изменения поискового запроса
 	const handleSearchChange = (value: string) => {
 		setQuery(value);
+
+		// Если очистили поле и мы на странице поиска — сбрасываем URL и каталог
+		if (value.trim().length < 2 && location.pathname === '/categories/all' && searchParams.get('search')) {
+			if (searchTimer) clearTimeout(searchTimer);
+			setSearchTimer(null);
+			setSearchParams({});
+			return;
+		}
 
 		// Очищаем предыдущий таймер
 		if (searchTimer) {
@@ -101,23 +140,30 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 		if (!query.trim()) return;
 
 		setIsDropdownOpen(false);
-		navigate(`/categories/all?search=${encodeURIComponent(query)}`);
+		const targetUrl = `/categories/all?search=${encodeURIComponent(query)}`;
+		const currentSearch = searchParams.get('search') || '';
+		const isAlreadyOnResults = location.pathname === '/categories/all' && currentSearch.trim() === query.trim();
 
-		// Добавляем небольшую задержку для загрузки страницы, затем скроллим
-		setTimeout(() => {
-			scroller.scrollTo('catalog-items-goals', {
+		if (isAlreadyOnResults) {
+			scroller.scrollTo('all-goals-and-lists', {
 				duration: 800,
-				delay: 100,
+				delay: 0,
 				smooth: 'easeInOutQuart',
 				offset: -150,
 			});
-		}, 100);
+		} else {
+			navigate(targetUrl);
+		}
 	};
 
-	// Переход к конкретной цели
-	const handleGoalClick = (goalCode: string) => {
+	// Переход к цели или списку
+	const handleItemClick = (item: SearchResultItem) => {
 		setIsDropdownOpen(false);
-		navigate(`/goals/${goalCode}`);
+		if (item.type === 'goal') {
+			navigate(`/goals/${item.item.code}`);
+		} else {
+			navigate(`/list/${item.item.code}`);
+		}
 	};
 
 	// Обработчик фокуса на поле ввода
@@ -149,22 +195,22 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 					padding: '8px 0',
 				}}
 			>
-				{results.map((goal) => (
+				{results.map((result) => (
 					<div
-						key={goal.code}
+						key={`${result.type}-${result.item.code}`}
 						className={element('result-item')}
 						role="button"
 						tabIndex={0}
-						onClick={() => handleGoalClick(goal.code)}
+						onClick={() => handleItemClick(result)}
 						onKeyDown={(e) => {
 							if (e.key === 'Enter' || e.key === ' ') {
 								e.preventDefault();
-								handleGoalClick(goal.code);
+								handleItemClick(result);
 							}
 						}}
-						aria-label={`Перейти к цели ${goal.title}`}
+						aria-label={`Перейти к ${result.type === 'goal' ? 'цели' : 'списку'} ${result.item.title}`}
 					>
-						<CardShort goal={goal} />
+						<CardShort item={result.item} variant={result.type} typeLabel={result.type === 'goal' ? 'Цель' : 'Список'} />
 					</div>
 				))}
 			</div>
@@ -177,11 +223,12 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 				<div className={element('input-wrapper')}>
 					<FieldInput
 						className={element('input')}
-						placeholder="Поиск целей"
+						placeholder="Поиск целей и списков"
 						id="global-search"
 						value={query}
 						setValue={handleSearchChange}
 						iconEnd="search"
+						iconEndClick={handleShowAllResults}
 						onFocus={handleInputFocus}
 						onKeyDown={handleKeyDown}
 						theme={!isModal && theme === 'transparent' ? 'transparent' : undefined}
@@ -201,11 +248,12 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 						<div className={element('input-wrapper')}>
 							<FieldInput
 								className={element('input')}
-								placeholder="Поиск целей"
+								placeholder="Поиск целей и списков"
 								id="global-search"
 								value={query}
 								setValue={handleSearchChange}
 								iconEnd="search"
+								iconEndClick={handleShowAllResults}
 								onFocus={handleInputFocus}
 								onKeyDown={handleKeyDown}
 								theme={!isModal && theme === 'transparent' ? 'transparent' : undefined}
