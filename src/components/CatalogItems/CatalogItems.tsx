@@ -23,7 +23,7 @@ import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
 import {Line} from '../Line/Line';
-import {BlurLoader} from '../Loader/BlurLoader';
+import {Loader} from '../Loader/Loader';
 import {Pagination} from '../Pagination/Pagination';
 import Select, {OptionSelect} from '../Select/Select';
 import {Switch} from '../Switch/Switch';
@@ -36,6 +36,7 @@ interface CatalogItemsProps {
 	columns?: string;
 	initialSearch?: string;
 	searchWrapperWrap?: boolean;
+	onSearchChange?: (query: string) => void;
 }
 
 interface CatalogItemsCategoriesProps extends CatalogItemsProps {
@@ -90,6 +91,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		categories,
 		initialSearch = '',
 		searchWrapperWrap = false,
+		onSearchChange,
 	} = props;
 
 	const [block, element] = useBem('catalog-items', className);
@@ -108,6 +110,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	const [get, setGet] = useState(userId ? {user_id: userId, completed} : {});
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
+	const [searchLoading, setSearchLoading] = useState(false);
 	const [goalsLoaded, setGoalsLoaded] = useState(false);
 	const [listsLoaded, setListsLoaded] = useState(false);
 
@@ -207,6 +210,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 				...get,
 				sort_by: sortValue,
 				page,
+				...(search.trim().length >= 2 ? {search: search.trim()} : {}),
 				...(categoriesSort && categoriesSort.length > 0 ? {categories: categoriesSort.join(',')} : {}),
 			};
 
@@ -250,6 +254,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 
 	const onSearch = (query: string) => {
 		setSearch(query);
+		onSearchChange?.(query);
 		// Устанавливаем задержку в 300 миллисекунд
 		const delay = 300;
 		// Если есть предыдущий таймер, сбрасываем его
@@ -259,47 +264,52 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		// Устанавливаем новый таймер
 		setTimer(
 			setTimeout(async () => {
-				// Выполняем поиск только если длина запроса больше или равна 3
-				if (subPage === 'goals') {
-					if (query.length >= 3) {
-						const res = await getAllGoals(code, {
+				setSearchLoading(true);
+				try {
+					// Выполняем поиск только если длина запроса больше или равна 3
+					if (subPage === 'goals') {
+						if (query.length >= 3) {
+							const res = await getAllGoals(code, {
+								sort_by: sortBy[activeSort].value,
+								search: query,
+								...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
+							});
+							if (res.success) {
+								setGoals(res.data);
+							}
+						} else {
+							// Если длина запроса меньше 3, делаем запрос с пустым значением
+							const res = await getAllGoals(code, {
+								sort_by: sortBy[activeSort].value,
+								search: '',
+								...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
+							});
+							if (res.success) {
+								setGoals(res.data);
+							}
+						}
+					} else if (query.length >= 3) {
+						const res = await getAllLists(code, {
 							sort_by: sortBy[activeSort].value,
 							search: query,
 							...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
 						});
 						if (res.success) {
-							setGoals(res.data);
+							setLists(res.data);
 						}
 					} else {
 						// Если длина запроса меньше 3, делаем запрос с пустым значением
-						const res = await getAllGoals(code, {
+						const res = await getAllLists(code, {
 							sort_by: sortBy[activeSort].value,
 							search: '',
 							...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
 						});
 						if (res.success) {
-							setGoals(res.data);
+							setLists(res.data);
 						}
 					}
-				} else if (query.length >= 3) {
-					const res = await getAllLists(code, {
-						sort_by: sortBy[activeSort].value,
-						search: query,
-						...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
-					});
-					if (res.success) {
-						setLists(res.data);
-					}
-				} else {
-					// Если длина запроса меньше 3, делаем запрос с пустым значением
-					const res = await getAllLists(code, {
-						sort_by: sortBy[activeSort].value,
-						search: '',
-						...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
-					});
-					if (res.success) {
-						setLists(res.data);
-					}
+				} finally {
+					setSearchLoading(false);
 				}
 			}, delay)
 		);
@@ -486,7 +496,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					</div>
 				</div>
 			</div>
-			<BlurLoader active={loading || (subPage === 'goals' && !goalsLoaded) || (subPage === 'lists' && !listsLoaded)}>
+			<Loader isLoading={loading || searchLoading || (subPage === 'goals' && !goalsLoaded) || (subPage === 'lists' && !listsLoaded)}>
 				{subPage === 'goals' ? (
 					!goalsLoaded ? null : goals.data.length === 0 ? (
 						<EmptyState
@@ -551,7 +561,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						))}
 					</section>
 				)}
-			</BlurLoader>
+			</Loader>
 			{subPage === 'lists' && lists.data.length > 0 && (
 				<Pagination currentPage={lists.pagination.page} totalPages={lists.pagination.totalPages} goToPage={goToPage} />
 			)}

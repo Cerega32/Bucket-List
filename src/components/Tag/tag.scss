@@ -66,6 +66,18 @@
 		flex-shrink: 0;
 	}
 
+	&--theme-minimal {
+		padding: 2px 8px;
+		border: none;
+		color: var(--color-text-primary);
+		background: var(--color-secondary);
+		flex-shrink: 0;
+		font-size: 12px;
+		font-weight: var(--weight-regular);
+		line-height: var(--line-height-12);
+		margin-bottom: 4px;
+	}
+
 	&--theme-integrate {
 		padding: 0;
 		border: none;
