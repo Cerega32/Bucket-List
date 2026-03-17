@@ -5,14 +5,29 @@
 		margin-bottom: 24px;
 	}
 
+	&__banner {
+		margin-bottom: 16px;
+	}
+
 	&__field {
 		margin-bottom: 16px;
 	}
 
 	&__btns-wrapper {
 		display: flex;
+		justify-content: space-between;
+		align-items: center;
 		gap: 8px;
 		margin-top: 24px;
+	}
+
+	&__btns-right {
+		display: flex;
+		gap: 8px;
+
+		&--full {
+			width: 100%;
+		}
 	}
 
 	&__btn-add {
@@ -28,11 +43,22 @@
 		* {
 			fill: var(--color-primary);
 		}
+
+		&:hover {
+			background: var(--color-secondary);
+		}
 	}
 
 	&__field-title {
 		margin-bottom: 16px;
 		font-weight: var(--weight-medium);
+	}
+
+	&__existing-photos {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-bottom: 12px;
 	}
 
 	&__dropzone {
@@ -74,9 +100,12 @@
 		right: 4px;
 		background: rgb(var(--color-black-rgb) / 40%);
 		border-radius: 6px;
+		backdrop-filter: blur(5px);
 
 		* {
 			fill: var(--color-white);
+			width: 24px;
+			height: 24px;
 		}
 	}
 }
