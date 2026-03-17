@@ -31,7 +31,7 @@ export const Login: FC<LoginProps> = (props) => {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const signIn = async (e: FormEvent) => {
-		const normalizedEmail = normalizeEmail(email);
+		const normalizedEmail = normalizeEmail(email.trim().toLowerCase());
 		setError('');
 		setEmailError(undefined);
 		setPasswordError(undefined);

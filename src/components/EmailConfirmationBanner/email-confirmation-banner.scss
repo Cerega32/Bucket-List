@@ -1,7 +1,7 @@
 .email-confirmation-banner {
 	position: fixed;
 	z-index: 999;
-	top: var(--height-header, 72px);
+	top: var(--height-header);
 	right: 0;
 	left: 0;
 	padding: 8px 20px;
@@ -10,6 +10,10 @@
 	box-shadow: 0 4px 20px rgb(var(--color-black) / 50%);
 	color: var(--color-text-primary);
 	animation: slide-down 0.3s ease-out;
+
+	&--compact {
+		top: var(--height-header-compact);
+	}
 
 	&__content {
 		display: flex;

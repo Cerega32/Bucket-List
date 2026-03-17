@@ -20,9 +20,10 @@ interface CardMainProps {
 	updateGoal?: () => void;
 	colored?: boolean;
 	topInfoClassName?: string;
+	disableNavigation?: boolean;
 }
 export const CardMain: FC<CardMainProps> = (props) => {
-	const {className, goal, big, withBtn, updateGoal, colored, topInfoClassName} = props;
+	const {className, goal, big, withBtn, updateGoal, colored, topInfoClassName, disableNavigation} = props;
 
 	const [block, element] = useBem('card-main', className);
 
@@ -35,45 +36,95 @@ export const CardMain: FC<CardMainProps> = (props) => {
 
 	return (
 		<section className={block({big, withBtn})}>
-			<Link to={`/goals/${goal.code}`} className={element('gradient')}>
-				<Gradient
-					img={{src: goal.image, alt: goal.title}}
-					category={goal.category.nameEn}
-					blacked={!colored && !goal.completedByUser}
-					withBlack={goal.completedByUser}
-					topInfoClassName={topInfoClassName}
-				>
-					<div className={element('info')}>
-						<div className={element('img-tags')}>
-							{goal.completedByUser && <Tag icon="done" theme="light" classNameIcon={element('img-tag-icon-done')} />}
-							{goal.completedByUser ? (
-								<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
-							) : (
-								<Tag text={goal.category.name} theme="gray" className={element('img-tag-category')} />
-							)}
+			{disableNavigation ? (
+				<div className={element('gradient')}>
+					<Gradient
+						img={{src: goal.image, alt: goal.title}}
+						category={goal.category.nameEn}
+						blacked={!colored && !goal.completedByUser}
+						withBlack={goal.completedByUser}
+						topInfoClassName={topInfoClassName}
+					>
+						<div className={element('info')}>
+							<div className={element('img-tags')}>
+								{goal.completedByUser && <Tag icon="done" theme="light" classNameIcon={element('img-tag-icon-done')} />}
+								{goal.completedByUser ? (
+									<Tag
+										text={goal.category.name}
+										category={goal.category.nameEn}
+										className={element('img-tag-category')}
+									/>
+								) : (
+									<Tag text={goal.category.name} theme="gray" className={element('img-tag-category')} />
+								)}
+							</div>
+							<div>
+								<Title tag="h3" className={element('title')} theme="white">
+									{goal.title}
+								</Title>
+								<p className={element('text')}>{goal.shortDescription}</p>
+								{withBtn && (
+									<>
+										<Line className={element('line')} />
+										<Button
+											className={element('btn')}
+											icon="done"
+											theme={goal.completedByUser ? 'green' : 'blue'}
+											onClick={handleButtonClick}
+										>
+											Выполнено
+										</Button>
+									</>
+								)}
+							</div>
 						</div>
-						<div>
-							<Title tag="h3" className={element('title')} theme="white">
-								{goal.title}
-							</Title>
-							<p className={element('text')}>{goal.shortDescription}</p>
-							{withBtn && (
-								<>
-									<Line className={element('line')} />
-									<Button
-										className={element('btn')}
-										icon="done"
-										theme={goal.completedByUser ? 'green' : 'blue'}
-										onClick={handleButtonClick}
-									>
-										Выполнено
-									</Button>
-								</>
-							)}
+					</Gradient>
+				</div>
+			) : (
+				<Link to={`/goals/${goal.code}`} className={element('gradient')}>
+					<Gradient
+						img={{src: goal.image, alt: goal.title}}
+						category={goal.category.nameEn}
+						blacked={!colored && !goal.completedByUser}
+						withBlack={goal.completedByUser}
+						topInfoClassName={topInfoClassName}
+					>
+						<div className={element('info')}>
+							<div className={element('img-tags')}>
+								{goal.completedByUser && <Tag icon="done" theme="light" classNameIcon={element('img-tag-icon-done')} />}
+								{goal.completedByUser ? (
+									<Tag
+										text={goal.category.name}
+										category={goal.category.nameEn}
+										className={element('img-tag-category')}
+									/>
+								) : (
+									<Tag text={goal.category.name} theme="gray" className={element('img-tag-category')} />
+								)}
+							</div>
+							<div>
+								<Title tag="h3" className={element('title')} theme="white">
+									{goal.title}
+								</Title>
+								<p className={element('text')}>{goal.shortDescription}</p>
+								{withBtn && (
+									<>
+										<Line className={element('line')} />
+										<Button
+											className={element('btn')}
+											icon="done"
+											theme={goal.completedByUser ? 'green' : 'blue'}
+											onClick={handleButtonClick}
+										>
+											Выполнено
+										</Button>
+									</>
+								)}
+							</div>
 						</div>
-					</div>
-				</Gradient>
-			</Link>
+					</Gradient>
+				</Link>
+			)}
 		</section>
 	);
 };

@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie';
 
+import {ModalStore} from '@/store/ModalStore';
 import {INotification, NotificationStore} from '@/store/NotificationStore';
 import {withRetry} from '@/utils/api/apiRetry';
 
@@ -58,6 +59,14 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 			}
 
 			if (!response.ok) {
+				if (response.status === 401 && params.auth) {
+					ModalStore.setWindow('login');
+					ModalStore.setIsOpen(true);
+					return {
+						success: false,
+						errors: data?.detail || data?.error,
+					};
+				}
 				if (response.status === 429 && enableRetry) {
 					return {
 						success: false,

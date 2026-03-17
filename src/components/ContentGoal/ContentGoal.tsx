@@ -8,12 +8,15 @@ import './content-goal.scss';
 import {useBem} from '@/hooks/useBem';
 import {GoalStore} from '@/store/GoalStore';
 import {IGoal} from '@/typings/goal';
-import {getComments} from '@/utils/api/get/getComments';
+import {getCommentsWithImages} from '@/utils/api/get/getComments';
 
 import {Banner} from '../Banner/Banner';
+import {CommentImagesGallery} from '../CommentImagesGallery/CommentImagesGallery';
 import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
+import {ComplexityDisplay} from '../ComplexityDisplay/ComplexityDisplay';
 import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
 import {GoalProgressHistory} from '../GoalProgressHistory/GoalProgressHistory';
+import {InfoGoal} from '../InfoGoal/InfoGoal';
 import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
 import {RegularGoalHistory} from '../RegularGoalHistory/RegularGoalHistory';
 import {RegularGoalRating} from '../RegularGoalRating/RegularGoalRating';
@@ -31,16 +34,20 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 	const [block, element] = useBem('content-goal', className);
 	const navigate = useNavigate();
 
-	const {comments, setComments, setInfoPaginationComments} = GoalStore;
+	const {comments, setComments, setInfoPaginationComments, commentPhotos, setCommentPhotos} = GoalStore;
 
 	useEffect(() => {
 		if (page === 'isGoal') {
 			(async () => {
-				const res = await getComments(goal.code);
+				const res = await getCommentsWithImages(goal.code);
 
-				if (res.success) {
+				if (res.success && res.data) {
 					setComments(res.data.data);
 					setInfoPaginationComments(res.data.pagination);
+					// popular_images – snake_case (бэкенд после наших прав),
+					// popularImages – camelCase (старый/другой контракт). Поддерживаем оба варианта.
+					const images = (res.data as any).popular_images || (res.data as any).popularImages || [];
+					setCommentPhotos(images);
 				}
 			})();
 		}
@@ -50,7 +57,9 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 	const getGoalContent = () => {
 		switch (page) {
 			case 'isGoal':
-				return <CommentsGoal comments={comments} setComments={setComments} />;
+				return (
+					<CommentsGoal comments={comments} setComments={setComments} canAddReview={goal.addedByUser && goal.completedByUser} />
+				);
 			case 'isGoalLists':
 				return <ListsWithGoal code={goal.code} />;
 			case 'isGoalProgressHistory':
@@ -104,11 +113,21 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 				</div>
 			)}
 			<DescriptionWithLinks goal={goal} page={page} />
+			{page === 'isGoal' && commentPhotos?.length > 0 && (
+				<section className={element('impressions')}>
+					<InfoGoal
+						size="small"
+						items={[
+							{
+								title: 'Сложность',
+								value: <ComplexityDisplay complexity={goal.complexity} />,
+							},
+						]}
+					/>
+					<CommentImagesGallery images={commentPhotos} navSuffix="impressions" imageBig />
+				</section>
+			)}
 			<section className={element('comments')} id="comments-section">
-				{/* <Title tag="h2" className={element('title-section')}>
-					Отметки выполнения&nbsp;
-					<span className={element('title-counter')}>256</span>
-				</Title> */}
 				{getGoalContent()}
 			</section>
 		</article>

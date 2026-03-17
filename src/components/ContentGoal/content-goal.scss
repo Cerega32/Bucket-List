@@ -33,4 +33,14 @@
 	&__section {
 		margin-bottom: 40px;
 	}
+
+	&__impressions {
+		display: flex;
+		gap: 8px;
+		margin-top: 24px;
+
+		@include xs {
+			flex-direction: column;
+		}
+	}
 }

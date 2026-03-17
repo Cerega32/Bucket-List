@@ -47,6 +47,17 @@
 		line-height: var(--line-height-16);
 	}
 
+	&__value-with-icon {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	&__icon {
+		width: 16px;
+		height: 16px;
+	}
+
 	&__vertical-line {
 		width: 1px;
 		height: 32px;
@@ -78,5 +89,15 @@
 		padding: 0;
 		background: transparent;
 		border: none;
+	}
+
+	&--small {
+		width: max-content;
+		flex-shrink: 0;
+		max-height: 76px;
+
+		@include xs {
+			width: 100%;
+		}
 	}
 }
