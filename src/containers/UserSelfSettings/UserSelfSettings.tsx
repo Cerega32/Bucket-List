@@ -15,6 +15,7 @@ import {NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
 import {IUserInfo} from '@/typings/user';
 import {deleteAvatar} from '@/utils/api/delete/deleteAvatar';
+import {checkUsername} from '@/utils/api/get/checkUsername';
 import {postAvatar} from '@/utils/api/post/postAvatar';
 import {postCover} from '@/utils/api/post/postCover';
 import {postResendConfirmationEmail} from '@/utils/api/post/postResendConfirmationEmail';
@@ -30,11 +31,63 @@ export const UserSelfSettings: FC = observer(() => {
 	const [surname, setSurname] = useState(user.lastName);
 	const [username, setUsername] = useState(user.username ?? '');
 	const [about, setAbout] = useState(user.aboutMe);
+	const [usernameErrors, setUsernameErrors] = useState<Array<string>>([]);
+	const [isCheckingUsername, setIsCheckingUsername] = useState(false);
 	const [activeCountry, setActiveCountry] = useState<number | null>(null);
 	const avatarInputRef = useRef<HTMLInputElement | null>(null);
 	const coverInputRef = useRef<HTMLInputElement | null>(null);
 
 	const [block, element] = useBem('user-self-settings');
+
+	const validateUsername = (name: string): Array<string> => {
+		const trimmed = name.trim();
+		const errors: Array<string> = [];
+
+		if (!trimmed) {
+			errors.push('Введите имя пользователя');
+		}
+
+		if (trimmed.length > 0 && !/^[A-Za-z0-9_]+$/.test(trimmed)) {
+			errors.push('Используйте только латинские буквы, цифры и знак подчёркивания');
+		}
+
+		return errors;
+	};
+
+	const checkUsernameAsync = async (name: string) => {
+		const localErrors = validateUsername(name);
+		if (localErrors.length > 0) {
+			setUsernameErrors(localErrors);
+			return;
+		}
+
+		const trimmed = name.trim();
+		if (!trimmed) return;
+
+		// Если имя не изменилось относительно текущего пользователя — не проверяем уникальность
+		if ((user.username ?? '').trim().toLowerCase() === trimmed.toLowerCase()) {
+			setUsernameErrors([]);
+			return;
+		}
+
+		setIsCheckingUsername(true);
+		const res = await checkUsername(trimmed);
+		setIsCheckingUsername(false);
+
+		if (!res.success) {
+			const serverErrors =
+				(Array.isArray(res.errors) && res.errors) ||
+				(Array.isArray(res.data?.errors) && res.data.errors) ||
+				(typeof res.errors === 'string' ? [res.errors] : undefined);
+
+			if (serverErrors && serverErrors.length) {
+				setUsernameErrors(serverErrors);
+				return;
+			}
+		}
+
+		setUsernameErrors([]);
+	};
 
 	useEffect(() => {
 		setFirstName(user.firstName);
@@ -57,6 +110,7 @@ export const UserSelfSettings: FC = observer(() => {
 				break;
 			case 'username':
 				setUsername(value);
+				setUsernameErrors(validateUsername(value));
 				break;
 			case 'about':
 				setAbout(value);
@@ -125,6 +179,26 @@ export const UserSelfSettings: FC = observer(() => {
 	};
 
 	const handleSaveChanges = async () => {
+		// Валидация имени пользователя перед сохранением
+		const currentUsernameErrors = validateUsername(username);
+		if (currentUsernameErrors.length > 0) {
+			setUsernameErrors(currentUsernameErrors);
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Некорректное имя пользователя',
+				message: currentUsernameErrors[0],
+			});
+			return;
+		}
+		if (usernameErrors.length > 0 || isCheckingUsername) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Исправьте ошибки в имени пользователя перед сохранением',
+			});
+			return;
+		}
+
 		// Создаем объект для хранения измененных данных
 		const updatedData: Partial<IUserInfo> = {};
 
@@ -291,11 +365,18 @@ export const UserSelfSettings: FC = observer(() => {
 					</Title>
 					<div className={element('input-group')}>
 						<FieldInput
-							text="Имя в системе"
-							placeholder="Имя в системе, которое увидят другие"
+							text="Имя пользователя"
+							placeholder="Имя, которое увидят другие пользователи"
 							id="username"
-							value={username || user.username || ''}
+							value={username}
 							setValueTarget={handleInputChange}
+							error={usernameErrors}
+							onBlur={() => checkUsernameAsync(username)}
+							hint={
+								!usernameErrors || usernameErrors.length === 0
+									? 'Используйте только латинские буквы, цифры и знак подчёркивания'
+									: undefined
+							}
 						/>
 						<FieldInput text="Имя" placeholder="Имя" id="name" value={firstName} setValueTarget={handleInputChange} />
 						<FieldInput text="Фамилия" placeholder="Фамилия" id="surname" value={surname} setValueTarget={handleInputChange} />

@@ -200,7 +200,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 		if (!trimmed) {
 			errors.push('Введите пароль');
 		} else if (trimmed.length < 8) {
-			errors.push('Минимальная длина пароля — 8 символов');
+			errors.push('Минимальная длина пароля - 8 символов');
 		}
 
 		return errors;
