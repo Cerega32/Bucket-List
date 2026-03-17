@@ -46,6 +46,12 @@
 
 	&__title {
 		margin-bottom: 8px;
+		display: -webkit-box;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 4;
+		line-clamp: 4;
+		overflow-wrap: anywhere;
 	}
 
 	&__text {

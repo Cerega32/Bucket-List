@@ -21,10 +21,47 @@ export const ChangePassword: FC<ChangePasswordProps> = (props) => {
 	const [password, setPassword] = useState('');
 	const [newPassword, setNewPassword] = useState('');
 	const [repeatPassword, setRepeatPassword] = useState('');
+	const [error, setError] = useState<{
+		newPassword?: Array<string>;
+		repeatPassword?: Array<string>;
+	}>({});
+
+	const validatePassword = (pwd: string): Array<string> => {
+		const trimmed = pwd;
+		const errors: Array<string> = [];
+
+		if (!trimmed) {
+			errors.push('Введите пароль');
+		} else if (trimmed.length < 8) {
+			errors.push('Минимальная длина пароля - 8 символов');
+		}
+
+		return errors;
+	};
+
+	const validateRepeatPassword = (pwd: string, repeat: string): Array<string> => {
+		const errors: Array<string> = [];
+
+		if (!repeat) {
+			errors.push('Повторите пароль');
+		} else if (pwd !== repeat) {
+			errors.push('Пароли не совпадают');
+		}
+
+		return errors;
+	};
 
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		if (newPassword !== repeatPassword) {
+
+		const newPasswordErrors = validatePassword(newPassword);
+		const repeatPasswordErrors = validateRepeatPassword(newPassword, repeatPassword);
+
+		if (newPasswordErrors.length || repeatPasswordErrors.length) {
+			setError({
+				newPassword: newPasswordErrors.length ? newPasswordErrors : undefined,
+				repeatPassword: repeatPasswordErrors.length ? repeatPasswordErrors : undefined,
+			});
 			return;
 		}
 
@@ -66,22 +103,37 @@ export const ChangePassword: FC<ChangePasswordProps> = (props) => {
 				id="new-password"
 				text="Новый пароль"
 				value={newPassword}
-				setValue={setNewPassword}
+				setValue={(val) => {
+					setNewPassword(val);
+					setError((prev) => ({
+						...prev,
+						newPassword: validatePassword(val),
+						repeatPassword: validateRepeatPassword(val, repeatPassword),
+					}));
+				}}
 				className={element('field')}
 				type="password"
 				iconBegin="lock"
 				autoComplete="new-password"
+				error={error.newPassword}
 			/>
 			<FieldInput
 				placeholder="Повтор ввода нового пароля"
 				id="repeat-new-password"
 				text="Повторите новый пароль"
 				value={repeatPassword}
-				setValue={setRepeatPassword}
+				setValue={(val) => {
+					setRepeatPassword(val);
+					setError((prev) => ({
+						...prev,
+						repeatPassword: validateRepeatPassword(newPassword, val),
+					}));
+				}}
 				className={element('field')}
 				type="password"
 				iconBegin="lock"
 				autoComplete="new-password"
+				error={error.repeatPassword}
 			/>
 			<div className={element('btns-wrapper')}>
 				<Button theme="blue-light" className={element('btn')} onClick={closeModal} size="medium">

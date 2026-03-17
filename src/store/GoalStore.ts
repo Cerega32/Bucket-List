@@ -19,6 +19,8 @@ class Store implements IGoalStore {
 
 	infoPaginationComments: IPaginationPage = defaultPagination;
 
+	commentPhotos: string[] = [];
+
 	id = 0;
 
 	constructor() {
@@ -27,6 +29,10 @@ class Store implements IGoalStore {
 
 	setComments = (comments: Array<IComment>) => {
 		this.comments = comments;
+	};
+
+	setCommentPhotos = (photos: string[]) => {
+		this.commentPhotos = photos;
 	};
 
 	setLists = (lists: Array<IShortList>) => {

@@ -7,11 +7,12 @@
 	&__error {
 		color: var(--color-sentiment-negative);
 		font-weight: var(--weight-medium);
+		font-size: 12px;
 	}
 
 	&__label {
 		margin-bottom: 4px;
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	&__wrapper {
@@ -121,5 +122,11 @@
 		white-space: nowrap;
 		pointer-events: none;
 		transform: translateY(-50%);
+	}
+
+	&__hint {
+		margin-top: 4px;
+		color: var(--color-text-secondary);
+		font-size: 12px;
 	}
 }
