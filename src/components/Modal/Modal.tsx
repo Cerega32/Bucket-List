@@ -17,6 +17,7 @@ import {ConfirmExecutionAllGoal} from '../ConfirmExecutionAllGoal/ConfirmExecuti
 import {CreateTodoListForm} from '../CreateTodoListForm/CreateTodoListForm';
 import {CreateTodoTaskForm} from '../CreateTodoTaskForm/CreateTodoTaskForm';
 import {DeleteGoal} from '../DeleteGoal/DeleteGoal';
+import {DeleteList} from '../DeleteList/DeleteList';
 import {FolderSelector} from '../FolderSelector/FolderSelector';
 import {ForgotPassword} from '../ForgotPassword/ForgotPassword';
 import {GoalMap} from '../GoalMap/GoalMap';
@@ -216,7 +217,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
 			{window === 'add-review' && <AddReview closeModal={closeWindow} />}
 			{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
-			{window === 'delete-list' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
+			{window === 'delete-list' && <DeleteList closeModal={closeWindow} funcModal={funcModal} />}
 			{window === 'confirm-execution-all-goal' && <ConfirmExecutionAllGoal closeModal={closeWindow} funcModal={funcModal} />}
 			{window === 'goal-map' && <GoalMap {...modalProps} />}
 			{window === 'goal-map-multi' && <GoalMapMulti {...modalProps} />}

@@ -81,8 +81,8 @@ export const Registration: FC<RegistrationProps> = (props) => {
 		if (step === 2 && !catalogLoaded && !catalogLoading) {
 			setCatalogLoading(true);
 			(async () => {
-				const res = await getPopularGoalsForAllTime();
-				if (res.success) setCatalogGoals((res.data ?? []).slice(0, 8));
+				const res = await getPopularGoalsForAllTime(8);
+				if (res.success) setCatalogGoals(res.data ?? []);
 				setCatalogLoaded(true);
 				setCatalogLoading(false);
 			})();

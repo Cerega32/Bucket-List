@@ -39,10 +39,7 @@ export const ContentListGoals: FC<ContentListGoalsProps> = (props) => {
 			{list.addedByUser && (
 				<InfoGoal
 					className={element('info')}
-					items={[
-						{title: 'Всего целей', value: list.goalsCount},
-						{title: 'Выполнено', value: list.userCompletedGoals},
-					]}
+					items={[]}
 					progress
 					horizontal
 					progressData={{
