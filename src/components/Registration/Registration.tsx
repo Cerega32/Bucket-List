@@ -474,12 +474,6 @@ export const Registration: FC<RegistrationProps> = (props) => {
 								className={element('consent-checkbox')}
 							/>
 						</div>
-						{/* <p className={element('sign-in')}>
-							У вас уже есть аккаунт?
-							<Button theme="no-border" className={element('btn-sign-in')} onClick={openLogin}>
-								Вход
-							</Button>
-						</p> */}
 					</form>
 				</div>
 			</div>
