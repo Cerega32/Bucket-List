@@ -3,12 +3,14 @@ import {FC, useEffect, useRef, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
+import {Card} from '@/components/Card/Card';
 import {ContentGoal} from '@/components/ContentGoal/ContentGoal';
 import {EditGoal} from '@/components/EditGoal/EditGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
 import {Loader} from '@/components/Loader/Loader';
 import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
 import {SEO} from '@/components/SEO/SEO';
+import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {useOGImage} from '@/hooks/useOGImage';
 import useScreenSize from '@/hooks/useScreenSize';
@@ -24,6 +26,8 @@ import {getGoalProgress} from '@/utils/api/goals';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
+
+import {useSimilarGoalsByCategory} from './hooks/useSimilarGoalsByCategory';
 
 import './goal.scss';
 
@@ -224,6 +228,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 
 	const [shrink, setShrink] = useState(false);
 	const [headerHeight, setHeaderHeight] = useState<number>(340);
+	const {similarGoals} = useSimilarGoalsByCategory(goal?.code || null, !!goal);
 
 	// Генерируем динамическое OG изображение
 	const {imageUrl: ogImageUrl} = useOGImage({
@@ -339,6 +344,25 @@ export const Goal: FC<IPage> = observer(({page}) => {
 						<ContentGoal page={page} goal={goal} className={element('content')} historyRefreshTrigger={historyRefreshTrigger} />
 					</div>
 				</section>
+				{similarGoals.length > 0 && (
+					<section className={element('similar-wrapper')}>
+						<Title tag="h2" className={element('similar-title')}>
+							Похожие цели
+						</Title>
+						<div className="catalog-items__goals">
+							{similarGoals.map((similarGoal) => (
+								<Card
+									key={similarGoal.id}
+									className="catalog-items__goal"
+									goal={similarGoal}
+									onClickAdd={async () => Promise.resolve()}
+									onClickDelete={async () => Promise.resolve()}
+									onClickMark={async () => Promise.resolve()}
+								/>
+							))}
+						</div>
+					</section>
+				)}
 				<ScrollToTop />
 			</main>
 		</>

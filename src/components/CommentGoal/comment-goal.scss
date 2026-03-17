@@ -123,6 +123,11 @@
 		cursor: pointer;
 		object-fit: cover;
 
+		&--big {
+			width: 76px;
+			height: 76px;
+		}
+
 		&:focus {
 			@include focus-outline;
 		}

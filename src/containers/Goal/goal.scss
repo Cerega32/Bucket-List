@@ -105,6 +105,25 @@
 		}
 	}
 
+	&__similar-wrapper {
+		max-width: 1440px;
+		margin: 0 auto 96px;
+		padding: 0 24px;
+
+		@include xl {
+			padding: 0 24px;
+		}
+
+		@include md {
+			padding: 0 16px;
+			margin-bottom: 96px;
+		}
+	}
+
+	&__similar-title {
+		margin: 0 0 24px;
+	}
+
 	&__map-section {
 		padding: 0 20px;
 		margin: 40px 0;

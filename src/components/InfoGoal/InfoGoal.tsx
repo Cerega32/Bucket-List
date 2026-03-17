@@ -1,4 +1,4 @@
-import {FC, Fragment} from 'react';
+import {FC, Fragment, ReactNode} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 
@@ -8,7 +8,7 @@ import './info-goal.scss';
 
 interface InfoItem {
 	title: string;
-	value: string | number;
+	value: ReactNode;
 }
 
 interface InfoGoalProps {
@@ -16,6 +16,7 @@ interface InfoGoalProps {
 	items: InfoItem[];
 	progress?: boolean;
 	horizontal?: boolean;
+	size?: 'small';
 	progressData?: {
 		completed: number;
 		total: number;
@@ -24,12 +25,12 @@ interface InfoGoalProps {
 }
 
 export const InfoGoal: FC<InfoGoalProps> = (props) => {
-	const {className, items, progressData, progress, horizontal, backgroundOff} = props;
+	const {className, items, progressData, progress, horizontal, backgroundOff, size} = props;
 
 	const [block, element] = useBem('info-goal', className);
 
 	return (
-		<section className={block({horizontal, backgroundOff})}>
+		<section className={block({horizontal, backgroundOff, small: size === 'small'})}>
 			<div className={element('wrapper')}>
 				{items.map((item, index) => (
 					// eslint-disable-next-line react/no-array-index-key
