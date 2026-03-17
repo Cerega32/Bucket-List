@@ -50,7 +50,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		const hasError = typeof activeComplexity !== 'number' || !newComment.trim() || photos.length === 0;
+		const hasError = typeof activeComplexity !== 'number' || !newComment.trim();
 
 		if (hasError) {
 			setShowErrors(true);

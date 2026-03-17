@@ -57,7 +57,9 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 	const getGoalContent = () => {
 		switch (page) {
 			case 'isGoal':
-				return <CommentsGoal comments={comments} setComments={setComments} />;
+				return (
+					<CommentsGoal comments={comments} setComments={setComments} canAddReview={goal.addedByUser && goal.completedByUser} />
+				);
 			case 'isGoalLists':
 				return <ListsWithGoal code={goal.code} />;
 			case 'isGoalProgressHistory':
