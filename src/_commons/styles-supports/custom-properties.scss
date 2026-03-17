@@ -29,6 +29,8 @@
 	--color-gray-10: rgb(var(--color-gray-rgb-10)); // #F1F4FF
 	--color-gray-rgb-11: 240 244 247; // #F0F4F7
 	--color-gray-11: rgb(var(--color-gray-rgb-11)); // #F0F4F7
+	--color-gray-rgb-12: 150 165 179; // #96A5B3
+	--color-gray-12: rgb(var(--color-gray-rgb-12)); // #96A5B3
 
 	//////
 	//////
@@ -127,6 +129,8 @@
 	--color-text-primary-rgb: var(--color-gray-rgb-8); // #384149
 	--color-text-secondary: var(--color-gray-1); // #718395
 	--color-logo: var(--color-red-4); // #E05A4F
+	--color-text-disabled: var(--color-gray-12); // #96A5B3
+	--color-text-disabled-rgb: var(--color-gray-rgb-12); // #96A5B3
 
 	//////
 	//////

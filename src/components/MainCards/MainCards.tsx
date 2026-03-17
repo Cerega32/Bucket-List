@@ -18,10 +18,11 @@ interface MainCardsProps {
 	updateGoal?: (i: number, complexity: IComplexity, code: string, done: boolean) => void;
 	allGoalsCompleted?: boolean;
 	topInfoClassName?: string;
+	disableNavigation?: boolean;
 }
 
 export const MainCards: FC<MainCardsProps> = (props) => {
-	const {className, goals, complexity, withBtn, updateGoal, allGoalsCompleted, topInfoClassName} = props;
+	const {className, goals, complexity, withBtn, updateGoal, allGoalsCompleted, topInfoClassName, disableNavigation} = props;
 
 	const [block, element] = useBem('main-cards', className);
 
@@ -40,6 +41,7 @@ export const MainCards: FC<MainCardsProps> = (props) => {
 							className={element('card')}
 							withBtn={withBtn}
 							topInfoClassName={topInfoClassName}
+							disableNavigation={disableNavigation}
 							updateGoal={() => updateGoal && updateGoal(i, complexity, goal.code, goal.completedByUser)}
 						/>
 					))}
