@@ -78,6 +78,12 @@ export const ListGoalsContainer: FC = () => {
 	};
 
 	const updateGoal = async (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
+		if (!isAuth) {
+			setWindow('login');
+			setIsOpen(true);
+			return;
+		}
+
 		const res = await (operation === 'add' ? addGoal(code) : operation === 'delete' ? removeGoal(code) : markGoal(code, !done));
 
 		if (res.success && list) {

@@ -1,3 +1,4 @@
+import {observer} from 'mobx-react-lite';
 import {FC} from 'react';
 
 import {useBem} from '@/hooks/useBem';
@@ -18,7 +19,7 @@ interface MainHeaderProps {
 	totalCompleted: number;
 }
 
-export const MainHeader: FC<MainHeaderProps> = (props) => {
+export const MainHeader: FC<MainHeaderProps> = observer((props) => {
 	const {className, leftPhotos, rightPhotos, totalCompleted} = props;
 
 	const [block, element] = useBem('main-header', className);
@@ -85,4 +86,4 @@ export const MainHeader: FC<MainHeaderProps> = (props) => {
 			</div>
 		</section>
 	);
-};
+});
