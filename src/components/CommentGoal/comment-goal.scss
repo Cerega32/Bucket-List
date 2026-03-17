@@ -70,9 +70,11 @@
 	&__comment-info {
 		display: flex;
 		gap: 8px;
+		align-items: center;
 
 		@include sm {
 			flex-direction: column;
+			align-items: flex-end;
 		}
 	}
 
@@ -81,14 +83,10 @@
 	}
 
 	&__vertical-line {
-		display: block;
-		width: 1px;
-		height: auto;
 		background: var(--color-gray-9);
-
-		@include sm {
-			display: none;
-		}
+		height: 16px;
+		width: 1px;
+		margin: 0;
 	}
 
 	&__horizontal-line {

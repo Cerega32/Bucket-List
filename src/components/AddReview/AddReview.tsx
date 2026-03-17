@@ -14,7 +14,6 @@ import {postAddReview} from '@/utils/api/post/postAddReview';
 import {putEditReview} from '@/utils/api/put/putEditReview';
 import {selectComplexity} from '@/utils/values/complexity';
 
-import {Banner} from '../Banner/Banner';
 import Select from '../Select/Select';
 import {Title} from '../Title/Title';
 import './add-review.scss';
@@ -175,11 +174,6 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 			<Title tag="h2" className={element('title')}>
 				{editingComment ? 'Редактирование впечатления к цели' : 'Оставить впечатление о цели'}
 			</Title>
-			<Banner
-				type="warning"
-				message="Редактировать впечатление можно только в течение 2х часов после публикации."
-				className={element('banner')}
-			/>
 			<Select
 				className={element('field')}
 				placeholder="Насколько вам было тяжело выполнить цель?"

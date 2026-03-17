@@ -18,6 +18,8 @@ export interface ICommentGoal {
 export interface IComment {
 	complexity: IComplexity;
 	dateCreated: string;
+	dateEdited?: string | null;
+	isEdited?: boolean;
 	dislikesCount: number;
 	hasDisliked: boolean;
 	hasLiked: boolean;

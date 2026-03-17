@@ -65,8 +65,16 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 				</Link>
 				{!isMain && (
 					<div className={element('comment-info')}>
-						<span className={element('date')}>{getDate(comment.dateCreated)}</span>
-						<div className={element('vertical-line')} />
+						{comment.isEdited && (
+							<Tag
+								text="Изменено"
+								theme="light"
+								className={element('edited-tag')}
+								title={getDate(comment.dateEdited || comment.dateCreated)}
+							/>
+						)}
+						<span className={element('date')}>{getDate(comment.dateEdited || comment.dateCreated)}</span>
+						<Line className={element('vertical-line')} />
 						<Tag complexity={comment.complexity} theme="integrate" icon={comment.complexity} />
 					</div>
 				)}
