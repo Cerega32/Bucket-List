@@ -21,11 +21,23 @@
 	&__filters-wrapper {
 		display: flex;
 		gap: 16px;
+
+		@include md {
+			width: 100%;
+		}
+
+		@include xs {
+			flex-direction: column;
+		}
 	}
 
 	&__goal-type-select {
 		width: max-content;
 		max-height: 40px;
+
+		@include md {
+			width: 100%;
+		}
 	}
 
 	&__switch {
@@ -53,7 +65,7 @@
 	&__search-wrapper {
 		display: flex;
 		justify-content: end;
-		gap: 8px;
+		gap: 16px;
 		width: 100%;
 
 		@include lg {
@@ -88,6 +100,11 @@
 		@include md {
 			justify-content: space-between;
 		}
+
+		@include xs {
+			flex-direction: column;
+			width: 100%;
+		}
 	}
 
 	&__goals {
@@ -95,10 +112,6 @@
 		flex-wrap: wrap;
 		gap: 24px;
 		margin-bottom: 24px;
-
-		@include lg {
-			gap: 16px;
-		}
 
 		&--columns-3 {
 			#{$block} {
