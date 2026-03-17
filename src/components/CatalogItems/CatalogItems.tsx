@@ -9,7 +9,9 @@ import {IList} from '@/typings/list';
 import {IPaginationPage} from '@/typings/request';
 import {getAllGoals} from '@/utils/api/get/getAllGoals';
 import {getAllLists} from '@/utils/api/get/getAllLists';
+import {getRegularGoals} from '@/utils/api/get/getRegularGoals';
 import {getRegularGoalSettings} from '@/utils/api/get/getRegularGoalSettings';
+import {getUsualGoals} from '@/utils/api/get/getUsualGoals';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {addListGoal} from '@/utils/api/post/addListGoal';
 import {addRegularGoalToUser, RegularGoalSettings} from '@/utils/api/post/addRegularGoalToUser';
@@ -23,7 +25,7 @@ import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
 import {Line} from '../Line/Line';
-import {BlurLoader} from '../Loader/BlurLoader';
+import {Loader} from '../Loader/Loader';
 import {Pagination} from '../Pagination/Pagination';
 import Select, {OptionSelect} from '../Select/Select';
 import {Switch} from '../Switch/Switch';
@@ -36,6 +38,7 @@ interface CatalogItemsProps {
 	columns?: string;
 	initialSearch?: string;
 	searchWrapperWrap?: boolean;
+	onSearchChange?: (query: string) => void;
 }
 
 interface CatalogItemsCategoriesProps extends CatalogItemsProps {
@@ -77,6 +80,21 @@ const sortBy: Array<OptionSelect> = [
 	},
 ];
 
+const goalTypeOptions: Array<OptionSelect> = [
+	{
+		name: 'Все цели',
+		value: 'all',
+	},
+	{
+		name: 'Регулярные',
+		value: 'regular',
+	},
+	{
+		name: 'Обычные',
+		value: 'usual',
+	},
+];
+
 export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersProps> = (props) => {
 	const {
 		className,
@@ -90,6 +108,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		categories,
 		initialSearch = '',
 		searchWrapperWrap = false,
+		onSearchChange,
 	} = props;
 
 	const [block, element] = useBem('catalog-items', className);
@@ -103,11 +122,13 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		pagination: IPaginationPage;
 	}>({data: [], pagination: defaultPagination});
 	const [activeSort, setActiveSort] = useState(0);
+	const [activeGoalType, setActiveGoalType] = useState(2);
 	const [search, setSearch] = useState(initialSearch);
 	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 	const [get, setGet] = useState(userId ? {user_id: userId, completed} : {});
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
+	const [searchLoading, setSearchLoading] = useState(false);
 	const [goalsLoaded, setGoalsLoaded] = useState(false);
 	const [listsLoaded, setListsLoaded] = useState(false);
 
@@ -140,13 +161,6 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 				page: 'lists',
 				count: lists.pagination.totalItems,
 			},
-			// TODO: добавить запрос на получение всех регулярных целей
-			// {
-			// 	url: `${beginUrl}${url}/regular`,
-			// 	name: 'Регулярные',
-			// 	page: 'regular',
-			// 	count: 0,
-			// },
 		];
 	}, [goals, lists, category, beginUrl]);
 
@@ -195,23 +209,32 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 
 	useEffect(() => {
 		setActiveSort(0);
+		setActiveGoalType(2);
 		setSearch(initialSearch); // Восстанавливаем начальный поисковый запрос
 		setSelectedCategories([]);
 	}, [subPage, beginUrl, initialSearch]);
 
-	const fetchData = async (sortValue: string, page?: number, categoriesSort?: string[]): Promise<boolean> => {
+	const fetchData = async (sortValue: string, page?: number, categoriesSort?: string[], goalTypeOverride?: string): Promise<boolean> => {
 		setLoading(true);
 		try {
 			let res;
+			const goalTypeValue = goalTypeOverride ?? goalTypeOptions[activeGoalType]?.value;
 			const queryParams = {
 				...get,
 				sort_by: sortValue,
 				page,
+				...(search.trim().length >= 2 ? {search: search.trim()} : {}),
 				...(categoriesSort && categoriesSort.length > 0 ? {categories: categoriesSort.join(',')} : {}),
 			};
 
 			if (subPage === 'goals') {
-				res = await getAllGoals(code, queryParams);
+				if (goalTypeValue === 'regular') {
+					res = await getRegularGoals(code, queryParams);
+				} else if (goalTypeValue === 'usual') {
+					res = await getUsualGoals(code, queryParams);
+				} else {
+					res = await getAllGoals(code, queryParams);
+				}
 			} else {
 				res = await getAllLists(code, queryParams);
 			}
@@ -237,6 +260,17 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		await fetchData(sortBy[active].value, undefined, selectedCategories);
 	};
 
+	const onSelectGoalType = async (active: number): Promise<void> => {
+		// Если выбран тот же тип, повторный запрос не нужен
+		if (active === activeGoalType) return;
+
+		setActiveGoalType(active);
+		const goalTypeValue = goalTypeOptions[active]?.value;
+		if (subPage === 'goals') {
+			await fetchData(sortBy[activeSort].value, undefined, selectedCategories, goalTypeValue);
+		}
+	};
+
 	const goToPage = async (active: number): Promise<boolean> => {
 		const success = await fetchData(sortBy[activeSort].value, active, selectedCategories);
 		scroller.scrollTo('catalog-items-goals', {
@@ -250,6 +284,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 
 	const onSearch = (query: string) => {
 		setSearch(query);
+		onSearchChange?.(query);
 		// Устанавливаем задержку в 300 миллисекунд
 		const delay = 300;
 		// Если есть предыдущий таймер, сбрасываем его
@@ -259,53 +294,63 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		// Устанавливаем новый таймер
 		setTimer(
 			setTimeout(async () => {
-				// Выполняем поиск только если длина запроса больше или равна 3
-				if (subPage === 'goals') {
-					if (query.length >= 3) {
-						const res = await getAllGoals(code, {
+				setSearchLoading(true);
+				try {
+					// Выполняем поиск только если длина запроса больше или равна 3
+					if (subPage === 'goals') {
+						if (query.length >= 3) {
+							const res = await getAllGoals(code, {
+								sort_by: sortBy[activeSort].value,
+								search: query,
+								...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
+							});
+							if (res.success) {
+								setGoals(res.data);
+							}
+						} else {
+							// Если длина запроса меньше 3, делаем запрос с пустым значением
+							const res = await getAllGoals(code, {
+								sort_by: sortBy[activeSort].value,
+								search: '',
+								...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
+							});
+							if (res.success) {
+								setGoals(res.data);
+							}
+						}
+					} else if (query.length >= 3) {
+						const res = await getAllLists(code, {
 							sort_by: sortBy[activeSort].value,
 							search: query,
 							...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
 						});
 						if (res.success) {
-							setGoals(res.data);
+							setLists(res.data);
 						}
 					} else {
 						// Если длина запроса меньше 3, делаем запрос с пустым значением
-						const res = await getAllGoals(code, {
+						const res = await getAllLists(code, {
 							sort_by: sortBy[activeSort].value,
 							search: '',
 							...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
 						});
 						if (res.success) {
-							setGoals(res.data);
+							setLists(res.data);
 						}
 					}
-				} else if (query.length >= 3) {
-					const res = await getAllLists(code, {
-						sort_by: sortBy[activeSort].value,
-						search: query,
-						...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
-					});
-					if (res.success) {
-						setLists(res.data);
-					}
-				} else {
-					// Если длина запроса меньше 3, делаем запрос с пустым значением
-					const res = await getAllLists(code, {
-						sort_by: sortBy[activeSort].value,
-						search: '',
-						...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
-					});
-					if (res.success) {
-						setLists(res.data);
-					}
+				} finally {
+					setSearchLoading(false);
 				}
 			}, delay)
 		);
 	};
 
 	const handleCategoryFilter = async (selected: string[]) => {
+		// Если набор категорий не изменился, повторно не запрашиваем данные
+		if (selected.length === selectedCategories.length && selected.every((categoryCode) => selectedCategories.includes(categoryCode))) {
+			return;
+		}
+
 		setSelectedCategories(selected);
 		await fetchData(sortBy[activeSort].value, undefined, selected);
 	};
@@ -461,7 +506,18 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	return (
 		<section className={block()} key={code}>
 			<div className={element('filters')}>
-				<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage || ''} />
+				<div className={element('filters-wrapper')}>
+					<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage || ''} />
+					{subPage === 'goals' && (
+						<Select
+							className={element('goal-type-select')}
+							options={goalTypeOptions}
+							activeOption={activeGoalType}
+							onSelect={onSelectGoalType}
+							placeholder="Все цели"
+						/>
+					)}
+				</div>
 				<Line className={element('line')} />
 				<div className={element('search-wrapper', {'wrap-on-lg': searchWrapperWrap})}>
 					<FieldInput
@@ -486,7 +542,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					</div>
 				</div>
 			</div>
-			<BlurLoader active={loading || (subPage === 'goals' && !goalsLoaded) || (subPage === 'lists' && !listsLoaded)}>
+			<Loader isLoading={loading || searchLoading || (subPage === 'goals' && !goalsLoaded) || (subPage === 'lists' && !listsLoaded)}>
 				{subPage === 'goals' ? (
 					!goalsLoaded ? null : goals.data.length === 0 ? (
 						<EmptyState
@@ -551,7 +607,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						))}
 					</section>
 				)}
-			</BlurLoader>
+			</Loader>
 			{subPage === 'lists' && lists.data.length > 0 && (
 				<Pagination currentPage={lists.pagination.page} totalPages={lists.pagination.totalPages} goToPage={goToPage} />
 			)}

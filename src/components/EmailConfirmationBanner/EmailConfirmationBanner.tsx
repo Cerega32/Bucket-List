@@ -19,6 +19,7 @@ export const EmailConfirmationBanner: FC = observer(() => {
 	const [isVisible, setIsVisible] = useState(false);
 	const [isSending, setIsSending] = useState(false);
 	const [isSent, setIsSent] = useState(false);
+	const [isCompactHeader, setIsCompactHeader] = useState(false);
 	const {isAuth, emailConfirmed, email} = UserStore;
 
 	useEffect(() => {
@@ -40,6 +41,19 @@ export const EmailConfirmationBanner: FC = observer(() => {
 		return undefined;
 	}, [isAuth, emailConfirmed]);
 
+	useEffect(() => {
+		const handleScroll = () => {
+			setIsCompactHeader(window.scrollY > 0);
+		};
+
+		handleScroll();
+		window.addEventListener('scroll', handleScroll);
+
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+		};
+	}, []);
+
 	const handleResend = async () => {
 		setIsSending(true);
 		const res = await postResendConfirmationEmail();
@@ -60,7 +74,7 @@ export const EmailConfirmationBanner: FC = observer(() => {
 	if (!isVisible) return null;
 
 	return (
-		<div className={block()}>
+		<div className={block({compact: isCompactHeader})}>
 			<div className={element('content')}>
 				<div className={element('icon')}>
 					<Svg icon="email" />

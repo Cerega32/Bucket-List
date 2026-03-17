@@ -213,7 +213,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			{window === 'login' && (
 				<Login openRegistration={openRegistration} openForgotPassword={openForgotPassword} successLogin={successAuth} />
 			)}
-			{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
+			{window === 'registration' && <Registration successRegistration={successAuth} />}
 			{window === 'forgot-password' && <ForgotPassword onBack={openLogin} initialEmail={modalProps?.initialEmail} />}
 			{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
 			{window === 'add-review' && <AddReview closeModal={closeWindow} />}

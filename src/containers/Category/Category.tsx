@@ -1,4 +1,4 @@
-import {FC, useEffect, useRef, useState} from 'react';
+import {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {useParams, useSearchParams} from 'react-router-dom';
 import {scroller} from 'react-scroll';
 
@@ -46,15 +46,41 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 	const [isRegularLoading, setIsRegularLoading] = useState(false);
 
 	const {id} = useParams();
-	const [searchParams] = useSearchParams();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const searchQuery = searchParams.get('search') || '';
+	const urlUpdateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const handleCatalogSearchChange = useCallback(
+		(query: string) => {
+			if (urlUpdateTimerRef.current) {
+				clearTimeout(urlUpdateTimerRef.current);
+				urlUpdateTimerRef.current = null;
+			}
+			if (query.trim().length < 2) {
+				setSearchParams({});
+				return;
+			}
+			urlUpdateTimerRef.current = setTimeout(() => {
+				setSearchParams({search: query});
+				urlUpdateTimerRef.current = null;
+			}, 300);
+		},
+		[setSearchParams]
+	);
+
+	useEffect(
+		() => () => {
+			if (urlUpdateTimerRef.current) clearTimeout(urlUpdateTimerRef.current);
+		},
+		[]
+	);
 
 	useEffect(() => {
 		// Скроллим к каталогу при наличии поискового запроса
 		if (searchQuery && !id) {
 			// Добавляем небольшую задержку для загрузки страницы
 			setTimeout(() => {
-				scroller.scrollTo('catalog-items-goals', {
+				scroller.scrollTo('all-goals-and-lists', {
 					duration: 800,
 					delay: 100,
 					smooth: 'easeInOutQuart',
@@ -308,19 +334,22 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 					</>
 				)}
 
-				<Title className={element('title')} tag="h2">
-					Все цели и списки
-				</Title>
-				<CatalogItems
-					code={id || 'all'}
-					className={element('all-goals')}
-					subPage={subPage}
-					category={category}
-					beginUrl={id ? '/categories/' : '/categories/all'}
-					categories={categories}
-					initialSearch={searchQuery}
-				/>
-				{!id && <AllCategories categories={categories} tag="h2" title="Категории" variant="minimal" />}
+				<div id="all-goals-and-lists">
+					<Title className={element('title')} tag="h2">
+						Все цели и списки
+					</Title>
+					<CatalogItems
+						code={id || 'all'}
+						className={element('all-goals')}
+						subPage={subPage}
+						category={category}
+						beginUrl={id ? '/categories/' : '/categories/all'}
+						categories={categories}
+						initialSearch={searchQuery}
+						onSearchChange={!id ? handleCatalogSearchChange : undefined}
+					/>
+					{!id && <AllCategories categories={categories} tag="h2" title="Категории" variant="minimal" />}
+				</div>
 			</Loader>
 
 			{/* Модалка настройки регулярности */}

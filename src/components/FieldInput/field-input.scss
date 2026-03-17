@@ -7,11 +7,12 @@
 	&__error {
 		color: var(--color-sentiment-negative);
 		font-weight: var(--weight-medium);
+		font-size: 12px;
 	}
 
 	&__label {
 		margin-bottom: 4px;
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	&__wrapper {
@@ -29,6 +30,17 @@
 		position: absolute;
 		top: 12px;
 		right: 16px;
+
+		&--clickable {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0;
+			margin: 0;
+			background: none;
+			border: none;
+			cursor: pointer;
+		}
 	}
 
 	&__input {
@@ -121,5 +133,11 @@
 		white-space: nowrap;
 		pointer-events: none;
 		transform: translateY(-50%);
+	}
+
+	&__hint {
+		margin-top: 4px;
+		color: var(--color-text-secondary);
+		font-size: 12px;
 	}
 }

@@ -24,6 +24,7 @@ interface FieldInputProps {
 	onBlur?: () => void;
 	onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 	iconEnd?: string;
+	iconEndClick?: () => void;
 	theme?: 'transparent';
 	// focusBorder?: 'white';
 	maxLength?: number;
@@ -34,6 +35,7 @@ interface FieldInputProps {
 	suffix?: string;
 	max?: number;
 	min?: number;
+	hint?: string;
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -48,6 +50,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		setValueTarget,
 		iconBegin,
 		iconEnd,
+		iconEndClick,
 		autoComplete = 'off',
 		error,
 		required,
@@ -64,6 +67,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		suffix,
 		max,
 		min,
+		hint,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -85,15 +89,17 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		}
 	};
 
+	const hasError = Array.isArray(error) ? error.length > 0 : !!error;
+
 	return (
-		<div className={block({error: !!error, theme})}>
+		<div className={block({error: hasError, theme})}>
 			{text && (
 				<label className={element('label')} htmlFor={id}>
 					{text}
 				</label>
 			)}
 			<div className={element('wrapper')}>
-				{iconBegin && <Svg icon={iconBegin} className={element('icon-begin')} />}
+				{iconBegin && <Svg icon={iconBegin} className={element('icon-begin')} width="16px" height="16px" />}
 				{typeState === 'textarea' ? (
 					<textarea
 						className={element('input', {iconBegin: !!iconBegin, textarea: true, iconEnd: !!iconEnd})}
@@ -142,8 +148,25 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						)}
 					</button>
 				)}
-				{iconEnd && <Svg icon={iconEnd} className={element('icon-end')} />}
+				{iconEnd &&
+					(iconEndClick ? (
+						<button
+							type="button"
+							className={element('icon-end', {clickable: true})}
+							onClick={iconEndClick}
+							aria-label="Выполнить поиск"
+						>
+							<Svg icon={iconEnd} />
+						</button>
+					) : (
+						<Svg icon={iconEnd} className={element('icon-end')} />
+					))}
 			</div>
+			{hint && (
+				<small id={`${id}-hint`} className={element('hint')}>
+					{hint}
+				</small>
+			)}
 			{showCharCount && maxLength !== undefined && <CharCount current={value.length} max={maxLength} />}
 			{Array.isArray(error) &&
 				error.map((er) => (

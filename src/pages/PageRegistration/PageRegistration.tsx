@@ -42,5 +42,5 @@ export const PageRegistration: FC<IPage> = ({page}) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	return <Registration isPage openLogin={() => navigate('/sign-in')} successRegistration={successRegistration} />;
+	return <Registration isPage successRegistration={successRegistration} />;
 };

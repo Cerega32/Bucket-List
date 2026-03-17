@@ -113,7 +113,12 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 								/>
 							</div>
 						)}
-						<CommentsGoal comments={otherComments} setComments={setComments} hasAnyComments={!!myComment} />
+						<CommentsGoal
+							comments={otherComments}
+							setComments={setComments}
+							canAddReview={goal.addedByUser && goal.completedByUser}
+							hasAnyComments={!!myComment}
+						/>
 					</>
 				);
 			case 'isGoalLists':
