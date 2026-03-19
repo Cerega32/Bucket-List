@@ -1,5 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import React, {useState} from 'react';
+import {Link} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
@@ -17,10 +18,11 @@ interface FriendCardProps {
 	onRemove?: (friendId: number) => void;
 	onCompare?: (friendId: number) => void;
 	showActions?: boolean;
+	className?: string;
 }
 
-export const FriendCard: React.FC<FriendCardProps> = observer(({friend, onRemove, onCompare, showActions = true}) => {
-	const [block, element] = useBem('friend-card');
+export const FriendCard: React.FC<FriendCardProps> = observer(({friend, onRemove, onCompare, showActions = true, className}) => {
+	const [block, element] = useBem('friend-card', className);
 	const [isRemoving, setIsRemoving] = useState(false);
 
 	const handleRemoveFriend = async () => {
@@ -67,22 +69,24 @@ export const FriendCard: React.FC<FriendCardProps> = observer(({friend, onRemove
 				{friend.avatar ? (
 					<Avatar size="medium-56" avatar={friend.avatar} />
 				) : (
-					<div className={element('avatar-placeholder')}>{displayName.charAt(0).toUpperCase()}</div>
+					<div className={element('avatar-placeholder')}>{friend.username.charAt(0).toUpperCase()}</div>
 				)}
 			</div>
 
 			<div className={element('info')}>
-				<h3 className={element('name')}>{displayName}</h3>
-				{hasName && <p className={element('username')}>{friend.username}</p>}
+				<Link className={element('name')} to={`/user/${friend.id}/showcase`} aria-label={`Перейти в профиль ${displayName}`}>
+					{friend.username}
+				</Link>
+				{hasName && (
+					<p className={element('username')}>
+						{friend.firstName || ''} {friend.lastName || ''}
+					</p>
+				)}
 				<p className={element('since')}>Друзья с {formatFriendshipDate(friend.createdAt)}</p>
 			</div>
 
 			{showActions && (
 				<div className={element('actions')}>
-					<Button type="Link" theme="blue-light" size="small" href={`/user/${friend.id}/showcase`}>
-						Профиль
-					</Button>
-
 					<Button theme="blue-light" size="small" onClick={handleCompare}>
 						Сравнить
 					</Button>

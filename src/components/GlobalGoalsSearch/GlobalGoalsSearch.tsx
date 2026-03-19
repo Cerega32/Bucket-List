@@ -22,10 +22,11 @@ interface GlobalGoalsSearchProps {
 	className?: string;
 	isModal?: boolean;
 	theme?: 'white' | 'transparent';
+	onModalClose?: () => void;
 }
 
 export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) => {
-	const {className, isModal, theme} = props;
+	const {className, isModal, theme, onModalClose} = props;
 
 	const [block, element] = useBem('global-goals-search', className);
 	const navigate = useNavigate();
@@ -154,6 +155,30 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 		} else {
 			navigate(targetUrl);
 		}
+		if (isModal) {
+			onModalClose?.();
+		}
+	};
+
+	// Сброс поиска в шапке и в каталоге (URL), когда оба имеют значение
+	const isCatalogWithSearch = location.pathname.startsWith('/categories/') && (searchParams.get('search') || '').trim().length > 0;
+	const showClearInHeader = query.trim().length > 0 && isCatalogWithSearch;
+
+	const handleClearSearch = () => {
+		setQuery('');
+		setResults([]);
+		setTotalCount(0);
+		setIsDropdownOpen(false);
+		if (location.pathname.startsWith('/categories/')) {
+			setSearchParams((prev) => {
+				const next = new URLSearchParams(prev);
+				next.delete('search');
+				return next;
+			});
+		}
+		if (isModal) {
+			onModalClose?.();
+		}
 	};
 
 	// Переход к цели или списку
@@ -163,6 +188,9 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 			navigate(`/goals/${item.item.code}`);
 		} else {
 			navigate(`/list/${item.item.code}`);
+		}
+		if (isModal) {
+			onModalClose?.();
 		}
 	};
 
@@ -227,8 +255,8 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 						id="global-search"
 						value={query}
 						setValue={handleSearchChange}
-						iconEnd="search"
-						iconEndClick={handleShowAllResults}
+						iconEnd={showClearInHeader ? 'cross' : 'search'}
+						iconEndClick={showClearInHeader ? handleClearSearch : handleShowAllResults}
 						onFocus={handleInputFocus}
 						onKeyDown={handleKeyDown}
 						theme={!isModal && theme === 'transparent' ? 'transparent' : undefined}
@@ -252,8 +280,8 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 								id="global-search"
 								value={query}
 								setValue={handleSearchChange}
-								iconEnd="search"
-								iconEndClick={handleShowAllResults}
+								iconEnd={showClearInHeader ? 'cross' : 'search'}
+								iconEndClick={showClearInHeader ? handleClearSearch : handleShowAllResults}
 								onFocus={handleInputFocus}
 								onKeyDown={handleKeyDown}
 								theme={!isModal && theme === 'transparent' ? 'transparent' : undefined}

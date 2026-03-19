@@ -5,7 +5,6 @@ import {IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import './description-with-links.scss';
 
-import {Button} from '../Button/Button';
 import {InfoGoal} from '../InfoGoal/InfoGoal';
 import {Line} from '../Line/Line';
 import {ITabs, Tabs} from '../Tabs/Tabs';
@@ -131,16 +130,9 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 						{goal.description}
 					</p>
 					{shouldShowButton && (
-						<Button
-							className={element('toggle-button')}
-							theme="blue-light"
-							size="small"
-							icon={isShortDesc ? 'download' : 'download--bottom'}
-							onClick={handleToggleMore}
-							width="auto"
-						>
-							{isShortDesc ? 'Читать подробнее' : 'Скрыть'}
-						</Button>
+						<button type="button" className={element('toggle-button')} onClick={handleToggleMore}>
+							{isShortDesc ? 'Показать полностью' : 'Скрыть'}
+						</button>
 					)}
 				</div>
 				<InfoGoal

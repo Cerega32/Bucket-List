@@ -18,6 +18,7 @@
 	&__page--active {
 		&.button--theme-blue-light {
 			background: var(--color-secondary-hover);
+			color: var(--color-text-primary);
 		}
 
 		&.button--disabled {

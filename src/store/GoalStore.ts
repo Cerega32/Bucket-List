@@ -13,6 +13,8 @@ interface IGoalStore {
 class Store implements IGoalStore {
 	comments: Array<IComment> = [];
 
+	myComment: IComment | null = null;
+
 	lists: Array<IShortList> = [];
 
 	infoPaginationLists: IPaginationPage = defaultPagination;
@@ -20,6 +22,12 @@ class Store implements IGoalStore {
 	infoPaginationComments: IPaginationPage = defaultPagination;
 
 	commentPhotos: string[] = [];
+
+	/** Есть ли ещё чужие комментарии для подгрузки */
+	hasMoreComments = false;
+
+	/** Номер следующей страницы чужих комментариев (null — больше нет) */
+	commentsNextPage: number | null = null;
 
 	id = 0;
 
@@ -29,6 +37,14 @@ class Store implements IGoalStore {
 
 	setComments = (comments: Array<IComment>) => {
 		this.comments = comments;
+	};
+
+	appendComments = (comments: Array<IComment>) => {
+		this.comments = [...this.comments, ...comments];
+	};
+
+	setMyComment = (comment: IComment | null) => {
+		this.myComment = comment;
 	};
 
 	setCommentPhotos = (photos: string[]) => {
@@ -45,6 +61,14 @@ class Store implements IGoalStore {
 
 	setInfoPaginationComments = (infoComments: IPaginationPage) => {
 		this.infoPaginationComments = infoComments;
+	};
+
+	setHasMoreComments = (value: boolean) => {
+		this.hasMoreComments = value;
+	};
+
+	setCommentsNextPage = (page: number | null) => {
+		this.commentsNextPage = page;
 	};
 
 	setId = (id: number) => {

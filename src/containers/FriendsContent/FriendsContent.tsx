@@ -93,7 +93,12 @@ export const FriendsContent: FC = observer(() => {
 			) : (
 				<div className={element('friends-list')}>
 					{FriendsStore.friends.map((friend) => (
-						<FriendCard key={friend.id} friend={friend} onCompare={handleCompareWithFriend} />
+						<FriendCard
+							className={element('friend-card')}
+							key={friend.id}
+							friend={friend}
+							onCompare={handleCompareWithFriend}
+						/>
 					))}
 				</div>
 			)}

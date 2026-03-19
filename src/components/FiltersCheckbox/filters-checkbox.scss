@@ -49,8 +49,8 @@
 	&__list {
 		position: absolute;
 		z-index: 101;
-		top: 100%;
-		left: 0;
+		top: calc(100% + 4px);
+		right: 0;
 		display: block;
 		width: max-content;
 		padding: 8px;

@@ -54,6 +54,15 @@
 			width: 696px;
 		}
 
+		&--type-folder-selector {
+			width: 696px;
+			max-width: 90vw;
+
+			@include md {
+				width: 95vw;
+			}
+		}
+
 		&--type-create-todo-list,
 		&--type-create-todo-task,
 		&--type-set-regular-goal {
@@ -105,6 +114,10 @@
 			}
 
 			&--type-add-review {
+				width: 95vw;
+			}
+
+			&--type-folder-selector {
 				width: 95vw;
 			}
 
@@ -188,8 +201,8 @@
 		font-weight: var(--weight-semi-bold);
 		line-height: 1.2;
 
-		@include md {
-			font-size: 20px;
+		@include sm {
+			margin-right: 50px;
 		}
 	}
 

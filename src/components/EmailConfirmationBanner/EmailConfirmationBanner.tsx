@@ -86,7 +86,7 @@ export const EmailConfirmationBanner: FC = observer(() => {
 						Мы отправили письмо на <strong>{email}</strong>. Перейдите по ссылке в письме для подтверждения.
 						{isSent && <span className={element('success')}> Письмо отправлено!</span>}
 					</p>
-					<p className={element('warning')}>Если не подтвердить email в течение 7 дней, аккаунт будет удалён.</p>
+					<p className={element('warning')}>Если не подтвердить email в течение 14 дней, аккаунт будет удалён.</p>
 				</div>
 				<div className={element('actions')}>
 					<Button

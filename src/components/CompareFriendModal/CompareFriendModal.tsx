@@ -70,11 +70,6 @@ function formatDisplayValue(value: number | string | null, formatDate?: boolean)
 	return String(value);
 }
 
-function getDisplayName(u: CompareUser): string {
-	const name = [u.firstName, u.lastName].filter(Boolean).join(' ').trim();
-	return name || u.username;
-}
-
 function getInitials(u: CompareUser): string {
 	const name = [u.firstName, u.lastName].filter(Boolean).join(' ').trim();
 	if (name) return name.charAt(0).toUpperCase();
@@ -99,7 +94,6 @@ interface CompareFriendModalProps {
 export const CompareFriendModal: FC<CompareFriendModalProps> = ({data}) => {
 	const [block, element] = useBem('compare-friend-modal');
 	const {user, friend} = data;
-	const friendName = getDisplayName(friend);
 
 	// Итог: кто впереди по скольким показателям (считаем только числовые, без дат)
 	const numericMetrics = METRIC_KEYS.filter((m) => !m.formatDate);
@@ -116,7 +110,7 @@ export const CompareFriendModal: FC<CompareFriendModalProps> = ({data}) => {
 	return (
 		<div className={block()}>
 			<div className={element('section')}>
-				<h2 className={element('header')}>Сравнение с {friendName}</h2>
+				<h2 className={element('header')}>Сравнение с {friend.username}</h2>
 			</div>
 
 			<div className={element('participants')}>
@@ -128,8 +122,10 @@ export const CompareFriendModal: FC<CompareFriendModalProps> = ({data}) => {
 							<div className={element('initials')}>{getInitials(user)}</div>
 						)}
 					</div>
-					<div className={element('card-name')}>{getDisplayName(user) || user.username}</div>
-					<div className={element('card-meta')}>@{user.username}</div>
+					<div className={element('card-name')}>{user.username}</div>
+					<div className={element('card-meta')}>
+						{user.firstName || ''} {user.lastName || ''}
+					</div>
 					<div className={element('card-row')}>
 						<span className={element('card-label')}>Уровень</span>
 						<span className={element('card-value')}>{user.activity.totalCompleted}</span>
@@ -143,8 +139,10 @@ export const CompareFriendModal: FC<CompareFriendModalProps> = ({data}) => {
 							<div className={element('initials')}>{getInitials(friend)}</div>
 						)}
 					</div>
-					<div className={element('card-name')}>{friendName}</div>
-					<div className={element('card-meta')}>@{friend.username}</div>
+					<div className={element('card-name')}>{friend.username}</div>
+					<div className={element('card-meta')}>
+						{friend.firstName || ''} {friend.lastName || ''}
+					</div>
 					<div className={element('card-row')}>
 						<span className={element('card-label')}>Уровень</span>
 						<span className={element('card-value')}>{friend.activity.totalCompleted}</span>

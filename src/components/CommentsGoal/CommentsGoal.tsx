@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useState} from 'react';
+import {FC} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
@@ -11,36 +11,27 @@ import {CommentGoal} from '../CommentGoal/CommentGoal';
 import {EmptyState} from '../EmptyState/EmptyState';
 import './comments-goal.scss';
 
-const INITIAL_VISIBLE = 3;
-const LOAD_MORE_STEP = 10;
-
 interface CommentsGoalProps {
 	className?: string;
 	comments: Array<IComment>;
 	isUser?: boolean;
 	canAddReview?: boolean;
+	hasMyComment?: boolean;
+	hasMore?: boolean;
+	isLoadingMore?: boolean;
+	onLoadMore?(): void;
 	setComments(comments: Array<IComment>): void;
-	hasAnyComments?: boolean;
 }
 
 export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
-	const {className, comments, isUser, setComments, hasAnyComments, canAddReview} = props;
+	const {className, comments, isUser, setComments, hasMyComment, canAddReview, hasMore, isLoadingMore, onLoadMore} = props;
 
 	const [block, element] = useBem('comments-goal', className);
 	const {setIsOpen, setWindow} = ModalStore;
-	const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
 
 	const openAddReview = () => {
 		setWindow('add-review');
 		setIsOpen(true);
-	};
-
-	const displayedComments = comments.slice(0, visibleCount);
-	const hasMore = comments.length > visibleCount;
-	const showLoadMoreButton = comments.length > INITIAL_VISIBLE;
-
-	const handleLoadMore = () => {
-		setVisibleCount((prev) => prev + LOAD_MORE_STEP);
 	};
 
 	const putScore = (i: number) => async (id: number, like: boolean) => {
@@ -58,7 +49,7 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 			<section className={element('items')}>
 				{comments && !!comments.length ? (
 					<>
-						{displayedComments.map((comment, i) => (
+						{comments.map((comment, i) => (
 							<CommentGoal
 								className={element('comment')}
 								key={comment.id}
@@ -67,15 +58,15 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 								onClickScore={putScore(i)}
 							/>
 						))}
-						{showLoadMoreButton && hasMore && (
+						{hasMore && (
 							<div className={element('load-more')}>
-								<Button theme="blue-light" width="auto" icon="download" onClick={handleLoadMore}>
-									Загрузить ещё
+								<Button theme="blue-light" width="auto" icon="download" onClick={onLoadMore} disabled={isLoadingMore}>
+									{isLoadingMore ? 'Загрузка...' : 'Загрузить ещё'}
 								</Button>
 							</div>
 						)}
 					</>
-				) : !hasAnyComments ? (
+				) : !hasMyComment ? (
 					<EmptyState title="Пока нет впечатлений" description="Но вы можете стать примером для других">
 						{canAddReview && (
 							<Button theme="blue" size="small" icon="comment" onClick={openAddReview}>

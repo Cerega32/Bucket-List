@@ -58,6 +58,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const [block, element] = useBem('header', className);
 
 	const navigate = useNavigate();
+	const homePath = isAuth ? '/categories/all' : '/';
 
 	useEffect(() => {
 		if (categoriesTree.length > 0) return;
@@ -310,7 +311,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			)}
 
 			<li className={element('item')}>
-				<Link className={element('item-link', {active: page === 'isMainGoals'})} to="/list/100-goals">
+				<Link className={element('item-link', {active: page === 'isMainGoals', is100Goals: true})} to="/list/100-goals">
 					100 целей
 				</Link>
 			</li>
@@ -358,6 +359,19 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		</div>
 	);
 
+	// На desktop/tablet — инлайн-поиск, на md и ниже — кнопка, открывающая модалку
+	const searchBlock =
+		isScreenDesktop || isScreenTablet ? (
+			<GlobalGoalsSearch className={element('search')} theme={header} />
+		) : (
+			<Button className={element('search-trigger')} onClick={() => setIsSearchOpen(true)} aria-label="Поиск">
+				<>
+					Поиск целей
+					<Svg icon="search" className={element('categories-icon')} width="16px" height="16px" />
+				</>
+			</Button>
+		);
+
 	return (
 		<header className={block({theme: header, compact: isPreHeaderHidden})}>
 			<div className={element('wrapper-pre-header', {hidden: isPreHeaderHidden})}>
@@ -384,7 +398,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 								</Button>
 							</div>
 							<div className={element('logo-wrap')}>
-								<Link className={element('logo')} to="/" aria-label="Главная">
+								<Link className={element('logo')} to={homePath} aria-label="Главная">
 									<Svg icon="delting" />
 								</Link>
 							</div>
@@ -441,14 +455,12 @@ export const Header: FC<HeaderProps> = observer((props) => {
 									<Svg icon="apps" className={element('categories-icon')} />
 								</Button>
 							</li>
-							<li className={element('search-item')}>
-								<GlobalGoalsSearch className={element('search')} theme={header} />
-							</li>
+							<li className={element('search-item')}>{searchBlock}</li>
 						</ul>
 					</>
 				) : (
 					<>
-						<Link className={element('logo')} to="/" aria-label="Главная">
+						<Link className={element('logo')} to={homePath} aria-label="Главная">
 							{isScreenMobile ? <Svg icon="icon-logo" className={element('logo-icon')} /> : <Svg icon="delting" />}
 						</Link>
 						{isScreenMobile && !isScreenSmallMobile && (
@@ -525,7 +537,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 																	<Link
 																		key={child.id}
 																		className={element('category-link', {child: true})}
-																		to={`/categories/${child.nameEn}`}
+																		to={`/categories/${category.nameEn}/${child.nameEn}`}
 																	>
 																		{child.name}
 																	</Link>
@@ -541,9 +553,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 							</li>
 
 							{/* Поиск по целям */}
-							<li className={element('search-item')}>
-								<GlobalGoalsSearch className={element('search')} theme={header} />
-							</li>
+							<li className={element('search-item')}>{searchBlock}</li>
 						</ul>
 
 						{isAuth ? (
@@ -758,7 +768,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				<div className={element('menu-wrapper')}>{isAuth ? menuProfile : buttonsAuth}</div>
 			</ModalPhone>
 			<ModalPhone title="Поиск" isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)}>
-				<GlobalGoalsSearch className={element('search')} isModal />
+				<GlobalGoalsSearch className={element('search')} isModal onModalClose={() => setIsSearchOpen(false)} />
 			</ModalPhone>
 			<ModalPhone title="Категории" isOpen={isCategoriesModalOpen} onClose={() => setIsCategoriesModalOpen(false)}>
 				<div className={element('categories-modal')}>
@@ -782,7 +792,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 										<Link
 											key={child.id}
 											className={element('category-child-link')}
-											to={`/categories/${child.nameEn}`}
+											to={`/categories/${category.nameEn}/${child.nameEn}`}
 											onClick={() => setIsCategoriesModalOpen(false)}
 										>
 											{child.name}

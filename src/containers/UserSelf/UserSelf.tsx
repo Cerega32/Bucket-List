@@ -129,6 +129,11 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			count: friendsCount,
 		},
 		{
+			url: '/user/self/subs',
+			name: 'Больше функционала',
+			page: 'isUserSelfSubs',
+		},
+		{
 			url: '/user/self/settings',
 			name: 'Настройки',
 			page: 'isUserSelfSettings',

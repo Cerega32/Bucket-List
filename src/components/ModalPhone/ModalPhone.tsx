@@ -101,7 +101,18 @@ export const ModalPhone: FC<ModalPhoneProps> = observer((props) => {
 	);
 
 	useEffect(() => {
+		let setViewportHeightVar: (() => void) | null = null;
 		if (isOpen) {
+			// для мобильных браузеров вместо
+			setViewportHeightVar = () => {
+				const heightPx = window.visualViewport?.height ?? window.innerHeight;
+				const vh = heightPx * 0.01;
+				document.documentElement.style.setProperty('--modal-vh', `${vh}px`);
+			};
+			setViewportHeightVar();
+			window.visualViewport?.addEventListener('resize', setViewportHeightVar);
+			window.addEventListener('resize', setViewportHeightVar);
+
 			document.addEventListener('keyup', handleKeyUp);
 			document.addEventListener('touchstart', handleTouchStart, {passive: true});
 
@@ -134,6 +145,12 @@ export const ModalPhone: FC<ModalPhoneProps> = observer((props) => {
 
 		// Cleanup при размонтировании компонента
 		return () => {
+			// для мобильных браузеров
+			document.documentElement.style.removeProperty('--modal-vh');
+			if (setViewportHeightVar) {
+				window.visualViewport?.removeEventListener('resize', setViewportHeightVar);
+				window.removeEventListener('resize', setViewportHeightVar);
+			}
 			document.body.style.overflow = '';
 			document.removeEventListener('keyup', handleKeyUp);
 			document.removeEventListener('touchstart', handleTouchStart);

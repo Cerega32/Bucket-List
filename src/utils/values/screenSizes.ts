@@ -5,5 +5,5 @@ export const screenSizes: Array<{name: ScreenSizeCode; size: number}> = [
 	{name: 'lg', size: 1200},
 	{name: 'md', size: 768},
 	{name: 'sm', size: 576},
-	{name: 'xs', size: 0},
+	{name: 'xs', size: 480},
 ];

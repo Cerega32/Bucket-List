@@ -2,6 +2,7 @@ import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
@@ -48,6 +49,7 @@ export const Card: FC<CardProps> = (props) => {
 	const {className, horizontal, disableNavigation, disableMark, allowAddWithoutAuth, ...restProps} = props;
 
 	const [block, element] = useBem('card', className);
+	const {isScreenXs} = useScreenSize();
 
 	const {goal, isList, onClickAdd, onClickDelete, onClickMark} = restProps as CardListProps | CardGoalProps;
 
@@ -159,7 +161,7 @@ export const Card: FC<CardProps> = (props) => {
 						showSeparator
 					/>
 					<div className={element('buttons-wrapper')}>
-						{isList && 'userCompletedGoals' in goal && 'goalsCount' in goal && (
+						{isList && goal.addedByUser && 'userCompletedGoals' in goal && 'goalsCount' in goal && (
 							<Progress done={goal.userCompletedGoals} all={goal.goalsCount} />
 						)}
 						{(() => {
@@ -174,22 +176,47 @@ export const Card: FC<CardProps> = (props) => {
 
 							return (
 								<div className={element('buttons')}>
-									{showAddButton && <Button theme="blue" icon="plus" size="small" onClick={onClickAddHandler} />}
-									{showDeleteButton && (
-										<Button theme="blue-light" icon="trash" size="small" onClick={onClickDeleteHandler} />
-									)}
-									{showMarkButton && (
-										<Button theme={goal.completedByUser ? 'green' : 'blue-light'} size="small" onClick={onClickMark}>
-											<Svg
-												icon="done"
-												width="16px"
-												height="16px"
-												className={element('btn-done', {
-													active: goal.completedByUser,
-												})}
-											/>
-										</Button>
-									)}
+									{showAddButton &&
+										(isScreenXs ? (
+											<Button theme="blue" size="small" onClick={onClickAddHandler}>
+												Добавить
+											</Button>
+										) : (
+											<Button theme="blue" icon="plus" size="small" onClick={onClickAddHandler} />
+										))}
+									{showDeleteButton &&
+										(isScreenXs ? (
+											<Button theme="blue-light" size="small" onClick={onClickDeleteHandler}>
+												Удалить
+											</Button>
+										) : (
+											<Button theme="blue-light" icon="trash" size="small" onClick={onClickDeleteHandler} />
+										))}
+									{showMarkButton &&
+										(isScreenXs ? (
+											<Button
+												theme={goal.completedByUser ? 'green' : 'blue-light'}
+												size="small"
+												onClick={onClickMark}
+											>
+												Выполнить
+											</Button>
+										) : (
+											<Button
+												theme={goal.completedByUser ? 'green' : 'blue-light'}
+												size="small"
+												onClick={onClickMark}
+											>
+												<Svg
+													icon="done"
+													width="16px"
+													height="16px"
+													className={element('btn-done', {
+														active: goal.completedByUser,
+													})}
+												/>
+											</Button>
+										))}
 								</div>
 							);
 						})()}

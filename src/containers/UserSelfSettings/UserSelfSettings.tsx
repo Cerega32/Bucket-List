@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
-import React, {FC, useEffect, useRef, useState} from 'react';
+import React, {FC, useEffect, useMemo, useRef, useState} from 'react';
 import {FileDrop} from 'react-file-drop';
 
 import {Avatar} from '@/components/Avatar/Avatar';
@@ -15,27 +15,49 @@ import {NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
 import {IUserInfo} from '@/typings/user';
 import {deleteAvatar} from '@/utils/api/delete/deleteAvatar';
+import {checkEmail} from '@/utils/api/get/checkEmail';
 import {checkUsername} from '@/utils/api/get/checkUsername';
 import {postAvatar} from '@/utils/api/post/postAvatar';
 import {postCover} from '@/utils/api/post/postCover';
 import {postResendConfirmationEmail} from '@/utils/api/post/postResendConfirmationEmail';
 import {putUserInfo} from '@/utils/api/put/putUserInfo';
 import {countriesArr} from '@/utils/data/countries';
+import {normalizeEmail} from '@/utils/text/normalizeEmail';
 import './user-self-settings.scss';
+
+const USERNAME_MAX_LENGTH = 30;
+const FIRST_NAME_MAX_LENGTH = 50;
+const LAST_NAME_MAX_LENGTH = 50;
+const ABOUT_MAX_LENGTH = 200;
 
 export const UserSelfSettings: FC = observer(() => {
 	const {userSelf: user, setUserSelf, setAvatar, setName, email: storeEmail} = UserStore;
 	const {setWindow, setIsOpen} = ModalStore;
+
+	// Делаем "Россия" первой опцией и отправляем на сервер полное название страны.
+	const countryOptions = useMemo(() => {
+		const ruIndex = countriesArr.findIndex((c) => c.value === 'RU');
+		if (ruIndex < 0) return countriesArr;
+
+		const ru = countriesArr[ruIndex];
+		return [ru, ...countriesArr.filter((_, i) => i !== ruIndex)];
+	}, []);
 
 	const [firstName, setFirstName] = useState(user.firstName);
 	const [surname, setSurname] = useState(user.lastName);
 	const [username, setUsername] = useState(user.username ?? '');
 	const [about, setAbout] = useState(user.aboutMe);
 	const [usernameErrors, setUsernameErrors] = useState<Array<string>>([]);
-	const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+	const [, setIsCheckingUsername] = useState(false);
 	const [activeCountry, setActiveCountry] = useState<number | null>(null);
+	const [email, setEmail] = useState(user.email || storeEmail || '');
+	const [emailErrors, setEmailErrors] = useState<Array<string>>([]);
+	const [, setIsCheckingEmail] = useState(false);
 	const avatarInputRef = useRef<HTMLInputElement | null>(null);
 	const coverInputRef = useRef<HTMLInputElement | null>(null);
+	const usernameValidationRequestId = useRef(0);
+	const emailValidationRequestId = useRef(0);
+	const emailSentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const [block, element] = useBem('user-self-settings');
 
@@ -54,24 +76,27 @@ export const UserSelfSettings: FC = observer(() => {
 		return errors;
 	};
 
-	const checkUsernameAsync = async (name: string) => {
+	const checkUsernameAsync = async (name: string): Promise<Array<string>> => {
 		const localErrors = validateUsername(name);
 		if (localErrors.length > 0) {
 			setUsernameErrors(localErrors);
-			return;
+			return localErrors;
 		}
 
 		const trimmed = name.trim();
-		if (!trimmed) return;
+		if (!trimmed) return [];
 
 		// Если имя не изменилось относительно текущего пользователя — не проверяем уникальность
 		if ((user.username ?? '').trim().toLowerCase() === trimmed.toLowerCase()) {
 			setUsernameErrors([]);
-			return;
+			return [];
 		}
 
 		setIsCheckingUsername(true);
+		const requestId = ++usernameValidationRequestId.current;
 		const res = await checkUsername(trimmed);
+		// Игнорируем устаревшие ответы (race condition)
+		if (requestId !== usernameValidationRequestId.current) return [];
 		setIsCheckingUsername(false);
 
 		if (!res.success) {
@@ -82,11 +107,12 @@ export const UserSelfSettings: FC = observer(() => {
 
 			if (serverErrors && serverErrors.length) {
 				setUsernameErrors(serverErrors);
-				return;
+				return serverErrors;
 			}
 		}
 
 		setUsernameErrors([]);
+		return [];
 	};
 
 	useEffect(() => {
@@ -94,10 +120,13 @@ export const UserSelfSettings: FC = observer(() => {
 		setSurname(user.lastName);
 		setUsername(user.username ?? '');
 		setAbout(user.aboutMe);
+		setEmail(user.email || storeEmail || '');
+		setEmailErrors([]);
 		if (user.country) {
-			setActiveCountry(countriesArr.findIndex((country) => country.value === user.country));
+			const idx = countryOptions.findIndex((country) => country.name === user.country || country.value === user.country);
+			setActiveCountry(idx >= 0 ? idx : null);
 		}
-	}, [user]);
+	}, [user, storeEmail]);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		const {id, value} = e.target;
@@ -115,9 +144,49 @@ export const UserSelfSettings: FC = observer(() => {
 			case 'about':
 				setAbout(value);
 				break;
+			case 'email':
+				setEmail(value);
+				setEmailErrors([]);
+				break;
 			default:
 				break;
 		}
+	};
+
+	const checkEmailAsync = async (mail: string): Promise<Array<string>> => {
+		const trimmed = normalizeEmail(mail);
+		if (!trimmed) {
+			setEmailErrors([]);
+			return [];
+		}
+
+		const currentEmail = normalizeEmail(user.email || storeEmail || '');
+		if (trimmed === currentEmail) {
+			setEmailErrors([]);
+			return [];
+		}
+
+		setIsCheckingEmail(true);
+		const requestId = ++emailValidationRequestId.current;
+		const res = await checkEmail(trimmed);
+		// Игнорируем устаревшие ответы (race condition)
+		if (requestId !== emailValidationRequestId.current) return [];
+		setIsCheckingEmail(false);
+
+		if (!res.success) {
+			const serverErrors =
+				(Array.isArray(res.errors) && res.errors) ||
+				(Array.isArray(res.data?.errors) && res.data.errors) ||
+				(typeof res.errors === 'string' ? [res.errors] : undefined);
+
+			if (serverErrors && serverErrors.length) {
+				setEmailErrors(serverErrors);
+				return serverErrors;
+			}
+		}
+
+		setEmailErrors([]);
+		return [];
 	};
 
 	const handleAvatarDrop = (files: FileList) => {
@@ -174,11 +243,18 @@ export const UserSelfSettings: FC = observer(() => {
 	const handleDeleteAvatar = async () => {
 		const res = await deleteAvatar();
 		if (res.success) {
-			setUserSelf({...user, avatar: Cookies.get('avatar') || ''});
+			const nextAvatar = Cookies.get('avatar') || '';
+			setUserSelf({...user, avatar: nextAvatar});
+			setAvatar(nextAvatar);
 		}
 	};
 
 	const handleSaveChanges = async () => {
+		// Снимаем фокус с активного поля, чтобы отработал onBlur-валидатор перед сохранением.
+		if (document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
+
 		// Валидация имени пользователя перед сохранением
 		const currentUsernameErrors = validateUsername(username);
 		if (currentUsernameErrors.length > 0) {
@@ -190,15 +266,32 @@ export const UserSelfSettings: FC = observer(() => {
 			});
 			return;
 		}
-		if (usernameErrors.length > 0 || isCheckingUsername) {
-			NotificationStore.addNotification({
-				type: 'error',
-				title: 'Ошибка',
-				message: 'Исправьте ошибки в имени пользователя перед сохранением',
-			});
-			return;
+		const trimmedUsername = username.trim();
+		const currentUsername = (user.username ?? '').trim();
+		if (trimmedUsername && trimmedUsername.toLowerCase() !== currentUsername.toLowerCase()) {
+			const asyncUsernameErrors = await checkUsernameAsync(username);
+			if (asyncUsernameErrors.length > 0) {
+				NotificationStore.addNotification({
+					type: 'error',
+					title: 'Ошибка',
+					message: 'Исправьте ошибки в имени пользователя перед сохранением',
+				});
+				return;
+			}
 		}
-
+		const normalizedEmail = normalizeEmail(email);
+		const currentEmail = normalizeEmail(user.email || storeEmail || '');
+		if (normalizedEmail && normalizedEmail !== currentEmail) {
+			const currentEmailErrors = await checkEmailAsync(email);
+			if (currentEmailErrors.length > 0) {
+				NotificationStore.addNotification({
+					type: 'error',
+					title: 'Ошибка',
+					message: 'Исправьте ошибки в email перед сохранением',
+				});
+				return;
+			}
+		}
 		// Создаем объект для хранения измененных данных
 		const updatedData: Partial<IUserInfo> = {};
 
@@ -212,11 +305,17 @@ export const UserSelfSettings: FC = observer(() => {
 		if (username !== (user.username ?? '')) {
 			updatedData.username = username.trim() || undefined;
 		}
-		if (activeCountry !== null && countriesArr[activeCountry].value !== user.country) {
-			updatedData.country = countriesArr[activeCountry].value;
+		if (activeCountry !== null) {
+			const selectedCountryName = countryOptions[activeCountry].name;
+			if (selectedCountryName !== user.country) {
+				updatedData.country = selectedCountryName;
+			}
 		}
 		if (about !== user.aboutMe) {
 			updatedData.aboutMe = about;
+		}
+		if (normalizedEmail && normalizedEmail !== currentEmail) {
+			updatedData.email = normalizedEmail;
 		}
 
 		// Проверяем, были ли какие-либо изменения
@@ -260,6 +359,14 @@ export const UserSelfSettings: FC = observer(() => {
 	const [emailSent, setEmailSent] = useState(false);
 	const [resendCooldown, setResendCooldown] = useState(0);
 
+	useEffect(() => {
+		return () => {
+			if (emailSentTimerRef.current) {
+				clearTimeout(emailSentTimerRef.current);
+			}
+		};
+	}, []);
+
 	// Обратный отсчёт задержки повторной отправки (2 мин)
 	useEffect(() => {
 		if (resendCooldown <= 0) return;
@@ -277,10 +384,18 @@ export const UserSelfSettings: FC = observer(() => {
 				return;
 			}
 			setEmailSent(true);
-			setTimeout(() => setEmailSent(false), 3000);
+			if (emailSentTimerRef.current) {
+				clearTimeout(emailSentTimerRef.current);
+			}
+			emailSentTimerRef.current = setTimeout(() => setEmailSent(false), 3000);
 			setResendCooldown(res.data.retry_after_seconds ?? 120);
 		}
 	};
+
+	const currentNormalizedEmail = normalizeEmail(user.email || storeEmail || '');
+	const editedNormalizedEmail = normalizeEmail(email);
+	const isEditedEmailChanged = !!editedNormalizedEmail && editedNormalizedEmail !== currentNormalizedEmail;
+	const isEmailConfirmed = user.isEmailConfirmed && !isEditedEmailChanged;
 
 	return (
 		<section className={block()}>
@@ -372,22 +487,37 @@ export const UserSelfSettings: FC = observer(() => {
 							setValueTarget={handleInputChange}
 							error={usernameErrors}
 							onBlur={() => checkUsernameAsync(username)}
+							maxLength={USERNAME_MAX_LENGTH}
 							hint={
 								!usernameErrors || usernameErrors.length === 0
 									? 'Используйте только латинские буквы, цифры и знак подчёркивания'
 									: undefined
 							}
 						/>
-						<FieldInput text="Имя" placeholder="Имя" id="name" value={firstName} setValueTarget={handleInputChange} />
-						<FieldInput text="Фамилия" placeholder="Фамилия" id="surname" value={surname} setValueTarget={handleInputChange} />
+						<FieldInput
+							text="Имя"
+							placeholder="Имя"
+							id="name"
+							value={firstName}
+							setValueTarget={handleInputChange}
+							maxLength={FIRST_NAME_MAX_LENGTH}
+						/>
+						<FieldInput
+							text="Фамилия"
+							placeholder="Фамилия"
+							id="surname"
+							value={surname}
+							setValueTarget={handleInputChange}
+							maxLength={LAST_NAME_MAX_LENGTH}
+						/>
 						<div>
 							<Select
 								text="Страна"
-								options={countriesArr}
 								activeOption={activeCountry}
 								onSelect={setActiveCountry}
 								className={element('country')}
 								searchInControl
+								options={countryOptions}
 							/>
 						</div>
 						<FieldInput
@@ -398,6 +528,8 @@ export const UserSelfSettings: FC = observer(() => {
 							value={about}
 							setValueTarget={handleInputChange}
 							className={element('about')}
+							maxLength={ABOUT_MAX_LENGTH}
+							showCharCount
 						/>
 					</div>
 					<Line margin="24px 0" />
@@ -411,25 +543,28 @@ export const UserSelfSettings: FC = observer(() => {
 								placeholder="Email"
 								id="email"
 								type="email"
-								value={user.email || storeEmail}
-								setValue={() => {}}
-								disabled
+								value={email}
+								setValueTarget={handleInputChange}
+								onBlur={() => checkEmailAsync(email)}
+								error={emailErrors}
 								className={element('email-input')}
 							/>
 							<div className={element('email-status')}>
-								{user.isEmailConfirmed ? (
+								{isEmailConfirmed ? (
 									<span className={element('email-confirmed')}>✓ Email подтвержден</span>
 								) : (
 									<div className={element('email-not-confirmed')}>
 										<div className={element('email-not-confirmed-row')}>
 											<span className={element('email-warning')}>
-												⚠ Email не подтвержден - отправьте письмо для подтверждения
+												{isEditedEmailChanged
+													? '⚠ Новый email нужно подтвердить повторно после сохранения настроек'
+													: '⚠ Email не подтвержден - отправьте письмо для подтверждения'}
 											</span>
 											<Button
 												theme="blue-light"
 												size="small"
 												onClick={handleResendConfirmationEmail}
-												disabled={isResendingEmail || resendCooldown > 0}
+												disabled={isEditedEmailChanged || isResendingEmail || resendCooldown > 0}
 												className={element('resend-btn')}
 											>
 												{isResendingEmail

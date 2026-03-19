@@ -88,13 +88,15 @@ const shouldScrollOnRouteChange = (prevPathname: string, pathname: string): bool
 };
 
 export const RoutesAuth: FC = observer(() => {
+	const {isAuth} = UserStore;
+
 	return (
 		<main className="main">
 			<ScrollToTopOnRouteChange shouldScroll={shouldScrollOnRouteChange} />
 			<Routes>
 				{/* Новый маршрут для дашборда (главной страницы) */}
 				{/* <Route path="/" element={<PageDashboard page="isDashboard" />} /> */}
-				<Route path="/" element={<PageMain page="isMain" />} />
+				<Route path="/" element={isAuth ? <Navigate to="/categories/all" replace /> : <PageMain page="isMain" />} />
 
 				{/* Перемещаем старую главную страницу на новый путь */}
 				<Route path="/100-goals" element={<PageMainGoals page="isMainGoals" />} />

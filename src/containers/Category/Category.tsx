@@ -10,6 +10,7 @@ import {Loader} from '@/components/Loader/Loader';
 import {RegularGoalSettingsModal} from '@/components/RegularGoalSettingsModal/RegularGoalSettingsModal';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {NotificationStore} from '@/store/NotificationStore';
 import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
@@ -31,6 +32,8 @@ import './category.scss';
 
 export const Category: FC<IPage> = ({subPage, page}) => {
 	const [block, element] = useBem('category');
+
+	const {isScreenSmallMobile} = useScreenSize();
 
 	const [category, setCategory] = useState<ICategoryWithSubcategories | null>(null);
 	const [popularGoals, setPopularGoals] = useState<Array<IGoal>>([]);
@@ -272,7 +275,12 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 	return (
 		<main className={block({sub: page === 'isSubCategories', empty: !category?.subcategories.length, all: !id})}>
 			{id && id !== 'all' && category && (
-				<HeaderCategory category={category} className={element('header')} isSub={page === 'isSubCategories'} refHeader={refTitle} />
+				<HeaderCategory
+					category={category}
+					className={element('header')}
+					isSub={page === 'isSubCategories' || !!category.category.parentCategory}
+					refHeader={refTitle}
+				/>
 			)}
 			<Loader isLoading={isLoading}>
 				{!!popularGoals.length && (
@@ -321,7 +329,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 						<section className={element('popular-lists')}>
 							{popularLists.map((list, i) => (
 								<Card
-									horizontal
+									horizontal={!isScreenSmallMobile}
 									isList
 									goal={list}
 									className={element('popular-list')}

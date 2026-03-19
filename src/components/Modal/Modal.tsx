@@ -147,6 +147,13 @@ export const Modal: FC<ModalProps> = observer((props) => {
 
 		const preventBackgroundScroll = (e: WheelEvent | TouchEvent) => {
 			const target = e.target as Node;
+			// Не мешаем нативным взаимодействиям со слайдерами (input[type="range"]) на тач-устройствах.
+			if (e instanceof TouchEvent) {
+				const targetElement = target instanceof HTMLElement ? target : null;
+				if (targetElement?.closest('input[type="range"], [role="slider"]')) {
+					return;
+				}
+			}
 			// Вне модалки — всегда блокируем
 			if (!modal?.contains(target)) {
 				e.preventDefault();

@@ -87,6 +87,8 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 					name={userInfo.name || userInfo.username}
 					firstName={userInfo.firstName}
 					lastName={userInfo.lastName}
+					country={userInfo.country}
+					about={userInfo.aboutMe}
 					totalAdded={userInfo.totalAddedGoals}
 					totalCompleted={userInfo.totalCompletedGoals}
 					page={page}

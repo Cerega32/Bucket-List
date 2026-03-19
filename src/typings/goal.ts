@@ -70,6 +70,7 @@ export interface IGoal {
 	};
 	createdByUser: boolean;
 	isCanEdit: boolean;
+	hasMyComment: boolean;
 	totalAdditions?: number;
 	estimatedTime?: string;
 	location?: ILocation;

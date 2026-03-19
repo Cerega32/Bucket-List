@@ -46,11 +46,16 @@ export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
 		>
 			<div className={element('title-wrapper')}>
 				{isSub && category.category.parentCategory && (
-					<Link to={`/categories/${category.category.parentCategory.nameEn}`}>
-						<Title className={element('title-link')} tag="h1">
-							{category.category.parentCategory.name}&nbsp;/&nbsp;
+					<Link className={element('title-link')} to={`/categories/${category.category.parentCategory.nameEn}`}>
+						<Title className={element('title-link-text')} tag="h1">
+							{category.category.parentCategory.name}
 						</Title>
 					</Link>
+				)}
+				{category.category.parentCategory?.name && (
+					<Title tag="h1" theme="white" className={element('title-separator')}>
+						/
+					</Title>
 				)}
 				<Title tag="h1" theme="white" className={element('title')}>
 					{category.category.name}

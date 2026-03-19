@@ -3,6 +3,7 @@ import {scroller} from 'react-scroll';
 
 import {RegularGoalSettingsModal} from '@/components/RegularGoalSettingsModal/RegularGoalSettingsModal';
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {NotificationStore} from '@/store/NotificationStore';
 import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
@@ -59,23 +60,23 @@ interface CatalogItemsUsersProps extends CatalogItemsProps {
 
 const sortBy: Array<OptionSelect> = [
 	{
-		name: 'Сначала новые',
+		name: 'Новые',
 		value: '-created_at',
 	},
 	{
-		name: 'Сначала популярные',
+		name: 'Популярные',
 		value: '-added_by_users',
 	},
 	{
-		name: 'Сначала обсуждаемые',
+		name: 'Обсуждаемые',
 		value: '-comments_count',
 	},
 	{
-		name: 'Сначала легкие',
+		name: 'Легкие',
 		value: 'complexity',
 	},
 	{
-		name: 'Сначала сложные',
+		name: 'Сложные',
 		value: '-complexity',
 	},
 ];
@@ -131,7 +132,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	const [searchLoading, setSearchLoading] = useState(false);
 	const [goalsLoaded, setGoalsLoaded] = useState(false);
 	const [listsLoaded, setListsLoaded] = useState(false);
-
+	const {isScreenSmallMobile} = useScreenSize();
 	// Состояния для модалки регулярных целей
 	const [showRegularModal, setShowRegularModal] = useState(false);
 	const [regularGoalData, setRegularGoalData] = useState<any>(null);
@@ -210,9 +211,13 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	useEffect(() => {
 		setActiveSort(0);
 		setActiveGoalType(2);
-		setSearch(initialSearch); // Восстанавливаем начальный поисковый запрос
 		setSelectedCategories([]);
-	}, [subPage, beginUrl, initialSearch]);
+	}, [subPage]);
+
+	// Синхронизируем поиск с URL при смене страницы/контекста (без смены вкладки)
+	useEffect(() => {
+		setSearch(initialSearch);
+	}, [initialSearch, beginUrl]);
 
 	const fetchData = async (sortValue: string, page?: number, categoriesSort?: string[], goalTypeOverride?: string): Promise<boolean> => {
 		setLoading(true);
@@ -527,6 +532,8 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						value={search}
 						setValue={onSearch}
 						iconBegin="search"
+						iconEnd={search.trim() ? 'cross' : undefined}
+						iconEndClick={search.trim() ? () => onSearch('') : undefined}
 					/>
 					<div className={element('categories-wrapper')}>
 						{categories && categories.length > 0 && (
@@ -599,7 +606,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 								className={element('list')}
 								goal={goal}
 								key={goal.code}
-								horizontal
+								horizontal={!isScreenSmallMobile}
 								isList
 								onClickAdd={() => updateList(goal.code, i, 'add')}
 								onClickDelete={() => updateList(goal.code, i, 'delete')}

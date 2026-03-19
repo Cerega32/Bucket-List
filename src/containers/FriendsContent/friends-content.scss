@@ -2,10 +2,10 @@
 
 .friends-content {
 	flex: 1;
-	padding: 32px;
-	background: var(--color-white);
-	border-radius: 12px;
-	box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
+
+	@include md {
+		width: 100%;
+	}
 
 	&__header {
 		margin-bottom: 32px;
@@ -30,6 +30,13 @@
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
+		background: transparent;
+	}
+
+	&__friend-card {
+		background: var(--color-white);
+		border-radius: 8px;
+		box-shadow: 0 2px 8px rgb(var(--color-black-rgb) / 8%);
 	}
 
 	&__empty-state {
