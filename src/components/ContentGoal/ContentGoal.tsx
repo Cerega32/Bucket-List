@@ -1,6 +1,5 @@
-import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect} from 'react';
+import {FC, useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {scroller} from 'react-scroll';
 
@@ -12,7 +11,7 @@ import {ModalStore} from '@/store/ModalStore';
 import {IComment} from '@/typings/comments';
 import {IGoal} from '@/typings/goal';
 import {deleteReview} from '@/utils/api/delete/deleteReview';
-import {getCommentsWithImages} from '@/utils/api/get/getComments';
+import {getGoalImpressionImages, getInitialComments, getMoreComments} from '@/utils/api/get/getComments';
 import {postLikeComment} from '@/utils/api/post/postLikeComment';
 
 import {Banner} from '../Banner/Banner';
@@ -31,7 +30,7 @@ interface ContentGoalProps {
 	className?: string;
 	goal: IGoal;
 	page: string;
-	historyRefreshTrigger?: number; // Триггер для обновления истории выполнения
+	historyRefreshTrigger?: number;
 }
 
 export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
@@ -40,30 +39,54 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 	const [block, element] = useBem('content-goal', className);
 	const navigate = useNavigate();
 
-	const {comments, setComments, setInfoPaginationComments, commentPhotos, setCommentPhotos} = GoalStore;
+	const {
+		comments,
+		myComment,
+		setComments,
+		appendComments,
+		setMyComment,
+		commentPhotos,
+		setCommentPhotos,
+		hasMoreComments,
+		setHasMoreComments,
+		commentsNextPage,
+		setCommentsNextPage,
+	} = GoalStore;
 	const {setIsOpen, setWindow, setModalProps, setFuncModal} = ModalStore;
 
-	const currentUserId = parseInt(Cookies.get('user-id') || '0', 10);
-	const myComment = comments.find((c) => c.user === currentUserId) ?? null;
-	const otherComments = myComment ? comments.filter((c) => c.id !== myComment.id) : comments;
+	const [isLoadingMore, setIsLoadingMore] = useState(false);
 
 	useEffect(() => {
-		if (page === 'isGoal') {
-			(async () => {
-				const res = await getCommentsWithImages(goal.code);
+		if (page !== 'isGoal') return;
 
-				if (res.success && res.data) {
-					setComments(res.data.data);
-					setInfoPaginationComments(res.data.pagination);
-					// popular_images – snake_case (бэкенд после наших прав),
-					// popularImages – camelCase (старый/другой контракт). Поддерживаем оба варианта.
-					const images = (res.data as any).popular_images || (res.data as any).popularImages || [];
-					setCommentPhotos(images);
-				}
-			})();
-		}
+		(async () => {
+			const [commentsRes, imagesRes] = await Promise.all([getInitialComments(goal.code), getGoalImpressionImages(goal.code)]);
+
+			if (commentsRes.success && commentsRes.data) {
+				setMyComment(commentsRes.data.myComment ?? (commentsRes.data as any).my_comment ?? null);
+				setComments(commentsRes.data.comments);
+				setHasMoreComments(commentsRes.data.hasMore ?? (commentsRes.data as any).has_more ?? false);
+				setCommentsNextPage(commentsRes.data.nextPage ?? (commentsRes.data as any).next_page ?? null);
+			}
+
+			if (imagesRes.success && imagesRes.data) {
+				setCommentPhotos(imagesRes.data.images);
+			}
+		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [goal.code, page]);
+
+	const handleLoadMore = async () => {
+		if (!commentsNextPage || isLoadingMore) return;
+		setIsLoadingMore(true);
+		const res = await getMoreComments(goal.code, commentsNextPage);
+		if (res.success && res.data) {
+			appendComments(res.data.comments);
+			setHasMoreComments(res.data.hasMore ?? (res.data as any).has_more ?? false);
+			setCommentsNextPage(res.data.nextPage ?? (res.data as any).next_page ?? null);
+		}
+		setIsLoadingMore(false);
+	};
 
 	const handleEditMyReview = (comment: IComment) => {
 		setModalProps({editComment: comment});
@@ -75,7 +98,7 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 		setFuncModal(async () => {
 			const res = await deleteReview(comment.id);
 			if (res.success) {
-				setComments(comments.filter((c) => c.id !== comment.id));
+				setMyComment(null);
 				return true;
 			}
 			return false;
@@ -89,12 +112,7 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 		if (!myComment) return;
 		const res = await postLikeComment(id, like);
 		if (res.success) {
-			const idx = comments.findIndex((c) => c.id === myComment.id);
-			if (idx !== -1) {
-				const next = [...comments];
-				next[idx] = {...next[idx], ...res.data};
-				setComments(next);
-			}
+			setMyComment({...myComment, ...res.data});
 		}
 	};
 
@@ -114,10 +132,13 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 							</div>
 						)}
 						<CommentsGoal
-							comments={otherComments}
+							comments={comments}
 							setComments={setComments}
 							canAddReview={goal.addedByUser && goal.completedByUser}
-							hasAnyComments={!!myComment}
+							hasMyComment={!!myComment || goal.hasMyComment}
+							hasMore={hasMoreComments}
+							isLoadingMore={isLoadingMore}
+							onLoadMore={handleLoadMore}
 						/>
 					</>
 				);
@@ -129,7 +150,6 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 				}
 				return null;
 			case 'isGoalHistory':
-				// Показываем историю только если цель регулярная и добавлена пользователем
 				if (goal.regularConfig && goal.addedByUser && goal.regularConfig.id) {
 					return (
 						<RegularGoalHistory
@@ -141,7 +161,6 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 				}
 				return null;
 			case 'isGoalRating':
-				// Показываем рейтинг только если цель регулярная, бессрочная и добавлена пользователем
 				if (goal.regularConfig && goal.addedByUser && goal.regularConfig.id && goal.regularConfig.durationType === 'indefinite') {
 					return <RegularGoalRating regularGoalId={goal.regularConfig.id} />;
 				}

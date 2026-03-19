@@ -25,7 +25,7 @@ export const MyReview: FC<MyReviewProps> = (props) => {
 		<div className={block()}>
 			<div className={element('header')}>
 				<Title tag="h3" className={element('title')}>
-					Мой отзыв
+					Мое впечатление
 				</Title>
 				<div className={element('actions')}>
 					<Button theme="blue-edit" size="small" icon="edit" onClick={() => onEdit?.(comment)}>

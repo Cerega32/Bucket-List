@@ -128,7 +128,8 @@ export const removeFriend = async (friendId: number): Promise<{message: string}>
 
 // Поиск пользователей
 export const searchUsers = async (query: string): Promise<IFriendSearchResponse> => {
-	const response = await GET(`friends/search?query=${encodeURIComponent(query)}`, {
+	const response = await GET('friends/search', {
+		get: {query},
 		showSuccessNotification: false,
 		showErrorNotification: false,
 		auth: true,

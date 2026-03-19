@@ -23,6 +23,8 @@
 		display: flex;
 		align-items: center;
 		gap: 16px;
+		flex: 1;
+		min-width: 0;
 	}
 
 	&__avatar {
@@ -55,18 +57,23 @@
 	&__info {
 		flex: 1;
 		min-width: 140px;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
 	}
 
 	&__name {
-		margin: 0 0 4px;
 		color: var(--color-text-primary);
 		font-size: 16px;
 		font-weight: var(--weight-medium);
 		line-height: var(--line-height-16);
+
+		&:hover {
+			color: var(--color-primary);
+		}
 	}
 
 	&__username {
-		margin: 0 0 8px;
 		color: var(--color-text-secondary);
 		font-size: 14px;
 		line-height: var(--line-height-14);

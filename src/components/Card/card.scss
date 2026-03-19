@@ -51,6 +51,10 @@
 		margin-left: auto;
 		min-width: 0;
 		flex-shrink: 1;
+
+		.tag__text {
+			max-width: none;
+		}
 	}
 
 	&__info {
@@ -188,6 +192,7 @@
 				-webkit-box-orient: vertical;
 				-webkit-line-clamp: 2;
 				line-clamp: 2;
+				min-height: calc(var(--line-height-14) * 2);
 			}
 
 			&__tags-wrapper {

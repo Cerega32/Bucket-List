@@ -161,7 +161,7 @@ export const Card: FC<CardProps> = (props) => {
 						showSeparator
 					/>
 					<div className={element('buttons-wrapper')}>
-						{isList && 'userCompletedGoals' in goal && 'goalsCount' in goal && (
+						{isList && goal.addedByUser && 'userCompletedGoals' in goal && 'goalsCount' in goal && (
 							<Progress done={goal.userCompletedGoals} all={goal.goalsCount} />
 						)}
 						{(() => {

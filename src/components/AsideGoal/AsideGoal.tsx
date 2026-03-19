@@ -3,6 +3,7 @@ import {FC, useEffect, useState} from 'react';
 import {WeekDaySchedule} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
+import {GoalStore} from '@/store/GoalStore';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
@@ -52,6 +53,7 @@ interface AsideGoalProps extends AsideProps {
 	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark' | 'partial' | 'start', done?: boolean) => Promise<void | boolean>;
 	isList?: never;
 	openAddReview: () => void;
+	hasMyComment?: boolean;
 	editGoal?: (() => void) | undefined;
 	canEdit?: boolean;
 	location?: ILocation;
@@ -105,6 +107,10 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const [isAddingRegularGoal, setIsAddingRegularGoal] = useState(false);
 	const [isAdded, setIsAdded] = useState(added);
 	const [localStatistics, setLocalStatistics] = useState<IRegularGoalStatistics | null>(regularConfig?.statistics || null);
+
+	const {myComment} = GoalStore;
+	const hasMyComment = !isList && (props as AsideGoalProps).hasMyComment;
+	const hasOwnComment = !!myComment || !!hasMyComment;
 
 	// Синхронизируем localStatistics с regularConfig при его изменении
 	useEffect(() => {
@@ -1992,7 +1998,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						>
 							{isCompleted ? 'Выполнено' : 'Выполнить'}
 						</Button>
-						{isCompleted && (
+						{isCompleted && !hasOwnComment && (
 							<Button
 								theme="blue-light"
 								onClick={openAddReview}

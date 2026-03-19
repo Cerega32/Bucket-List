@@ -274,6 +274,7 @@
 	&__search-trigger {
 		display: flex;
 		align-items: center;
+		justify-content: space-between;
 		gap: 4px;
 		height: 40px;
 		padding: 10px 16px;
@@ -281,7 +282,7 @@
 		border-radius: 8px;
 		color: var(--color-white);
 		font-weight: var(--font-weight-medium);
-		width: max-content;
+		width: 100%;
 
 		svg * {
 			fill: var(--color-white);

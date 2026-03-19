@@ -72,6 +72,18 @@
 		&--iconEnd {
 			padding-right: 50px;
 		}
+
+		// Скрываем системные "стрелки" у `input type="number"`, не меняя тип инпута.
+		// Работает для Chromium/Safari и Firefox.
+		&[type='number'] {
+			-moz-appearance: textfield;
+		}
+
+		&[type='number']::-webkit-outer-spin-button,
+		&[type='number']::-webkit-inner-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+		}
 	}
 
 	&__show-password {
@@ -127,7 +139,7 @@
 	&__suffix {
 		position: absolute;
 		top: 50%;
-		right: 50px;
+		right: 16px;
 		color: var(--color-text-secondary);
 		font-size: 14px;
 		white-space: nowrap;

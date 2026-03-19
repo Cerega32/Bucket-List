@@ -330,6 +330,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 						goalId={goal.id}
 						done={goal.completedByUser}
 						openAddReview={openAddReview}
+						hasMyComment={goal.hasMyComment}
 						editGoal={goal.createdByUser && goal.isCanEdit ? () => setIsEditing(true) : undefined}
 						canEdit={goal?.isCanEdit}
 						location={goal?.location}

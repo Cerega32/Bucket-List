@@ -58,6 +58,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const [block, element] = useBem('header', className);
 
 	const navigate = useNavigate();
+	const homePath = isAuth ? '/categories/all' : '/';
 
 	useEffect(() => {
 		if (categoriesTree.length > 0) return;
@@ -365,8 +366,8 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		) : (
 			<Button className={element('search-trigger')} onClick={() => setIsSearchOpen(true)} aria-label="Поиск">
 				<>
-					<Svg icon="search" className={element('categories-icon')} width="16px" height="16px" />
 					Поиск целей
+					<Svg icon="search" className={element('categories-icon')} width="16px" height="16px" />
 				</>
 			</Button>
 		);
@@ -397,7 +398,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 								</Button>
 							</div>
 							<div className={element('logo-wrap')}>
-								<Link className={element('logo')} to="/" aria-label="Главная">
+								<Link className={element('logo')} to={homePath} aria-label="Главная">
 									<Svg icon="delting" />
 								</Link>
 							</div>
@@ -459,7 +460,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 					</>
 				) : (
 					<>
-						<Link className={element('logo')} to="/" aria-label="Главная">
+						<Link className={element('logo')} to={homePath} aria-label="Главная">
 							{isScreenMobile ? <Svg icon="icon-logo" className={element('logo-icon')} /> : <Svg icon="delting" />}
 						</Link>
 						{isScreenMobile && !isScreenSmallMobile && (
