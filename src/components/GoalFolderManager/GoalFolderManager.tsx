@@ -18,9 +18,7 @@ import {
 import {Button} from '../Button/Button';
 import {CharCount} from '../CharCount/CharCount';
 import {EmptyState} from '../EmptyState/EmptyState';
-import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '../FieldInput/FieldInput';
-import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
 import {FolderRulesManager} from '../FolderRulesManager/FolderRulesManager';
 import {ItemGoal} from '../ItemGoal/ItemGoal';
 import {Line} from '../Line/Line';
@@ -40,16 +38,17 @@ interface GoalFolderManagerProps {
 
 // const FOLDER_COLORS = ['#3A89D8', '#7C3AED', '#10B981', '#F59E0B', '#EF4444', '#0EA5E9', '#8B5CF6', '#14B8A6', '#F97316'];
 
-const filterItems = [
-	{
-		name: 'Публичные',
-		code: 'public',
-	},
-	{
-		name: 'Приватные',
-		code: 'private',
-	},
-];
+// Пока не используется
+// const filterItems = [
+// 	{
+// 		name: 'Публичные',
+// 		code: 'public',
+// 	},
+// 	{
+// 		name: 'Приватные',
+// 		code: 'private',
+// 	},
+// ];
 
 export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({className}) => {
 	const [block, element] = useBem('goal-folder-manager', className);
@@ -72,7 +71,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	});
 	const [deletingFolder, setDeletingFolder] = useState<IGoalFolder | null>(null);
 	const [search, setSearch] = useState('');
-	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+	const [selectedFilters] = useState<string[]>([]);
 	const [activeSort, setActiveSort] = useState(0);
 
 	const isSearchMode = search.trim().length > 0;
@@ -145,9 +144,10 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		setSearch(value);
 	};
 
-	const handleFilterChange = async (selected: string[]) => {
-		setSelectedFilters(selected);
-	};
+	// Пока не используется
+	// const handleFilterChange = async (selected: string[]) => {
+	// 	setSelectedFilters(selected);
+	// };
 
 	const handleSortSelect = async (active: number): Promise<void> => {
 		setActiveSort(active);
@@ -306,13 +306,13 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 								iconBegin="search"
 							/>
 							<div className="catalog-items__categories-wrapper">
-								<FiltersCheckbox
+								{/* <FiltersCheckbox
 									head={{name: 'Все папки', code: 'all'}}
 									items={filterItems}
 									onFinish={handleFilterChange}
 									multipleSelectedText={['тип', 'типа', 'типов']}
 									multipleThreshold={1}
-								/>
+								/> */}
 								<Select options={sortOptions} activeOption={activeSort} onSelect={handleSortSelect} filter />
 							</div>
 						</div>
@@ -342,19 +342,21 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 								>
 									<div className={element('folder-badge')} style={{backgroundColor: folder.color}}>
 										{/* <span className={element('icon', {[folder.icon || 'folder']: true})} /> */}
-										{folder.isPrivate && (
+										{/* Пока не используется */}
+										{/* {folder.isPrivate && (
 											<img
 												src="/svg/eye-closed.svg"
 												alt="Приватная папка"
 												className={element('folder-badge-private-icon')}
 												title="Приватная"
 											/>
-										)}
+										)} */}
 									</div>
 									<div className={element('folder-info')}>
 										<h4 className={element('folder-name')}>
 											{folder.name}
-											{folder.isPrivate && <span className={element('private-badge')}>Приватная</span>}
+											{/* Пока не используется */}
+											{/* {folder.isPrivate && <span className={element('private-badge')}>Приватная</span>} */}
 										</h4>
 										{folder.description && <p className={element('folder-description')}>{folder.description}</p>}
 										<p className={element('folder-meta')}>Целей: {folder.goalsCount}</p>
@@ -398,18 +400,19 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 									style={{backgroundColor: selectedFolder.color}}
 									aria-hidden="true"
 								>
-									{selectedFolder.isPrivate && (
+									{/* Пока не используется */}
+									{/* {selectedFolder.isPrivate && (
 										<img
 											src="/svg/eye-closed.svg"
 											alt="Приватная папка"
 											className={element('folder-badge-private-icon')}
 											aria-hidden="true"
 										/>
-									)}
+									)} */}
 								</span>
 								<span>
 									Папка &quot;{selectedFolder.name}&quot;
-									{selectedFolder.isPrivate && <span className={element('folder-private-label')}> (Приватная)</span>}
+									{/* {selectedFolder.isPrivate && <span className={element('folder-private-label')}> (Приватная)</span>} */}
 								</span>
 							</Title>
 							<div className={element('folder-tabs')}>
@@ -533,12 +536,13 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 							/>
 						))}
 					</div>
-					<FieldCheckbox
+					{/* Пока не используется */}
+					{/* <FieldCheckbox
 						id="folder-private"
 						text="Приватная папка (видна только вам)"
 						checked={formData.is_private || false}
 						setChecked={(checked: boolean) => setFormData({...formData, is_private: checked})}
-					/>
+					/> */}
 					<div className={element('form-actions')}>
 						<Button theme="blue" onClick={handleCreateFolder} disabled={!formData.name.trim()} width="auto">
 							Создать папку
@@ -617,12 +621,13 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 							/>
 						))}
 					</div>
-					<FieldCheckbox
+					{/* Пока не используется */}
+					{/* <FieldCheckbox
 						id="edit-folder-private"
 						text="Приватная папка (видна только вам)"
 						checked={formData.is_private || false}
 						setChecked={(checked: boolean) => setFormData({...formData, is_private: checked})}
-					/>
+					/> */}
 					<div className={element('form-actions')}>
 						<Button theme="blue" onClick={handleUpdateFolder} disabled={!formData.name.trim()} width="auto">
 							Сохранить изменения

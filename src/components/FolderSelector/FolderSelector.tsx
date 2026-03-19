@@ -7,8 +7,8 @@ import {addGoalToFolder, getGoalFoldersLight, IGoalFolder} from '@/utils/api/goa
 import {Button} from '../Button/Button';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {Loader} from '../Loader/Loader';
-
 import './folder-selector.scss';
+import {Title} from '../Title/Title';
 
 interface FolderSelectorProps {
 	goalId: number;
@@ -84,7 +84,9 @@ export const FolderSelector: FC<FolderSelectorProps> = observer(
 		return (
 			<div className={block()}>
 				<div className={element('header')}>
-					<h3 className={element('title')}>Добавить цель &quot;{goalTitle}&quot; в папку</h3>
+					<Title tag="h2" className={element('title')}>
+						Добавить цель &quot;{goalTitle}&quot; в папку
+					</Title>
 					<p className={element('description')}>Выберите папку, в которую хотите добавить эту цель</p>
 				</div>
 

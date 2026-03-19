@@ -45,9 +45,24 @@ export const User100Goals: FC<User100GoalsProps> = observer((props) => {
 				totalCompletedMedium={mainGoals.mediumGoals.countCompleted}
 				totalCompletedHard={mainGoals.hardGoals.countCompleted}
 			/>
-			<MainCards className={element('goals')} goals={mainGoals.easyGoals.data} complexity="easy" />
-			<MainCards className={element('goals')} goals={mainGoals.mediumGoals.data} complexity="medium" />
-			<MainCards className={element('goals')} goals={mainGoals.hardGoals.data} complexity="hard" />
+			<MainCards
+				className={element('goals')}
+				goals={mainGoals.easyGoals.data}
+				complexity="easy"
+				topInfoClassName="gradient__top-info--main-goals"
+			/>
+			<MainCards
+				className={element('goals')}
+				goals={mainGoals.mediumGoals.data}
+				complexity="medium"
+				topInfoClassName="gradient__top-info--main-goals"
+			/>
+			<MainCards
+				className={element('goals')}
+				goals={mainGoals.hardGoals.data}
+				complexity="hard"
+				topInfoClassName="gradient__top-info--main-goals"
+			/>
 		</Loader>
 	);
 });

@@ -17,6 +17,10 @@
 		flex-shrink: 0;
 		width: 336px;
 
+		@include md {
+			width: 100%;
+		}
+
 		@include xs {
 			width: 100%;
 		}

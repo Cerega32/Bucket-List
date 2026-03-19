@@ -165,6 +165,11 @@
 			padding: 12px 20px;
 			gap: 8px;
 		}
+
+		@include xs {
+			grid-template-columns: 1fr;
+			grid-template-rows: auto auto auto;
+		}
 	}
 
 	&__footer-back {
@@ -182,6 +187,10 @@
 		gap: 10px;
 		align-items: center;
 		justify-self: center;
+
+		@include xs {
+			justify-self: start;
+		}
 	}
 
 	&__step-rocket-wrap {
@@ -234,6 +243,10 @@
 		gap: 8px;
 		align-items: center;
 		justify-self: end;
+
+		@include xs {
+			justify-self: start;
+		}
 	}
 
 	&__footer-skip {
@@ -244,6 +257,10 @@
 	&__footer-submit {
 		justify-self: end;
 		white-space: nowrap;
+
+		@include xs {
+			justify-self: start;
+		}
 	}
 
 	&--page {

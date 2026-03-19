@@ -14,6 +14,7 @@
 	line-height: var(--line-height-14);
 	backdrop-filter: blur(4px);
 	overflow: hidden;
+	flex-shrink: 0;
 
 	&__text {
 		min-width: 0;

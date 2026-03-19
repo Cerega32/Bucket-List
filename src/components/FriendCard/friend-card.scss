@@ -1,6 +1,7 @@
 .friend-card {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: 16px;
 	padding: 16px;
 	background: var(--color-white);
@@ -11,6 +12,17 @@
 	&:hover {
 		border-color: var(--color-border-medium);
 		box-shadow: 0 2px 8px rgb(var(--color-black-rbg) / 8%);
+	}
+
+	@include xs {
+		flex-direction: column;
+		align-items: start;
+	}
+
+	&__content {
+		display: flex;
+		align-items: center;
+		gap: 16px;
 	}
 
 	&__avatar {
@@ -42,7 +54,7 @@
 
 	&__info {
 		flex: 1;
-		min-width: 0;
+		min-width: 140px;
 	}
 
 	&__name {
@@ -69,45 +81,12 @@
 
 	&__actions {
 		display: flex;
-		flex-shrink: 0;
+		flex-wrap: wrap;
 		gap: 8px;
+		justify-content: flex-end;
 
-		.button {
-			white-space: nowrap;
-		}
-	}
-
-	// Responsive design
-	@media (width <= 768px) {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 12px;
-
-		&__actions {
-			justify-content: space-between;
-			width: 100%;
-
-			.button {
-				flex: 1;
-			}
-		}
-	}
-
-	@media (width <= 480px) {
-		padding: 12px;
-
-		&__avatar {
-			width: 48px;
-			height: 48px;
-		}
-
-		&__avatar-placeholder {
-			font-size: 18px;
-		}
-
-		&__actions {
-			flex-direction: column;
-			gap: 8px;
+		@include xs {
+			align-self: flex-end;
 		}
 	}
 }

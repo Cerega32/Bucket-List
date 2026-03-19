@@ -209,6 +209,16 @@
 			color: var(--color-text);
 		}
 
+		&--is100Goals {
+			font-weight: var(--weight-semi-bold);
+			background: linear-gradient(
+				130deg,
+				rgb(var(--color-purple-rgb-3) / 0.25),
+				rgb(var(--color-blue-rgb-1) / 0.1),
+				rgb(var(--color-purple-rgb-3) / 0.2)
+			);
+		}
+
 		@include md {
 			display: inline-block;
 			width: 100%;
@@ -259,6 +269,23 @@
 	&__categories-link-menu {
 		padding: 0;
 		min-width: auto;
+	}
+
+	&__search-trigger {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		height: 40px;
+		padding: 10px 16px;
+		background: rgb(var(--color-black-rgb) / 16%);
+		border-radius: 8px;
+		color: var(--color-white);
+		font-weight: var(--font-weight-medium);
+		width: max-content;
+
+		svg * {
+			fill: var(--color-white);
+		}
 	}
 
 	&__categories-item-parent {
@@ -688,7 +715,8 @@
 				}
 			}
 
-			&__categories-link {
+			&__categories-link,
+			&__search-trigger {
 				background: var(--color-secondary);
 				color: var(--color-text);
 

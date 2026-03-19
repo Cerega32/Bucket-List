@@ -6,6 +6,7 @@ import {Button} from '@/components/Button/Button';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {GoalStore} from '@/store/GoalStore';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
@@ -30,7 +31,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	const {modalProps, setFuncModal, setWindow, setIsOpen} = ModalStore;
 
 	const editingComment = modalProps?.editComment;
-
+	const {isScreenSmallMobile} = useScreenSize();
 	const initialComplexityIndex =
 		editingComment != null ? selectComplexity.findIndex((opt) => opt.value === editingComment.complexity) : -1;
 
@@ -64,7 +65,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 
 		const isEditing = !!editingComment;
 
-		const hasError = typeof activeComplexity !== 'number' || !newComment.trim() || (!isEditing && photos.length === 0);
+		const hasError = typeof activeComplexity !== 'number' || !newComment.trim();
 
 		if (hasError) {
 			setShowErrors(true);
@@ -191,7 +192,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 				setValue={setNewComment}
 				className={element('field')}
 				type="textarea"
-				rows={1}
+				rows={isScreenSmallMobile ? 2 : 1}
 				error={showErrors && !newComment.trim()}
 			/>
 			<p className={element('field-title')}>Фотографии</p>

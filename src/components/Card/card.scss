@@ -95,10 +95,17 @@
 		justify-content: space-between;
 		align-items: center;
 		height: 32px;
+		gap: 8px;
 
 		@include sm {
 			height: auto;
 			gap: 16px;
+			align-items: start;
+		}
+
+		@include xs {
+			justify-content: flex-end;
+			flex-direction: column;
 		}
 	}
 
@@ -114,14 +121,19 @@
 		justify-content: space-between;
 		align-items: center;
 		gap: 8px;
+
+		@include xs {
+			width: 100%;
+		}
 	}
 
 	&__buttons {
 		display: flex;
 		gap: 8px;
 
-		@media (width >= 768px) {
-			display: none;
+		@include xs {
+			flex-direction: column;
+			width: 100%;
 		}
 	}
 

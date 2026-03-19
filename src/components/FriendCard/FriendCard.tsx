@@ -63,18 +63,20 @@ export const FriendCard: React.FC<FriendCardProps> = observer(({friend, onRemove
 
 	return (
 		<Loader isLoading={isRemoving} className={block()}>
-			<div className={element('avatar')}>
-				{friend.avatar ? (
-					<Avatar size="medium-56" avatar={friend.avatar} />
-				) : (
-					<div className={element('avatar-placeholder')}>{displayName.charAt(0).toUpperCase()}</div>
-				)}
-			</div>
+			<div className={element('content')}>
+				<div className={element('avatar')}>
+					{friend.avatar ? (
+						<Avatar size="medium-56" avatar={friend.avatar} />
+					) : (
+						<div className={element('avatar-placeholder')}>{displayName.charAt(0).toUpperCase()}</div>
+					)}
+				</div>
 
-			<div className={element('info')}>
-				<h3 className={element('name')}>{displayName}</h3>
-				{hasName && <p className={element('username')}>{friend.username}</p>}
-				<p className={element('since')}>Друзья с {formatFriendshipDate(friend.createdAt)}</p>
+				<div className={element('info')}>
+					<h3 className={element('name')}>{displayName}</h3>
+					{hasName && <p className={element('username')}>{friend.username}</p>}
+					<p className={element('since')}>Друзья с {formatFriendshipDate(friend.createdAt)}</p>
+				</div>
 			</div>
 
 			{showActions && (

@@ -16,6 +16,7 @@
 
 	@include md {
 		flex-direction: column;
+		gap: 0;
 	}
 
 	&__image {

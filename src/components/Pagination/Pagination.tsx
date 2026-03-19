@@ -23,6 +23,10 @@ interface IPage {
 const generatePagination = (activePage: number, totalPages: number, visiblePages = 5): Array<IPage> => {
 	const pages: Array<IPage> = [];
 
+	const getMiddlePage = (start: number, end: number): number => {
+		return Math.ceil((start + end) / 2);
+	};
+
 	if (totalPages <= visiblePages) {
 		for (let i = 1; i <= totalPages; i += 1) {
 			pages.push({number: i, symbol: i});
@@ -43,7 +47,10 @@ const generatePagination = (activePage: number, totalPages: number, visiblePages
 		if (leftSibling === 3) {
 			pages.push({number: 2, symbol: 2});
 		} else {
-			pages.push({number: 2, symbol: '...'});
+			const startHidden = 3;
+			const endHidden = leftSibling - 1;
+			const jumpTo = getMiddlePage(startHidden, endHidden);
+			pages.push({number: jumpTo, symbol: '...'});
 		}
 	} else if (leftSibling === 2) {
 		pages.push({number: 2, symbol: 2});
@@ -68,7 +75,10 @@ const generatePagination = (activePage: number, totalPages: number, visiblePages
 				pages.push({number: totalPages - 1, symbol: totalPages - 1});
 			}
 		} else {
-			pages.push({number: totalPages - 1, symbol: '...'});
+			const startHidden = rightSibling + 1;
+			const endHidden = totalPages - 2;
+			const jumpTo = getMiddlePage(startHidden, endHidden);
+			pages.push({number: jumpTo, symbol: '...'});
 		}
 	} else if (rightSibling === totalPages - 1 && !pages.some((p) => p.number === totalPages - 1)) {
 		pages.push({number: totalPages - 1, symbol: totalPages - 1});

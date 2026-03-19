@@ -81,7 +81,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 		if (step === 2 && !catalogLoaded && !catalogLoading) {
 			setCatalogLoading(true);
 			(async () => {
-				const res = await getPopularGoalsForAllTime(8);
+				const res = await getPopularGoalsForAllTime(16);
 				if (res.success) setCatalogGoals(res.data ?? []);
 				setCatalogLoaded(true);
 				setCatalogLoading(false);
@@ -318,6 +318,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 								withBtn
 								updateGoal={updateMainGoal}
 								disableNavigation
+								topInfoClassName="gradient__top-info--main-goals"
 							/>
 							<MainCards
 								className={element('main-goals')}
@@ -326,6 +327,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 								withBtn
 								updateGoal={updateMainGoal}
 								disableNavigation
+								topInfoClassName="gradient__top-info--main-goals"
 							/>
 							<MainCards
 								className={element('main-goals')}
@@ -334,6 +336,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 								withBtn
 								updateGoal={updateMainGoal}
 								disableNavigation
+								topInfoClassName="gradient__top-info--main-goals"
 							/>
 						</div>
 					)}

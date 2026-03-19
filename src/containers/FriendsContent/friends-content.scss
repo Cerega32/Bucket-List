@@ -7,6 +7,10 @@
 	border-radius: 12px;
 	box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
 
+	@include md {
+		width: 100%;
+	}
+
 	&__header {
 		margin-bottom: 32px;
 	}

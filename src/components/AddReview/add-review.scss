@@ -3,6 +3,10 @@
 
 	&__title {
 		margin-bottom: 24px;
+
+		@include xs {
+			margin-right: 50px;
+		}
 	}
 
 	&__banner {

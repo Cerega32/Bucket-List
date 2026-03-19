@@ -2,6 +2,7 @@ import {FC, useEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {IShortGoal} from '@/typings/goal';
 
 import {Button} from '../Button/Button';
@@ -29,13 +30,13 @@ export const RandomGoalPicker: FC<RandomGoalPickerProps> = ({goals, onClose}) =>
 	const rafRef = useRef<number | null>(null);
 	const animatingRef = useRef(false);
 	const navigate = useNavigate();
-
+	const {isScreenSmallMobile} = useScreenSize();
 	const [isAnimating, setIsAnimating] = useState(false);
 	const [selectedGoal, setSelectedGoal] = useState<IShortGoal | null>(null);
 	const [block, element] = useBem('random-goal-picker');
 
 	// Константы настройки анимации — можно подстроить
-	const WIDTH = 400;
+	const WIDTH = isScreenSmallMobile ? 250 : 400;
 	const HEIGHT = 300;
 	const DURATION = 1200; // ms (длительность движения частиц)
 	const MAX_PARTICLES = 2000; // ограничение по количеству частиц
@@ -110,7 +111,7 @@ export const RandomGoalPicker: FC<RandomGoalPickerProps> = ({goals, onClose}) =>
 		// создаём простые частички одного цвета, если нет изображения
 		const particles: Particle[] = [];
 		const color = '#cbd5e1';
-		const approx = 800;
+		const approx = isScreenSmallMobile ? 250 : 800;
 		for (let i = 0; i < Math.min(approx, MAX_PARTICLES); i++) {
 			const tx = Math.random() * WIDTH;
 			const ty = Math.random() * HEIGHT;
