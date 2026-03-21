@@ -44,6 +44,15 @@ export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
 			});
 		}
 	}, [title]);
+
+	/** Клик по названию копирует целиком; если пользователь выделяет текст — не перехватываем буфер */
+	const handleTitleButtonClick = useCallback(() => {
+		const sel = typeof window !== 'undefined' ? window.getSelection()?.toString() ?? '' : '';
+		if (sel.length > 0) {
+			return;
+		}
+		handleCopyTitle().catch(() => {});
+	}, [handleCopyTitle]);
 	// TODO: пересчёт размера текста в зависимости от количества строк
 	// const baseStylesRef = useRef<{fontSize: number; lineHeight: number} | null>(null);
 	// const rafIdRef = useRef<number | null>(null);
@@ -160,9 +169,9 @@ export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
 				<button
 					type="button"
 					className={element('title-copyable')}
-					title="Нажмите на название, чтобы скопировать его"
-					onClick={handleCopyTitle}
-					aria-label="Нажмите на название, чтобы скопировать его"
+					title="Нажмите на название без выделения, чтобы скопировать целиком; иначе выделите текст мышью"
+					onClick={handleTitleButtonClick}
+					aria-label="Нажмите на название без выделения, чтобы скопировать целиком; иначе выделите текст мышью"
 				>
 					<Title className={element('title', {short})} tag="h1" theme={isList ? 'black' : 'white'}>
 						{title}

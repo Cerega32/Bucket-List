@@ -11,6 +11,11 @@ import {Progress} from '../Progress/Progress';
 
 import './progress-update-modal.scss';
 
+/** Черновик (id=0) или 0% без истории — первое сохранение может быть с нулём */
+function isProgressNotStartedYet(cp: IGoalProgress): boolean {
+	return cp.id === 0 || (cp.progressPercentage === 0 && (cp.progressEntriesCount ?? 0) === 0);
+}
+
 interface ProgressUpdateModalProps {
 	goalId: number;
 	goalTitle: string;
@@ -26,7 +31,7 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 
 		const [newProgress, setNewProgress] = useState(currentProgress.progressPercentage.toString());
 		const [notes, setNotes] = useState(currentProgress.dailyNotes || '');
-		const [workedToday, setWorkedToday] = useState(currentProgress.isWorkingToday);
+		const [workedToday, setWorkedToday] = useState(false);
 		const [isLoading, setIsLoading] = useState(false);
 		const [isSliderDragging, setIsSliderDragging] = useState(false);
 
@@ -48,12 +53,14 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 
 			try {
 				const progressValue = Math.min(100, Math.max(0, parseInt(newProgress, 10) || 0));
+				if (progressValue === currentProgress.progressPercentage && !isProgressNotStartedYet(currentProgress)) {
+					return;
+				}
 
-				// Обновляем прогресс цели
+				// Уже отмечено кнопкой «Отметить сегодня» — остаётся true; иначе — галочка в модалке
 				const updateData = {
 					progress_percentage: progressValue,
 					daily_notes: notes,
-					// Уже отмечено кнопкой «Отметить сегодня» — остаётся true, чекбокс в модалке скрыт
 					is_working_today: currentProgress.isWorkingToday ? true : workedToday,
 				};
 
@@ -100,6 +107,9 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 		};
 
 		const progressValue = Math.min(100, Math.max(0, parseInt(newProgress, 10) || 0));
+		const percentChanged = progressValue !== currentProgress.progressPercentage;
+		const isProgressNotStarted = isProgressNotStartedYet(currentProgress);
+		const canSave = percentChanged || isProgressNotStarted;
 		const isAtStart = progressValue <= 4;
 		const isAtEnd = progressValue >= 95;
 
@@ -165,19 +175,24 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 						type="textarea"
 						className={element('field')}
 					/>
+
+					{!currentProgress.isWorkingToday && (
+						<div className={element('pre-footer')}>
+							<FieldCheckbox
+								id="worked-today-modal"
+								text="Работал над целью сегодня"
+								checked={workedToday}
+								setChecked={setWorkedToday}
+								className={element('field')}
+							/>
+						</div>
+					)}
 				</div>
 
-				{!currentProgress.isWorkingToday && (
-					<div className={element('pre-footer')}>
-						<FieldCheckbox
-							id="worked-today"
-							text="Работал над целью сегодня"
-							checked={workedToday}
-							setChecked={setWorkedToday}
-							className={element('field')}
-						/>
-					</div>
-				)}
+				<p className={element('hint')}>
+					Сохранение доступно только при изменении процента. Без смены процента отметьте день кнопкой «Отметить сегодня» на
+					карточке.
+				</p>
 
 				<div className={element('footer')}>
 					<Button theme="blue-light" className={element('btn')} onClick={onClose} disabled={isLoading} type="button">
@@ -187,7 +202,7 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 						theme="blue"
 						className={element('btn')}
 						onClick={handleSave}
-						disabled={isLoading}
+						disabled={isLoading || !canSave}
 						loading={isLoading}
 						type="button"
 					>

@@ -153,7 +153,14 @@
 	}
 
 	&__pre-footer {
-		padding-top: 8px;
+		padding-top: 4px;
+	}
+
+	&__hint {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 13px;
+		line-height: 1.45;
 	}
 
 	&__footer {

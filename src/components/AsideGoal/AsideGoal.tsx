@@ -1202,13 +1202,28 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	};
 
 	// Хелперы для блока прогресса (цели с прогрессом, не регулярные)
+	const getLocalMonday = (d: Date): Date => {
+		const t = new Date(d);
+		t.setHours(0, 0, 0, 0);
+		const day = t.getDay();
+		const diffFromMonday = day === 0 ? 6 : day - 1;
+		t.setDate(t.getDate() - diffFromMonday);
+		return t;
+	};
+
+	/** Недели по календарю (Пн–Вс): первая неделя = 1, с каждым новым понедельником +1 от недели старта */
 	const getProgressWeeksCount = (p: IGoalProgress): number => {
-		const start = new Date(p.createdAt);
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		start.setHours(0, 0, 0, 0);
-		const diffMs = today.getTime() - start.getTime();
-		return Math.max(0, Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)));
+		if (typeof p.calendarWeeksCount === 'number') {
+			return p.calendarWeeksCount;
+		}
+		const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+		const startMonday = getLocalMonday(new Date(p.createdAt));
+		const todayMonday = getLocalMonday(new Date());
+		const deltaWeeks = Math.floor((todayMonday.getTime() - startMonday.getTime()) / msPerWeek);
+		if (deltaWeeks < 0) {
+			return 1;
+		}
+		return Math.max(1, deltaWeeks + 1);
 	};
 
 	const getProgressMaxStreak = (p: IGoalProgress): number => {

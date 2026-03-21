@@ -25,6 +25,8 @@ export interface IGoalProgress {
 	weekWorkDone?: boolean[];
 	/** Всего записей в истории (COUNT), даже если recentEntries не отданы */
 	progressEntriesCount?: number;
+	/** Календарные недели (с понедельника) с недели начала прогресса по текущую, минимум 1 */
+	calendarWeeksCount?: number;
 	// Для обратной совместимости
 	user?: number;
 	userUsername?: string;

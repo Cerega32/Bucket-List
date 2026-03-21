@@ -43,6 +43,10 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const {isScreenDesktop, isScreenSmallTablet, isScreenMobile, isScreenSmallMobile, isScreenTablet} = useScreenSize();
 	const isCategoriesLabelVisible = isScreenDesktop || (isScreenTablet && !isScreenSmallTablet);
 	const {isAuth, avatar, setAvatar, setIsAuth, setName, userSelf} = UserStore;
+
+	/** Бейдж: общее число из GET /api/user/ (counts.progressGoals); иначе длина первой страницы списка */
+	const progressGoalsBadgeCount = userSelf.counts?.progressGoals ?? HeaderProgressGoalsStore.goalsCount;
+	const showProgressGoalsBadge = progressGoalsBadgeCount > 0;
 	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 	const [isRegularGoalsOpen, setIsRegularGoalsOpen] = useState(false);
 	const [isProgressOpen, setIsProgressOpen] = useState(false);
@@ -595,7 +599,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 													onClick={toggleProgress}
 													aria-label="Прогресс"
 												>
-													{HeaderProgressGoalsStore.hasRegularGoalsToday ? (
+													{showProgressGoalsBadge ? (
 														<span
 															className={element('regular-goals-badge', {
 																allCompleted: isProgressOpen,
@@ -606,9 +610,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 																className={element('regular-goals-badge-icon', {theme: header})}
 															/>
 															<span className={element('regular-goals-badge-count', {theme: header})}>
-																{HeaderProgressGoalsStore.goalsCount > 99
-																	? '99+'
-																	: HeaderProgressGoalsStore.goalsCount}
+																{progressGoalsBadgeCount > 99 ? '99+' : progressGoalsBadgeCount}
 															</span>
 														</span>
 													) : (
