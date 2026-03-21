@@ -456,7 +456,9 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					}
 					if (goal.estimatedTime) baseData.estimatedTime = goal.estimatedTime;
 					if (goal.deadline) baseData.deadline = goal.deadline;
-					if (goal.complexity) baseData.complexity = goal.complexity;
+					// Сложность цели (в т.ч. после редактирования), не из устаревшего autoParserData
+					baseData.complexity =
+						goal.complexity ?? (activeComplexity !== null ? selectComplexity[activeComplexity].value : 'medium');
 					// Если у цели теперь нет изображения — сбрасываем старое из autoParserData
 					if (!goal.image) {
 						baseData.imageUrl = null;
