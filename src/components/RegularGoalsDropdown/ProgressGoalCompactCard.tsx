@@ -33,8 +33,15 @@ const formatLocalDate = (d: Date): string => {
 
 const getProgressWeekDayState = (progress: IGoalProgress, index: number): DayState => {
 	const currentDayIndex = getCurrentDayOfWeek();
+	if (progress.weekWorkDone && progress.weekWorkDone.length === 7) {
+		const hasWorked = progress.weekWorkDone[index] ?? false;
+		const isToday = index === currentDayIndex;
+		if (hasWorked) return 'completed';
+		if (isToday && progress.isWorkingToday) return 'active';
+		if (isToday) return 'active';
+		return 'inactive';
+	}
 	const entries = progress.recentEntries || progress.entries || [];
-	const entryDates = new Set(entries.map((e) => e.date.split('T')[0]));
 
 	const now = new Date();
 	const startOfWeek = new Date(now);
@@ -43,10 +50,10 @@ const getProgressWeekDayState = (progress: IGoalProgress, index: number): DaySta
 	dayDate.setDate(startOfWeek.getDate() + index);
 	const dateStr = formatLocalDate(dayDate);
 
-	const hasEntry = entryDates.has(dateStr);
+	const hasWorked = entries.some((e) => e.date.split('T')[0] === dateStr && (e.workDone ?? false));
 	const isToday = index === currentDayIndex;
 
-	if (hasEntry) return 'completed';
+	if (hasWorked) return 'completed';
 	if (isToday && progress.isWorkingToday) return 'active';
 	if (isToday) return 'active';
 	return 'inactive';

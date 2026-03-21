@@ -1,3 +1,5 @@
+import type {IGoalProgress} from '@/utils/api/goals';
+
 export type IComplexity = 'hard' | 'medium' | 'easy';
 
 export interface ICategory {
@@ -106,6 +108,9 @@ export interface IGoal {
 
 	// Поля для регулярных целей
 	regularConfig?: IRegularGoalConfig;
+
+	/** Вложенный прогресс текущего пользователя (приходит с GET цели по коду) */
+	userProgress?: IGoalProgress | null;
 
 	// Количество записей в истории прогресса (для нерегулярных целей)
 	progressEntriesCount?: number;

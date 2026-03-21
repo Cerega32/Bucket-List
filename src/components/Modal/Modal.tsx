@@ -263,10 +263,12 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			)}
 			{window === 'progress-update' && (
 				<ProgressUpdateModal
+					key={`${modalProps?.goalId}-${modalProps?.currentProgress?.id ?? 'new'}`}
 					goalId={modalProps?.goalId}
 					goalTitle={modalProps?.goalTitle}
 					currentProgress={modalProps?.currentProgress}
 					onProgressUpdate={modalProps?.onProgressUpdate}
+					onGoalCompleted={modalProps?.onGoalCompleted}
 					onClose={closeWindow}
 				/>
 			)}
@@ -291,13 +293,14 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		return createPortal(
 			<Modal isOpen={isOpen} onClose={closeWindow} className="progress-update-modal" size="medium">
 				<ProgressUpdateModal
+					key={`${modalProps?.goalId}-${modalProps?.currentProgress?.id ?? 'new'}`}
 					goalId={modalProps?.goalId ?? 0}
 					goalTitle={modalProps?.goalTitle ?? ''}
 					currentProgress={
 						modalProps?.currentProgress ?? {
 							progressPercentage: 0,
 							dailyNotes: '',
-							isWorkingToday: false,
+							isWorkingToday: true,
 							id: 0,
 							goal: 0,
 							goalTitle: '',

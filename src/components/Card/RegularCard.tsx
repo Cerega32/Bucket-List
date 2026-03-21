@@ -185,8 +185,19 @@ const getCurrentProgress = (statistics: IRegularGoalStatistics) => {
 
 // --- Progress variant helpers ---
 const getProgressSeriesText = (progress: IGoalProgress): string => {
+	if (typeof progress.workedDaysCount === 'number') {
+		if (progress.workedDaysCount === 0) return '—';
+		return pluralize(progress.workedDaysCount, ['день', 'дня', 'дней']);
+	}
 	const entries = progress.recentEntries || progress.entries || [];
-	const markedCount = new Set(entries.map((e) => e.date.split('T')[0])).size;
+	const byDate = new Map<string, boolean>();
+	entries.forEach((e) => {
+		const key = e.date.split('T')[0];
+		if (!key) return;
+		const wd = e.workDone ?? false;
+		byDate.set(key, (byDate.get(key) ?? false) || wd);
+	});
+	const markedCount = [...byDate.values()].filter(Boolean).length;
 	if (markedCount === 0) return '—';
 	return pluralize(markedCount, ['день', 'дня', 'дней']);
 };
@@ -200,8 +211,15 @@ const formatLocalDate = (d: Date): string => {
 
 const getProgressWeekDayState = (progress: IGoalProgress, index: number): RegularDayState => {
 	const currentDayIndex = getCurrentDayOfWeek();
+	if (progress.weekWorkDone && progress.weekWorkDone.length === 7) {
+		const hasWorked = progress.weekWorkDone[index] ?? false;
+		const isToday = index === currentDayIndex;
+		if (hasWorked) return 'completed';
+		if (isToday && progress.isWorkingToday) return 'active';
+		if (isToday) return 'active';
+		return 'inactive';
+	}
 	const entries = progress.recentEntries || progress.entries || [];
-	const entryDates = new Set(entries.map((e) => e.date.split('T')[0]));
 
 	const now = new Date();
 	const startOfWeek = new Date(now);
@@ -210,10 +228,10 @@ const getProgressWeekDayState = (progress: IGoalProgress, index: number): Regula
 	dayDate.setDate(startOfWeek.getDate() + index);
 	const dateStr = formatLocalDate(dayDate);
 
-	const hasEntry = entryDates.has(dateStr);
+	const hasWorked = entries.some((e) => e.date.split('T')[0] === dateStr && (e.workDone ?? false));
 	const isToday = index === currentDayIndex;
 
-	if (hasEntry) return 'completed';
+	if (hasWorked) return 'completed';
 	if (isToday && progress.isWorkingToday) return 'active';
 	if (isToday) return 'active';
 	return 'inactive';

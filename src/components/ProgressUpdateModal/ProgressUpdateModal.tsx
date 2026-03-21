@@ -25,7 +25,7 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 		const [block, element] = useBem('progress-update-modal');
 
 		const [newProgress, setNewProgress] = useState(currentProgress.progressPercentage.toString());
-		const [notes, setNotes] = useState('');
+		const [notes, setNotes] = useState(currentProgress.dailyNotes || '');
 		const [workedToday, setWorkedToday] = useState(currentProgress.isWorkingToday);
 		const [isLoading, setIsLoading] = useState(false);
 		const [isSliderDragging, setIsSliderDragging] = useState(false);
@@ -53,7 +53,8 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 				const updateData = {
 					progress_percentage: progressValue,
 					daily_notes: notes,
-					is_working_today: workedToday,
+					// Уже отмечено кнопкой «Отметить сегодня» — остаётся true, чекбокс в модалке скрыт
+					is_working_today: currentProgress.isWorkingToday ? true : workedToday,
 				};
 
 				const response = await updateGoalProgress(goalId, updateData);
@@ -164,8 +165,10 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 						type="textarea"
 						className={element('field')}
 					/>
+				</div>
 
-					{!currentProgress.isWorkingToday && (
+				{!currentProgress.isWorkingToday && (
+					<div className={element('pre-footer')}>
 						<FieldCheckbox
 							id="worked-today"
 							text="Работал над целью сегодня"
@@ -173,8 +176,8 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 							setChecked={setWorkedToday}
 							className={element('field')}
 						/>
-					)}
-				</div>
+					</div>
+				)}
 
 				<div className={element('footer')}>
 					<Button theme="blue-light" className={element('btn')} onClick={onClose} disabled={isLoading} type="button">

@@ -25,11 +25,11 @@ import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {selectComplexity} from '@/utils/values/complexity';
 import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
 
+import {AllowCustomSettingsField} from './components/AllowCustomSettingsField';
 import {Loader} from '../Loader/Loader';
 import Select from '../Select/Select';
 import {SimilarGoalItem} from '../SimilarGoalItem/SimilarGoalItem';
 import {Title} from '../Title/Title';
-import {AllowCustomSettingsField} from './components/AllowCustomSettingsField';
 
 import './add-goal.scss';
 

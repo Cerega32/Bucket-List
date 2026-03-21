@@ -22,7 +22,6 @@ import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
 import {canEditGoal} from '@/utils/api/get/canEditGoal';
 import {getGoal} from '@/utils/api/get/getGoal';
-import {getGoalProgress} from '@/utils/api/goals';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
@@ -86,22 +85,30 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		checkEditPermission();
 	}, [goal, listId, canEditCheck.checked]);
 
-	// Загружаем количество записей прогресса для отображения вкладки «История прогресса выполнения»
+	// Счётчик записей для вкладки «История прогресса» — из userProgress (не из recentEntries: может не приходить)
 	useEffect(() => {
-		const loadProgressEntriesCount = async () => {
-			if (goal?.addedByUser && !goal.regularConfig && goal.id) {
-				try {
-					const res = await getGoalProgress(goal.id);
-					const count = res.success && res.data?.recentEntries ? res.data.recentEntries.length : 0;
-					setGoal((prev) => (prev ? {...prev, progressEntriesCount: count} : prev));
-				} catch {
-					setGoal((prev) => (prev ? {...prev, progressEntriesCount: 0} : prev));
-				}
-			}
-		};
+		if (!goal?.addedByUser || goal.regularConfig) return;
+		const count = goal.userProgress?.progressEntriesCount ?? goal.userProgress?.recentEntries?.length ?? 0;
+		setGoal((prev) => {
+			if (!prev || prev.progressEntriesCount === count) return prev;
+			return {...prev, progressEntriesCount: count};
+		});
+	}, [goal?.id, goal?.addedByUser, goal?.regularConfig, goal?.userProgress]);
 
-		loadProgressEntriesCount();
-	}, [goal?.id, goal?.addedByUser, goal?.regularConfig, historyRefreshTrigger]);
+	// После действий на странице истории — перезагрузить цель (обновится user_progress)
+	useEffect(() => {
+		if (historyRefreshTrigger === 0 || !listId) return;
+		let cancelled = false;
+		(async () => {
+			const res = await getGoal(listId);
+			if (!cancelled && res.success && res.data.goal) {
+				setGoal(res.data.goal);
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [historyRefreshTrigger, listId]);
 
 	const openAddReview = () => {
 		setWindow('add-review');
@@ -160,7 +167,26 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				totalCompleted: res.data.totalCompleted,
 			};
 
-			setGoal({...goal, ...updatedGoal});
+			// Функциональное обновление: иначе после patchParentUserProgress(null) из AsideGoal
+			// следующий setGoal({...goal, ...}) с устаревшим goal снова подставляет старый userProgress.
+			setGoal((prev) => {
+				if (!prev) {
+					return null;
+				}
+				const next = {...prev, ...updatedGoal} as IGoal;
+				if (operation === 'mark') {
+					const data = res.data as Partial<IGoal> & {userProgress?: IGoal['userProgress']};
+					if (Object.prototype.hasOwnProperty.call(data, 'userProgress')) {
+						next.userProgress = data.userProgress ?? null;
+						if (next.userProgress == null) {
+							next.progressEntriesCount = 0;
+						} else if (data.progressEntriesCount !== undefined) {
+							next.progressEntriesCount = data.progressEntriesCount;
+						}
+					}
+				}
+				return next;
+			});
 
 			// Если удалена или добавлена регулярная цель, перезагружаем данные цели, чтобы обновить regularConfig.statistics
 			if ((operation === 'delete' || operation === 'add') && goal.regularConfig && listId) {
@@ -180,11 +206,13 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		setIsEditing(false);
 	};
 
-	const handleGoalUpdate = async (updatedGoal?: IGoal) => {
-		// Если передан обновленный goal из API, используем его
-		if (updatedGoal) {
-			setGoal(updatedGoal);
-		} else if (goal && listId) {
+	const handleGoalUpdate = async (updatedGoal?: IGoal | Partial<IGoal>) => {
+		// Патч или полная цель с API
+		if (updatedGoal !== undefined && Object.keys(updatedGoal).length > 0) {
+			setGoal((prev) => (prev ? ({...prev, ...updatedGoal} as IGoal) : null));
+			return;
+		}
+		if (goal && listId) {
 			// Иначе перезагружаем цель из API
 			setIsLoading(true);
 			const res = await getGoal(listId);
@@ -340,6 +368,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 						page={page}
 						userFolders={goal.userFolders}
 						regularConfig={goal.regularConfig}
+						userProgress={goal.userProgress}
 					/>
 					<div className={element('content-wrapper')}>
 						<ContentGoal page={page} goal={goal} className={element('content')} historyRefreshTrigger={historyRefreshTrigger} />

@@ -38,6 +38,10 @@
 		color: var(--color-text);
 		line-height: 1.5;
 		word-break: break-word;
+
+		&--empty {
+			color: var(--color-text-secondary);
+		}
 	}
 
 	&__badge {
