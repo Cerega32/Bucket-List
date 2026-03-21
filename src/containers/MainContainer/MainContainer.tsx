@@ -1,3 +1,4 @@
+import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
 import {Loader} from '@/components/Loader/Loader';
@@ -6,6 +7,7 @@ import {MainHeader} from '@/components/MainHeader/MainHeader';
 import {MainInfo} from '@/components/MainInfo/MainInfo';
 import {MainPopular} from '@/components/MainPopular/MainPopular';
 import {useBem} from '@/hooks/useBem';
+import {UserStore} from '@/store/UserStore';
 import {IComment} from '@/typings/comments';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
@@ -19,8 +21,9 @@ import {Categories} from '../Categories/Categories';
 
 import './main-container.scss';
 
-export const MainContainer: FC<IPage> = () => {
+const MainContainerComponent: FC<IPage> = () => {
 	const [block] = useBem('main-container');
+	const {isAuth} = UserStore;
 	const [isLoading, setIsLoading] = useState(0);
 	const [popularCommentsPhoto, setPopularCommentsPhoto] = useState<IComment[]>([]);
 	const [popularGoalsForDay, setPopularGoalsForDay] = useState<IGoal[]>([]);
@@ -79,7 +82,7 @@ export const MainContainer: FC<IPage> = () => {
 		getGoalsForAllTime();
 		getComments();
 		getTotal();
-	}, []);
+	}, [isAuth]);
 
 	return (
 		<Loader isLoading={!!isLoading} className={block()}>
@@ -95,3 +98,5 @@ export const MainContainer: FC<IPage> = () => {
 		</Loader>
 	);
 };
+
+export const MainContainer = observer(MainContainerComponent);

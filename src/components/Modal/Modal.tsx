@@ -9,6 +9,7 @@ import {Registration} from '@/components/Registration/Registration';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
+import {getUser} from '@/utils/api/get/getUser';
 
 import {AddReview} from '../AddReview/AddReview';
 import {ChangePassword} from '../ChangePassword/ChangePassword';
@@ -90,6 +91,8 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			name: data.name || userInfo.name,
 			...(data.email_confirmed !== undefined && {isEmailConfirmed: data.email_confirmed}),
 		});
+		// Загружаем полный профиль и триггерим обновление данных на страницах
+		getUser();
 	};
 
 	const handleKeyUp = (e: KeyboardEvent) => {

@@ -63,7 +63,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				setIsLoading(false);
 			}
 		})();
-	}, [listId]);
+	}, [listId, isAuth]);
 
 	useEffect(() => {
 		const checkEditPermission = async () => {

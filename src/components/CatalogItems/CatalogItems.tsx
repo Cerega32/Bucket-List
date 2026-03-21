@@ -1,3 +1,4 @@
+import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useMemo, useState} from 'react';
 import {scroller} from 'react-scroll';
 
@@ -5,6 +6,7 @@ import {RegularGoalSettingsModal} from '@/components/RegularGoalSettingsModal/Re
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
 import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import {IPaginationPage} from '@/typings/request';
@@ -98,7 +100,7 @@ const goalTypeOptions: Array<OptionSelect> = [
 	},
 ];
 
-export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersProps> = (props) => {
+const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersProps> = (props) => {
 	const {
 		className,
 		code = 'all',
@@ -115,6 +117,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		pendingCatalogReview = false,
 	} = props;
 
+	const {isAuth} = UserStore;
 	const [block, element] = useBem('catalog-items', className);
 
 	const [goals, setGoals] = useState<{
@@ -200,7 +203,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			}
 			setGoalsLoaded(true);
 		})();
-	}, [subPage, code, completed, userId, initialSearch, pendingCatalogReview]);
+	}, [subPage, code, completed, userId, initialSearch, pendingCatalogReview, isAuth]);
 
 	useEffect(() => {
 		setListsLoaded(false);
@@ -217,7 +220,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			}
 			setListsLoaded(true);
 		})();
-	}, [subPage, code, completed, userId, initialSearch, pendingCatalogReview]);
+	}, [subPage, code, completed, userId, initialSearch, pendingCatalogReview, isAuth]);
 
 	useEffect(() => {
 		setActiveSort(0);
@@ -661,3 +664,5 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		</section>
 	);
 };
+
+export const CatalogItems = observer(CatalogItemsComponent);

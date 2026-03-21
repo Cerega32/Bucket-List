@@ -1,3 +1,4 @@
+import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
@@ -6,15 +7,16 @@ import {Loader} from '@/components/Loader/Loader';
 import {MainCards} from '@/components/MainCards/MainCards';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
-import {IMainGoals} from '@/store/UserStore';
+import {IMainGoals, UserStore} from '@/store/UserStore';
 import {IComplexity} from '@/typings/goal';
 import {IPage} from '@/typings/page';
 import {get100Goals} from '@/utils/api/get/get100Goals';
 import {markGoal} from '@/utils/api/post/markGoal';
 import './main-goals.scss';
 
-export const MainGoals: FC<IPage> = () => {
+const MainGoalsComponent: FC<IPage> = () => {
 	const [block, element] = useBem('main-goals');
+	const {isAuth} = UserStore;
 	const [isLoading, setIsLoading] = useState(true);
 	const [hideCompleted, setHideCompleted] = useState(false);
 	const [allGoalsCompleted, setAllGoalsCompleted] = useState(false);
@@ -34,7 +36,7 @@ export const MainGoals: FC<IPage> = () => {
 			}
 			setIsLoading(false);
 		})();
-	}, []);
+	}, [isAuth]);
 
 	useEffect(() => {
 		if (mainGoals.easyGoals.data.length === 0) {
@@ -164,3 +166,5 @@ export const MainGoals: FC<IPage> = () => {
 		</main>
 	);
 };
+
+export const MainGoals = observer(MainGoalsComponent);

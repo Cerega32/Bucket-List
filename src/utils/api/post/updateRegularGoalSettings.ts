@@ -10,6 +10,7 @@ export interface RegularGoalSettings {
 	durationValue?: number;
 	endDate?: string;
 	allowSkipDays: number;
+	daysForEarnedSkip?: number;
 	resetOnSkip: boolean;
 }
 
@@ -153,7 +154,7 @@ export const updateRegularGoalSettings = async (goalCode: string, settings: Regu
 		frequency: settings.frequency,
 		duration_type: settings.durationType,
 		allow_skip_days: settings.allowSkipDays,
-		days_for_earned_skip: 0, // По умолчанию 0, так как в форме этого поля нет
+		days_for_earned_skip: settings.resetOnSkip ? settings.daysForEarnedSkip ?? 0 : 0,
 		reset_on_skip: settings.resetOnSkip,
 	};
 

@@ -1,3 +1,4 @@
+import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {useParams, useSearchParams} from 'react-router-dom';
 import {scroller} from 'react-scroll';
@@ -12,6 +13,7 @@ import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
 import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import {IPage} from '@/typings/page';
@@ -30,9 +32,9 @@ import {sortMainCategories} from '@/utils/values/categoriesOrder';
 
 import './category.scss';
 
-export const Category: FC<IPage> = ({subPage, page}) => {
+const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 	const [block, element] = useBem('category');
-
+	const {isAuth} = UserStore;
 	const {isScreenSmallMobile} = useScreenSize();
 
 	const [category, setCategory] = useState<ICategoryWithSubcategories | null>(null);
@@ -126,7 +128,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 
 			setIsLoading(false);
 		})();
-	}, [id]);
+	}, [id, isAuth]);
 
 	const updateGoal = async (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
 		// Специальная обработка для добавления цели - проверяем на регулярность
@@ -374,3 +376,5 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 		</main>
 	);
 };
+
+export const Category = observer(CategoryComponent);

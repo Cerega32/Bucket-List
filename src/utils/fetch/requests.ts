@@ -2,7 +2,34 @@ import Cookies from 'js-cookie';
 
 import {ModalStore} from '@/store/ModalStore';
 import {INotification, NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
 import {withRetry} from '@/utils/api/apiRetry';
+
+/** Получить CSRF-токен из cookie (Django: csrftoken) */
+const getCsrfToken = (): string | undefined => {
+	return Cookies.get('csrftoken') || undefined;
+};
+
+/** Обновить CSRF cookie — GET-запрос заставит Django установить актуальный токен (публичный endpoint) */
+const refreshCsrfToken = async (): Promise<void> => {
+	await fetch('/api/categories/', {method: 'GET', credentials: 'include'});
+};
+
+/** Очистить авторизацию при ошибке CSRF — избежать рассинхрона (модалка логина + «вы авторизованы» в шапке) */
+const clearAuthOnCsrfError = (): void => {
+	Cookies.remove('token');
+	Cookies.remove('avatar');
+	Cookies.remove('name');
+	Cookies.remove('user-id');
+	Cookies.remove('subscription_type');
+	Cookies.remove('user_level');
+	Cookies.remove('user_total_completed_goals');
+	Cookies.remove('email_confirmed');
+	Cookies.remove('token');
+	UserStore.setIsAuth(false);
+	UserStore.setAvatar('');
+	UserStore.setName('');
+};
 
 export interface IRequestGet {
 	[key: string]: string | number | boolean | undefined;
@@ -24,14 +51,20 @@ type Headers = HeadersInit & {
 	Authorization?: string;
 };
 
-const setHeaders = (params: IFetchParams = {}): Headers => {
-	const headers: Headers = {};
+const setHeaders = (method: string, params: IFetchParams = {}): Headers => {
+	const headers: Record<string, string> = {};
 	if (params?.auth && Cookies.get('token')) {
-		headers.Authorization = `Token ${Cookies.get('token')}`;
+		headers['Authorization'] = `Token ${Cookies.get('token')}`;
 	}
 
 	if (!params?.file) {
 		headers['Content-Type'] = 'application/json';
+	}
+
+	// CSRF-токен для POST/PUT/PATCH/DELETE (Django)
+	const csrfToken = getCsrfToken();
+	if (csrfToken && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+		headers['X-CSRFToken'] = csrfToken;
 	}
 
 	return headers;
@@ -40,13 +73,14 @@ const setHeaders = (params: IFetchParams = {}): Headers => {
 const fetchData = async (url: string, method: string, params: IFetchParams = {}): Promise<any> => {
 	const {showErrorNotification = true, showSuccessNotification = false, enableRetry = false} = params;
 
-	const makeRequest = async () => {
-		const headers = setHeaders(params);
+	const makeRequest = async (isRetryAfterCsrfRefresh = false) => {
+		const headers = setHeaders(method, params);
 
 		try {
 			const response = await fetch(`/api/${url}/`, {
 				method,
 				headers,
+				credentials: 'include',
 				body: params.body ? (params.file ? (params.body as FormData) : JSON.stringify(params.body)) : undefined,
 			});
 
@@ -59,6 +93,19 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 			}
 
 			if (!response.ok) {
+				const isCsrfError =
+					response.status === 403 && (typeof data?.detail === 'string' ? data.detail : '').toLowerCase().includes('csrf');
+
+				// 403 CSRF — пробуем обновить токен и повторить один раз
+				if (isCsrfError && !isRetryAfterCsrfRefresh) {
+					await refreshCsrfToken();
+					return makeRequest(true);
+				}
+
+				// Повтор не помог — очищаем авторизацию, чтобы не было рассинхрона (модалка логина + «вы авторизованы»)
+				if (isCsrfError && isRetryAfterCsrfRefresh) {
+					clearAuthOnCsrfError();
+				}
 				if (response.status === 401 && params.auth) {
 					ModalStore.setWindow('login');
 					ModalStore.setIsOpen(true);
@@ -82,17 +129,21 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 					if (params?.error) {
 						NotificationStore.addNotification(params.error);
 					} else {
+						const message =
+							response.status === 403 && (typeof data?.detail === 'string' ? data.detail : '').toLowerCase().includes('csrf')
+								? 'Сессия истекла. Обновите страницу и попробуйте снова.'
+								: data.error || 'Что-то пошло не так';
 						NotificationStore.addNotification({
 							type: 'error',
 							title: 'Ошибка',
-							message: data.error || 'Что-то пошло не так',
+							message,
 						});
 					}
 				}
 
 				return {
 					success: false,
-					errors: data.error,
+					errors: data?.detail || data?.error || data.error,
 				};
 			}
 
@@ -139,8 +190,6 @@ export const POST_WITH_RETRY = (url: string, params: IFetchParams): Promise<any>
 export const DELETE = (url: string, params: IFetchParams): Promise<any> => fetchData(url, 'DELETE', params);
 
 export const GET = async (url: string, params?: IFetchParams): Promise<any> => {
-	const headers = setHeaders(params);
-
 	let queryString = '';
 
 	if (params?.get) {
@@ -160,7 +209,8 @@ export const GET = async (url: string, params?: IFetchParams): Promise<any> => {
 
 	try {
 		const response = await fetch(`/api/${url}/${queryString ? `?${queryString}` : ''}`, {
-			headers,
+			headers: setHeaders('GET', params || {}),
+			credentials: 'include',
 		});
 
 		// Проверяем Content-Type перед парсингом JSON
@@ -203,6 +253,7 @@ export const getGoogleBooksVolumeDetails = async (volumeId: string): Promise<any
 			headers: {
 				'Content-Type': 'application/json',
 			},
+			credentials: 'include',
 		});
 
 		const data = await response.json();

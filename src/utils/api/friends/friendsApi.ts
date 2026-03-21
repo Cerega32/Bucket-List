@@ -21,11 +21,11 @@ export interface FriendRequest {
 export interface User {
 	id: number;
 	username: string;
-	email: string;
-	first_name: string;
-	last_name: string;
-	friends_count: number;
-	pending_requests_count: number;
+	firstName: string;
+	lastName: string;
+	isFriend: boolean;
+	hasPendingRequest: boolean;
+	isRequestFromMe: boolean;
 }
 
 export interface ComparisonData {

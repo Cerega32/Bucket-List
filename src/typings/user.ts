@@ -119,7 +119,6 @@ export interface IFriendSearchResult {
 	firstName: string;
 	lastName: string;
 	avatar?: string;
-	email: string;
 	isFriend: boolean;
 	hasPendingRequest: boolean;
 	isRequestFromMe: boolean;

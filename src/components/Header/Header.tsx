@@ -206,6 +206,13 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		}
 	}, [isAuth]);
 
+	// Очистка уведомлений при разлогине (в т.ч. при принудительной очистке из‑за CSRF)
+	useEffect(() => {
+		if (!isAuth) {
+			HeaderNotificationsStore.clearNotifications();
+		}
+	}, [isAuth]);
+
 	// Загрузка целей в процессе для бейджа прогресса
 	useEffect(() => {
 		if (isAuth) {

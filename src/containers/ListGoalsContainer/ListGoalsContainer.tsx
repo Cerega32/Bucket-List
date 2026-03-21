@@ -1,3 +1,4 @@
+import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
@@ -23,7 +24,7 @@ import {removeListGoal} from '@/utils/api/post/removeListGoal';
 import {GoalWithLocation} from '@/utils/mapApi';
 import './list-goals-container.scss';
 
-export const ListGoalsContainer: FC = () => {
+const ListGoalsContainerComponent: FC = () => {
 	const [block, element] = useBem('list-goals-container');
 	const [list, setList] = useState<IList | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +51,7 @@ export const ListGoalsContainer: FC = () => {
 			}
 			setIsLoading(false);
 		})();
-	}, [listId]);
+	}, [listId, isAuth]);
 
 	const updateList = async (code: string, operation: 'add' | 'delete' | 'mark-all'): Promise<void | boolean> => {
 		if (!isAuth) {
@@ -177,3 +178,5 @@ export const ListGoalsContainer: FC = () => {
 		</>
 	);
 };
+
+export const ListGoalsContainer = observer(ListGoalsContainerComponent);

@@ -327,7 +327,13 @@ export const UserSelfSettings: FC = observer(() => {
 			const res = await putUserInfo(updatedData);
 
 			if (res.success && res.data) {
-				setUserSelf(res.data);
+				// Объединяем с текущим userSelf, чтобы не потерять counts и другие данные,
+				// которые API update-profile не возвращает
+				setUserSelf({
+					...user,
+					...res.data,
+					counts: res.data.counts ?? user.counts,
+				});
 				const displayName = res.data.name ?? res.data.username;
 				if (displayName) {
 					setName(displayName);

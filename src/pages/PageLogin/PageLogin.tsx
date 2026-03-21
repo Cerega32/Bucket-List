@@ -7,6 +7,7 @@ import {ModalStore} from '@/store/ModalStore';
 import {ThemeStore} from '@/store/ThemeStore';
 import {UserStore} from '@/store/UserStore';
 import {IPage} from '@/typings/page';
+import {getUser} from '@/utils/api/get/getUser';
 
 export const PageLogin: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;
@@ -27,6 +28,7 @@ export const PageLogin: FC<IPage> = ({page}) => {
 		setName(data.name || '');
 		setIsAuth(true);
 		setAvatar(Cookies.get('avatar') || '');
+		getUser();
 		navigate('/list/100-goals');
 	};
 
