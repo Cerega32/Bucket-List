@@ -18,6 +18,7 @@ import {POST_WITH_RETRY} from '@/utils/fetch/requests';
 import {debounce} from '@/utils/time/debounce';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {selectComplexity} from '@/utils/values/complexity';
+import {getGoalListTitleFieldErrors, GOAL_LIST_TITLE_MIN_LENGTH, isGoalListTitleInvalid} from '@/utils/values/goalConstants';
 
 import '../GoalListItem/goal-list-item.scss';
 import {Banner} from '../Banner/Banner';
@@ -346,7 +347,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 	};
 
 	const validateRequiredFields = () => {
-		const hasError = !title || !description || activeComplexity === null || activeCategory === null || !image;
+		const hasError = isGoalListTitleInvalid(title) || !description || activeComplexity === null || activeCategory === null || !image;
 
 		if (hasError) {
 			setShowErrors(true);
@@ -855,7 +856,8 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 								setValue={handleTitleChange}
 								className={element('field')}
 								required
-								error={showErrors && !title}
+								minLength={GOAL_LIST_TITLE_MIN_LENGTH}
+								error={getGoalListTitleFieldErrors(showErrors, title)}
 							/>
 						</div>
 
@@ -976,7 +978,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 												message="Вставьте список целей (книги, фильмы, игры) — система автоматически найдет соответствия и добавит их к уже выбранным целям."
 											/>
 										</div>
-										{!(activeCategory === null) && (
+										{activeCategory === null && (
 											<div className={element('error-info')}>
 												<Banner
 													type="warning"

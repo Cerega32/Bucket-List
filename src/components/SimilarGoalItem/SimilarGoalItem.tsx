@@ -3,7 +3,9 @@ import {FC, KeyboardEvent} from 'react';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
 import {IGoal} from '@/typings/goal';
+
 import './similar-goal-item.scss';
+import {Title} from '../Title/Title';
 
 interface SimilarGoalItemProps {
 	goal: IGoal;
@@ -32,7 +34,9 @@ export const SimilarGoalItem: FC<SimilarGoalItemProps> = ({goal, onSelect}) => {
 					)}
 				</div>
 				<div className={element('info')}>
-					<h4 className={element('title')}>{goal.title}</h4>
+					<Title tag="h4" className={element('title')}>
+						{goal.title}
+					</Title>
 					<p className={element('complexity')}>{goal.complexity}</p>
 					<p className={element('description')}>{goal.shortDescription}</p>
 				</div>

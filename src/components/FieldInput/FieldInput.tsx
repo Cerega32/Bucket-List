@@ -35,6 +35,7 @@ interface FieldInputProps {
 	suffix?: string;
 	max?: number;
 	min?: number;
+	minLength?: number;
 	hint?: string;
 }
 
@@ -67,6 +68,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		suffix,
 		max,
 		min,
+		minLength,
 		hint,
 	} = props;
 
@@ -112,6 +114,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onKeyDown={onKeyDown}
 						rows={rows}
 						maxLength={maxLength}
+						minLength={minLength}
 						disabled={disabled}
 					/>
 				) : (
@@ -134,6 +137,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onKeyDown={onKeyDown}
 						maxLength={maxLength}
 						min={min}
+						minLength={minLength}
 						max={max}
 						disabled={disabled}
 					/>

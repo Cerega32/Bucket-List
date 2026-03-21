@@ -23,7 +23,7 @@ import {debounce} from '@/utils/time/debounce';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {selectComplexity} from '@/utils/values/complexity';
-import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
+import {getGoalTitleFieldErrors, GOAL_TITLE_MAX_LENGTH, GOAL_TITLE_MIN_LENGTH, isGoalTitleInvalid} from '@/utils/values/goalConstants';
 
 import {Loader} from '../Loader/Loader';
 import Select from '../Select/Select';
@@ -511,7 +511,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	};
 
 	const validateRequiredFields = () => {
-		const hasError = !title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl);
+		const hasError =
+			isGoalTitleInvalid(title) || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl);
 
 		if (hasError) {
 			setShowErrors(true);
@@ -1071,7 +1072,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 								onBlur={handleTitleBlur}
 								maxLength={GOAL_TITLE_MAX_LENGTH}
 								showCharCount
-								error={showErrors && !title}
+								error={getGoalTitleFieldErrors(showErrors, title)}
+								minLength={GOAL_TITLE_MIN_LENGTH}
 							/>
 
 							{showSimilarGoals && (

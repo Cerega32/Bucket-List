@@ -18,84 +18,93 @@ interface FriendCardProps {
 	onRemove?: (friendId: number) => void;
 	onCompare?: (friendId: number) => void;
 	showActions?: boolean;
+	actions?: React.ReactNode;
+	sinceText?: string;
+	outgoing?: boolean;
 	className?: string;
 }
 
-export const FriendCard: React.FC<FriendCardProps> = observer(({friend, onRemove, onCompare, showActions = true, className}) => {
-	const [block, element] = useBem('friend-card', className);
-	const [isRemoving, setIsRemoving] = useState(false);
+export const FriendCard: React.FC<FriendCardProps> = observer(
+	({friend, onRemove, onCompare, showActions = true, actions, sinceText, outgoing, className}) => {
+		const [block, element] = useBem('friends-card', className);
+		const [isRemoving, setIsRemoving] = useState(false);
 
-	const handleRemoveFriend = async () => {
-		try {
-			setIsRemoving(true);
-			await removeFriend(friend.id);
-			FriendsStore.removeFriend(friend.id);
-			onRemove?.(friend.id);
-		} catch (error) {
-			NotificationStore.addNotification({
-				type: 'error',
-				title: 'Ошибка',
-				message: error instanceof Error ? error.message : 'Не удалось удалить друга',
-			});
-		} finally {
-			setIsRemoving(false);
-		}
-	};
+		const handleRemoveFriend = async () => {
+			try {
+				setIsRemoving(true);
+				await removeFriend(friend.id);
+				FriendsStore.removeFriend(friend.id);
+				onRemove?.(friend.id);
+			} catch (error) {
+				NotificationStore.addNotification({
+					type: 'error',
+					title: 'Ошибка',
+					message: error instanceof Error ? error.message : 'Не удалось удалить друга',
+				});
+			} finally {
+				setIsRemoving(false);
+			}
+		};
 
-	const handleCompare = () => {
-		onCompare?.(friend.id);
-	};
+		const handleCompare = () => {
+			onCompare?.(friend.id);
+		};
 
-	const hasName = friend.firstName || friend.lastName;
-	const displayName = hasName ? `${friend.firstName || ''} ${friend.lastName || ''}`.trim() : friend.username;
+		const hasName = friend.firstName || friend.lastName;
+		const displayName = hasName ? `${friend.firstName || ''} ${friend.lastName || ''}`.trim() : friend.username;
 
-	// Форматируем дату более надежно
-	const formatFriendshipDate = (dateString: string) => {
-		try {
-			const date = new Date(dateString);
-			// Проверяем что дата валидная
-			if (Number.isNaN(date.getTime())) {
+		// Форматируем дату более надежно
+		const formatFriendshipDate = (dateString: string) => {
+			try {
+				const date = new Date(dateString);
+				// Проверяем что дата валидная
+				if (Number.isNaN(date.getTime())) {
+					return 'Недавно';
+				}
+				return date.toLocaleDateString('ru-RU');
+			} catch {
 				return 'Недавно';
 			}
-			return date.toLocaleDateString('ru-RU');
-		} catch {
-			return 'Недавно';
-		}
-	};
+		};
 
-	return (
-		<Loader isLoading={isRemoving} className={block()}>
-			<div className={element('avatar')}>
-				{friend.avatar ? (
-					<Avatar size="medium-56" avatar={friend.avatar} />
-				) : (
-					<div className={element('avatar-placeholder')}>{friend.username.charAt(0).toUpperCase()}</div>
-				)}
-			</div>
-
-			<div className={element('info')}>
-				<Link className={element('name')} to={`/user/${friend.id}/showcase`} aria-label={`Перейти в профиль ${displayName}`}>
-					{friend.username}
-				</Link>
-				{hasName && (
-					<p className={element('username')}>
-						{friend.firstName || ''} {friend.lastName || ''}
-					</p>
-				)}
-				<p className={element('since')}>Друзья с {formatFriendshipDate(friend.createdAt)}</p>
-			</div>
-
-			{showActions && (
-				<div className={element('actions')}>
-					<Button theme="blue-light" size="small" onClick={handleCompare}>
-						Сравнить
-					</Button>
-
-					<Button theme="red" size="small" onClick={handleRemoveFriend}>
-						Удалить
-					</Button>
+		return (
+			<Loader isLoading={isRemoving} className={block({outgoing})}>
+				<div className={element('avatar')}>
+					{friend.avatar ? (
+						<Avatar size="medium-56" avatar={friend.avatar} />
+					) : (
+						<div className={element('avatar-placeholder')}>{friend.username.charAt(0).toUpperCase()}</div>
+					)}
 				</div>
-			)}
-		</Loader>
-	);
-});
+
+				<div className={element('info')}>
+					<Link className={element('name')} to={`/user/${friend.id}/showcase`} aria-label={`Перейти в профиль ${displayName}`}>
+						{friend.username}
+					</Link>
+					{hasName && (
+						<p className={element('username')}>
+							{friend.firstName || ''} {friend.lastName || ''}
+						</p>
+					)}
+					<p className={element('since')}>{sinceText ?? `Друзья с ${formatFriendshipDate(friend.createdAt)}`}</p>
+				</div>
+
+				{(showActions || actions) && (
+					<div className={element('actions')}>
+						{actions ?? (
+							<>
+								<Button theme="blue-light" size="small" onClick={handleCompare}>
+									Сравнить
+								</Button>
+
+								<Button theme="red" size="small" onClick={handleRemoveFriend}>
+									Удалить
+								</Button>
+							</>
+						)}
+					</div>
+				)}
+			</Loader>
+		);
+	}
+);

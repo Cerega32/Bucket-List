@@ -14,7 +14,7 @@ import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {debounce} from '@/utils/time/debounce';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {selectComplexity} from '@/utils/values/complexity';
-import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
+import {getGoalTitleFieldErrors, GOAL_TITLE_MAX_LENGTH, GOAL_TITLE_MIN_LENGTH, isGoalTitleInvalid} from '@/utils/values/goalConstants';
 
 import {Loader} from '../Loader/Loader';
 import Select from '../Select/Select';
@@ -71,6 +71,7 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 	const [, setIsSearching] = useState(false);
 	const [showSimilarGoals, setShowSimilarGoals] = useState(false);
 	const [isTitleFocused, setIsTitleFocused] = useState(false);
+	const [showErrors, setShowErrors] = useState(false);
 
 	useEffect(() => {
 		if (autoParserData) {
@@ -400,7 +401,8 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 	const onSubmit = async (e?: React.FormEvent | React.MouseEvent) => {
 		if (e && typeof e.preventDefault === 'function') e.preventDefault();
 
-		if (!title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+		if (isGoalTitleInvalid(title) || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+			setShowErrors(true);
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -548,7 +550,9 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 								onFocus={handleTitleFocus}
 								onBlur={handleTitleBlur}
 								maxLength={GOAL_TITLE_MAX_LENGTH}
+								minLength={GOAL_TITLE_MIN_LENGTH}
 								showCharCount
+								error={getGoalTitleFieldErrors(showErrors, title)}
 							/>
 
 							{showSimilarGoals && (

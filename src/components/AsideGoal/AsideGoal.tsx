@@ -28,6 +28,7 @@ import {pluralize} from '@/utils/text/pluralize';
 
 import {Button} from '../Button/Button';
 import {GoalTimer} from '../GoalTimer/GoalTimer';
+import {GRADIENT_DEFAULT_IMAGE} from '../Gradient/Gradient';
 import {Line} from '../Line/Line';
 import {Modal} from '../Modal/Modal';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
@@ -40,7 +41,7 @@ import './aside-goal.scss';
 interface AsideProps {
 	className?: string;
 	title: string;
-	image: string;
+	image: string | null | undefined;
 	added: boolean;
 	code: string;
 	done: boolean;
@@ -1356,9 +1357,11 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const currentDayIndex = getCurrentDayOfWeek();
 	const progressPercentage = getProgressPercentage();
 
+	const imageSrc = image != null && String(image).trim() !== '' ? String(image).trim() : GRADIENT_DEFAULT_IMAGE;
+
 	return (
 		<aside className={block({isList})}>
-			<img src={image} alt={title} className={element('image')} />
+			<img src={imageSrc} alt={title} className={element('image')} />
 			{/* Блок с информацией о регулярной цели - показывается только если цель не добавлена */}
 			{regularConfig && !isList && !isAdded && (
 				<div className={element('regular-info-header')}>
