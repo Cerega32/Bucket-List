@@ -16,20 +16,21 @@
 		@include block-radius(40px);
 
 		background: var(--color-white);
+
+		@include sm {
+			padding: 24px;
+		}
 	}
 
 	&__header {
-		padding: 40px 40px 24px;
+		padding-bottom: 24px;
 		text-align: center;
 		border-bottom: 1px solid var(--color-border);
-
-		@include md {
-			padding: 24px 24px 20px;
-		}
 	}
 
 	&__title {
 		margin: 0 0 16px;
+		overflow-wrap: break-word;
 	}
 
 	&__date {
@@ -39,11 +40,7 @@
 	}
 
 	&__document {
-		padding: 40px;
-
-		@include md {
-			padding: 24px;
-		}
+		padding-top: 24px;
 
 		section {
 			margin-bottom: 32px;

@@ -144,11 +144,10 @@
 		padding: 4px 0;
 		color: var(--color-text-secondary);
 		text-decoration: none;
-		transition: all 0.2s ease;
+		line-height: var(--line-height-14);
 
 		&:hover {
 			color: var(--color-primary);
-			transform: translateX(4px);
 		}
 	}
 

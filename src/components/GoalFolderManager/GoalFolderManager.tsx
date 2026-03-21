@@ -3,6 +3,7 @@ import {FC, useCallback, useEffect, useState} from 'react';
 import {Link, useNavigate, useParams} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {ICreateFolderData} from '@/typings/goal';
 import {
 	createGoalFolder,
@@ -54,6 +55,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	const [block, element] = useBem('goal-folder-manager', className);
 	const navigate = useNavigate();
 	const {folderId} = useParams<{folderId: string}>();
+	const {isScreenXs} = useScreenSize();
 
 	const [folders, setFolders] = useState<IGoalFolder[]>([]);
 	const [selectedFolder, setSelectedFolder] = useState<IGoalFolder | null>(null);
@@ -286,7 +288,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 				<Title tag="h2" className={element('title')}>
 					Папки целей
 				</Title>
-				<Button theme="blue" icon="plus" onClick={() => setIsCreating(true)} size="medium" width="auto">
+				<Button theme="blue" icon="plus" onClick={() => setIsCreating(true)} size="medium" width={isScreenXs ? 'full' : 'auto'}>
 					Создать папку
 				</Button>
 			</div>

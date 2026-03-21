@@ -134,6 +134,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const [isCompleted, setIsCompleted] = useState(done);
 	const [isRegularGoalCompletedToday, setIsRegularGoalCompletedToday] = useState(false);
 	const [isAddingRegularGoal, setIsAddingRegularGoal] = useState(false);
+	const [isAddingListGoal, setIsAddingListGoal] = useState(false);
 	const [isAdded, setIsAdded] = useState(added);
 	const [localStatistics, setLocalStatistics] = useState<IRegularGoalStatistics | null>(regularConfig?.statistics || null);
 
@@ -991,6 +992,16 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		// Прогресс заданий обновляется автоматически на бэкенде
 
 		window.open(`https://telegram.me/share/url?url=${window.location.href}`, 'sharer', 'status=0,toolbar=0,width=650,height=500');
+	};
+
+	const handleAddListGoal = async () => {
+		if (!isList || isAdded) return;
+		setIsAddingListGoal(true);
+		try {
+			await updateGoal(code, 'add');
+		} finally {
+			setIsAddingListGoal(false);
+		}
 	};
 
 	// Обработчик добавления цели с проверкой на регулярность
@@ -2127,13 +2138,14 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					<>
 						{!isAdded && (
 							<Button
-								onClick={() => updateGoal(code, 'add')}
+								onClick={handleAddListGoal}
 								icon="plus"
 								className={element('btn')}
 								theme="blue"
 								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+								disabled={isAddingListGoal}
 							>
-								Добавить к себе
+								{isAddingListGoal ? 'Добавление...' : 'Добавить к себе'}
 							</Button>
 						)}
 						{isAdded && !isCompleted && (

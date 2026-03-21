@@ -85,65 +85,99 @@ export const Card: FC<CardProps> = (props) => {
 		}
 	};
 
+	const getProgress = () => {
+		if (!isList) return null;
+		if ('userCompletedGoals' in goal && 'goalsCount' in goal) {
+			return `${Math.round((goal.userCompletedGoals / goal.goalsCount) * 100)}%`;
+		}
+		return null;
+	};
+
 	return (
-		<section className={block({horizontal})}>
+		<section className={block({horizontal, list: isList})}>
 			{disableNavigation ? (
 				<div className={element('gradient')}>
 					<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} show={goal.completedByUser}>
-						<div className={element('img-tags')}>
-							{goal.addedByUser && !goal.completedByUser && (
-								<Tag icon="watch" theme="blue" classNameIcon={element('img-tag-icon-done')} title="В процессе" />
-							)}
-							{goal.completedByUser && (
-								<Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
-							)}
-							{!isList && goal.regularConfig && (
-								<Tag
-									icon={goal.completedByUser ? 'regular' : 'regular-empty'}
-									theme="gold"
-									classNameIcon={element('img-tag-icon-done')}
-									title="Регулярная цель"
-								/>
-							)}
-							{/* {goal.catalogApproved === false && (
+						<div className={element('img-tags-wrapper')}>
+							<div className={element('img-tags')}>
+								{goal.addedByUser &&
+									!goal.completedByUser &&
+									(() => {
+										const progress = getProgress();
+										return (
+											<Tag
+												icon="watch"
+												theme="blue"
+												classNameIcon={element('img-tag-icon-done')}
+												title={progress ? `В процессе ${progress}` : 'В процессе'}
+												text={progress ?? undefined}
+											/>
+										);
+									})()}
+								{goal.completedByUser && (
+									<Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
+								)}
+								{!isList && goal.regularConfig && (
+									<Tag
+										icon={goal.completedByUser ? 'regular' : 'regular-empty'}
+										theme="gold"
+										classNameIcon={element('img-tag-icon-done')}
+										title="Регулярная цель"
+									/>
+								)}
+								<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
+							</div>
+							{goal.catalogApproved === false && (
 								<Tag
 									text="Ожидает проверки"
 									theme="gray"
-									className={element('img-tag-category')}
+									className={element('img-tag-pending')}
 									title="Ожидает публикации в каталоге"
 								/>
-							)} */}
-							<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
+							)}
 						</div>
 					</Gradient>
 				</div>
 			) : (
 				<Link to={`/${isList ? 'list' : 'goals'}/${goal.code}`} className={element('gradient')}>
 					<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} show={goal.completedByUser}>
-						<div className={element('img-tags')}>
-							{goal.addedByUser && !goal.completedByUser && (
-								<Tag icon="watch" theme="blue" classNameIcon={element('img-tag-icon-done')} title="В процессе" />
-							)}
-							{goal.completedByUser && (
-								<Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
-							)}
-							{!isList && goal.regularConfig && (
-								<Tag
-									icon={goal.completedByUser ? 'regular' : 'regular-empty'}
-									theme="gold"
-									classNameIcon={element('img-tag-icon-done')}
-									title="Регулярная цель"
-								/>
-							)}
-							{/* {goal.catalogApproved === false && (
+						<div className={element('img-tags-wrapper')}>
+							<div className={element('img-tags')}>
+								{goal.addedByUser &&
+									!goal.completedByUser &&
+									(() => {
+										const progress = getProgress();
+										return (
+											<Tag
+												icon="watch"
+												theme="blue"
+												classNameIcon={element('img-tag-icon-done')}
+												title={progress ? `В процессе ${progress}` : 'В процессе'}
+												text={progress ?? undefined}
+											/>
+										);
+									})()}
+								{goal.completedByUser && (
+									<Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
+								)}
+								{!isList && goal.regularConfig && (
+									<Tag
+										icon={goal.completedByUser ? 'regular' : 'regular-empty'}
+										theme="gold"
+										classNameIcon={element('img-tag-icon-done')}
+										title="Регулярная цель"
+									/>
+								)}
+								<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
+							</div>
+							{goal.catalogApproved === false && (
 								<Tag
 									text="Ожидает проверки"
 									theme="gray"
-									className={element('img-tag-category')}
+									className={element('img-tag-pending')}
 									title="Ожидает публикации в каталоге"
 								/>
-							)} */}
-							<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
+							)}
 						</div>
 					</Gradient>
 				</Link>
@@ -210,12 +244,8 @@ export const Card: FC<CardProps> = (props) => {
 										))}
 									{showMarkButton &&
 										(isScreenXs ? (
-											<Button
-												theme={goal.completedByUser ? 'green' : 'blue-light'}
-												size="small"
-												onClick={onClickMark}
-											>
-												Выполнить
+											<Button theme={goal.completedByUser ? 'green' : 'blue'} size="small" onClick={onClickMark}>
+												{goal.completedByUser ? 'Выполнено' : 'Выполнить'}
 											</Button>
 										) : (
 											<Button
