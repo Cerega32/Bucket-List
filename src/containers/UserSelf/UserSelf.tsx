@@ -58,6 +58,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 	};
 
 	const {userSelf} = UserStore;
+	const isPremium = userSelf.subscriptionType === 'premium';
 
 	const activeGoalsAndListsCount =
 		userSelf.totalAddedGoals + userSelf.totalAddedLists - userSelf.totalCompletedGoals - userSelf.totalCompletedLists;
@@ -128,11 +129,15 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			page: 'isUserSelfFriends',
 			count: friendsCount,
 		},
-		{
-			url: '/user/self/subs',
-			name: 'Больше функционала',
-			page: 'isUserSelfSubs',
-		},
+		...(isPremium
+			? []
+			: [
+					{
+						url: '/user/self/subs',
+						name: 'Больше функционала',
+						page: 'isUserSelfSubs',
+					},
+			  ]),
 		{
 			url: '/user/self/settings',
 			name: 'Настройки',

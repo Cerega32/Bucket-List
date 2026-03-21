@@ -16,6 +16,7 @@ import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {updateGoalList} from '@/utils/api/put/updateGoalList';
 import {debounce} from '@/utils/time/debounce';
 import {getComplexity, selectComplexity} from '@/utils/values/complexity';
+import {getGoalListTitleFieldErrors, GOAL_LIST_TITLE_MIN_LENGTH, isGoalListTitleInvalid} from '@/utils/values/goalConstants';
 
 import {GoalSearchItem} from '../GoalSearchItem/GoalSearchItem';
 import {ScrollToTop} from '../ScrollToTop/ScrollToTop';
@@ -212,9 +213,16 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 	};
 
 	const removeImage = () => {
-		if (canEditAll) {
-			setImage(null);
-			setImagePreview(listData.image); // Возвращаем оригинальное изображение
+		if (!canEditAll) return;
+		// Освобождаем blob URL предпросмотра, если пользователь загружал файл
+		if (imagePreview.startsWith('blob:')) {
+			URL.revokeObjectURL(imagePreview);
+		}
+		setImage(null);
+		// Пустой превью — показываем зону загрузки, чтобы можно было выбрать новое изображение
+		setImagePreview('');
+		if (fileInputRef.current) {
+			fileInputRef.current.value = '';
 		}
 	};
 
@@ -252,7 +260,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 	const validateRequiredFields = () => {
 		if (!canEditAll) return true;
 
-		const hasError = !title || !description || activeComplexity === null || activeCategory === null;
+		const hasError = isGoalListTitleInvalid(title) || !description || activeComplexity === null || activeCategory === null;
 
 		if (hasError) {
 			setShowErrors(true);
@@ -403,7 +411,8 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 									setValue={handleTitleChange}
 									className={element('field')}
 									required
-									error={showErrors && !title}
+									minLength={GOAL_LIST_TITLE_MIN_LENGTH}
+									error={getGoalListTitleFieldErrors(showErrors, title)}
 								/>
 							</div>
 

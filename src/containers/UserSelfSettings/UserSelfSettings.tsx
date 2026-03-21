@@ -69,6 +69,10 @@ export const UserSelfSettings: FC = observer(() => {
 			errors.push('Введите имя пользователя');
 		}
 
+		if (trimmed.length > 0 && trimmed.length < 3) {
+			errors.push('Минимальная длина имени пользователя - 3 символа');
+		}
+
 		if (trimmed.length > 0 && !/^[A-Za-z0-9_]+$/.test(trimmed)) {
 			errors.push('Используйте только латинские буквы, цифры и знак подчёркивания');
 		}
@@ -488,6 +492,7 @@ export const UserSelfSettings: FC = observer(() => {
 							error={usernameErrors}
 							onBlur={() => checkUsernameAsync(username)}
 							maxLength={USERNAME_MAX_LENGTH}
+							minLength={3}
 							hint={
 								!usernameErrors || usernameErrors.length === 0
 									? 'Используйте только латинские буквы, цифры и знак подчёркивания'

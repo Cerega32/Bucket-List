@@ -115,7 +115,7 @@
 		margin: 0;
 		color: var(--color-primary);
 		font-size: 16px;
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	&__close-similar {
@@ -146,7 +146,7 @@
 		display: block;
 		margin-bottom: 4px;
 		font-size: 14px;
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	&__dropzone {
