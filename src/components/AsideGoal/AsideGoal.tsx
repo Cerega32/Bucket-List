@@ -10,8 +10,6 @@ import {UserStore} from '@/store/UserStore';
 import {IGoal, ILocation, IRegularGoalConfig, IRegularGoalStatistics, IShortGoal} from '@/typings/goal';
 import {getGoalTimer, TimerInfo} from '@/utils/api/get/getGoalTimer';
 import {
-	createGoalProgress,
-	getGoalProgress,
 	IGoalProgress,
 	markRegularProgress,
 	resetCompletedSeries,
@@ -38,6 +36,33 @@ import {Svg} from '../Svg/Svg';
 
 import './aside-goal.scss';
 
+/** Черновик для модалки до первого сохранения на сервер (id === 0) */
+function buildDraftGoalProgress(p: {goalId: number; title: string; code: string; image?: string | null}): IGoalProgress {
+	return {
+		id: 0,
+		goal: p.goalId,
+		goalTitle: p.title,
+		goalCategory: '',
+		goalCategoryNameEn: '',
+		goalImage: p.image || '',
+		goalCode: p.code,
+		progressPercentage: 0,
+		dailyNotes: '',
+		isWorkingToday: false,
+		lastUpdated: '',
+		createdAt: '',
+		recentEntries: [],
+	};
+}
+
+/** Календарная дата YYYY-MM-DD в локальном часовом поясе (toISOString даёт UTC и ломает сопоставление с датами с бэкенда). */
+function formatLocalDateYMD(d: Date): string {
+	const y = d.getFullYear();
+	const m = String(d.getMonth() + 1).padStart(2, '0');
+	const day = String(d.getDate()).padStart(2, '0');
+	return `${y}-${m}-${day}`;
+}
+
 interface AsideProps {
 	className?: string;
 	title: string;
@@ -60,7 +85,9 @@ interface AsideGoalProps extends AsideProps {
 	location?: ILocation;
 	onGoalCompleted?: () => void; // Новый колбэк для уведомления о завершении цели
 	onHistoryRefresh?: () => void; // Колбэк для обновления истории выполнения
-	onGoalUpdate?: (updatedGoal?: IGoal) => void; // Колбэк для обновления цели
+	onGoalUpdate?: (updatedGoal?: IGoal | Partial<IGoal>) => void; // Колбэк для обновления цели
+	/** Прогресс из ответа GET цели; если передан (включая null), отдельный запрос к /progress/ не делается */
+	userProgress?: IGoalProgress | null;
 	page?: string; // Текущая страница (для определения, находимся ли мы на странице истории)
 	list?: never;
 }
@@ -101,6 +128,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		page,
 	} = props;
 	const onGoalUpdate = !isList ? (props as AsideGoalProps).onGoalUpdate : undefined;
+	const goalUserProgress = !isList ? (props as AsideGoalProps).userProgress : undefined;
 	const [timer, setTimer] = useState<TimerInfo | null>(null);
 	const [progress, setProgress] = useState<IGoalProgress | null>(null);
 	const [isCompleted, setIsCompleted] = useState(done);
@@ -126,6 +154,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const [pendingSettings, setPendingSettings] = useState<RegularGoalSettings | null>(null);
 	const [isAddRegularGoalModalOpen, setIsAddRegularGoalModalOpen] = useState(false);
 	const [isDeleteProgressModalOpen, setIsDeleteProgressModalOpen] = useState(false);
+	const [isUncompleteWithProgressModalOpen, setIsUncompleteWithProgressModalOpen] = useState(false);
 
 	const [block, element] = useBem('aside-goal', className);
 
@@ -204,6 +233,14 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const {isAuth} = UserStore;
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 
+	const patchParentUserProgress = (next: IGoalProgress | null) => {
+		if (!onGoalUpdate) return;
+		onGoalUpdate({
+			userProgress: next,
+			progressEntriesCount: next?.progressEntriesCount ?? next?.recentEntries?.length ?? 0,
+		});
+	};
+
 	// Загрузка информации о таймере
 	useEffect(() => {
 		const loadTimer = async () => {
@@ -222,23 +259,13 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		loadTimer();
 	}, [code, isAdded, isList]);
 
-	// Загрузка прогресса цели
+	// Прогресс только из ответа GET цели (userProgress); отдельных запросов к /progress/ нет
 	useEffect(() => {
-		const loadProgress = async () => {
-			if (isAdded && !isList && goalId) {
-				try {
-					const response = await getGoalProgress(goalId);
-					if (response.success && response.data) {
-						setProgress(response.data);
-					}
-				} catch (error) {
-					console.error('Ошибка загрузки прогресса:', error);
-				}
-			}
-		};
-
-		loadProgress();
-	}, [isAdded, isList, goalId]);
+		if (!isAdded || isList || !goalId) {
+			return;
+		}
+		setProgress(goalUserProgress ?? null);
+	}, [isAdded, isList, goalId, goalUserProgress]);
 
 	const handleTimerUpdate = (updatedTimer: TimerInfo | null) => {
 		setTimer(updatedTimer);
@@ -881,6 +908,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				currentProgress: current,
 				onProgressUpdate: (updatedProgress: IGoalProgress) => {
 					setProgress(updatedProgress);
+					patchParentUserProgress(updatedProgress);
 					// Если прогресс достиг 100%, отмечаем как выполненную
 					if (updatedProgress.progressPercentage >= 100) {
 						setIsCompleted(true);
@@ -899,22 +927,10 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		}
 	};
 
-	const handleOpenProgressModalOrStart = async () => {
+	const handleOpenProgressModalOrStart = () => {
 		if (isList || !goalId || !isAdded || regularConfig) return;
 		if (!progress) {
-			try {
-				const response = await createGoalProgress(goalId, {
-					progress_percentage: 0,
-					daily_notes: '',
-					is_working_today: true,
-				});
-				if (response.success && response.data) {
-					setProgress(response.data);
-					openProgressModal(response.data);
-				}
-			} catch (error) {
-				console.error('Ошибка начала прогресса:', error);
-			}
+			openProgressModal(buildDraftGoalProgress({goalId, title, code, image}));
 		} else {
 			openProgressModal();
 		}
@@ -1041,6 +1057,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 			});
 			if (response.success && response.data) {
 				setProgress(response.data);
+				patchParentUserProgress(response.data);
 			}
 		} catch (error) {
 			console.error('Ошибка отметки сегодня:', error);
@@ -1058,18 +1075,33 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 			try {
 				await resetGoalProgress(goalId);
 				setProgress(null);
+				patchParentUserProgress(null);
+				onHistoryRefresh?.();
 			} catch (error) {
 				console.error('Ошибка сброса прогресса:', error);
+				NotificationStore.addNotification({
+					type: 'error',
+					title: 'Ошибка',
+					message: error instanceof Error ? error.message : 'Не удалось сбросить прогресс',
+				});
+				return;
 			}
 		}
 
-		// Обновляем локальное состояние
 		setIsCompleted(!isCurrentlyCompleted);
 
-		// Вызываем оригинальную функцию только для целей (не списков)
 		if (!isList) {
 			await (updateGoal as any)(code, 'mark', isCurrentlyCompleted);
 		}
+	};
+
+	/** Отмена выполнения: при активном прогрессе — сначала подтверждение (прогресс будет удалён) */
+	const handleMarkGoalClick = () => {
+		if (!isList && isCompleted && progress && goalId) {
+			setIsUncompleteWithProgressModalOpen(true);
+			return;
+		}
+		handleMarkGoal(isCompleted).catch(() => {});
 	};
 
 	// Функция для форматирования дней недели
@@ -1171,19 +1203,37 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	};
 
 	// Хелперы для блока прогресса (цели с прогрессом, не регулярные)
+	const getLocalMonday = (d: Date): Date => {
+		const t = new Date(d);
+		t.setHours(0, 0, 0, 0);
+		const day = t.getDay();
+		const diffFromMonday = day === 0 ? 6 : day - 1;
+		t.setDate(t.getDate() - diffFromMonday);
+		return t;
+	};
+
+	/** Недели по календарю (Пн–Вс): первая неделя = 1, с каждым новым понедельником +1 от недели старта */
 	const getProgressWeeksCount = (p: IGoalProgress): number => {
-		const start = new Date(p.createdAt);
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		start.setHours(0, 0, 0, 0);
-		const diffMs = today.getTime() - start.getTime();
-		return Math.max(0, Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)));
+		if (typeof p.calendarWeeksCount === 'number') {
+			return p.calendarWeeksCount;
+		}
+		const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+		const startMonday = getLocalMonday(new Date(p.createdAt));
+		const todayMonday = getLocalMonday(new Date());
+		const deltaWeeks = Math.floor((todayMonday.getTime() - startMonday.getTime()) / msPerWeek);
+		if (deltaWeeks < 0) {
+			return 1;
+		}
+		return Math.max(1, deltaWeeks + 1);
 	};
 
 	const getProgressMaxStreak = (p: IGoalProgress): number => {
-		const entries = p.recentEntries || [];
+		if (typeof p.maxConsecutiveWorkDays === 'number') {
+			return p.maxConsecutiveWorkDays;
+		}
+		const entries = (p.recentEntries || []).filter((e) => e.workDone);
 		if (entries.length === 0) return 0;
-		const dates = [...new Set(entries.map((e) => e.date))].sort();
+		const dates = [...new Set(entries.map((e) => e.date.split('T')[0]))].sort();
 		let maxStreak = 1;
 		let currentStreak = 1;
 		for (let i = 1; i < dates.length; i++) {
@@ -1201,26 +1251,41 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	};
 
 	const getProgressWeekDaysCompleted = (p: IGoalProgress): boolean[] => {
+		if (p.weekWorkDone && p.weekWorkDone.length === 7) {
+			return p.weekWorkDone;
+		}
 		const today = new Date();
 		const dayOfWeek = today.getDay();
 		const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 		const monday = new Date(today);
 		monday.setDate(today.getDate() - diff);
 		monday.setHours(0, 0, 0, 0);
-		const entryDates = new Set((p.recentEntries || []).map((e) => e.date.split('T')[0]));
+		const hasWorkedOnDate = (dateStr: string): boolean =>
+			(p.recentEntries || []).some((e) => {
+				const entryDay = e.date.split('T')[0];
+				return entryDay === dateStr && (e.workDone ?? false);
+			});
 		return Array.from({length: 7}, (_, i) => {
 			const d = new Date(monday);
 			d.setDate(monday.getDate() + i);
-			const dateStr = d.toISOString().split('T')[0];
-			return entryDates.has(dateStr);
+			const dateStr = formatLocalDateYMD(d);
+			return hasWorkedOnDate(dateStr);
 		});
 	};
 
-	/** Количество отмеченных дней (уникальные даты в recentEntries) */
+	/** Количество дней с отметкой «работал» (по workDone в записях) */
 	const getProgressMarkedDaysCount = (p: IGoalProgress): number => {
-		const entries = p.recentEntries || [];
-		const uniqueDates = new Set(entries.map((e) => e.date.split('T')[0]));
-		return uniqueDates.size;
+		if (typeof p.workedDaysCount === 'number') {
+			return p.workedDaysCount;
+		}
+		const byDate = new Map<string, boolean>();
+		(p.recentEntries || []).forEach((e) => {
+			const key = e.date.split('T')[0];
+			if (!key) return;
+			const wd = e.workDone ?? false;
+			byDate.set(key, (byDate.get(key) ?? false) || wd);
+		});
+		return [...byDate.values()].filter(Boolean).length;
 	};
 
 	// Получение информации о серии (дни или недели)
@@ -1356,6 +1421,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const seriesInfo = getSeriesInfo();
 	const currentDayIndex = getCurrentDayOfWeek();
 	const progressPercentage = getProgressPercentage();
+	const isProgressGoalComplete = progress != null && progress.progressPercentage >= 100;
 
 	const imageSrc = image != null && String(image).trim() !== '' ? String(image).trim() : GRADIENT_DEFAULT_IMAGE;
 
@@ -1825,121 +1891,127 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				</div>
 			)}
 
-			{/* Блок прогресса показывается только если пользователь изменил прогресс (процент или заметка) или отметил цель выполненной */}
-			{!isList &&
-				isAdded &&
-				!regularConfig &&
-				progress &&
-				(progress.progressPercentage > 0 || !!progress.dailyNotes || isCompleted) && (
-					<div className={element('regular-info-header')}>
-						<div className={element('regular-info-title')}>
-							<Svg icon="signal" className={element('regular-info-icon', {progress: true})} />
-							<span>Прогресс</span>
-							<span className={element('regular-info-streak', {active: true})}>
-								{pluralize(getProgressMarkedDaysCount(progress), ['день', 'дня', 'дней'])}
-							</span>
-						</div>
-						<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+			{/* Блок прогресса: есть запись GoalProgress — прогресс начат, в т.ч. 0% и без заметок */}
+			{!isList && isAdded && !regularConfig && progress && (
+				<div className={element('regular-info-header')}>
+					<div className={element('regular-info-title')}>
+						<Svg icon="signal" className={element('regular-info-icon', {progress: true})} />
+						<span>{isProgressGoalComplete ? 'Выполнено за:' : 'Прогресс'}</span>
+						<span className={element('regular-info-streak', {active: true})}>
+							{pluralize(getProgressMarkedDaysCount(progress), ['день', 'дня', 'дней'])}
+						</span>
+					</div>
+					<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
 
-						{/* График дней недели по recentEntries */}
-						<div className={element('regular-series-days')}>
-							{Array.from({length: 7}, (_, i) => {
-								const dayName = getDayName(i);
-								const isCompletedDay = getProgressWeekDaysCompleted(progress)[i];
-								const isCurrentDay = i === currentDayIndex;
-								return (
-									<div key={i} className={element('regular-series-day-wrapper')}>
-										<div
-											className={element('regular-series-day', {
-												selected: isCurrentDay,
-												completed: isCompletedDay,
-											})}
-										>
-											{isCompletedDay && <Svg icon="done" className={element('regular-series-day-icon-selected')} />}
+					{!isProgressGoalComplete && (
+						<>
+							{/* График дней недели по recentEntries */}
+							<div className={element('regular-series-days')}>
+								{Array.from({length: 7}, (_, i) => {
+									const dayName = getDayName(i);
+									const isCompletedDay = getProgressWeekDaysCompleted(progress)[i];
+									const isCurrentDay = i === currentDayIndex;
+									return (
+										<div key={i} className={element('regular-series-day-wrapper')}>
+											<div
+												className={element('regular-series-day', {
+													selected: isCurrentDay,
+													completed: isCompletedDay,
+												})}
+											>
+												{isCompletedDay && (
+													<Svg icon="done" className={element('regular-series-day-icon-selected')} />
+												)}
+											</div>
+											<span
+												className={element('regular-series-day-name', {
+													selected: isCurrentDay,
+												})}
+											>
+												{dayName}
+											</span>
 										</div>
-										<span
-											className={element('regular-series-day-name', {
-												selected: isCurrentDay,
-											})}
-										>
-											{dayName}
-										</span>
-									</div>
-								);
-							})}
-						</div>
-						<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+									);
+								})}
+							</div>
+							<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
 
-						{/* Прогресс */}
-						<div
-							className={element('progress-bar')}
-							onClick={handleProgressBarClick}
-							onKeyDown={handleProgressBarKeyDown}
-							role="button"
-							tabIndex={0}
-							aria-label={`Изменить прогресс цели, текущий прогресс ${progress.progressPercentage}%`}
-							style={{cursor: 'pointer'}}
-						>
-							<div className={element('regular-series-progress')}>
-								<span className={element('regular-series-progress-label')}>Прогресс:</span>
-								<div className={element('regular-series-progress-bar')}>
-									<Progress done={progress.progressPercentage} all={100} goal />
+							{/* Прогресс */}
+							<div
+								className={element('progress-bar')}
+								onClick={handleProgressBarClick}
+								onKeyDown={handleProgressBarKeyDown}
+								role="button"
+								tabIndex={0}
+								aria-label={`Изменить прогресс цели, текущий прогресс ${progress.progressPercentage}%`}
+								style={{cursor: 'pointer'}}
+							>
+								<div className={element('regular-series-progress')}>
+									<span className={element('regular-series-progress-label')}>Прогресс:</span>
+									<div className={element('regular-series-progress-bar')}>
+										<Progress done={progress.progressPercentage} all={100} goal />
+									</div>
 								</div>
 							</div>
-						</div>
-						<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+							<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+						</>
+					)}
 
-						{/* Количество недель и макс. серия */}
-						<div className={element('regular-info-details')}>
-							<div className={element('regular-info-row')}>
-								<span className={element('regular-info-label')}>Количество недель:</span>
-								<span className={element('regular-info-value')}>{getProgressWeeksCount(progress)}</span>
-							</div>
-							<div className={element('regular-info-row')}>
-								<span className={element('regular-info-label')}>Макс. серия без пропусков:</span>
-								<span className={element('regular-info-value')}>
-									{pluralize(getProgressMaxStreak(progress), ['день', 'дня', 'дней'])}
-								</span>
-							</div>
+					{/* Количество недель и макс. серия — показываем и при 100% */}
+					<div className={element('regular-info-details')}>
+						<div className={element('regular-info-row')}>
+							<span className={element('regular-info-label')}>Количество недель:</span>
+							<span className={element('regular-info-value')}>{getProgressWeeksCount(progress)}</span>
 						</div>
-						<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+						<div className={element('regular-info-row')}>
+							<span className={element('regular-info-label')}>Макс. серия без пропусков:</span>
+							<span className={element('regular-info-value')}>
+								{pluralize(getProgressMaxStreak(progress), ['день', 'дня', 'дней'])}
+							</span>
+						</div>
+					</div>
+					<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
 
-						{/* Кнопки прогресса */}
-						<div className={element('regular-series-actions')}>
-							<Button
-								theme={progress.isWorkingToday ? 'green' : 'blue'}
-								onClick={handleMarkToday}
-								icon={progress.isWorkingToday ? 'regular-checked' : 'regular-empty'}
-								className={element('btn')}
-								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-								hoverContent={progress.isWorkingToday ? 'Снять отметку' : undefined}
-								hoverIcon={progress.isWorkingToday ? 'cross' : undefined}
-							>
-								{progress.isWorkingToday ? 'Отмечено сегодня' : 'Отметить сегодня'}
-							</Button>
-							<Button
-								theme="blue-light"
-								onClick={handleOpenProgressModalOrStart}
-								icon="signal"
-								className={element('btn')}
-								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-							>
-								{progress.progressPercentage > 0 ? 'Изменить прогресс' : 'Задать прогресс'}
-							</Button>
-							{goalId && (
+					{/* Кнопки прогресса: при 100% — только сброс прогресса */}
+					<div className={element('regular-series-actions')}>
+						{!isProgressGoalComplete && (
+							<>
+								<Button
+									theme={progress.isWorkingToday ? 'green' : 'blue'}
+									onClick={handleMarkToday}
+									icon={progress.isWorkingToday ? 'regular-checked' : 'regular-empty'}
+									className={element('btn')}
+									size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+									hoverContent={progress.isWorkingToday ? 'Снять отметку' : undefined}
+									hoverIcon={progress.isWorkingToday ? 'cross' : undefined}
+								>
+									{progress.isWorkingToday ? 'Отмечено сегодня' : 'Отметить сегодня'}
+								</Button>
 								<Button
 									theme="blue-light"
-									onClick={() => setIsDeleteProgressModalOpen(true)}
-									icon="trash"
+									onClick={handleOpenProgressModalOrStart}
+									icon="signal"
 									className={element('btn')}
 									size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 								>
-									Удалить прогресс
+									Изменить прогресс
 								</Button>
-							)}
-						</div>
+							</>
+						)}
+						{goalId && (
+							<Button
+								theme="blue-light"
+								onClick={() => setIsDeleteProgressModalOpen(true)}
+								icon="trash"
+								className={element('btn')}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								Удалить прогресс
+							</Button>
+						)}
 					</div>
-				)}
+				</div>
+			)}
 
 			<div className={element('info')}>
 				{/* Кнопки для регулярной цели */}
@@ -1992,7 +2064,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					<>
 						<Button
 							theme={isCompleted ? 'green' : 'blue'}
-							onClick={() => handleMarkGoal(isCompleted)}
+							onClick={handleMarkGoalClick}
 							icon="done"
 							className={element('btn', {done: true})}
 							hoverContent={isCompleted ? 'Отменить выполнение' : ''}
@@ -2028,21 +2100,17 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				{isAdded && !isCompleted && !isList && !regularConfig && (
 					<GoalTimer timer={timer} goalCode={code} onTimerUpdate={handleTimerUpdate} />
 				)}
-				{!isList &&
-					isAdded &&
-					!isCompleted &&
-					!regularConfig &&
-					(!progress || (progress.progressPercentage === 0 && !progress.dailyNotes)) && (
-						<Button
-							theme="blue-light"
-							onClick={handleOpenProgressModalOrStart}
-							icon="signal"
-							className={element('btn')}
-							size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-						>
-							Задать прогресс
-						</Button>
-					)}
+				{!isList && isAdded && !isCompleted && !regularConfig && !progress && (
+					<Button
+						theme="blue-light"
+						onClick={handleOpenProgressModalOrStart}
+						icon="signal"
+						className={element('btn')}
+						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+					>
+						Задать прогресс
+					</Button>
+				)}
 				{isAdded && !regularConfig && !isList && (
 					<Button
 						theme="blue-light"
@@ -2208,11 +2276,27 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					if (!goalId) return;
 					await resetGoalProgress(goalId);
 					setProgress(null);
+					patchParentUserProgress(null);
 					if (onHistoryRefresh) {
 						onHistoryRefresh();
 					}
 				}}
 			/>
+			{/* Отмена выполнения цели с прогрессом — прогресс удаляется вместе с отметкой */}
+			{!isList && isAdded && (
+				<ModalConfirm
+					isOpen={isUncompleteWithProgressModalOpen}
+					onClose={() => setIsUncompleteWithProgressModalOpen(false)}
+					title="Отменить выполнение?"
+					text="Прогресс будет удалён. Вы точно хотите начать заново выполнение цели?"
+					textBtnCancel="Отмена"
+					textBtn="Отменить выполнение"
+					themeBtn="red"
+					handleBtn={async () => {
+						await handleMarkGoal(true);
+					}}
+				/>
+			)}
 			{/* Модалка редактирования настроек регулярной цели */}
 			{regularConfig &&
 				isAdded &&

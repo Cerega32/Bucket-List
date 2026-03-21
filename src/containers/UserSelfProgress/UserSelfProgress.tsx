@@ -18,6 +18,7 @@ import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {IPaginationPage} from '@/typings/request';
+import {getUser} from '@/utils/api/get/getUser';
 import {getGoalsInProgress, IGoalProgress, updateGoalProgress} from '@/utils/api/goals';
 
 import '@/components/CatalogItems/catalog-items.scss';
@@ -57,7 +58,7 @@ export const UserSelfProgress: FC = observer(() => {
 	const filteredGoals = useMemo(() => {
 		let result = [...goals];
 		if (activeTab === 'today') {
-			result = result.filter((g) => g.isWorkingToday);
+			result = result.filter((g) => !g.isWorkingToday);
 		}
 		if (search.trim()) {
 			const q = search.trim().toLowerCase();
@@ -108,7 +109,7 @@ export const UserSelfProgress: FC = observer(() => {
 						totalItems: data.length,
 					});
 					// Если нет пагинации, считаем на клиенте
-					setTodayCount(data.filter((g) => g.isWorkingToday).length);
+					setTodayCount(data.filter((g) => !g.isWorkingToday).length);
 				} else {
 					setGoals(data.data);
 					setPagination(data.pagination);
@@ -118,7 +119,7 @@ export const UserSelfProgress: FC = observer(() => {
 						setTodayCount(data.todayCount);
 					} else {
 						// Fallback: считаем на клиенте из текущей страницы
-						setTodayCount(data.data.filter((g) => g.isWorkingToday).length);
+						setTodayCount(data.data.filter((g) => !g.isWorkingToday).length);
 					}
 				}
 			}
@@ -130,29 +131,34 @@ export const UserSelfProgress: FC = observer(() => {
 		}
 	};
 
+	const refreshProgressAndProfile = async (page: number) => {
+		await loadGoalsInProgress(page);
+		await getUser();
+	};
+
 	useEffect(() => {
 		loadGoalsInProgress();
 	}, []);
 
+	// На вкладке «На сегодня» поиск и категории скрыты — сбрасываем, чтобы не фильтровать «вслепую»
+	useEffect(() => {
+		if (activeTab === 'today') {
+			setSearch('');
+			setSelectedCategories([]);
+		}
+	}, [activeTab]);
+
 	const openProgressModal = (goal: IGoalProgress) => {
+		const pageAtOpen = currentPage;
 		setWindow('progress-update');
 		setIsOpen(true);
 		setModalProps({
 			goalId: goal.goal,
 			goalTitle: goal.goalTitle,
 			currentProgress: goal,
-			onProgressUpdate: (updatedProgress: IGoalProgress) => {
-				// Если цель завершена (100%), удаляем её из списка
-				if (updatedProgress.progressPercentage >= 100) {
-					setGoals(goals.filter((g) => g.id !== updatedProgress.id));
-				} else {
-					// Иначе обновляем данные цели
-					setGoals(goals.map((g) => (g.id === updatedProgress.id ? updatedProgress : g)));
-				}
-			},
-			onGoalCompleted: () => {
-				// Удаляем цель из списка при завершении
-				setGoals(goals.filter((g) => g.id !== goal.id));
+			// При 100% модалка вызывает onGoalCompleted и затем onProgressUpdate — обновляем один раз здесь
+			onProgressUpdate: async () => {
+				await refreshProgressAndProfile(pageAtOpen);
 			},
 		});
 	};
@@ -166,7 +172,7 @@ export const UserSelfProgress: FC = observer(() => {
 			});
 
 			if (updateResponse.success && updateResponse.data) {
-				setGoals(goals.map((g) => (g.id === goal.id ? updateResponse.data! : g)));
+				await refreshProgressAndProfile(currentPage);
 			}
 		} catch (error) {
 			console.error('Ошибка отметки «работаю сегодня»:', error);
@@ -182,29 +188,29 @@ export const UserSelfProgress: FC = observer(() => {
 			});
 
 			if (updateResponse.success) {
-				// Перезагружаем данные для обновления пагинации
-				await loadGoalsInProgress(currentPage);
+				await refreshProgressAndProfile(currentPage);
 			}
 		} catch (error) {
 			console.error('Ошибка отметки цели как выполненной:', error);
 		}
 	};
 
-	const todayWorkingGoals = goals.filter((g) => g.isWorkingToday);
-	const areAllTodayCompleted = todayWorkingGoals.length > 0 && todayWorkingGoals.every((g) => g.progressPercentage >= 100);
+	/** На текущей странице: без отметки «сегодня» / с отметкой (для массовых действий) */
+	const pendingTodayOnPage = goals.filter((g) => !g.isWorkingToday);
+	const markedTodayOnPage = goals.filter((g) => g.isWorkingToday);
+	const allMarkedOnPage = goals.length > 0 && pendingTodayOnPage.length === 0;
 
 	const handleToggleCompleteAllToday = async () => {
-		if (activeTab !== 'today' || todayWorkingGoals.length === 0 || isBulkTodayUpdating) {
+		if (activeTab !== 'today' || isBulkTodayUpdating || goals.length === 0) {
 			return;
 		}
 
 		setIsBulkTodayUpdating(true);
 
 		try {
-			if (!areAllTodayCompleted) {
-				// Отметить все цели как «работаю сегодня»
+			if (pendingTodayOnPage.length > 0) {
 				await Promise.all(
-					todayWorkingGoals.map((goal) =>
+					pendingTodayOnPage.map((goal) =>
 						updateGoalProgress(goal.goal, {
 							progress_percentage: goal.progressPercentage,
 							daily_notes: goal.dailyNotes || '',
@@ -212,10 +218,9 @@ export const UserSelfProgress: FC = observer(() => {
 						})
 					)
 				);
-			} else {
-				// Снять отметку "работаю сегодня" со всех
+			} else if (markedTodayOnPage.length > 0) {
 				await Promise.all(
-					todayWorkingGoals.map((goal) =>
+					markedTodayOnPage.map((goal) =>
 						updateGoalProgress(goal.goal, {
 							progress_percentage: goal.progressPercentage,
 							daily_notes: goal.dailyNotes || '',
@@ -225,7 +230,7 @@ export const UserSelfProgress: FC = observer(() => {
 				);
 			}
 
-			await loadGoalsInProgress(currentPage);
+			await refreshProgressAndProfile(currentPage);
 		} catch (error) {
 			console.error('Ошибка массового обновления целей «работаю сегодня»:', error);
 		} finally {
@@ -270,13 +275,13 @@ export const UserSelfProgress: FC = observer(() => {
 								theme="blue-light"
 								size="medium"
 								width="full"
-								icon={areAllTodayCompleted ? 'regular' : 'regular-empty'}
+								icon={allMarkedOnPage ? 'regular' : 'regular-empty'}
 								onClick={handleToggleCompleteAllToday}
-								disabled={isBulkTodayUpdating || todayWorkingGoals.length === 0}
-								hoverContent={areAllTodayCompleted ? 'Снять отметку всех' : undefined}
-								hoverIcon={areAllTodayCompleted ? 'cross' : undefined}
+								disabled={isBulkTodayUpdating || goals.length === 0}
+								hoverContent={allMarkedOnPage ? 'Снять отметку со всех на странице' : undefined}
+								hoverIcon={allMarkedOnPage ? 'cross' : undefined}
 							>
-								{areAllTodayCompleted ? 'Отмечено все сегодня' : 'Отметить все сегодня'}
+								{allMarkedOnPage ? 'Все отмечены на сегодня' : 'Отметить все сегодня'}
 							</Button>
 						</div>
 					) : (
@@ -317,10 +322,12 @@ export const UserSelfProgress: FC = observer(() => {
 						</EmptyState>
 					) : filteredGoals.length === 0 ? (
 						<EmptyState
-							title={activeTab === 'today' ? 'Прогресс для целей не установлен' : 'Нет целей'}
+							title={activeTab === 'today' ? 'Нет целей на сегодня' : 'Нет целей'}
 							description={
 								activeTab === 'today'
-									? 'Задайте отслеживание прогресса выполнения в любой активной цели'
+									? goals.length > 0 && !goals.some((g) => !g.isWorkingToday)
+										? 'На этой странице все цели уже отмечены на сегодня. Переключитесь на «Все цели» или другую страницу.'
+										: 'Список целей, по которым ещё не отмечено «работал сегодня».'
 									: 'Не найдено ни одной цели с заданным прогрессом'
 							}
 						/>

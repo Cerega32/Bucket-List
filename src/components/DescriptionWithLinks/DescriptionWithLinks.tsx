@@ -96,6 +96,7 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 				url: '/progress-history',
 				name: 'История прогресса выполнения',
 				page: 'isGoalProgressHistory',
+				count: goal.progressEntriesCount ?? 0,
 			});
 		}
 

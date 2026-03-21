@@ -152,6 +152,17 @@
 		margin-bottom: 0;
 	}
 
+	&__pre-footer {
+		padding-top: 4px;
+	}
+
+	&__hint {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 13px;
+		line-height: 1.45;
+	}
+
 	&__footer {
 		display: flex;
 		justify-content: flex-end;

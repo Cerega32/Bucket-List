@@ -106,7 +106,9 @@ export const GoalProgressHistory: FC<GoalProgressHistoryProps> = observer(({clas
 						>
 							<span className={element('date')}>{dateStr}</span>
 							<div
-								className={element('note')}
+								className={element('note', {
+									empty: !note,
+								})}
 								ref={(el) => {
 									noteRefs.current[entry.id] = el;
 								}}

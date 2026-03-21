@@ -18,9 +18,11 @@
 		text-align: left;
 		background: none;
 		border: none;
-		cursor: pointer;
+		cursor: text;
 		font: inherit;
 		color: inherit;
+		user-select: text;
+		-webkit-user-select: text;
 
 		&:hover {
 			opacity: 0.9;

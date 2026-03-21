@@ -17,6 +17,16 @@ export interface IGoalProgress {
 	lastUpdated: string;
 	createdAt: string;
 	recentEntries: IGoalProgressEntry[];
+	/** С сервера: число дней с отметкой «работал» (по всей истории, не по срезу recentEntries) */
+	workedDaysCount?: number;
+	/** С сервера: макс. серия подряд дней с «работал» */
+	maxConsecutiveWorkDays?: number;
+	/** С сервера: Пн–Вс текущей недели, был ли день с work_done */
+	weekWorkDone?: boolean[];
+	/** Всего записей в истории (COUNT), даже если recentEntries не отданы */
+	progressEntriesCount?: number;
+	/** Календарные недели (с понедельника) с недели начала прогресса по текущую, минимум 1 */
+	calendarWeeksCount?: number;
 	// Для обратной совместимости
 	user?: number;
 	userUsername?: string;
@@ -61,55 +71,7 @@ export interface IDailyProgress {
 	created_at: string;
 }
 
-// Получить прогресс цели
-export const getGoalProgress = async (
-	goalId: number
-): Promise<{
-	success: boolean;
-	data?: IGoalProgress;
-	error?: string;
-}> => {
-	try {
-		const response = await GET(`goals/${goalId}/progress`, {
-			auth: true,
-		});
-		return response;
-	} catch (error) {
-		return {
-			success: false,
-			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
-		};
-	}
-};
-
-// Создать или обновить прогресс цели (используется один endpoint для создания и обновления)
-export const createGoalProgress = async (
-	goalId: number,
-	data: {
-		progress_percentage: number;
-		daily_notes: string;
-		is_working_today: boolean;
-	}
-): Promise<{
-	success: boolean;
-	data?: IGoalProgress;
-	error?: string;
-}> => {
-	try {
-		const response = await POST(`goals/${goalId}/progress/update`, {
-			body: data,
-			auth: true,
-		});
-		return response;
-	} catch (error) {
-		return {
-			success: false,
-			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
-		};
-	}
-};
-
-// Обновить прогресс цели
+// Создать или обновить прогресс цели (один POST: первое сохранение создаёт запись)
 export const updateGoalProgress = async (
 	goalId: number,
 	data: {
@@ -540,7 +502,7 @@ export const getGoalsInProgress = async (params?: {
 	error?: string;
 }> => {
 	try {
-		const response = await GET('goals/progress', {
+		const response = await GET('self/goals-in-progress', {
 			auth: true,
 			...(params ? {get: params} : {}),
 		});
