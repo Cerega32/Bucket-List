@@ -105,6 +105,14 @@ export const Card: FC<CardProps> = (props) => {
 									title="Регулярная цель"
 								/>
 							)}
+							{goal.catalogApproved === false && (
+								<Tag
+									text="Ожидает проверки"
+									theme="gray"
+									className={element('img-tag-category')}
+									title="Ожидает публикации в каталоге"
+								/>
+							)}
 							<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
 						</div>
 					</Gradient>
@@ -125,6 +133,14 @@ export const Card: FC<CardProps> = (props) => {
 									theme="gold"
 									classNameIcon={element('img-tag-icon-done')}
 									title="Регулярная цель"
+								/>
+							)}
+							{goal.catalogApproved === false && (
+								<Tag
+									text="Ожидает проверки"
+									theme="gray"
+									className={element('img-tag-category')}
+									title="Ожидает публикации в каталоге"
 								/>
 							)}
 							<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />

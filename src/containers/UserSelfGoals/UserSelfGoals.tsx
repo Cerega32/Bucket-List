@@ -14,10 +14,12 @@ import './user-self-goals.scss';
 interface UserSelfGoalsProps {
 	subPage: string;
 	completed: boolean;
+	/** Раздел «На рассмотрении» (неодобренные для каталога) */
+	pendingCatalogReview?: boolean;
 }
 
 export const UserSelfGoals: FC<UserSelfGoalsProps> = observer((props) => {
-	const {subPage, completed} = props;
+	const {subPage, completed, pendingCatalogReview = false} = props;
 
 	const [block, element] = useBem('user-self-goals');
 	const [isLoading, setIsLoading] = useState(true);
@@ -37,16 +39,17 @@ export const UserSelfGoals: FC<UserSelfGoalsProps> = observer((props) => {
 	return (
 		<Loader isLoading={isLoading} className={block()}>
 			<Title tag="h2" className={element('title')}>
-				{completed ? 'Выполненные цели и списки' : 'Все активные цели и списки'}
+				{pendingCatalogReview ? 'На рассмотрении' : completed ? 'Выполненные цели и списки' : 'Все активные цели и списки'}
 			</Title>
 			<CatalogItems
 				userId={Cookies.get('user-id') as string}
-				beginUrl={`/user/self/${completed ? 'done' : 'active'}-goals`}
+				beginUrl={pendingCatalogReview ? '/user/self/pending-review' : `/user/self/${completed ? 'done' : 'active'}-goals`}
 				completed={completed}
 				subPage={subPage}
 				columns="3"
 				categories={categories}
 				searchWrapperWrap
+				pendingCatalogReview={pendingCatalogReview}
 			/>
 		</Loader>
 	);

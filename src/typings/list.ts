@@ -19,4 +19,5 @@ export interface IList {
 	createdByUser: boolean;
 	isCanEdit: boolean;
 	isCanAddGoals: boolean;
+	catalogApproved?: boolean;
 }

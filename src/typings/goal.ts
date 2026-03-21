@@ -42,6 +42,8 @@ export interface IShortList {
 	userCompletedGoals: number;
 	goalsCount: number;
 	estimatedTime?: never;
+	/** false — ждёт одобрения для общего каталога */
+	catalogApproved?: boolean;
 }
 
 export interface IGoal {
@@ -114,6 +116,7 @@ export interface IGoal {
 
 	// Количество записей в истории прогресса (для нерегулярных целей)
 	progressEntriesCount?: number;
+	catalogApproved?: boolean;
 }
 
 export interface IShortGoal {
@@ -133,6 +136,7 @@ export interface IShortGoal {
 	location?: ILocation;
 	estimatedTime?: string;
 	regularConfig?: IRegularGoalConfig;
+	catalogApproved?: boolean;
 }
 
 // Типы для работы с картами

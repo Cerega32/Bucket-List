@@ -34,6 +34,8 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			// 	return <User100Goals id={id} />;
 			case 'isUserSelfActive':
 				return <UserSelfGoals subPage={subPage as string} completed={false} />;
+			case 'isUserSelfPending':
+				return <UserSelfGoals subPage={subPage as string} completed={false} pendingCatalogReview />;
 			case 'isUserSelfDone':
 				return <UserSelfGoals subPage={subPage as string} completed />;
 			case 'isUserSelfSettings':
@@ -127,6 +129,11 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			name: 'Друзья',
 			page: 'isUserSelfFriends',
 			count: friendsCount,
+		},
+		{
+			url: '/user/self/pending-review',
+			name: 'Цели на рассмотрении',
+			page: 'isUserSelfPending',
 		},
 		{
 			url: '/user/self/subs',

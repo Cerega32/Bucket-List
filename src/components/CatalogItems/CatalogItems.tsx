@@ -40,6 +40,8 @@ interface CatalogItemsProps {
 	initialSearch?: string;
 	searchWrapperWrap?: boolean;
 	onSearchChange?: (query: string) => void;
+	/** Личный кабинет: раздел «На рассмотрении» (неодобренные для каталога) */
+	pendingCatalogReview?: boolean;
 }
 
 interface CatalogItemsCategoriesProps extends CatalogItemsProps {
@@ -110,6 +112,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 		initialSearch = '',
 		searchWrapperWrap = false,
 		onSearchChange,
+		pendingCatalogReview = false,
 	} = props;
 
 	const [block, element] = useBem('catalog-items', className);
@@ -141,6 +144,14 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 
 	// Активен ли сейчас режим поиска
 	const isSearchMode = search.trim().length >= 3;
+
+	const userListQueryBase = userId
+		? {
+				user_id: userId,
+				completed,
+				...(pendingCatalogReview ? {pending_catalog_review: true as const} : {}),
+		  }
+		: {};
 
 	const buttonsSwitch = useMemo(() => {
 		let url = '';
@@ -177,7 +188,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 	useEffect(() => {
 		setGoalsLoaded(false);
 		(async () => {
-			const tempGet = userId ? {user_id: userId, completed} : {};
+			const tempGet = {...userListQueryBase};
 			setGet(tempGet);
 
 			// Добавляем поисковый запрос, если он есть
@@ -189,12 +200,12 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			}
 			setGoalsLoaded(true);
 		})();
-	}, [subPage, code, completed, userId, initialSearch]);
+	}, [subPage, code, completed, userId, initialSearch, pendingCatalogReview]);
 
 	useEffect(() => {
 		setListsLoaded(false);
 		(async () => {
-			const tempGet = userId ? {user_id: userId, completed} : {};
+			const tempGet = {...userListQueryBase};
 			setGet(tempGet);
 
 			// Добавляем поисковый запрос, если он есть
@@ -206,7 +217,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			}
 			setListsLoaded(true);
 		})();
-	}, [subPage, code, completed, userId, initialSearch]);
+	}, [subPage, code, completed, userId, initialSearch, pendingCatalogReview]);
 
 	useEffect(() => {
 		setActiveSort(0);
@@ -233,7 +244,9 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			};
 
 			if (subPage === 'goals') {
-				if (goalTypeValue === 'regular') {
+				if (pendingCatalogReview && userId) {
+					res = await getAllGoals(code, queryParams);
+				} else if (goalTypeValue === 'regular') {
 					res = await getRegularGoals(code, queryParams);
 				} else if (goalTypeValue === 'usual') {
 					res = await getUsualGoals(code, queryParams);
@@ -305,6 +318,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					if (subPage === 'goals') {
 						if (query.length >= 3) {
 							const res = await getAllGoals(code, {
+								...userListQueryBase,
 								sort_by: sortBy[activeSort].value,
 								search: query,
 								...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
@@ -315,6 +329,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						} else {
 							// Если длина запроса меньше 3, делаем запрос с пустым значением
 							const res = await getAllGoals(code, {
+								...userListQueryBase,
 								sort_by: sortBy[activeSort].value,
 								search: '',
 								...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
@@ -325,6 +340,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						}
 					} else if (query.length >= 3) {
 						const res = await getAllLists(code, {
+							...userListQueryBase,
 							sort_by: sortBy[activeSort].value,
 							search: query,
 							...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
@@ -335,6 +351,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 					} else {
 						// Если длина запроса меньше 3, делаем запрос с пустым значением
 						const res = await getAllLists(code, {
+							...userListQueryBase,
 							sort_by: sortBy[activeSort].value,
 							search: '',
 							...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
@@ -513,7 +530,7 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 			<div className={element('filters')}>
 				<div className={element('filters-wrapper')}>
 					<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage || ''} />
-					{subPage === 'goals' && (
+					{subPage === 'goals' && !pendingCatalogReview && (
 						<Select
 							className={element('goal-type-select')}
 							options={goalTypeOptions}
@@ -556,6 +573,8 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 							title={
 								isSearchMode
 									? 'По запросу ничего не найдено'
+									: pendingCatalogReview
+									? 'Нет целей на рассмотрении'
 									: completed
 									? 'У вас пока нет выполненных целей'
 									: 'У вас пока нет активных целей'
@@ -563,6 +582,8 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 							description={
 								isSearchMode
 									? 'Попробуйте изменить параметры поиска'
+									: pendingCatalogReview
+									? 'Созданные вами цели и списки появятся здесь до публикации в общий каталог. Выполненные — в разделе «Выполненные».'
 									: completed
 									? 'Начните выполнять цели, чтобы они появились в списке выполненных'
 									: 'Добавьте цели из каталога, чтобы они появились в списке активных'
@@ -587,6 +608,8 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						title={
 							isSearchMode
 								? 'По запросу ничего не найдено'
+								: pendingCatalogReview
+								? 'Нет списков на рассмотрении'
 								: completed
 								? 'У вас пока нет выполненных списков'
 								: 'У вас пока нет активных списков'
@@ -594,6 +617,8 @@ export const CatalogItems: FC<CatalogItemsCategoriesProps | CatalogItemsUsersPro
 						description={
 							isSearchMode
 								? 'Попробуйте изменить параметры поиска'
+								: pendingCatalogReview
+								? 'После одобрения модератором список появится в общем каталоге. Выполненные — в разделе «Выполненные».'
 								: completed
 								? 'Начните выполнять списки целей, чтобы они появились в списке выполненных'
 								: 'Добавьте списки из каталога, чтобы они появились в списке активных'
