@@ -1,8 +1,6 @@
 .user-map-page {
 	@include max-width;
 
-	min-height: 100vh;
-
 	&__title {
 		margin-bottom: 24px;
 	}
@@ -23,12 +21,15 @@
 	}
 
 	&__map-section {
-		padding: 24px 16px 16px;
-		margin-bottom: 32px;
+		padding: 12px;
 		background: var(--color-white);
 		border-radius: 12px;
 		box-shadow: 0 4px 20px var(--color-secondary);
 		backdrop-filter: blur(10px);
+
+		@include md {
+			padding: 0px;
+		}
 	}
 
 	&__section-header {
@@ -103,26 +104,5 @@
 		color: var(--color-primary);
 		font-size: 1.2rem;
 		font-weight: 500;
-	}
-
-	// Адаптивность
-	@include md {
-		padding: 32px 0;
-
-		&__map-section {
-			padding: 16px 8px;
-		}
-	}
-
-	@include xs {
-		padding: 16px 0;
-
-		&__header h1 {
-			font-size: 24px;
-		}
-
-		&__map-section {
-			padding: 12px 4px;
-		}
 	}
 }

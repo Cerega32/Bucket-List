@@ -109,19 +109,7 @@ export const UserSearch: React.FC<UserSearchProps> = observer(({placeholder = '�
 			</Button>
 		);
 
-		return (
-			<FriendCard
-				key={user.id}
-				friend={friend}
-				showActions={false}
-				sinceText={
-					friend.firstName || friend.lastName
-						? `${friend.firstName || ''} ${friend.lastName || ''}`.trim()
-						: 'Пользователь Delting'
-				}
-				actions={actions}
-			/>
-		);
+		return <FriendCard key={user.id} friend={friend} variant="search" showActions={false} actions={actions} />;
 	};
 
 	return (
