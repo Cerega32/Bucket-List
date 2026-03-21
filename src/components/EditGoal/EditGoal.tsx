@@ -18,7 +18,7 @@ import {updateGoal} from '@/utils/api/put/updateGoal';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {selectComplexity} from '@/utils/values/complexity';
-import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
+import {getGoalTitleFieldErrors, GOAL_TITLE_MAX_LENGTH, GOAL_TITLE_MIN_LENGTH} from '@/utils/values/goalConstants';
 
 import {AllowCustomSettingsField} from '../AddGoal/components/AllowCustomSettingsField';
 import {Loader} from '../Loader/Loader';
@@ -565,7 +565,8 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								required
 								maxLength={GOAL_TITLE_MAX_LENGTH}
 								showCharCount
-								error={showErrors && !title}
+								error={getGoalTitleFieldErrors(showErrors, title)}
+								minLength={GOAL_TITLE_MIN_LENGTH}
 							/>
 
 							<Select

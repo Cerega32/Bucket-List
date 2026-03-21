@@ -25,4 +25,16 @@
 	&__content {
 		flex: 1;
 	}
+
+	&__banner {
+		margin-bottom: 16px;
+	}
+
+	&__search {
+		flex: 1;
+		padding: 8px;
+		background: var(--color-white);
+		border-radius: 8px;
+		box-shadow: 0 2px 8px rgb(var(--color-black-rgb) / 8%);
+	}
 }

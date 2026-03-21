@@ -1,13 +1,15 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useMemo} from 'react';
 
+import {Banner} from '@/components/Banner/Banner';
 import {Switch} from '@/components/Switch/Switch';
 import {Title} from '@/components/Title/Title';
+import {UserSearch} from '@/components/UserSearch/UserSearch';
 import {useBem} from '@/hooks/useBem';
+import {FriendsStore} from '@/store/FriendsStore';
 
 import {FriendsContent} from '../FriendsContent/FriendsContent';
 import {FriendsRequests} from '../FriendsRequests/FriendsRequests';
-import {FriendsSearch} from '../FriendsSearch/FriendsSearch';
 
 import './user-self-friends.scss';
 
@@ -23,7 +25,13 @@ export const UserSelfFriends: FC<UserSelfFriendsProps> = observer(({subPage = 'f
 			case 'requests':
 				return <FriendsRequests />;
 			case 'search':
-				return <FriendsSearch />;
+				return (
+					<section className={element('search')}>
+						<div className={element('search-container')}>
+							<UserSearch placeholder="Найдите единомышленников и отправьте им заявки в друзья" />
+						</div>
+					</section>
+				);
 			default:
 				return <FriendsContent />;
 		}
@@ -57,6 +65,14 @@ export const UserSelfFriends: FC<UserSelfFriendsProps> = observer(({subPage = 'f
 				</Title>
 				<Switch className={element('switch')} buttons={switchButtons} active={subPage} />
 			</div>
+			{FriendsStore.searchResults.length > 0 && subPage === 'search' && (
+				<Banner
+					type="info"
+					title="Советы"
+					message="Просмотрите профиль пользователя перед отправкой заявки на дружбу"
+					className={element('banner')}
+				/>
+			)}
 			<div className={element('content')}>{getFriendsContent()}</div>
 		</section>
 	);

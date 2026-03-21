@@ -137,6 +137,10 @@ export const Registration: FC<RegistrationProps> = (props) => {
 			errors.push('Введите имя пользователя');
 		}
 
+		if (trimmed.length > 0 && trimmed.length < 3) {
+			errors.push('Минимальная длина имени пользователя - 3 символа');
+		}
+
 		if (trimmed.length > 0 && !/^[A-Za-z0-9_]+$/.test(trimmed)) {
 			errors.push('Используйте только латинские буквы, цифры и знак подчёркивания');
 		}
@@ -403,6 +407,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 							autoComplete="username"
 							error={error?.username}
 							required
+							minLength={3}
 							iconBegin="user"
 							hint={!error?.username || error.username.length === 0 ? 'Будет отображаться в вашем профиле' : undefined}
 						/>
