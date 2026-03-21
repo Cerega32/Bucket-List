@@ -37,7 +37,7 @@ import {Svg} from '../Svg/Svg';
 import './aside-goal.scss';
 
 /** Черновик для модалки до первого сохранения на сервер (id === 0) */
-function buildDraftGoalProgress(p: {goalId: number; title: string; code: string; image: string}): IGoalProgress {
+function buildDraftGoalProgress(p: {goalId: number; title: string; code: string; image?: string | null}): IGoalProgress {
 	return {
 		id: 0,
 		goal: p.goalId,
