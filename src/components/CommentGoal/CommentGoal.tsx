@@ -55,7 +55,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 						</div>
 					) : (
 						<div className={element('user-wrapper')}>
-							<Title tag="h4">{comment.userName || comment.userNickname}</Title>
+							<Title tag="h4">{comment.userNickname}</Title>
 							<p className={element('user-level')}>
 								{/* {comment.level} уровень&nbsp; */}
 								{pluralize(comment.userTotalCompletedGoals, ['цель выполнена', 'цели выполнено', 'целей выполнено'])}

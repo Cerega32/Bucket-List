@@ -1,8 +1,9 @@
 import {motion} from 'framer-motion';
 import {observer} from 'mobx-react-lite';
-import {FC} from 'react';
+import {FC, useState} from 'react';
 import {Link} from 'react-router-dom';
 
+import {FeedbackModal} from '@/components/FeedbackModal/FeedbackModal';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {ThemeStore} from '@/store/ThemeStore';
@@ -24,6 +25,7 @@ export const Footer: FC<FooterProps> = observer((props) => {
 	const {isScreenMobile} = useScreenSize();
 
 	const [block, element] = useBem('footer', className);
+	const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
 
 	const currentYear = new Date().getFullYear();
 
@@ -64,6 +66,7 @@ export const Footer: FC<FooterProps> = observer((props) => {
 				{to: '/about', label: 'О проекте'},
 				{to: '/help', label: 'Помощь'},
 				{to: '/contacts', label: 'Контакты'},
+				{to: '', label: 'Оставить отзыв', feedbackModal: true},
 			],
 		},
 		{
@@ -110,10 +113,20 @@ export const Footer: FC<FooterProps> = observer((props) => {
 								<h3 className={element('nav-title')}>{section.title}</h3>
 								<ul className={element('nav-list')}>
 									{section.links.map((link) => (
-										<li key={link.to} className={element('nav-item')}>
-											<Link to={link.to} className={element('nav-link')}>
-												{link.label}
-											</Link>
+										<li key={link.to || link.label}>
+											{link.feedbackModal ? (
+												<button
+													type="button"
+													className={element('nav-link')}
+													onClick={() => setIsFeedbackModalOpen(true)}
+												>
+													{link.label}
+												</button>
+											) : (
+												<Link to={link.to} className={element('nav-link')}>
+													{link.label}
+												</Link>
+											)}
 										</li>
 									))}
 								</ul>
@@ -143,6 +156,8 @@ export const Footer: FC<FooterProps> = observer((props) => {
 					</div>
 				</motion.div>
 			</div>
+
+			<FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
 		</footer>
 	);
 });
