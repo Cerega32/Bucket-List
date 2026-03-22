@@ -73,7 +73,7 @@ const setHeaders = (method: string, params: IFetchParams = {}): Headers => {
 const fetchData = async (url: string, method: string, params: IFetchParams = {}): Promise<any> => {
 	const {showErrorNotification = true, showSuccessNotification = false, enableRetry = false} = params;
 
-	const makeRequest = async (isRetryAfterCsrfRefresh = false) => {
+	const makeRequest = async (isRetryAfterCsrfRefresh = false): Promise<any> => {
 		const headers = setHeaders(method, params);
 
 		try {
@@ -99,7 +99,7 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 				// 403 CSRF — пробуем обновить токен и повторить один раз
 				if (isCsrfError && !isRetryAfterCsrfRefresh) {
 					await refreshCsrfToken();
-					return makeRequest(true);
+					return await makeRequest(true);
 				}
 
 				// Повтор не помог — очищаем авторизацию, чтобы не было рассинхрона (модалка логина + «вы авторизованы»)
