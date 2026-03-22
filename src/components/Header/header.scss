@@ -441,6 +441,7 @@
 		background: transparent;
 		border: none;
 		cursor: pointer;
+		gap: 4px;
 
 		&:hover,
 		&:active {
@@ -488,7 +489,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		gap: 2px;
+		gap: 4px;
 		border: none;
 		border-radius: 6px;
 		color: var(--color-white);
@@ -649,6 +650,7 @@
 		justify-content: start;
 		padding: 8px;
 		color: var(--color-red-1);
+		flex-shrink: 0;
 	}
 
 	&__menu-wrapper {

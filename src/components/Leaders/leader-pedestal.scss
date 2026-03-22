@@ -11,6 +11,11 @@
 	border: 1px solid var(--color-gray-9);
 	border-radius: 8px;
 
+	@include xs {
+		flex-direction: column;
+		gap: 64px;
+	}
+
 	&__user {
 		position: relative;
 		display: flex;
@@ -19,6 +24,10 @@
 		align-items: center;
 		padding: 16px 0;
 		border-radius: 8px;
+
+		@include xs {
+			width: 100%;
+		}
 
 		&:first-child {
 			order: 2;

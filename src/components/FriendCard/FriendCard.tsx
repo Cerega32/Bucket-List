@@ -13,8 +13,12 @@ import {Avatar} from '../Avatar/Avatar';
 import {Loader} from '../Loader/Loader';
 import './friend-card.scss';
 
+export type FriendCardVariant = 'friend' | 'request' | 'search';
+
 interface FriendCardProps {
 	friend: IFriend;
+	/** friend — список друзей; request — заявки; search — поиск */
+	variant?: FriendCardVariant;
 	onRemove?: (friendId: number) => void;
 	onCompare?: (friendId: number) => void;
 	showActions?: boolean;
@@ -24,8 +28,12 @@ interface FriendCardProps {
 	className?: string;
 }
 
+const NO_NAME_PLACEHOLDER = 'Пользователь Delting';
+
+const getFullName = (friend: IFriend) => `${friend.firstName || ''} ${friend.lastName || ''}`.trim();
+
 export const FriendCard: React.FC<FriendCardProps> = observer(
-	({friend, onRemove, onCompare, showActions = true, actions, sinceText, outgoing, className}) => {
+	({friend, variant = 'friend', onRemove, onCompare, showActions = true, actions, sinceText, outgoing, className}) => {
 		const [block, element] = useBem('friends-card', className);
 		const [isRemoving, setIsRemoving] = useState(false);
 
@@ -50,8 +58,11 @@ export const FriendCard: React.FC<FriendCardProps> = observer(
 			onCompare?.(friend.id);
 		};
 
-		const hasName = friend.firstName || friend.lastName;
-		const displayName = hasName ? `${friend.firstName || ''} ${friend.lastName || ''}`.trim() : friend.username;
+		const fullName = getFullName(friend);
+		const hasName = Boolean(fullName);
+		const isFriendList = variant === 'friend';
+		const showSince = isFriendList;
+		const displayName = hasName ? fullName : isFriendList ? friend.username : NO_NAME_PLACEHOLDER;
 
 		// Форматируем дату более надежно
 		const formatFriendshipDate = (dateString: string) => {
@@ -81,12 +92,12 @@ export const FriendCard: React.FC<FriendCardProps> = observer(
 					<Link className={element('name')} to={`/user/${friend.id}/showcase`} aria-label={`Перейти в профиль ${displayName}`}>
 						{friend.username}
 					</Link>
-					{hasName && (
-						<p className={element('username')}>
-							{friend.firstName || ''} {friend.lastName || ''}
-						</p>
+					{isFriendList ? (
+						hasName && <p className={element('username')}>{fullName}</p>
+					) : (
+						<p className={element('username')}>{hasName ? fullName : NO_NAME_PLACEHOLDER}</p>
 					)}
-					<p className={element('since')}>{sinceText ?? `Друзья с ${formatFriendshipDate(friend.createdAt)}`}</p>
+					{showSince && <p className={element('since')}>{sinceText ?? `Друзья с ${formatFriendshipDate(friend.createdAt)}`}</p>}
 				</div>
 
 				{(showActions || actions) && (

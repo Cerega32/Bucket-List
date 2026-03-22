@@ -19,10 +19,6 @@
 		margin: 24px 30px 96px;
 	}
 
-	@include xs {
-		margin: 0 20px 24px;
-	}
-
 	&__sidebar {
 		flex-shrink: 0;
 		width: 336px;

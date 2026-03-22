@@ -272,7 +272,6 @@
 
 		#{$block}__scroll {
 			width: 100%;
-			max-width: 560px;
 			flex: none;
 			overflow: visible;
 		}
@@ -281,7 +280,6 @@
 			position: sticky;
 			bottom: 0;
 			width: 100%;
-			max-width: 560px;
 			border-radius: 0 0 8px 8px;
 		}
 	}

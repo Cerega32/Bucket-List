@@ -139,6 +139,7 @@ export const FriendsRequests: FC = observer(() => {
 								key={request.requestId}
 								className={element('friend-card')}
 								friend={friend}
+								variant="request"
 								showActions={false}
 								outgoing={!isIncoming}
 								actions={isIncoming ? <FriendCardActionsIncoming request={request} /> : <FriendCardActionsOutgoing />}
