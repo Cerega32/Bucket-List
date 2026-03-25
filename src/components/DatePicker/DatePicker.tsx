@@ -24,6 +24,7 @@ export interface DatePickerProps {
 	showYearDropdown?: boolean;
 	scrollableYearDropdown?: boolean;
 	dateFormat?: string | string[];
+	error?: boolean | Array<string>;
 }
 
 interface CustomInputProps {
@@ -32,26 +33,30 @@ interface CustomInputProps {
 	onChange?: React.ChangeEventHandler<HTMLInputElement>;
 	placeholder?: string;
 	id?: string;
+	hasError?: boolean;
 }
 
 // Кастомный компонент для инпута
-const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(({value, onClick, onChange, placeholder, id, ...rest}, ref) => (
-	<div className="custom-date-input">
-		<input
-			ref={ref}
-			id={id}
-			value={value}
-			onClick={onClick}
-			onChange={onChange}
-			placeholder={placeholder}
-			readOnly // Чтобы пользователь не мог вводить текст, только через календарь
-			{...rest}
-		/>
-		<button type="button" onClick={onClick as unknown as React.MouseEventHandler<HTMLButtonElement>} aria-label="Календарь">
-			<Svg icon="calendar" className="calendar-icon" width="16" height="16" />
-		</button>
-	</div>
-));
+const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
+	({value, onClick, onChange, placeholder, id, hasError, ...rest}, ref) => (
+		<div className="custom-date-input">
+			<input
+				ref={ref}
+				id={id}
+				value={value}
+				onClick={onClick}
+				onChange={onChange}
+				placeholder={placeholder}
+				readOnly // Чтобы пользователь не мог вводить текст, только через календарь
+				aria-invalid={hasError || undefined}
+				{...rest}
+			/>
+			<button type="button" onClick={onClick as unknown as React.MouseEventHandler<HTMLButtonElement>} aria-label="Календарь">
+				<Svg icon="calendar" className="calendar-icon" width="16" height="16" />
+			</button>
+		</div>
+	)
+);
 
 CustomInput.displayName = 'CustomDateInput';
 
@@ -62,8 +67,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 	selected,
 	minDate: propMinDate,
 	maxDate: propMaxDate,
+	error,
 	...props
 }) => {
+	const hasError = Array.isArray(error) ? error.length > 0 : !!error;
 	// Рассчитываем максимальную дату (10 лет от текущей даты)
 	const defaultMaxDate = new Date();
 	defaultMaxDate.setFullYear(defaultMaxDate.getFullYear() + 10);
@@ -80,12 +87,12 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 	};
 
 	return (
-		<div className={`date-picker ${className}`}>
+		<div className={`date-picker ${hasError ? 'date-picker--error' : ''} ${className}`.trim()}>
 			<ReactDatePicker
 				locale="ru"
 				dateFormat="dd.MM.yyyy"
 				onChange={handleChange as any}
-				customInput={<CustomInput id={id} />}
+				customInput={<CustomInput id={id} hasError={hasError} />}
 				maxDate={maxDate}
 				minDate={minDate}
 				showPopperArrow={false}
@@ -93,6 +100,12 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 				selected={selected}
 				{...props}
 			/>
+			{Array.isArray(error) &&
+				error.map((er) => (
+					<p key={er} className="date-picker__error">
+						{er}
+					</p>
+				))}
 		</div>
 	);
 };

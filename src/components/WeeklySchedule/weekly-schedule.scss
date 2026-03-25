@@ -31,9 +31,10 @@
 	&__weeks {
 		display: flex;
 		justify-content: space-between;
-		gap: 16px;
+		gap: 8px;
 		height: 195px;
 		overflow-x: auto;
+		flex: 1 1 auto;
 
 		@include xs {
 			gap: 4px;
@@ -72,6 +73,10 @@
 				transition: all 0.3s linear;
 				visibility: visible;
 			}
+		}
+
+		@include xs {
+			width: 32px;
 		}
 	}
 

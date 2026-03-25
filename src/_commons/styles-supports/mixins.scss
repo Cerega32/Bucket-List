@@ -134,3 +134,21 @@ $main-categories: (
 		@content;
 	}
 }
+
+// Выпадашки под фиксированным хедером: не уезжают за нижний край окна.
+// 100dvh — динамическая высота вьюпорта (моб. Safari / macOS, в отличие от 100vh).
+@mixin header-anchor-dropdown-max-height($cap, $header-height: var(--height-header), $offset: 20px) {
+	max-height: min($cap, max(0px, calc(100vh - #{$header-height} - #{$offset} - env(safe-area-inset-bottom, 0px))));
+
+	@supports (height: 100dvh) {
+		max-height: min($cap, max(0px, calc(100dvh - #{$header-height} - #{$offset} - env(safe-area-inset-bottom, 0px))));
+	}
+}
+
+@mixin header-profile-menu-max-height($header-height: var(--height-header), $offset: 24px) {
+	max-height: max(0px, calc(100vh - #{$header-height} - #{$offset} - env(safe-area-inset-bottom, 0px)));
+
+	@supports (height: 100dvh) {
+		max-height: max(0px, calc(100dvh - #{$header-height} - #{$offset} - env(safe-area-inset-bottom, 0px)));
+	}
+}

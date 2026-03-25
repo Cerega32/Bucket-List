@@ -1,4 +1,5 @@
-import {FC, useEffect, useState} from 'react';
+import {type KeyboardEvent, FC, useEffect, useState} from 'react';
+import Lightbox from 'yet-another-react-lightbox';
 
 import {WeekDaySchedule} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
@@ -25,6 +26,7 @@ import {GoalWithLocation} from '@/utils/mapApi';
 import {pluralize} from '@/utils/text/pluralize';
 
 import {Button} from '../Button/Button';
+import '../CommentImagesGallery/comment-images-gallery.scss';
 import {GoalTimer} from '../GoalTimer/GoalTimer';
 import {GRADIENT_DEFAULT_IMAGE} from '../Gradient/Gradient';
 import {Line} from '../Line/Line';
@@ -156,6 +158,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const [isAddRegularGoalModalOpen, setIsAddRegularGoalModalOpen] = useState(false);
 	const [isDeleteProgressModalOpen, setIsDeleteProgressModalOpen] = useState(false);
 	const [isUncompleteWithProgressModalOpen, setIsUncompleteWithProgressModalOpen] = useState(false);
+	const [isGoalImageLightboxOpen, setIsGoalImageLightboxOpen] = useState(false);
 
 	const [block, element] = useBem('aside-goal', className);
 
@@ -1463,10 +1466,42 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 			: null;
 
 	const imageSrc = image != null && String(image).trim() !== '' ? String(image).trim() : GRADIENT_DEFAULT_IMAGE;
+	const canOpenGoalImageLightbox = imageSrc !== GRADIENT_DEFAULT_IMAGE;
 
 	return (
 		<aside className={block({isList})}>
-			<img src={imageSrc} alt={title} className={element('image')} />
+			{/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role */}
+			<img
+				src={imageSrc}
+				alt={title}
+				className={element('image', {clickable: canOpenGoalImageLightbox})}
+				{...(canOpenGoalImageLightbox
+					? {
+							role: 'button' as const,
+							tabIndex: 0,
+							onClick: () => setIsGoalImageLightboxOpen(true),
+							onKeyDown: (e: KeyboardEvent<HTMLImageElement>) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									e.preventDefault();
+									setIsGoalImageLightboxOpen(true);
+								}
+							},
+					  }
+					: {})}
+			/>
+			{canOpenGoalImageLightbox && (
+				<Lightbox
+					open={isGoalImageLightboxOpen}
+					close={() => setIsGoalImageLightboxOpen(false)}
+					slides={[{src: imageSrc}]}
+					index={0}
+					className="comment-images-gallery__lightbox"
+					carousel={{finite: true, padding: '16px'}}
+					controller={{closeOnBackdropClick: true}}
+					animation={{fade: 300}}
+					render={{buttonPrev: () => null, buttonNext: () => null}}
+				/>
+			)}
 			{/* Блок с информацией о регулярной цели - показывается только если цель не добавлена */}
 			{regularConfig && !isList && !isAdded && (
 				<div className={element('regular-info-header')}>

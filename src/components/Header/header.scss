@@ -210,13 +210,7 @@
 		}
 
 		&--is100Goals {
-			font-weight: var(--weight-semi-bold);
-			background: linear-gradient(
-				130deg,
-				rgb(var(--color-purple-rgb-3) / 0.25),
-				rgb(var(--color-blue-rgb-1) / 0.1),
-				rgb(var(--color-purple-rgb-3) / 0.2)
-			);
+			// стили для 100 целей
 		}
 
 		@include md {
@@ -347,8 +341,10 @@
 		border-radius: 6px;
 		color: var(--color-text-primary);
 
-		&:hover {
-			background: var(--color-secondary-hover);
+		@media (pointer: fine) {
+			&:hover {
+				background: var(--color-secondary-hover);
+			}
 		}
 
 		&--child {
@@ -582,7 +578,6 @@
 		display: flex;
 		flex-direction: column;
 		width: 336px;
-		max-height: calc(100vh - 120px);
 		padding: 8px;
 		background: var(--color-white);
 		border-radius: 8px;
@@ -593,6 +588,8 @@
 		visibility: hidden;
 		box-shadow: 0 0 20px -2px rgb(var(--color-gray-rgb-8) / 8%);
 		z-index: 10000;
+
+		@include header-profile-menu-max-height(var(--height-header), 24px);
 
 		@include md {
 			position: relative;
@@ -605,6 +602,8 @@
 			transform: translateY(0);
 			visibility: visible;
 			box-shadow: none;
+
+			@include header-profile-menu-max-height(var(--height-header-compact), 24px);
 		}
 	}
 

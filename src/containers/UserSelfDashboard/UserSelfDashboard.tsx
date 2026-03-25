@@ -79,7 +79,7 @@ export const UserSelfDashboard: FC = observer(() => {
 				)}
 
 				{userStatistics?.weeklyProgress && <WeeklySchedule weeks={userStatistics?.weeklyProgress} className={element('weekly')} />}
-				{userStatistics && <UserStatistics statistics={userStatistics} />}
+				{userStatistics && <UserStatistics statistics={userStatistics} className={element('user-statistics')} />}
 			</div>
 			<ActivityHeatmap />
 			<GoalTimers />

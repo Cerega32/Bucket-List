@@ -229,6 +229,7 @@ export const NewsDetailPage = observer(() => {
 					carousel={{finite: true, padding: '16px'}}
 					controller={{closeOnBackdropClick: true}}
 					animation={{fade: 300}}
+					render={{buttonPrev: () => null, buttonNext: () => null}}
 					styles={{container: {backgroundColor: 'rgba(0, 0, 0, .8)'}}}
 				/>
 			</div>

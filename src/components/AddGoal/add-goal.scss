@@ -63,10 +63,6 @@
 		position: relative;
 	}
 
-	&__field {
-		margin-bottom: 4px;
-	}
-
 	// Ошибки валидации обязательных полей
 	&__image-section--error &__dropzone {
 		border-color: var(--color-red-border);
@@ -222,6 +218,10 @@
 		@include md {
 			margin-bottom: 0;
 		}
+	}
+
+	&__external-search-section:not(:has(div)) {
+		display: none;
 	}
 
 	&__external-search {

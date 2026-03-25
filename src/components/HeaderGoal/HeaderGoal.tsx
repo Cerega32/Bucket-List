@@ -1,4 +1,5 @@
-import {forwardRef} from 'react';
+import {useState, forwardRef} from 'react';
+import Lightbox from 'yet-another-react-lightbox';
 
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
@@ -6,6 +7,7 @@ import {ICategory, IGoal} from '@/typings/goal';
 import './header-goal.scss';
 
 import {TitleWithTags} from '../TitleWithTags/TitleWithTags';
+import '../CommentImagesGallery/comment-images-gallery.scss';
 
 interface HeaderGoalProps {
 	className?: string;
@@ -24,6 +26,8 @@ export const HeaderGoal = forwardRef<HTMLElement, HeaderGoalProps>((props, ref) 
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 	const isMobile = isScreenMobile || isScreenSmallTablet;
 
+	const [isGoalImageLightboxOpen, setIsGoalImageLightboxOpen] = useState(false);
+
 	return (
 		<header
 			ref={ref}
@@ -34,7 +38,29 @@ export const HeaderGoal = forwardRef<HTMLElement, HeaderGoalProps>((props, ref) 
 			})}
 			style={{backgroundImage: `url(${background})`}}
 		>
-			{isMobile && <img src={image} alt={title} className={element('image')} onLoad={onImageLoad} />}
+			{isMobile && (
+				<>
+					<button
+						type="button"
+						className={element('image', {clickable: true})}
+						aria-label={`Открыть изображение цели «${title}»`}
+						onClick={() => setIsGoalImageLightboxOpen(true)}
+					>
+						<img src={image} alt="" onLoad={onImageLoad} />
+					</button>
+					<Lightbox
+						open={isGoalImageLightboxOpen}
+						close={() => setIsGoalImageLightboxOpen(false)}
+						slides={[{src: image}]}
+						index={0}
+						className="comment-images-gallery__lightbox"
+						carousel={{finite: true, padding: '16px'}}
+						controller={{closeOnBackdropClick: true}}
+						animation={{fade: 300}}
+						render={{buttonPrev: () => null, buttonNext: () => null}}
+					/>
+				</>
+			)}
 			<TitleWithTags
 				category={category}
 				complexity={goal.complexity}

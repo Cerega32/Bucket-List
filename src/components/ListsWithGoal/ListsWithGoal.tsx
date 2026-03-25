@@ -45,7 +45,7 @@ export const ListsWithGoal: FC<ListsWithGoalProps> = observer((props) => {
 	};
 
 	return (
-		<section className={block()}>
+		<section className={block()} id="goal-lists-section">
 			{lists && lists.length > 0 ? (
 				lists.map((list, i) => (
 					<Card

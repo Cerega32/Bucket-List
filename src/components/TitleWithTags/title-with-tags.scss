@@ -31,6 +31,8 @@
 
 	&__title {
 		margin-bottom: 16px;
+		cursor: pointer;
+		width: max-content;
 
 		&--short {
 			margin-bottom: 0;
