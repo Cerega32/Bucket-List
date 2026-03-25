@@ -13,7 +13,7 @@ import {TitleWithTags} from '../TitleWithTags/TitleWithTags';
 interface ContentListGoalsProps {
 	className?: string;
 	list: IList;
-	updateGoal: (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void>;
+	updateGoal: (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void | boolean>;
 }
 
 export const ContentListGoals: FC<ContentListGoalsProps> = (props) => {

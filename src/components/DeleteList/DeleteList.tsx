@@ -3,6 +3,7 @@ import {FC} from 'react';
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
 import {IFuncModal} from '@/store/ModalStore';
+import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
 
 import {Title} from '../Title/Title';
 import './delete-list.scss';
@@ -19,10 +20,17 @@ export const DeleteList: FC<DeleteListProps> = (props) => {
 	const [block, element] = useBem('delete-list', className);
 
 	const handleDeleteList = async () => {
-		const res = funcModal(); // TODO
-		if (res) {
-			closeModal();
+		const raw = funcModal();
+		const ok = raw instanceof Promise ? await raw : raw;
+		if (ok === false) {
+			return;
 		}
+		try {
+			await refreshHeaderGoalCounts();
+		} catch (e) {
+			console.error(e);
+		}
+		closeModal();
 	};
 
 	return (

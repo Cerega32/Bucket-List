@@ -12,7 +12,7 @@ interface ListGoalsProps {
 	horizontal?: boolean;
 	list: Array<IShortGoal>;
 	columns?: 'two' | 'three' | 'four';
-	updateGoal: (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void>;
+	updateGoal: (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void | boolean>;
 }
 
 export const ListGoals: FC<ListGoalsProps> = (props) => {

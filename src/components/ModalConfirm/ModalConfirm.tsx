@@ -38,10 +38,11 @@ export const ModalConfirm: FC<ModalProps> = observer(
 		const modalRef = useRef<HTMLDivElement>(null);
 		const closeButtonRef = useRef<HTMLButtonElement>(null);
 		const [checkboxValue, setCheckboxValue] = useState(false);
+		const [isSubmitting, setIsSubmitting] = useState(false);
 
 		// Закрытие модалки по Escape
 		const handleKeyUp = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') onClose();
+			if (e.key === 'Escape' && !isSubmitting) onClose();
 		};
 
 		// Ловушка фокуса
@@ -66,7 +67,8 @@ export const ModalConfirm: FC<ModalProps> = observer(
 		};
 
 		const handleBtnClick = async () => {
-			// Вызываем handleBtn и передаем значение checkbox (если используется)
+			if (isSubmitting) return;
+			setIsSubmitting(true);
 			try {
 				const result = checkboxText ? handleBtn(checkboxValue) : handleBtn();
 				// Если handleBtn возвращает Promise, ждем его завершения
@@ -81,13 +83,20 @@ export const ModalConfirm: FC<ModalProps> = observer(
 			} catch (error) {
 				// При ошибке не закрываем модалку, чтобы пользователь мог попробовать снова
 				console.error('Ошибка при выполнении действия:', error);
+			} finally {
+				setIsSubmitting(false);
 			}
+		};
+
+		const handleSafeClose = () => {
+			if (!isSubmitting) onClose();
 		};
 
 		// Сброс состояния checkbox при открытии модалки
 		useEffect(() => {
 			if (isOpen) {
 				setCheckboxValue(false);
+				setIsSubmitting(false);
 			}
 		}, [isOpen]);
 
@@ -117,7 +126,7 @@ export const ModalConfirm: FC<ModalProps> = observer(
 				document.removeEventListener('keydown', handleTabKey);
 				document.body.style.overflow = '';
 			};
-		}, [isOpen]);
+		}, [isOpen, isSubmitting]);
 
 		if (!isOpen) return null;
 
@@ -133,23 +142,48 @@ export const ModalConfirm: FC<ModalProps> = observer(
 						<p className={element('text')}>{text}</p>
 						{checkboxText && (
 							<div className={element('checkbox-wrapper')}>
-								<FieldCheckbox id={checkboxId} text={checkboxText} checked={checkboxValue} setChecked={setCheckboxValue} />
+								<FieldCheckbox
+									id={checkboxId}
+									text={checkboxText}
+									checked={checkboxValue}
+									setChecked={setCheckboxValue}
+									disabled={isSubmitting}
+								/>
 							</div>
 						)}
 						<div className={element('btns-wrapper')}>
-							<Button theme="gray" className={element('btn')} onClick={onClose} type="button">
+							<Button theme="gray" className={element('btn')} onClick={handleSafeClose} type="button" disabled={isSubmitting}>
 								{textBtnCancel}
 							</Button>
-							<Button theme={themeBtn} className={element('btn')} onClick={handleBtnClick} type="button">
+							<Button
+								theme={themeBtn}
+								className={element('btn')}
+								onClick={handleBtnClick}
+								type="button"
+								loading={isSubmitting}
+								disabled={isSubmitting}
+							>
 								{textBtn}
 							</Button>
 						</div>
 					</div>
-					<Button theme="blue-light" className={element('close')} onClick={onClose} refInner={closeButtonRef}>
+					<Button
+						theme="blue-light"
+						className={element('close')}
+						onClick={handleSafeClose}
+						refInner={closeButtonRef}
+						disabled={isSubmitting}
+					>
 						<Svg icon="cross" />
 					</Button>
 				</div>
-				<button aria-label="Закрыть окно" type="button" className={element('base')} onClick={onClose} />
+				<button
+					aria-label="Закрыть окно"
+					type="button"
+					className={element('base')}
+					onClick={handleSafeClose}
+					disabled={isSubmitting}
+				/>
 			</section>
 		);
 

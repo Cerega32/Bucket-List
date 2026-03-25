@@ -263,6 +263,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	// Прогресс только из ответа GET цели (userProgress); отдельных запросов к /progress/ нет
 	useEffect(() => {
 		if (!isAdded || isList || !goalId) {
+			// Иначе после «удалить → снова добавить» остаётся старый локальный progress
+			setProgress(null);
 			return;
 		}
 		setProgress(goalUserProgress ?? null);
@@ -1339,6 +1341,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				// Для остальных типов длительности (days, weeks) используем currentStreak (количество дней/недель в серии)
 				streak = stats.currentStreak || 0;
 			}
+		} else {
+			// Активная серия: пока ни одного выполненного дня/недели нет — показываем 0, а не устаревший currentStreak
+			const completions = stats.totalCompletions ?? 0;
+			if (completions === 0) {
+				streak = 0;
+			}
 		}
 
 		// Для daily - серия в днях, для weekly/custom - в неделях
@@ -1430,9 +1438,29 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 
 	// Пересчитываем seriesInfo при каждом рендере (функция легковесная)
 	const seriesInfo = getSeriesInfo();
+	const regularStatsForActions = localStatistics || regularConfig?.statistics;
+	const hasRegularSeriesStarted =
+		(regularStatsForActions?.totalCompletions ?? 0) > 0 || Boolean(regularStatsForActions?.lastCompletionDate);
 	const currentDayIndex = getCurrentDayOfWeek();
 	const progressPercentage = getProgressPercentage();
 	const isProgressGoalComplete = progress != null && progress.progressPercentage >= 100;
+	const daysForEarnedSkip =
+		(localStatistics?.regularGoalData as any)?.daysForEarnedSkip ??
+		(regularConfig?.statistics?.regularGoalData as any)?.daysForEarnedSkip ??
+		(regularConfig as any)?.daysForEarnedSkip ??
+		0;
+	const consecutiveCompletionsForSkip =
+		localStatistics?.consecutiveCompletionsForSkip ?? regularConfig?.statistics?.consecutiveCompletionsForSkip ?? 0;
+	const daysUntilEarnedSkipFromBackend = localStatistics?.daysUntilEarnedSkip ?? regularConfig?.statistics?.daysUntilEarnedSkip;
+	const daysUntilEarnedSkip =
+		daysUntilEarnedSkipFromBackend !== undefined
+			? daysUntilEarnedSkipFromBackend
+			: daysForEarnedSkip > 0
+			? (() => {
+					const completedInCycle = consecutiveCompletionsForSkip % daysForEarnedSkip;
+					return completedInCycle === 0 ? daysForEarnedSkip : daysForEarnedSkip - completedInCycle;
+			  })()
+			: null;
 
 	const imageSrc = image != null && String(image).trim() !== '' ? String(image).trim() : GRADIENT_DEFAULT_IMAGE;
 
@@ -1485,6 +1513,14 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										: regularConfig.allowSkipDays || 0}
 								</span>
 							</div>
+							{daysUntilEarnedSkip !== null && (
+								<div className={element('regular-info-row')}>
+									<span className={element('regular-info-label')}>До начисления пропуска:</span>
+									<span className={element('regular-info-value')}>
+										{pluralize(daysUntilEarnedSkip, ['день', 'дня', 'дней'])}
+									</span>
+								</div>
+							)}
 							{/* Показываем использованные пропуски, если они есть */}
 							{localStatistics?.usedSkipDays !== undefined && localStatistics.usedSkipDays > 0 && (
 								<div className={element('regular-info-row')}>
@@ -1521,15 +1557,13 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						<span>
 							{seriesInfo.isCompleted ? 'Серия выполнена' : seriesInfo.isInterrupted ? 'Серия прервана' : 'Текущая серия'}
 						</span>
-						{(seriesInfo.isCompleted || seriesInfo.isInterrupted || seriesInfo.value > 0) && (
-							<span
-								className={element('regular-info-streak', {
-									active: true,
-								})}
-							>
-								{seriesInfo.unit}
-							</span>
-						)}
+						<span
+							className={element('regular-info-streak', {
+								active: seriesInfo.value > 0 || seriesInfo.isCompleted || seriesInfo.isInterrupted,
+							})}
+						>
+							{seriesInfo.unit}
+						</span>
 					</div>
 
 					{/* Календарь дней недели - показываем только если серия не прервана и не завершена */}
@@ -1780,6 +1814,14 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 									: regularConfig.allowSkipDays || 0}
 							</span>
 						</div>
+						{daysUntilEarnedSkip !== null && (
+							<div className={element('regular-info-row')}>
+								<span className={element('regular-info-label')}>До начисления пропуска:</span>
+								<span className={element('regular-info-value')}>
+									{pluralize(daysUntilEarnedSkip, ['день', 'дня', 'дней'])}
+								</span>
+							</div>
+						)}
 						{/* Показываем использованные пропуски, если они есть */}
 						{(localStatistics?.usedSkipDays !== undefined && localStatistics.usedSkipDays > 0) ||
 						(regularConfig.statistics?.usedSkipDays !== undefined && regularConfig.statistics.usedSkipDays > 0) ? (
@@ -2028,7 +2070,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				{/* Кнопки для регулярной цели */}
 				{regularConfig && isAdded && !isList && (
 					<>
-						{!seriesInfo.isInterrupted && !seriesInfo.isCompleted && (
+						{!seriesInfo.isInterrupted && !seriesInfo.isCompleted && hasRegularSeriesStarted && (
 							<Button
 								theme="blue-light"
 								onClick={handleCompleteSeries}
@@ -2106,6 +2148,17 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 					>
 						Добавить в папку
+					</Button>
+				)}
+				{!isList && !!canEdit && typeof editGoal === 'function' && (
+					<Button
+						theme="blue-light"
+						onClick={editGoal}
+						icon="edit"
+						className={element('btn')}
+						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+					>
+						Редактировать
 					</Button>
 				)}
 				{isAdded && !isCompleted && !isList && !regularConfig && (

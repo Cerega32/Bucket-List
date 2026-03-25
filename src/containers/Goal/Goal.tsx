@@ -20,7 +20,6 @@ import {ThemeStore} from '@/store/ThemeStore';
 import {UserStore} from '@/store/UserStore';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
-import {canEditGoal} from '@/utils/api/get/canEditGoal';
 import {getGoal} from '@/utils/api/get/getGoal';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
@@ -43,10 +42,6 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const [isEditing, setIsEditing] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0); // Триггер для обновления истории
-	const [canEditCheck, setCanEditCheck] = useState<{can_edit: boolean; checked: boolean}>({
-		can_edit: false,
-		checked: false,
-	});
 
 	const {setIsOpen, setWindow} = ModalStore;
 	const {setHeader} = ThemeStore;
@@ -64,26 +59,6 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			}
 		})();
 	}, [listId, isAuth]);
-
-	useEffect(() => {
-		const checkEditPermission = async () => {
-			if (goal && goal.createdBy && !canEditCheck.checked) {
-				try {
-					const response = await canEditGoal(listId || '');
-					if (response.success && response.data) {
-						setCanEditCheck({
-							can_edit: response.data.can_edit,
-							checked: true,
-						});
-					}
-				} catch (error) {
-					console.error('Ошибка при проверке возможности редактирования:', error);
-				}
-			}
-		};
-
-		checkEditPermission();
-	}, [goal, listId, canEditCheck.checked]);
 
 	// Счётчик записей для вкладки «История прогресса» — из userProgress (не из recentEntries: может не приходить)
 	useEffect(() => {
@@ -115,29 +90,33 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		setIsOpen(true);
 	};
 
-	const updateGoal = async (code: string, operation: 'add' | 'delete' | 'mark' | 'partial' | 'start', done?: boolean): Promise<void> => {
+	const updateGoal = async (
+		code: string,
+		operation: 'add' | 'delete' | 'mark' | 'partial' | 'start',
+		done?: boolean
+	): Promise<boolean> => {
 		if (!goal) {
-			return;
+			return false;
 		}
 
 		// Специальная обработка для начала выполнения
 		if (operation === 'start') {
 			// Логика начала выполнения обрабатывается в AsideGoal
 			// Здесь можем добавить дополнительную логику если нужно
-			return;
+			return false;
 		}
 
 		// Специальная обработка для частичного выполнения
 		if (operation === 'partial') {
 			// Логика частичного выполнения обрабатывается в AsideGoal
 			// Здесь можем добавить дополнительную логику если нужно
-			return;
+			return false;
 		}
 
 		if (!isAuth) {
 			setWindow('login');
 			setIsOpen(true);
-			return;
+			return false;
 		}
 
 		const res = await (operation === 'add'
@@ -159,45 +138,53 @@ export const Goal: FC<IPage> = observer(({page}) => {
 						: undefined
 			  ));
 
-		if (res.success) {
-			const updatedGoal = {
-				addedByUser: operation !== 'delete',
-				completedByUser: operation === 'mark' ? !done : false,
-				totalAdded: res.data.totalAdded,
-				totalCompleted: res.data.totalCompleted,
-			};
+		if (!res.success) {
+			return false;
+		}
 
-			// Функциональное обновление: иначе после patchParentUserProgress(null) из AsideGoal
-			// следующий setGoal({...goal, ...}) с устаревшим goal снова подставляет старый userProgress.
-			setGoal((prev) => {
-				if (!prev) {
-					return null;
-				}
-				const next = {...prev, ...updatedGoal} as IGoal;
-				if (operation === 'mark') {
-					const data = res.data as Partial<IGoal> & {userProgress?: IGoal['userProgress']};
-					if (Object.prototype.hasOwnProperty.call(data, 'userProgress')) {
-						next.userProgress = data.userProgress ?? null;
-						if (next.userProgress == null) {
-							next.progressEntriesCount = 0;
-						} else if (data.progressEntriesCount !== undefined) {
-							next.progressEntriesCount = data.progressEntriesCount;
-						}
+		const updatedGoal = {
+			addedByUser: operation !== 'delete',
+			completedByUser: operation === 'mark' ? !done : false,
+			totalAdded: res.data.totalAdded,
+			totalCompleted: res.data.totalCompleted,
+		};
+
+		// Функциональное обновление: иначе после patchParentUserProgress(null) из AsideGoal
+		// следующий setGoal({...goal, ...}) с устаревшим goal снова подставляет старый userProgress.
+		setGoal((prev) => {
+			if (!prev) {
+				return null;
+			}
+			// POST add/remove возвращают полную цель (GoalSerializer) — подмешиваем, чтобы не тянуть старый userProgress
+			const fromApi = res.data as Partial<IGoal> & {id?: number};
+			if ((operation === 'delete' || operation === 'add') && typeof fromApi.id === 'number' && fromApi.id === prev.id) {
+				return {...prev, ...fromApi} as IGoal;
+			}
+			const next = {...prev, ...updatedGoal} as IGoal;
+			if (operation === 'mark') {
+				const data = res.data as Partial<IGoal> & {userProgress?: IGoal['userProgress']};
+				if (Object.prototype.hasOwnProperty.call(data, 'userProgress')) {
+					next.userProgress = data.userProgress ?? null;
+					if (next.userProgress == null) {
+						next.progressEntriesCount = 0;
+					} else if (data.progressEntriesCount !== undefined) {
+						next.progressEntriesCount = data.progressEntriesCount;
 					}
 				}
-				return next;
-			});
-
-			// Если удалена или добавлена регулярная цель, перезагружаем данные цели, чтобы обновить regularConfig.statistics
-			if ((operation === 'delete' || operation === 'add') && goal.regularConfig && listId) {
-				const reloadRes = await getGoal(listId);
-				if (reloadRes.success && reloadRes.data.goal) {
-					setGoal(reloadRes.data.goal);
-				}
 			}
+			return next;
+		});
 
-			// Прогресс заданий обновляется автоматически на бэкенде
+		// Если удалена или добавлена регулярная цель, перезагружаем данные цели, чтобы обновить regularConfig.statistics
+		if ((operation === 'delete' || operation === 'add') && goal.regularConfig && listId) {
+			const reloadRes = await getGoal(listId);
+			if (reloadRes.success && reloadRes.data.goal) {
+				setGoal(reloadRes.data.goal);
+			}
 		}
+
+		// Прогресс заданий обновляется автоматически на бэкенде
+		return true;
 	};
 
 	const handleGoalUpdated = (updatedGoal: IGoal) => {
@@ -359,8 +346,8 @@ export const Goal: FC<IPage> = observer(({page}) => {
 						done={goal.completedByUser}
 						openAddReview={openAddReview}
 						hasMyComment={goal.hasMyComment}
-						editGoal={goal.createdByUser && goal.isCanEdit ? () => setIsEditing(true) : undefined}
-						canEdit={goal?.isCanEdit}
+						editGoal={goal.isCanEdit ? () => setIsEditing(true) : undefined}
+						canEdit={goal.isCanEdit}
 						location={goal?.location}
 						onGoalCompleted={handleGoalCompleted}
 						onHistoryRefresh={handleHistoryRefresh}
