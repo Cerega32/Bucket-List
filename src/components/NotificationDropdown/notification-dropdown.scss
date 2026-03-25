@@ -5,8 +5,9 @@
 	z-index: 1000;
 	top: 100%;
 	right: 0;
+	display: flex;
+	flex-direction: column;
 	width: 400px;
-	max-height: 696px;
 	margin-top: 8px;
 	background: var(--color-white);
 	border: 1px solid var(--color-border-light);
@@ -14,7 +15,18 @@
 	box-shadow: 0 8px 32px rgb(0 0 0 / 15%);
 	overflow: hidden;
 
+	@include header-anchor-dropdown-max-height(696px, var(--height-header), 20px);
+
+	@include md {
+		@include header-anchor-dropdown-max-height(696px, var(--height-header-compact), 20px);
+	}
+
+	> .line {
+		flex-shrink: 0;
+	}
+
 	&__header {
+		flex-shrink: 0;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
@@ -35,12 +47,9 @@
 	}
 
 	&__content {
-		max-height: min(640px, 80vh);
+		flex: 1 1 auto;
+		min-height: 0;
 		overflow-y: auto;
-
-		@include lg {
-			max-height: min(640px, 70vh);
-		}
 
 		&::-webkit-scrollbar {
 			width: 4px;
@@ -163,6 +172,7 @@
 	}
 
 	&__footer {
+		flex-shrink: 0;
 		padding: 12px 20px;
 		border-top: 1px solid var(--color-border-light);
 		background: var(--color-background-light);

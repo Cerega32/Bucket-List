@@ -102,6 +102,7 @@ export const CommentImagesGallery: FC<CommentImagesGalleryProps> = ({images, nav
 				carousel={{finite: true, padding: '16px'}}
 				controller={{closeOnBackdropClick: true}}
 				animation={{fade: 300}}
+				render={{buttonPrev: () => null, buttonNext: () => null}}
 			/>
 		</div>
 	);

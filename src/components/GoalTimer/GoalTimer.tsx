@@ -22,7 +22,8 @@ export const GoalTimer: React.FC<GoalTimerProps> = ({goalCode, timer: initialTim
 	const [isSettingTimer, setIsSettingTimer] = useState(false);
 	const [selectedDate, setSelectedDate] = useState<Date | null>(initialTimer?.deadline ? parseISO(initialTimer.deadline) : null);
 	const [timer, setTimer] = useState<TimerInfo | null>(initialTimer || null);
-	const [error, setError] = useState<string | null>(null);
+	const [serverError, setServerError] = useState<string | null>(null);
+	const [dateError, setDateError] = useState<string[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 
 	const [block, element] = useBem('goal-timer');
@@ -38,7 +39,7 @@ export const GoalTimer: React.FC<GoalTimerProps> = ({goalCode, timer: initialTim
 				setSelectedDate(parseISO(response.data.timer.deadline));
 			}
 		} catch (err) {
-			setError('Не удалось получить информацию о сроке выполнения');
+			setServerError('Не удалось получить информацию о сроке выполнения');
 		} finally {
 			setIsLoading(false);
 		}
@@ -57,16 +58,27 @@ export const GoalTimer: React.FC<GoalTimerProps> = ({goalCode, timer: initialTim
 
 	const handleSetTimer = async () => {
 		if (!selectedDate) {
-			setError('Пожалуйста, выберите дату');
+			setDateError(['Пожалуйста, выберите дату']);
 			return;
 		}
 
+		const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+
+		if (timer?.deadline) {
+			const existingDate = timer.deadline.length >= 10 ? timer.deadline.slice(0, 10) : format(parseISO(timer.deadline), 'yyyy-MM-dd');
+			if (existingDate === formattedDate) {
+				setIsSettingTimer(false);
+				setDateError([]);
+				setServerError(null);
+				return;
+			}
+		}
+
 		setIsLoading(true);
-		setError(null);
+		setDateError([]);
+		setServerError(null);
 
 		try {
-			// Форматируем дату в формат yyyy-MM-dd для API
-			const formattedDate = format(selectedDate, 'yyyy-MM-dd');
 			const response = await setGoalTimer(goalCode, formattedDate);
 
 			if (response.success && response.timer) {
@@ -84,10 +96,10 @@ export const GoalTimer: React.FC<GoalTimerProps> = ({goalCode, timer: initialTim
 					message: response.message || 'Срок выполнения установлен',
 				});
 			} else {
-				setError(response.message || 'Не удалось установить срок выполнения');
+				setServerError(response.message || 'Не удалось установить срок выполнения');
 			}
 		} catch (err) {
-			setError('Произошла ошибка при установке срока выполнения');
+			setServerError('Произошла ошибка при установке срока выполнения');
 		} finally {
 			setIsLoading(false);
 		}
@@ -113,10 +125,10 @@ export const GoalTimer: React.FC<GoalTimerProps> = ({goalCode, timer: initialTim
 					message: response.message || 'Срок выполнения удален',
 				});
 			} else {
-				setError(response.message || 'Не удалось удалить срок выполнения');
+				setServerError(response.message || 'Не удалось удалить срок выполнения');
 			}
 		} catch (err) {
-			setError('Произошла ошибка при удалении срока выполнения');
+			setServerError('Произошла ошибка при удалении срока выполнения');
 		} finally {
 			setIsLoading(false);
 		}
@@ -124,7 +136,8 @@ export const GoalTimer: React.FC<GoalTimerProps> = ({goalCode, timer: initialTim
 
 	const handleCancelTimerSetting = () => {
 		setIsSettingTimer(false);
-		setError(null);
+		setDateError([]);
+		setServerError(null);
 
 		// Восстанавливаем предыдущую дату, если она была
 		if (timer?.deadline) {
@@ -150,25 +163,27 @@ export const GoalTimer: React.FC<GoalTimerProps> = ({goalCode, timer: initialTim
 		);
 	};
 
-	// Определяем кнопку удаления в зависимости от статуса загрузки
-	const renderDeleteButton = () => {
-		if (isLoading) {
-			return (
-				<Button onClick={() => {}} theme="red" className={element('delete-button')}>
-					Удаление...
-				</Button>
-			);
-		}
-		return (
-			<Button onClick={handleDeleteTimer} theme="red" className={element('delete-button')}>
-				Удалить
-			</Button>
-		);
+	const renderDeleteButton = () => (
+		<Button
+			icon="trash"
+			onClick={handleDeleteTimer}
+			theme="red-delete"
+			size="small"
+			width="auto"
+			className={element('delete-button')}
+			loading={isLoading}
+		/>
+	);
+
+	const openTimerSetup = () => {
+		setDateError([]);
+		setServerError(null);
+		setIsSettingTimer(true);
 	};
 
 	return (
 		<div className={block()}>
-			{error && <div className={element('error')}>{error}</div>}
+			{serverError && <div className={element('error')}>{serverError}</div>}
 
 			{isSettingTimer ? (
 				<div className={element('setup')}>
@@ -177,7 +192,11 @@ export const GoalTimer: React.FC<GoalTimerProps> = ({goalCode, timer: initialTim
 							className={element('date-input')}
 							placeholderText="ДД.ММ.ГГГГ"
 							selected={selectedDate}
-							onChange={setSelectedDate}
+							onChange={(d) => {
+								setSelectedDate(d);
+								setDateError([]);
+							}}
+							error={dateError}
 							minDate={new Date(new Date().setDate(new Date().getDate() + 1))} // завтра
 						/>
 					</div>
@@ -197,33 +216,34 @@ export const GoalTimer: React.FC<GoalTimerProps> = ({goalCode, timer: initialTim
 					{timer?.deadline ? (
 						<div className={element('info')}>
 							<div className={element('deadline')}>
-								<span className={element('label')}>Срок выполнения:</span>
-								<span className={element('date')}>{formatDate(timer.deadline)}</span>
+								<div className={element('row')}>
+									<span className={element('label')}>Срок выполнения:</span>
+									<span className={element('date')}>{formatDate(timer.deadline)}</span>
+								</div>
 								{timer.daysLeft !== undefined && (
-									<span className={element('days-left', {expired: timer.isExpired})}>
-										{timer.isExpired
-											? 'Срок истек'
-											: `${pluralize(timer.daysLeft, ['Остался', 'Осталось', 'Осталось'], false)}: ${pluralize(
-													timer.daysLeft,
-													['день', 'дня', 'дней']
-											  )}`}
-									</span>
+									<div className={element('row')}>
+										<span className={element('label')}>Осталось:</span>
+										<span className={element('days-left', {expired: timer.isExpired})}>
+											{timer.isExpired ? 'Срок истек' : pluralize(timer.daysLeft, ['день', 'дня', 'дней'])}
+										</span>
+									</div>
 								)}
 							</div>
 							<div className={element('actions')}>
 								<Button
-									onClick={isLoading ? () => {} : () => setIsSettingTimer(true)}
-									theme="blue-light"
+									onClick={isLoading ? () => {} : openTimerSetup}
+									theme="blue-edit"
 									className={element('edit-button')}
-								>
-									Изменить
-								</Button>
+									size="small"
+									width="auto"
+									icon="edit"
+								/>
 								{renderDeleteButton()}
 							</div>
 						</div>
 					) : (
 						<Button
-							onClick={isLoading ? () => {} : () => setIsSettingTimer(true)}
+							onClick={isLoading ? () => {} : openTimerSetup}
 							theme="blue-light"
 							className={element('set-button')}
 							icon="stopwatch"

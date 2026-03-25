@@ -26,6 +26,14 @@
 		object-fit: cover;
 		border-radius: 8px;
 
+		&--clickable {
+			cursor: pointer;
+		}
+
+		&--clickable:focus {
+			@include focus-outline;
+		}
+
 		@include lg {
 			display: none;
 		}
