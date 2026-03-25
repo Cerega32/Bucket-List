@@ -260,6 +260,7 @@ export interface IRegularGoalStatistics {
 	consecutiveCompletionsForSkip?: number;
 	usedSkipDays?: number;
 	remainingSkipDays?: number; // Количество использованных разрешенных пропусков
+	daysUntilEarnedSkip?: number | null;
 	isActive: boolean;
 	isPaused: boolean;
 	resetCount: number;
