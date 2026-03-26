@@ -1,4 +1,4 @@
-import {type KeyboardEvent, FC, useEffect, useState} from 'react';
+import {type KeyboardEvent, type MouseEvent, FC, useEffect, useState} from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 
 import {WeekDaySchedule} from '@/components/WeekDaySelector/WeekDaySelector';
@@ -24,6 +24,7 @@ import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
 import {updateRegularGoalSettings} from '@/utils/api/post/updateRegularGoalSettings';
 import {GoalWithLocation} from '@/utils/mapApi';
 import {pluralize} from '@/utils/text/pluralize';
+import {emitConfettiFromElement} from '@/utils/ui/emitConfetti';
 
 import {Button} from '../Button/Button';
 import '../CommentImagesGallery/comment-images-gallery.scss';
@@ -1085,7 +1086,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		}
 	};
 
-	const handleMarkGoal = async (isCurrentlyCompleted: boolean) => {
+	const handleMarkGoal = async (isCurrentlyCompleted: boolean, triggerElement?: HTMLElement | null) => {
 		// Если цель снимается с выполнения и есть прогресс, сбрасываем его
 		if (isCurrentlyCompleted && progress && goalId) {
 			try {
@@ -1109,15 +1110,19 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		if (!isList) {
 			await (updateGoal as any)(code, 'mark', isCurrentlyCompleted);
 		}
+
+		if (!isCurrentlyCompleted && triggerElement) {
+			emitConfettiFromElement(triggerElement);
+		}
 	};
 
 	/** Отмена выполнения: при активном прогрессе — сначала подтверждение (прогресс будет удалён) */
-	const handleMarkGoalClick = () => {
+	const handleMarkGoalClick = (e: MouseEvent<HTMLButtonElement>) => {
 		if (!isList && isCompleted && progress && goalId) {
 			setIsUncompleteWithProgressModalOpen(true);
 			return;
 		}
-		handleMarkGoal(isCompleted).catch(() => {});
+		handleMarkGoal(isCompleted, e.currentTarget).catch(() => {});
 	};
 
 	// Функция для форматирования дней недели

@@ -1,4 +1,4 @@
-import {FC} from 'react';
+import {type MouseEvent, FC} from 'react';
 import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
@@ -7,6 +7,7 @@ import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
 import {IShortGoal, IShortList} from '@/typings/goal';
+import {emitConfettiFromElement} from '@/utils/ui/emitConfetti';
 
 import {Button} from '../Button/Button';
 import {Gradient} from '../Gradient/Gradient';
@@ -82,6 +83,15 @@ export const Card: FC<CardProps> = (props) => {
 				title: 'Цель удалена',
 				message: 'Мы убрали её из вашего списка.',
 			});
+		}
+	};
+
+	const onClickMarkHandler = async (e: MouseEvent<HTMLButtonElement>) => {
+		const buttonEl = e.currentTarget;
+		const shouldCelebrate = !goal.completedByUser;
+		await onClickMark?.();
+		if (shouldCelebrate) {
+			emitConfettiFromElement(buttonEl);
 		}
 	};
 
@@ -244,14 +254,18 @@ export const Card: FC<CardProps> = (props) => {
 										))}
 									{showMarkButton &&
 										(isScreenXs ? (
-											<Button theme={goal.completedByUser ? 'green' : 'blue'} size="small" onClick={onClickMark}>
+											<Button
+												theme={goal.completedByUser ? 'green' : 'blue'}
+												size="small"
+												onClick={onClickMarkHandler}
+											>
 												{goal.completedByUser ? 'Выполнено' : 'Выполнить'}
 											</Button>
 										) : (
 											<Button
 												theme={goal.completedByUser ? 'green' : 'blue-light'}
 												size="small"
-												onClick={onClickMark}
+												onClick={onClickMarkHandler}
 											>
 												<Svg
 													icon="done"

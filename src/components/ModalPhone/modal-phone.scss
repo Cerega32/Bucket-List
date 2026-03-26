@@ -1,22 +1,21 @@
 .modal-phone {
 	$block: &;
+	position: fixed;
+	z-index: 10001;
+	inset: 0;
+	overflow: hidden;
+	background: var(--color-white);
+	overscroll-behavior: none;
 
 	&__window {
-		position: fixed;
-		z-index: 10001;
+		position: absolute;
+		z-index: 1;
 		inset: 0;
 		display: flex;
 		flex-direction: column;
 		width: 100vw;
-		// для мобильных браузеров вместо vh используем dvh
-		height: calc(var(--modal-vh, 1vh) * 100);
-		@supports (height: 100dvh) {
-			height: 100dvh;
-			max-height: 100dvh;
-		}
-		@supports (-webkit-touch-callout: none) {
-			height: -webkit-fill-available;
-		}
+		height: 100%;
+		max-height: 100%;
 		background: var(--color-white);
 		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		transform: translateY(100%);
@@ -94,6 +93,7 @@
 		padding: 2px 24px 0;
 		min-height: 0;
 		overflow-y: auto;
+		overscroll-behavior-y: contain;
 		-webkit-overflow-scrolling: touch;
 		padding-bottom: max(24px, env(safe-area-inset-bottom));
 
