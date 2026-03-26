@@ -4,12 +4,8 @@
 	margin: 0 auto;
 	background: var(--color-gray-3);
 
-	@include xl {
-		padding: 56px 30px 96px;
-	}
-
 	@include md {
-		padding: 24px 20px 96px;
+		padding: 40px 24px 96px;
 	}
 
 	&__content {

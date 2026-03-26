@@ -83,6 +83,10 @@
 		grid-template-columns: 1fr 1fr;
 		grid-template-rows: 1fr min-content;
 		gap: 24px;
+
+		@include xs {
+			grid-template-columns: 1fr;
+		}
 	}
 
 	&__btn-change {

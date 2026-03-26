@@ -2,10 +2,6 @@
 	width: 100%;
 	border-radius: 16px;
 
-	@include md {
-		padding: 16px;
-	}
-
 	&__content {
 		display: flex;
 		flex-direction: column;

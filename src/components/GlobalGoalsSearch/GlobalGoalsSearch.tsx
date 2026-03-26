@@ -218,8 +218,7 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 			<div
 				className={element('results')}
 				style={{
-					maxHeight: isModal ? 'auto' : '60vh',
-					overflowY: 'auto',
+					maxHeight: isModal ? 'none' : '60vh',
 					padding: '8px 0',
 				}}
 			>

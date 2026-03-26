@@ -164,7 +164,7 @@ export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
 	// }, [title, category, complexity, totalCompleted, categoryRank, userFolders, estimatedTime, short, MAX_HEIGHT, isScreenMobile]);
 
 	return (
-		<div ref={containerRef} className={block({theme})}>
+		<div ref={containerRef} className={block({theme, list: isList})}>
 			<div className={element('header')}>
 				<button
 					type="button"

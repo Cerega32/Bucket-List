@@ -4,11 +4,11 @@
 
 	&__container {
 		max-width: 1200px;
-		padding: 40px 20px 96px;
+		padding: 56px 24px 96px;
 		margin: 0 auto;
 
-		@media (width <= 768px) {
-			padding: 20px 16px 96px;
+		@include md {
+			padding: 40px 24px 96px;
 		}
 	}
 
@@ -19,24 +19,16 @@
 		h1 {
 			margin: 0 0 16px;
 			color: var(--color-text-primary);
-			font-size: 48px;
+			font-size: 40px;
 			font-weight: var(--weight-bold);
-			line-height: 1.2;
-
-			@media (width <= 768px) {
-				font-size: 32px;
-			}
+			line-height: var(--line-height-40);
 		}
 
 		p {
 			margin: 0;
 			color: var(--color-text-secondary);
-			font-size: 18px;
-			line-height: var(--line-height-18);
-
-			@media (width <= 768px) {
-				font-size: 16px;
-			}
+			font-size: 16px;
+			line-height: var(--line-height-16);
 		}
 	}
 
@@ -53,7 +45,7 @@
 		align-items: center;
 		gap: 12px;
 
-		@media (width <= 768px) {
+		@include md {
 			flex-direction: column;
 			align-items: stretch;
 		}
@@ -141,20 +133,19 @@
 	&__empty {
 		padding: 80px 40px;
 		color: var(--color-text-secondary);
-		font-size: 18px;
-		line-height: var(--line-height-18);
+		font-size: 16px;
+		line-height: var(--line-height-16);
 		text-align: center;
 
-		@media (width <= 768px) {
+		@include md {
 			padding: 60px 20px;
-			font-size: 16px;
 		}
 	}
 
 	&__news-list {
 		padding: 32px;
 
-		@media (width <= 768px) {
+		@include md {
 			padding: 20px;
 		}
 	}
@@ -217,7 +208,7 @@
 				color: var(--color-primary);
 			}
 
-			@media (width <= 768px) {
+			@include md {
 				font-size: 20px;
 			}
 		}
@@ -236,7 +227,7 @@
 		align-items: center;
 		gap: 16px;
 
-		@media (width <= 768px) {
+		@include md {
 			flex-direction: column;
 			align-items: flex-start;
 			gap: 8px;
@@ -255,7 +246,7 @@
 		align-items: center;
 		gap: 16px;
 
-		@media (width <= 768px) {
+		@include md {
 			gap: 12px;
 		}
 	}
