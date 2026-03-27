@@ -253,6 +253,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 
 	const [shrink, setShrink] = useState(false);
 	const [headerHeight, setHeaderHeight] = useState<number>(340);
+	const collapsedHeaderHeightMobile = 260; // на какой высоте сворачивается header на мобильных устройствах
 	const headerHeightRef = useRef(headerHeight);
 	const shrinkRef = useRef(false);
 	const expandedHeaderHeightRef = useRef<number | null>(null);
@@ -264,7 +265,11 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	useEffect(() => {
 		shrinkRef.current = shrink;
 		if (!shrink && headerRef.current) {
-			expandedHeaderHeightRef.current = headerRef.current.offsetHeight;
+			const h = headerRef.current.offsetHeight;
+			const prevExpanded = expandedHeaderHeightRef.current;
+			if (prevExpanded == null || h > prevExpanded) {
+				expandedHeaderHeightRef.current = h;
+			}
 		}
 	}, [shrink]);
 
@@ -282,7 +287,10 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			const h = headerRef.current.offsetHeight;
 			setHeaderHeight(h);
 			if (!shrinkRef.current) {
-				expandedHeaderHeightRef.current = h;
+				const prevExpanded = expandedHeaderHeightRef.current;
+				if (prevExpanded == null || h > prevExpanded) {
+					expandedHeaderHeightRef.current = h;
+				}
 			}
 		} else {
 			setHeaderHeight(340);
@@ -296,7 +304,10 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		if (oh > headerHeight) {
 			updateHeaderHeight();
 		} else if (!shrinkRef.current) {
-			expandedHeaderHeightRef.current = oh;
+			const prevExpanded = expandedHeaderHeightRef.current;
+			if (prevExpanded == null || oh > prevExpanded) {
+				expandedHeaderHeightRef.current = oh;
+			}
 		}
 	}, [shrink, isScreenMobile, isScreenSmallTablet, headerHeight]);
 
@@ -318,7 +329,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				const expandedH = expandedHeaderHeightRef.current ?? headerHeightRef.current;
 
 				if (isNarrowPhone) {
-					const shrinkAfterScrollPx = 260;
+					const shrinkAfterScrollPx = collapsedHeaderHeightMobile;
 					const expandHysteresisPx = 40;
 					let enterAt = expandedH - shrinkAfterScrollPx;
 					if (enterAt < expandHysteresisPx + 1) {
@@ -365,6 +376,8 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		return <Loader isLoading={isLoading} isPageLoader />;
 	}
 
+	const expandedHeaderHeight = expandedHeaderHeightRef.current ?? headerHeight;
+
 	return (
 		<>
 			<SEO
@@ -373,7 +386,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				dynamicImage={ogImageUrl}
 				type="article"
 			/>
-			<main className={block()}>
+			<main className={block({shrink})}>
 				<HeaderGoal
 					ref={headerRef}
 					title={goal.title}
@@ -387,7 +400,11 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				<section
 					className={element('wrapper')}
 					style={{
-						paddingTop: isScreenMobile ? headerHeight : 0,
+						paddingTop: isScreenMobile
+							? shrink
+								? Math.max(expandedHeaderHeight - collapsedHeaderHeightMobile, 0)
+								: expandedHeaderHeight
+							: 0,
 					}}
 				>
 					<AsideGoal

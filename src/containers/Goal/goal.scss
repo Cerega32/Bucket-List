@@ -26,6 +26,14 @@
 		}
 	}
 
+	&--shrink {
+		padding: calc(var(--height-header-goal) - var(--height-header-goal-collapsed) + 24px) 0 0; // 24px - дополнительный отступ после свертывания
+
+		@include lg {
+			padding: calc(var(--height-header-goal) - var(--height-header-goal-collapsed)) 0 0;
+		}
+	}
+
 	&__wrapper {
 		position: relative;
 		display: flex;

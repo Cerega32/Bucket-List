@@ -653,9 +653,11 @@
 			top: auto;
 			right: auto;
 			width: 100%;
+			max-height: none;
 			padding: 0;
 			border-radius: 0;
 			opacity: 1;
+			overflow: visible;
 			transform: translateY(0);
 			visibility: visible;
 			box-shadow: none;
@@ -704,12 +706,15 @@
 		justify-content: start;
 		padding: 8px;
 		color: var(--color-red-1);
+		flex-shrink: 0;
 	}
 
 	&__menu-wrapper {
 		display: flex;
 		flex-direction: column;
 		gap: 24px;
+		max-height: none;
+		overflow: visible;
 
 		@include md {
 			gap: 8px;
