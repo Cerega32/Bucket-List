@@ -22,6 +22,7 @@ import {
 import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
 import {updateRegularGoalSettings} from '@/utils/api/post/updateRegularGoalSettings';
 import {GoalWithLocation} from '@/utils/mapApi';
+import {weeklyProratedHintForFirstDayOnCalendar} from '@/utils/regularGoal/weeklyProratedHint';
 import {pluralize} from '@/utils/text/pluralize';
 
 import {Button} from '../Button/Button';
@@ -1191,7 +1192,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 			if (customSchedule && Object.keys(customSchedule).length > 0) {
 				return formatDaysOfWeek(customSchedule);
 			}
-			return `${weeklyFrequency || 0} раз в неделю`;
+			return pluralize(weeklyFrequency || 0, ['раз в неделю', 'раза в неделю', 'раз в неделю']);
 		}
 
 		if (frequency === 'custom' && customSchedule) {
@@ -1462,6 +1463,29 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 			  })()
 			: null;
 
+	const getWeeklyTargetCount = (): number => {
+		if (!regularConfig || regularConfig.frequency !== 'weekly') return 0;
+		let wf = regularConfig.weeklyFrequency ?? 0;
+		const stats = localStatistics || regularConfig.statistics;
+		if (isAdded && stats?.regularGoalData?.weeklyFrequency != null) {
+			wf = stats.regularGoalData.weeklyFrequency;
+		}
+		return wf || 0;
+	};
+
+	/** Пропорция N×(T/7): пока серия не начата — подсказка «если начать сегодня» */
+	const weeklyProratedStartHint = (() => {
+		if (!regularConfig || regularConfig.frequency !== 'weekly') return null;
+		const detailsWhenNotAdded = !isAdded && !regularConfig.allowCustomSettings;
+		const detailsWhenAddedNotStarted = isAdded && !hasRegularSeriesStarted;
+		if (!detailsWhenNotAdded && !detailsWhenAddedNotStarted) return null;
+		const N = getWeeklyTargetCount();
+		if (N <= 0) return null;
+		const today = new Date();
+		const {tDays, minCompletions} = weeklyProratedHintForFirstDayOnCalendar(N, today, today);
+		return {tDays, minCompletions, N};
+	})();
+
 	const imageSrc = image != null && String(image).trim() !== '' ? String(image).trim() : GRADIENT_DEFAULT_IMAGE;
 
 	return (
@@ -1513,6 +1537,15 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										: regularConfig.allowSkipDays || 0}
 								</span>
 							</div>
+							{weeklyProratedStartHint && (
+								<div className={element('regular-info-hint')} role="note">
+									Если отметите первый раз сегодня, на этой неделе нужно не меньше{' '}
+									<strong>{weeklyProratedStartHint.minCompletions}</strong>{' '}
+									{pluralize(weeklyProratedStartHint.minCompletions, ['раз', 'раза', 'раз'])} из{' '}
+									{weeklyProratedStartHint.N} по недельному плану (остаётся {weeklyProratedStartHint.tDays}{' '}
+									{pluralize(weeklyProratedStartHint.tDays, ['день', 'дня', 'дней'])} до конца недели).
+								</div>
+							)}
 							{daysUntilEarnedSkip !== null && (
 								<div className={element('regular-info-row')}>
 									<span className={element('regular-info-label')}>До начисления пропуска:</span>
@@ -1699,12 +1732,13 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 											}) => d.dayIndex === i
 										);
 										if (dayData) {
-											const daySelected = dayData.isAllowed !== false;
-											isSelected = daySelected;
-											isBlocked = !daySelected; // все невыбранные дни — с крестиками
-											isBlockedByStartDate = false;
-											isCompletedDay = daySelected && !isBlocked && (dayData.isCompleted || false);
-											isSkipped = daySelected && !isBlocked && (dayData.isSkipped || false);
+											isBlockedByStartDate = dayData.isBlockedByStartDate || false;
+											// Дни вне графика — всегда с крестиком (и до start_date тоже: у API тогда isBlocked=false)
+											const inCustomSchedule = isDaySelected(i);
+											isBlocked = !inCustomSchedule || !!dayData.isBlocked;
+											isSelected = dayData.isAllowed !== false;
+											isCompletedDay = !isBlockedByStartDate && (dayData.isCompleted || false);
+											isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false);
 										}
 									} else {
 										// Fallback: определяем выбранные дни по общему графику, без учета startDate
@@ -1720,28 +1754,24 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 								// Синяя рамка и выделение всегда на текущем дне (isCurrentDay),
 								// Не показываем рамку только для блокировки по дате начала (isBlockedByStartDate).
 								const showBorder = isCurrentDay && !isBlockedByStartDate;
+								// custom: крестик для любого дня вне графика, даже до start_date; в графике до старта — без крестика
+								const blockedScheduleCross =
+									regularConfig.frequency === 'custom' ? isBlocked : isBlocked && !isBlockedByStartDate;
 
 								return (
 									<div key={i} className={element('regular-series-day-wrapper')}>
 										<div
 											className={element('regular-series-day', {
 												selected: showBorder,
-												// Класс blocked применяется только для блокировки по расписанию (custom/weekly)
-												// Для блокировки по дате начала (isBlockedByStartDate) не применяем класс blocked
-												blocked: isBlocked && !isBlockedByStartDate, // Блокировка по расписанию - показываем крестик
-												completed: isCompletedDay && !isSkipped && !isBlocked && !isBlockedByStartDate, // Обычное выполнение (зеленый)
-												skipped: isSkipped && !isBlocked && !isBlockedByStartDate, // Использован пропуск (серый)
+												blocked: blockedScheduleCross,
+												completed: isCompletedDay && !isSkipped && !blockedScheduleCross && !isBlockedByStartDate,
+												skipped: isSkipped && !blockedScheduleCross && !isBlockedByStartDate,
 											})}
 										>
-											{/* Для заблокированных по расписанию дней показываем крестик */}
-											{isBlocked && !isBlockedByStartDate && (
-												<Svg icon="cross" className={element('regular-series-day-icon')} />
-											)}
-											{/* Для выполненных дней показываем галочку */}
-											{!isBlocked && !isBlockedByStartDate && (isCompletedDay || isSkipped) && (
+											{blockedScheduleCross && <Svg icon="cross" className={element('regular-series-day-icon')} />}
+											{!blockedScheduleCross && !isBlockedByStartDate && (isCompletedDay || isSkipped) && (
 												<Svg icon="done" className={element('regular-series-day-icon-selected')} />
 											)}
-											{/* Для заблокированных по дате начала дней ничего не показываем (пустой день) */}
 										</div>
 										<span
 											className={element('regular-series-day-name', {
@@ -1814,6 +1844,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 									: regularConfig.allowSkipDays || 0}
 							</span>
 						</div>
+						{weeklyProratedStartHint && (
+							<div className={element('regular-info-hint')} role="note">
+								Если начнёте сегодня, достаточно выполнить {weeklyProratedStartHint.minCompletions} из{' '}
+								{pluralize(weeklyProratedStartHint.N, ['дня', 'дней', 'дней'])} по недельному плану.
+							</div>
+						)}
 						{daysUntilEarnedSkip !== null && (
 							<div className={element('regular-info-row')}>
 								<span className={element('regular-info-label')}>До начисления пропуска:</span>

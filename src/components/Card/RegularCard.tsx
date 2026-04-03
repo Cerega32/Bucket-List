@@ -47,6 +47,7 @@ interface RegularCardPropsProgress extends RegularCardPropsBase {
 type RegularCardProps = RegularCardPropsRegular | RegularCardPropsProgress;
 
 const WEEK_DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+const REGULAR_CUSTOM_DAY_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
 const getCurrentDayOfWeek = (): number => {
 	const today = new Date();
@@ -119,6 +120,12 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 
 		const isBlockedByStartDate = dayData.isBlockedByStartDate || false;
 		const isBlocked = dayData.isBlocked || false;
+		const cs = statistics.regularGoalData?.customSchedule;
+		let blockedCross = isBlocked && !isBlockedByStartDate;
+		if (progress.type === 'custom' && cs && typeof cs === 'object') {
+			const inSchedule = cs[REGULAR_CUSTOM_DAY_KEYS[index]] === true;
+			blockedCross = !inSchedule || !!isBlocked;
+		}
 		const isCompleted = !isBlockedByStartDate && (dayData.isCompleted || false);
 		const isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false);
 		const isCurrent = index === currentDayIndex;
@@ -127,9 +134,8 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 			return 'completed';
 		}
 
-		// Заблокированные по расписанию дни показываем как blocked (для крестика),
-		// но подсветку текущего дня будем решать в JSX.
-		if (isBlocked && !isBlockedByStartDate) {
+		// custom: крестик для дня вне графика всегда (даже до start_date, где API даёт isBlocked=false)
+		if (blockedCross) {
 			return 'blocked';
 		}
 
