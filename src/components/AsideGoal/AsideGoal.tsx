@@ -1,4 +1,4 @@
-import {type KeyboardEvent, type MouseEvent, FC, useEffect, useState} from 'react';
+import {type KeyboardEvent, FC, useEffect, useState} from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 
 import {WeekDaySchedule} from '@/components/WeekDaySelector/WeekDaySelector';
@@ -1149,12 +1149,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	};
 
 	/** Отмена выполнения: при активном прогрессе — сначала подтверждение (прогресс будет удалён) */
-	const handleMarkGoalClick = (e: MouseEvent<HTMLButtonElement>) => {
+	const handleMarkGoalClick = () => {
 		if (!isList && isCompleted && progress && goalId) {
 			setIsUncompleteWithProgressModalOpen(true);
 			return;
 		}
-		handleMarkGoal(isCompleted, e.currentTarget).catch(() => {});
+		handleMarkGoal(isCompleted).catch(() => {});
 	};
 
 	// Функция для форматирования дней недели
