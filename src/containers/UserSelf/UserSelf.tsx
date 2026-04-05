@@ -133,7 +133,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 		},
 		{
 			url: '/user/self/pending-review',
-			name: 'Цели на рассмотрении',
+			name: 'Цели на модерации',
 			page: 'isUserSelfPending',
 		},
 		...(isPremium

@@ -8,13 +8,22 @@
 	display: flex;
 	flex-direction: column;
 	width: 400px;
-	max-height: 696px;
-	margin-top: 8px;
+	margin-top: 4px;
 	background: var(--color-white);
 	border: 1px solid var(--color-border-light);
 	border-radius: 12px;
 	box-shadow: 0 8px 32px rgb(0 0 0 / 15%);
 	overflow: hidden;
+
+	@include header-anchor-dropdown-max-height(696px, var(--height-header), 20px);
+
+	@include md {
+		@include header-anchor-dropdown-max-height(696px, var(--height-header-compact), 20px);
+	}
+
+	> .line {
+		flex-shrink: 0;
+	}
 
 	&__header {
 		position: sticky;

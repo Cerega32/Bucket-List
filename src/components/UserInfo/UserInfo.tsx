@@ -119,6 +119,14 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 		];
 	}, [id, totalAchievements, totalAdded, totalAddedLists, totalCompleted, totalCompletedLists]);
 
+	const baseName = [firstName, lastName]
+		.map((v) => v?.trim())
+		.filter((v): v is string => Boolean(v))
+		.join(' ');
+
+	const safeCountry = country?.trim() || '';
+	const fullName = safeCountry ? (baseName ? `${baseName}, ${safeCountry}` : safeCountry) : baseName;
+
 	return (
 		<article className={block({noBackground: !background})}>
 			<div
@@ -132,11 +140,7 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 						<Title tag="h1" className={element('name')}>
 							{name}
 						</Title>
-						{(firstName || lastName || country) && (
-							<p className={element('full-name')}>
-								{`${firstName || ''} ${lastName || ''}${country ? `, ${country}` : ''}`.trim()}
-							</p>
-						)}
+						{fullName && <p className={element('full-name')}>{fullName}</p>}
 						{about && <p className={element('description')}>{about}</p>}
 					</div>
 					<div className={element('right')}>

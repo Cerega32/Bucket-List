@@ -31,6 +31,9 @@
 
 	&__title {
 		margin-bottom: 16px;
+		cursor: pointer;
+		width: 100%;
+		min-width: 0;
 
 		&--short {
 			margin-bottom: 0;
@@ -43,6 +46,23 @@
 			overflow-wrap: anywhere;
 			-webkit-box-orient: vertical;
 			-webkit-line-clamp: 1;
+		}
+	}
+
+	&--list {
+		#{$block}__title {
+			display: -webkit-box;
+			overflow: hidden;
+			white-space: normal;
+			text-overflow: ellipsis;
+			overflow-wrap: anywhere;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 3;
+			line-clamp: 3;
+		}
+
+		#{$block}__copy-icon {
+			background-color: var(--color-text-secondary);
 		}
 	}
 

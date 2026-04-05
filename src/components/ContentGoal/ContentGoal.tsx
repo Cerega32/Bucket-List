@@ -1,7 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {scroller} from 'react-scroll';
 
 import './content-goal.scss';
 
@@ -171,25 +170,25 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 		}
 	};
 
-	const scrollToComments = () => {
+	const goToListsTab = () => {
+		const y = window.scrollY;
 		navigate(`/goals/${goal.code}/lists`);
-		scroller.scrollTo('comments-section', {
-			duration: 800,
-			delay: 0,
-			smooth: 'easeInOutQuart',
-			offset: -50,
+		requestAnimationFrame(() => {
+			window.scrollTo({top: y});
 		});
 	};
 
+	const addedViaLists = Array.isArray(goal.addedFromList) ? goal.addedFromList.filter((c) => typeof c === 'string' && c.length > 0) : [];
+
 	return (
 		<article className={block()}>
-			{goal.addedFromList && goal.addedFromList.length > 0 && (
+			{addedViaLists && addedViaLists.length > 0 && (
 				<div className={element('goal-in-list')}>
 					<Banner
 						type="info"
 						message="Цель включена в список и отображается вместе с ним"
 						actionText="Смотреть списки"
-						onAction={scrollToComments}
+						onAction={goToListsTab}
 					/>
 				</div>
 			)}

@@ -7,7 +7,7 @@
 	background: var(--color-gray-3);
 
 	@include xl {
-		margin: 56px 30px 96px;
+		margin: 56px 24px 96px;
 	}
 
 	@include lg {
@@ -16,7 +16,7 @@
 
 	@include md {
 		flex-direction: column;
-		margin: 24px 30px 96px;
+		margin: 24px 24px 96px;
 	}
 
 	&__sidebar {

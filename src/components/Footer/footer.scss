@@ -11,7 +11,7 @@
 		padding: 48px 24px 24px;
 
 		@include md {
-			padding: 32px 16px 16px;
+			padding: 24px;
 		}
 	}
 
@@ -38,8 +38,8 @@
 		gap: 16px;
 
 		@include lg {
-			align-items: center;
-			text-align: center;
+			align-items: start;
+			text-align: start;
 		}
 	}
 
@@ -64,11 +64,11 @@
 	}
 
 	&__description {
-		max-width: 320px;
+		max-width: 350px;
 		color: var(--color-text-secondary);
 
 		@include lg {
-			max-width: 400px;
+			max-width: 100%;
 		}
 	}
 

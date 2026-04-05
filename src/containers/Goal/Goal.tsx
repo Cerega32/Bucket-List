@@ -29,6 +29,16 @@ import {useSimilarGoalsByCategory} from './hooks/useSimilarGoalsByCategory';
 
 import './goal.scss';
 
+/** GET goals/:code отдаёт addedFromList; при отсутствии — camelCase из рендерера */
+const normalizeGoalFromApi = (raw: IGoal & {added_from_list?: string[]}): IGoal => {
+	const addedFromList = Array.isArray(raw.addedFromList)
+		? raw.addedFromList
+		: Array.isArray(raw.added_from_list)
+		? raw.added_from_list
+		: [];
+	return {...raw, addedFromList};
+};
+
 export const Goal: FC<IPage> = observer(({page}) => {
 	const [block, element] = useBem('goal');
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
@@ -52,7 +62,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				setIsLoading(true);
 				const res = await getGoal(listId);
 				if (res.success) {
-					setGoal(res.data.goal);
+					setGoal(normalizeGoalFromApi(res.data.goal));
 					setId(res.data.goal.id);
 				}
 				setIsLoading(false);
@@ -77,7 +87,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		(async () => {
 			const res = await getGoal(listId);
 			if (!cancelled && res.success && res.data.goal) {
-				setGoal(res.data.goal);
+				setGoal(normalizeGoalFromApi(res.data.goal));
 			}
 		})();
 		return () => {
@@ -179,7 +189,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		if ((operation === 'delete' || operation === 'add') && goal.regularConfig && listId) {
 			const reloadRes = await getGoal(listId);
 			if (reloadRes.success && reloadRes.data.goal) {
-				setGoal(reloadRes.data.goal);
+				setGoal(normalizeGoalFromApi(reloadRes.data.goal));
 			}
 		}
 
@@ -204,7 +214,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			setIsLoading(true);
 			const res = await getGoal(listId);
 			if (res.success && res.data.goal) {
-				setGoal(res.data.goal);
+				setGoal(normalizeGoalFromApi(res.data.goal));
 			}
 			setIsLoading(false);
 		}
@@ -221,7 +231,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			try {
 				const res = await getGoal(listId || '');
 				if (res.success && res.data?.goal) {
-					setGoal(res.data.goal);
+					setGoal(normalizeGoalFromApi(res.data.goal));
 					setId(res.data.goal.id);
 				}
 			} catch (error) {
@@ -259,6 +269,26 @@ export const Goal: FC<IPage> = observer(({page}) => {
 
 	const [shrink, setShrink] = useState(false);
 	const [headerHeight, setHeaderHeight] = useState<number>(340);
+	const collapsedHeaderHeightMobile = 260; // на какой высоте сворачивается header на мобильных устройствах
+	const headerHeightRef = useRef(headerHeight);
+	const shrinkRef = useRef(false);
+	const expandedHeaderHeightRef = useRef<number | null>(null);
+
+	useEffect(() => {
+		headerHeightRef.current = headerHeight;
+	}, [headerHeight]);
+
+	useEffect(() => {
+		shrinkRef.current = shrink;
+		if (!shrink && headerRef.current) {
+			const h = headerRef.current.offsetHeight;
+			const prevExpanded = expandedHeaderHeightRef.current;
+			if (prevExpanded == null || h > prevExpanded) {
+				expandedHeaderHeightRef.current = h;
+			}
+		}
+	}, [shrink]);
+
 	const {similarGoals} = useSimilarGoalsByCategory(goal?.code || null, !!goal);
 
 	// Генерируем динамическое OG изображение
@@ -270,46 +300,85 @@ export const Goal: FC<IPage> = observer(({page}) => {
 
 	const updateHeaderHeight = () => {
 		if (headerRef.current) {
-			setHeaderHeight(headerRef.current.offsetHeight);
+			const h = headerRef.current.offsetHeight;
+			setHeaderHeight(h);
+			if (!shrinkRef.current) {
+				const prevExpanded = expandedHeaderHeightRef.current;
+				if (prevExpanded == null || h > prevExpanded) {
+					expandedHeaderHeightRef.current = h;
+				}
+			}
 		} else {
-			setHeaderHeight(isScreenMobile || isScreenSmallTablet ? 340 : 340);
+			setHeaderHeight(340);
 		}
 	};
 
 	useEffect(() => {
-		if ((headerRef?.current?.offsetHeight || 0) > headerHeight) {
+		const el = headerRef.current;
+		if (!el) return;
+		const oh = el.offsetHeight;
+		if (oh > headerHeight) {
 			updateHeaderHeight();
+		} else if (!shrinkRef.current) {
+			const prevExpanded = expandedHeaderHeightRef.current;
+			if (prevExpanded == null || oh > prevExpanded) {
+				expandedHeaderHeightRef.current = oh;
+			}
 		}
-	}, [shrink, isScreenMobile, isScreenSmallTablet]);
+	}, [shrink, isScreenMobile, isScreenSmallTablet, headerHeight]);
 
 	useEffect(() => {
-		const handleScroll = () => {
-			const isMobile = isScreenMobile;
-			const headerH = headerRef.current?.offsetHeight || (isMobile ? 480 : 340);
-			const threshold = isMobile ? headerH * 0.8 : 160;
+		let rafId: number | null = null;
+		let ticking = false;
 
-			if (isMobile) {
-				if (shrink) {
-					if (window.scrollY < headerHeight - (headerRef.current?.offsetHeight || 0)) {
+		const onScroll = () => {
+			if (ticking) return;
+			ticking = true;
+
+			rafId = window.requestAnimationFrame(() => {
+				ticking = false;
+
+				const isNarrowPhone = isScreenMobile;
+				const scrollY = window.scrollY || 0;
+				const currentShrink = shrinkRef.current;
+
+				const expandedH = expandedHeaderHeightRef.current ?? headerHeightRef.current;
+
+				if (isNarrowPhone) {
+					const shrinkAfterScrollPx = collapsedHeaderHeightMobile;
+					const expandHysteresisPx = 40;
+					let enterAt = expandedH - shrinkAfterScrollPx;
+					if (enterAt < expandHysteresisPx + 1) {
+						enterAt = expandHysteresisPx + 1;
+					}
+					const exitAt = enterAt - expandHysteresisPx;
+
+					if (!currentShrink) {
+						if (scrollY > enterAt) setShrink(true);
+					} else if (scrollY < exitAt) {
 						setShrink(false);
 					}
-				} else if (window.scrollY > headerHeight - 168) {
-					setShrink(true);
+				} else {
+					const enterAt = 40;
+					const exitAt = 30;
+
+					if (!currentShrink && scrollY > enterAt) {
+						setShrink(true);
+					} else if (currentShrink && scrollY < exitAt) {
+						setShrink(false);
+					}
 				}
-			} else if (window.scrollY > threshold) {
-				setShrink(true);
-			} else {
-				setShrink(false);
-			}
+			});
 		};
 
-		setTimeout(() => {
-			handleScroll();
-		}, 100);
+		onScroll();
 
-		window.addEventListener('scroll', handleScroll);
-		return () => window.removeEventListener('scroll', handleScroll);
-	}, [isScreenMobile, shrink]);
+		window.addEventListener('scroll', onScroll, {passive: true});
+		return () => {
+			window.removeEventListener('scroll', onScroll);
+			if (rafId != null) window.cancelAnimationFrame(rafId);
+		};
+	}, [isScreenMobile]);
 
 	if (isEditing && goal) {
 		return (
@@ -323,6 +392,8 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		return <Loader isLoading={isLoading} isPageLoader />;
 	}
 
+	const expandedHeaderHeight = expandedHeaderHeightRef.current ?? headerHeight;
+
 	return (
 		<>
 			<SEO
@@ -331,7 +402,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				dynamicImage={ogImageUrl}
 				type="article"
 			/>
-			<main className={block()}>
+			<main className={block({shrink})}>
 				<HeaderGoal
 					ref={headerRef}
 					title={goal.title}
@@ -345,7 +416,11 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				<section
 					className={element('wrapper')}
 					style={{
-						paddingTop: isScreenMobile ? headerHeight : 0,
+						paddingTop: isScreenMobile
+							? shrink
+								? Math.max(expandedHeaderHeight - collapsedHeaderHeightMobile, 0)
+								: expandedHeaderHeight
+							: 0,
 					}}
 				>
 					<AsideGoal

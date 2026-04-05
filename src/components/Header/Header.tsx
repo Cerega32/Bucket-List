@@ -164,6 +164,11 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		}
 	}, []);
 
+	const closeCategoriesMenu = useCallback(() => {
+		setIsCategoriesOpen(false);
+		setHoveredParentId(null);
+	}, []);
+
 	// Обработчик клика по аватару на мобильных устройствах
 	const handleAvatarClick = () => {
 		if (isScreenMobile) {
@@ -286,6 +291,9 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			>
 				Выполненные
 			</NavLink>
+			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/maps" end>
+				Мои карты
+			</NavLink>
 			<NavLink
 				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
 				to="/user/self/achievements"
@@ -296,10 +304,14 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/friends" end>
 				Друзья
 			</NavLink>
-			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/maps" end>
-				Мои карты
-			</NavLink>
 			<Line margin="8px 0" />
+			<NavLink
+				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
+				to="/user/self/pending-review"
+				end
+			>
+				Цели на модерации
+			</NavLink>
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/subs" end>
 				Больше функционала
 			</NavLink>
@@ -524,10 +536,18 @@ export const Header: FC<HeaderProps> = observer((props) => {
 												<li
 													key={category.id}
 													className={element('categories-item-parent')}
-													onMouseEnter={() => setHoveredParentId(category.id)}
-													onMouseLeave={() => setHoveredParentId(null)}
+													onMouseEnter={() => {
+														if (isScreenDesktop) setHoveredParentId(category.id);
+													}}
+													onMouseLeave={() => {
+														if (isScreenDesktop) setHoveredParentId(null);
+													}}
 												>
-													<Link className={element('category-link')} to={`/categories/${category.nameEn}`}>
+													<Link
+														className={element('category-link')}
+														to={`/categories/${category.nameEn}`}
+														onClick={() => closeCategoriesMenu()}
+													>
 														{category?.icon ? (
 															<img
 																src={category?.icon}
@@ -538,7 +558,30 @@ export const Header: FC<HeaderProps> = observer((props) => {
 															<Svg icon={category?.icon || 'apps'} />
 														)}
 														{category.name}
-														<Svg icon="arrow" className={element('categories-arrow')} />
+														<span
+															className={element('categories-arrow')}
+															role="button"
+															tabIndex={0}
+															onClick={(e) => {
+																if (isScreenDesktop) return;
+																e.preventDefault();
+																e.stopPropagation();
+																setHoveredParentId((prev) => (prev === category.id ? null : category.id));
+															}}
+															aria-label="Открыть подкатегории"
+															onKeyDown={(e) => {
+																if (isScreenDesktop) return;
+																if (e.key === 'Enter' || e.key === ' ') {
+																	e.preventDefault();
+																	e.stopPropagation();
+																	setHoveredParentId((prev) =>
+																		prev === category.id ? null : category.id
+																	);
+																}
+															}}
+														>
+															<Svg icon="arrow" />
+														</span>
 													</Link>
 													<AnimatePresence>
 														{category.children.length > 0 && hoveredParentId === category.id && (
@@ -554,6 +597,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 																		key={child.id}
 																		className={element('category-link', {child: true})}
 																		to={`/categories/${category.nameEn}/${child.nameEn}`}
+																		onClick={() => closeCategoriesMenu()}
 																	>
 																		{child.name}
 																	</Link>

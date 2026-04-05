@@ -1,9 +1,10 @@
-import {FC} from 'react';
+import {type MouseEvent, FC} from 'react';
 import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
 import {ITimer} from '@/typings/dashboard';
 import {formatDistanceToNow} from '@/utils/date/formatDistanceToNow';
+import {emitConfettiFromElement} from '@/utils/ui/emitConfetti';
 
 import {Button} from '../Button/Button';
 import {Svg} from '../Svg/Svg';
@@ -21,10 +22,14 @@ interface UpcomingTimersProps {
 export const UpcomingTimers: FC<UpcomingTimersProps> = ({className, timers, onMarkComplete}) => {
 	const [block, element] = useBem('upcoming-timers', className);
 
-	const handleMarkComplete = (code: string, done: boolean, e: React.MouseEvent) => {
+	const handleMarkComplete = async (code: string, done: boolean, e: MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 		e.stopPropagation();
-		onMarkComplete(code, done);
+		const buttonEl = e.currentTarget;
+		await onMarkComplete(code, done);
+		if (!done) {
+			emitConfettiFromElement(buttonEl);
+		}
 	};
 
 	return (

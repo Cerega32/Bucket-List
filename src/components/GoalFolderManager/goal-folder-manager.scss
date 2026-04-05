@@ -183,6 +183,16 @@
 		opacity: 1;
 	}
 
+	&__folder:focus-within &__folder-actions {
+		opacity: 1;
+	}
+
+	@media (hover: none), (pointer: coarse) {
+		&__folder-actions {
+			opacity: 1;
+		}
+	}
+
 	&__folder-action {
 		display: flex;
 		flex-direction: column;
