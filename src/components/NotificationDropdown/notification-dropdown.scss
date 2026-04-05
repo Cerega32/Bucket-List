@@ -5,6 +5,8 @@
 	z-index: 1000;
 	top: 100%;
 	right: 0;
+	display: flex;
+	flex-direction: column;
 	width: 400px;
 	max-height: 696px;
 	margin-top: 8px;
@@ -15,10 +17,15 @@
 	overflow: hidden;
 
 	&__header {
+		position: sticky;
+		z-index: 1;
+		top: 0;
 		display: flex;
+		flex-shrink: 0;
 		justify-content: space-between;
 		align-items: center;
-		padding: 16px 16px 8px;
+		padding: 16px 20px;
+		background: var(--color-white);
 		border-bottom: 1px solid var(--color-border-light);
 	}
 
@@ -30,24 +37,30 @@
 	}
 
 	&__mark-all {
-		padding: 4px 8px;
+		padding: 0;
+		background: none;
+		border: none;
+		color: var(--color-primary);
 		font-size: 14px;
+		font-weight: var(--weight-medium);
+		cursor: pointer;
+
+		&:hover {
+			text-decoration: underline;
+		}
 	}
 
 	&__content {
-		max-height: min(640px, 80vh);
+		flex: 1;
+		min-height: 0;
 		overflow-y: auto;
-
-		@include lg {
-			max-height: min(640px, 70vh);
-		}
 
 		&::-webkit-scrollbar {
 			width: 4px;
 		}
 
 		&::-webkit-scrollbar-track {
-			background: var(--color-background-light);
+			background: transparent;
 		}
 
 		&::-webkit-scrollbar-thumb {
@@ -61,36 +74,22 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		padding: 8px;
+		padding: 32px 20px;
 		text-align: center;
 	}
 
-	&__empty-icon {
-		width: 32px;
-		height: 32px;
-		margin-bottom: 12px;
-		opacity: 0.4;
-	}
-
-	&__empty-text {
-		margin: 0;
-		color: var(--color-text-secondary);
-		font-size: 14px;
+	&__list {
+		display: flex;
+		flex-direction: column;
 	}
 
 	&__item {
-		position: relative;
 		display: flex;
 		gap: 12px;
-		width: 100%;
-		padding: inherit;
-		background: none;
-		border: none;
-		text-align: left;
-		cursor: pointer;
-		transition: background-color 0.2s ease;
+		padding: 14px 20px;
 		border-bottom: 1px solid var(--color-border-light);
-		font: inherit;
+		cursor: pointer;
+		transition: background-color 0.15s ease;
 
 		&:hover {
 			background: var(--color-background-light);
@@ -101,13 +100,25 @@
 		}
 
 		&--unread {
-			background: rgb(var(--color-primary-rgb) 0.02);
+			background: rgb(var(--color-primary-rgb) / 3%);
 		}
+	}
+
+	&__item-avatar {
+		flex-shrink: 0;
+		width: 40px;
+		height: 40px;
+	}
+
+	&__item-image {
+		width: 40px;
+		height: 40px;
+		border-radius: 10px;
+		object-fit: cover;
 	}
 
 	&__item-icon {
 		display: flex;
-		flex-shrink: 0;
 		justify-content: center;
 		align-items: center;
 		width: 40px;
@@ -116,8 +127,8 @@
 		border-radius: 50%;
 
 		svg {
-			width: 20px;
-			height: 20px;
+			width: 22px;
+			height: 22px;
 			color: var(--color-text-secondary);
 		}
 	}
@@ -127,17 +138,33 @@
 		min-width: 0;
 	}
 
+	&__item-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		margin-bottom: 2px;
+	}
+
 	&__item-title {
-		margin: 0 0 4px;
+		margin: 0;
 		color: var(--color-text-primary);
 		font-size: 14px;
-		font-weight: var(--weight-medium);
+		font-weight: var(--weight-semi-bold);
 		line-height: 1.3;
+	}
+
+	&__item-dot {
+		flex-shrink: 0;
+		width: 8px;
+		height: 8px;
+		background: var(--color-primary);
+		border-radius: 50%;
 	}
 
 	&__item-message {
 		display: -webkit-box;
-		margin: 0 0 6px;
+		margin: 0;
 		color: var(--color-text-secondary);
 		font-size: 13px;
 		line-height: 1.4;
@@ -147,51 +174,24 @@
 		-webkit-box-orient: vertical;
 	}
 
-	&__item-time {
-		color: var(--color-text-tertiary);
-		font-size: 12px;
+	&__item-actions {
+		display: flex;
+		gap: 8px;
+		margin-top: 10px;
 	}
 
-	&__unread-dot {
-		position: absolute;
-		top: 16px;
-		right: 16px;
-		width: 8px;
-		height: 8px;
-		background: var(--color-primary);
-		border-radius: 50%;
-	}
-
-	&__footer {
-		padding: 12px 20px;
-		border-top: 1px solid var(--color-border-light);
-		background: var(--color-background-light);
-		text-align: center;
-	}
-
-	&__view-all {
-		justify-content: center;
-		width: 100%;
-	}
-
-	// Responsive design
+	// Responsive
 	@media (width <= 480px) {
-		width: 350px;
-		max-width: calc(100vw - 32px);
-
-		&__item {
-			padding: 12px 16px;
-		}
+		width: 100vw;
+		max-width: 100vw;
+		right: -12px;
+		border-radius: 0 0 12px 12px;
 
 		&__header {
-			padding: 12px 16px;
+			padding: 14px 16px;
 		}
 
-		&__title {
-			font-size: 16px;
-		}
-
-		&__footer {
+		&__item {
 			padding: 12px 16px;
 		}
 	}

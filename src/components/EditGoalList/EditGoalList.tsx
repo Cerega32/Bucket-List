@@ -15,6 +15,7 @@ import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {updateGoalList} from '@/utils/api/put/updateGoalList';
 import {debounce} from '@/utils/time/debounce';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {getComplexity, selectComplexity} from '@/utils/values/complexity';
 import {getGoalListTitleFieldErrors, GOAL_LIST_TITLE_MIN_LENGTH, isGoalListTitleInvalid} from '@/utils/values/goalConstants';
 
@@ -82,25 +83,27 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 			try {
 				const data = await getAllCategories();
 				if (data.success) {
-					setCategories(data.data);
+					const sortedCategories: ICategory[] = sortMainCategories(data.data);
+					setCategories(sortedCategories);
+
+					// Отсортированные родительские категории — тот же массив, что и parentCategories (useMemo)
+					const sortedParents = sortedCategories.filter((cat) => !cat.parentCategory);
 
 					// Определяем, является ли категория списка подкатегорией
-					const listCategory = data.data.find((cat: ICategory) => cat.id === listData.category.id);
+					const listCategory = sortedCategories.find((cat) => cat.id === listData.category.id);
 
 					if (listCategory) {
 						if (listCategory.parentCategory) {
 							// Если это подкатегория, находим её родительскую категорию
-							const parentCategoryIndex = data.data
-								.filter((cat: ICategory) => !cat.parentCategory)
-								.findIndex((cat: ICategory) => cat.id === listCategory.parentCategory?.id);
+							const parentCategoryIndex = sortedParents.findIndex(
+								(cat: ICategory) => cat.id === listCategory.parentCategory?.id
+							);
 							if (parentCategoryIndex !== -1) {
 								setActiveCategory(parentCategoryIndex);
 							}
 						} else {
 							// Если это родительская категория
-							const categoryIndex = data.data
-								.filter((cat: ICategory) => !cat.parentCategory)
-								.findIndex((cat: ICategory) => cat.id === listData.category.id);
+							const categoryIndex = sortedParents.findIndex((cat: ICategory) => cat.id === listData.category.id);
 							if (categoryIndex !== -1) {
 								setActiveCategory(categoryIndex);
 							}

@@ -3,10 +3,18 @@ import {FC, useEffect, useRef, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
+import {HeaderProgressGoalsStore} from '@/store/HeaderProgressGoalsStore';
 import {HeaderRegularGoalsStore} from '@/store/HeaderRegularGoalsStore';
 import {ModalStore} from '@/store/ModalStore';
 import {IRegularGoalStatistics} from '@/typings/goal';
-import {getGoalsInProgress, getRegularGoalStatistics, IGoalProgress, markRegularProgress, updateGoalProgress} from '@/utils/api/goals';
+import {
+	getGoalsInProgress,
+	getRegularGoalStatistics,
+	IGoalProgress,
+	markRegularProgress,
+	restartRegularGoal,
+	updateGoalProgress,
+} from '@/utils/api/goals';
 
 import {ProgressGoalCompactCard} from './ProgressGoalCompactCard';
 import {RegularGoalCompactCard} from './RegularGoalCompactCard';
@@ -51,19 +59,22 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 					const response = await getRegularGoalStatistics();
 					if (response.success && response.data) {
 						const statistics = Array.isArray(response.data) ? response.data : response.data.data;
-						const forToday = statistics
-							.filter(
-								(stat) => stat.isActive && (stat.canCompleteToday || stat.currentPeriodProgress?.completedToday === true)
-							)
+						const active = statistics
+							.filter((stat) => stat.isActive)
 							.sort((a, b) => {
+								// Прерванные — в конец
+								if (a.isInterrupted !== b.isInterrupted) return a.isInterrupted ? 1 : -1;
+								// Выполненные сегодня — после невыполненных
 								const aDone = a.currentPeriodProgress?.completedToday === true;
 								const bDone = b.currentPeriodProgress?.completedToday === true;
 								if (aDone === bDone) return 0;
 								return aDone ? 1 : -1;
 							});
-						setRegularGoals(forToday);
-						const completedCount = forToday.filter((s) => s.currentPeriodProgress?.completedToday === true).length;
-						HeaderRegularGoalsStore.setTodayStats(forToday.length, completedCount);
+						setRegularGoals(active);
+						const completedCount = active.filter(
+							(s) => !s.isInterrupted && s.currentPeriodProgress?.completedToday === true
+						).length;
+						HeaderRegularGoalsStore.setStats(active.length, completedCount);
 					}
 				}
 			} catch (error) {
@@ -102,6 +113,7 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 			});
 			if (response.success && response.data) {
 				setProgressGoals((prev) => prev.map((g) => (g.id === goal.id ? response.data! : g)));
+				HeaderProgressGoalsStore.loadGoalsInProgress();
 			}
 		} catch (error) {
 			console.error('Ошибка отметки «работаю сегодня»:', error);
@@ -120,11 +132,32 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 				if (updated.progressPercentage >= 100) {
 					setProgressGoals((prev) => prev.filter((g) => g.id !== updated.id));
 				}
+				HeaderProgressGoalsStore.loadGoalsInProgress();
 			},
 			onGoalCompleted: () => {
 				setProgressGoals((prev) => prev.filter((g) => g.id !== goal.id));
+				HeaderProgressGoalsStore.loadGoalsInProgress();
 			},
 		});
+	};
+
+	const refreshRegularGoals = async () => {
+		const updatedResponse = await getRegularGoalStatistics();
+		if (updatedResponse.success && updatedResponse.data) {
+			const statistics = Array.isArray(updatedResponse.data) ? updatedResponse.data : updatedResponse.data.data;
+			const active = statistics
+				.filter((stat) => stat.isActive)
+				.sort((a, b) => {
+					if (a.isInterrupted !== b.isInterrupted) return a.isInterrupted ? 1 : -1;
+					const aDone = a.currentPeriodProgress?.completedToday === true;
+					const bDone = b.currentPeriodProgress?.completedToday === true;
+					if (aDone === bDone) return 0;
+					return aDone ? 1 : -1;
+				});
+			setRegularGoals(active);
+			const completedCount = active.filter((s) => !s.isInterrupted && s.currentPeriodProgress?.completedToday === true).length;
+			HeaderRegularGoalsStore.setStats(active.length, completedCount);
+		}
 	};
 
 	const handleQuickComplete = async (regularGoalId: number, currentlyCompleted: boolean) => {
@@ -136,24 +169,24 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 			});
 
 			if (response.success) {
-				const updatedResponse = await getRegularGoalStatistics();
-				if (updatedResponse.success && updatedResponse.data) {
-					const statistics = Array.isArray(updatedResponse.data) ? updatedResponse.data : updatedResponse.data.data;
-					const forToday = statistics
-						.filter((stat) => stat.isActive && (stat.canCompleteToday || stat.currentPeriodProgress?.completedToday === true))
-						.sort((a, b) => {
-							const aDone = a.currentPeriodProgress?.completedToday === true;
-							const bDone = b.currentPeriodProgress?.completedToday === true;
-							if (aDone === bDone) return 0;
-							return aDone ? 1 : -1;
-						});
-					setRegularGoals(forToday);
-					const completedCount = forToday.filter((s) => s.currentPeriodProgress?.completedToday === true).length;
-					HeaderRegularGoalsStore.setTodayStats(forToday.length, completedCount);
-				}
+				await refreshRegularGoals();
 			}
 		} catch (error) {
 			console.error('Ошибка отметки регулярной цели:', error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleRestart = async (regularGoalId: number) => {
+		setLoading(true);
+		try {
+			const response = await restartRegularGoal(regularGoalId);
+			if (response.success) {
+				await refreshRegularGoals();
+			}
+		} catch (error) {
+			console.error('Ошибка рестарта регулярной цели:', error);
 		} finally {
 			setLoading(false);
 		}
@@ -169,7 +202,8 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 				return aDone ? 1 : -1;
 		  })
 		: [];
-	const regularList = regularGoals;
+	const MAX_VISIBLE = 12;
+	const regularList = regularGoals.slice(0, MAX_VISIBLE);
 
 	return (
 		<div ref={dropdownRef} className={block()}>
@@ -195,7 +229,7 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 								))}
 							</div>
 						)
-					) : regularList.length === 0 ? (
+					) : regularGoals.length === 0 ? (
 						<EmptyState
 							title="Регулярных целей нет"
 							description="Добавьте цели из каталога для отслеживания привычек"
@@ -209,6 +243,7 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 									key={statistics.id}
 									statistics={statistics}
 									onQuickComplete={(id, completed) => handleQuickComplete(id, completed)}
+									onRestart={(id) => handleRestart(id)}
 								/>
 							))}
 						</div>

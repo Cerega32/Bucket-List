@@ -73,3 +73,5 @@ deploy.sh
 # quick_logs.sh
 # view_logs.sh
 # check_updates.sh
+CLAUDE.md
+.claude/

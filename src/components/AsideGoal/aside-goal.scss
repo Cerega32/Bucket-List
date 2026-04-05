@@ -313,19 +313,6 @@
 		margin-bottom: 16px;
 	}
 
-	&__regular-series-completed-count-label {
-		color: var(--color-text-secondary);
-		font-size: 14px;
-		font-weight: var(--weight-regular);
-	}
-
-	&__regular-series-completed-count-value {
-		color: var(--color-text-primary);
-		font-size: 14px;
-		font-weight: var(--weight-semi-bold);
-		white-space: nowrap;
-	}
-
 	&__regular-series-actions {
 		@include lg {
 			width: 100%;

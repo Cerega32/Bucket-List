@@ -15,7 +15,7 @@ import {Title} from '../Title/Title';
 
 import './card.scss';
 
-type RegularDayState = 'completed' | 'active' | 'inactive' | 'blocked';
+type RegularDayState = 'completed' | 'allowedSkip' | 'active' | 'inactive' | 'blocked';
 
 interface RegularCardPropsBase {
 	className?: string;
@@ -56,10 +56,22 @@ const getCurrentDayOfWeek = (): number => {
 };
 
 const getSeriesText = (statistics: IRegularGoalStatistics): string => {
-	const value = statistics.currentStreak || 0;
-	const isWeekly = statistics.currentPeriodProgress?.type === 'weekly' || statistics.regularGoalData?.durationType === 'weeks';
+	const isWeeksDuration = statistics.regularGoalData?.durationType === 'weeks';
+	let current = statistics.currentStreak || 0;
+	const max = statistics.maxStreak || 0;
 
-	if (isWeekly) {
+	// Для завершённой серии используем completedWeeks/totalCompletions
+	if (statistics.isSeriesCompleted) {
+		if (isWeeksDuration) {
+			current = statistics.completedWeeks > 0 ? statistics.completedWeeks : current;
+		} else {
+			current = statistics.totalCompletions > 0 ? statistics.totalCompletions : current;
+		}
+	}
+
+	const value = max > current ? max : current;
+
+	if (isWeeksDuration) {
 		return pluralize(value, ['неделя', 'недели', 'недель']);
 	}
 
@@ -75,11 +87,19 @@ const getSeriesTitle = (statistics: IRegularGoalStatistics): string => {
 		return 'Серия прервана';
 	}
 
+	const current = statistics.currentStreak || 0;
+	const max = statistics.maxStreak || 0;
+	if (max > current) {
+		return 'Макс. серия';
+	}
+
 	return 'Текущая серия';
 };
 
 const getSeriesIcon = (statistics: IRegularGoalStatistics): string => {
-	const hasValue = (statistics.currentStreak || 0) > 0;
+	const current = statistics.currentStreak || 0;
+	const max = statistics.maxStreak || 0;
+	const hasValue = current > 0 || max > 0;
 
 	if (statistics.isSeriesCompleted) {
 		return 'regular-checked';
@@ -130,7 +150,11 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 		const isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false);
 		const isCurrent = index === currentDayIndex;
 
-		if (isCompleted || isSkipped) {
+		if (isSkipped) {
+			return 'allowedSkip';
+		}
+
+		if (isCompleted) {
 			return 'completed';
 		}
 
@@ -163,30 +187,6 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 	}
 
 	return 'inactive';
-};
-
-const getCurrentProgress = (statistics: IRegularGoalStatistics) => {
-	if (!statistics.currentPeriodProgress) return null;
-
-	const progress = statistics.currentPeriodProgress;
-
-	if (progress.type === 'daily') {
-		return {
-			completed: progress.completedToday || false,
-			text: progress.completedToday ? 'Выполнено сегодня' : 'Не выполнено сегодня',
-			streak: progress.streak || 0,
-		};
-	}
-
-	if (progress.type === 'weekly') {
-		return {
-			completed: (progress.currentWeekCompletions || 0) >= (progress.requiredPerWeek || 1),
-			text: `${progress.currentWeekCompletions || 0} из ${progress.requiredPerWeek || 1} на этой неделе`,
-			progress: progress.weekProgress || 0,
-		};
-	}
-
-	return null;
 };
 
 // --- Progress variant helpers ---
@@ -333,11 +333,26 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 
 	const {regularGoal: goal, statistics, onMarkRegular, onRestart} = props;
 	const isInterrupted = !!statistics.isInterrupted;
-	const currentProgress = getCurrentProgress(statistics);
-	const isCompletedToday = !!currentProgress?.completed;
 	const completionPercent = Math.round(statistics.completionPercentage || 0);
 	const currentDayIndex = getCurrentDayOfWeek();
-	const isBlockedOrUnavailableToday = !statistics.canCompleteToday && !isCompletedToday;
+
+	// Логика как в AsideGoal:
+	// 1. Заблокировано по расписанию (custom, isAllowed === false) → "Сегодня нельзя"
+	// 2. daily → completedToday, weekly/custom → !canCompleteToday → "Выполнено"
+	const progress = statistics.currentPeriodProgress;
+	const isBlockedBySchedule = (() => {
+		if (progress?.type !== 'custom') return false;
+		const weekDays = Array.isArray(progress.weekDays) ? progress.weekDays : null;
+		if (!weekDays) return false;
+		const todayData = weekDays.find((d: {dayIndex: number}) => d.dayIndex === currentDayIndex);
+		return todayData?.isAllowed === false;
+	})();
+	const isCompletedToday = isBlockedBySchedule
+		? false
+		: progress?.type === 'daily'
+		? !!progress.completedToday
+		: !statistics.canCompleteToday;
+	const isBlockedOrUnavailableToday = isBlockedBySchedule;
 
 	return (
 		<section className={block({horizontal, regular: true, interrupted: isInterrupted})}>
@@ -365,6 +380,7 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 							const state = getWeekDayState(statistics, index);
 							const isToday = index === currentDayIndex;
 							const isCompleted = state === 'completed';
+							const isAllowedSkip = state === 'allowedSkip';
 							const isBlocked = state === 'blocked';
 							const isSelected = state === 'active' || (isBlocked && isToday);
 
@@ -375,10 +391,15 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 											selected: isSelected && !isCompleted,
 											blocked: isBlocked,
 											completed: isCompleted,
+											skipped: isAllowedSkip,
 										})}
 									>
-										{isCompleted && <Svg icon="done" className={element('series-day-icon-selected')} />}
-										{!isCompleted && isBlocked && <Svg icon="cross" className={element('series-day-icon')} />}
+										{(isCompleted || isAllowedSkip) && (
+											<Svg icon="done" className={element('series-day-icon-selected')} />
+										)}
+										{!isCompleted && !isAllowedSkip && isBlocked && (
+											<Svg icon="cross" className={element('series-day-icon')} />
+										)}
 									</div>
 									<span
 										className={element('series-day-name', {

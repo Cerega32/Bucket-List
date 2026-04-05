@@ -139,7 +139,14 @@ export const ModalConfirm: FC<ModalProps> = observer(
 						</div>
 					)}
 					<div className={element('content')}>
-						<p className={element('text')}>{text}</p>
+						<p className={element('text')}>
+							{text.split('\n').map((line, i, arr) => (
+								<span key={i}>
+									{line}
+									{i < arr.length - 1 && <br />}
+								</span>
+							))}
+						</p>
 						{checkboxText && (
 							<div className={element('checkbox-wrapper')}>
 								<FieldCheckbox

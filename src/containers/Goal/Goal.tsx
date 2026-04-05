@@ -241,6 +241,22 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		setHistoryRefreshTrigger((prev) => prev + 1);
 	};
 
+	// Перезагрузка цели после изменения списка (цель могла быть добавлена/удалена у пользователя)
+	const handleListChanged = async () => {
+		if (listId) {
+			const res = await getGoal(listId);
+			if (res.success && res.data.goal) {
+				const updatedGoal = res.data.goal;
+				setGoal(updatedGoal);
+
+				// Если цель удалена у пользователя — сбросить закешированный отзыв
+				if (!updatedGoal.addedByUser && !updatedGoal.hasMyComment) {
+					GoalStore.setMyComment(null);
+				}
+			}
+		}
+	};
+
 	const [shrink, setShrink] = useState(false);
 	const [headerHeight, setHeaderHeight] = useState<number>(340);
 	const {similarGoals} = useSimilarGoalsByCategory(goal?.code || null, !!goal);
@@ -358,7 +374,13 @@ export const Goal: FC<IPage> = observer(({page}) => {
 						userProgress={goal.userProgress}
 					/>
 					<div className={element('content-wrapper')}>
-						<ContentGoal page={page} goal={goal} className={element('content')} historyRefreshTrigger={historyRefreshTrigger} />
+						<ContentGoal
+							page={page}
+							goal={goal}
+							className={element('content')}
+							historyRefreshTrigger={historyRefreshTrigger}
+							onListChanged={handleListChanged}
+						/>
 					</div>
 				</section>
 				{similarGoals.length > 0 && (

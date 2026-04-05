@@ -217,8 +217,13 @@ export const Card: FC<CardProps> = (props) => {
 						{(() => {
 							const showAddButton = !goal.addedByUser;
 							const showDeleteButton = goal.addedByUser && !(isList && goal.code === '100-goals');
+							const isRegularGoal = !isList && 'regularConfig' in goal && !!goal.regularConfig;
 							const showMarkButton =
-								!disableMark && (goal.addedByUser || goal.completedByUser) && !isList && typeof onClickMark === 'function';
+								!disableMark &&
+								!isRegularGoal &&
+								(goal.addedByUser || goal.completedByUser) &&
+								!isList &&
+								typeof onClickMark === 'function';
 
 							if (!showAddButton && !showDeleteButton && !showMarkButton) {
 								return null;

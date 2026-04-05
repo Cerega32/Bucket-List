@@ -5,6 +5,7 @@ import {scroller} from 'react-scroll';
 import {RegularGoalSettingsModal} from '@/components/RegularGoalSettingsModal/RegularGoalSettingsModal';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
+import {HeaderRegularGoalsStore} from '@/store/HeaderRegularGoalsStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
 import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
@@ -407,6 +408,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 						const newGoals = [...goals.data];
 						newGoals[i] = updatedGoal;
 						setGoals({...goals, data: newGoals});
+						HeaderRegularGoalsStore.loadTodayCount();
 						NotificationStore.addNotification({
 							type: 'success',
 							title: 'Успех',
@@ -439,6 +441,11 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			newGoals[i] = updatedGoal;
 
 			setGoals({...goals, data: newGoals});
+
+			// Обновляем счётчик регулярных целей при добавлении/удалении
+			if (operation === 'add' || operation === 'delete') {
+				HeaderRegularGoalsStore.loadTodayCount();
+			}
 		}
 	};
 
@@ -504,6 +511,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 				const newGoals = [...goals.data];
 				newGoals[pendingGoalIndex] = updatedGoal;
 				setGoals({...goals, data: newGoals});
+				HeaderRegularGoalsStore.loadTodayCount();
 
 				NotificationStore.addNotification({
 					type: 'success',

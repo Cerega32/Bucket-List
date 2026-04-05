@@ -214,17 +214,19 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	};
 
 	const getTodayGoals = () => {
-		// "На сегодня" — цели, которые можно выполнить сегодня (canCompleteToday) или уже выполнены сегодня (completedToday).
-		// сортируем - сначала шли НЕ выполненные сегодня, затем выполненные.
+		// "На сегодня" — цели, которые можно выполнить сегодня (canCompleteToday), уже выполнены (completedToday),
+		// или прерванные (isInterrupted) — чтобы можно было начать заново.
+		// Сортируем: сначала НЕ выполненные, затем выполненные, прерванные — в конец.
 		return filteredStatistics()
 			.filter((stats) => {
 				if (!stats) return false;
 
 				const completedToday = stats.currentPeriodProgress?.completedToday || false;
 
-				return stats.canCompleteToday || completedToday;
+				return stats.isInterrupted || stats.canCompleteToday || completedToday;
 			})
 			.sort((a, b) => {
+				if (a.isInterrupted !== b.isInterrupted) return a.isInterrupted ? 1 : -1;
 				const aCompleted = a.currentPeriodProgress?.completedToday || false;
 				const bCompleted = b.currentPeriodProgress?.completedToday || false;
 
@@ -240,9 +242,10 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	const todayGoals = getTodayGoals();
 	const allGoals = getAllGoals();
 
+	const completableTodayGoals = todayGoals.filter((s) => !s.isInterrupted);
 	const areAllTodayCompleted =
-		todayGoals.length > 0 &&
-		todayGoals.every((stats) => {
+		completableTodayGoals.length > 0 &&
+		completableTodayGoals.every((stats) => {
 			const progress = stats.currentPeriodProgress;
 			if (progress?.type === 'daily') {
 				return !!progress.completedToday;
@@ -369,7 +372,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	};
 
 	const handleToggleCompleteAllToday = async () => {
-		if (todayGoals.length === 0 || isBulkTodayUpdating) {
+		if (completableTodayGoals.length === 0 || isBulkTodayUpdating) {
 			return;
 		}
 
@@ -378,7 +381,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 
 		try {
 			await Promise.all(
-				todayGoals.map((stats) =>
+				completableTodayGoals.map((stats) =>
 					markRegularProgress({
 						regular_goal_id: stats.regularGoal,
 						completed: targetCompleted,
@@ -453,7 +456,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 								icon={areAllTodayCompleted ? 'regular' : 'regular-empty'}
 								hoverIcon={areAllTodayCompleted ? 'cross' : undefined}
 								onClick={handleToggleCompleteAllToday}
-								disabled={isBulkTodayUpdating || todayGoals.length === 0}
+								disabled={isBulkTodayUpdating || completableTodayGoals.length === 0}
 								hoverContent={areAllTodayCompleted ? 'Снять выполнение всех' : undefined}
 							>
 								{areAllTodayCompleted ? 'Выполнено все сегодня' : 'Выполнить все сегодня'}

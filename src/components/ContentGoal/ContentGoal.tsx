@@ -31,10 +31,11 @@ interface ContentGoalProps {
 	goal: IGoal;
 	page: string;
 	historyRefreshTrigger?: number;
+	onListChanged?: () => void;
 }
 
 export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
-	const {className, goal, page, historyRefreshTrigger} = props;
+	const {className, goal, page, historyRefreshTrigger, onListChanged} = props;
 
 	const [block, element] = useBem('content-goal', className);
 	const navigate = useNavigate();
@@ -143,7 +144,7 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 					</>
 				);
 			case 'isGoalLists':
-				return <ListsWithGoal code={goal.code} />;
+				return <ListsWithGoal code={goal.code} onListChanged={onListChanged} />;
 			case 'isGoalProgressHistory':
 				if (goal.addedByUser && !goal.regularConfig) {
 					return <GoalProgressHistory goalId={goal.id} refreshTrigger={historyRefreshTrigger} />;

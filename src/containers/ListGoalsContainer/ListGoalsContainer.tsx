@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
+import {FC, useEffect, useRef, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
@@ -15,6 +15,7 @@ import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
 import {IList} from '@/typings/list';
 import {getList} from '@/utils/api/get/getList';
+import {getListGoalsPage} from '@/utils/api/get/getListGoalsPage';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {addListGoal} from '@/utils/api/post/addListGoal';
 import {markAllGoalsFromList} from '@/utils/api/post/markAllGoalsFromList';
@@ -28,11 +29,14 @@ const ListGoalsContainerComponent: FC = () => {
 	const [block, element] = useBem('list-goals-container');
 	const [list, setList] = useState<IList | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isLoadingMore, setIsLoadingMore] = useState(false);
 	const {isAuth} = UserStore;
 	const {setIsOpen, setWindow} = ModalStore;
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
+	const loadMoreRef = useRef<HTMLDivElement>(null);
+	const loaderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-	// Генерируем динамическое OG изображение для списка
+	// Ге��ерируем динамич��ское OG изображение для списка
 	const {imageUrl: ogImageUrl} = useOGImage({
 		list,
 		width: 1200,
@@ -51,7 +55,71 @@ const ListGoalsContainerComponent: FC = () => {
 			}
 			setIsLoading(false);
 		})();
+		return () => {
+			if (loaderTimerRef.current) clearTimeout(loaderTimerRef.current);
+		};
 	}, [listId, isAuth]);
+
+	// Ref для предотвращения повторных запросов (не вызывает ре-рендер)
+	const isLoadingMoreRef = useRef(false);
+	const listRef = useRef(list);
+	listRef.current = list;
+
+	// Подгрузка следующей страницы целей
+	const loadMoreGoals = async () => {
+		const currentList = listRef.current;
+		if (isLoadingMoreRef.current || !currentList || !currentList.goalsPagination?.hasMore) return;
+
+		isLoadingMoreRef.current = true;
+
+		// Показываем лоудер только если запрос занимает больше 300ms
+		loaderTimerRef.current = setTimeout(() => setIsLoadingMore(true), 300);
+
+		const nextPage = currentList.goalsPagination.page + 1;
+		const res = await getListGoalsPage(currentList.code, nextPage, currentList.goalsPagination.pageSize);
+
+		if (res.success) {
+			const newGoals = res.data.list.goals;
+			const newPagination = res.data.list.goalsPagination;
+			setList((prev) => {
+				if (!prev) return prev;
+				return {
+					...prev,
+					goals: [...prev.goals, ...newGoals],
+					goalsPagination: newPagination,
+				};
+			});
+		}
+
+		if (loaderTimerRef.current) clearTimeout(loaderTimerRef.current);
+		isLoadingMoreRef.current = false;
+		setIsLoadingMore(false);
+	};
+
+	// IntersectionObserver для бесконечной прокрутки
+	useEffect(() => {
+		if (!list?.goalsPagination?.hasMore) return;
+
+		const intersectionObserver = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting) {
+					loadMoreGoals();
+				}
+			},
+			{rootMargin: '400px'}
+		);
+
+		const ref = loadMoreRef.current;
+		if (ref) {
+			intersectionObserver.observe(ref);
+		}
+
+		return () => {
+			if (ref) {
+				intersectionObserver.unobserve(ref);
+			}
+		};
+	}, [list?.goalsPagination?.hasMore]);
 
 	const updateList = async (code: string, operation: 'add' | 'delete' | 'mark-all'): Promise<boolean> => {
 		if (!isAuth) {
@@ -67,7 +135,7 @@ const ListGoalsContainerComponent: FC = () => {
 			: markAllGoalsFromList(code));
 
 		if (res.success) {
-			// Прогресс заданий обновляется автоматически на бэкенде
+			// ��рогресс заданий обновляется автоматически на бэкенде
 
 			setList({
 				...list,
@@ -127,7 +195,7 @@ const ListGoalsContainerComponent: FC = () => {
 		return <Loader isLoading={isLoading} isPageLoader />;
 	}
 
-	// Собираем массив целей с локацией для карты
+	// ��обираем массив целей с локацией для карты
 	const goalsWithLocation = list.goals
 		.filter((goal) => goal.location && typeof goal.location.latitude === 'number' && typeof goal.location.longitude === 'number')
 		.map((goal) => ({
@@ -171,9 +239,15 @@ const ListGoalsContainerComponent: FC = () => {
 						canEdit={list.isCanEdit || list.isCanAddGoals}
 						location={goalsWithLocation}
 						list={list.goals}
+						listCode={list.code}
 					/>
 					<div className={element('content-wrapper')}>
 						<ContentListGoals className={element('content')} list={list} updateGoal={updateGoal} />
+						{list.goalsPagination?.hasMore && (
+							<div ref={loadMoreRef}>
+								<Loader isLoading={isLoadingMore} />
+							</div>
+						)}
 					</div>
 				</article>
 				<ScrollToTop />

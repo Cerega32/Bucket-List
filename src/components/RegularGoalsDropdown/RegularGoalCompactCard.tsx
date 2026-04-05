@@ -11,6 +11,7 @@ import {Svg} from '../Svg/Svg';
 interface RegularGoalCompactCardProps {
 	statistics: IRegularGoalStatistics;
 	onQuickComplete: (regularGoalId: number, currentlyCompleted: boolean) => void;
+	onRestart: (regularGoalId: number) => void;
 }
 
 type RegularDayState = 'completed' | 'allowedSkip' | 'active' | 'inactive' | 'blocked';
@@ -25,14 +26,20 @@ const getCurrentDayOfWeek = (): number => {
 };
 
 const getSeriesText = (statistics: IRegularGoalStatistics): string => {
-	const value = statistics.currentStreak || 0;
-	const isWeekly = statistics.currentPeriodProgress?.type === 'weekly';
+	const isWeeksDuration = statistics.regularGoalData?.durationType === 'weeks';
+	let value = statistics.currentStreak || 0;
 
-	if (isWeekly) {
-		return pluralize(value, ['неделя', 'недели', 'недель']);
+	// Для завершённой серии используем completedWeeks/totalCompletions
+	if (statistics.isSeriesCompleted) {
+		if (isWeeksDuration) {
+			value = statistics.completedWeeks > 0 ? statistics.completedWeeks : value;
+		} else {
+			value = statistics.totalCompletions > 0 ? statistics.totalCompletions : value;
+		}
 	}
 
-	return pluralize(value, ['день', 'дня', 'дней']);
+	const units = isWeeksDuration ? ['неделя', 'недели', 'недель'] : ['день', 'дня', 'дней'];
+	return pluralize(value, units as [string, string, string]);
 };
 
 const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): RegularDayState => {
@@ -62,12 +69,12 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 		const isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false);
 		const isCurrent = index === currentDayIndex;
 
-		if (isCompleted) {
-			return 'completed';
-		}
-
 		if (isSkipped) {
 			return 'allowedSkip';
+		}
+
+		if (isCompleted) {
+			return 'completed';
 		}
 
 		if (blockedCross) {
@@ -98,20 +105,49 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 	return 'inactive';
 };
 
-export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statistics, onQuickComplete}) => {
+export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statistics, onQuickComplete, onRestart}) => {
 	const [block, element] = useBem('regular-goal-compact-card');
 	const [hovered, setHovered] = useState(false);
 	const currentDayIndex = getCurrentDayOfWeek();
-	const isCompletedToday = statistics.currentPeriodProgress?.completedToday ?? false;
 	const isSeriesInterrupted = statistics.isInterrupted ?? false;
 	const goalData = statistics.regularGoalData;
+	const progress = statistics.currentPeriodProgress as any;
 
-	const actionIcon = isCompletedToday && hovered ? 'cross' : isCompletedToday ? 'regular' : 'regular-empty';
+	// Логика как в AsideGoal: для custom проверяем, заблокирован ли сегодня по расписанию
+	const isBlockedBySchedule = (() => {
+		if (progress?.type !== 'custom') return false;
+		const weekDays = Array.isArray(progress.weekDays) ? progress.weekDays : null;
+		if (!weekDays) return false;
+		const todayData = weekDays.find((d: {dayIndex: number}) => d.dayIndex === currentDayIndex);
+		return todayData?.isAllowed === false;
+	})();
+
+	// Для daily: completedToday; для weekly/custom: !canCompleteToday (если не заблокировано по расписанию)
+	const isCompletedToday = isBlockedBySchedule
+		? false
+		: progress?.type === 'daily'
+		? !!progress.completedToday
+		: !(statistics.canCompleteToday ?? true);
+
+	const actionIcon = isSeriesInterrupted
+		? 'regular-empty'
+		: isBlockedBySchedule
+		? 'cross'
+		: isCompletedToday && hovered
+		? 'cross'
+		: isCompletedToday
+		? 'regular'
+		: 'regular-empty';
 
 	const handleActionClick = (e: React.MouseEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
-		onQuickComplete(statistics.regularGoal, isCompletedToday);
+		if (isBlockedBySchedule) return;
+		if (isSeriesInterrupted) {
+			onRestart(statistics.regularGoal);
+		} else {
+			onQuickComplete(statistics.regularGoal, isCompletedToday);
+		}
 	};
 
 	return (
@@ -163,11 +199,20 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 			</Link>
 			<button
 				type="button"
-				className={element('action-button', {completed: isCompletedToday})}
+				className={element('action-button', {completed: isCompletedToday && !isSeriesInterrupted, blocked: isBlockedBySchedule})}
 				onClick={handleActionClick}
 				onMouseEnter={() => setHovered(true)}
 				onMouseLeave={() => setHovered(false)}
-				aria-label={isCompletedToday ? 'Отменить выполнение' : 'Быстро выполнить'}
+				disabled={isBlockedBySchedule}
+				aria-label={
+					isBlockedBySchedule
+						? 'Сегодня нельзя выполнить'
+						: isSeriesInterrupted
+						? 'Начать заново'
+						: isCompletedToday
+						? 'Отменить выполнение'
+						: 'Быстро выполнить'
+				}
 			>
 				<Svg icon={actionIcon} className={element('action-icon')} />
 			</button>

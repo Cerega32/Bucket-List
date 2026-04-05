@@ -1,7 +1,9 @@
 import {makeAutoObservable} from 'mobx';
 
 import {IHeaderNotification} from '@/typings/notification';
-import {markAllNotificationsAsRead, markNotificationRead} from '@/utils/api/notifications';
+import {getNotifications, getUnreadCount, markAllNotificationsAsRead, markNotificationRead} from '@/utils/api/notifications';
+
+const POLL_INTERVAL = 60 * 60 * 1000; // 60 минут
 
 class Store {
 	notifications: IHeaderNotification[] = [];
@@ -9,6 +11,8 @@ class Store {
 	unreadCount = 0;
 
 	isLoading = false;
+
+	private pollTimer: ReturnType<typeof setInterval> | null = null;
 
 	constructor() {
 		makeAutoObservable(this);
@@ -30,16 +34,58 @@ class Store {
 		return this.unreadCount > 0;
 	}
 
+	/** Загрузить уведомления и unreadCount с сервера */
+	async fetchNotifications() {
+		const isFirstLoad = this.notifications.length === 0;
+		try {
+			if (isFirstLoad) this.isLoading = true;
+			const res = await getNotifications();
+			if (res.success) {
+				this.notifications = res.data.results || [];
+				this.unreadCount = res.data.unreadCount ?? 0;
+			}
+		} catch (error) {
+			console.error('Ошибка загрузки уведомлений:', error);
+		} finally {
+			if (isFirstLoad) this.isLoading = false;
+		}
+	}
+
+	/** Обновить только счётчик непрочитанных (лёгкий запрос) */
+	async fetchUnreadCount() {
+		try {
+			const res = await getUnreadCount();
+			if (res.success) {
+				this.unreadCount = res.data.unreadCount ?? 0;
+			}
+		} catch (error) {
+			console.error('Ошибка загрузки счётчика уведомлений:', error);
+		}
+	}
+
+	/** Запустить периодический опрос (при авторизации) */
+	startPolling() {
+		this.stopPolling();
+		this.fetchNotifications();
+		this.pollTimer = setInterval(() => {
+			this.fetchUnreadCount();
+		}, POLL_INTERVAL);
+	}
+
+	/** Остановить периодический опрос (при выходе) */
+	stopPolling() {
+		if (this.pollTimer) {
+			clearInterval(this.pollTimer);
+			this.pollTimer = null;
+		}
+	}
+
 	async markAsRead(notificationId: number) {
 		try {
 			await markNotificationRead(notificationId);
 
-			// Обновляем локальное состояние
 			this.notifications = this.notifications.map((n) => (n.id === notificationId ? {...n, isRead: true} : n));
-			const wasUpdated = this.notifications.some((n) => n.id === notificationId && n.isRead);
-			if (wasUpdated) {
-				this.unreadCount = Math.max(0, this.unreadCount - 1);
-			}
+			this.unreadCount = Math.max(0, this.unreadCount - 1);
 		} catch (error) {
 			console.error('Ошибка отметки уведомления как прочитанного:', error);
 			throw error;
@@ -50,7 +96,6 @@ class Store {
 		try {
 			await markAllNotificationsAsRead();
 
-			// Обновляем локальное состояние
 			this.notifications = this.notifications.map((notification) => ({
 				...notification,
 				isRead: true,
@@ -63,6 +108,7 @@ class Store {
 	}
 
 	clearNotifications() {
+		this.stopPolling();
 		this.notifications = [];
 		this.unreadCount = 0;
 	}
