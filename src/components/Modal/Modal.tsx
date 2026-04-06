@@ -275,7 +275,9 @@ export const Modal: FC<ModalProps> = observer((props) => {
 					onClose={closeWindow}
 				/>
 			)}
-			{window === 'random-goal-picker' && <RandomGoalPicker goals={modalProps?.goals || []} onClose={closeWindow} />}
+			{window === 'random-goal-picker' && (
+				<RandomGoalPicker goals={modalProps?.goals || []} listCode={modalProps?.listCode} onClose={closeWindow} />
+			)}
 			{window === 'set-regular-goal' && (
 				<SetRegularGoalModal
 					onSave={async (settings) => {

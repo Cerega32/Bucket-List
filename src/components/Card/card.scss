@@ -395,6 +395,11 @@
 			border-color: transparent;
 		}
 
+		&--skipped {
+			background: var(--color-text-secondary);
+			border-color: transparent;
+		}
+
 		&--blocked {
 			background: var(--color-white);
 			border-color: var(--color-border);

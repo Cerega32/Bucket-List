@@ -33,8 +33,8 @@ export const PageEditGoalList: FC<IPage> = ({page}) => {
 			try {
 				setIsLoading(true);
 
-				// Загружаем данные списка
-				const response = await getList(`goal-lists/${id}`);
+				// Загружаем данные списка со всеми целями (без пагинации)
+				const response = await getList(`goal-lists/${id}`, {page_size: 'all'});
 				if (!response.success) {
 					throw new Error(response.error || 'Невозможно загрузить список');
 				}

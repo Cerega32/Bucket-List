@@ -331,5 +331,6 @@ export interface IRegularGoalHistory {
 	endDate: string;
 	totalCompletions: number;
 	totalDays: number;
+	usedSkipDays?: number;
 	createdAt: string;
 }

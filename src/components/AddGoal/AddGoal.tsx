@@ -101,7 +101,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		saturday: false,
 		sunday: false,
 	});
-	const [durationType, setDurationType] = useState<'days' | 'weeks' | 'indefinite'>('days');
+	const [durationType, setDurationType] = useState<'days' | 'weeks' | 'until_date' | 'indefinite'>('days');
+	const [regularEndDate, setRegularEndDate] = useState('');
 	const [durationValue, setDurationValue] = useState(30);
 	const [allowSkipDays, setAllowSkipDays] = useState(0);
 	const [allowSkipDaysThrough, setAllowSkipDaysThrough] = useState(0);
@@ -118,6 +119,17 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 	// Состояние для подсветки обязательных полей при ошибке валидации
 	const [showErrors, setShowErrors] = useState(false);
+
+	const requireCustomRegularSettingsForOthers = isRegular && durationType === 'until_date';
+	const allowCustomSettingsLockNotice = `Для длительности «до даты» эта настройка обязательна и не отключается:
+		 дата окончания в каталоге со временем может оказаться в прошлом, поэтому при добавлении цели к себе
+		 каждый пользователь должен выставить актуальную дату окончания и при необходимости свою регулярность.`;
+
+	useEffect(() => {
+		if (isRegular && durationType === 'until_date') {
+			setAllowCustomSettings(true);
+		}
+	}, [isRegular, durationType]);
 
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat: ICategory) => !cat.parentCategory), [categories]);
@@ -148,6 +160,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			sunday: false,
 		});
 		setDurationType('days');
+		setRegularEndDate('');
 		setDurationValue(30);
 		setAllowSkipDays(0);
 		setAllowSkipDaysThrough(0);
@@ -549,159 +562,12 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			return;
 		}
 
-		setIsLoading(true);
-
-		try {
-			const formData = new FormData();
-			formData.append('title', title);
-			if (description) {
-				formData.append('description', description);
-			}
-
-			if (activeComplexity !== null) {
-				formData.append('complexity', selectComplexity[activeComplexity].value);
-			}
-
-			// Если выбрана подкатегория, используем её ID
-			if (activeSubcategory !== null && subcategories[activeSubcategory]) {
-				formData.append('category', subcategories[activeSubcategory].id.toString());
-			}
-			// Иначе используем ID основной категории
-			else if (activeCategory !== null) {
-				formData.append('category', parentCategories[activeCategory].id.toString());
-			}
-
-			// Если есть локальное изображение, добавляем его в formData
-			if (image) {
-				formData.append('image', image as Blob);
-			}
-			// Если есть URL изображения, добавляем его в formData
-			else if (imageUrl) {
-				formData.append('image_url', imageUrl);
-			}
-
-			// Если задан дедлайн, добавляем его в formData
-			if (deadline) {
-				formData.append('deadline', deadline);
-			}
-
-			// Если задано предполагаемое время, добавляем его в formData
-			if (estimatedTime) {
-				const standardTime = convertTimeToStandardFormat(estimatedTime);
-				formData.append('estimated_time', standardTime);
-			}
-
-			// Если выбрано место, обрабатываем его
-			let locationId = null;
-			if (selectedGoalLocation) {
-				if (!selectedGoalLocation.id) {
-					// Создаем новое место
-					try {
-						const newLocation = await mapApi.createLocation({
-							name: selectedGoalLocation.name! || title,
-							longitude: selectedGoalLocation.longitude!,
-							latitude: selectedGoalLocation.latitude!,
-							country: selectedGoalLocation.country!,
-							city: selectedGoalLocation.city,
-							description: selectedGoalLocation.description,
-							place_type: selectedGoalLocation.place_type || 'other',
-						});
-						locationId = newLocation.id;
-					} catch (error) {
-						NotificationStore.addNotification({
-							type: 'error',
-							title: 'Ошибка',
-							message: error instanceof Error ? error.message : 'Не удалось создать место',
-						});
-						return;
-					}
-				} else {
-					locationId = selectedGoalLocation.id;
-				}
-			}
-
-			// Если создано место, добавляем его ID
-			if (locationId) {
-				formData.append('location_id', locationId.toString());
-			}
-
-			// Добавляем данные о регулярности, если это регулярная цель
-			if (isRegular) {
-				formData.append('is_regular', 'true');
-				formData.append('regular_frequency', regularFrequency);
-
-				if (regularFrequency === 'weekly') {
-					formData.append('weekly_frequency', weeklyFrequency.toString());
-				}
-
-				if (regularFrequency === 'custom') {
-					formData.append('custom_schedule', JSON.stringify(customSchedule));
-				}
-
-				formData.append('duration_type', durationType);
-
-				if (durationType === 'days' || durationType === 'weeks') {
-					formData.append('duration_value', durationValue.toString());
-				}
-
-				// Если reset_on_skip = false, то пропуски не имеют смысла, отправляем 0
-				const finalAllowSkipDays = resetOnSkip ? allowSkipDays : 0;
-				const finalDaysForEarnedSkip = resetOnSkip ? allowSkipDaysThrough : 0;
-
-				formData.append('allow_skip_days', finalAllowSkipDays.toString());
-				formData.append('days_for_earned_skip', finalDaysForEarnedSkip.toString());
-				formData.append('reset_on_skip', resetOnSkip.toString());
-				formData.append('allow_custom_settings', allowCustomSettings.toString());
-			}
-
-			// Добавляем дополнительные поля из внешних API, если они есть
-			if (externalGoalFields) {
-				Object.entries(externalGoalFields).forEach(([key, value]) => {
-					if (value !== undefined && value !== null) {
-						if (Array.isArray(value)) {
-							formData.append(key, JSON.stringify(value));
-						} else {
-							formData.append(key, String(value));
-						}
-					}
-				});
-			}
-
-			const response = await postCreateGoal(formData);
-
-			if (response.success) {
-				NotificationStore.addNotification({
-					type: 'success',
-					title: 'Успех',
-					message: isRegular ? 'Регулярная цель успешно создана' : 'Цель успешно создана',
-				});
-
-				// Если передан обработчик создания цели, вызываем его
-				if (onGoalCreated && response.data) {
-					onGoalCreated(response.data);
-					resetForm();
-				} else if (!hideNavigation) {
-					// Если не нужно скрывать навигацию, переходим на страницу цели
-					navigate(`/goals/${response.data.code}`);
-				}
-			} else {
-				// Упрощаем обработку ошибок, так как теперь бэкенд должен корректно обрабатывать любые названия
-				throw new Error(response.error || 'Неизвестная ошибка');
-			}
-		} catch (error: unknown) {
+		if (isRegular && durationType === 'until_date' && !regularEndDate) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
-				message: error instanceof Error ? error.message : 'Не удалось создать цель',
+				message: 'Укажите дату окончания серии для типа «до даты»',
 			});
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
-	// Метод для программного создания цели
-	const createGoal = async () => {
-		if (!validateRequiredFields()) {
 			return;
 		}
 
@@ -800,6 +666,10 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					formData.append('duration_value', durationValue.toString());
 				}
 
+				if (durationType === 'until_date' && regularEndDate) {
+					formData.append('end_date', regularEndDate);
+				}
+
 				// Если reset_on_skip = false, то пропуски не имеют смысла, отправляем 0
 				const finalAllowSkipDays = resetOnSkip ? allowSkipDays : 0;
 				const finalDaysForEarnedSkip = resetOnSkip ? allowSkipDaysThrough : 0;
@@ -807,7 +677,185 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				formData.append('allow_skip_days', finalAllowSkipDays.toString());
 				formData.append('days_for_earned_skip', finalDaysForEarnedSkip.toString());
 				formData.append('reset_on_skip', resetOnSkip.toString());
-				formData.append('allow_custom_settings', allowCustomSettings.toString());
+				formData.append('allow_custom_settings', (durationType === 'until_date' || allowCustomSettings).toString());
+			}
+
+			// Добавляем дополнительные поля из внешних API, если они есть
+			if (externalGoalFields) {
+				Object.entries(externalGoalFields).forEach(([key, value]) => {
+					if (value !== undefined && value !== null) {
+						if (Array.isArray(value)) {
+							formData.append(key, JSON.stringify(value));
+						} else {
+							formData.append(key, String(value));
+						}
+					}
+				});
+			}
+
+			const response = await postCreateGoal(formData);
+
+			if (response.success) {
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Успех',
+					message: isRegular ? 'Регулярная цель успешно создана' : 'Цель успешно создана',
+				});
+
+				// Если передан обработчик создания цели, вызываем его
+				if (onGoalCreated && response.data) {
+					onGoalCreated(response.data);
+					resetForm();
+				} else if (!hideNavigation) {
+					// Если не нужно скрывать навигацию, переходим на страницу цели
+					navigate(`/goals/${response.data.code}`);
+				}
+			} else {
+				// Упрощаем обработку ошибок, так как теперь бэкенд должен корректно обрабатывать любые названия
+				throw new Error(response.error || 'Неизвестная ошибка');
+			}
+		} catch (error: unknown) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: error instanceof Error ? error.message : 'Не удалось создать цель',
+			});
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	// Метод для программного создания цели
+	const createGoal = async () => {
+		if (!validateRequiredFields()) {
+			return;
+		}
+
+		if (isRegular && regularFrequency === 'custom' && !Object.values(customSchedule).some(Boolean)) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Выберите хотя бы один день недели для пользовательского графика',
+			});
+			return;
+		}
+
+		if (isRegular && durationType === 'until_date' && !regularEndDate) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Укажите дату окончания серии для типа «до даты»',
+			});
+			return;
+		}
+
+		setIsLoading(true);
+
+		try {
+			const formData = new FormData();
+			formData.append('title', title);
+			if (description) {
+				formData.append('description', description);
+			}
+
+			if (activeComplexity !== null) {
+				formData.append('complexity', selectComplexity[activeComplexity].value);
+			}
+
+			// Если выбрана подкатегория, используем её ID
+			if (activeSubcategory !== null && subcategories[activeSubcategory]) {
+				formData.append('category', subcategories[activeSubcategory].id.toString());
+			}
+			// Иначе используем ID основной категории
+			else if (activeCategory !== null) {
+				formData.append('category', parentCategories[activeCategory].id.toString());
+			}
+
+			// Если есть локальное изображение, добавляем его в formData
+			if (image) {
+				formData.append('image', image as Blob);
+			}
+			// Если есть URL изображения, добавляем его в formData
+			else if (imageUrl) {
+				formData.append('image_url', imageUrl);
+			}
+
+			// Если задан дедлайн, добавляем его в formData
+			if (deadline) {
+				formData.append('deadline', deadline);
+			}
+
+			// Если задано предполагаемое время, добавляем его в formData
+			if (estimatedTime) {
+				const standardTime = convertTimeToStandardFormat(estimatedTime);
+				formData.append('estimated_time', standardTime);
+			}
+
+			// Если выбрано место, обрабатываем его
+			let locationId = null;
+			if (selectedGoalLocation) {
+				if (!selectedGoalLocation.id) {
+					// Создаем новое место
+					try {
+						const newLocation = await mapApi.createLocation({
+							name: selectedGoalLocation.name! || title,
+							longitude: selectedGoalLocation.longitude!,
+							latitude: selectedGoalLocation.latitude!,
+							country: selectedGoalLocation.country!,
+							city: selectedGoalLocation.city,
+							description: selectedGoalLocation.description,
+							place_type: selectedGoalLocation.place_type || 'other',
+						});
+						locationId = newLocation.id;
+					} catch (error) {
+						NotificationStore.addNotification({
+							type: 'error',
+							title: 'Ошибка',
+							message: error instanceof Error ? error.message : 'Не удалось создать место',
+						});
+						return;
+					}
+				} else {
+					locationId = selectedGoalLocation.id;
+				}
+			}
+
+			// Если создано место, добавляем его ID
+			if (locationId) {
+				formData.append('location_id', locationId.toString());
+			}
+
+			// Добавляем данные о регулярности, если это регулярная цель
+			if (isRegular) {
+				formData.append('is_regular', 'true');
+				formData.append('regular_frequency', regularFrequency);
+
+				if (regularFrequency === 'weekly') {
+					formData.append('weekly_frequency', weeklyFrequency.toString());
+				}
+
+				if (regularFrequency === 'custom') {
+					formData.append('custom_schedule', JSON.stringify(customSchedule));
+				}
+
+				formData.append('duration_type', durationType);
+
+				if (durationType === 'days' || durationType === 'weeks') {
+					formData.append('duration_value', durationValue.toString());
+				}
+
+				if (durationType === 'until_date' && regularEndDate) {
+					formData.append('end_date', regularEndDate);
+				}
+
+				// Если reset_on_skip = false, то пропуски не имеют смысла, отправляем 0
+				const finalAllowSkipDays = resetOnSkip ? allowSkipDays : 0;
+				const finalDaysForEarnedSkip = resetOnSkip ? allowSkipDaysThrough : 0;
+
+				formData.append('allow_skip_days', finalAllowSkipDays.toString());
+				formData.append('days_for_earned_skip', finalDaysForEarnedSkip.toString());
+				formData.append('reset_on_skip', resetOnSkip.toString());
+				formData.append('allow_custom_settings', (durationType === 'until_date' || allowCustomSettings).toString());
 			}
 
 			// Добавляем дополнительные поля из внешних API, если они есть
@@ -1240,12 +1288,25 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 											options={[
 												{name: 'Дни', value: 'days'},
 												{name: 'Недели', value: 'weeks'},
+												{name: 'До даты', value: 'until_date'},
 												{name: 'Бессрочно', value: 'indefinite'},
 											]}
-											activeOption={durationType === 'days' ? 0 : durationType === 'weeks' ? 1 : 2}
+											activeOption={
+												durationType === 'days'
+													? 0
+													: durationType === 'weeks'
+													? 1
+													: durationType === 'until_date'
+													? 2
+													: 3
+											}
 											onSelect={(index) => {
-												const types = ['days', 'weeks', 'indefinite'] as const;
-												setDurationType(types[index]);
+												const types = ['days', 'weeks', 'until_date', 'indefinite'] as const;
+												const next = types[index];
+												setDurationType(next);
+												if (next === 'until_date') {
+													setAllowCustomSettings(true);
+												}
 											}}
 											text="Длительность"
 										/>
@@ -1263,6 +1324,26 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 												className={element('field')}
 												type="number"
 											/>
+										)}
+
+										{durationType === 'until_date' && (
+											<div className={element('date-field-container')}>
+												<p className={element('field-title')}>Дата окончания серии</p>
+												<DatePicker
+													selected={regularEndDate ? new Date(regularEndDate) : null}
+													onChange={(date) => {
+														if (date) {
+															setRegularEndDate(format(date, 'yyyy-MM-dd'));
+														} else {
+															setRegularEndDate('');
+														}
+													}}
+													className={element('date-input')}
+													placeholderText="ДД.ММ.ГГГГ"
+													minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
+												/>
+												<small className={element('format-hint')}>Не ранее завтрашнего дня</small>
+											</div>
 										)}
 									</div>
 
@@ -1311,7 +1392,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 														type="number"
 													/>
 													<span className={element('input-suffix')}>
-														{durationType === 'days' ? 'дней' : durationType === 'weeks' ? 'недель' : 'дней'}
+														{durationType === 'weeks' ? 'недель' : 'дней'}
 													</span>
 												</div>
 												<small className={element('format-hint')}>
@@ -1325,6 +1406,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 										checked={allowCustomSettings}
 										setChecked={setAllowCustomSettings}
 										className={element('field')}
+										disabled={requireCustomRegularSettingsForOthers}
+										lockNotice={requireCustomRegularSettingsForOthers ? allowCustomSettingsLockNotice : undefined}
 									/>
 								</div>
 							)}

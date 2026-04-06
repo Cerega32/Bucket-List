@@ -593,8 +593,11 @@ export interface IRegularGoalStatistics {
 	isActive: boolean;
 	isPaused: boolean;
 	resetCount: number;
+	isInterrupted: boolean;
+	isSeriesCompleted?: boolean;
+	completedSeriesCount?: number;
 	currentPeriodProgress?: {
-		type: 'daily' | 'weekly';
+		type: 'daily' | 'weekly' | 'custom';
 		completedToday?: boolean;
 		streak?: number;
 		currentWeekCompletions?: number;

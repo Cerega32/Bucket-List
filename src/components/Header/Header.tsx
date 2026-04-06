@@ -113,6 +113,9 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const toggleNotifications = (e: React.MouseEvent) => {
 		e.stopPropagation();
+		if (!isNotificationsOpen) {
+			HeaderNotificationsStore.fetchNotifications();
+		}
 		setIsNotificationsOpen(!isNotificationsOpen);
 	};
 
@@ -211,9 +214,11 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		}
 	}, [isAuth]);
 
-	// Очистка уведомлений при разлогине (в т.ч. при принудительной очистке из‑за CSRF)
+	// Загрузка уведомлений при авторизации, очистка при разлогине
 	useEffect(() => {
-		if (!isAuth) {
+		if (isAuth) {
+			HeaderNotificationsStore.startPolling();
+		} else {
 			HeaderNotificationsStore.clearNotifications();
 		}
 	}, [isAuth]);
@@ -563,6 +568,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 																e.stopPropagation();
 																setHoveredParentId((prev) => (prev === category.id ? null : category.id));
 															}}
+															aria-label="Открыть подкатегории"
 															onKeyDown={(e) => {
 																if (isScreenDesktop) return;
 																if (e.key === 'Enter' || e.key === ' ') {
@@ -627,13 +633,17 @@ export const Header: FC<HeaderProps> = observer((props) => {
 											onClick={toggleNotifications}
 											aria-label="Уведомления"
 										>
-											<Svg icon="bell" className={element('notifications-icon', {theme: header})} />
-											{HeaderNotificationsStore.hasUnreadNotifications && (
-												<span className={element('notifications-badge')}>
-													{HeaderNotificationsStore.unreadCount > 99
-														? '99+'
-														: HeaderNotificationsStore.unreadCount}
+											{HeaderNotificationsStore.hasUnreadNotifications ? (
+												<span className={element('regular-goals-badge')}>
+													<Svg icon="bell" className={element('regular-goals-badge-icon', {theme: header})} />
+													<span className={element('regular-goals-badge-count', {theme: header})}>
+														{HeaderNotificationsStore.unreadCount > 99
+															? '99+'
+															: HeaderNotificationsStore.unreadCount}
+													</span>
 												</span>
+											) : (
+												<Svg icon="bell" className={element('notifications-icon', {theme: header})} />
 											)}
 										</button>
 
@@ -696,7 +706,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 													onClick={toggleRegularGoals}
 													aria-label="Регулярные цели"
 												>
-													{HeaderRegularGoalsStore.hasRegularGoalsToday ? (
+													{HeaderRegularGoalsStore.hasRegularGoals ? (
 														<span
 															className={element('regular-goals-badge', {
 																allCompleted: HeaderRegularGoalsStore.allCompletedToday,
@@ -712,9 +722,9 @@ export const Header: FC<HeaderProps> = observer((props) => {
 																})}
 															/>
 															<span className={element('regular-goals-badge-count', {theme: header})}>
-																{HeaderRegularGoalsStore.todayCount > 99
+																{HeaderRegularGoalsStore.totalCount > 99
 																	? '99+'
-																	: HeaderRegularGoalsStore.todayCount}
+																	: HeaderRegularGoalsStore.totalCount}
 															</span>
 														</span>
 													) : (

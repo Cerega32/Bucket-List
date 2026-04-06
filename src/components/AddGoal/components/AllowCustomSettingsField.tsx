@@ -1,5 +1,6 @@
 import {FC} from 'react';
 
+import {Banner} from '@/components/Banner/Banner';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
@@ -8,9 +9,18 @@ interface AllowCustomSettingsFieldProps {
 	className?: string;
 	checked: boolean;
 	setChecked: (value: boolean) => void;
+	disabled?: boolean;
+	/** Пояснение, почему галочку нельзя снять (показывается под полем) */
+	lockNotice?: string;
 }
 
-export const AllowCustomSettingsField: FC<AllowCustomSettingsFieldProps> = ({className, checked, setChecked}) => {
+export const AllowCustomSettingsField: FC<AllowCustomSettingsFieldProps> = ({
+	className,
+	checked,
+	setChecked,
+	disabled = false,
+	lockNotice,
+}) => {
 	const [, element] = useBem('add-goal', className);
 
 	return (
@@ -21,6 +31,7 @@ export const AllowCustomSettingsField: FC<AllowCustomSettingsFieldProps> = ({cla
 					text="Разрешить пользователям изменять настройки регулярности, при добавлении цели к себе"
 					checked={checked}
 					setChecked={setChecked}
+					disabled={disabled}
 					className={element('field')}
 				/>
 				<div className={element('tooltip-wrapper')}>
@@ -36,6 +47,7 @@ export const AllowCustomSettingsField: FC<AllowCustomSettingsFieldProps> = ({cla
 					</div>
 				</div>
 			</div>
+			{disabled && lockNotice ? <Banner type="info" message={lockNotice} className={element('allow-custom-lock-banner')} /> : null}
 		</div>
 	);
 };

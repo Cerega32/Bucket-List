@@ -77,9 +77,21 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	const [regularEndDate, setRegularEndDate] = useState('');
 	const [allowSkipDays, setAllowSkipDays] = useState(0);
 	const [resetOnSkip, setResetOnSkip] = useState(false);
+	const [allowSkipDaysThrough, setAllowSkipDaysThrough] = useState(0);
 
 	// Состояние для подсветки обязательных полей
 	const [showErrors, setShowErrors] = useState(false);
+
+	const requireCustomRegularSettingsForOthers = isRegular && durationType === 'until_date';
+	const allowCustomSettingsLockNotice = `Для длительности «до даты» эта настройка обязательна и не отключается:
+		 дата окончания в каталоге со временем может оказаться в прошлом, поэтому при добавлении цели к себе
+		 каждый пользователь должен выставить актуальную дату окончания и при необходимости свою регулярность.`;
+
+	useEffect(() => {
+		if (isRegular && durationType === 'until_date') {
+			setAllowCustomSettings(true);
+		}
+	}, [isRegular, durationType]);
 
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
@@ -102,27 +114,29 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 				// Загружаем категории
 				const categoriesResponse = await getAllCategories();
 				if (categoriesResponse.success) {
-					setCategories(sortMainCategories(categoriesResponse.data));
+					const sortedCategories: ICategory[] = sortMainCategories(categoriesResponse.data);
+					setCategories(sortedCategories);
+
+					// Отсортированные родительские категории — тот же массив, что и parentCategories (useMemo)
+					const sortedParents = sortedCategories.filter((cat) => !cat.parentCategory);
 
 					// Устанавливаем активную категорию
 					if (goal.category) {
 						// Определяем, является ли категория цели подкатегорией
-						const goalCategory = categoriesResponse.data.find((cat: ICategory) => cat.id === goal.category.id);
+						const goalCategory = sortedCategories.find((cat) => cat.id === goal.category.id);
 
 						if (goalCategory) {
 							if (goalCategory.parentCategory) {
 								// Если это подкатегория, находим её родительскую категорию
-								const parentCategoryIndex = categoriesResponse.data
-									.filter((cat: ICategory) => !cat.parentCategory)
-									.findIndex((cat: ICategory) => cat.id === goalCategory.parentCategory?.id);
+								const parentCategoryIndex = sortedParents.findIndex(
+									(cat: ICategory) => cat.id === goalCategory.parentCategory?.id
+								);
 								if (parentCategoryIndex !== -1) {
 									setActiveCategory(parentCategoryIndex);
 								}
 							} else {
 								// Если это родительская категория
-								const categoryIndex = categoriesResponse.data
-									.filter((cat: ICategory) => !cat.parentCategory)
-									.findIndex((cat: ICategory) => cat.id === goal.category.id);
+								const categoryIndex = sortedParents.findIndex((cat: ICategory) => cat.id === goal.category.id);
 								if (categoryIndex !== -1) {
 									setActiveCategory(categoryIndex);
 								}
@@ -194,6 +208,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 						setRegularEndDate(endDate);
 						setAllowSkipDays(allowSkipDaysBase);
 						setResetOnSkip(resetOnSkipBase);
+						setAllowSkipDaysThrough((userSettings as any)?.daysForEarnedSkip ?? (baseSettings as any)?.daysForEarnedSkip ?? 0);
 						setAllowCustomSettings(baseSettings.allowCustomSettings ?? true);
 					}
 				}
@@ -404,8 +419,10 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 					formData.append('end_date', regularEndDate);
 				}
 
+				const finalDaysForEarnedSkip = resetOnSkip ? allowSkipDaysThrough : 0;
 				formData.append('allow_skip_days', allowSkipDays.toString());
 				formData.append('reset_on_skip', resetOnSkip.toString());
+				formData.append('days_for_earned_skip', finalDaysForEarnedSkip.toString());
 				formData.append('allow_custom_settings', allowCustomSettings.toString());
 			} else if (goal.regularConfig) {
 				formData.append('is_regular', 'false');
@@ -706,7 +723,11 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 													}
 													onSelect={(index) => {
 														const types = ['days', 'weeks', 'until_date', 'indefinite'] as const;
-														setDurationType(types[index]);
+														const next = types[index];
+														setDurationType(next);
+														if (next === 'until_date') {
+															setAllowCustomSettings(true);
+														}
 													}}
 													text="Длительность"
 												/>
@@ -747,26 +768,57 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 											</div>
 
 											<div className={element('regular-field-group')}>
-												<FieldInput
-													placeholder="0"
-													id="allow-skip-days"
-													text="Разрешенные пропуски"
-													value={allowSkipDays.toString()}
-													setValue={(value) => {
-														const num = parseInt(value, 10) || 0;
-														setAllowSkipDays(Math.max(0, num));
-													}}
-													className={element('field')}
-													type="number"
-												/>
-
 												<FieldCheckbox
 													id="reset-on-skip"
 													text="Сбрасывать прогресс при превышении лимита пропусков"
 													checked={resetOnSkip}
-													setChecked={setResetOnSkip}
+													setChecked={(checked) => {
+														setResetOnSkip(checked);
+														if (!checked) {
+															setAllowSkipDays(0);
+															setAllowSkipDaysThrough(0);
+														}
+													}}
 													className={element('field')}
 												/>
+
+												{resetOnSkip && (
+													<>
+														<FieldInput
+															placeholder="0"
+															id="allow-skip-days"
+															text="Разрешенные пропуски"
+															value={allowSkipDays.toString()}
+															setValue={(value) => {
+																const num = parseInt(value, 10) || 0;
+																setAllowSkipDays(Math.max(0, num));
+															}}
+															className={element('field')}
+															type="number"
+														/>
+
+														<div className={element('input-with-suffix')}>
+															<FieldInput
+																placeholder="0"
+																id="allow-skip-days-through"
+																text="Начисление разрешенного пропуска через"
+																value={allowSkipDaysThrough.toString()}
+																setValue={(value) => {
+																	const num = parseInt(value, 10);
+																	setAllowSkipDaysThrough(Math.max(0, num));
+																}}
+																className={element('field')}
+																type="number"
+															/>
+															<span className={element('input-suffix')}>
+																{durationType === 'weeks' ? 'недель' : 'дней'}
+															</span>
+														</div>
+														<small className={element('format-hint')}>
+															Если установлено 0, то дополнительные пропуски не начисляются
+														</small>
+													</>
+												)}
 											</div>
 
 											{goal.createdByUser && (
@@ -774,6 +826,10 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 													checked={allowCustomSettings}
 													setChecked={setAllowCustomSettings}
 													className={element('field')}
+													disabled={requireCustomRegularSettingsForOthers}
+													lockNotice={
+														requireCustomRegularSettingsForOthers ? allowCustomSettingsLockNotice : undefined
+													}
 												/>
 											)}
 										</div>

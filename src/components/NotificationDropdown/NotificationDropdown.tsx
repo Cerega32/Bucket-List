@@ -1,26 +1,93 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useRef} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
 import {HeaderNotificationsStore} from '@/store/HeaderNotificationsStore';
-import {formatNotificationTime} from '@/utils/date/formatNotificationTime';
+import {IHeaderNotification} from '@/typings/notification';
+import {respondToFriendRequest} from '@/utils/api/friends';
 
 import {Avatar} from '../Avatar/Avatar';
 import {Button} from '../Button/Button';
 import {EmptyState} from '../EmptyState/EmptyState';
+import {Svg} from '../Svg/Svg';
 import './notification-dropdown.scss';
-import {Line} from '../Line/Line';
 
 interface NotificationDropdownProps {
 	isOpen: boolean;
 	onClose: () => void;
 }
 
+const getNotificationIcon = (type: string) => {
+	switch (type) {
+		case 'friend_request':
+			return 'user-plus';
+		case 'friend_accepted':
+			return 'user-check';
+		case 'friend_rejected':
+			return 'user-x';
+		case 'achievement':
+			return 'award';
+		case 'goal_completed':
+		case 'list_completed':
+			return 'done';
+		case 'goal_approved':
+			return 'check';
+		case 'goal_rejected':
+			return 'cross';
+		case 'level_up':
+			return 'rocket';
+		case 'daily_goal_reminder':
+		case 'daily_challenge':
+		case 'weekly_challenge':
+			return 'zap';
+		case 'daily_goal_streak_broken':
+			return 'signal';
+		default:
+			return 'bell';
+	}
+};
+
+/** Определяет, нужно ли показывать картинку объекта вместо аватара/иконки */
+const hasObjectImage = (notification: IHeaderNotification) => {
+	return (
+		notification.relatedObjectImage &&
+		['achievement', 'goal_approved', 'goal_rejected', 'goal_completed', 'list_completed'].includes(notification.type)
+	);
+};
+
+/** Возвращает ссылку для перехода по клику на уведомление */
+const getNotificationLink = (notification: IHeaderNotification): string | null => {
+	const {type, relatedObjectType, relatedObjectCode, sender} = notification;
+
+	if (relatedObjectType === 'goal' && relatedObjectCode) {
+		return `/goals/${relatedObjectCode}`;
+	}
+
+	if (relatedObjectType === 'list' && relatedObjectCode) {
+		return `/list/${relatedObjectCode}`;
+	}
+
+	if (relatedObjectType === 'user' && relatedObjectCode) {
+		return `/user/${relatedObjectCode}/showcase`;
+	}
+
+	if (relatedObjectType === 'friendship' && relatedObjectCode) {
+		return `/user/${relatedObjectCode}/showcase`;
+	}
+
+	if (type === 'friend_request' || type === 'friend_accepted' || type === 'friend_rejected') {
+		if (sender?.id) return `/user/${sender.id}/showcase`;
+	}
+
+	return null;
+};
+
 export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({isOpen, onClose}) => {
 	const [block, element] = useBem('notification-dropdown');
 	const dropdownRef = useRef<HTMLDivElement>(null);
+	const navigate = useNavigate();
 
-	// Закрываем при клике вне компонента
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
 			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -37,36 +104,30 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 		};
 	}, [isOpen, onClose]);
 
-	const handleNotificationClick = async (notificationId: number) => {
-		try {
-			await HeaderNotificationsStore.markAsRead(notificationId);
-		} catch (error) {
-			console.error('Ошибка отметки уведомления:', error);
+	const handleNotificationClick = async (notification: IHeaderNotification) => {
+		if (!notification.isRead) {
+			await HeaderNotificationsStore.markAsRead(notification.id);
+		}
+		const link = getNotificationLink(notification);
+		if (link) {
+			onClose();
+			navigate(link);
 		}
 	};
 
 	const handleMarkAllAsRead = async () => {
-		try {
-			await HeaderNotificationsStore.markAllAsRead();
-		} catch (error) {
-			console.error('Ошибка отметки всех уведомлений:', error);
-		}
+		await HeaderNotificationsStore.markAllAsRead();
 	};
 
-	const getNotificationIcon = (type: string) => {
-		switch (type) {
-			case 'friend_request':
-				return 'user-plus';
-			case 'friend_accepted':
-				return 'user-check';
-			case 'friend_rejected':
-				return 'user-x';
-			case 'achievement':
-				return 'trophy';
-			case 'goal_completed':
-				return 'check-circle';
-			default:
-				return 'bell';
+	const handleFriendAction = async (e: React.MouseEvent, notification: IHeaderNotification, action: 'accept' | 'reject') => {
+		e.stopPropagation();
+		if (!notification.sender?.id) return;
+
+		try {
+			await respondToFriendRequest(notification.sender.id, action);
+			// respondToFriendRequest сам вызывает refreshNotifications
+		} catch {
+			// ошибка обработана внутри respondToFriendRequest
 		}
 	};
 
@@ -77,12 +138,11 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 			<div className={element('header')}>
 				<h3 className={element('title')}>Уведомления</h3>
 				{HeaderNotificationsStore.hasUnreadNotifications && (
-					<Button theme="blue-light" size="small" onClick={handleMarkAllAsRead}>
-						Отметить все
-					</Button>
+					<button type="button" className={element('mark-all')} onClick={handleMarkAllAsRead}>
+						Прочитать все
+					</button>
 				)}
 			</div>
-			<Line margin="8px" />
 
 			<div className={element('content')}>
 				{!HeaderNotificationsStore.notifications || HeaderNotificationsStore.notifications.length === 0 ? (
@@ -99,35 +159,60 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 								? `${notification.sender.firstName} ${notification.sender.lastName}`.trim() || notification.sender.username
 								: notification.userName;
 							const userAvatar = notification.sender?.avatar || notification.userAvatar;
+							const showObjectImage = hasObjectImage(notification);
+							const isFriendRequest = notification.type === 'friend_request' && !notification.isRead;
 
 							return (
-								<button
+								<div
 									key={notification.id}
 									className={element('item', {unread: !notification.isRead})}
-									onClick={() => handleNotificationClick(notification.id)}
-									type="button"
-									aria-label={`Отметить уведомление "${notification.title}" как прочитанное`}
+									onClick={() => handleNotificationClick(notification)}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
+											handleNotificationClick(notification);
+										}
+									}}
+									role="button"
+									tabIndex={0}
 								>
 									<div className={element('item-avatar')}>
-										{userName ? (
-											<Avatar avatar={userAvatar} size="small" />
+										{showObjectImage ? (
+											<img src={notification.relatedObjectImage} alt="" className={element('item-image')} />
+										) : userName ? (
+											<Avatar avatar={userAvatar} size="medium" />
 										) : (
 											<div className={element('item-icon')}>
-												<span className={`icon-${getNotificationIcon(notification.type)}`} />
+												<Svg icon={getNotificationIcon(notification.type)} />
 											</div>
 										)}
 									</div>
 									<div className={element('item-content')}>
-										<div className={element('item-header')}>
+										<div className={element('item-row')}>
 											<h4 className={element('item-title')}>{notification.title}</h4>
-											<span className={element('item-time')}>
-												{formatNotificationTime(new Date(notification.createdAt))}
-											</span>
+											{!notification.isRead && <div className={element('item-dot')} />}
 										</div>
 										<p className={element('item-message')}>{notification.message}</p>
+										{isFriendRequest && (
+											<div className={element('item-actions')}>
+												<Button
+													theme="blue"
+													size="small"
+													onClick={(e) => handleFriendAction(e, notification, 'accept')}
+												>
+													Принять
+												</Button>
+												<Button
+													theme="gray"
+													size="small"
+													onClick={(e) => handleFriendAction(e, notification, 'reject')}
+												>
+													Отклонить
+												</Button>
+											</div>
+										)}
 									</div>
-									{!notification.isRead && <div className={element('item-badge')} />}
-								</button>
+								</div>
 							);
 						})}
 					</div>

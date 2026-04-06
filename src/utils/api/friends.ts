@@ -1,17 +1,10 @@
 import {HeaderNotificationsStore} from '@/store/HeaderNotificationsStore';
 import {IFriendCompareResponse, IFriendRequestsResponse, IFriendSearchResponse, IFriendsResponse} from '@/typings/user';
-import {getNotifications} from '@/utils/api/notifications';
 import {DELETE, GET, POST} from '@/utils/fetch/requests';
 
 // Функция для обновления уведомлений
 const refreshNotifications = async () => {
-	try {
-		const notificationsData = await getNotifications();
-		HeaderNotificationsStore.setNotifications(notificationsData.results);
-		HeaderNotificationsStore.setUnreadCount(notificationsData.unreadCount);
-	} catch (error) {
-		console.error('Ошибка обновления уведомлений:', error);
-	}
+	await HeaderNotificationsStore.fetchNotifications();
 };
 
 // Получение списка друзей

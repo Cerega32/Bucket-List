@@ -1,5 +1,12 @@
 import {ICategory, IComplexity, IShortGoal} from '@/typings/goal';
 
+export interface IGoalsPagination {
+	page: number;
+	pageSize: number;
+	totalGoals: number;
+	hasMore: boolean;
+}
+
 export interface IList {
 	code: string;
 	title: string;
@@ -20,4 +27,5 @@ export interface IList {
 	isCanEdit: boolean;
 	isCanAddGoals: boolean;
 	catalogApproved?: boolean;
+	goalsPagination?: IGoalsPagination;
 }
