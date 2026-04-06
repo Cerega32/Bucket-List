@@ -1,4 +1,4 @@
-import {FC} from 'react';
+import {FC, useState} from 'react';
 
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
@@ -16,19 +16,24 @@ interface DeleteListProps {
 
 export const DeleteList: FC<DeleteListProps> = (props) => {
 	const {className, closeModal, funcModal} = props;
+	const [isDelete, setIsDelete] = useState(false);
 
 	const [block, element] = useBem('delete-list', className);
 
 	const handleDeleteList = async () => {
+		setIsDelete(true);
 		const raw = funcModal();
 		const ok = raw instanceof Promise ? await raw : raw;
 		if (ok === false) {
+			setIsDelete(false);
 			return;
 		}
 		try {
 			await refreshHeaderGoalCounts();
 		} catch (e) {
 			console.error(e);
+		} finally {
+			setIsDelete(false);
 		}
 		closeModal();
 	};
@@ -45,8 +50,8 @@ export const DeleteList: FC<DeleteListProps> = (props) => {
 				<Button theme="blue-light" className={element('btn')} onClick={closeModal}>
 					Отмена
 				</Button>
-				<Button theme="red" className={element('btn')} onClick={handleDeleteList}>
-					Удалить
+				<Button theme="red" className={element('btn')} onClick={handleDeleteList} disabled={isDelete}>
+					{isDelete ? 'Удаление...' : 'Удалить'}
 				</Button>
 			</div>
 		</section>

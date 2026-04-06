@@ -2,6 +2,7 @@
 	position: relative;
 	padding: var(--height-header-goal) 0 0;
 	background: var(--color-gray-3);
+	transition: padding 0.32s ease;
 
 	@include md {
 		padding: 24px 0 0;
@@ -62,7 +63,7 @@
 		z-index: 13;
 		top: 284px;
 		margin-bottom: -93px;
-		transition: all linear 0.3s;
+		transition: top 0.32s ease, margin-bottom 0.32s ease, transform 0.32s ease;
 		transform: translateY(-132px);
 
 		@include lg {

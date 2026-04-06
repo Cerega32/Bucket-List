@@ -5,8 +5,8 @@ import {Link, useParams} from 'react-router-dom';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import remarkGfm from 'remark-gfm';
-import Lightbox from 'yet-another-react-lightbox';
 
+import {LightboxWithScrollLock} from '@/components/LightboxWithScrollLock/LightboxWithScrollLock';
 import {NewsComments} from '@/components/NewsComments/NewsComments';
 import {useBem} from '@/hooks/useBem';
 import {newsStore} from '@/store/NewsStore';
@@ -221,7 +221,7 @@ export const NewsDetailPage = observer(() => {
 				{id && <NewsComments newsId={Number(id)} />}
 
 				{/* Лайтбокс для просмотра изображений */}
-				<Lightbox
+				<LightboxWithScrollLock
 					open={isLightboxOpen}
 					close={() => setIsLightboxOpen(false)}
 					slides={lightboxSlides}

@@ -1,6 +1,6 @@
 import {useState, forwardRef} from 'react';
-import Lightbox from 'yet-another-react-lightbox';
 
+import {LightboxWithScrollLock} from '@/components/LightboxWithScrollLock/LightboxWithScrollLock';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {ICategory, IGoal} from '@/typings/goal';
@@ -48,7 +48,7 @@ export const HeaderGoal = forwardRef<HTMLElement, HeaderGoalProps>((props, ref) 
 					>
 						<img src={image} alt="" onLoad={onImageLoad} />
 					</button>
-					<Lightbox
+					<LightboxWithScrollLock
 						open={isGoalImageLightboxOpen}
 						close={() => setIsGoalImageLightboxOpen(false)}
 						slides={[{src: image}]}
