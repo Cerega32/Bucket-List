@@ -169,8 +169,16 @@
 	}
 
 	&__window--fullscreen &__content {
+		display: flex;
 		height: 100%;
 		max-height: 100%;
+	}
+
+	&__window--type-goal-map &__content,
+	&__window--type-goal-map-multi &__content,
+	&__window--type-goal-map-add &__content {
+		padding: 0;
+		overflow: hidden;
 	}
 
 	&__window--type-registration &__content {
