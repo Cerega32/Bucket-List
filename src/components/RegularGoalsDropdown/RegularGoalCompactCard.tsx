@@ -14,7 +14,7 @@ interface RegularGoalCompactCardProps {
 	onRestart: (regularGoalId: number) => void;
 }
 
-type RegularDayState = 'completed' | 'allowedSkip' | 'active' | 'inactive' | 'blocked';
+type RegularDayState = 'completed' | 'completedBg' | 'allowedSkip' | 'active' | 'inactive' | 'blocked';
 
 const WEEK_DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 const REGULAR_CUSTOM_DAY_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
@@ -27,6 +27,8 @@ const getCurrentDayOfWeek = (): number => {
 
 const getSeriesText = (statistics: IRegularGoalStatistics): string => {
 	const isWeeksDuration = statistics.regularGoalData?.durationType === 'weeks';
+	const durationType = statistics.regularGoalData?.durationType;
+	const frequency = statistics.regularGoalData?.frequency;
 	let value = statistics.currentStreak || 0;
 
 	// Для завершённой серии используем completedWeeks/totalCompletions
@@ -36,6 +38,9 @@ const getSeriesText = (statistics: IRegularGoalStatistics): string => {
 		} else {
 			value = statistics.totalCompletions > 0 ? statistics.totalCompletions : value;
 		}
+	} else if (durationType === 'days' && frequency !== 'daily') {
+		// Для weekly/custom с durationType 'days': currentStreak считает недели, нужно дни
+		value = statistics.totalCompletions || 0;
 	}
 
 	const units = isWeeksDuration ? ['неделя', 'недели', 'недель'] : ['день', 'дня', 'дней'];
@@ -51,8 +56,14 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 
 	if (weekDays && weekDays.length > 0) {
 		const dayData = weekDays.find(
-			(d: {dayIndex: number; isCompleted?: boolean; isBlocked?: boolean; isBlockedByStartDate?: boolean; isSkipped?: boolean}) =>
-				d.dayIndex === index
+			(d: {
+				dayIndex: number;
+				isCompleted?: boolean;
+				isCompletedDay?: boolean;
+				isBlocked?: boolean;
+				isBlockedByStartDate?: boolean;
+				isSkipped?: boolean;
+			}) => d.dayIndex === index
 		);
 
 		if (!dayData) return 'inactive';
@@ -65,7 +76,8 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 			const inSchedule = cs[REGULAR_CUSTOM_DAY_KEYS[index]] === true;
 			blockedCross = !inSchedule || !!isBlocked;
 		}
-		const isCompleted = !isBlockedByStartDate && (dayData.isCompleted || false);
+		const isCompletedBg = !isBlockedByStartDate && (dayData.isCompleted || false);
+		const isCompletedActual = !isBlockedByStartDate && (dayData.isCompletedDay ?? dayData.isCompleted ?? false);
 		const isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false);
 		const isCurrent = index === currentDayIndex;
 
@@ -73,8 +85,12 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 			return 'allowedSkip';
 		}
 
-		if (isCompleted) {
+		if (isCompletedActual) {
 			return 'completed';
+		}
+
+		if (isCompletedBg) {
+			return 'completedBg';
 		}
 
 		if (blockedCross) {
@@ -169,24 +185,26 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 								WEEK_DAYS.map((day, index) => {
 									const state = getWeekDayState(statistics, index);
 									const isToday = index === currentDayIndex;
-									const isCompleted = state === 'completed';
+									const isActuallyCompleted = state === 'completed';
+									const isCompletedBg = state === 'completedBg';
 									const isAllowedSkip = state === 'allowedSkip';
 									const isBlocked = state === 'blocked';
+									const showCompleted = isActuallyCompleted || isCompletedBg;
 									const isSelected = state === 'active' || (isBlocked && isToday);
 
 									return (
 										<div
 											key={day}
 											className={element('day', {
-												selected: isSelected && !isCompleted,
+												selected: isSelected && !showCompleted,
 												blocked: isBlocked,
-												completed: isCompleted,
+												completed: showCompleted,
 												allowedSkip: isAllowedSkip,
 											})}
 											title={day}
 										>
-											{(isCompleted || isAllowedSkip) && <Svg icon="done" className={element('day-icon')} />}
-											{!isCompleted && isBlocked && <Svg icon="cross" className={element('day-icon')} />}
+											{(isActuallyCompleted || isAllowedSkip) && <Svg icon="done" className={element('day-icon')} />}
+											{!isActuallyCompleted && isBlocked && <Svg icon="cross" className={element('day-icon')} />}
 										</div>
 									);
 								})

@@ -47,6 +47,16 @@ interface RegularGoalSettingsModalProps {
 	isLoading?: boolean;
 }
 
+// Проверяет, что дата в будущем (позже сегодня)
+// const isDateInFuture = (dateStr: string): boolean => {
+// 	if (!dateStr) return false;
+// 	const today = new Date();
+// 	today.setHours(0, 0, 0, 0);
+// 	const date = new Date(dateStr);
+// 	date.setHours(0, 0, 0, 0);
+// 	return date > today;
+// };
+
 export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 	isOpen,
 	onClose,
@@ -77,6 +87,16 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 	const [allowSkipDays, setAllowSkipDays] = useState(originalSettings.allowSkipDays || 0);
 	const [resetOnSkip, setResetOnSkip] = useState(originalSettings.resetOnSkip);
 
+	// Проверяет, что дата в будущем (позже сегодня)
+	const isDateInFuture = (dateStr: string): boolean => {
+		if (!dateStr) return false;
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const date = new Date(dateStr);
+		date.setHours(0, 0, 0, 0);
+		return date > today;
+	};
+
 	// Обновляем состояния при изменении originalSettings
 	useEffect(() => {
 		setFrequency(originalSettings.frequency);
@@ -94,7 +114,9 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 		);
 		setDurationType(originalSettings.durationType);
 		setDurationValue(originalSettings.durationValue || 30);
-		setEndDate(originalSettings.endDate || '');
+		// Если дата окончания в прошлом — сбрасываем
+		const originalEndDate = originalSettings.endDate || '';
+		setEndDate(isDateInFuture(originalEndDate) ? originalEndDate : '');
 		setAllowSkipDays(originalSettings.allowSkipDays || 0);
 		setResetOnSkip(originalSettings.resetOnSkip);
 	}, [originalSettings]);
@@ -117,6 +139,21 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 				message: 'Для типа "до даты" необходимо указать дату окончания',
 			});
 			return;
+		}
+
+		if (durationType === 'until_date' && endDate) {
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+			const selectedDate = new Date(endDate);
+			selectedDate.setHours(0, 0, 0, 0);
+			if (selectedDate <= today) {
+				NotificationStore.addNotification({
+					type: 'error',
+					title: 'Ошибка',
+					message: 'Дата окончания должна быть позже сегодняшнего дня',
+				});
+				return;
+			}
 		}
 
 		if ((durationType === 'days' || durationType === 'weeks') && (!durationValue || durationValue < 1)) {

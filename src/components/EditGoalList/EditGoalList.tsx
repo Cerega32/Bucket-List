@@ -513,19 +513,11 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 													<p className={element('goal-description')}>{goal.shortDescription}</p>
 												</div>
 											</div>
-											<button
-												type="button"
+											<Button
+												type="button-close"
 												className={element('goal-remove-btn')}
 												onClick={() => removeSelectedGoal(goal.id)}
-												aria-label="Удалить цель"
-												onKeyDown={(e) => {
-													if (e.key === 'Enter' || e.key === ' ') {
-														removeSelectedGoal(goal.id);
-													}
-												}}
-											>
-												<Svg icon="cross" />
-											</button>
+											/>
 										</div>
 									))}
 								</div>

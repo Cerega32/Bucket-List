@@ -213,25 +213,31 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		}
 	};
 
+	const isStatsCompletedToday = (stats: IRegularGoalStatistics): boolean => {
+		const progress = stats.currentPeriodProgress;
+		if (progress?.type === 'daily') {
+			return !!progress.completedToday;
+		}
+		// Для weekly/custom: если нельзя выполнить сегодня и цель не прервана — значит уже выполнено
+		return !stats.isInterrupted && !stats.canCompleteToday;
+	};
+
+	const getTodayRelevantGoals = () => {
+		// Все цели, которые относятся к "сегодня": можно выполнить, уже выполнены или прерваны
+		return filteredStatistics().filter((stats) => {
+			if (!stats) return false;
+			const completedToday = stats.currentPeriodProgress?.completedToday || false;
+			return stats.isInterrupted || stats.canCompleteToday || completedToday;
+		});
+	};
+
 	const getTodayGoals = () => {
-		// "На сегодня" — цели, которые можно выполнить сегодня (canCompleteToday), уже выполнены (completedToday),
-		// или прерванные (isInterrupted) — чтобы можно было начать заново.
-		// Сортируем: сначала НЕ выполненные, затем выполненные, прерванные — в конец.
-		return filteredStatistics()
-			.filter((stats) => {
-				if (!stats) return false;
-
-				const completedToday = stats.currentPeriodProgress?.completedToday || false;
-
-				return stats.isInterrupted || stats.canCompleteToday || completedToday;
-			})
+		// Отображаем только невыполненные и прерванные — выполненные скрываем
+		return getTodayRelevantGoals()
+			.filter((stats) => stats.isInterrupted || !isStatsCompletedToday(stats))
 			.sort((a, b) => {
 				if (a.isInterrupted !== b.isInterrupted) return a.isInterrupted ? 1 : -1;
-				const aCompleted = a.currentPeriodProgress?.completedToday || false;
-				const bCompleted = b.currentPeriodProgress?.completedToday || false;
-
-				if (aCompleted === bCompleted) return 0;
-				return aCompleted ? 1 : -1;
+				return 0;
 			});
 	};
 
@@ -239,19 +245,12 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		return filteredStatistics();
 	};
 
+	const todayRelevantGoals = getTodayRelevantGoals();
 	const todayGoals = getTodayGoals();
 	const allGoals = getAllGoals();
 
-	const completableTodayGoals = todayGoals.filter((s) => !s.isInterrupted);
-	const areAllTodayCompleted =
-		completableTodayGoals.length > 0 &&
-		completableTodayGoals.every((stats) => {
-			const progress = stats.currentPeriodProgress;
-			if (progress?.type === 'daily') {
-				return !!progress.completedToday;
-			}
-			return !stats.canCompleteToday;
-		});
+	const completableTodayGoals = todayRelevantGoals.filter((s) => !s.isInterrupted);
+	const areAllTodayCompleted = completableTodayGoals.length > 0 && completableTodayGoals.every((stats) => isStatsCompletedToday(stats));
 
 	const buttonsSwitch = [
 		{
@@ -492,8 +491,10 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 						{activeTab === 'today'
 							? renderGoalsList(
 									todayGoals,
-									'На сегодня нет регулярных целей',
-									'Отметьте регулярные цели, которые хотите выполнить сегодня.'
+									areAllTodayCompleted ? 'Все цели на сегодня выполнены!' : 'На сегодня нет регулярных целей',
+									areAllTodayCompleted
+										? 'Отличная работа! Возвращайтесь завтра, чтобы продолжить серию.'
+										: 'Отметьте регулярные цели, которые хотите выполнить сегодня.'
 							  )
 							: renderGoalsList(
 									allGoals,

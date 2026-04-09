@@ -119,7 +119,7 @@ const ListGoalsContainerComponent: FC = () => {
 				intersectionObserver.unobserve(ref);
 			}
 		};
-	}, [list?.goalsPagination?.hasMore]);
+	}, [list?.goalsPagination?.hasMore, list?.goalsPagination?.page]);
 
 	const updateList = async (code: string, operation: 'add' | 'delete' | 'mark-all'): Promise<boolean> => {
 		if (!isAuth) {
