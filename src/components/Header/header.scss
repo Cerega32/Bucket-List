@@ -1,3 +1,9 @@
+@property --header-gradient-angle {
+	syntax: '<angle>';
+	inherits: false;
+	initial-value: 0deg;
+}
+
 .header {
 	$block: &;
 
@@ -232,6 +238,14 @@
 			overflow: visible;
 			z-index: 0;
 			border: 1px solid rgb(255 255 255 / 18%);
+			background: conic-gradient(
+				from var(--header-gradient-angle),
+				rgb(192 132 252 / 10%) 0deg,
+				rgb(244 114 182 / 10%) 120deg,
+				rgb(56 189 248 / 10%) 240deg,
+				rgb(192 132 252 / 10%) 360deg
+			);
+			animation: header-gradient-rotate 6s linear infinite;
 
 			&::before,
 			&::after {
@@ -245,7 +259,7 @@
 
 			&::before {
 				background: conic-gradient(
-					from 0deg,
+					from var(--header-gradient-angle),
 					rgb(192 132 252 / 95%) 0deg,
 					rgb(244 114 182 / 95%) 120deg,
 					rgb(56 189 248 / 95%) 240deg,
@@ -254,41 +268,15 @@
 				mask: linear-gradient(var(--color-white) 0 0) content-box, linear-gradient(var(--color-white) 0 0);
 				mask-composite: exclude;
 				padding: 1px;
-				animation: header-100-goals-border-colors 3.8s ease-in-out infinite;
+				animation: header-gradient-rotate 6s linear infinite;
 				opacity: 0.9;
 			}
 		}
 	}
 
-	@keyframes header-100-goals-border-colors {
-		0% {
-			background: conic-gradient(
-				from 0deg,
-				rgb(192 132 252 / 95%) 0deg,
-				rgb(244 114 182 / 95%) 120deg,
-				rgb(56 189 248 / 95%) 240deg,
-				rgb(192 132 252 / 95%) 360deg
-			);
-		}
-
-		50% {
-			background: conic-gradient(
-				from 0deg,
-				rgb(56 189 248 / 95%) 0deg,
-				rgb(192 132 252 / 95%) 120deg,
-				rgb(244 114 182 / 95%) 240deg,
-				rgb(56 189 248 / 95%) 360deg
-			);
-		}
-
-		100% {
-			background: conic-gradient(
-				from 0deg,
-				rgb(244 114 182 / 95%) 0deg,
-				rgb(56 189 248 / 95%) 120deg,
-				rgb(192 132 252 / 95%) 240deg,
-				rgb(244 114 182 / 95%) 360deg
-			);
+	@keyframes header-gradient-rotate {
+		to {
+			--header-gradient-angle: 360deg;
 		}
 	}
 
@@ -330,6 +318,7 @@
 	&__search-trigger {
 		display: flex;
 		align-items: center;
+		justify-content: space-between;
 		gap: 4px;
 		height: 40px;
 		padding: 10px 16px;
@@ -337,7 +326,7 @@
 		border-radius: 8px;
 		color: var(--color-white);
 		font-weight: var(--font-weight-medium);
-		width: max-content;
+		width: 100%;
 
 		svg * {
 			fill: var(--color-white);

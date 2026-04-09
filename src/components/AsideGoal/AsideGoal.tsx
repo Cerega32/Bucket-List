@@ -1,6 +1,6 @@
 import {type KeyboardEvent, FC, useEffect, useState} from 'react';
-import Lightbox from 'yet-another-react-lightbox';
 
+import {LightboxWithScrollLock} from '@/components/LightboxWithScrollLock/LightboxWithScrollLock';
 import {WeekDaySchedule} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
@@ -1558,7 +1558,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					: {})}
 			/>
 			{canOpenGoalImageLightbox && (
-				<Lightbox
+				<LightboxWithScrollLock
 					open={isGoalImageLightboxOpen}
 					close={() => setIsGoalImageLightboxOpen(false)}
 					slides={[{src: imageSrc}]}

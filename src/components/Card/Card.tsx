@@ -208,83 +208,85 @@ export const Card: FC<CardProps> = (props) => {
 						<p className={element('text')}>{goal.shortDescription}</p>
 					</Link>
 				)}
-				<Line />
-				<div className={element('tags-wrapper')}>
-					<Tags
-						complexity={goal.complexity}
-						added={goal.totalAdded}
-						estimatedTime={goal.estimatedTime}
-						theme="integrate"
-						className={element('tags', {
-							added: goal.addedByUser,
-						})}
-						showSeparator
-					/>
-					<div className={element('buttons-wrapper')}>
-						{isList && goal.addedByUser && 'userCompletedGoals' in goal && 'goalsCount' in goal && (
-							<Progress done={goal.userCompletedGoals} all={goal.goalsCount} />
-						)}
-						{(() => {
-							const showAddButton = !goal.addedByUser;
-							const showDeleteButton = goal.addedByUser && !(isList && goal.code === '100-goals');
-							const isRegularGoal = !isList && 'regularConfig' in goal && !!goal.regularConfig;
-							const showMarkButton =
-								!disableMark &&
-								!isRegularGoal &&
-								(goal.addedByUser || goal.completedByUser) &&
-								!isList &&
-								typeof onClickMark === 'function';
+				<div className={element('down-wrapper')}>
+					<Line />
+					<div className={element('tags-wrapper')}>
+						<Tags
+							complexity={goal.complexity}
+							added={goal.totalAdded}
+							estimatedTime={goal.estimatedTime}
+							theme="integrate"
+							className={element('tags', {
+								added: goal.addedByUser,
+							})}
+							showSeparator
+						/>
+						<div className={element('buttons-wrapper')}>
+							{isList && goal.addedByUser && 'userCompletedGoals' in goal && 'goalsCount' in goal && (
+								<Progress done={goal.userCompletedGoals} all={goal.goalsCount} />
+							)}
+							{(() => {
+								const showAddButton = !goal.addedByUser;
+								const showDeleteButton = goal.addedByUser && !(isList && goal.code === '100-goals');
+								const isRegularGoal = !isList && 'regularConfig' in goal && !!goal.regularConfig;
+								const showMarkButton =
+									!disableMark &&
+									!isRegularGoal &&
+									(goal.addedByUser || goal.completedByUser) &&
+									!isList &&
+									typeof onClickMark === 'function';
 
-							if (!showAddButton && !showDeleteButton && !showMarkButton) {
-								return null;
-							}
+								if (!showAddButton && !showDeleteButton && !showMarkButton) {
+									return null;
+								}
 
-							return (
-								<div className={element('buttons')}>
-									{showAddButton &&
-										(isScreenXs ? (
-											<Button theme="blue" size="small" onClick={onClickAddHandler}>
-												Добавить
-											</Button>
-										) : (
-											<Button theme="blue" icon="plus" size="small" onClick={onClickAddHandler} />
-										))}
-									{showDeleteButton &&
-										(isScreenXs ? (
-											<Button theme="blue-light" size="small" onClick={onClickDeleteHandler}>
-												Удалить
-											</Button>
-										) : (
-											<Button theme="blue-light" icon="trash" size="small" onClick={onClickDeleteHandler} />
-										))}
-									{showMarkButton &&
-										(isScreenXs ? (
-											<Button
-												theme={goal.completedByUser ? 'green' : 'blue'}
-												size="small"
-												onClick={onClickMarkHandler}
-											>
-												{goal.completedByUser ? 'Выполнено' : 'Выполнить'}
-											</Button>
-										) : (
-											<Button
-												theme={goal.completedByUser ? 'green' : 'blue-light'}
-												size="small"
-												onClick={onClickMarkHandler}
-											>
-												<Svg
-													icon="done"
-													width="16px"
-													height="16px"
-													className={element('btn-done', {
-														active: goal.completedByUser,
-													})}
-												/>
-											</Button>
-										))}
-								</div>
-							);
-						})()}
+								return (
+									<div className={element('buttons')}>
+										{showAddButton &&
+											(isScreenXs ? (
+												<Button theme="blue" size="small" onClick={onClickAddHandler}>
+													Добавить
+												</Button>
+											) : (
+												<Button theme="blue" icon="plus" size="small" onClick={onClickAddHandler} />
+											))}
+										{showDeleteButton &&
+											(isScreenXs ? (
+												<Button theme="blue-light" size="small" onClick={onClickDeleteHandler}>
+													Удалить
+												</Button>
+											) : (
+												<Button theme="blue-light" icon="trash" size="small" onClick={onClickDeleteHandler} />
+											))}
+										{showMarkButton &&
+											(isScreenXs ? (
+												<Button
+													theme={goal.completedByUser ? 'green' : 'blue'}
+													size="small"
+													onClick={onClickMarkHandler}
+												>
+													{goal.completedByUser ? 'Выполнено' : 'Выполнить'}
+												</Button>
+											) : (
+												<Button
+													theme={goal.completedByUser ? 'green' : 'blue-light'}
+													size="small"
+													onClick={onClickMarkHandler}
+												>
+													<Svg
+														icon="done"
+														width="16px"
+														height="16px"
+														className={element('btn-done', {
+															active: goal.completedByUser,
+														})}
+													/>
+												</Button>
+											))}
+									</div>
+								);
+							})()}
+						</div>
 					</div>
 				</div>
 			</div>

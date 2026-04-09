@@ -3,8 +3,8 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import {Navigation} from 'swiper/modules';
 import {Swiper, SwiperSlide} from 'swiper/react';
-import Lightbox from 'yet-another-react-lightbox';
 
+import {LightboxWithScrollLock} from '@/components/LightboxWithScrollLock/LightboxWithScrollLock';
 import {useBem} from '@/hooks/useBem';
 import {useSwiperNavigation} from '@/hooks/useSwiperNavigation';
 
@@ -93,7 +93,7 @@ export const CommentImagesGallery: FC<CommentImagesGalleryProps> = ({images, nav
 					</SwiperSlide>
 				))}
 			</Swiper>
-			<Lightbox
+			<LightboxWithScrollLock
 				open={isOpen}
 				close={() => setIsOpen(false)}
 				slides={slides}

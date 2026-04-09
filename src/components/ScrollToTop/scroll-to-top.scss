@@ -1,14 +1,14 @@
 .scroll-to-top {
 	position: fixed;
 	z-index: 1000;
-	right: 20px;
-	bottom: 20px;
+	right: 24px;
+	bottom: 16px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	width: 48px;
-	height: 48px;
-	background: var(--color-green);
+	width: 40px;
+	height: 40px;
+	background: rgb(var(--color-white-rgb) / 90%);
 	border: none;
 	border-radius: 50%;
 	color: var(--color-white);
@@ -17,24 +17,15 @@
 	opacity: 1;
 	transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
 	transform: translateY(0);
-	box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-
-	@include md {
-		right: 16px;
-		bottom: 16px;
-		width: 44px;
-		height: 44px;
-	}
+	box-shadow: 0 4px 12px rgb(var(--color-black-rgb) / 15%);
 
 	&:hover {
-		background: var(--color-green-dark);
+		background: var(--color-white);
 		transform: translateY(-2px);
-		box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
 	}
 
 	&:active {
 		transform: translateY(0);
-		box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
 	}
 
 	&:hover &__icon {

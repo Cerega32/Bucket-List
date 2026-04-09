@@ -3,6 +3,7 @@ import {FC, useEffect, useRef} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {HeaderNotificationsStore} from '@/store/HeaderNotificationsStore';
 import {IHeaderNotification} from '@/typings/notification';
 import {respondToFriendRequest} from '@/utils/api/friends';
@@ -10,12 +11,15 @@ import {respondToFriendRequest} from '@/utils/api/friends';
 import {Avatar} from '../Avatar/Avatar';
 import {Button} from '../Button/Button';
 import {EmptyState} from '../EmptyState/EmptyState';
+import {Line} from '../Line/Line';
 import {Svg} from '../Svg/Svg';
 import './notification-dropdown.scss';
 
 interface NotificationDropdownProps {
 	isOpen: boolean;
 	onClose: () => void;
+	disableClickOutside?: boolean;
+	inModal?: boolean;
 }
 
 const getNotificationIcon = (type: string) => {
@@ -47,7 +51,6 @@ const getNotificationIcon = (type: string) => {
 			return 'bell';
 	}
 };
-
 /** Определяет, нужно ли показывать картинку объекта вместо аватара/иконки */
 const hasObjectImage = (notification: IHeaderNotification) => {
 	return (
@@ -83,12 +86,15 @@ const getNotificationLink = (notification: IHeaderNotification): string | null =
 	return null;
 };
 
-export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({isOpen, onClose}) => {
+export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({isOpen, onClose, disableClickOutside, inModal}) => {
 	const [block, element] = useBem('notification-dropdown');
 	const dropdownRef = useRef<HTMLDivElement>(null);
 	const navigate = useNavigate();
+	const {isScreenSmallMobile} = useScreenSize();
 
 	useEffect(() => {
+		if (disableClickOutside) return;
+
 		const handleClickOutside = (event: MouseEvent) => {
 			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
 				onClose();
@@ -102,7 +108,7 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
-	}, [isOpen, onClose]);
+	}, [isOpen, onClose, disableClickOutside]);
 
 	const handleNotificationClick = async (notification: IHeaderNotification) => {
 		if (!notification.isRead) {
@@ -134,15 +140,16 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 	if (!isOpen) return null;
 
 	return (
-		<div ref={dropdownRef} className={block()}>
+		<div ref={dropdownRef} className={block({'in-modal': inModal})}>
 			<div className={element('header')}>
-				<h3 className={element('title')}>Уведомления</h3>
+				<h3 className={element('title')}>{!isScreenSmallMobile ? 'Уведомления' : ''}</h3>
 				{HeaderNotificationsStore.hasUnreadNotifications && (
 					<button type="button" className={element('mark-all')} onClick={handleMarkAllAsRead}>
 						Прочитать все
 					</button>
 				)}
 			</div>
+			<Line margin="8px 0" />
 
 			<div className={element('content')}>
 				{!HeaderNotificationsStore.notifications || HeaderNotificationsStore.notifications.length === 0 ? (
@@ -163,56 +170,59 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 							const isFriendRequest = notification.type === 'friend_request' && !notification.isRead;
 
 							return (
-								<div
-									key={notification.id}
-									className={element('item', {unread: !notification.isRead})}
-									onClick={() => handleNotificationClick(notification)}
-									onKeyDown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											e.preventDefault();
-											handleNotificationClick(notification);
-										}
-									}}
-									role="button"
-									tabIndex={0}
-								>
-									<div className={element('item-avatar')}>
-										{showObjectImage ? (
-											<img src={notification.relatedObjectImage} alt="" className={element('item-image')} />
-										) : userName ? (
-											<Avatar avatar={userAvatar} size="medium" />
-										) : (
-											<div className={element('item-icon')}>
-												<Svg icon={getNotificationIcon(notification.type)} />
-											</div>
-										)}
-									</div>
-									<div className={element('item-content')}>
-										<div className={element('item-row')}>
-											<h4 className={element('item-title')}>{notification.title}</h4>
-											{!notification.isRead && <div className={element('item-dot')} />}
+								<>
+									<div
+										key={notification.id}
+										className={element('item', {unread: !notification.isRead})}
+										onClick={() => handleNotificationClick(notification)}
+										onKeyDown={(e) => {
+											if (e.key === 'Enter' || e.key === ' ') {
+												e.preventDefault();
+												handleNotificationClick(notification);
+											}
+										}}
+										role="button"
+										tabIndex={0}
+									>
+										<div className={element('item-avatar')}>
+											{showObjectImage ? (
+												<img src={notification.relatedObjectImage} alt="" className={element('item-image')} />
+											) : userName ? (
+												<Avatar avatar={userAvatar} size="medium" noBorder />
+											) : (
+												<div className={element('item-icon')}>
+													<Svg icon={getNotificationIcon(notification.type)} />
+												</div>
+											)}
 										</div>
-										<p className={element('item-message')}>{notification.message}</p>
-										{isFriendRequest && (
-											<div className={element('item-actions')}>
-												<Button
-													theme="blue"
-													size="small"
-													onClick={(e) => handleFriendAction(e, notification, 'accept')}
-												>
-													Принять
-												</Button>
-												<Button
-													theme="gray"
-													size="small"
-													onClick={(e) => handleFriendAction(e, notification, 'reject')}
-												>
-													Отклонить
-												</Button>
+										<div className={element('item-content')}>
+											<div className={element('item-row')}>
+												<h4 className={element('item-title')}>{notification.title}</h4>
+												{!notification.isRead && <div className={element('item-dot')} />}
 											</div>
-										)}
+											<p className={element('item-message')}>{notification.message}</p>
+											{isFriendRequest && (
+												<div className={element('item-actions')}>
+													<Button
+														theme="blue"
+														size="small"
+														onClick={(e) => handleFriendAction(e, notification, 'accept')}
+													>
+														Принять
+													</Button>
+													<Button
+														theme="gray"
+														size="small"
+														onClick={(e) => handleFriendAction(e, notification, 'reject')}
+													>
+														Отклонить
+													</Button>
+												</div>
+											)}
+										</div>
 									</div>
-								</div>
+									<Line margin="8px 0" className={element('item-line')} />
+								</>
 							);
 						})}
 					</div>

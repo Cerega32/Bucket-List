@@ -361,6 +361,14 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 			return;
 		}
 
+		if (isRegular && regularFrequency === 'weekly' && weeklyFrequency < 1) {
+			return;
+		}
+
+		if (isRegular && (durationType === 'days' || durationType === 'weeks') && durationValue < 1) {
+			return;
+		}
+
 		setIsLoading(true);
 
 		try {
@@ -684,11 +692,12 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 														text="Сколько раз в неделю"
 														value={weeklyFrequency.toString()}
 														setValue={(value) => {
-															const num = parseInt(value, 10) || 1;
-															setWeeklyFrequency(Math.min(7, Math.max(1, num)));
+															const num = parseInt(value, 10) || 0;
+															setWeeklyFrequency(Math.min(7, Math.max(0, num)));
 														}}
 														className={element('field')}
 														type="number"
+														error={weeklyFrequency < 1 ? ['Значение должно быть не менее 1'] : false}
 													/>
 												)}
 
@@ -739,11 +748,12 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 														text={durationType === 'days' ? 'Количество дней' : 'Количество недель'}
 														value={durationValue.toString()}
 														setValue={(value) => {
-															const num = parseInt(value, 10) || 1;
-															setDurationValue(Math.max(1, num));
+															const num = parseInt(value, 10) || 0;
+															setDurationValue(Math.max(0, num));
 														}}
 														className={element('field')}
 														type="number"
+														error={durationValue < 1 ? ['Значение должно быть не менее 1'] : false}
 													/>
 												)}
 

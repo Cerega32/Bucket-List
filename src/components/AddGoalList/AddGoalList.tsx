@@ -958,6 +958,9 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 											setValue={setSearchQuery}
 											className={element('search-field')}
 											iconBegin="search"
+											onKeyDown={(e) => {
+												if (e.key === 'Enter') e.preventDefault();
+											}}
 										/>
 
 										{searchResults.length > 0 && (
