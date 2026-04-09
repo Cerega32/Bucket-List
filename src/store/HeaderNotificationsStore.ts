@@ -1,4 +1,4 @@
-import {makeAutoObservable} from 'mobx';
+import {makeAutoObservable, runInAction} from 'mobx';
 
 import {IHeaderNotification} from '@/typings/notification';
 import {getNotifications, getUnreadCount, markAllNotificationsAsRead, markNotificationRead} from '@/utils/api/notifications';
@@ -37,17 +37,25 @@ class Store {
 	/** Загрузить уведомления и unreadCount с сервера */
 	async fetchNotifications() {
 		const isFirstLoad = this.notifications.length === 0;
-		try {
+		runInAction(() => {
 			if (isFirstLoad) this.isLoading = true;
+		});
+		try {
 			const res = await getNotifications();
-			if (res.success) {
-				this.notifications = res.data.results || [];
-				this.unreadCount = res.data.unreadCount ?? 0;
-			}
+			runInAction(() => {
+				if (res.success) {
+					this.notifications = res.data.results || [];
+					this.unreadCount = res.data.unreadCount ?? 0;
+				}
+				if (isFirstLoad) this.isLoading = false;
+			});
 		} catch (error) {
 			console.error('Ошибка загрузки уведомлений:', error);
-		} finally {
-			if (isFirstLoad) this.isLoading = false;
+			if (isFirstLoad) {
+				runInAction(() => {
+					this.isLoading = false;
+				});
+			}
 		}
 	}
 
@@ -56,7 +64,9 @@ class Store {
 		try {
 			const res = await getUnreadCount();
 			if (res.success) {
-				this.unreadCount = res.data.unreadCount ?? 0;
+				runInAction(() => {
+					this.unreadCount = res.data.unreadCount ?? 0;
+				});
 			}
 		} catch (error) {
 			console.error('Ошибка загрузки счётчика уведомлений:', error);
@@ -83,9 +93,10 @@ class Store {
 	async markAsRead(notificationId: number) {
 		try {
 			await markNotificationRead(notificationId);
-
-			this.notifications = this.notifications.map((n) => (n.id === notificationId ? {...n, isRead: true} : n));
-			this.unreadCount = Math.max(0, this.unreadCount - 1);
+			runInAction(() => {
+				this.notifications = this.notifications.map((n) => (n.id === notificationId ? {...n, isRead: true} : n));
+				this.unreadCount = Math.max(0, this.unreadCount - 1);
+			});
 		} catch (error) {
 			console.error('Ошибка отметки уведомления как прочитанного:', error);
 			throw error;
@@ -95,12 +106,10 @@ class Store {
 	async markAllAsRead() {
 		try {
 			await markAllNotificationsAsRead();
-
-			this.notifications = this.notifications.map((notification) => ({
-				...notification,
-				isRead: true,
-			}));
-			this.unreadCount = 0;
+			runInAction(() => {
+				this.notifications = this.notifications.map((notification) => ({...notification, isRead: true}));
+				this.unreadCount = 0;
+			});
 		} catch (error) {
 			console.error('Ошибка отметки всех уведомлений как прочитанных:', error);
 			throw error;

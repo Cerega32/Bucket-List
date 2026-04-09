@@ -354,9 +354,8 @@
 	&--disabled {
 		cursor: not-allowed;
 		pointer-events: none;
-		background: var(--color-gray-3);
-		color: var(--color-text-disabled);
 		border: 1px solid var(--color-gray-9);
+		opacity: 0.8;
 	}
 
 	@keyframes rotate {

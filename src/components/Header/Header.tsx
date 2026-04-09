@@ -56,6 +56,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
+	const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
 	const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
 	const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
 
@@ -248,14 +249,14 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const menuProfile = (
 		<div className={element('profile-menu')}>
 			<UserSelfProfile hideSubscriptionButton noBorder />
-			{isScreenMobile ? (
+			{isScreenSmallMobile ? (
 				<>
 					<button
 						type="button"
 						className={element('menu-item')}
 						onClick={() => {
-							setIsUserMenuOpen(true);
-							setIsNotificationsOpen(true);
+							HeaderNotificationsStore.fetchNotifications();
+							setIsNotificationsModalOpen(true);
 						}}
 					>
 						Уведомления
@@ -697,6 +698,22 @@ export const Header: FC<HeaderProps> = observer((props) => {
 											</div>
 										)}
 
+										<AnimatePresence>
+											{isNotificationsOpen && (
+												<motion.div
+													initial={{opacity: 0, y: -10}}
+													animate={{opacity: 1, y: 0}}
+													exit={{opacity: 0, y: -10}}
+													transition={{duration: 0.2, ease: 'easeOut'}}
+													className={element('notifications-dropdown')}
+												>
+													<NotificationDropdown
+														isOpen={isNotificationsOpen}
+														onClose={() => setIsNotificationsOpen(false)}
+													/>
+												</motion.div>
+											)}
+										</AnimatePresence>
 										{/* Кнопка регулярных целей */}
 										{!isScreenMobile && (
 											<>
@@ -734,22 +751,6 @@ export const Header: FC<HeaderProps> = observer((props) => {
 														/>
 													)}
 												</button>
-												<AnimatePresence>
-													{isNotificationsOpen && (
-														<motion.div
-															initial={{opacity: 0, y: -10}}
-															animate={{opacity: 1, y: 0}}
-															exit={{opacity: 0, y: -10}}
-															transition={{duration: 0.2, ease: 'easeOut'}}
-															className={element('notifications-dropdown')}
-														>
-															<NotificationDropdown
-																isOpen={isNotificationsOpen}
-																onClose={() => setIsNotificationsOpen(false)}
-															/>
-														</motion.div>
-													)}
-												</AnimatePresence>
 												<AnimatePresence>
 													{isRegularGoalsOpen && (
 														<motion.div
@@ -865,6 +866,14 @@ export const Header: FC<HeaderProps> = observer((props) => {
 						</div>
 					))}
 				</div>
+			</ModalPhone>
+			<ModalPhone title="Уведомления" isOpen={isNotificationsModalOpen} onClose={() => setIsNotificationsModalOpen(false)}>
+				<NotificationDropdown
+					isOpen={isNotificationsModalOpen}
+					onClose={() => setIsNotificationsModalOpen(false)}
+					disableClickOutside
+					inModal
+				/>
 			</ModalPhone>
 			<FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
 		</header>
