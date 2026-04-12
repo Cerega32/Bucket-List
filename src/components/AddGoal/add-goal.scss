@@ -89,7 +89,7 @@
 	&__similar-goals {
 		position: absolute;
 		z-index: 10;
-		top: 100%;
+		top: 70px;
 		right: 0;
 		left: 0;
 		max-height: 400px;
@@ -447,21 +447,15 @@
 		background: var(--background-light);
 		border: 1px solid var(--border-color);
 		border-radius: 8px;
-
-		.select {
-			margin-bottom: 16px;
-		}
-
-		.field-input {
-			margin-bottom: 16px;
-		}
-
-		.field-checkbox {
-			margin-bottom: 8px;
-		}
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
 	}
 
 	&__regular-field-group {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
 	}
 
 	&__input-with-suffix {
@@ -584,7 +578,6 @@
 	}
 
 	&__allow-custom-lock-banner {
-		margin-top: 10px;
 	}
 
 	&__custom-schedule-info {

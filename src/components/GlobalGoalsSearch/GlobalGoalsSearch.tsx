@@ -48,6 +48,16 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 		setQuery(urlSearch);
 	}, [location.pathname, location.search]);
 
+	// Автофокус на поле ввода в модальном режиме
+	useEffect(() => {
+		if (isModal && searchRef.current) {
+			const input = searchRef.current.querySelector<HTMLInputElement>('input#global-search');
+			if (input) {
+				setTimeout(() => input.focus(), 100);
+			}
+		}
+	}, [isModal]);
+
 	// Закрыть дропдаун при клике вне компонента
 	useEffect(() => {
 		if (isModal) return;
@@ -73,34 +83,74 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 		setIsSearching(true);
 
 		try {
+			const limit = isModal ? 8 : 10;
+			const half = Math.ceil(limit / 2);
+
+			// Первый запрос: по половине от лимита каждого типа
 			const [goalsRes, listsRes] = await Promise.all([
 				getAllGoals('all', {
 					search: searchQuery,
 					page: 1,
-					items_per_page: 3,
+					items_per_page: half,
 				}),
 				getAllLists('all', {
 					search: searchQuery,
 					page: 1,
-					items_per_page: 3,
+					items_per_page: half,
 				}),
 			]);
 
-			const combined: SearchResultItem[] = [];
+			const goals: SearchResultItem[] = [];
+			const lists: SearchResultItem[] = [];
 			let total = 0;
+			let totalGoals = 0;
+			let totalLists = 0;
 
 			if (goalsRes.success && goalsRes.data?.data) {
-				goalsRes.data.data.forEach((goal: IShortGoal) => combined.push({type: 'goal', item: goal}));
+				goalsRes.data.data.forEach((goal: IShortGoal) => goals.push({type: 'goal', item: goal}));
 				const pag = goalsRes.data.pagination;
-				total += pag?.totalItems ?? pag?.total_items ?? 0;
+				totalGoals = pag?.totalItems ?? pag?.total_items ?? 0;
 			}
 			if (listsRes.success && listsRes.data?.data) {
-				listsRes.data.data.forEach((list: IShortList) => combined.push({type: 'list', item: list}));
+				listsRes.data.data.forEach((list: IShortList) => lists.push({type: 'list', item: list}));
 				const pag = listsRes.data.pagination;
-				total += pag?.totalItems ?? pag?.total_items ?? 0;
+				totalLists = pag?.totalItems ?? pag?.total_items ?? 0;
+			}
+			total = totalGoals + totalLists;
+
+			// Дозапрос: если одного типа мало, добираем другим
+			const goalsShort = goals.length < half;
+			const listsShort = lists.length < half;
+
+			if (goalsShort && !listsShort && totalLists > half) {
+				const extra = limit - goals.length - lists.length;
+				if (extra > 0) {
+					const extraRes = await getAllLists('all', {
+						search: searchQuery,
+						page: 1,
+						items_per_page: half + extra,
+					});
+					if (extraRes.success && extraRes.data?.data) {
+						lists.length = 0;
+						extraRes.data.data.forEach((list: IShortList) => lists.push({type: 'list', item: list}));
+					}
+				}
+			} else if (listsShort && !goalsShort && totalGoals > half) {
+				const extra = limit - goals.length - lists.length;
+				if (extra > 0) {
+					const extraRes = await getAllGoals('all', {
+						search: searchQuery,
+						page: 1,
+						items_per_page: half + extra,
+					});
+					if (extraRes.success && extraRes.data?.data) {
+						goals.length = 0;
+						extraRes.data.data.forEach((goal: IShortGoal) => goals.push({type: 'goal', item: goal}));
+					}
+				}
 			}
 
-			setResults(combined);
+			setResults([...goals, ...lists]);
 			setTotalCount(total);
 			setIsDropdownOpen(true);
 		} catch (error) {
@@ -142,6 +192,13 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 
 		setIsDropdownOpen(false);
 		const targetUrl = `/categories/all?search=${encodeURIComponent(query)}`;
+
+		if (isModal) {
+			onModalClose?.();
+			navigate(targetUrl);
+			return;
+		}
+
 		const currentSearch = searchParams.get('search') || '';
 		const isAlreadyOnResults = location.pathname === '/categories/all' && currentSearch.trim() === query.trim();
 
@@ -154,9 +211,6 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 			});
 		} else {
 			navigate(targetUrl);
-		}
-		if (isModal) {
-			onModalClose?.();
 		}
 	};
 
@@ -297,7 +351,7 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 						<>
 							<ScrollableResults />
 
-							{totalCount > 6 && (
+							{totalCount > results.length && (
 								<div className={element('show-all', {isModal})}>
 									<Button
 										className={element('show-all-button')}

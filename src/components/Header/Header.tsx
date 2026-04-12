@@ -316,6 +316,11 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/subs" end>
 				Больше функционала
 			</NavLink>
+			{isScreenMobile && (
+				<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/goals/create" end>
+					Создать цель
+				</NavLink>
+			)}
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/settings" end>
 				Настройки
 			</NavLink>
@@ -395,7 +400,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		) : (
 			<Button className={element('search-trigger')} onClick={() => setIsSearchOpen(true)} aria-label="Поиск">
 				<>
-					Поиск целей
+					Поиск целей и списков
 					<Svg icon="search" className={element('categories-icon')} width="16px" height="16px" />
 				</>
 			</Button>

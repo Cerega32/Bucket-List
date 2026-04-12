@@ -19,9 +19,9 @@ export const AboutContainer: FC = () => {
 	const {setWindow, setIsOpen} = ModalStore;
 	const {isAuth} = UserStore;
 
-	const openLogin = () => {
+	const openRegistration = () => {
 		setIsOpen(true);
-		setWindow('login');
+		setWindow('registration');
 	};
 
 	useEffect(() => {
@@ -193,7 +193,7 @@ export const AboutContainer: FC = () => {
 						theme="gradient"
 						size="medium"
 						icon="rocket"
-						onClick={openLogin}
+						onClick={openRegistration}
 						href="/categories/all"
 					>
 						Идти вперед!
