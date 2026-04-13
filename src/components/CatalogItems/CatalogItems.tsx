@@ -5,6 +5,7 @@ import {scroller} from 'react-scroll';
 import {RegularGoalSettingsModal} from '@/components/RegularGoalSettingsModal/RegularGoalSettingsModal';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
+import {CategoriesStore} from '@/store/CategoriesStore';
 import {HeaderRegularGoalsStore} from '@/store/HeaderRegularGoalsStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
@@ -27,7 +28,7 @@ import {defaultPagination} from '@/utils/data/default';
 import {Card} from '../Card/Card';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldInput} from '../FieldInput/FieldInput';
-import {FiltersCheckbox} from '../FiltersCheckbox/FiltersCheckbox';
+import {FiltersDrawer, FilterGroup} from '../FiltersDrawer/FiltersDrawer';
 import {Line} from '../Line/Line';
 import {Loader} from '../Loader/Loader';
 import {Pagination} from '../Pagination/Pagination';
@@ -63,43 +64,57 @@ interface CatalogItemsUsersProps extends CatalogItemsProps {
 	categories?: Array<ICategoryDetailed>;
 }
 
-const sortBy: Array<OptionSelect> = [
-	{
-		name: 'Новые',
-		value: '-created_at',
-	},
-	{
-		name: 'Популярные',
-		value: '-added_by_users',
-	},
-	{
-		name: 'Обсуждаемые',
-		value: '-comments_count',
-	},
-	{
-		name: 'Легкие',
-		value: 'complexity',
-	},
-	{
-		name: 'Сложные',
-		value: '-complexity',
-	},
-];
+/** Варианты сортировки зависят от контекста: каталог / активные / выполненные, цели / списки */
+function getSortOptions(isUser: boolean, isCompleted: boolean, page?: string): Array<OptionSelect> {
+	if (!isUser) {
+		// Каталог — оставляем как было
+		return [
+			{name: 'Новые', value: '-created_at'},
+			{name: 'Популярные', value: '-added_by_users'},
+			{name: 'Обсуждаемые', value: '-comments_count'},
+			{name: 'Легкие', value: 'complexity'},
+			{name: 'Сложные', value: '-complexity'},
+		];
+	}
 
-const goalTypeOptions: Array<OptionSelect> = [
-	{
-		name: 'Все цели',
-		value: 'all',
-	},
-	{
-		name: 'Регулярные',
-		value: 'regular',
-	},
-	{
-		name: 'Обычные',
-		value: 'usual',
-	},
-];
+	if (isCompleted) {
+		// Выполненные
+		if (page === 'lists') {
+			return [
+				{name: 'Новые', value: '-completed_at'},
+				{name: 'Старые', value: 'completed_at'},
+				{name: 'Легкие', value: 'complexity'},
+				{name: 'Сложные', value: '-complexity'},
+				{name: 'По кол-ву целей', value: '-goals_count'},
+			];
+		}
+		return [
+			{name: 'Новые', value: '-completed_at'},
+			{name: 'Старые', value: 'completed_at'},
+			{name: 'Легкие', value: 'complexity'},
+			{name: 'Сложные', value: '-complexity'},
+		];
+	}
+
+	// Активные
+	if (page === 'lists') {
+		return [
+			{name: 'Новые', value: '-added_at'},
+			{name: 'Старые', value: 'added_at'},
+			{name: 'Легкие', value: 'complexity'},
+			{name: 'Сложные', value: '-complexity'},
+			{name: 'По кол-ву целей', value: '-goals_count'},
+			{name: 'По выполненным', value: '-completed_goals_count'},
+		];
+	}
+	return [
+		{name: 'Новые', value: '-added_at'},
+		{name: 'Старые', value: 'added_at'},
+		{name: 'Обсуждаемые', value: '-comments_count'},
+		{name: 'Легкие', value: 'complexity'},
+		{name: 'Сложные', value: '-complexity'},
+	];
+}
 
 const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersProps> = (props) => {
 	const {
@@ -130,11 +145,15 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		pagination: IPaginationPage;
 	}>({data: [], pagination: defaultPagination});
 	const [activeSort, setActiveSort] = useState(0);
-	const [activeGoalType, setActiveGoalType] = useState(2);
 	const [search, setSearch] = useState(initialSearch);
 	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 	const [get, setGet] = useState(userId ? {user_id: userId, completed} : {});
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+	const [filterValues, setFilterValues] = useState<Record<string, string[]>>({
+		categories: [],
+		goalType: [],
+		complexity: [],
+		hundredGoals: [],
+	});
 	const [loading, setLoading] = useState(false);
 	const [searchLoading, setSearchLoading] = useState(false);
 	const [goalsLoaded, setGoalsLoaded] = useState(false);
@@ -145,6 +164,8 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 	const [regularGoalData, setRegularGoalData] = useState<any>(null);
 	const [pendingGoalIndex, setPendingGoalIndex] = useState<number | null>(null);
 	const [isRegularLoading, setIsRegularLoading] = useState(false);
+
+	const sortOptions = useMemo(() => getSortOptions(!!userId, !!completed, subPage), [userId, completed, subPage]);
 
 	// Активен ли сейчас режим поиска
 	const isSearchMode = search.trim().length >= 3;
@@ -180,14 +201,81 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		];
 	}, [goals, lists, category, beginUrl]);
 
-	// Преобразуем категории в формат для FiltersCheckbox
+	// Преобразуем категории в формат для FiltersDrawer (с подкатегориями)
 	const categoryFilters = useMemo(() => {
+		const tree = CategoriesStore.categoriesTree;
+		if (tree.length > 0) {
+			return tree.map((cat) => ({
+				name: cat.name,
+				code: cat.nameEn,
+				children: cat.children?.length
+					? cat.children.map((sub) => ({
+							name: sub.name,
+							code: sub.nameEn,
+					  }))
+					: undefined,
+			}));
+		}
+		// Fallback на плоский список из пропсов
 		if (!categories) return [];
 		return categories.map((cat: ICategoryDetailed) => ({
 			name: cat.name,
 			code: cat.nameEn,
 		}));
-	}, [categories]);
+	}, [categories, CategoriesStore.categoriesTree]);
+
+	const drawerFilters = useMemo((): FilterGroup[] => {
+		const groups: FilterGroup[] = [];
+
+		if (categoryFilters.length > 0) {
+			groups.push({
+				key: 'categories',
+				label: 'Категории',
+				options: categoryFilters,
+				multiple: true,
+				allLabel: 'Все категории',
+			});
+		}
+
+		// Сложность — для целей и списков
+		if (!pendingCatalogReview) {
+			groups.push({
+				key: 'complexity',
+				label: 'Сложность',
+				options: [
+					{name: 'Легко', code: 'easy'},
+					{name: 'Средне', code: 'medium'},
+					{name: 'Тяжело', code: 'hard'},
+				],
+				allLabel: 'Все цели',
+			});
+		}
+
+		// Только для целей: тип целей и 100 целей
+		if (subPage === 'goals' && !pendingCatalogReview) {
+			groups.push({
+				key: 'hundredGoals',
+				label: '100 целей',
+				options: [
+					{name: 'Только из 100 целей', code: 'only'},
+					{name: 'Исключить 100 целей', code: 'exclude'},
+				],
+				allLabel: 'Все цели',
+			});
+
+			groups.push({
+				key: 'goalType',
+				label: 'Тип цели',
+				options: [
+					{name: 'Регулярные', code: 'regular'},
+					{name: 'Обычные', code: 'usual'},
+				],
+				allLabel: 'Все цели',
+			});
+		}
+
+		return groups;
+	}, [categoryFilters, subPage, pendingCatalogReview]);
 
 	useEffect(() => {
 		setGoalsLoaded(false);
@@ -225,8 +313,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 
 	useEffect(() => {
 		setActiveSort(0);
-		setActiveGoalType(2);
-		setSelectedCategories([]);
+		setFilterValues({categories: [], goalType: [], complexity: [], hundredGoals: []});
 	}, [subPage]);
 
 	// Синхронизируем поиск с URL при смене страницы/контекста (без смены вкладки)
@@ -234,17 +321,21 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		setSearch(initialSearch);
 	}, [initialSearch, beginUrl]);
 
-	const fetchData = async (sortValue: string, page?: number, categoriesSort?: string[], goalTypeOverride?: string): Promise<boolean> => {
+	const fetchData = async (sortValue: string, page?: number, filtersOverride?: Record<string, string[]>): Promise<boolean> => {
 		setLoading(true);
 		try {
 			let res;
-			const goalTypeValue = goalTypeOverride ?? goalTypeOptions[activeGoalType]?.value;
+			const currentFilters = filtersOverride ?? filterValues;
+			const goalTypeValue = currentFilters['goalType']?.[0] || 'all';
+			const categoriesSort = currentFilters['categories'] || [];
 			const queryParams = {
 				...get,
 				sort_by: sortValue,
 				page,
 				...(search.trim().length >= 2 ? {search: search.trim()} : {}),
-				...(categoriesSort && categoriesSort.length > 0 ? {categories: categoriesSort.join(',')} : {}),
+				...(categoriesSort.length > 0 ? {categories: categoriesSort.join(',')} : {}),
+				...(currentFilters['complexity']?.length > 0 ? {complexity: currentFilters['complexity'][0]} : {}),
+				...(currentFilters['hundredGoals']?.length > 0 ? {hundred_goals: currentFilters['hundredGoals'][0]} : {}),
 			};
 
 			if (subPage === 'goals') {
@@ -279,22 +370,25 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 
 	const onSelect = async (active: number): Promise<void> => {
 		setActiveSort(active);
-		await fetchData(sortBy[active].value, undefined, selectedCategories);
+		await fetchData(sortOptions[active].value, undefined, filterValues);
 	};
 
-	const onSelectGoalType = async (active: number): Promise<void> => {
-		// Если выбран тот же тип, повторный запрос не нужен
-		if (active === activeGoalType) return;
+	const handleFilterChange = (key: string, selected: string[]) => {
+		setFilterValues((prev) => {
+			const newFilters = {...prev, [key]: selected};
+			fetchData(sortOptions[activeSort].value, undefined, newFilters);
+			return newFilters;
+		});
+	};
 
-		setActiveGoalType(active);
-		const goalTypeValue = goalTypeOptions[active]?.value;
-		if (subPage === 'goals') {
-			await fetchData(sortBy[activeSort].value, undefined, selectedCategories, goalTypeValue);
-		}
+	const handleFilterReset = () => {
+		const emptyFilters = {categories: [], goalType: [], complexity: [], hundredGoals: []};
+		setFilterValues(emptyFilters);
+		fetchData(sortOptions[activeSort].value, undefined, emptyFilters);
 	};
 
 	const goToPage = async (active: number): Promise<boolean> => {
-		const success = await fetchData(sortBy[activeSort].value, active, selectedCategories);
+		const success = await fetchData(sortOptions[activeSort].value, active, filterValues);
 		scroller.scrollTo('catalog-items-goals', {
 			duration: 800,
 			delay: 0,
@@ -323,9 +417,9 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 						if (query.length >= 3) {
 							const res = await getAllGoals(code, {
 								...userListQueryBase,
-								sort_by: sortBy[activeSort].value,
+								sort_by: sortOptions[activeSort].value,
 								search: query,
-								...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
+								...(filterValues['categories'].length > 0 ? {categories: filterValues['categories'].join(',')} : {}),
 							});
 							if (res.success) {
 								setGoals(res.data);
@@ -334,9 +428,9 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 							// Если длина запроса меньше 3, делаем запрос с пустым значением
 							const res = await getAllGoals(code, {
 								...userListQueryBase,
-								sort_by: sortBy[activeSort].value,
+								sort_by: sortOptions[activeSort].value,
 								search: '',
-								...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
+								...(filterValues['categories'].length > 0 ? {categories: filterValues['categories'].join(',')} : {}),
 							});
 							if (res.success) {
 								setGoals(res.data);
@@ -345,9 +439,9 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 					} else if (query.length >= 3) {
 						const res = await getAllLists(code, {
 							...userListQueryBase,
-							sort_by: sortBy[activeSort].value,
+							sort_by: sortOptions[activeSort].value,
 							search: query,
-							...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
+							...(filterValues['categories'].length > 0 ? {categories: filterValues['categories'].join(',')} : {}),
 						});
 						if (res.success) {
 							setLists(res.data);
@@ -356,9 +450,9 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 						// Если длина запроса меньше 3, делаем запрос с пустым значением
 						const res = await getAllLists(code, {
 							...userListQueryBase,
-							sort_by: sortBy[activeSort].value,
+							sort_by: sortOptions[activeSort].value,
 							search: '',
-							...(selectedCategories.length > 0 ? {categories: selectedCategories.join(',')} : {}),
+							...(filterValues['categories'].length > 0 ? {categories: filterValues['categories'].join(',')} : {}),
 						});
 						if (res.success) {
 							setLists(res.data);
@@ -369,16 +463,6 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 				}
 			}, delay)
 		);
-	};
-
-	const handleCategoryFilter = async (selected: string[]) => {
-		// Если набор категорий не изменился, повторно не запрашиваем данные
-		if (selected.length === selectedCategories.length && selected.every((categoryCode) => selectedCategories.includes(categoryCode))) {
-			return;
-		}
-
-		setSelectedCategories(selected);
-		await fetchData(sortBy[activeSort].value, undefined, selected);
 	};
 
 	const updateGoal = async (codeGoal: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
@@ -541,15 +625,6 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			<div className={element('filters')}>
 				<div className={element('filters-wrapper')}>
 					<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage || ''} />
-					{subPage === 'goals' && !pendingCatalogReview && (
-						<Select
-							className={element('goal-type-select')}
-							options={goalTypeOptions}
-							activeOption={activeGoalType}
-							onSelect={onSelectGoalType}
-							placeholder="Все цели"
-						/>
-					)}
 				</div>
 				<Line className={element('line')} />
 				<div className={element('search-wrapper', {'wrap-on-lg': searchWrapperWrap})}>
@@ -564,16 +639,14 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 						iconEndClick={search.trim() ? () => onSearch('') : undefined}
 					/>
 					<div className={element('categories-wrapper')}>
-						{categories && categories.length > 0 && (
-							<FiltersCheckbox
-								head={{name: 'Все категории', code: 'all'}}
-								items={categoryFilters}
-								onFinish={handleCategoryFilter}
-								multipleSelectedText={['категория', 'категории', 'категорий']}
-								multipleThreshold={1}
-							/>
-						)}
-						<Select options={sortBy} activeOption={activeSort} onSelect={onSelect} filter />
+						<FiltersDrawer
+							filters={drawerFilters}
+							values={filterValues}
+							onChange={handleFilterChange}
+							onReset={handleFilterReset}
+							totalCount={subPage === 'goals' ? goals.pagination.totalItems : lists.pagination.totalItems}
+						/>
+						<Select options={sortOptions} activeOption={activeSort} onSelect={onSelect} filter />
 					</div>
 				</div>
 			</div>

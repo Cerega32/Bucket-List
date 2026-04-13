@@ -167,7 +167,7 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 										</span>
 										{item.isCompleted && (
 											<span className={element('completed-badge')}>
-												<Svg icon="check" />
+												<Svg icon="done" />
 												Выполнено
 											</span>
 										)}

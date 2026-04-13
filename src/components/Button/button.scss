@@ -46,10 +46,11 @@
 	}
 
 	&--close {
-		width: 24px;
-		height: 24px;
-		padding: 2px;
+		width: 32px;
+		height: 32px;
 		border: none;
+		border-radius: 6px;
+		background: var(--color-secondary);
 
 		&:hover {
 			background: var(--color-secondary-hover);
@@ -57,7 +58,7 @@
 
 		&:focus {
 			@include focus-outline;
-
+			outline: none;
 			background: var(--color-secondary-hover);
 		}
 
@@ -129,6 +130,7 @@
 
 		&:focus {
 			@include focus-outline;
+			outline: none;
 		}
 
 		path {

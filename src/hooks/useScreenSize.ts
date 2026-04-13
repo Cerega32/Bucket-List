@@ -30,7 +30,7 @@ const getScreenByMode = (mode: ScreenSizeCode): ScreenMode => {
 };
 
 const getScreenSizeCode = (width: number): ScreenSizeCode => {
-	if (width >= 1464) return 'xl';
+	if (width >= 1465) return 'xl';
 	if (width >= 1200) return 'lg';
 	if (width >= 768) return 'md';
 	if (width >= 576) return 'sm';

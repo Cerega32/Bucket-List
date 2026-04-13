@@ -97,7 +97,7 @@ export const QRPaymentModal: FC<QRPaymentModalProps> = observer(({isOpen, onClos
 			<div className={element('content')}>
 				{paymentStatus === 'paid' ? (
 					<div className={element('success')}>
-						<Svg icon="check" className={element('success-icon')} />
+						<Svg icon="done" className={element('success-icon')} />
 						<p className={element('success-text')}>Оплата успешно подтверждена!</p>
 						<p className={element('success-subtext')}>Ваша подписка активирована</p>
 					</div>

@@ -106,7 +106,7 @@ $main-categories: (
 }
 
 @mixin xl {
-	@media (width <= 1463px) {
+	@media (width <= 1464px) {
 		@content;
 	}
 }
@@ -130,7 +130,7 @@ $main-categories: (
 }
 
 @mixin xs {
-	@media (width <= 480px) {
+	@media (width <= 479px) {
 		@content;
 	}
 }
