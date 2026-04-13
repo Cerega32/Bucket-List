@@ -13,10 +13,11 @@ interface FieldCheckboxProps {
 	setChecked: (value: boolean) => void;
 	checked: boolean;
 	disabled?: boolean;
+	indeterminate?: boolean;
 }
 
 export const FieldCheckbox: FC<FieldCheckboxProps> = (props) => {
-	const {className, id, text, checked, setChecked, disabled = false} = props;
+	const {className, id, text, checked, setChecked, disabled = false, indeterminate = false} = props;
 
 	const [block, element] = useBem('field-checkbox');
 
@@ -28,8 +29,10 @@ export const FieldCheckbox: FC<FieldCheckboxProps> = (props) => {
 		}
 	};
 
+	const visualState = indeterminate ? 'indeterminate' : checked ? 'checked' : 'unchecked';
+
 	return (
-		<div className={block({disabled})}>
+		<div className={block({disabled, [visualState]: true})}>
 			<input
 				className={element('input')}
 				id={id}

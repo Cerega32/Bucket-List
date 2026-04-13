@@ -7,7 +7,7 @@ import {Button} from '@/components/Button/Button';
 import {RegularCard} from '@/components/Card/RegularCard';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
-import {FiltersCheckbox} from '@/components/FiltersCheckbox/FiltersCheckbox';
+import {FiltersDrawer, FilterGroup} from '@/components/FiltersDrawer/FiltersDrawer';
 import {Line} from '@/components/Line/Line';
 import {BlurLoader} from '@/components/Loader/BlurLoader';
 import {Loader} from '@/components/Loader/Loader';
@@ -40,7 +40,7 @@ export const UserSelfProgress: FC = observer(() => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [search, setSearch] = useState('');
 	const [activeSort, setActiveSort] = useState(0);
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+	const [filterValues, setFilterValues] = useState<Record<string, string[]>>({categories: [], complexity: []});
 	const [pagination, setPagination] = useState<IPaginationPage | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [isPageLoading, setIsPageLoading] = useState(false);
@@ -64,8 +64,8 @@ export const UserSelfProgress: FC = observer(() => {
 			const q = search.trim().toLowerCase();
 			result = result.filter((g) => g.goalTitle.toLowerCase().includes(q));
 		}
-		if (selectedCategories.length > 0) {
-			result = result.filter((g) => selectedCategories.includes(g.goalCategory));
+		if (filterValues['categories'].length > 0) {
+			result = result.filter((g) => filterValues['categories'].includes(g.goalCategory));
 		}
 		const sortKey = SORT_OPTIONS[activeSort]?.value;
 		if (sortKey === 'progress_desc') {
@@ -78,10 +78,31 @@ export const UserSelfProgress: FC = observer(() => {
 			result.sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''));
 		}
 		return result;
-	}, [goals, activeTab, search, selectedCategories, activeSort]);
+	}, [goals, activeTab, search, filterValues, activeSort]);
 
 	const handleSearchChange = (value: string) => setSearch(value);
-	const handleCategoryFilter = (selected: string[]) => setSelectedCategories(selected);
+	const handleFilterChange = (key: string, selected: string[]) => {
+		setFilterValues((prev) => ({...prev, [key]: selected}));
+	};
+	const handleFilterReset = () => setFilterValues({categories: [], complexity: []});
+
+	const drawerFilters = useMemo((): FilterGroup[] => {
+		const groups: FilterGroup[] = [];
+		if (categoryFilters.length > 0) {
+			groups.push({key: 'categories', label: 'Категории', options: categoryFilters, multiple: true, allLabel: 'Все категории'});
+		}
+		groups.push({
+			key: 'complexity',
+			label: 'Сложность',
+			options: [
+				{name: 'Легко', code: 'easy'},
+				{name: 'Средне', code: 'medium'},
+				{name: 'Тяжело', code: 'hard'},
+			],
+			allLabel: 'Все цели',
+		});
+		return groups;
+	}, [categoryFilters]);
 	const handleSortSelect = (index: number) => setActiveSort(index);
 
 	const {setIsOpen, setWindow, setModalProps} = ModalStore;
@@ -144,7 +165,7 @@ export const UserSelfProgress: FC = observer(() => {
 	useEffect(() => {
 		if (activeTab === 'today') {
 			setSearch('');
-			setSelectedCategories([]);
+			setFilterValues({categories: [], complexity: []});
 		}
 	}, [activeTab]);
 
@@ -295,15 +316,13 @@ export const UserSelfProgress: FC = observer(() => {
 								iconBegin="search"
 							/>
 							<div className="catalog-items__categories-wrapper">
-								{categoryFilters.length > 0 && (
-									<FiltersCheckbox
-										head={{name: 'Все категории', code: 'all'}}
-										items={categoryFilters}
-										onFinish={handleCategoryFilter}
-										multipleSelectedText={['категория', 'категории', 'категорий']}
-										multipleThreshold={1}
-									/>
-								)}
+								<FiltersDrawer
+									filters={drawerFilters}
+									values={filterValues}
+									onChange={handleFilterChange}
+									onReset={handleFilterReset}
+									totalCount={filteredGoals.length}
+								/>
 								<Select options={SORT_OPTIONS} activeOption={activeSort} onSelect={handleSortSelect} filter />
 							</div>
 						</div>
