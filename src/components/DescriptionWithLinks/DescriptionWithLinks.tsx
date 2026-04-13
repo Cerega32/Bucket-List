@@ -111,8 +111,14 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 			});
 		}
 
-		// Добавляем вкладку "Рейтинг" только если цель регулярная, бессрочная и добавлена пользователем
-		if (goal.regularConfig && goal.addedByUser && goal.regularConfig.id && goal.regularConfig.durationType === 'indefinite') {
+		// Добавляем вкладку "Рейтинг" только если цель регулярная, бессрочная, без пользовательских настроек и добавлена пользователем
+		if (
+			goal.regularConfig &&
+			goal.addedByUser &&
+			goal.regularConfig.id &&
+			goal.regularConfig.durationType === 'indefinite' &&
+			!goal.regularConfig.allowCustomSettings
+		) {
 			baseTabs.push({
 				url: '/rating',
 				name: 'Рейтинг',

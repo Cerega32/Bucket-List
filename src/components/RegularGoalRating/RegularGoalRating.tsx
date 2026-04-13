@@ -15,6 +15,7 @@ interface RegularGoalRatingUser {
 	name: string;
 	avatar: string | null;
 	level: number;
+	completedGoalsCount: number;
 	maxStreak: number;
 	completedSeriesCount: number;
 	place: number;
@@ -23,11 +24,21 @@ interface RegularGoalRatingUser {
 interface RegularGoalRatingProps {
 	regularGoalId: number;
 	className?: string;
+	refreshTrigger?: number;
 }
 
-export const RegularGoalRating: FC<RegularGoalRatingProps> = ({regularGoalId, className}) => {
+const getPlaceModifier = (place: number): string | undefined => {
+	if (place === 1) return 'gold';
+	if (place === 2) return 'silver';
+	if (place === 3) return 'bronze';
+	return undefined;
+};
+
+export const RegularGoalRating: FC<RegularGoalRatingProps> = ({regularGoalId, className, refreshTrigger}) => {
 	const [block, element] = useBem('regular-goal-rating', className);
 	const [users, setUsers] = useState<RegularGoalRatingUser[]>([]);
+	const [, setCurrentUserId] = useState<number | null>(null);
+	const [currentExecution, setCurrentExecution] = useState<RegularGoalRatingUser | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
@@ -37,28 +48,25 @@ export const RegularGoalRating: FC<RegularGoalRatingProps> = ({regularGoalId, cl
 				const response = await getRegularGoalRating(regularGoalId);
 
 				if (response.success && response.data) {
-					// GET возвращает: { success: true, data: <ответ сервера> }
-					// Сервер возвращает: { success: true, data: { users: [...] } }
-					// После GET: response.data = { success: true, data: { users: [...] } }
-					// Итого: response.data.data.users
 					let usersArray: RegularGoalRatingUser[] = [];
+					let userId: number | null = null;
+					let execution: RegularGoalRatingUser | null = null;
 
-					// Если response.data содержит data.users (вложенная структура от сервера)
-					if (
-						(response.data as any).data &&
-						(response.data as any).data.users &&
-						Array.isArray((response.data as any).data.users)
-					) {
-						usersArray = (response.data as any).data.users;
+					const serverData = (response.data as any).data || response.data;
+
+					if (Array.isArray(serverData.users)) {
+						usersArray = serverData.users;
 					}
-					// Если response.data уже содержит users напрямую (fallback)
-					else if (Array.isArray((response.data as any).users)) {
-						usersArray = (response.data as any).users;
+					if (serverData.currentUserId) {
+						userId = serverData.currentUserId;
+					}
+					if (serverData.currentExecution) {
+						execution = serverData.currentExecution;
 					}
 
 					setUsers(usersArray);
-				} else {
-					console.warn('📊 Рейтинг: ответ не успешен или нет данных', response);
+					setCurrentUserId(userId);
+					setCurrentExecution(execution);
 				}
 			} catch (error) {
 				console.error('Ошибка при загрузке рейтинга:', error);
@@ -68,7 +76,7 @@ export const RegularGoalRating: FC<RegularGoalRatingProps> = ({regularGoalId, cl
 		};
 
 		loadRating();
-	}, [regularGoalId]);
+	}, [regularGoalId, refreshTrigger]);
 
 	if (isLoading) {
 		return (
@@ -89,6 +97,37 @@ export const RegularGoalRating: FC<RegularGoalRatingProps> = ({regularGoalId, cl
 		);
 	}
 
+	const renderRow = (user: RegularGoalRatingUser, isCurrentExecution: boolean) => {
+		const placeModifier = getPlaceModifier(user.place);
+		return (
+			<tr
+				className={element('row', {...(placeModifier ? {[placeModifier]: true} : {})})}
+				key={isCurrentExecution ? `exec-${user.id}` : user.id}
+			>
+				<td className={element('item')}>
+					<span
+						className={element('place', {
+							...(isCurrentExecution ? {current: true} : placeModifier ? {[placeModifier]: true} : {}),
+						})}
+					>
+						{user.place}
+					</span>
+				</td>
+				<td className={element('item')}>
+					<Link to={`/user/${user.id}/showcase`} className={element('row-link')}>
+						<Avatar noBorder className={element('avatar')} size="medium" avatar={user.avatar} />
+						<p className={element('user-name')}>{user.name}</p>
+						<p className={element('user-info')}>
+							{user.level} уровень {user.completedGoalsCount} целей выполнено
+						</p>
+					</Link>
+				</td>
+				<td className={element('item')}>{user.maxStreak}</td>
+				<td className={element('item')}>{user.completedSeriesCount}</td>
+			</tr>
+		);
+	};
+
 	return (
 		<section className={block()}>
 			<div className={element('board')}>
@@ -102,19 +141,21 @@ export const RegularGoalRating: FC<RegularGoalRatingProps> = ({regularGoalId, cl
 						</tr>
 					</thead>
 					<tbody>
-						{users.map((user) => (
-							<tr className={element('row')} key={user.id}>
-								<td className={element('item')}>{user.place}</td>
-								<td className={element('item')}>
-									<Link to={`/user/${user.id}/showcase`} className={element('row-link')}>
-										<Avatar noBorder className={element('avatar')} size="medium" avatar={user.avatar} />
-										<p>{user.name}</p>
-									</Link>
-								</td>
-								<td className={element('item')}>{user.maxStreak}</td>
-								<td className={element('item')}>{user.completedSeriesCount}</td>
-							</tr>
-						))}
+						{users.map((user) => renderRow(user, false))}
+						{currentExecution && (
+							<>
+								<tr className={element('separator')}>
+									<td colSpan={4} aria-label="Разделитель">
+										<div className={element('dots')}>
+											<span className={element('dot')} />
+											<span className={element('dot')} />
+											<span className={element('dot')} />
+										</div>
+									</td>
+								</tr>
+								{renderRow(currentExecution, true)}
+							</>
+						)}
 					</tbody>
 				</table>
 			</div>

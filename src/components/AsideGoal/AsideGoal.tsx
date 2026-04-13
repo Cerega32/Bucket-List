@@ -1346,12 +1346,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		// Используем локальную статистику, если она есть, иначе из пропсов
 		const stats = localStatistics || regularConfig?.statistics;
 
-		// Единица измерения определяется по durationType, а не по frequency
-		const durationType = stats?.regularGoalData?.durationType || regularConfig?.durationType;
-		const isWeeksDuration = durationType === 'weeks';
+		// Единица измерения определяется по frequency: daily → дни, weekly/custom → недели
+		const frequency = stats?.regularGoalData?.frequency || regularConfig?.frequency;
+		const isWeeklyUnit = frequency !== 'daily';
 
 		if (!stats || !regularConfig) {
-			const unit = isWeeksDuration ? pluralize(0, ['неделя', 'недели', 'недель']) : pluralize(0, ['день', 'дня', 'дней']);
+			const unit = isWeeklyUnit ? pluralize(0, ['неделя', 'недели', 'недель']) : pluralize(0, ['день', 'дня', 'дней']);
 			return {value: 0, unit, isInterrupted: false, isCompleted: false, maxStreak: 0};
 		}
 
@@ -1362,42 +1362,32 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		if (isInterrupted && stats.interruptedStreak !== null && stats.interruptedStreak !== undefined) {
 			streak = stats.interruptedStreak;
 		} else if (seriesIsCompleted) {
-			// Для завершенной серии определяем количество дней/недель
-			if (isWeeksDuration) {
-				// durationType 'weeks' — используем completedWeeks
+			// Для завершённой серии
+			if (isWeeklyUnit) {
+				// weekly/custom → недели
 				streak = stats.completedWeeks > 0 ? stats.completedWeeks : stats.currentStreak || 0;
-			} else if (durationType === 'until_date') {
-				const frequency = stats.regularGoalData?.frequency || regularConfig.frequency;
-				if (frequency === 'weekly') {
-					streak = stats.completedWeeks > 0 ? stats.completedWeeks : stats.currentStreak || 0;
-				} else {
-					streak = stats.totalCompletions || 0;
-				}
-			} else if (durationType === 'days') {
-				// durationType 'days' — используем totalCompletions (количество отмеченных дней)
-				streak = stats.totalCompletions > 0 ? stats.totalCompletions : stats.currentStreak || 0;
 			} else {
-				streak = stats.currentStreak || 0;
+				// daily → дни
+				streak = stats.totalCompletions > 0 ? stats.totalCompletions : stats.currentStreak || 0;
 			}
 		} else {
 			// Активная серия
 			const completions = stats.totalCompletions ?? 0;
-			const frequency = stats.regularGoalData?.frequency || regularConfig.frequency;
 			if (completions === 0) {
 				streak = 0;
-			} else if (durationType === 'days' && frequency !== 'daily') {
-				// Для weekly/custom с durationType 'days': currentStreak считает недели, а нужно дни
-				streak = completions;
-			} else if (isWeeksDuration && frequency !== 'daily') {
-				// Для weekly/custom с durationType 'weeks': используем completedWeeks
+			} else if (isWeeklyUnit) {
+				// weekly/custom → недели
 				streak = stats.completedWeeks > 0 ? stats.completedWeeks : stats.currentStreak || 0;
+			} else {
+				// daily → дни
+				streak = stats.currentStreak || 0;
 			}
 		}
 
 		const maxStreakValue = stats.maxStreak || 0;
 
-		// Единица измерения: weeks → недели, всё остальное → дни
-		if (isWeeksDuration) {
+		// Единица измерения: weekly/custom → недели, daily → дни
+		if (isWeeklyUnit) {
 			return {
 				value: streak,
 				unit: pluralize(streak, ['неделя', 'недели', 'недель']),

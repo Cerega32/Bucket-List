@@ -33,13 +33,13 @@ class Store {
 	async loadTodayCount() {
 		this.setLoading(true);
 		try {
-			const response = await getRegularGoalStatistics();
+			const response = await getRegularGoalStatistics({page_size: 100});
 			if (response.success && response.data) {
 				const statistics = Array.isArray(response.data) ? response.data : response.data.data;
 				const active = statistics.filter((s: {isActive: boolean}) => s.isActive);
 				const completedToday = active.filter(
-					(s: {isInterrupted?: boolean; currentPeriodProgress?: {completedToday?: boolean}}) =>
-						!s.isInterrupted && s.currentPeriodProgress?.completedToday === true
+					(s: {isInterrupted?: boolean; canCompleteToday?: boolean; currentPeriodProgress?: {completedToday?: boolean}}) =>
+						!s.isInterrupted && (s.currentPeriodProgress?.completedToday === true || s.canCompleteToday === false)
 				);
 				this.setStats(active.length, completedToday.length);
 			} else {
