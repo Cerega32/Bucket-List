@@ -15,7 +15,7 @@ import {Title} from '../Title/Title';
 
 import './card.scss';
 
-type RegularDayState = 'completed' | 'allowedSkip' | 'active' | 'inactive' | 'blocked';
+type RegularDayState = 'completed' | 'completedBg' | 'allowedSkip' | 'active' | 'inactive' | 'blocked';
 
 interface RegularCardPropsBase {
 	className?: string;
@@ -57,6 +57,8 @@ const getCurrentDayOfWeek = (): number => {
 
 const getSeriesText = (statistics: IRegularGoalStatistics): string => {
 	const isWeeksDuration = statistics.regularGoalData?.durationType === 'weeks';
+	const durationType = statistics.regularGoalData?.durationType;
+	const frequency = statistics.regularGoalData?.frequency;
 	let current = statistics.currentStreak || 0;
 	const max = statistics.maxStreak || 0;
 
@@ -67,6 +69,9 @@ const getSeriesText = (statistics: IRegularGoalStatistics): string => {
 		} else {
 			current = statistics.totalCompletions > 0 ? statistics.totalCompletions : current;
 		}
+	} else if (durationType === 'days' && frequency !== 'daily') {
+		// Для weekly/custom с durationType 'days': currentStreak считает недели, нужно дни
+		current = statistics.totalCompletions || 0;
 	}
 
 	const value = max > current ? max : current;
@@ -129,6 +134,7 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 			(d: {
 				dayIndex: number;
 				isCompleted?: boolean;
+				isCompletedDay?: boolean;
 				isBlocked?: boolean;
 				isBlockedByStartDate?: boolean;
 				isSkipped?: boolean;
@@ -146,7 +152,8 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 			const inSchedule = cs[REGULAR_CUSTOM_DAY_KEYS[index]] === true;
 			blockedCross = !inSchedule || !!isBlocked;
 		}
-		const isCompleted = !isBlockedByStartDate && (dayData.isCompleted || false);
+		const isCompletedBg = !isBlockedByStartDate && (dayData.isCompleted || false);
+		const isCompletedActual = !isBlockedByStartDate && (dayData.isCompletedDay ?? dayData.isCompleted ?? false);
 		const isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false);
 		const isCurrent = index === currentDayIndex;
 
@@ -154,8 +161,13 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 			return 'allowedSkip';
 		}
 
-		if (isCompleted) {
+		if (isCompletedActual) {
 			return 'completed';
+		}
+
+		// День закрашен зелёным по норме недели, но фактически не выполнен — без галочки
+		if (isCompletedBg) {
+			return 'completedBg';
 		}
 
 		// custom: крестик для дня вне графика всегда (даже до start_date, где API даёт isBlocked=false)
@@ -379,25 +391,27 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 						{WEEK_DAYS.map((day, index) => {
 							const state = getWeekDayState(statistics, index);
 							const isToday = index === currentDayIndex;
-							const isCompleted = state === 'completed';
+							const isActuallyCompleted = state === 'completed';
+							const isCompletedBg = state === 'completedBg';
 							const isAllowedSkip = state === 'allowedSkip';
 							const isBlocked = state === 'blocked';
+							const showCompleted = isActuallyCompleted || isCompletedBg;
 							const isSelected = state === 'active' || (isBlocked && isToday);
 
 							return (
 								<div key={day} className={element('series-day-wrapper')}>
 									<div
 										className={element('series-day', {
-											selected: isSelected && !isCompleted,
+											selected: isSelected && !showCompleted,
 											blocked: isBlocked,
-											completed: isCompleted,
+											completed: showCompleted,
 											skipped: isAllowedSkip,
 										})}
 									>
-										{(isCompleted || isAllowedSkip) && (
+										{(isActuallyCompleted || isAllowedSkip) && (
 											<Svg icon="done" className={element('series-day-icon-selected')} />
 										)}
-										{!isCompleted && !isAllowedSkip && isBlocked && (
+										{!isActuallyCompleted && !isAllowedSkip && isBlocked && (
 											<Svg icon="cross" className={element('series-day-icon')} />
 										)}
 									</div>

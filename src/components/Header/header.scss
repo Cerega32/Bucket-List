@@ -530,7 +530,7 @@
 			fill: var(--color-gray-1);
 		}
 
-		&--theme-transparent {
+		&--theme-transparent:not(&--completed) {
 			svg * {
 				fill: var(--color-white);
 			}
@@ -539,6 +539,7 @@
 		&--completed {
 			fill: var(--color-orange);
 
+			svg *,
 			path {
 				fill: var(--color-orange);
 			}

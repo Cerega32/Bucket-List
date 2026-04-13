@@ -1380,10 +1380,17 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				streak = stats.currentStreak || 0;
 			}
 		} else {
-			// Активная серия: пока ни одного выполненного дня/недели нет — показываем 0
+			// Активная серия
 			const completions = stats.totalCompletions ?? 0;
+			const frequency = stats.regularGoalData?.frequency || regularConfig.frequency;
 			if (completions === 0) {
 				streak = 0;
+			} else if (durationType === 'days' && frequency !== 'daily') {
+				// Для weekly/custom с durationType 'days': currentStreak считает недели, а нужно дни
+				streak = completions;
+			} else if (isWeeksDuration && frequency !== 'daily') {
+				// Для weekly/custom с durationType 'weeks': используем completedWeeks
+				streak = stats.completedWeeks > 0 ? stats.completedWeeks : stats.currentStreak || 0;
 			}
 		}
 
@@ -1617,11 +1624,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 							})()}
 							{weeklyProratedStartHint && (
 								<div className={element('regular-info-hint')} role="note">
-									Если отметите первый раз сегодня, на этой неделе нужно не меньше{' '}
-									<strong>{weeklyProratedStartHint.minCompletions}</strong>{' '}
-									{pluralize(weeklyProratedStartHint.minCompletions, ['раз', 'раза', 'раз'])} из{' '}
-									{weeklyProratedStartHint.N} по недельному плану (остаётся {weeklyProratedStartHint.tDays}{' '}
-									{pluralize(weeklyProratedStartHint.tDays, ['день', 'дня', 'дней'])} до конца недели).
+									Если начнёте сегодня, достаточно выполнить {weeklyProratedStartHint.minCompletions} из{' '}
+									{pluralize(weeklyProratedStartHint.N, ['дня', 'дней', 'дней'])} по недельному плану.
 								</div>
 							)}
 							{daysUntilEarnedSkip !== null && (
@@ -1685,7 +1689,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 								let isSelected = false;
 								let isBlocked = false;
 								let isBlockedByStartDate = false; // Блокировка из-за даты начала (показываем пустым, без крестика)
-								let isCompletedDay = false;
+								let isCompletedDay = false; // Зелёный фон (включая дни, закрашенные нормой недели)
+								let isCompletedActual = false; // Реально выполненный день — для галочки
 								let isSkipped = false; // Использован разрешенный пропуск
 								const isCurrentDay = i === currentDayIndex;
 
@@ -1699,6 +1704,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 											(d: {
 												dayIndex: number;
 												isCompleted?: boolean;
+												isCompletedDay?: boolean;
 												isBlocked?: boolean;
 												isBlockedByStartDate?: boolean;
 												isSkipped?: boolean;
@@ -1706,19 +1712,18 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 											}) => d.dayIndex === i
 										);
 										if (dayData) {
-											isSelected = dayData.isAllowed !== false; // Все дни недели доступны, но нужно проверить, не до start_date
-											// Для daily целей: isBlockedByStartDate - пустой день (не показываем крестик)
-											// isBlocked по расписанию не используется для daily
-											isBlocked = false; // Для daily целей нет блокировки по расписанию
+											isSelected = dayData.isAllowed !== false;
+											isBlocked = false;
 											isBlockedByStartDate = dayData.isBlockedByStartDate || false;
-											isCompletedDay = !isBlockedByStartDate && (dayData.isCompleted || false); // Выполнено, только если не заблокирован по дате начала
-											isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false); // Использован разрешенный пропуск (для цвета фона)
+											isCompletedDay = !isBlockedByStartDate && (dayData.isCompleted || false);
+											isCompletedActual =
+												!isBlockedByStartDate && (dayData.isCompletedDay ?? dayData.isCompleted ?? false);
+											isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false);
 										}
 									} else {
 										// Fallback: если weekDays нет, используем старую логику (только текущий день)
 										isSelected = i === currentDayIndex;
 										if (isSelected) {
-											// Для текущего дня используем данные из обновленной статистики
 											if (localStatistics?.currentPeriodProgress?.type === 'daily') {
 												isCompletedDay = localStatistics.currentPeriodProgress.completedToday || false;
 											} else {
@@ -1726,10 +1731,10 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 												if (dailyFallbackStats?.currentPeriodProgress?.type === 'daily') {
 													isCompletedDay = dailyFallbackStats.currentPeriodProgress.completedToday || false;
 												} else {
-													// Fallback на локальное состояние
 													isCompletedDay = isRegularGoalCompletedToday || regularProgress?.completed || false;
 												}
 											}
+											isCompletedActual = isCompletedDay;
 										}
 									}
 								} else if (regularConfig.frequency === 'weekly') {
@@ -1741,6 +1746,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 											(d: {
 												dayIndex: number;
 												isCompleted?: boolean;
+												isCompletedDay?: boolean;
 												isBlocked?: boolean;
 												isBlockedByStartDate?: boolean;
 												isSkipped?: boolean;
@@ -1748,20 +1754,18 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 											}) => d.dayIndex === i
 										);
 										if (dayData) {
-											isSelected = dayData.isAllowed !== false; // Все дни недели доступны по умолчанию, но нужно проверить, не до start_date
-											// Для weekly целей: isBlockedByStartDate - пустой день (не показываем крестик)
-											// isBlocked по расписанию не используется для weekly (все дни доступны)
+											isSelected = dayData.isAllowed !== false;
 											isBlockedByStartDate = dayData.isBlockedByStartDate || false;
-											isBlocked = false; // Для weekly целей нет блокировки по расписанию
-											isCompletedDay = !isBlockedByStartDate && (dayData.isCompleted || false); // Выполнено или использован пропуск, только
-											//  если не заблокирован по дате начала
-											isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false); // Использован разрешенный пропуск (для цвета фона)
+											isBlocked = false;
+											// isCompleted у бэка для weekly = "зелёный фон" (все дни, если неделя выполнена)
+											isCompletedDay = !isBlockedByStartDate && (dayData.isCompleted || false);
+											// isCompletedDay у бэка для weekly = "реально выполнен" (для галочки)
+											isCompletedActual = !isBlockedByStartDate && (dayData.isCompletedDay ?? false);
+											isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false);
 										}
 									}
 									// Если weekDays нет или пуст, используем fallback логику
 									if (!weekDays || weekDays.length === 0) {
-										// Fallback: для weekly целей все дни недели доступны по умолчанию
-										// Проверяем, не до start_date (если start_date установлен)
 										const weeklyFallbackStats = localStatistics || regularConfig.statistics;
 										const startDate = weeklyFallbackStats?.startDate
 											? new Date(`${weeklyFallbackStats.startDate}T00:00:00`)
@@ -1769,9 +1773,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										const today = new Date();
 										today.setHours(0, 0, 0, 0);
 
-										// Вычисляем понедельник текущей недели (Python weekday: понедельник = 0)
-										const dayOfWeek = today.getDay(); // JS: воскресенье = 0, понедельник = 1
-										const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Преобразуем в формат понедельник = 0
+										const dayOfWeek = today.getDay();
+										const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 										const weekStart = new Date(today);
 										weekStart.setDate(today.getDate() - diff);
 										weekStart.setHours(0, 0, 0, 0);
@@ -1783,16 +1786,16 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										if (startDate) {
 											startDate.setHours(0, 0, 0, 0);
 											isSelected = dayDate >= startDate;
-											isBlockedByStartDate = dayDate < startDate; // Блокировка из-за даты начала
-											isBlocked = false; // Для weekly нет блокировки по расписанию
+											isBlockedByStartDate = dayDate < startDate;
+											isBlocked = false;
 										} else {
-											// Если start_date еще не установлен, все дни доступны
 											isSelected = true;
 											isBlockedByStartDate = false;
 											isBlocked = false;
 										}
 
 										isCompletedDay = false;
+										isCompletedActual = false;
 										isSkipped = false;
 									}
 								} else if (regularConfig.frequency === 'custom') {
@@ -1803,6 +1806,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 											(d: {
 												dayIndex: number;
 												isCompleted?: boolean;
+												isCompletedDay?: boolean;
 												isBlocked?: boolean;
 												isBlockedByStartDate?: boolean;
 												isSkipped?: boolean;
@@ -1811,20 +1815,21 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										);
 										if (dayData) {
 											isBlockedByStartDate = dayData.isBlockedByStartDate || false;
-											// Дни вне графика — всегда с крестиком (и до start_date тоже: у API тогда isBlocked=false)
 											const inCustomSchedule = isDaySelected(i);
 											isBlocked = !inCustomSchedule || !!dayData.isBlocked;
 											isSelected = dayData.isAllowed !== false;
 											isCompletedDay = !isBlockedByStartDate && (dayData.isCompleted || false);
+											isCompletedActual =
+												!isBlockedByStartDate && (dayData.isCompletedDay ?? dayData.isCompleted ?? false);
 											isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false);
 										}
 									} else {
-										// Fallback: определяем выбранные дни по общему графику, без учета startDate
 										const daySelected = isDaySelected(i);
 										isSelected = daySelected;
-										isBlocked = !daySelected; // все невыбранные дни — с крестиками
+										isBlocked = !daySelected;
 										isBlockedByStartDate = false;
 										isCompletedDay = false;
+										isCompletedActual = false;
 										isSkipped = false;
 									}
 								}
@@ -1836,18 +1841,20 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 								const blockedScheduleCross =
 									regularConfig.frequency === 'custom' ? isBlocked : isBlocked && !isBlockedByStartDate;
 
+								const showCompleted = isCompletedDay && !isSkipped && !blockedScheduleCross && !isBlockedByStartDate;
+
 								return (
 									<div key={i} className={element('regular-series-day-wrapper')}>
 										<div
 											className={element('regular-series-day', {
 												selected: showBorder,
 												blocked: blockedScheduleCross,
-												completed: isCompletedDay && !isSkipped && !blockedScheduleCross && !isBlockedByStartDate,
+												completed: showCompleted,
 												skipped: isSkipped && !blockedScheduleCross && !isBlockedByStartDate,
 											})}
 										>
 											{blockedScheduleCross && <Svg icon="cross" className={element('regular-series-day-icon')} />}
-											{!blockedScheduleCross && !isBlockedByStartDate && (isCompletedDay || isSkipped) && (
+											{!blockedScheduleCross && !isBlockedByStartDate && (isCompletedActual || isSkipped) && (
 												<Svg icon="done" className={element('regular-series-day-icon-selected')} />
 											)}
 										</div>
