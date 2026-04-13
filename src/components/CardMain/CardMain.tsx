@@ -91,7 +91,7 @@ export const CardMain: FC<CardMainProps> = (props) => {
 					>
 						<div className={element('info')}>
 							<div className={element('img-tags')}>
-								{goal.completedByUser && <Tag icon="done" theme="light" classNameIcon={element('img-tag-icon-done')} />}
+								{goal.completedByUser && <Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} />}
 								{goal.completedByUser ? (
 									<Tag
 										text={goal.category.name}

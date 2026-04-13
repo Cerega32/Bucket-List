@@ -60,7 +60,15 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 			requestAnimationFrame(checkOverflow);
 		}, 0);
 
-		return () => clearTimeout(timeoutId);
+		const resizeObserver = new ResizeObserver(() => {
+			requestAnimationFrame(checkOverflow);
+		});
+		resizeObserver.observe(textElement);
+
+		return () => {
+			clearTimeout(timeoutId);
+			resizeObserver.disconnect();
+		};
 	}, [isShortDesc, goal.description]);
 
 	const shouldShowButton =

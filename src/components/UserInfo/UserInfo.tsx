@@ -159,7 +159,7 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 									</Button>
 								)}
 								{isFriend && (
-									<Button theme="green" icon="check">
+									<Button theme="green" icon="done">
 										В друзьях
 									</Button>
 								)}

@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {GoalStore} from '@/store/GoalStore';
 import {getListsWithGoals} from '@/utils/api/get/getListsWithGoal';
 import {addListGoal} from '@/utils/api/post/addListGoal';
@@ -26,6 +27,7 @@ export const ListsWithGoal: FC<ListsWithGoalProps> = observer((props) => {
 
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [deleteTarget, setDeleteTarget] = useState<{code: string; index: number; title: string} | null>(null);
+	const {isScreenSmallMobile} = useScreenSize();
 
 	useEffect(() => {
 		(async () => {
@@ -73,7 +75,7 @@ export const ListsWithGoal: FC<ListsWithGoalProps> = observer((props) => {
 					<Card
 						goal={list}
 						isList
-						horizontal
+						horizontal={!isScreenSmallMobile}
 						onClickAdd={() => updateListGoal(list.code, i, 'add')}
 						onClickDelete={async () => handleDeleteClick(list.code, i, list.title)}
 						key={list.code}
