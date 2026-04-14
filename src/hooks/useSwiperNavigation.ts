@@ -46,6 +46,7 @@ export function useSwiperNavigation() {
 
 	return {
 		updateSwiperState,
+		canScroll,
 		isPrevDisabled,
 		isNextDisabled,
 		isPrevHardDisabled,

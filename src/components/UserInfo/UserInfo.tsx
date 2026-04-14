@@ -31,6 +31,7 @@ interface UserInfoProps {
 	totalAddedLists: number;
 	totalAchievements: number;
 	subscriptionType?: 'free' | 'premium';
+	level?: number;
 }
 
 export const UserInfo: FC<UserInfoProps> = observer((props) => {
@@ -50,6 +51,7 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 		totalCompletedLists,
 		totalAchievements,
 		subscriptionType,
+		level,
 	} = props;
 	const [block, element] = useBem('user-info');
 	const [isAddingFriend, setIsAddingFriend] = useState(false);
@@ -172,6 +174,9 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 						)}
 						<InfoGoal
 							items={[
+								...(level !== undefined
+									? [{title: 'Уровень', value: <span className={element('level')}>{level}</span>}]
+									: []),
 								{title: 'Всего целей', value: totalAdded},
 								{title: 'Выполнено', value: totalCompleted},
 							]}

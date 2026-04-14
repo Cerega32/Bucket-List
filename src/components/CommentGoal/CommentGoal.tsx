@@ -2,6 +2,8 @@ import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
+import {ModalStore} from '@/store/ModalStore';
+import {UserStore} from '@/store/UserStore';
 import {IComment} from '@/typings/comments';
 import {getDate} from '@/utils/date/getDate';
 import {pluralize} from '@/utils/text/pluralize';
@@ -28,6 +30,13 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 	const [block, element] = useBem('comment-goal', className);
 
 	const photoSlides = comment.photos?.map((p) => ({src: p.image, id: p.id})) ?? [];
+	const isOwnComment = UserStore.userSelf.id === comment.user;
+
+	const openReport = () => {
+		ModalStore.setModalProps({commentId: comment.id});
+		ModalStore.setWindow('report-comment');
+		ModalStore.setIsOpen(true);
+	};
 
 	return (
 		<article className={block()}>
@@ -82,25 +91,38 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 			<Line className={element('horizontal-line')} />
 			<p className={element('text')}>{comment.text}</p>
 			{photoSlides.length > 0 && <CommentImagesGallery images={photoSlides} navSuffix={String(comment.id)} />}
-			{!isMain && onClickScore && (
-				<div className={element('score')}>
-					<Button
-						icon="like"
-						small
-						theme={comment.hasLiked ? 'green' : 'blue-light'}
-						onClick={() => onClickScore(comment.id, true)}
-						className={element('like')}
-					>
-						{comment.likesCount}
-					</Button>
-					<Button
-						icon="like--bottom"
-						small
-						theme={comment.hasDisliked ? 'red' : 'blue-light'}
-						onClick={() => onClickScore(comment.id, false)}
-					>
-						{comment.dislikesCount}
-					</Button>
+			{!isMain && (
+				<div className={element('footer')}>
+					{onClickScore && (
+						<div className={element('score')}>
+							<Button
+								icon="like"
+								small
+								theme={comment.hasLiked ? 'green' : 'blue-light'}
+								onClick={() => onClickScore(comment.id, true)}
+								className={element('like')}
+							>
+								{comment.likesCount}
+							</Button>
+							<Button
+								icon="like--bottom"
+								small
+								theme={comment.hasDisliked ? 'red' : 'blue-light'}
+								onClick={() => onClickScore(comment.id, false)}
+							>
+								{comment.dislikesCount}
+							</Button>
+						</div>
+					)}
+					{!isOwnComment && (
+						<Button
+							icon="exclamation-triangle"
+							width="auto"
+							theme="blue-light"
+							onClick={openReport}
+							className={element('report')}
+						/>
+					)}
 				</div>
 			)}
 		</article>

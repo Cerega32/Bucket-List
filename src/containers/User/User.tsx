@@ -98,6 +98,7 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 					totalAchievements={userInfo.totalAchievements}
 					background={userInfo.coverImage}
 					subscriptionType={userInfo.subscriptionType}
+					level={userInfo.level}
 				/>
 			</Loader>
 			{getUserContent()}
