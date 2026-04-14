@@ -59,7 +59,6 @@ const getSeriesText = (statistics: IRegularGoalStatistics): string => {
 	const frequency = statistics.regularGoalData?.frequency;
 	const isWeeklyUnit = frequency !== 'daily';
 	let current = statistics.currentStreak || 0;
-	const max = statistics.maxStreak || 0;
 
 	if (statistics.isSeriesCompleted) {
 		if (isWeeklyUnit) {
@@ -71,13 +70,11 @@ const getSeriesText = (statistics: IRegularGoalStatistics): string => {
 		current = statistics.completedWeeks > 0 ? statistics.completedWeeks : current;
 	}
 
-	const value = max > current ? max : current;
-
 	if (isWeeklyUnit) {
-		return pluralize(value, ['неделя', 'недели', 'недель']);
+		return pluralize(current, ['неделя', 'недели', 'недель']);
 	}
 
-	return pluralize(value, ['день', 'дня', 'дней']);
+	return pluralize(current, ['день', 'дня', 'дней']);
 };
 
 const getSeriesTitle = (statistics: IRegularGoalStatistics): string => {
@@ -89,20 +86,10 @@ const getSeriesTitle = (statistics: IRegularGoalStatistics): string => {
 		return 'Серия прервана';
 	}
 
-	const current = statistics.currentStreak || 0;
-	const max = statistics.maxStreak || 0;
-	if (max > current) {
-		return 'Макс. серия';
-	}
-
 	return 'Текущая серия';
 };
 
-const getSeriesIcon = (statistics: IRegularGoalStatistics): string => {
-	const current = statistics.currentStreak || 0;
-	const max = statistics.maxStreak || 0;
-	const hasValue = current > 0 || max > 0;
-
+const getSeriesIcon = (statistics: IRegularGoalStatistics, isCurrentPeriodCompleted: boolean): string => {
 	if (statistics.isSeriesCompleted) {
 		return 'regular-checked';
 	}
@@ -111,11 +98,24 @@ const getSeriesIcon = (statistics: IRegularGoalStatistics): string => {
 		return 'regular-cancel';
 	}
 
-	if (hasValue) {
+	if (isCurrentPeriodCompleted) {
 		return 'regular';
 	}
 
 	return 'regular-empty';
+};
+
+const getIsCurrentPeriodCompleted = (statistics: IRegularGoalStatistics): boolean => {
+	const frequency = statistics.regularGoalData?.frequency;
+	const progress = statistics.currentPeriodProgress;
+
+	if (frequency === 'daily') {
+		return progress?.type === 'daily' ? !!progress.completedToday : false;
+	}
+
+	const totalWeeks = statistics.totalWeeks ?? 0;
+	const completedWeeks = statistics.completedWeeks ?? 0;
+	return totalWeeks > 0 && completedWeeks >= totalWeeks;
 };
 
 const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): RegularDayState => {
@@ -362,6 +362,12 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 		? !!progress.completedToday
 		: !statistics.canCompleteToday;
 	const isBlockedOrUnavailableToday = isBlockedBySchedule;
+	const isCurrentPeriodCompleted = getIsCurrentPeriodCompleted(statistics);
+	const isSeriesActiveState =
+		statistics.isSeriesCompleted ||
+		isInterrupted ||
+		((statistics.currentStreak || 0) > 0 && isCurrentPeriodCompleted) ||
+		((statistics.completedWeeks || 0) > 0 && isCurrentPeriodCompleted);
 
 	return (
 		<section className={block({horizontal, regular: true, interrupted: isInterrupted})}>
@@ -379,10 +385,10 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 				<div className={element('series')}>
 					<div className={element('series-header')}>
 						<div className={element('series-title')}>
-							<Svg icon={getSeriesIcon(statistics)} className={element('series-icon')} />
+							<Svg icon={getSeriesIcon(statistics, isCurrentPeriodCompleted)} className={element('series-icon')} />
 							<span>{getSeriesTitle(statistics)}</span>
 						</div>
-						<span className={element('series-value')}>{getSeriesText(statistics)}</span>
+						<span className={element('series-value', {active: isSeriesActiveState})}>{getSeriesText(statistics)}</span>
 					</div>
 					<div className={element('series-days')}>
 						{WEEK_DAYS.map((day, index) => {
