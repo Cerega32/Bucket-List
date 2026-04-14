@@ -52,3 +52,24 @@ export const getGoalImpressionImages = async (codeGoal: string): Promise<IImpres
 	const response = await GET(`goals/${codeGoal}/impression-images`, {auth: false});
 	return response as IImpressionImagesResponse;
 };
+
+/** Изображения из отзывов пользователя (витрина) */
+export const getUserImpressionImages = async (userId: string): Promise<IImpressionImagesResponse> => {
+	const response = await GET(`comments/${userId}/impression-images`, {auth: false});
+	return response as IImpressionImagesResponse;
+};
+
+/** Первая загрузка комментариев пользователя (витрина): 3 шт. */
+export const getUserInitialComments = async (userId: string): Promise<ICommentsInitialResponse> => {
+	const response = await GET(`comments/${userId}`, {auth: true});
+	return response as ICommentsInitialResponse;
+};
+
+/** Дозагрузка комментариев пользователя: 10 шт., page >= 2 */
+export const getUserMoreComments = async (userId: string, page: number): Promise<ICommentsPageResponse> => {
+	const response = await GET(`comments/${userId}`, {
+		auth: true,
+		get: {page: String(page)},
+	});
+	return response as ICommentsPageResponse;
+};

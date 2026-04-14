@@ -59,6 +59,10 @@ const hasObjectImage = (notification: IHeaderNotification) => {
 	);
 };
 
+const isAchievementImage = (notification: IHeaderNotification) => {
+	return notification.type === 'achievement' && notification.relatedObjectImage;
+};
+
 /** Возвращает ссылку для перехода по клику на уведомление */
 const getNotificationLink = (notification: IHeaderNotification): string | null => {
 	const {type, relatedObjectType, relatedObjectCode, sender} = notification;
@@ -170,9 +174,8 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 							const isFriendRequest = notification.type === 'friend_request' && !notification.isRead;
 
 							return (
-								<>
+								<div key={notification.id}>
 									<div
-										key={notification.id}
 										className={element('item', {unread: !notification.isRead})}
 										onClick={() => handleNotificationClick(notification)}
 										onKeyDown={(e) => {
@@ -185,7 +188,15 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 										tabIndex={0}
 									>
 										<div className={element('item-avatar')}>
-											{showObjectImage ? (
+											{isAchievementImage(notification) ? (
+												<div className={element('item-icon')}>
+													<img
+														src={notification.relatedObjectImage}
+														alt=""
+														className={element('item-image', {small: true})}
+													/>
+												</div>
+											) : showObjectImage ? (
 												<img src={notification.relatedObjectImage} alt="" className={element('item-image')} />
 											) : userName ? (
 												<Avatar avatar={userAvatar} size="medium" noBorder />
@@ -222,7 +233,7 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 										</div>
 									</div>
 									<Line margin="8px 0" className={element('item-line')} />
-								</>
+								</div>
 							);
 						})}
 					</div>

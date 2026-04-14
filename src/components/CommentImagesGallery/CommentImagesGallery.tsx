@@ -1,6 +1,4 @@
 import {FC, useState} from 'react';
-import 'swiper/css';
-import 'swiper/css/navigation';
 import {Navigation} from 'swiper/modules';
 import {Swiper, SwiperSlide} from 'swiper/react';
 
@@ -23,13 +21,14 @@ interface CommentImagesGalleryProps {
 	images: CommentImagesGallerySlide[] | string[];
 	navSuffix: string;
 	imageBig?: boolean;
+	imageShowcase?: boolean;
 }
 
-export const CommentImagesGallery: FC<CommentImagesGalleryProps> = ({images, navSuffix, imageBig}) => {
+export const CommentImagesGallery: FC<CommentImagesGalleryProps> = ({images, navSuffix, imageBig, imageShowcase}) => {
 	const [, element] = useBem('comment-goal');
 	const [isOpen, setIsOpen] = useState(false);
 	const [photoIndex, setPhotoIndex] = useState(0);
-	const {updateSwiperState, isPrevDisabled, isNextDisabled, isPrevHardDisabled, isNextHardDisabled} = useSwiperNavigation();
+	const {updateSwiperState, isPrevDisabled, isNextDisabled, isPrevHardDisabled, isNextHardDisabled, canScroll} = useSwiperNavigation();
 
 	const slides = images.map((img) => (typeof img === 'string' ? {src: img} : {src: img.src, id: img.id}));
 	const prevSelector = `comment-goal__prev-${navSuffix}`;
@@ -42,26 +41,24 @@ export const CommentImagesGallery: FC<CommentImagesGalleryProps> = ({images, nav
 
 	return (
 		<div className={element('comment-images-container')}>
-			{slides.length > 1 && (
-				<>
-					<Button
-						theme="blue-light"
-						icon="arrow--bottom"
-						className={`${element('prev', {
-							disabled: isPrevDisabled,
-							'hard-disabled': isPrevHardDisabled,
-						})} ${prevSelector}`}
-					/>
-					<Button
-						theme="blue-light"
-						icon="arrow"
-						className={`${element('next', {
-							disabled: isNextDisabled,
-							'hard-disabled': isNextHardDisabled,
-						})} ${nextSelector}`}
-					/>
-				</>
-			)}
+			<Button
+				theme="blue-light"
+				icon="arrow--bottom"
+				width="auto"
+				className={`${element('prev', {
+					disabled: !canScroll || isPrevDisabled,
+					'hard-disabled': !canScroll || isPrevHardDisabled,
+				})} ${prevSelector}`}
+			/>
+			<Button
+				theme="blue-light"
+				icon="arrow"
+				width="auto"
+				className={`${element('next', {
+					disabled: !canScroll || isNextDisabled,
+					'hard-disabled': !canScroll || isNextHardDisabled,
+				})} ${nextSelector}`}
+			/>
 			<Swiper
 				modules={[Navigation]}
 				spaceBetween={8}
@@ -77,19 +74,14 @@ export const CommentImagesGallery: FC<CommentImagesGalleryProps> = ({images, nav
 				className={element('comment-images')}
 			>
 				{slides.map((slide, index) => (
-					<SwiperSlide key={slide.id ?? `${slide.src}-${index}`} className={element('comment-slide')}>
-						<img
-							src={slide.src}
-							alt="Фото впечатления"
-							className={element('comment-img', {big: imageBig})}
-							// eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
-							role="button"
-							tabIndex={0}
-							onClick={() => openLightbox(index)}
-							onKeyDown={(e) => {
-								if (e.key === 'Enter' || e.key === ' ') openLightbox(index);
-							}}
-						/>
+					<SwiperSlide key={slide.id ?? `${slide.src}-${index}`}>
+						<button type="button" className={element('comment-img-btn')} onClick={() => openLightbox(index)}>
+							<img
+								src={slide.src}
+								alt="Фото впечатления"
+								className={element('comment-img', {big: imageBig, showcase: imageShowcase})}
+							/>
+						</button>
 					</SwiperSlide>
 				))}
 			</Swiper>

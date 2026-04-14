@@ -13,6 +13,7 @@ import {UserStore} from '@/store/UserStore';
 import {IAchievement} from '@/typings/achievements';
 import {IComment} from '@/typings/comments';
 import {get100Goals} from '@/utils/api/get/get100Goals';
+import {getUserImpressionImages, getUserInitialComments, getUserMoreComments} from '@/utils/api/get/getComments';
 import {GET} from '@/utils/fetch/requests';
 import './user-showcase.scss';
 
@@ -26,6 +27,10 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 
 	// const {addedGoals, addedLists} = UserStore;
 	const [comments, setComments] = useState<Array<IComment>>([]);
+	const [commentPhotos, setCommentPhotos] = useState<string[]>([]);
+	const [hasMoreComments, setHasMoreComments] = useState(false);
+	const [commentsNextPage, setCommentsNextPage] = useState<number | null>(null);
+	const [isLoadingMore, setIsLoadingMore] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 
 	const {mainGoals, setMainGoals} = UserStore;
@@ -36,10 +41,11 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 		(async () => {
 			setIsLoading(true);
 			try {
-				const [goalsRes, achievementsRes, commentsRes] = await Promise.all([
+				const [goalsRes, achievementsRes, commentsRes, imagesRes] = await Promise.all([
 					get100Goals(id),
 					GET('achievements', {get: {user_id: id}}),
-					GET(`comments/${id}`, {auth: true}),
+					getUserInitialComments(id),
+					getUserImpressionImages(id),
 				]);
 
 				if (goalsRes.success) {
@@ -50,8 +56,13 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 					const achieved = achievementsRes.data.data.filter((achievement: IAchievement) => achievement.isAchieved).slice(0, 3);
 					setAchievements(achieved);
 				}
-				if (commentsRes.success) {
-					setComments(commentsRes.data.data);
+				if (commentsRes.success && commentsRes.data) {
+					setComments(commentsRes.data.comments);
+					setHasMoreComments(commentsRes.data.hasMore ?? (commentsRes.data as any).has_more ?? false);
+					setCommentsNextPage(commentsRes.data.nextPage ?? (commentsRes.data as any).next_page ?? null);
+				}
+				if (imagesRes.success && imagesRes.data) {
+					setCommentPhotos(imagesRes.data.images);
 				}
 			} finally {
 				setIsLoading(false);
@@ -59,9 +70,31 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 		})();
 	}, [id]);
 
+	const handleLoadMore = async () => {
+		if (!commentsNextPage || isLoadingMore) return;
+		setIsLoadingMore(true);
+		const res = await getUserMoreComments(id, commentsNextPage);
+		if (res.success && res.data) {
+			setComments((prev) => [...prev, ...res.data.comments]);
+			setHasMoreComments(res.data.hasMore ?? (res.data as any).has_more ?? false);
+			setCommentsNextPage(res.data.nextPage ?? (res.data as any).next_page ?? null);
+		}
+		setIsLoadingMore(false);
+	};
+
 	return (
 		<Loader isLoading={isLoading} className={block()}>
-			<CommentsGoal comments={comments} setComments={setComments} isUser />
+			<CommentsGoal
+				comments={comments}
+				setComments={setComments}
+				isUser
+				isShowcase
+				showcasePhotos={commentPhotos}
+				hasMore={hasMoreComments}
+				isLoadingMore={isLoadingMore}
+				onLoadMore={handleLoadMore}
+				className={element('comment')}
+			/>
 			<aside className={element('sidebar')}>
 				<div className={element('title')}>
 					<Title tag="h2">100 целей</Title>
