@@ -198,9 +198,20 @@
 		pointer-events: none;
 	}
 
+	&__footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 24px;
+	}
+
 	&__score {
 		display: flex;
 		gap: 4px;
-		margin-top: 16px;
+	}
+
+	&__report {
+		margin-left: auto;
+		padding: 8px;
 	}
 }

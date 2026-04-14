@@ -41,22 +41,23 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 	const [searchTimer, setSearchTimer] = useState<NodeJS.Timeout | null>(null);
 
 	const searchRef = useRef<HTMLDivElement>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	// Автофокус на поле ввода в модальном режиме
+	// Задержка 320ms — ждём завершения анимации модалки (0.3s transition)
+	useEffect(() => {
+		if (!isModal) return;
+		const timer = setTimeout(() => {
+			inputRef.current?.focus();
+		}, 320);
+		return () => clearTimeout(timer);
+	}, [isModal]);
 
 	// Синхронизация поля с URL (когда зашли на страницу с search)
 	useEffect(() => {
 		const urlSearch = searchParams.get('search') || '';
 		setQuery(urlSearch);
 	}, [location.pathname, location.search]);
-
-	// Автофокус на поле ввода в модальном режиме
-	useEffect(() => {
-		if (isModal && searchRef.current) {
-			const input = searchRef.current.querySelector<HTMLInputElement>('input#global-search');
-			if (input) {
-				setTimeout(() => input.focus(), 100);
-			}
-		}
-	}, [isModal]);
 
 	// Закрыть дропдаун при клике вне компонента
 	useEffect(() => {
@@ -339,6 +340,7 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 								onKeyDown={handleKeyDown}
 								theme={!isModal && theme === 'transparent' ? 'transparent' : undefined}
 								focusBorder="white"
+								inputRef={inputRef}
 							/>
 							{isSearching && (
 								<div className={element('loading')}>
