@@ -8,6 +8,7 @@ import {postLikeComment} from '@/utils/api/post/postLikeComment';
 
 import {Button} from '../Button/Button';
 import {CommentGoal} from '../CommentGoal/CommentGoal';
+import {CommentImagesGallery} from '../CommentImagesGallery/CommentImagesGallery';
 import {EmptyState} from '../EmptyState/EmptyState';
 import './comments-goal.scss';
 
@@ -19,12 +20,26 @@ interface CommentsGoalProps {
 	hasMyComment?: boolean;
 	hasMore?: boolean;
 	isLoadingMore?: boolean;
+	isShowcase?: boolean;
+	showcasePhotos?: string[];
 	onLoadMore?(): void;
 	setComments(comments: Array<IComment>): void;
 }
 
 export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
-	const {className, comments, isUser, setComments, hasMyComment, canAddReview, hasMore, isLoadingMore, onLoadMore} = props;
+	const {
+		className,
+		comments,
+		isUser,
+		setComments,
+		hasMyComment,
+		canAddReview,
+		hasMore,
+		isLoadingMore,
+		onLoadMore,
+		isShowcase,
+		showcasePhotos,
+	} = props;
 
 	const [block, element] = useBem('comments-goal', className);
 	const {setIsOpen, setWindow} = ModalStore;
@@ -46,6 +61,9 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 
 	return (
 		<div className={block()}>
+			{isShowcase && showcasePhotos && showcasePhotos.length > 0 && (
+				<CommentImagesGallery images={showcasePhotos} navSuffix="showcase" imageShowcase />
+			)}
 			<section className={element('items')}>
 				{comments && !!comments.length ? (
 					<>

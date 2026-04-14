@@ -51,7 +51,8 @@
 		padding: 10px 16px;
 		border: 1px solid var(--color-gray-4);
 		border-radius: 8px;
-		transition: outline 0.15s ease-in-out, border 0.15s ease-in-out;
+		outline: none;
+		transition: border 0.15s ease-in-out;
 		resize: vertical;
 
 		&:hover {

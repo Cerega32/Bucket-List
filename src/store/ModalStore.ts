@@ -19,7 +19,8 @@ type IWindow =
 	| 'random-goal-picker'
 	| 'set-regular-goal'
 	| 'compare-friend'
-	| 'delete-review';
+	| 'delete-review'
+	| 'report-comment';
 
 export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 

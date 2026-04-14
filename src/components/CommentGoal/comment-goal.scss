@@ -113,26 +113,42 @@
 	&__comment-images-container {
 		position: relative;
 		overflow: hidden;
+		flex: 1;
+		min-width: 0;
 	}
 
-	&__comment-images {
-		width: 100%;
-	}
-
-	&__comment-slide {
+	&__comment-images .swiper-slide {
 		width: auto;
+	}
+
+	&__comment-img-btn {
+		display: block;
+		padding: 0;
+		border: none;
+		background: none;
+		cursor: pointer;
+		line-height: 0;
+
+		&:focus-visible {
+			@include focus-outline;
+			border-radius: 8px;
+		}
 	}
 
 	&__comment-img {
 		width: 72px;
 		height: 72px;
 		border-radius: 8px;
-		cursor: pointer;
 		object-fit: cover;
 
 		&--big {
 			width: 76px;
 			height: 76px;
+		}
+
+		&--showcase {
+			width: 160px;
+			height: 160px;
 		}
 
 		&:focus {
@@ -153,6 +169,10 @@
 		backdrop-filter: blur(4px);
 		transition: opacity 0.3s ease 0.5s, background 0.2s ease;
 		transform: translateY(-50%);
+
+		&:active {
+			transform: translateY(-50%);
+		}
 	}
 
 	&__prev {
@@ -178,9 +198,20 @@
 		pointer-events: none;
 	}
 
+	&__footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 24px;
+	}
+
 	&__score {
 		display: flex;
 		gap: 4px;
-		margin-top: 16px;
+	}
+
+	&__report {
+		margin-left: auto;
+		padding: 8px;
 	}
 }

@@ -93,6 +93,10 @@
 		margin-left: auto;
 	}
 
+	&__level {
+		color: var(--color-primary);
+	}
+
 	&__friend-actions {
 		display: flex;
 		align-items: center;

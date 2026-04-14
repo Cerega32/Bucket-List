@@ -27,6 +27,7 @@ import {GoalMapMulti} from '../GoalMap/GoalMapMulti';
 import LocationPicker from '../LocationPicker/LocationPicker';
 import {ProgressUpdateModal} from '../ProgressUpdateModal/ProgressUpdateModal';
 import {RandomGoalPicker} from '../RandomGoalPicker/RandomGoalPicker';
+import {ReportComment} from '../ReportComment/ReportComment';
 import {SetRegularGoalModal} from '../SetRegularGoalModal/SetRegularGoalModal';
 import {Svg} from '../Svg/Svg';
 
@@ -289,6 +290,9 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			)}
 			{window === 'compare-friend' && modalProps?.comparisonData && (
 				<CompareFriendModal data={modalProps.comparisonData as CompareFriendData} />
+			)}
+			{window === 'report-comment' && modalProps?.commentId && (
+				<ReportComment commentId={modalProps.commentId} closeModal={closeWindow} />
 			)}
 		</>
 	);

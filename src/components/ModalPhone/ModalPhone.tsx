@@ -78,12 +78,12 @@ export const ModalPhone: FC<ModalPhoneProps> = observer((props) => {
 			// Отключаем прокрутку body при открытии модального окна
 			document.body.style.overflow = 'hidden';
 
-			// Устанавливаем фокус на кнопку закрытия
+			// Устанавливаем фокус на кнопку закрытия, если внутри модалки нет элемента с фокусом
 			setTimeout(() => {
-				if (closeButtonRef.current) {
-					closeButtonRef.current.focus();
+				if (modalRef.current && !modalRef.current.contains(document.activeElement)) {
+					closeButtonRef.current?.focus();
 				}
-			}, 100);
+			}, 350);
 		} else {
 			document.removeEventListener('keyup', handleKeyUp);
 

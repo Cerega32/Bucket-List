@@ -37,6 +37,7 @@ interface FieldInputProps {
 	min?: number;
 	minLength?: number;
 	hint?: string;
+	inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement>;
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -70,6 +71,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		min,
 		minLength,
 		hint,
+		inputRef,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -116,6 +118,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						maxLength={maxLength}
 						minLength={minLength}
 						disabled={disabled}
+						ref={inputRef as React.RefObject<HTMLTextAreaElement>}
 					/>
 				) : (
 					<input
@@ -140,6 +143,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						minLength={minLength}
 						max={max}
 						disabled={disabled}
+						ref={inputRef as React.RefObject<HTMLInputElement>}
 					/>
 				)}
 				{suffix && <span className={element('suffix')}>{suffix}</span>}
