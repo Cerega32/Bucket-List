@@ -744,9 +744,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 																})}
 															/>
 															<span className={element('regular-goals-badge-count', {theme: header})}>
-																{HeaderRegularGoalsStore.totalCount > 99
-																	? '99+'
-																	: HeaderRegularGoalsStore.totalCount}
+																{HeaderRegularGoalsStore.totalCount}
 															</span>
 														</span>
 													) : (

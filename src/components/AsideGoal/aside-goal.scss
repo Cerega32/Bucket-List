@@ -100,6 +100,10 @@
 		flex-direction: column;
 		gap: 8px;
 		margin-top: 16px;
+
+		&--tight {
+			margin-top: 0;
+		}
 	}
 
 	&__regular-info-row {
@@ -293,6 +297,10 @@
 		gap: 12px;
 		margin-top: 16px;
 		margin-bottom: 16px;
+
+		&--tight {
+			margin-bottom: 8px;
+		}
 	}
 
 	&__regular-series-progress-label {

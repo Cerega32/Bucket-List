@@ -19,6 +19,7 @@ import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {postCreateGoal} from '@/utils/api/post/postCreateGoal';
 import {mapApi} from '@/utils/mapApi';
+import {pluralize} from '@/utils/text/pluralize';
 import {debounce} from '@/utils/time/debounce';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
@@ -1410,7 +1411,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 														type="number"
 													/>
 													<span className={element('input-suffix')}>
-														{durationType === 'weeks' ? 'недель' : 'дней'}
+														{regularFrequency === 'daily'
+															? `${pluralize(allowSkipDaysThrough, ['день', 'дня', 'дней'], false)}`
+															: `${pluralize(allowSkipDaysThrough, ['неделю', 'недели', 'недель'], false)}`}
 													</span>
 												</div>
 												<small className={element('format-hint')}>

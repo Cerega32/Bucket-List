@@ -62,6 +62,7 @@ const ListGoalsContainerComponent: FC = () => {
 
 	// Ref для предотвращения повторных запросов (не вызывает ре-рендер)
 	const isLoadingMoreRef = useRef(false);
+	const lastRequestedPageRef = useRef(0);
 	const listRef = useRef(list);
 	listRef.current = list;
 
@@ -70,12 +71,15 @@ const ListGoalsContainerComponent: FC = () => {
 		const currentList = listRef.current;
 		if (isLoadingMoreRef.current || !currentList || !currentList.goalsPagination?.hasMore) return;
 
+		const nextPage = currentList.goalsPagination.page + 1;
+		if (lastRequestedPageRef.current >= nextPage) return;
+		lastRequestedPageRef.current = nextPage;
+
 		isLoadingMoreRef.current = true;
 
 		// Показываем лоудер только если запрос занимает больше 300ms
 		loaderTimerRef.current = setTimeout(() => setIsLoadingMore(true), 300);
 
-		const nextPage = currentList.goalsPagination.page + 1;
 		const res = await getListGoalsPage(currentList.code, nextPage, currentList.goalsPagination.pageSize);
 
 		if (res.success) {
@@ -89,6 +93,8 @@ const ListGoalsContainerComponent: FC = () => {
 					goalsPagination: newPagination,
 				};
 			});
+		} else {
+			lastRequestedPageRef.current = nextPage - 1;
 		}
 
 		if (loaderTimerRef.current) clearTimeout(loaderTimerRef.current);

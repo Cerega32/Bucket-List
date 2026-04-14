@@ -79,6 +79,11 @@
 	}
 }
 
+/* Popper поверх модалок и без клиппинга overflow-контейнерами */
+.date-picker__popper {
+	z-index: 10002 !important;
+}
+
 /* Стили для самого календаря (переопределение стилей react-datepicker) */
 .react-datepicker {
 	border: 1px solid var(--color-border);
