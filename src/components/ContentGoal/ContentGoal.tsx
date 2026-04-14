@@ -161,8 +161,14 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 				}
 				return null;
 			case 'isGoalRating':
-				if (goal.regularConfig && goal.addedByUser && goal.regularConfig.id && goal.regularConfig.durationType === 'indefinite') {
-					return <RegularGoalRating regularGoalId={goal.regularConfig.id} />;
+				if (
+					goal.regularConfig &&
+					goal.addedByUser &&
+					goal.regularConfig.id &&
+					goal.regularConfig.durationType === 'indefinite' &&
+					!goal.regularConfig.allowCustomSettings
+				) {
+					return <RegularGoalRating regularGoalId={goal.regularConfig.id} refreshTrigger={historyRefreshTrigger} />;
 				}
 				return null;
 			default:

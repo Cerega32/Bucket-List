@@ -72,7 +72,7 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 							});
 						setRegularGoals(active);
 						const completedCount = active.filter(
-							(s) => !s.isInterrupted && s.currentPeriodProgress?.completedToday === true
+							(s) => !s.isInterrupted && (s.currentPeriodProgress?.completedToday === true || s.canCompleteToday === false)
 						).length;
 						HeaderRegularGoalsStore.setStats(active.length, completedCount);
 					}
@@ -155,7 +155,9 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 					return aDone ? 1 : -1;
 				});
 			setRegularGoals(active);
-			const completedCount = active.filter((s) => !s.isInterrupted && s.currentPeriodProgress?.completedToday === true).length;
+			const completedCount = active.filter(
+				(s) => !s.isInterrupted && (s.currentPeriodProgress?.completedToday === true || s.canCompleteToday === false)
+			).length;
 			HeaderRegularGoalsStore.setStats(active.length, completedCount);
 		}
 	};

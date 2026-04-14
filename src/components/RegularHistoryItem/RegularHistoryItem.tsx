@@ -25,10 +25,10 @@ export const RegularHistoryItem: FC<RegularHistoryItemProps> = (props) => {
 	const iconName = history.status === 'completed' ? 'regular-checked' : 'regular-cancel';
 	const statusText = history.status === 'completed' ? 'Серия выполнена' : 'Серия прервана';
 
-	// Определяем единицу измерения (дни или недели) в зависимости от durationType
-	const isWeeksDuration = history.regularGoalData.durationType === 'weeks';
+	// Определяем единицу измерения (дни или недели) в зависимости от frequency
+	const isWeeklyUnit = history.regularGoalData.frequency !== 'daily';
 	const streakValue = history.streak;
-	const unit = isWeeksDuration ? pluralize(streakValue, ['неделя', 'недели', 'недель']) : pluralize(streakValue, ['день', 'дня', 'дней']);
+	const unit = isWeeklyUnit ? pluralize(streakValue, ['неделя', 'недели', 'недель']) : pluralize(streakValue, ['день', 'дня', 'дней']);
 
 	// Форматирование периодичности
 	const getFrequencyText = () => {

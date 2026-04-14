@@ -656,7 +656,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 
 							{/* Секция регулярности выполнения */}
 							{/* Показываем секцию только если пользователь создатель или может редактировать параметры */}
-							{(goal.createdByUser || (goal.regularConfig && goal.regularConfig.allowCustomSettings)) && (
+							{(goal.isCanEdit || goal.createdByUser || (goal.regularConfig && goal.regularConfig.allowCustomSettings)) && (
 								<div className={element('regular-section')}>
 									<FieldCheckbox
 										id="is-regular"

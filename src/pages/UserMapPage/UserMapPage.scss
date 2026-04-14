@@ -21,6 +21,7 @@
 	}
 
 	&__map-section {
+		height: 500px;
 		padding: 12px;
 		background: var(--color-white);
 		border-radius: 12px;
@@ -28,6 +29,7 @@
 		backdrop-filter: blur(10px);
 
 		@include md {
+			height: 600px;
 			padding: 0px;
 		}
 	}

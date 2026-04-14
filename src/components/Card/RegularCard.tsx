@@ -56,27 +56,24 @@ const getCurrentDayOfWeek = (): number => {
 };
 
 const getSeriesText = (statistics: IRegularGoalStatistics): string => {
-	const isWeeksDuration = statistics.regularGoalData?.durationType === 'weeks';
-	const durationType = statistics.regularGoalData?.durationType;
 	const frequency = statistics.regularGoalData?.frequency;
+	const isWeeklyUnit = frequency !== 'daily';
 	let current = statistics.currentStreak || 0;
 	const max = statistics.maxStreak || 0;
 
-	// Для завершённой серии используем completedWeeks/totalCompletions
 	if (statistics.isSeriesCompleted) {
-		if (isWeeksDuration) {
+		if (isWeeklyUnit) {
 			current = statistics.completedWeeks > 0 ? statistics.completedWeeks : current;
 		} else {
 			current = statistics.totalCompletions > 0 ? statistics.totalCompletions : current;
 		}
-	} else if (durationType === 'days' && frequency !== 'daily') {
-		// Для weekly/custom с durationType 'days': currentStreak считает недели, нужно дни
-		current = statistics.totalCompletions || 0;
+	} else if (isWeeklyUnit) {
+		current = statistics.completedWeeks > 0 ? statistics.completedWeeks : current;
 	}
 
 	const value = max > current ? max : current;
 
-	if (isWeeksDuration) {
+	if (isWeeklyUnit) {
 		return pluralize(value, ['неделя', 'недели', 'недель']);
 	}
 

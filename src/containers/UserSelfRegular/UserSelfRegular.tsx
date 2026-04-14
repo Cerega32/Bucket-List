@@ -17,6 +17,7 @@ import {Switch} from '@/components/Switch/Switch';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {CategoriesStore} from '@/store/CategoriesStore';
+import {HeaderRegularGoalsStore} from '@/store/HeaderRegularGoalsStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {IPaginationPage} from '@/typings/request';
 import {getRegularGoalStatistics, IRegularGoalStatistics, markRegularProgress, restartRegularGoal} from '@/utils/api/goals';
@@ -213,6 +214,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				// Полностью перезагружаем данные вместо частичного обновления
 				// чтобы избежать проблем с неполными объектами
 				await loadRegularGoalStatistics(currentPage);
+				HeaderRegularGoalsStore.loadTodayCount();
 
 				NotificationStore.addNotification({
 					type: 'success',
@@ -235,6 +237,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 
 			if (response.success) {
 				await loadRegularGoalStatistics();
+				HeaderRegularGoalsStore.loadTodayCount();
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успешно!',
@@ -427,6 +430,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 			);
 
 			await loadRegularGoalStatistics(currentPage);
+			HeaderRegularGoalsStore.loadTodayCount();
 
 			NotificationStore.addNotification({
 				type: 'success',
@@ -539,7 +543,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 					</div>
 				</BlurLoader>
 
-				{pagination && pagination.totalPages > 1 && (
+				{activeTab === 'all' && pagination && pagination.totalPages > 1 && (
 					<Pagination currentPage={currentPage} totalPages={pagination.totalPages} goToPage={goToPage} />
 				)}
 			</div>

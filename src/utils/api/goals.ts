@@ -705,6 +705,7 @@ export const markRegularProgress = async (data: {
 // если на бэкенде включена пагинация.
 export const getRegularGoalStatistics = async (params?: {
 	page?: number;
+	page_size?: number;
 }): Promise<{
 	success: boolean;
 	data?:
