@@ -54,8 +54,15 @@ export const ConfirmExecutionAllGoal: FC<ConfirmExecutionAllGoalProps> = (props)
 				<Button theme="blue-light" className={element('btn')} onClick={closeModal} disabled={isMarking}>
 					Отмена
 				</Button>
-				<Button theme="blue" className={element('btn')} onClick={handleMarkAllGoalsFromList} disabled={isMarking}>
-					{isMarking ? 'Выполнение...' : 'Выполнить'}
+				<Button
+					theme="blue"
+					className={element('btn')}
+					onClick={handleMarkAllGoalsFromList}
+					disabled={isMarking}
+					loading={isMarking}
+					loadingText="Выполнение..."
+				>
+					Выполнить
 				</Button>
 			</div>
 		</section>

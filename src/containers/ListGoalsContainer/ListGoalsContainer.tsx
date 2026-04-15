@@ -151,6 +151,7 @@ const ListGoalsContainerComponent: FC = () => {
 				...list,
 				...res.data,
 			});
+			lastRequestedPageRef.current = Number.MAX_SAFE_INTEGER;
 			return true;
 		}
 		return res.success;
