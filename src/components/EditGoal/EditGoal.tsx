@@ -15,6 +15,7 @@ import {ICategory, IGoal} from '@/typings/goal';
 import {deleteGoal} from '@/utils/api/delete/deleteGoal';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {updateGoal} from '@/utils/api/put/updateGoal';
+import {pluralize} from '@/utils/text/pluralize';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {selectComplexity} from '@/utils/values/complexity';
@@ -821,7 +822,13 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 																type="number"
 															/>
 															<span className={element('input-suffix')}>
-																{durationType === 'weeks' ? 'недель' : 'дней'}
+																{regularFrequency === 'daily'
+																	? `${pluralize(allowSkipDaysThrough, ['день', 'дня', 'дней'], false)}`
+																	: `${pluralize(
+																			allowSkipDaysThrough,
+																			['неделю', 'недели', 'недель'],
+																			false
+																	  )}`}
 															</span>
 														</div>
 														<small className={element('format-hint')}>

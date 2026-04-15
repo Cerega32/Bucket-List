@@ -98,6 +98,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 				showPopperArrow={false}
 				placeholderText="ДД.ММ.ГГГГ"
 				selected={selected}
+				popperProps={{strategy: 'fixed'}}
+				popperClassName="date-picker__popper"
 				{...props}
 			/>
 			{Array.isArray(error) &&

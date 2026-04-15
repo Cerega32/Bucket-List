@@ -586,7 +586,8 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 							}
 							return !selectedGoals.some(
 								(selected) =>
-									selected.id === updatedGoal.goalCode || selected.title.toLowerCase() === updatedGoal.title.toLowerCase()
+									selected.code === updatedGoal.goalCode ||
+									selected.title.toLowerCase() === updatedGoal.title.toLowerCase()
 							);
 						});
 
@@ -605,12 +606,13 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 			await processChunksSequentially();
 
 			// Преобразуем все найденные цели в формат IGoal
-			const goalsToAdd: IGoalExtended[] = allGoals.map((goal: any) => {
+			const goalsToAdd: IGoalExtended[] = allGoals.map((goal: any, idx: number) => {
 				const confidence = goal.confidence || 0;
 				const needsConfirmation = confidence < 0.97;
+				const uniqueId = `auto_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 8)}`;
 
 				const mappedGoal: IGoalExtended = {
-					id: goal.goalCode || `temp_${Date.now()}_${Math.random()}`,
+					id: uniqueId,
 					title: goal.title,
 					description: goal.description,
 					image: goal.imageUrl,
@@ -621,13 +623,14 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					category: activeSubcategory !== null ? subcategories[activeSubcategory] : parentCategories[activeCategory!],
 					isFromAutoParser: true,
 					originalSearchText: goal.searchText,
-					autoParserData: goal,
+					autoParserData: {...goal},
 					needsConfirmation,
 					isConfirmed: !needsConfirmation, // Автоматически подтверждаем цели с высоким confidence
 					isRejected: false,
 					replacementSearch: false,
-					// Добавляем недостающие поля из IGoal
-					code: goal.goalCode || `temp_${Date.now()}_${Math.random()}`,
+					// code — референс на цель в бэкенде (может повторяться у одинаковых результатов поиска).
+					// id — уникальный идентификатор элемента списка, чтобы редактирование не затрагивало дубли.
+					code: goal.goalCode || uniqueId,
 					additional: goal.additional || {},
 				};
 
@@ -665,6 +668,14 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 			const updated = prev.map((g) => (g.id === goalId ? {...g, ...editedGoal} : g));
 			return updated;
 		});
+		// Скроллим к отредактированной цели, чтобы пользователь видел следующие цели, требующие правки
+		setTimeout(() => {
+			const selector = `[data-goal-id="${CSS.escape(String(goalId))}"]`;
+			const el = document.querySelector<HTMLElement>(selector);
+			if (el) {
+				el.scrollIntoView({behavior: 'smooth', block: 'start'});
+			}
+		}, 50);
 	};
 
 	// Добавляем функцию для очистки целей

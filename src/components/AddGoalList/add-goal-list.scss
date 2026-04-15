@@ -4,6 +4,11 @@
 	max-width: 1200px;
 	padding: 56px 24px 96px;
 	margin: 0 auto;
+	scroll-margin-top: var(--height-header);
+
+	* {
+		scroll-margin-top: var(--height-header);
+	}
 
 	&__wrapper-title {
 		display: flex;

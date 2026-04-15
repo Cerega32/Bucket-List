@@ -1,10 +1,11 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
+import {FC, useEffect} from 'react';
 
 import {Achievement} from '@/components/Achievement/Achievement';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
+import {UserStore} from '@/store/UserStore';
 import {IAchievement} from '@/typings/achievements';
 import {GET} from '@/utils/fetch/requests';
 import './user-achievements.scss';
@@ -17,25 +18,36 @@ export const UserAchievements: FC<UserAchievementsProps> = observer((props) => {
 	const {id} = props;
 	const [block, element] = useBem('user-achievements');
 
-	const [achievements, setAchievements] = useState<Array<IAchievement>>([]);
-	const [isLoading, setIsLoading] = useState(true);
+	const {achievements, setAchievements, achievementsLoadedForId, setAchievementsLoadedForId} = UserStore;
 
 	useEffect(() => {
+		if (achievementsLoadedForId === id) return undefined;
+		let cancelled = false;
+		setAchievementsLoadedForId(null);
+		setAchievements([]);
 		(async () => {
-			setIsLoading(true);
 			const res = await GET('achievements', {get: {user_id: id}});
+			if (cancelled) return;
 			if (res.success) {
 				// Фильтруем только выполненные достижения
 				const achieved = res.data.data.filter((achievement: IAchievement) => achievement.isAchieved);
 				setAchievements(achieved);
 			}
-			setIsLoading(false);
+			setAchievementsLoadedForId(id);
 		})();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+		return () => {
+			cancelled = true;
+		};
+	}, [id]);
+
+	const isFresh = achievementsLoadedForId === id;
+
+	if (!isFresh) {
+		return <Loader isLoading className={block({empty: true})} />;
+	}
 
 	return (
-		<Loader isLoading={isLoading} className={block({empty: achievements.length === 0})}>
+		<Loader isLoading={false} className={block({empty: achievements.length === 0})}>
 			{achievements.length === 0 ? (
 				<EmptyState title="У этого пользователя пока нет достижений" description="Выполняйте цели, чтобы получать достижения" />
 			) : (

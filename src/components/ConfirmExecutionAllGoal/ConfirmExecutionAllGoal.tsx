@@ -1,4 +1,4 @@
-import {FC} from 'react';
+import {FC, useState} from 'react';
 
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
@@ -8,7 +8,6 @@ import {NotificationStore} from '@/store/NotificationStore';
 import {Title} from '../Title/Title';
 
 import './confirm-execution-all-goal.scss';
-// import {markAllGoalsFromList} from '@/utils/api/post/markAllGoalsFromList';
 
 interface ConfirmExecutionAllGoalProps {
 	className?: string;
@@ -18,21 +17,28 @@ interface ConfirmExecutionAllGoalProps {
 
 export const ConfirmExecutionAllGoal: FC<ConfirmExecutionAllGoalProps> = (props) => {
 	const {className, closeModal, funcModal} = props;
+	const [isMarking, setIsMarking] = useState(false);
 
 	const [block, element] = useBem('confirm-execution-all-goal', className);
 
 	const handleMarkAllGoalsFromList = async () => {
+		if (isMarking) return;
+		setIsMarking(true);
 		try {
-			const res = funcModal();
-			if (res) {
-				closeModal();
+			const raw = funcModal();
+			const ok = raw instanceof Promise ? await raw : raw;
+			if (ok === false) {
+				return;
 			}
+			closeModal();
 		} catch (error) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Упс',
 				message: 'Что-то пошло не так',
 			});
+		} finally {
+			setIsMarking(false);
 		}
 	};
 
@@ -45,11 +51,11 @@ export const ConfirmExecutionAllGoal: FC<ConfirmExecutionAllGoalProps> = (props)
 				Вы действительно хотите отметить все цели выполненными? Отменить это действие можно только вручную по каждой цели.
 			</p>
 			<div className={element('btns-wrapper')}>
-				<Button theme="blue-light" className={element('btn')} onClick={closeModal}>
+				<Button theme="blue-light" className={element('btn')} onClick={closeModal} disabled={isMarking}>
 					Отмена
 				</Button>
-				<Button theme="blue" className={element('btn')} onClick={handleMarkAllGoalsFromList}>
-					Выполнить
+				<Button theme="blue" className={element('btn')} onClick={handleMarkAllGoalsFromList} disabled={isMarking}>
+					{isMarking ? 'Выполнение...' : 'Выполнить'}
 				</Button>
 			</div>
 		</section>

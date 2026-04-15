@@ -15,9 +15,10 @@ const refreshCsrfToken = async (): Promise<void> => {
 	await fetch('/api/categories/', {method: 'GET', credentials: 'include'});
 };
 
-/** Очистить авторизацию при ошибке CSRF — избежать рассинхрона (модалка логина + «вы авторизованы» в шапке) */
+/** Очистить авторизацию при ошибке CSRF — избежать рассинхрона (модалка логина + «вы авторизованы» в шапке).
+ * httpOnly cookie 'token' может снять только сервер, поэтому тут трогаем только JS-видимые. */
 const clearAuthOnCsrfError = (): void => {
-	Cookies.remove('token');
+	Cookies.remove('is_authenticated');
 	Cookies.remove('avatar');
 	Cookies.remove('name');
 	Cookies.remove('user-id');
@@ -25,7 +26,6 @@ const clearAuthOnCsrfError = (): void => {
 	Cookies.remove('user_level');
 	Cookies.remove('user_total_completed_goals');
 	Cookies.remove('email_confirmed');
-	Cookies.remove('token');
 	UserStore.setIsAuth(false);
 	UserStore.setAvatar('');
 	UserStore.setName('');
@@ -47,15 +47,10 @@ interface IFetchParams {
 	enableRetry?: boolean;
 }
 
-type Headers = HeadersInit & {
-	Authorization?: string;
-};
-
-const setHeaders = (method: string, params: IFetchParams = {}): Headers => {
+const setHeaders = (method: string, params: IFetchParams = {}): HeadersInit => {
 	const headers: Record<string, string> = {};
-	if (params?.auth && Cookies.get('token')) {
-		headers['Authorization'] = `Token ${Cookies.get('token')}`;
-	}
+	// Токен живёт в httpOnly cookie и отправляется автоматически через credentials: 'include'.
+	// Authorization-заголовок больше не формируем из JS — токен JS-коду недоступен.
 
 	if (!params?.file) {
 		headers['Content-Type'] = 'application/json';

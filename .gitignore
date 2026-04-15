@@ -75,3 +75,6 @@ deploy.sh
 # check_updates.sh
 CLAUDE.md
 .claude/
+
+# VS Code auto-generated Python helper cache
+.vscode/PythonImportHelper-*.json

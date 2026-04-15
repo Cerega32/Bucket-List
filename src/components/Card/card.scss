@@ -355,9 +355,14 @@
 	}
 
 	&__series-value {
-		color: var(--color-text);
+		color: var(--color-text-secondary);
 		font-size: 14px;
 		font-weight: var(--weight-medium);
+
+		&--active {
+			color: var(--color-text-primary);
+			font-weight: var(--weight-semi-bold);
+		}
 	}
 
 	&__series-days {

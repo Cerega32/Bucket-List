@@ -25,7 +25,12 @@ import {
 import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
 import {updateRegularGoalSettings} from '@/utils/api/post/updateRegularGoalSettings';
 import {GoalWithLocation} from '@/utils/mapApi';
-import {weeklyProratedHintForFirstDayOnCalendar} from '@/utils/regularGoal/weeklyProratedHint';
+import {
+	addDays,
+	endOfISOWeekFromMonday,
+	startOfISOWeek,
+	weeklyProratedHintForFirstDayOnCalendar,
+} from '@/utils/regularGoal/weeklyProratedHint';
 import {pluralize} from '@/utils/text/pluralize';
 
 import {Button} from '../Button/Button';
@@ -599,8 +604,31 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				setIsAdded(true);
 				setIsAddRegularGoalModalOpen(false);
 
+				// Синтезируем локальную статистику, чтобы отображение параметров сразу обновилось
+				const prevStats = localStatistics || regularConfig?.statistics;
+				setLocalStatistics({
+					...(prevStats || {}),
+					regularGoalData: {
+						...((prevStats?.regularGoalData as any) || {}),
+						frequency: settingsWithDefaults.frequency,
+						weeklyFrequency: settingsWithDefaults.weeklyFrequency,
+						customSchedule: settingsWithDefaults.customSchedule,
+						durationType: settingsWithDefaults.durationType,
+						durationValue: settingsWithDefaults.durationValue,
+						endDate: settingsWithDefaults.endDate,
+						resetOnSkip: settingsWithDefaults.resetOnSkip,
+						allowSkipDays: settingsWithDefaults.allowSkipDays,
+						daysForEarnedSkip: settingsWithDefaults.daysForEarnedSkip,
+					},
+				} as any);
+
 				// Обновляем счётчик регулярных целей в шапке
 				HeaderRegularGoalsStore.loadTodayCount();
+
+				// Перезагружаем цель, чтобы обновить regularConfig.statistics и показать вкладку "История выполнения"
+				if (onGoalUpdate) {
+					onGoalUpdate();
+				}
 
 				NotificationStore.addNotification({
 					type: 'success',
@@ -779,6 +807,11 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const handleRestartAfterCompletion = async () => {
 		if (!regularConfig || !isAdded) return;
 
+		if (regularConfig.allowCustomSettings) {
+			setIsEditSettingsModalOpen(true);
+			return;
+		}
+
 		try {
 			const response = await restartAfterCompletion(regularConfig.id);
 
@@ -842,6 +875,48 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				type: 'error',
 				title: 'Ошибка',
 				message: error instanceof Error ? error.message : 'Не удалось начать новую серию',
+			});
+		}
+	};
+
+	// Обработчик перевода прерванной цели в выполненную (для бессрочных)
+	const handleCompleteInterruptedSeries = async () => {
+		if (!regularConfig || !isAdded) return;
+		try {
+			const response = await resetRegularGoal(regularConfig.id, true);
+			if (response.success && response.data) {
+				const serverResponse = (response.data as any).data || response.data;
+				const statisticsData = serverResponse.statistics || serverResponse;
+				if (statisticsData) {
+					const newStatistics = {...statisticsData};
+					if (newStatistics.currentPeriodProgress) {
+						const currentPeriodProgress = {...newStatistics.currentPeriodProgress};
+						if (currentPeriodProgress.weekDays && Array.isArray(currentPeriodProgress.weekDays)) {
+							currentPeriodProgress.weekDays = currentPeriodProgress.weekDays.map((day: any) => ({...day}));
+						}
+						newStatistics.currentPeriodProgress = currentPeriodProgress;
+					}
+					if (newStatistics.regularGoalData) {
+						newStatistics.regularGoalData = {...newStatistics.regularGoalData};
+					}
+					setLocalStatistics(newStatistics);
+				}
+				HeaderRegularGoalsStore.loadTodayCount();
+				if (onGoalCompleted) onGoalCompleted();
+				if (onHistoryRefresh) onHistoryRefresh();
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Успех',
+					message: 'Серия отмечена выполненной',
+				});
+			} else {
+				throw new Error(response.error || 'Не удалось отметить серию выполненной');
+			}
+		} catch (error) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: error instanceof Error ? error.message : 'Не удалось отметить серию выполненной',
 			});
 		}
 	};
@@ -1017,6 +1092,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				goalId,
 				goalTitle: title,
 				goalFolders: userFolders || [],
+				onFolderSelected: (folder: {id: number; name: string; color: string; icon: string}) => {
+					if (!onGoalUpdate) return;
+					const current = userFolders || [];
+					if (current.some((f) => f.id === folder.id)) return;
+					onGoalUpdate({userFolders: [...current, folder]});
+				},
 			});
 		}
 	};
@@ -1138,6 +1219,24 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 			}
 		}
 
+		// Если цель отмечается как выполненная и есть прогресс < 100%, подтягиваем прогресс до 100%
+		if (!isCurrentlyCompleted && progress && goalId && progress.progressPercentage < 100) {
+			try {
+				const response = await updateGoalProgress(goalId, {
+					progress_percentage: 100,
+					daily_notes: progress.dailyNotes || '',
+					is_working_today: progress.isWorkingToday ?? false,
+				});
+				if (response.success && response.data) {
+					setProgress(response.data);
+					patchParentUserProgress(response.data);
+					onHistoryRefresh?.();
+				}
+			} catch (error) {
+				console.error('Ошибка обновления прогресса до 100%:', error);
+			}
+		}
+
 		setIsCompleted(!isCurrentlyCompleted);
 
 		if (!isList) {
@@ -1185,14 +1284,20 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const getDurationDisplay = () => {
 		if (!regularConfig) return '';
 
-		switch (regularConfig.durationType) {
+		const stats = localStatistics || regularConfig.statistics;
+		const source = isAdded && stats?.regularGoalData ? stats.regularGoalData : regularConfig;
+		const durationType = source.durationType || regularConfig.durationType;
+		const durationValue = source.durationValue ?? regularConfig.durationValue;
+		const endDate = source.endDate ?? regularConfig.endDate;
+
+		switch (durationType) {
 			case 'days':
-				return `${pluralize(regularConfig.durationValue || 0, ['день', 'дня', 'дней'])}`;
+				return `${pluralize(durationValue || 0, ['день', 'дня', 'дней'])}`;
 			case 'weeks':
-				return `${pluralize(regularConfig.durationValue || 0, ['неделя', 'недели', 'недель'])}`;
+				return `${pluralize(durationValue || 0, ['неделя', 'недели', 'недель'])}`;
 			case 'until_date':
-				if (regularConfig.endDate) {
-					const date = new Date(regularConfig.endDate);
+				if (endDate) {
+					const date = new Date(endDate);
 					return date.toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: 'numeric'});
 				}
 				return 'До даты';
@@ -1352,7 +1457,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 
 		if (!stats || !regularConfig) {
 			const unit = isWeeklyUnit ? pluralize(0, ['неделя', 'недели', 'недель']) : pluralize(0, ['день', 'дня', 'дней']);
-			return {value: 0, unit, isInterrupted: false, isCompleted: false, maxStreak: 0};
+			return {value: 0, unit, isInterrupted: false, isCompleted: false, maxStreak: 0, maxStreakUnit: unit};
 		}
 
 		const seriesIsCompleted = stats.isSeriesCompleted || false;
@@ -1364,8 +1469,19 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		} else if (seriesIsCompleted) {
 			// Для завершённой серии
 			if (isWeeklyUnit) {
-				// weekly/custom → недели
-				streak = stats.completedWeeks > 0 ? stats.completedWeeks : stats.currentStreak || 0;
+				// weekly/custom → недели. Считаем календарные недели от старта серии до её завершения,
+				// чтобы короткие серии показывали минимум 1 неделю, а серия, завершившаяся на 2-й неделе — 2.
+				const startStr = stats.startDate;
+				const endStr = stats.seriesCompletionDate;
+				if (startStr && endStr) {
+					const startMonday = getLocalMonday(new Date(startStr));
+					const endMonday = getLocalMonday(new Date(endStr));
+					const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+					const deltaWeeks = Math.floor((endMonday.getTime() - startMonday.getTime()) / msPerWeek);
+					streak = Math.max(1, deltaWeeks + 1);
+				} else {
+					streak = Math.max(1, stats.completedWeeks || stats.currentStreak || 0);
+				}
 			} else {
 				// daily → дни
 				streak = stats.totalCompletions > 0 ? stats.totalCompletions : stats.currentStreak || 0;
@@ -1394,6 +1510,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				isInterrupted,
 				isCompleted: seriesIsCompleted,
 				maxStreak: maxStreakValue,
+				maxStreakUnit: pluralize(maxStreakValue, ['неделя', 'недели', 'недель']),
 			};
 		}
 		return {
@@ -1402,6 +1519,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 			isInterrupted,
 			isCompleted: seriesIsCompleted,
 			maxStreak: maxStreakValue,
+			maxStreakUnit: pluralize(maxStreakValue, ['день', 'дня', 'дней']),
 		};
 	};
 
@@ -1520,6 +1638,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		if (N <= 0) return null;
 		const today = new Date();
 		const {tDays, minCompletions} = weeklyProratedHintForFirstDayOnCalendar(N, today, today);
+		if (minCompletions >= N) return null;
 		return {tDays, minCompletions, N};
 	})();
 
@@ -1622,7 +1741,9 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 								<div className={element('regular-info-row')}>
 									<span className={element('regular-info-label')}>До начисления пропуска:</span>
 									<span className={element('regular-info-value')}>
-										{pluralize(daysUntilEarnedSkip, ['день', 'дня', 'дней'])}
+										{regularConfig.frequency === 'daily'
+											? pluralize(daysUntilEarnedSkip, ['день', 'дня', 'дней'])
+											: pluralize(daysUntilEarnedSkip, ['неделя', 'недели', 'недель'])}
 									</span>
 								</div>
 							)}
@@ -1649,27 +1770,76 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 			{/* Блок сведений о текущей серии - показывается если цель добавлена */}
 			{regularConfig && isAdded && !isList && (
 				<div className={element('regular-info-header')}>
-					<div className={element('regular-info-title')}>
-						{seriesInfo.isCompleted ? (
-							<Svg icon="regular-checked" className={element('regular-info-icon')} />
-						) : seriesInfo.isInterrupted ? (
-							<Svg icon="regular-cancel" className={element('regular-info-icon')} />
-						) : seriesInfo.value > 0 ? (
-							<Svg icon="regular" className={element('regular-info-icon')} />
-						) : (
-							<Svg icon="regular-empty" className={element('regular-info-icon')} />
-						)}
-						<span>
-							{seriesInfo.isCompleted ? 'Серия выполнена' : seriesInfo.isInterrupted ? 'Серия прервана' : 'Текущая серия'}
-						</span>
-						<span
-							className={element('regular-info-streak', {
-								active: seriesInfo.value > 0 || seriesInfo.isCompleted || seriesInfo.isInterrupted,
-							})}
-						>
-							{seriesInfo.unit}
-						</span>
-					</div>
+					{(() => {
+						const stats = localStatistics || regularConfig.statistics;
+						const frequency = stats?.regularGoalData?.frequency || regularConfig.frequency;
+						const currentWeekCompletions = stats?.currentWeekCompletions ?? 0;
+						const startDate = stats?.startDate;
+
+						let isCurrentPeriodCompleted = false;
+						if (frequency === 'daily') {
+							isCurrentPeriodCompleted = isRegularGoalCompletedToday;
+						} else if (frequency === 'weekly') {
+							const weeklyN = stats?.regularGoalData?.weeklyFrequency ?? regularConfig.weeklyFrequency ?? 0;
+							if (weeklyN > 0) {
+								const startForHint = startDate ? new Date(startDate) : new Date();
+								const {minCompletions} = weeklyProratedHintForFirstDayOnCalendar(weeklyN, startForHint, new Date());
+								isCurrentPeriodCompleted = currentWeekCompletions >= minCompletions;
+							}
+						} else if (frequency === 'custom') {
+							const schedule = stats?.regularGoalData?.customSchedule || regularConfig.customSchedule;
+							if (schedule) {
+								const today = new Date();
+								today.setHours(0, 0, 0, 0);
+								const monday = startOfISOWeek(today);
+								const sunday = endOfISOWeekFromMonday(monday);
+								const start = startDate ? new Date(startDate) : monday;
+								start.setHours(0, 0, 0, 0);
+								const effStart = start.getTime() > monday.getTime() ? start : monday;
+								const dayKeys: Array<keyof WeekDaySchedule> = [
+									'monday',
+									'tuesday',
+									'wednesday',
+									'thursday',
+									'friday',
+									'saturday',
+									'sunday',
+								];
+								let requiredCount = 0;
+								for (let i = 0; i < 7; i++) {
+									const d = addDays(monday, i);
+									if (d.getTime() >= effStart.getTime() && d.getTime() <= sunday.getTime() && schedule[dayKeys[i]]) {
+										requiredCount++;
+									}
+								}
+								isCurrentPeriodCompleted = requiredCount > 0 && currentWeekCompletions >= requiredCount;
+							}
+						}
+
+						const isActiveState =
+							seriesInfo.isCompleted || seriesInfo.isInterrupted || (seriesInfo.value > 0 && isCurrentPeriodCompleted);
+						return (
+							<div className={element('regular-info-title')}>
+								{seriesInfo.isCompleted ? (
+									<Svg icon="regular-checked" className={element('regular-info-icon')} />
+								) : seriesInfo.isInterrupted ? (
+									<Svg icon="regular-cancel" className={element('regular-info-icon')} />
+								) : seriesInfo.value > 0 && isCurrentPeriodCompleted ? (
+									<Svg icon="regular" className={element('regular-info-icon')} />
+								) : (
+									<Svg icon="regular-empty" className={element('regular-info-icon')} />
+								)}
+								<span>
+									{seriesInfo.isCompleted
+										? 'Серия выполнена'
+										: seriesInfo.isInterrupted
+										? 'Серия прервана'
+										: 'Текущая серия'}
+								</span>
+								<span className={element('regular-info-streak', {active: isActiveState})}>{seriesInfo.unit}</span>
+							</div>
+						);
+					})()}
 
 					{/* Календарь дней недели - показываем только если серия не прервана и не завершена */}
 					{!seriesInfo.isInterrupted && !seriesInfo.isCompleted && (
@@ -1862,36 +2032,56 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					)}
 					<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
 
-					{/* Прогресс - показывается только для целей с определенной длительностью и не завершенных */}
-					{progressPercentage !== null && !seriesInfo.isCompleted && (
-						<>
-							<div className={element('regular-series-progress')}>
-								<span className={element('regular-series-progress-label')}>Прогресс:</span>
-								<div className={element('regular-series-progress-bar')}>
-									<Progress done={progressPercentage} all={100} goal />
-								</div>
-							</div>
-							<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
-						</>
-					)}
-					<div className={element('regular-info-details')}>
-						{/* Строка "Выполнено раз: X" - показывается если серия была выполнена хотя бы раз (даже если цель удалена) */}
-						{regularConfig.completedSeriesCount !== undefined && regularConfig.completedSeriesCount > 0 && (
-							<div className={element('regular-info-row')}>
-								<span className={element('regular-info-label')}>Выполнено раз:</span>
-								<span className={element('regular-info-value')}>{regularConfig.completedSeriesCount}</span>
-							</div>
-						)}
-						{/* Строка "Макс. серия: X" - показывается если макс > текущей или серия прервана (но НЕ для выполненной серии) */}
-						{seriesInfo.maxStreak > 0 &&
+					{(() => {
+						const stats = localStatistics || regularConfig.statistics;
+						const source = isAdded && stats?.regularGoalData ? stats.regularGoalData : regularConfig;
+						const durationType = source.durationType || regularConfig.durationType;
+						const resetOnSkip = source.resetOnSkip ?? regularConfig.resetOnSkip;
+						const showMaxStreak =
+							durationType === 'indefinite' &&
+							!resetOnSkip &&
+							seriesInfo.maxStreak > 0 &&
 							!seriesInfo.isCompleted &&
-							(seriesInfo.isInterrupted || seriesInfo.maxStreak > seriesInfo.value) && (
-								<div className={element('regular-info-row')}>
-									<span className={element('regular-info-label')}>Макс. серия:</span>
-									<span className={element('regular-info-value')}>{seriesInfo.maxStreak}</span>
+							(seriesInfo.isInterrupted || seriesInfo.maxStreak > seriesInfo.value);
+						const showCompletedCount =
+							regularConfig.completedSeriesCount !== undefined && regularConfig.completedSeriesCount > 0;
+						const hasBelow = showMaxStreak || showCompletedCount;
+						const isCompletedWithFinite = seriesInfo.isCompleted && durationType !== 'indefinite';
+						const displayProgress = isCompletedWithFinite ? 100 : progressPercentage;
+						const showProgress =
+							durationType !== 'indefinite' && displayProgress !== null && (isCompletedWithFinite || !seriesInfo.isCompleted);
+						return (
+							<>
+								{/* Прогресс - показывается только для целей с определенной длительностью */}
+								{showProgress && (
+									<div className={element('regular-series-progress', {tight: hasBelow})}>
+										<span className={element('regular-series-progress-label')}>Прогресс:</span>
+										<div className={element('regular-series-progress-bar')}>
+											<Progress done={displayProgress as number} all={100} goal />
+										</div>
+									</div>
+								)}
+								<div
+									className={element('regular-info-details', {
+										tight: showProgress,
+									})}
+								>
+									{showCompletedCount && (
+										<div className={element('regular-info-row')}>
+											<span className={element('regular-info-label')}>Выполнено раз:</span>
+											<span className={element('regular-info-value')}>{regularConfig.completedSeriesCount}</span>
+										</div>
+									)}
+									{showMaxStreak && (
+										<div className={element('regular-info-row')}>
+											<span className={element('regular-info-label')}>Макс. серия без пропусков:</span>
+											<span className={element('regular-info-value')}>{seriesInfo.maxStreakUnit}</span>
+										</div>
+									)}
 								</div>
-							)}
-					</div>
+							</>
+						);
+					})()}
 					{(seriesInfo.isCompleted ||
 						seriesInfo.isInterrupted ||
 						(regularConfig.completedSeriesCount !== undefined && regularConfig.completedSeriesCount > 0)) && (
@@ -1937,7 +2127,9 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 							<div className={element('regular-info-row')}>
 								<span className={element('regular-info-label')}>До начисления пропуска:</span>
 								<span className={element('regular-info-value')}>
-									{pluralize(daysUntilEarnedSkip, ['день', 'дня', 'дней'])}
+									{regularConfig.frequency === 'daily'
+										? pluralize(daysUntilEarnedSkip, ['день', 'дня', 'дней'])
+										: pluralize(daysUntilEarnedSkip, ['неделя', 'недели', 'недель'])}
 								</span>
 							</div>
 						)}
@@ -1962,7 +2154,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 									<Button
 										theme="green"
 										onClick={handleResetCompletedSeries}
-										icon="regular-checked"
+										icon="done"
 										className={element('btn')}
 										size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 										hoverContent="Отменить выполнение"
@@ -1992,16 +2184,33 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 									</Button>
 								</>
 							) : seriesInfo.isInterrupted ? (
-								// Если серия прервана, показываем кнопку "Начать заново"
-								<Button
-									theme="blue"
-									onClick={handleRestartGoal}
-									icon="regular-empty"
-									className={element('btn')}
-									size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-								>
-									Начать заново
-								</Button>
+								// Если серия прервана
+								<>
+									{(() => {
+										const stats = localStatistics || regularConfig.statistics;
+										const durationType = stats?.regularGoalData?.durationType || regularConfig.durationType;
+										return durationType === 'indefinite' ? (
+											<Button
+												theme="blue"
+												onClick={handleCompleteInterruptedSeries}
+												icon="done"
+												className={element('btn')}
+												size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+											>
+												Выполнить
+											</Button>
+										) : null;
+									})()}
+									<Button
+										theme="blue-light"
+										onClick={handleRestartGoal}
+										icon="regular-empty"
+										className={element('btn')}
+										size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+									>
+										Начать заново
+									</Button>
+								</>
 							) : (
 								// Если серия не завершена и не прервана, показываем обычную кнопку выполнения
 								(regularConfig.frequency === 'daily' ||
@@ -2019,7 +2228,16 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 												: 'blue'
 										}
 										onClick={handleMarkRegularGoal}
-										icon={isRegularGoalBlockedTodayBySchedule ? undefined : 'regular'}
+										icon={
+											isRegularGoalBlockedTodayBySchedule
+												? undefined
+												: (regularConfig.frequency === 'daily' &&
+														(isRegularGoalCompletedToday || regularProgress?.completed)) ||
+												  ((regularConfig.frequency === 'weekly' || regularConfig.frequency === 'custom') &&
+														isRegularGoalCompletedToday)
+												? 'regular-checked'
+												: 'regular-empty'
+										}
 										className={element('btn')}
 										size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 										disabled={isRegularGoalBlockedTodayBySchedule}
@@ -2058,11 +2276,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 									</Button>
 								)
 							)}
-							{/* Кнопка "изменить параметры" - показывается только если разрешено редактирование */}
-							{regularConfig && isAdded && !isList && regularConfig.allowCustomSettings && (
+							{/* Кнопка "изменить параметры" - показывается только если разрешено редактирование и серия не выполнена */}
+							{regularConfig && isAdded && !isList && regularConfig.allowCustomSettings && !seriesInfo.isCompleted && (
 								<Button
 									theme="blue-light"
 									onClick={() => setIsEditSettingsModalOpen(true)}
+									icon="edit"
 									className={element('btn')}
 									size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 								>

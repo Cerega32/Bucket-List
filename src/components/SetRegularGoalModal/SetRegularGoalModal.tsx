@@ -9,9 +9,10 @@ import Select from '@/components/Select/Select';
 import {WeekDaySchedule, WeekDaySelector} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
+import {pluralize} from '@/utils/text/pluralize';
 
-import './set-regular-goal-modal.scss';
 import {Banner} from '../Banner/Banner';
+import './set-regular-goal-modal.scss';
 
 export interface RegularGoalSettings {
 	frequency: 'daily' | 'weekly' | 'custom';
@@ -54,7 +55,18 @@ export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCan
 		initialSettings?.durationType || 'days'
 	);
 	const [durationValue, setDurationValue] = useState(initialSettings?.durationValue || 30);
-	const [endDate, setEndDate] = useState(initialSettings?.endDate || '');
+	const [endDate, setEndDate] = useState(() => {
+		const initial = initialSettings?.endDate;
+		if (!initial) return '';
+		const tomorrow = new Date();
+		tomorrow.setHours(0, 0, 0, 0);
+		tomorrow.setDate(tomorrow.getDate() + 1);
+		const initialDate = new Date(initial);
+		if (Number.isNaN(initialDate.getTime()) || initialDate < tomorrow) {
+			return format(tomorrow, 'yyyy-MM-dd');
+		}
+		return initial;
+	});
 	const [resetOnSkip, setResetOnSkip] = useState(initialSettings?.resetOnSkip || false);
 	const [allowSkipDays, setAllowSkipDays] = useState(initialSettings?.allowSkipDays || 0);
 	const [daysForEarnedSkip, setDaysForEarnedSkip] = useState(initialSettings?.daysForEarnedSkip || 0);
@@ -270,7 +282,11 @@ export const SetRegularGoalModal: FC<SetRegularGoalModalProps> = ({onSave, onCan
 										}}
 										className={element('field')}
 										type="number"
-										suffix={frequency === 'weekly' ? 'недель' : 'дней'}
+										suffix={
+											frequency === 'daily'
+												? `${pluralize(daysForEarnedSkip, ['день', 'дня', 'дней'], false)}`
+												: `${pluralize(daysForEarnedSkip, ['неделю', 'недели', 'недель'], false)}`
+										}
 									/>
 								</div>
 							</>

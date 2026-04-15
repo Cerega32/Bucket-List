@@ -212,7 +212,7 @@ export const GoalListItem: React.FC<GoalListItemProps> = ({
 	// Если цель редактируется
 	if (isEditing && editingGoalData) {
 		return (
-			<div className={block({editing: true})}>
+			<div className={block({editing: true})} data-goal-id={goal.id}>
 				{/* Отображаем auto-header при редактировании автопарсерных целей */}
 				{goal.isFromAutoParser && (statusInfo || confidenceInfo) && (
 					<div className={element('auto-header')}>
@@ -261,6 +261,7 @@ export const GoalListItem: React.FC<GoalListItemProps> = ({
 				'needs-edit': needsEdit,
 				rejected: goal.isRejected,
 			})}
+			data-goal-id={goal.id}
 		>
 			{goal.isFromAutoParser && (statusInfo || confidenceInfo) && (
 				<div className={element('auto-header')}>

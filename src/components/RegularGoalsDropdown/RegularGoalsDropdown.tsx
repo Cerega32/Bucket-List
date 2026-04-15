@@ -56,7 +56,7 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 						setProgressGoals(list || []);
 					}
 				} else {
-					const response = await getRegularGoalStatistics();
+					const response = await getRegularGoalStatistics({page_size: 100});
 					if (response.success && response.data) {
 						const statistics = Array.isArray(response.data) ? response.data : response.data.data;
 						const active = statistics
@@ -142,7 +142,7 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 	};
 
 	const refreshRegularGoals = async () => {
-		const updatedResponse = await getRegularGoalStatistics();
+		const updatedResponse = await getRegularGoalStatistics({page_size: 100});
 		if (updatedResponse.success && updatedResponse.data) {
 			const statistics = Array.isArray(updatedResponse.data) ? updatedResponse.data : updatedResponse.data.data;
 			const active = statistics

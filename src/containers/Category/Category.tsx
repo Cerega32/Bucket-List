@@ -200,7 +200,7 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 			const updatedGoal = {
 				...popularGoals[i],
 				addedByUser: operation !== 'delete',
-				completedByUser: operation === 'mark' ? !done : popularGoals[i].completedByUser,
+				completedByUser: operation === 'mark' ? !done : operation === 'delete' ? false : popularGoals[i].completedByUser,
 				totalAdded: res.data.users_added_count,
 			};
 

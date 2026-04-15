@@ -29,6 +29,9 @@ class Store implements IGoalStore {
 	/** Номер следующей страницы чужих комментариев (null — больше нет) */
 	commentsNextPage: number | null = null;
 
+	/** Для какого goal.code уже загружены lists — чтобы не перезагружать при повторном входе на таб */
+	listsLoadedForCode: string | null = null;
+
 	id = 0;
 
 	constructor() {
@@ -73,6 +76,10 @@ class Store implements IGoalStore {
 
 	setId = (id: number) => {
 		this.id = id;
+	};
+
+	setListsLoadedForCode = (code: string | null) => {
+		this.listsLoadedForCode = code;
 	};
 }
 

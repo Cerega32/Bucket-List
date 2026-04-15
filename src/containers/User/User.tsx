@@ -22,7 +22,7 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 
 	const {userInfo} = UserStore;
 	const {id} = useParams();
-	const [isLoading, setIsLoading] = useState(true);
+	const [, setIsLoading] = useState(true);
 	const [hasVisited, setHasVisited] = useState(false);
 
 	if (!id) {
@@ -30,20 +30,30 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 	}
 
 	useEffect(() => {
+		if (UserStore.userInfoLoadedForId === id) {
+			setIsLoading(false);
+			return undefined;
+		}
+		let cancelled = false;
+		UserStore.resetUserInfo();
+		setIsLoading(true);
 		(async () => {
-			setIsLoading(true);
 			await getUser(id);
+			if (cancelled) return;
+			UserStore.setUserInfoLoadedForId(id);
 
 			// Ленивая загрузка списка друзей и заявок,
 			// чтобы корректно отображать состояние кнопки дружбы
 			try {
 				if (FriendsStore.friends.length === 0) {
 					const friendsResponse = await getFriends();
+					if (cancelled) return;
 					FriendsStore.setFriends(friendsResponse.results);
 				}
 
 				if (FriendsStore.friendRequests.length === 0) {
 					const requestsResponse = await getFriendRequests();
+					if (cancelled) return;
 					FriendsStore.setFriendRequests(requestsResponse.results);
 				}
 			} catch (error) {
@@ -52,6 +62,7 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 				console.error('Не удалось загрузить список друзей или заявок:', error);
 			}
 
+			if (cancelled) return;
 			// Обновляем прогресс заданий при посещении профиля (только один раз за сессию)
 			if (!hasVisited) {
 				// Прогресс заданий обновляется автоматически на бэкенде
@@ -60,6 +71,9 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 
 			setIsLoading(false);
 		})();
+		return () => {
+			cancelled = true;
+		};
 	}, [id, hasVisited]);
 
 	const getUserContent = () => {
@@ -79,27 +93,31 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 		}
 	};
 
+	const isUserLoaded = !!userInfo.id && userInfo.id !== 0;
+
 	return (
 		<main className={block()}>
-			<Loader isLoading={isLoading}>
-				<UserInfo
-					avatar={userInfo.avatar || null}
-					name={userInfo.name || userInfo.username}
-					firstName={userInfo.firstName}
-					lastName={userInfo.lastName}
-					country={userInfo.country}
-					about={userInfo.aboutMe}
-					totalAdded={userInfo.totalAddedGoals}
-					totalCompleted={userInfo.totalCompletedGoals}
-					page={page}
-					id={id}
-					totalAddedLists={userInfo.totalAddedLists}
-					totalCompletedLists={userInfo.totalCompletedLists}
-					totalAchievements={userInfo.totalAchievements}
-					background={userInfo.coverImage}
-					subscriptionType={userInfo.subscriptionType}
-					level={userInfo.level}
-				/>
+			<Loader isLoading={!isUserLoaded} isPageLoader={!isUserLoaded}>
+				{isUserLoaded && (
+					<UserInfo
+						avatar={userInfo.avatar || null}
+						name={userInfo.name || userInfo.username}
+						firstName={userInfo.firstName}
+						lastName={userInfo.lastName}
+						country={userInfo.country}
+						about={userInfo.aboutMe}
+						totalAdded={userInfo.totalAddedGoals}
+						totalCompleted={userInfo.totalCompletedGoals}
+						page={page}
+						id={id}
+						totalAddedLists={userInfo.totalAddedLists}
+						totalCompletedLists={userInfo.totalCompletedLists}
+						totalAchievements={userInfo.totalAchievements}
+						background={userInfo.coverImage}
+						subscriptionType={userInfo.subscriptionType}
+						level={userInfo.level}
+					/>
+				)}
 			</Loader>
 			{getUserContent()}
 		</main>

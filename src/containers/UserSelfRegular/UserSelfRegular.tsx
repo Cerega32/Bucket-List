@@ -59,7 +59,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	const loadRegularGoalStatistics = async (page = 1) => {
 		setIsLoading(true);
 		try {
-			const response = await getRegularGoalStatistics({page});
+			const response = await getRegularGoalStatistics({page, page_size: 100});
 			if (response.success && response.data) {
 				const data = response.data as
 					| IRegularGoalStatistics[]

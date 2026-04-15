@@ -47,21 +47,26 @@ const ListGoalsContainerComponent: FC = () => {
 	const listId = params?.['id'];
 
 	useEffect(() => {
+		let cancelled = false;
+		setList(null);
+		setIsLoading(true);
 		(async () => {
-			setIsLoading(true);
 			const res = await getList(`goal-lists/${listId}`);
+			if (cancelled) return;
 			if (res.success) {
 				setList(res.data.list);
 			}
 			setIsLoading(false);
 		})();
 		return () => {
+			cancelled = true;
 			if (loaderTimerRef.current) clearTimeout(loaderTimerRef.current);
 		};
 	}, [listId, isAuth]);
 
 	// Ref для предотвращения повторных запросов (не вызывает ре-рендер)
 	const isLoadingMoreRef = useRef(false);
+	const lastRequestedPageRef = useRef(0);
 	const listRef = useRef(list);
 	listRef.current = list;
 
@@ -70,12 +75,15 @@ const ListGoalsContainerComponent: FC = () => {
 		const currentList = listRef.current;
 		if (isLoadingMoreRef.current || !currentList || !currentList.goalsPagination?.hasMore) return;
 
+		const nextPage = currentList.goalsPagination.page + 1;
+		if (lastRequestedPageRef.current >= nextPage) return;
+		lastRequestedPageRef.current = nextPage;
+
 		isLoadingMoreRef.current = true;
 
 		// Показываем лоудер только если запрос занимает больше 300ms
 		loaderTimerRef.current = setTimeout(() => setIsLoadingMore(true), 300);
 
-		const nextPage = currentList.goalsPagination.page + 1;
 		const res = await getListGoalsPage(currentList.code, nextPage, currentList.goalsPagination.pageSize);
 
 		if (res.success) {
@@ -89,6 +97,8 @@ const ListGoalsContainerComponent: FC = () => {
 					goalsPagination: newPagination,
 				};
 			});
+		} else {
+			lastRequestedPageRef.current = nextPage - 1;
 		}
 
 		if (loaderTimerRef.current) clearTimeout(loaderTimerRef.current);
@@ -164,7 +174,7 @@ const ListGoalsContainerComponent: FC = () => {
 		const updatedGoal = {
 			...list.goals[i],
 			addedByUser: operation !== 'delete',
-			completedByUser: operation === 'mark' ? !done : list.goals[i].completedByUser,
+			completedByUser: operation === 'mark' ? !done : operation === 'delete' ? false : list.goals[i].completedByUser,
 			totalAdded: res.data.users_added_count,
 		};
 
@@ -176,6 +186,8 @@ const ListGoalsContainerComponent: FC = () => {
 		if (operation === 'mark' && !done && !list.goals[i].completedByUser) {
 			userCompletedGoals += 1;
 		} else if (operation === 'mark' && done && list.goals[i].completedByUser) {
+			userCompletedGoals -= 1;
+		} else if (operation === 'delete' && list.goals[i].completedByUser) {
 			userCompletedGoals -= 1;
 		}
 
@@ -191,8 +203,8 @@ const ListGoalsContainerComponent: FC = () => {
 		return true;
 	};
 
-	if (!list) {
-		return <Loader isLoading={isLoading} isPageLoader />;
+	if (!list || list.code !== listId) {
+		return <Loader isLoading={isLoading || !list || list.code !== listId} isPageLoader />;
 	}
 
 	// ��обираем массив целей с локацией для карты

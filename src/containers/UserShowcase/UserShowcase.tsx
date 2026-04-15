@@ -11,7 +11,6 @@ import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {UserStore} from '@/store/UserStore';
 import {IAchievement} from '@/typings/achievements';
-import {IComment} from '@/typings/comments';
 import {get100Goals} from '@/utils/api/get/get100Goals';
 import {getUserImpressionImages, getUserInitialComments, getUserMoreComments} from '@/utils/api/get/getComments';
 import {GET} from '@/utils/fetch/requests';
@@ -25,72 +24,114 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 	const {id} = props;
 	const [block, element] = useBem('user-showcase');
 
-	// const {addedGoals, addedLists} = UserStore;
-	const [comments, setComments] = useState<Array<IComment>>([]);
-	const [commentPhotos, setCommentPhotos] = useState<string[]>([]);
-	const [hasMoreComments, setHasMoreComments] = useState(false);
-	const [commentsNextPage, setCommentsNextPage] = useState<number | null>(null);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
 
-	const {mainGoals, setMainGoals} = UserStore;
-
-	const [achievements, setAchievements] = useState<Array<IAchievement>>([]);
+	const {
+		mainGoals,
+		setMainGoals,
+		mainGoalsLoadedForId,
+		setMainGoalsLoadedForId,
+		showcaseLoadedForId,
+		setShowcaseLoadedForId,
+		showcaseComments,
+		setShowcaseComments,
+		appendShowcaseComments,
+		showcaseCommentPhotos,
+		setShowcaseCommentPhotos,
+		showcaseHasMoreComments,
+		setShowcaseHasMoreComments,
+		showcaseCommentsNextPage,
+		setShowcaseCommentsNextPage,
+		showcaseAchievementsPreview,
+		setShowcaseAchievementsPreview,
+	} = UserStore;
 
 	useEffect(() => {
-		(async () => {
-			setIsLoading(true);
-			try {
-				const [goalsRes, achievementsRes, commentsRes, imagesRes] = await Promise.all([
-					get100Goals(id),
-					GET('achievements', {get: {user_id: id}}),
-					getUserInitialComments(id),
-					getUserImpressionImages(id),
-				]);
+		if (showcaseLoadedForId === id && mainGoalsLoadedForId === id) return undefined;
 
-				if (goalsRes.success) {
-					setMainGoals(goalsRes.data);
-				}
-				if (achievementsRes.success) {
-					// Фильтруем только полученные достижения и берем первые 3
-					const achieved = achievementsRes.data.data.filter((achievement: IAchievement) => achievement.isAchieved).slice(0, 3);
-					setAchievements(achieved);
-				}
-				if (commentsRes.success && commentsRes.data) {
-					setComments(commentsRes.data.comments);
-					setHasMoreComments(commentsRes.data.hasMore ?? (commentsRes.data as any).has_more ?? false);
-					setCommentsNextPage(commentsRes.data.nextPage ?? (commentsRes.data as any).next_page ?? null);
-				}
-				if (imagesRes.success && imagesRes.data) {
-					setCommentPhotos(imagesRes.data.images);
-				}
-			} finally {
-				setIsLoading(false);
+		let cancelled = false;
+		const needShowcase = showcaseLoadedForId !== id;
+		const needMainGoals = mainGoalsLoadedForId !== id;
+
+		if (needShowcase) {
+			setShowcaseLoadedForId(null);
+			setShowcaseComments([]);
+			setShowcaseCommentPhotos([]);
+			setShowcaseHasMoreComments(false);
+			setShowcaseCommentsNextPage(null);
+			setShowcaseAchievementsPreview([]);
+		}
+		if (needMainGoals) {
+			setMainGoalsLoadedForId(null);
+			setMainGoals({
+				easyGoals: {data: [], countCompleted: 0},
+				mediumGoals: {data: [], countCompleted: 0},
+				hardGoals: {data: [], countCompleted: 0},
+			});
+		}
+
+		(async () => {
+			const [goalsRes, achievementsRes, commentsRes, imagesRes] = await Promise.all([
+				needMainGoals ? get100Goals(id) : Promise.resolve(null),
+				needShowcase ? GET('achievements', {get: {user_id: id}}) : Promise.resolve(null),
+				needShowcase ? getUserInitialComments(id) : Promise.resolve(null),
+				needShowcase ? getUserImpressionImages(id) : Promise.resolve(null),
+			]);
+			if (cancelled) return;
+
+			if (goalsRes && goalsRes.success) {
+				setMainGoals(goalsRes.data);
+				setMainGoalsLoadedForId(id);
+			}
+			if (achievementsRes && achievementsRes.success) {
+				const achieved = achievementsRes.data.data.filter((achievement: IAchievement) => achievement.isAchieved).slice(0, 3);
+				setShowcaseAchievementsPreview(achieved);
+			}
+			if (commentsRes && commentsRes.success && commentsRes.data) {
+				setShowcaseComments(commentsRes.data.comments);
+				setShowcaseHasMoreComments(commentsRes.data.hasMore ?? (commentsRes.data as any).has_more ?? false);
+				setShowcaseCommentsNextPage(commentsRes.data.nextPage ?? (commentsRes.data as any).next_page ?? null);
+			}
+			if (imagesRes && imagesRes.success && imagesRes.data) {
+				setShowcaseCommentPhotos(imagesRes.data.images);
+			}
+			if (needShowcase) {
+				setShowcaseLoadedForId(id);
 			}
 		})();
+		return () => {
+			cancelled = true;
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id]);
 
 	const handleLoadMore = async () => {
-		if (!commentsNextPage || isLoadingMore) return;
+		if (!showcaseCommentsNextPage || isLoadingMore) return;
 		setIsLoadingMore(true);
-		const res = await getUserMoreComments(id, commentsNextPage);
+		const res = await getUserMoreComments(id, showcaseCommentsNextPage);
 		if (res.success && res.data) {
-			setComments((prev) => [...prev, ...res.data.comments]);
-			setHasMoreComments(res.data.hasMore ?? (res.data as any).has_more ?? false);
-			setCommentsNextPage(res.data.nextPage ?? (res.data as any).next_page ?? null);
+			appendShowcaseComments(res.data.comments);
+			setShowcaseHasMoreComments(res.data.hasMore ?? (res.data as any).has_more ?? false);
+			setShowcaseCommentsNextPage(res.data.nextPage ?? (res.data as any).next_page ?? null);
 		}
 		setIsLoadingMore(false);
 	};
 
+	const isFresh = showcaseLoadedForId === id && mainGoalsLoadedForId === id;
+
+	if (!isFresh) {
+		return <Loader isLoading className={block()} />;
+	}
+
 	return (
-		<Loader isLoading={isLoading} className={block()}>
+		<Loader isLoading={false} className={block()}>
 			<CommentsGoal
-				comments={comments}
-				setComments={setComments}
+				comments={showcaseComments}
+				setComments={setShowcaseComments}
 				isUser
 				isShowcase
-				showcasePhotos={commentPhotos}
-				hasMore={hasMoreComments}
+				showcasePhotos={showcaseCommentPhotos}
+				hasMore={showcaseHasMoreComments}
 				isLoadingMore={isLoadingMore}
 				onLoadMore={handleLoadMore}
 				className={element('comment')}
@@ -118,7 +159,7 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 						Смотреть все
 					</Button>
 				</div>
-				{achievements.length === 0 ? (
+				{showcaseAchievementsPreview.length === 0 ? (
 					<EmptyState
 						title="Пока нет достижений"
 						description="Выполняйте цели, чтобы получать достижения"
@@ -126,7 +167,7 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 						className={element('empty-achievements')}
 					/>
 				) : (
-					achievements.map((achievement) => (
+					showcaseAchievementsPreview.map((achievement) => (
 						<Achievement key={achievement.id} className={element('achievement')} achievement={achievement} />
 					))
 				)}

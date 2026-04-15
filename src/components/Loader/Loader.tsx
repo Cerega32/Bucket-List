@@ -18,10 +18,12 @@ export const Loader: FC<LoaderProps> = ({isLoading, children, className, isPageL
 
 	return (
 		<div className={block({page: isPageLoader})}>
-			{children && <div className={element('content', {blurred: isLoading, page: isPageLoader}, className)}>{children}</div>}
+			{children && (
+				<div className={element('content', {blurred: isLoading && isPageLoader, page: isPageLoader}, className)}>{children}</div>
+			)}
 
 			{isLoading && (
-				<div className={element('overlay')}>
+				<div className={element('overlay', {page: isPageLoader})}>
 					<svg width="80" height="80" viewBox="-10 -10 50 46" fill="none" xmlns="http://www.w3.org/2000/svg" overflow="visible">
 						<g className={element('aim')}>
 							<circle cx="11.3667" cy="14.56" r="11.25" fill="#E05A4F" />

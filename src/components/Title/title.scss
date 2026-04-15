@@ -1,5 +1,6 @@
 .title {
 	$block: &;
+	overflow-wrap: anywhere;
 
 	color: var(--color-text-primary);
 
