@@ -23,7 +23,7 @@ export const getDate = (apiDate: string) => {
 };
 
 export const getMonthShortName = (date: string) => {
-	const monthNames = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+	const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
 	const month = new Date(date).getMonth();
 	return monthNames[month];
 };

@@ -30,7 +30,7 @@ export const WeeklySchedule: FC<WeeklyScheduleProps> = (props) => {
 
 	return (
 		<section className={block()}>
-			<h3 className={element('info-title')}>Выполнено целей за неделю</h3>
+			<h3 className={element('info-title')}>Выполнено целей по неделям</h3>
 			<span className={element('info-count')}>
 				<Svg icon="rocket" />
 				{weeks[weeks.length - 1].completedGoals}
@@ -42,7 +42,7 @@ export const WeeklySchedule: FC<WeeklyScheduleProps> = (props) => {
 							<div className={element('column-active')} style={{height: `${(week.completedGoals / max) * 100}%`}} />
 						</div>
 						{/* <p className={element('count')}>{week.completedGoals}</p> */}
-						<p className={element('count-week')}>{week.weekNumber}</p>
+						<p className={element('count-week')}>{`${week.weekNumber}н`}</p>
 						<p className={element('month')}>{getMonthShortName(week.startDate)}</p>
 					</div>
 				))}

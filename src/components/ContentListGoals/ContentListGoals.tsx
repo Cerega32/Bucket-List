@@ -33,6 +33,7 @@ export const ContentListGoals: FC<ContentListGoalsProps> = (props) => {
 					totalCompleted={list.totalCompleted}
 					isList
 					theme="light"
+					listTotal={list.goalsCount}
 				/>
 			)}
 			<DescriptionWithLinks isList goal={list} className={element('description')} />

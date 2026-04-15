@@ -227,7 +227,7 @@ const ListGoalsContainerComponent: FC = () => {
 				dynamicImage={ogImageUrl}
 				type="article"
 			/>
-			<main className={block()}>
+			<main className={block({category: list.category.nameEn})}>
 				<article className={element('wrapper')}>
 					{(isScreenSmallTablet || isScreenMobile) && (
 						<TitleWithTags

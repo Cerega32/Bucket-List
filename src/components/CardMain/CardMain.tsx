@@ -1,4 +1,4 @@
-import {FC} from 'react';
+import {FC, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
@@ -27,6 +27,20 @@ export const CardMain: FC<CardMainProps> = (props) => {
 
 	const [block, element] = useBem('card-main', className);
 
+	const [isTouch, setIsTouch] = useState(false);
+
+	useEffect(() => {
+		if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+		const mql = window.matchMedia('(hover: none)');
+		const update = () => setIsTouch(mql.matches);
+		update();
+		if (mql.addEventListener) {
+			mql.addEventListener('change', update);
+			return () => mql.removeEventListener('change', update);
+		}
+		mql.addListener(update);
+		return () => mql.removeListener(update);
+	}, []);
 	const isColoredCard = colored || goal.completedByUser;
 
 	const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -64,20 +78,21 @@ export const CardMain: FC<CardMainProps> = (props) => {
 								<Title tag="h3" className={element('title')} theme="white">
 									{goal.title}
 								</Title>
-								<p className={element('text')}>{goal.shortDescription}</p>
-								{withBtn && (
-									<>
-										<Line className={element('line')} />
+								{withBtn && <Line className={element('line')} />}
+								<div className={element('bottom')}>
+									<p className={element('text')}>{goal.shortDescription}</p>
+									{withBtn && (
 										<Button
 											className={element('btn')}
 											icon="done"
 											theme={goal.completedByUser ? 'green' : 'blue'}
+											size={isTouch ? 'small' : undefined}
 											onClick={handleButtonClick}
 										>
-											Выполнено
+											{isTouch ? undefined : goal.completedByUser ? 'Выполнено' : 'Выполнить'}
 										</Button>
-									</>
-								)}
+									)}
+								</div>
 							</div>
 						</div>
 					</Gradient>
@@ -108,20 +123,21 @@ export const CardMain: FC<CardMainProps> = (props) => {
 								<Title tag="h3" className={element('title')} theme="white">
 									{goal.title}
 								</Title>
-								<p className={element('text')}>{goal.shortDescription}</p>
-								{withBtn && (
-									<>
-										<Line className={element('line')} />
+								{withBtn && <Line className={element('line')} />}
+								<div className={element('bottom')}>
+									<p className={element('text')}>{goal.shortDescription}</p>
+									{withBtn && (
 										<Button
 											className={element('btn')}
 											icon="done"
 											theme={goal.completedByUser ? 'green' : 'blue'}
+											size={isTouch ? 'small' : undefined}
 											onClick={handleButtonClick}
 										>
-											Выполнено
+											{isTouch ? undefined : goal.completedByUser ? 'Выполнено' : 'Выполнить'}
 										</Button>
-									</>
-								)}
+									)}
+								</div>
 							</div>
 						</div>
 					</Gradient>

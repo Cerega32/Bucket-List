@@ -72,28 +72,58 @@
 		opacity: 0;
 	}
 
+	&__bottom {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+	}
+
 	&__btn {
 		display: none;
 		visibility: hidden;
 		opacity: 0;
+		flex-shrink: 0;
+		width: auto;
 	}
 
-	&--withBtn:hover {
-		#{$block} {
-			&__text {
-				display: none;
-			}
+	@media (hover: hover) {
+		&--withBtn:hover {
+			#{$block} {
+				&__text {
+					display: none;
+				}
 
-			&__line {
-				display: block;
-				visibility: visible;
-				opacity: 1;
-			}
+				&__line {
+					display: block;
+					visibility: visible;
+					opacity: 1;
+				}
 
-			&__btn {
-				display: flex;
-				visibility: visible;
-				opacity: 1;
+				&__btn {
+					display: flex;
+					visibility: visible;
+					opacity: 1;
+					width: 100%;
+				}
+			}
+		}
+	}
+
+	@media (hover: none) {
+		&--withBtn {
+			#{$block} {
+				&__line {
+					display: block;
+					visibility: visible;
+					opacity: 1;
+				}
+
+				&__btn {
+					display: flex;
+					visibility: visible;
+					opacity: 1;
+				}
 			}
 		}
 	}

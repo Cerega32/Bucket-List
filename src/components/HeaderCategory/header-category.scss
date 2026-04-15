@@ -8,7 +8,6 @@
 	background-repeat: no-repeat;
 	background-position: 50% 50%;
 	background-size: cover;
-	transition: all 0.3s linear;
 
 	&::after {
 		position: absolute;
@@ -24,44 +23,67 @@
 	&__title-wrapper {
 		position: relative;
 		z-index: 2;
-		display: flex;
-		align-items: baseline;
 		max-width: 1440px;
 		margin: 0 auto;
-		max-height: 52px;
 		min-width: 0;
-		gap: 8px;
+
+		// Inline flow: parent title, separator and subcategory wrap like regular text
+		> * {
+			display: inline;
+		}
+
+		> * > * {
+			display: inline;
+		}
 
 		@include xl {
 			margin: 0 24px;
 		}
 	}
 
+	&--fixed &__title-wrapper {
+		overflow: hidden;
+		max-height: 52px;
+		flex-wrap: nowrap;
+		// stylelint-disable-next-line no-unknown-animations -- defined in scaffolding.scss
+		animation: rise-from-bottom 0.3s ease-out;
+	}
+
 	&__title-separator {
 		flex-shrink: 0;
+		margin: 0 8px;
 		opacity: 0.72;
 	}
 
 	&__title-link {
 		flex: 0 2 auto;
 		min-width: 0;
-		max-width: 75%;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 		color: rgb(var(--color-white-rgb) / 72%);
 
 		> * {
 			min-width: 0;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
 		}
 	}
 
 	&__title {
 		flex: 0 1 auto;
 		min-width: 0;
+	}
+
+	&--fixed &__title-link {
+		max-width: 75%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		> * {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	&--fixed &__title {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -136,7 +158,6 @@
 
 	&--fixed {
 		padding: calc(var(--height-header-compact) + 16px) 0 16px;
-		transition: all 0.3s linear;
 
 		@include sm {
 			padding: calc(var(--height-header-compact) + 60px) 0 12px;

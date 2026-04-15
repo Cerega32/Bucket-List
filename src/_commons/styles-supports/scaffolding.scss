@@ -99,3 +99,15 @@ button {
 		width: 100%;
 	}
 }
+
+@keyframes rise-from-bottom {
+	from {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}

@@ -53,14 +53,15 @@ export const UserStatistics: FC<UserStatisticsProps> = (props) => {
 				<span>Достижения</span>
 				<span>{statistics.totalStats.achievementsCount}</span>
 			</p>
-			{statistics.totalStats.weeklyCompletedChallenges !== undefined && (
+			{/* TODO: пока не работают еженедельные задания */}
+			{/* {statistics.totalStats.weeklyCompletedChallenges !== undefined && (
 				<p className={element('text')}>
 					<span>Еженедельные задания</span>
 					<span>
 						{statistics.totalStats.weeklyCompletedChallenges}/{statistics.totalStats.totalWeeklyChallenges}
 					</span>
 				</p>
-			)}
+			)} */}
 		</section>
 	);
 };

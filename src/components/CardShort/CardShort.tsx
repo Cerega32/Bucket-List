@@ -2,6 +2,7 @@ import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {IShortGoal, IShortList} from '@/typings/goal';
 
 import {Tag} from '../Tag/Tag';
@@ -26,6 +27,7 @@ export const CardShort: FC<CardShortProps> = (props) => {
 	const isList = variant === 'list';
 	const linkTo = isList ? `/list/${item.code}` : `/goals/${item.code}`;
 	const added = item.totalAdded ?? (item as {total_added?: number}).total_added ?? 0;
+	const {isScreenMobile} = useScreenSize();
 	const estimatedTime = 'estimatedTime' in item ? item.estimatedTime : undefined;
 
 	return (
@@ -37,7 +39,14 @@ export const CardShort: FC<CardShortProps> = (props) => {
 						<Title tag="h3" className={element('title')}>
 							{item.title}
 						</Title>
-						{typeLabel && <Tag text={typeLabel} theme="minimal" className={element('type-tag')} />}
+						{typeLabel && (
+							<Tag
+								text={!isScreenMobile ? typeLabel : undefined}
+								icon={isList ? 'apps' : 'bullseye'}
+								theme="minimal"
+								className={element('type-tag')}
+							/>
+						)}
 					</div>
 					<div className={element('tags-wrapper')}>
 						<Tags

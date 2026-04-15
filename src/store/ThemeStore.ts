@@ -15,6 +15,9 @@ class Store implements IThemeStore {
 
 	full = true;
 
+	/** Внешнее управление compact-состоянием хедера (например, со страницы цели) */
+	preHeaderHiddenOverride: boolean | null = null;
+
 	constructor() {
 		makeAutoObservable(this);
 	}
@@ -33,6 +36,10 @@ class Store implements IThemeStore {
 
 	setFooter = (footer: boolean) => {
 		this.footer = footer;
+	};
+
+	setPreHeaderHiddenOverride = (value: boolean | null) => {
+		this.preHeaderHiddenOverride = value;
 	};
 }
 

@@ -220,6 +220,8 @@ export const Card: FC<CardProps> = (props) => {
 							complexity={goal.complexity}
 							added={goal.totalAdded}
 							estimatedTime={goal.estimatedTime}
+							listTotal={isList && 'goalsCount' in goal ? goal.goalsCount : undefined}
+							onlyCount
 							theme="integrate"
 							className={element('tags', {
 								added: goal.addedByUser,
