@@ -18,6 +18,7 @@ import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getUser} from '@/utils/api/get/getUser';
+import {postLogout} from '@/utils/api/post/postLogout';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 
 import {ThemeStore} from '../../store/ThemeStore';
@@ -95,14 +96,18 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		setWindow('registration');
 	};
 
-	const handleLogout = () => {
-		Cookies.remove('token');
+	const handleLogout = async () => {
+		// httpOnly cookie 'token' и маркер 'is_authenticated' снимает сервер — JS их не трогает.
+		await postLogout();
+		// Оставшиеся JS-видимые cookie с отображаемыми данными удаляем на клиенте.
 		Cookies.remove('avatar');
 		Cookies.remove('name');
 		Cookies.remove('user-id');
 		Cookies.remove('subscription_type');
 		Cookies.remove('user_level');
 		Cookies.remove('user_total_completed_goals');
+		Cookies.remove('email_confirmed');
+		Cookies.remove('email');
 		setAvatar('');
 		setIsAuth(false);
 		setName('');

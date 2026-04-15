@@ -36,7 +36,9 @@ interface IUserStore {
 }
 
 class Store implements IUserStore {
-	isAuth = !!Cookies.get('token');
+	// Токен живёт в httpOnly cookie и JS его не видит.
+	// Маркер 'is_authenticated' ставит сервер как НЕ-httpOnly — только для отображения состояния.
+	isAuth = !!Cookies.get('is_authenticated');
 
 	name = Cookies.get('name') || '';
 

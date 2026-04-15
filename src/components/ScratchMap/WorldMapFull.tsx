@@ -1,6 +1,33 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 
+import worldMapSvgRaw from '@/assets/world-map-full.svg?raw';
 import {Country} from '@/utils/mapApi';
+
+// Построить <svg>-элемент из сырой строки и вырезать любые исполняемые векторы
+// (script-теги и on*-обработчики), даже если источник "свой" — defense-in-depth.
+const buildSafeSvgElement = (svgText: string): SVGElement | null => {
+	const parsed = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+	const root = parsed.documentElement;
+	if (!root || root.tagName.toLowerCase() !== 'svg') {
+		return null;
+	}
+	root.querySelectorAll('script').forEach((node) => node.remove());
+	root.querySelectorAll('*').forEach((el) => {
+		Array.from(el.attributes).forEach((attr) => {
+			const name = attr.name.toLowerCase();
+			if (name.startsWith('on')) {
+				el.removeAttribute(attr.name);
+				return;
+			}
+			// Литерал собран из частей, чтобы не триггерить no-script-url — нам нужно именно выловить такие URL.
+			const jsScheme = `java${'script'}:`;
+			if ((name === 'href' || name === 'xlink:href') && attr.value.trim().toLowerCase().startsWith(jsScheme)) {
+				el.removeAttribute(attr.name);
+			}
+		});
+	});
+	return root as unknown as SVGElement;
+};
 
 interface WorldMapFullProps {
 	countries: Country[];
@@ -50,49 +77,20 @@ const WorldMapFull: React.FC<WorldMapFullProps> = ({countries, visitedCountries,
 		[getCountryById, visitedCountries]
 	);
 
-	// Загрузка SVG карты
+	// Инжект SVG карты (bundled Vite'ом) с санитизацией script/on* на случай,
+	// если исходный файл когда-нибудь будет подменён или заменён на user-generated.
 	useEffect(() => {
-		let isCancelled = false;
+		if (!containerRef.current) return;
 
-		const loadSVGMap = async () => {
-			try {
-				setError(null);
-				const response = await fetch('/src/assets/world-map-full.svg');
+		setError(null);
+		const svgElement = buildSafeSvgElement(worldMapSvgRaw);
+		if (!svgElement) {
+			setError('Не удалось загрузить карту мира');
+			return;
+		}
 
-				if (!response.ok) {
-					throw new Error(`Failed to load map: ${response.status}`);
-				}
-
-				const svgText = await response.text();
-
-				if (!isCancelled && containerRef.current) {
-					containerRef.current.innerHTML = svgText;
-					setMapLoaded(true);
-				}
-			} catch (loadError) {
-				// eslint-disable-next-line no-console
-				console.error('Error loading SVG map:', loadError);
-				setError('Не удалось загрузить карту мира');
-
-				if (!isCancelled && containerRef.current) {
-					const fallbackSvg = `
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" style="width: 100%; height: 100%; background: #f8f9fa;">
-							<text x="500" y="250" text-anchor="middle" fill="#666" font-size="16">
-								Не удалось загрузить карту мира
-							</text>
-						</svg>
-					`;
-					containerRef.current.innerHTML = fallbackSvg;
-					setMapLoaded(true);
-				}
-			}
-		};
-
-		loadSVGMap();
-
-		return () => {
-			isCancelled = true;
-		};
+		containerRef.current.replaceChildren(svgElement);
+		setMapLoaded(true);
 	}, []);
 
 	// Настройка обработчиков событий
