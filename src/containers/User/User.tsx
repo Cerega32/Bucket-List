@@ -30,12 +30,17 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 	}
 
 	useEffect(() => {
+		if (UserStore.userInfoLoadedForId === id) {
+			setIsLoading(false);
+			return undefined;
+		}
 		let cancelled = false;
 		UserStore.resetUserInfo();
 		setIsLoading(true);
 		(async () => {
 			await getUser(id);
 			if (cancelled) return;
+			UserStore.setUserInfoLoadedForId(id);
 
 			// Ленивая загрузка списка друзей и заявок,
 			// чтобы корректно отображать состояние кнопки дружбы

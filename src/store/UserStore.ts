@@ -98,6 +98,9 @@ class Store implements IUserStore {
 		hardGoals: {data: [], countCompleted: 0},
 	};
 
+	/** id пользователя (из URL), для которого уже загружен userInfo — чтобы не повторять запрос при повторном mount */
+	userInfoLoadedForId: string | null = null;
+
 	/** id пользователя, для которого уже загружены mainGoals (100 целей) — общий кэш для UserShowcase и User100Goals */
 	mainGoalsLoadedForId: string | null = null;
 
@@ -154,6 +157,7 @@ class Store implements IUserStore {
 			mediumGoals: {data: [], countCompleted: 0},
 			hardGoals: {data: [], countCompleted: 0},
 		};
+		this.userInfoLoadedForId = null;
 		this.mainGoalsLoadedForId = null;
 		this.achievementsLoadedForId = null;
 		this.achievements = [];
@@ -163,6 +167,10 @@ class Store implements IUserStore {
 		this.showcaseHasMoreComments = false;
 		this.showcaseCommentsNextPage = null;
 		this.showcaseAchievementsPreview = [];
+	};
+
+	setUserInfoLoadedForId = (id: string | null) => {
+		this.userInfoLoadedForId = id;
 	};
 
 	setMainGoalsLoadedForId = (id: string | null) => {
