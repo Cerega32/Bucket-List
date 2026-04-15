@@ -47,15 +47,19 @@ const ListGoalsContainerComponent: FC = () => {
 	const listId = params?.['id'];
 
 	useEffect(() => {
+		let cancelled = false;
+		setList(null);
+		setIsLoading(true);
 		(async () => {
-			setIsLoading(true);
 			const res = await getList(`goal-lists/${listId}`);
+			if (cancelled) return;
 			if (res.success) {
 				setList(res.data.list);
 			}
 			setIsLoading(false);
 		})();
 		return () => {
+			cancelled = true;
 			if (loaderTimerRef.current) clearTimeout(loaderTimerRef.current);
 		};
 	}, [listId, isAuth]);
@@ -197,8 +201,8 @@ const ListGoalsContainerComponent: FC = () => {
 		return true;
 	};
 
-	if (!list) {
-		return <Loader isLoading={isLoading} isPageLoader />;
+	if (!list || list.code !== listId) {
+		return <Loader isLoading={isLoading || !list || list.code !== listId} isPageLoader />;
 	}
 
 	// ��обираем массив целей с локацией для карты

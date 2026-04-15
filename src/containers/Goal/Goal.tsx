@@ -57,17 +57,22 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const {setHeader} = ThemeStore;
 
 	useEffect(() => {
+		if (!listId) return undefined;
+		let cancelled = false;
+		setGoal(null);
+		setIsLoading(true);
 		(async () => {
-			if (listId) {
-				setIsLoading(true);
-				const res = await getGoal(listId);
-				if (res.success) {
-					setGoal(normalizeGoalFromApi(res.data.goal));
-					setId(res.data.goal.id);
-				}
-				setIsLoading(false);
+			const res = await getGoal(listId);
+			if (cancelled) return;
+			if (res.success) {
+				setGoal(normalizeGoalFromApi(res.data.goal));
+				setId(res.data.goal.id);
 			}
+			setIsLoading(false);
 		})();
+		return () => {
+			cancelled = true;
+		};
 	}, [listId, isAuth]);
 
 	// Счётчик записей для вкладки «История прогресса» — из userProgress (не из recentEntries: может не приходить)
@@ -393,8 +398,8 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		);
 	}
 
-	if (!goal) {
-		return <Loader isLoading={isLoading} isPageLoader />;
+	if (!goal || goal.code !== listId) {
+		return <Loader isLoading={isLoading || !goal || goal.code !== listId} isPageLoader />;
 	}
 
 	const expandedHeaderHeight = expandedHeaderHeightRef.current ?? headerHeight;

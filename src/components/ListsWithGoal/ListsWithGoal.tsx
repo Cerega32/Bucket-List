@@ -10,6 +10,7 @@ import {removeListGoal} from '@/utils/api/post/removeListGoal';
 
 import {Card} from '../Card/Card';
 import {EmptyState} from '../EmptyState/EmptyState';
+import {Loader} from '../Loader/Loader';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
 import './lists-with-goal.scss';
 
@@ -23,22 +24,34 @@ export const ListsWithGoal: FC<ListsWithGoalProps> = observer((props) => {
 	const {className, code, onListChanged} = props;
 
 	const [block] = useBem('lists-with-goal', className);
-	const {lists, setLists, setInfoPaginationLists} = GoalStore;
+	const {lists, setLists, setInfoPaginationLists, listsLoadedForCode, setListsLoadedForCode} = GoalStore;
 
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [deleteTarget, setDeleteTarget] = useState<{code: string; index: number; title: string} | null>(null);
 	const {isScreenSmallMobile} = useScreenSize();
 
 	useEffect(() => {
+		if (listsLoadedForCode === code) return undefined;
+		let cancelled = false;
+		setLists([]);
+		setListsLoadedForCode(null);
 		(async () => {
 			const res = await getListsWithGoals(code);
+			if (cancelled) return;
 
 			if (res.success) {
 				setLists(res.data.data);
 				setInfoPaginationLists(res.data.pagination);
 			}
+			setListsLoadedForCode(code);
 		})();
+		return () => {
+			cancelled = true;
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [code]);
+
+	const isFresh = listsLoadedForCode === code;
 
 	const updateListGoal = async (codeList: string, i: number, operation: 'add' | 'delete'): Promise<void> => {
 		const res = await (operation === 'add' ? addListGoal(codeList) : removeListGoal(codeList));
@@ -70,7 +83,9 @@ export const ListsWithGoal: FC<ListsWithGoalProps> = observer((props) => {
 
 	return (
 		<section className={block()} id="goal-lists-section">
-			{lists && lists.length > 0 ? (
+			{!isFresh ? (
+				<Loader isLoading />
+			) : lists && lists.length > 0 ? (
 				lists.map((list, i) => (
 					<Card
 						goal={list}

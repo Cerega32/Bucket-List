@@ -21,6 +21,7 @@ import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks
 import {GoalProgressHistory} from '../GoalProgressHistory/GoalProgressHistory';
 import {InfoGoal} from '../InfoGoal/InfoGoal';
 import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
+import {Loader} from '../Loader/Loader';
 import {MyReview} from '../MyReview/MyReview';
 import {RegularGoalHistory} from '../RegularGoalHistory/RegularGoalHistory';
 import {RegularGoalRating} from '../RegularGoalRating/RegularGoalRating';
@@ -55,12 +56,20 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 	const {setIsOpen, setWindow, setModalProps, setFuncModal} = ModalStore;
 
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const [loadedForCode, setLoadedForCode] = useState<string | null>(null);
 
 	useEffect(() => {
-		if (page !== 'isGoal') return;
+		let cancelled = false;
+		setLoadedForCode(null);
+		setComments([]);
+		setMyComment(null);
+		setCommentPhotos([]);
+		setHasMoreComments(false);
+		setCommentsNextPage(null);
 
 		(async () => {
 			const [commentsRes, imagesRes] = await Promise.all([getInitialComments(goal.code), getGoalImpressionImages(goal.code)]);
+			if (cancelled) return;
 
 			if (commentsRes.success && commentsRes.data) {
 				setMyComment(commentsRes.data.myComment ?? (commentsRes.data as any).my_comment ?? null);
@@ -72,9 +81,14 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 			if (imagesRes.success && imagesRes.data) {
 				setCommentPhotos(imagesRes.data.images);
 			}
+
+			setLoadedForCode(goal.code);
 		})();
+		return () => {
+			cancelled = true;
+		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [goal.code, page]);
+	}, [goal.code]);
 
 	const handleLoadMore = async () => {
 		if (!commentsNextPage || isLoadingMore) return;
@@ -116,9 +130,14 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 		}
 	};
 
+	const isCommentsFresh = loadedForCode === goal.code;
+
 	const getGoalContent = () => {
 		switch (page) {
 			case 'isGoal':
+				if (!isCommentsFresh) {
+					return <Loader isLoading />;
+				}
 				return (
 					<>
 						{myComment && (
@@ -199,7 +218,7 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 				</div>
 			)}
 			<DescriptionWithLinks goal={goal} page={page} />
-			{page === 'isGoal' && commentPhotos?.length > 0 && (
+			{page === 'isGoal' && isCommentsFresh && commentPhotos?.length > 0 && (
 				<section className={element('impressions')}>
 					<InfoGoal
 						size="small"
