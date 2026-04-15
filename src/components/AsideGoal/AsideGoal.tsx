@@ -1092,6 +1092,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				goalId,
 				goalTitle: title,
 				goalFolders: userFolders || [],
+				onFolderSelected: (folder: {id: number; name: string; color: string; icon: string}) => {
+					if (!onGoalUpdate) return;
+					const current = userFolders || [];
+					if (current.some((f) => f.id === folder.id)) return;
+					onGoalUpdate({userFolders: [...current, folder]});
+				},
 			});
 		}
 	};

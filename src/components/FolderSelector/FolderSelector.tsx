@@ -14,7 +14,7 @@ interface FolderSelectorProps {
 	goalId: number;
 	goalTitle: string;
 	goalFolders?: Array<{id: number; name: string; color: string; icon: string}>;
-	onFolderSelected?: (folderId: number, folderName: string) => void;
+	onFolderSelected?: (folder: {id: number; name: string; color: string; icon: string}) => void;
 	showCreateButton?: boolean;
 }
 
@@ -52,7 +52,14 @@ export const FolderSelector: FC<FolderSelectorProps> = observer(
 				const response = await addGoalToFolder(selectedFolderId, goalId);
 				if (response.success) {
 					const selectedFolder = folders.find((f) => f.id === selectedFolderId);
-					onFolderSelected?.(selectedFolderId, selectedFolder?.name || '');
+					if (selectedFolder) {
+						onFolderSelected?.({
+							id: selectedFolder.id,
+							name: selectedFolder.name,
+							color: selectedFolder.color,
+							icon: selectedFolder.icon,
+						});
+					}
 				}
 			} catch (error) {
 				console.error('Ошибка добавления цели в папку:', error);

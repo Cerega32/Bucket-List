@@ -239,8 +239,9 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				<FolderSelector
 					goalId={modalProps?.goalId}
 					goalTitle={modalProps?.goalTitle}
-					onFolderSelected={(folderId, folderName) => {
-						modalProps?.onFolderSelected?.(folderId, folderName);
+					goalFolders={modalProps?.goalFolders}
+					onFolderSelected={(folder) => {
+						modalProps?.onFolderSelected?.(folder);
 						closeWindow();
 					}}
 					showCreateButton

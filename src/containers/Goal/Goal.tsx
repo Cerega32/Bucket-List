@@ -152,11 +152,12 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			return false;
 		}
 
-		const updatedGoal = {
+		const updatedGoal: Partial<IGoal> = {
 			addedByUser: operation !== 'delete',
 			completedByUser: operation === 'mark' ? !done : false,
 			totalAdded: res.data.totalAdded,
 			totalCompleted: res.data.totalCompleted,
+			...(operation === 'delete' ? {userFolders: []} : {}),
 		};
 
 		// Функциональное обновление: иначе после patchParentUserProgress(null) из AsideGoal
@@ -168,7 +169,11 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			// POST add/remove возвращают полную цель (GoalSerializer) — подмешиваем, чтобы не тянуть старый userProgress
 			const fromApi = res.data as Partial<IGoal> & {id?: number};
 			if ((operation === 'delete' || operation === 'add') && typeof fromApi.id === 'number' && fromApi.id === prev.id) {
-				return {...prev, ...fromApi} as IGoal;
+				const merged = {...prev, ...fromApi} as IGoal;
+				if (operation === 'delete') {
+					merged.userFolders = [];
+				}
+				return merged;
 			}
 			const next = {...prev, ...updatedGoal} as IGoal;
 			if (operation === 'mark') {
