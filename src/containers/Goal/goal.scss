@@ -5,7 +5,7 @@
 	transition: padding 0.32s ease;
 
 	@include md {
-		padding: 24px 0 0;
+		padding: calc(var(--height-header-goal) + 56px) 0 0;
 	}
 
 	&::before {
@@ -24,14 +24,6 @@
 
 		&::before {
 			display: none;
-		}
-	}
-
-	&--shrink {
-		padding: calc(var(--height-header-goal) - var(--height-header-goal-collapsed) + 24px) 0 0; // 24px - дополнительный отступ после свертывания
-
-		@include lg {
-			padding: calc(var(--height-header-goal) - var(--height-header-goal-collapsed)) 0 0;
 		}
 	}
 
@@ -61,32 +53,22 @@
 	&__aside {
 		position: sticky;
 		z-index: 13;
-		top: 284px;
-		margin-bottom: -93px;
-		transition: top 0.32s ease, margin-bottom 0.32s ease, transform 0.32s ease;
-		transform: translateY(-132px);
+		top: 160px;
+		margin-top: calc(-1 * (var(--height-header-goal) - 248px));
+		margin-bottom: 0;
+		transition: top 0.32s ease, margin-top 0.32s ease, margin-bottom 0.32s ease;
 
 		@include lg {
 			position: relative;
 			z-index: 1;
 			top: 0;
+			margin-top: 0;
 			margin-bottom: 0;
-			transform: none;
 		}
 
-		&--shrink {
+		&--compact {
 			z-index: 0;
-			top: 168px;
-			margin-bottom: 40px;
-			transform: translateY(0);
-
-			@include lg {
-				position: relative;
-				z-index: 0;
-				top: 0;
-				margin-bottom: 0;
-				transform: none;
-			}
+			top: 160px;
 		}
 	}
 
@@ -95,9 +77,11 @@
 		flex-direction: column;
 		gap: 24px;
 		width: 100%;
+		padding-top: 56px;
 
 		@include lg {
 			gap: 20px;
+			padding-top: 0;
 		}
 
 		@include md {
@@ -107,7 +91,7 @@
 
 	&__content {
 		width: 100%;
-		padding: 40px 0;
+		padding: 0;
 
 		@include lg {
 			padding: 0;

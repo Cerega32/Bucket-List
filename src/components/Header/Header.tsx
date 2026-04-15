@@ -194,6 +194,12 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	// Скрываем pre-header при прокрутке страницы
 	useEffect(() => {
+		// Если страница (например, Goal) управляет compact-состоянием хедера — не слушаем скролл
+		if (ThemeStore.preHeaderHiddenOverride !== null) {
+			setIsPreHeaderHidden(ThemeStore.preHeaderHiddenOverride);
+			return;
+		}
+
 		const handleScroll = () => {
 			setIsPreHeaderHidden(window.scrollY > 0);
 		};
@@ -204,7 +210,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		return () => {
 			window.removeEventListener('scroll', handleScroll);
 		};
-	}, []);
+	}, [ThemeStore.preHeaderHiddenOverride]);
 
 	// Загрузка количества регулярных целей на сегодня для бейджа
 	useEffect(() => {

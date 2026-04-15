@@ -267,11 +267,10 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		}
 	};
 
-	const [shrink, setShrink] = useState(false);
-	const [headerHeight, setHeaderHeight] = useState<number>(340);
-	const collapsedHeaderHeightMobile = 260; // на какой высоте сворачивается header на мобильных устройствах
+	const [compact, setCompact] = useState(false);
+	const [headerHeight, setHeaderHeight] = useState<number>(0);
 	const headerHeightRef = useRef(headerHeight);
-	const shrinkRef = useRef(false);
+	const compactRef = useRef(false);
 	const expandedHeaderHeightRef = useRef<number | null>(null);
 
 	useEffect(() => {
@@ -279,15 +278,21 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	}, [headerHeight]);
 
 	useEffect(() => {
-		shrinkRef.current = shrink;
-		if (!shrink && headerRef.current) {
-			const h = headerRef.current.offsetHeight;
-			const prevExpanded = expandedHeaderHeightRef.current;
-			if (prevExpanded == null || h > prevExpanded) {
-				expandedHeaderHeightRef.current = h;
-			}
+		compactRef.current = compact;
+		ThemeStore.setPreHeaderHiddenOverride(compact);
+		// Сбрасываем clip-path после того, как compact-класс применён к DOM
+		if (compact && headerRef.current) {
+			headerRef.current.style.clipPath = '';
 		}
-	}, [shrink]);
+	}, [compact]);
+
+	// Сбрасываем override при размонтировании
+	useEffect(() => {
+		ThemeStore.setPreHeaderHiddenOverride(false);
+		return () => {
+			ThemeStore.setPreHeaderHiddenOverride(null);
+		};
+	}, []);
 
 	const {similarGoals} = useSimilarGoalsByCategory(goal?.code || null, !!goal);
 
@@ -300,9 +305,13 @@ export const Goal: FC<IPage> = observer(({page}) => {
 
 	const updateHeaderHeight = () => {
 		if (headerRef.current) {
+			// Временно сбрасываем clip-path чтобы измерить натуральную высоту
+			const savedClip = headerRef.current.style.clipPath;
+			headerRef.current.style.clipPath = '';
 			const h = headerRef.current.offsetHeight;
+			headerRef.current.style.clipPath = savedClip;
 			setHeaderHeight(h);
-			if (!shrinkRef.current) {
+			if (!compactRef.current) {
 				const prevExpanded = expandedHeaderHeightRef.current;
 				if (prevExpanded == null || h > prevExpanded) {
 					expandedHeaderHeightRef.current = h;
@@ -316,16 +325,14 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	useEffect(() => {
 		const el = headerRef.current;
 		if (!el) return;
-		const oh = el.offsetHeight;
-		if (oh > headerHeight) {
-			updateHeaderHeight();
-		} else if (!shrinkRef.current) {
-			const prevExpanded = expandedHeaderHeightRef.current;
-			if (prevExpanded == null || oh > prevExpanded) {
-				expandedHeaderHeightRef.current = oh;
-			}
-		}
-	}, [shrink, isScreenMobile, isScreenSmallTablet, headerHeight]);
+		updateHeaderHeight();
+	}, [compact, isScreenMobile, isScreenSmallTablet]);
+
+	// Измеряем высоту шапки при первом появлении HeaderGoal (после загрузки goal)
+	useEffect(() => {
+		if (!headerRef.current || expandedHeaderHeightRef.current != null) return;
+		updateHeaderHeight();
+	});
 
 	useEffect(() => {
 		let rafId: number | null = null;
@@ -338,34 +345,28 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			rafId = window.requestAnimationFrame(() => {
 				ticking = false;
 
-				const isNarrowPhone = isScreenMobile;
 				const scrollY = window.scrollY || 0;
-				const currentShrink = shrinkRef.current;
-
+				const currentCompact = compactRef.current;
 				const expandedH = expandedHeaderHeightRef.current ?? headerHeightRef.current;
+				const minHeight = 136;
 
-				if (isNarrowPhone) {
-					const shrinkAfterScrollPx = collapsedHeaderHeightMobile;
-					const expandHysteresisPx = 40;
-					let enterAt = expandedH - shrinkAfterScrollPx;
-					if (enterAt < expandHysteresisPx + 1) {
-						enterAt = expandHysteresisPx + 1;
-					}
-					const exitAt = enterAt - expandHysteresisPx;
+				// Визуальная высота 1:1 со скроллом через clip-path на всех разрешениях
+				if (expandedH <= 0) return;
 
-					if (!currentShrink) {
-						if (scrollY > enterAt) setShrink(true);
-					} else if (scrollY < exitAt) {
-						setShrink(false);
-					}
-				} else {
-					const enterAt = 40;
-					const exitAt = 30;
+				const newHeight = Math.max(minHeight, expandedH - scrollY);
 
-					if (!currentShrink && scrollY > enterAt) {
-						setShrink(true);
-					} else if (currentShrink && scrollY < exitAt) {
-						setShrink(false);
+				if (newHeight <= minHeight && !currentCompact) {
+					// clip-path сбросится в useEffect после применения compact-класса
+					setCompact(true);
+				} else if (newHeight > minHeight && currentCompact) {
+					setCompact(false);
+				}
+
+				// clip-path только когда НЕ compact
+				if (!currentCompact && !(newHeight <= minHeight)) {
+					const clipBottom = expandedH - newHeight;
+					if (headerRef.current) {
+						headerRef.current.style.clipPath = clipBottom > 0 ? `inset(0 0 ${clipBottom}px 0)` : '';
 					}
 				}
 			});
@@ -402,7 +403,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				dynamicImage={ogImageUrl}
 				type="article"
 			/>
-			<main className={block({shrink})}>
+			<main className={block()} style={{'--height-header-goal': `${expandedHeaderHeight}px`} as React.CSSProperties}>
 				<HeaderGoal
 					ref={headerRef}
 					title={goal.title}
@@ -410,24 +411,15 @@ export const Goal: FC<IPage> = observer(({page}) => {
 					image={goal.image}
 					background={goal.image}
 					goal={goal}
-					shrink={shrink}
+					compact={compact}
 					onImageLoad={updateHeaderHeight}
 				/>
-				<section
-					className={element('wrapper')}
-					style={{
-						paddingTop: isScreenMobile
-							? shrink
-								? Math.max(expandedHeaderHeight - collapsedHeaderHeightMobile, 0)
-								: expandedHeaderHeight
-							: 0,
-					}}
-				>
+				<section className={element('wrapper')}>
 					<AsideGoal
 						key={`aside-${goal.id}-${goal.regularConfig?.statistics?.updatedAt || ''}-${goal.regularConfig?.frequency || ''}-${
 							goal.regularConfig?.durationValue || 0
 						}-${goal.regularConfig?.allowSkipDays || 0}`}
-						className={element('aside', {shrink})}
+						className={element('aside', {compact})}
 						title={goal.title}
 						image={goal.image || ''}
 						added={goal.addedByUser}
