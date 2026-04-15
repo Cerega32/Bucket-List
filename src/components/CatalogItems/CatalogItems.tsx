@@ -517,7 +517,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			const updatedGoal = {
 				...goals.data[i],
 				addedByUser: operation !== 'delete',
-				completedByUser: operation === 'mark' ? !done : goals.data[i].completedByUser,
+				completedByUser: operation === 'mark' ? !done : operation === 'delete' ? false : goals.data[i].completedByUser,
 				totalAdded: res.data.users_added_count,
 			};
 

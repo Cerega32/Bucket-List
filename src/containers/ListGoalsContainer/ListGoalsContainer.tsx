@@ -174,7 +174,7 @@ const ListGoalsContainerComponent: FC = () => {
 		const updatedGoal = {
 			...list.goals[i],
 			addedByUser: operation !== 'delete',
-			completedByUser: operation === 'mark' ? !done : list.goals[i].completedByUser,
+			completedByUser: operation === 'mark' ? !done : operation === 'delete' ? false : list.goals[i].completedByUser,
 			totalAdded: res.data.users_added_count,
 		};
 
@@ -186,6 +186,8 @@ const ListGoalsContainerComponent: FC = () => {
 		if (operation === 'mark' && !done && !list.goals[i].completedByUser) {
 			userCompletedGoals += 1;
 		} else if (operation === 'mark' && done && list.goals[i].completedByUser) {
+			userCompletedGoals -= 1;
+		} else if (operation === 'delete' && list.goals[i].completedByUser) {
 			userCompletedGoals -= 1;
 		}
 

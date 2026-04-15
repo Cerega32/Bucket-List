@@ -55,7 +55,7 @@ export const Card: FC<CardProps> = (props) => {
 	const {goal, isList, onClickAdd, onClickDelete, onClickMark} = restProps as CardListProps | CardGoalProps;
 
 	const {isAuth} = UserStore;
-	const {setIsOpen, setWindow} = ModalStore;
+	const {setIsOpen, setWindow, setFuncModal, setModalProps} = ModalStore;
 
 	const onClickAddHandler = async () => {
 		if (!isAuth && !allowAddWithoutAuth) {
@@ -75,15 +75,20 @@ export const Card: FC<CardProps> = (props) => {
 	};
 
 	const onClickDeleteHandler = async () => {
-		await onClickDelete();
-
 		if (!isAuth) {
+			await onClickDelete();
 			NotificationStore.addNotification({
 				type: 'warning',
 				title: 'Цель удалена',
 				message: 'Мы убрали её из вашего списка.',
 			});
+			return;
 		}
+
+		setModalProps({});
+		setWindow(isList ? 'delete-list' : 'delete-goal');
+		setIsOpen(true);
+		setFuncModal(() => onClickDelete());
 	};
 
 	const onClickMarkHandler = async (e: MouseEvent<HTMLButtonElement>) => {
