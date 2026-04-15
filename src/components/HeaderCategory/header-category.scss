@@ -45,19 +45,8 @@
 		overflow: hidden;
 		max-height: 52px;
 		flex-wrap: nowrap;
-		animation: header-category-title-rise 0.3s ease-out;
-	}
-
-	@keyframes header-category-title-rise {
-		from {
-			transform: translateY(100%);
-			opacity: 0;
-		}
-
-		to {
-			transform: translateY(0);
-			opacity: 1;
-		}
+		// stylelint-disable-next-line no-unknown-animations -- defined in scaffolding.scss
+		animation: rise-from-bottom 0.3s ease-out;
 	}
 
 	&__title-separator {
