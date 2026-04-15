@@ -28,8 +28,8 @@ export const MainHeader: FC<MainHeaderProps> = observer((props) => {
 
 	const handleButtonClick = () => {
 		if (!isAuth) {
-			setIsOpen(true);
 			setWindow('registration');
+			setIsOpen(true);
 		}
 	};
 

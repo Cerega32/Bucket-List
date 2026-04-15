@@ -87,13 +87,13 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const categoriesRef = useRef<HTMLLIElement>(null);
 
 	const openLogin = () => {
-		setIsOpen(true);
 		setWindow('login');
+		setIsOpen(true);
 	};
 
 	const openRegistration = () => {
-		setIsOpen(true);
 		setWindow('registration');
+		setIsOpen(true);
 	};
 
 	const handleLogout = async () => {
