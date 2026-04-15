@@ -6,7 +6,9 @@ import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {getGoalActivity} from '@/utils/api/get/getGoalActivity';
 import {pluralize} from '@/utils/text/pluralize';
+
 import './activity-heatmap.scss';
+import {EmptyState} from '../EmptyState/EmptyState';
 
 interface ICompletedItem {
 	id: number;
@@ -496,9 +498,7 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 
 			<Loader isLoading={fetchStatus === 'loading'}>
 				{fetchStatus === 'error' ? (
-					<div className={element('error')}>
-						<p>Не удалось загрузить данные активности</p>
-					</div>
+					<EmptyState title="Не удалось загрузить данные активности" />
 				) : activityData ? (
 					<>
 						<div className={element('stats')}>
