@@ -13,6 +13,7 @@ import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {NotificationStore} from '@/store/NotificationStore';
+import {ThemeStore} from '@/store/ThemeStore';
 import {UserStore} from '@/store/UserStore';
 import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
@@ -79,6 +80,28 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 		},
 		[]
 	);
+
+	// Сбрасываем override при размонтировании / отсутствии HeaderCategory
+	useEffect(() => {
+		const hasHeader = !!(id && id !== 'all');
+		if (!hasHeader) {
+			ThemeStore.setPreHeaderHiddenOverride(null);
+		} else {
+			ThemeStore.setPreHeaderHiddenOverride(false);
+		}
+		return () => {
+			ThemeStore.setPreHeaderHiddenOverride(null);
+		};
+	}, [id]);
+
+	const handleHeaderCompactChange = useCallback((compact: boolean) => {
+		ThemeStore.setPreHeaderHiddenOverride(compact);
+	}, []);
+
+	const [headerHeight, setHeaderHeight] = useState<number | null>(null);
+	const handleHeaderHeightChange = useCallback((h: number) => {
+		setHeaderHeight(h);
+	}, []);
 
 	useEffect(() => {
 		// Скроллим к каталогу при наличии поискового запроса
@@ -275,13 +298,18 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 	};
 
 	return (
-		<main className={block({sub: page === 'isSubCategories', empty: !category?.subcategories.length, all: !id})}>
+		<main
+			className={block({sub: page === 'isSubCategories', empty: !category?.subcategories.length, all: !id})}
+			style={headerHeight != null ? ({'--header-category-height': `${headerHeight}px`} as React.CSSProperties) : undefined}
+		>
 			{id && id !== 'all' && category && (
 				<HeaderCategory
 					category={category}
 					className={element('header')}
 					isSub={page === 'isSubCategories' || !!category.category.parentCategory}
 					refHeader={refTitle}
+					onCompactChange={handleHeaderCompactChange}
+					onHeightChange={handleHeaderHeightChange}
 				/>
 			)}
 			<Loader isLoading={isLoading}>

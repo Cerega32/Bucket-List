@@ -1,8 +1,8 @@
 .category {
-	padding: calc(430px + 56px) 0 0;
+	padding: calc(var(--header-category-height, 430px) + 56px) 0 0;
 
 	@include xl {
-		padding: calc(430px + 56px) 24px 0;
+		padding: calc(var(--header-category-height, 430px) + 56px) 24px 0;
 	}
 
 	&__wrapper-title {
@@ -75,15 +75,15 @@
 		gap: 24px;
 	}
 
-	&--sub {
-		padding: calc(284px + 56px) 0 0;
-	}
-
 	&--empty {
-		padding: calc(284px + 56px) 0 0;
+		padding: calc(var(--header-category-height, 284px) + 56px) 0 0;
 
 		@include xl {
-			padding: calc(284px + 56px) 24px 0;
+			padding: calc(var(--header-category-height, 284px) + 56px) 24px 0;
+		}
+
+		@include md {
+			padding: calc(var(--header-category-height, 284px) + 24px) 24px 0;
 		}
 	}
 

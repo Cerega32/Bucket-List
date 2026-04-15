@@ -37,7 +37,7 @@ interface HeaderProps {
 export const Header: FC<HeaderProps> = observer((props) => {
 	const {className} = props;
 
-	const {header, page} = ThemeStore;
+	const {header, page, preHeaderHiddenOverride} = ThemeStore;
 	const {setIsOpen, setWindow} = ModalStore;
 	const {categoriesTree, setCategories} = CategoriesStore;
 	const {isScreenDesktop, isScreenSmallTablet, isScreenMobile, isScreenSmallMobile, isScreenTablet} = useScreenSize();
@@ -195,8 +195,8 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	// Скрываем pre-header при прокрутке страницы
 	useEffect(() => {
 		// Если страница (например, Goal) управляет compact-состоянием хедера — не слушаем скролл
-		if (ThemeStore.preHeaderHiddenOverride !== null) {
-			setIsPreHeaderHidden(ThemeStore.preHeaderHiddenOverride);
+		if (preHeaderHiddenOverride !== null) {
+			setIsPreHeaderHidden(preHeaderHiddenOverride);
 			return;
 		}
 
@@ -210,7 +210,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		return () => {
 			window.removeEventListener('scroll', handleScroll);
 		};
-	}, [ThemeStore.preHeaderHiddenOverride]);
+	}, [preHeaderHiddenOverride]);
 
 	// Загрузка количества регулярных целей на сегодня для бейджа
 	useEffect(() => {

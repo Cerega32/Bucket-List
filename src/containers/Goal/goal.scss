@@ -5,18 +5,23 @@
 	transition: padding 0.32s ease;
 
 	@include md {
-		padding: calc(var(--height-header-goal) + 56px) 0 0;
+		padding: calc(var(--height-header-goal) + 24px) 0 0;
 	}
 
 	&::before {
 		position: absolute;
-		z-index: -1;
-		top: 318px;
+		z-index: 0;
+		top: calc(var(--height-header-goal) - 8px);
 		display: block;
 		width: 100%;
-		height: 416px;
-		background: linear-gradient(180deg, rgb(var(--color-green-rgb) 0.04) 0%, rgb(var(--color-gray-rgb-12) 0) 100%);
+		height: 600px;
 		content: '';
+	}
+
+	@each $category in $main-categories {
+		&--category-#{$category}::before {
+			background: linear-gradient(180deg, rgb(var(--color-#{$category}-rgb) / 2%) 0%, rgb(var(--color-white-rgb) / 0%) 100%);
+		}
 	}
 
 	&--editing {
@@ -69,6 +74,11 @@
 		&--compact {
 			z-index: 0;
 			top: 160px;
+
+			@include lg {
+				position: relative;
+				top: 0;
+			}
 		}
 	}
 

@@ -2,6 +2,7 @@ import {FC, Fragment} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import {ICategory, IComplexity, IGoalFolderTag} from '@/typings/goal';
+import {pluralize} from '@/utils/text/pluralize';
 import {formatDjangoDurationShort} from '@/utils/time/formatEstimatedTime';
 import {getComplexity} from '@/utils/values/complexity';
 
@@ -21,10 +22,26 @@ interface TagsProps {
 	estimatedTime?: string;
 	showSeparator?: boolean;
 	userFolders?: IGoalFolderTag[];
+	listTotal?: number;
+	onlyCount?: boolean;
 }
 
 export const Tags: FC<TagsProps> = (props) => {
-	const {className, theme, category, complexity, done, added, medal, time, estimatedTime, showSeparator, userFolders} = props;
+	const {
+		className,
+		theme,
+		category,
+		complexity,
+		done,
+		added,
+		medal,
+		time,
+		estimatedTime,
+		showSeparator,
+		userFolders,
+		listTotal,
+		onlyCount,
+	} = props;
 
 	const [block] = useBem('tags', className);
 
@@ -37,6 +54,17 @@ export const Tags: FC<TagsProps> = (props) => {
 	// Добавляем элементы в массив
 	if (category) {
 		elements.push(<Tag category={category.nameEn} text={category.name} theme={theme} />);
+	}
+
+	if (listTotal) {
+		elements.push(
+			<Tag
+				text={onlyCount ? listTotal : pluralize(listTotal, ['цель', 'цели', 'целей'])}
+				theme={theme}
+				icon="apps"
+				className="apps-icon"
+			/>
+		);
 	}
 
 	if (medal) {

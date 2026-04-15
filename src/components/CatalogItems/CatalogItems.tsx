@@ -67,7 +67,6 @@ interface CatalogItemsUsersProps extends CatalogItemsProps {
 /** Варианты сортировки зависят от контекста: каталог / активные / выполненные, цели / списки */
 function getSortOptions(isUser: boolean, isCompleted: boolean, page?: string): Array<OptionSelect> {
 	if (!isUser) {
-		// Каталог — оставляем как было
 		return [
 			{name: 'Новые', value: '-created_at'},
 			{name: 'Популярные', value: '-added_by_users'},
@@ -78,7 +77,6 @@ function getSortOptions(isUser: boolean, isCompleted: boolean, page?: string): A
 	}
 
 	if (isCompleted) {
-		// Выполненные
 		if (page === 'lists') {
 			return [
 				{name: 'Новые', value: '-completed_at'},
@@ -153,6 +151,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		goalType: [],
 		complexity: [],
 		hundredGoals: [],
+		goalDisplaying: [],
 	});
 	const [loading, setLoading] = useState(false);
 	const [searchLoading, setSearchLoading] = useState(false);
@@ -237,7 +236,6 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			});
 		}
 
-		// Сложность — для целей и списков
 		if (!pendingCatalogReview) {
 			groups.push({
 				key: 'complexity',
@@ -251,7 +249,18 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			});
 		}
 
-		// Только для целей: тип целей и 100 целей
+		if (code === 'all' && !userId && !pendingCatalogReview) {
+			groups.push({
+				key: 'goalDisplaying',
+				label: 'Показ целей',
+				options: [
+					{name: 'Исключить добавленные', code: 'added'},
+					{name: 'Исключить выполненные', code: 'completed'},
+				],
+				allLabel: 'Все цели',
+			});
+		}
+
 		if (subPage === 'goals' && !pendingCatalogReview) {
 			groups.push({
 				key: 'hundredGoals',
@@ -275,7 +284,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		}
 
 		return groups;
-	}, [categoryFilters, subPage, pendingCatalogReview]);
+	}, [categoryFilters, subPage, pendingCatalogReview, code, userId]);
 
 	useEffect(() => {
 		setGoalsLoaded(false);
@@ -313,7 +322,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 
 	useEffect(() => {
 		setActiveSort(0);
-		setFilterValues({categories: [], goalType: [], complexity: [], hundredGoals: []});
+		setFilterValues({categories: [], goalType: [], complexity: [], hundredGoals: [], goalDisplaying: []});
 	}, [subPage]);
 
 	// Синхронизируем поиск с URL при смене страницы/контекста (без смены вкладки)
@@ -328,6 +337,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			const currentFilters = filtersOverride ?? filterValues;
 			const goalTypeValue = currentFilters['goalType']?.[0] || 'all';
 			const categoriesSort = currentFilters['categories'] || [];
+			const goalDisplaying = currentFilters['goalDisplaying'] || [];
 			const queryParams = {
 				...get,
 				sort_by: sortValue,
@@ -336,6 +346,8 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 				...(categoriesSort.length > 0 ? {categories: categoriesSort.join(',')} : {}),
 				...(currentFilters['complexity']?.length > 0 ? {complexity: currentFilters['complexity'][0]} : {}),
 				...(currentFilters['hundredGoals']?.length > 0 ? {hundred_goals: currentFilters['hundredGoals'][0]} : {}),
+				...(goalDisplaying.includes('added') ? {exclude_added: true} : {}),
+				...(goalDisplaying.includes('completed') ? {exclude_completed: true} : {}),
 			};
 
 			if (subPage === 'goals') {
@@ -382,7 +394,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 	};
 
 	const handleFilterReset = () => {
-		const emptyFilters = {categories: [], goalType: [], complexity: [], hundredGoals: []};
+		const emptyFilters = {categories: [], goalType: [], complexity: [], hundredGoals: [], goalDisplaying: []};
 		setFilterValues(emptyFilters);
 		fetchData(sortOptions[activeSort].value, undefined, emptyFilters);
 	};

@@ -403,7 +403,10 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				dynamicImage={ogImageUrl}
 				type="article"
 			/>
-			<main className={block()} style={{'--height-header-goal': `${expandedHeaderHeight}px`} as React.CSSProperties}>
+			<main
+				className={block({category: goal.category.nameEn})}
+				style={{'--height-header-goal': `${expandedHeaderHeight}px`} as React.CSSProperties}
+			>
 				<HeaderGoal
 					ref={headerRef}
 					title={goal.title}
