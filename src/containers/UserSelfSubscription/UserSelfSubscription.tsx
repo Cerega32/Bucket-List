@@ -12,6 +12,7 @@ import {FREE_FEATURES, PREMIUM_FEATURES, SUBSCRIPTION_PERIODS} from './subscript
 import {SubscriptionComparisonModal} from './SubscriptionComparisonModal/SubscriptionComparisonModal';
 import {SubscriptionPayment} from './SubscriptionPayment/SubscriptionPayment';
 import {SubscriptionPlanCard} from './SubscriptionPlanCard/SubscriptionPlanCard';
+import {UserSelfSubscriptionSkeleton} from './UserSelfSubscriptionSkeleton';
 import './user-self-subscription.scss';
 
 export const UserSelfSubscription: FC = observer(() => {
@@ -97,7 +98,9 @@ export const UserSelfSubscription: FC = observer(() => {
 				</Button>
 			</div>
 
-			{!isLoading && (
+			{isLoading ? (
+				<UserSelfSubscriptionSkeleton />
+			) : (
 				<>
 					<CurrentSubscription
 						type={subscription.type}

@@ -1,0 +1,42 @@
+.comments-goal-skeleton {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	width: 100%;
+
+	&__card {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		padding: 16px;
+		background: var(--color-white);
+		border: 1px solid var(--color-gray-9);
+		border-radius: 8px;
+	}
+
+	&__head {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 4px;
+	}
+
+	&__head-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		flex: 1;
+	}
+
+	&__head-info {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	&__footer {
+		display: flex;
+		gap: 8px;
+		margin-top: 4px;
+	}
+}

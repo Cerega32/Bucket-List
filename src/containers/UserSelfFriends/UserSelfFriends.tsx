@@ -6,7 +6,6 @@ import {Switch} from '@/components/Switch/Switch';
 import {Title} from '@/components/Title/Title';
 import {UserSearch} from '@/components/UserSearch/UserSearch';
 import {useBem} from '@/hooks/useBem';
-import {FriendsStore} from '@/store/FriendsStore';
 
 import {FriendsContent} from '../FriendsContent/FriendsContent';
 import {FriendsRequests} from '../FriendsRequests/FriendsRequests';
@@ -65,7 +64,7 @@ export const UserSelfFriends: FC<UserSelfFriendsProps> = observer(({subPage = 'f
 				</Title>
 				<Switch className={element('switch')} buttons={switchButtons} active={subPage} />
 			</div>
-			{FriendsStore.searchResults.length > 0 && subPage === 'search' && (
+			{subPage === 'search' && (
 				<Banner
 					type="info"
 					title="Советы"

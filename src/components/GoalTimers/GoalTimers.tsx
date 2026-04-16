@@ -5,12 +5,12 @@ import {useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
-import {Loader} from '@/components/Loader/Loader';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
 import {getUserTimers, TimerInfo} from '@/utils/api/get/getGoalTimer';
 
+import {GoalTimersSkeleton} from './GoalTimersSkeleton';
 import './goal-timers.scss';
 
 // Расширенный интерфейс для таймера с дополнительными полями
@@ -124,9 +124,7 @@ const GoalTimers: FC = () => {
 			</div>
 
 			{loading ? (
-				<div className={element('loading')}>
-					<Loader isLoading={loading} />
-				</div>
+				<GoalTimersSkeleton />
 			) : timers.length > 0 ? (
 				<div className={element('list')}>
 					{timers.map((timer, index) => (

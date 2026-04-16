@@ -23,12 +23,13 @@ import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
 import {GoalWithLocation} from '@/utils/mapApi';
+
+import {ListGoalsContainerSkeleton} from './ListGoalsContainerSkeleton';
 import './list-goals-container.scss';
 
 const ListGoalsContainerComponent: FC = () => {
 	const [block, element] = useBem('list-goals-container');
 	const [list, setList] = useState<IList | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
 	const {isAuth} = UserStore;
 	const {setIsOpen, setWindow} = ModalStore;
@@ -49,14 +50,12 @@ const ListGoalsContainerComponent: FC = () => {
 	useEffect(() => {
 		let cancelled = false;
 		setList(null);
-		setIsLoading(true);
 		(async () => {
 			const res = await getList(`goal-lists/${listId}`);
 			if (cancelled) return;
 			if (res.success) {
 				setList(res.data.list);
 			}
-			setIsLoading(false);
 		})();
 		return () => {
 			cancelled = true;
@@ -205,7 +204,7 @@ const ListGoalsContainerComponent: FC = () => {
 	};
 
 	if (!list || list.code !== listId) {
-		return <Loader isLoading={isLoading || !list || list.code !== listId} isPageLoader />;
+		return <ListGoalsContainerSkeleton />;
 	}
 
 	// ��обираем массив целей с локацией для карты

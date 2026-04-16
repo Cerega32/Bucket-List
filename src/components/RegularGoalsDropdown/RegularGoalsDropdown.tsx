@@ -18,6 +18,7 @@ import {
 
 import {ProgressGoalCompactCard} from './ProgressGoalCompactCard';
 import {RegularGoalCompactCard} from './RegularGoalCompactCard';
+import {RegularGoalsDropdownSkeleton} from './RegularGoalsDropdownSkeleton';
 import {Button} from '../Button/Button';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {BlurLoader} from '../Loader/BlurLoader';
@@ -210,47 +211,51 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 	return (
 		<div ref={dropdownRef} className={block()}>
 			<div className={element('content')}>
-				<BlurLoader active={loading} className={element('loader')}>
-					{isProgress ? (
-						goals.length === 0 ? (
+				{loading && (isProgress ? progressGoals.length === 0 : regularGoals.length === 0) ? (
+					<RegularGoalsDropdownSkeleton variant={variant} />
+				) : (
+					<BlurLoader active={loading} className={element('loader')}>
+						{isProgress ? (
+							goals.length === 0 ? (
+								<EmptyState
+									title="Прогресс для целей не установлен"
+									description="Задайте отслеживание прогресса выполнения в любой активной цели"
+									size="small"
+									className={element('empty')}
+								/>
+							) : (
+								<div className={element('list')}>
+									{goals.map((progress) => (
+										<ProgressGoalCompactCard
+											key={progress.id}
+											progress={progress}
+											onMarkToday={() => handleProgressMarkToday(progress)}
+											onChangeProgress={() => handleProgressChange(progress)}
+										/>
+									))}
+								</div>
+							)
+						) : regularGoals.length === 0 ? (
 							<EmptyState
-								title="Прогресс для целей не установлен"
-								description="Задайте отслеживание прогресса выполнения в любой активной цели"
+								title="Регулярных целей нет"
+								description="Добавьте цели из каталога для отслеживания привычек"
 								size="small"
 								className={element('empty')}
 							/>
 						) : (
 							<div className={element('list')}>
-								{goals.map((progress) => (
-									<ProgressGoalCompactCard
-										key={progress.id}
-										progress={progress}
-										onMarkToday={() => handleProgressMarkToday(progress)}
-										onChangeProgress={() => handleProgressChange(progress)}
+								{regularList.map((statistics) => (
+									<RegularGoalCompactCard
+										key={statistics.id}
+										statistics={statistics}
+										onQuickComplete={(id, completed) => handleQuickComplete(id, completed)}
+										onRestart={(id) => handleRestart(id)}
 									/>
 								))}
 							</div>
-						)
-					) : regularGoals.length === 0 ? (
-						<EmptyState
-							title="Регулярных целей нет"
-							description="Добавьте цели из каталога для отслеживания привычек"
-							size="small"
-							className={element('empty')}
-						/>
-					) : (
-						<div className={element('list')}>
-							{regularList.map((statistics) => (
-								<RegularGoalCompactCard
-									key={statistics.id}
-									statistics={statistics}
-									onQuickComplete={(id, completed) => handleQuickComplete(id, completed)}
-									onRestart={(id) => handleRestart(id)}
-								/>
-							))}
-						</div>
-					)}
-				</BlurLoader>
+						)}
+					</BlurLoader>
+				)}
 			</div>
 
 			<div className={element('footer')}>

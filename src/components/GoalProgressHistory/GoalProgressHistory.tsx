@@ -2,11 +2,11 @@ import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useRef, useState} from 'react';
 
 import {EmptyState} from '@/components/EmptyState/EmptyState';
-import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
 import {IGoalProgressEntry, getGoalProgressEntries} from '@/utils/api/goals';
 import {formatDateString} from '@/utils/time/formatDate';
 
+import {GoalProgressHistorySkeleton} from './GoalProgressHistorySkeleton';
 import './goal-progress-history.scss';
 
 interface GoalProgressHistoryProps {
@@ -73,7 +73,7 @@ export const GoalProgressHistory: FC<GoalProgressHistoryProps> = observer(({clas
 	if (isLoading) {
 		return (
 			<div className={block()}>
-				<Loader isLoading={isLoading} />
+				<GoalProgressHistorySkeleton />
 			</div>
 		);
 	}

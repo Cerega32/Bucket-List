@@ -16,6 +16,7 @@ import {
 	updateGoalFolder,
 } from '@/utils/api/goals';
 
+import {GoalFolderManagerSkeleton} from './GoalFolderManagerSkeleton';
 import {Button} from '../Button/Button';
 import {CharCount} from '../CharCount/CharCount';
 import {EmptyState} from '../EmptyState/EmptyState';
@@ -23,12 +24,12 @@ import {FieldInput} from '../FieldInput/FieldInput';
 import {FolderRulesManager} from '../FolderRulesManager/FolderRulesManager';
 import {ItemGoal} from '../ItemGoal/ItemGoal';
 import {Line} from '../Line/Line';
-import {Loader} from '../Loader/Loader';
 import {Modal} from '../Modal/Modal';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
 import Select, {OptionSelect} from '../Select/Select';
 import {Switch} from '../Switch/Switch';
 import {Title} from '../Title/Title';
+
 import './goal-folder-manager.scss';
 
 interface GoalFolderManagerProps {
@@ -278,10 +279,6 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		}
 	};
 
-	if (isLoading) {
-		return <Loader isLoading />;
-	}
-
 	return (
 		<div className={block()}>
 			<div className={element('header')}>
@@ -319,7 +316,9 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 							</div>
 						</div>
 					</div>
-					{filteredFolders.length === 0 ? (
+					{isLoading ? (
+						<GoalFolderManagerSkeleton />
+					) : filteredFolders.length === 0 ? (
 						<EmptyState
 							title={isSearchMode ? 'По запросу ничего не найдено' : 'У вас пока нет папок для целей'}
 							description={

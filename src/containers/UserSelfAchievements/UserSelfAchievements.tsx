@@ -3,11 +3,12 @@ import {FC, useEffect, useMemo, useState} from 'react';
 
 import {Achievement} from '@/components/Achievement/Achievement';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
-import {Loader} from '@/components/Loader/Loader';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {AchievementCategory, IAchievement} from '@/typings/achievements';
 import {GET} from '@/utils/fetch/requests';
+
+import {UserSelfAchievementsSkeleton} from './UserSelfAchievementsSkeleton';
 import './user-self-achievements.scss';
 
 // interface UserSelfAchievementsProps {
@@ -78,8 +79,12 @@ export const UserSelfAchievements: FC = observer(() => {
 		return groups;
 	}, [achievements]);
 
+	if (isLoading) {
+		return <UserSelfAchievementsSkeleton />;
+	}
+
 	return (
-		<Loader isLoading={isLoading} className={block({empty: achievements.length === 0})}>
+		<div className={block({empty: achievements.length === 0})}>
 			{achievements.length === 0 ? (
 				<EmptyState title="У вас пока нет достижений" description="Выполняйте цели и получайте достижения за свой прогресс" />
 			) : (
@@ -105,6 +110,6 @@ export const UserSelfAchievements: FC = observer(() => {
 					})}
 				</div>
 			)}
-		</Loader>
+		</div>
 	);
 });

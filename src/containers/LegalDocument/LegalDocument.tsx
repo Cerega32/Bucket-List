@@ -11,14 +11,10 @@ interface LegalDocumentProps {
 	className?: string;
 }
 
+const UPDATE_DATE = '7 февраля 2026 г.';
+
 export const LegalDocument: FC<LegalDocumentProps> = ({title, children, className}) => {
 	const [block, element] = useBem('legal-document', className);
-
-	const currentDate = new Date().toLocaleDateString('ru-RU', {
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric',
-	});
 
 	return (
 		<main className={block()}>
@@ -27,7 +23,7 @@ export const LegalDocument: FC<LegalDocumentProps> = ({title, children, classNam
 					<Title tag="h1" className={element('title')}>
 						{title}
 					</Title>
-					<p className={element('date')}>Дата последнего обновления: {currentDate}</p>
+					<p className={element('date')}>Дата последнего обновления: {UPDATE_DATE}</p>
 				</div>
 
 				<div className={element('document')}>{children}</div>

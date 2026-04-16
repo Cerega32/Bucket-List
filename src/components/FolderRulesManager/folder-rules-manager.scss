@@ -1,4 +1,11 @@
 .folder-rules-manager {
+	&__rule-type-select {
+		.select__list {
+			max-height: 140px;
+			overflow-y: auto;
+		}
+	}
+
 	&__header {
 		display: flex;
 		justify-content: space-between;

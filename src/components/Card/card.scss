@@ -115,7 +115,6 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		height: 32px;
 		gap: 8px;
 
 		@include sm {
@@ -139,9 +138,10 @@
 
 	&__buttons-wrapper {
 		display: flex;
-		justify-content: space-between;
+		justify-content: end;
 		align-items: center;
 		gap: 8px;
+		height: 32px;
 
 		@include xs {
 			width: 100%;
@@ -263,6 +263,7 @@
 			&__tags-wrapper {
 				justify-content: flex-end;
 				gap: 8px;
+				flex-wrap: wrap;
 
 				@include sm {
 					justify-content: space-between;
@@ -271,6 +272,7 @@
 
 			&__tags {
 				margin-right: auto;
+				flex-wrap: nowrap;
 			}
 		}
 	}

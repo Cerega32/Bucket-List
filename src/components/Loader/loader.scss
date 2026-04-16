@@ -5,7 +5,7 @@
 	min-height: 40px;
 
 	&--page {
-		height: 100vh;
+		min-height: 0;
 	}
 
 	&__overlay {
@@ -36,10 +36,6 @@
 
 		&--blurred {
 			filter: blur(6px);
-		}
-
-		&--page {
-			height: 100vh;
 		}
 	}
 

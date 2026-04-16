@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite';
 import React, {useCallback, useState} from 'react';
 
 import {Button} from '@/components/Button/Button';
+import {FriendsContentSkeleton} from '@/containers/FriendsContent/FriendsContentSkeleton';
 import {useBem} from '@/hooks/useBem';
 import {FriendsStore} from '@/store/FriendsStore';
 import {NotificationStore} from '@/store/NotificationStore';
@@ -12,7 +13,6 @@ import {debounce} from '@/utils/time/debounce';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FriendCard} from '../FriendCard/FriendCard';
-import {Loader} from '../Loader/Loader';
 import './user-search.scss';
 import {Title} from '../Title/Title';
 
@@ -117,8 +117,8 @@ export const UserSearch: React.FC<UserSearchProps> = observer(({placeholder = '�
 			<div className={element('input-container')}>
 				<FieldInput value={query} setValue={handleInputChange} placeholder={placeholder} id="user-search-input" />
 			</div>
-			<Loader isLoading={FriendsStore.isSearching} />
-			{FriendsStore.hasSearchResults && (
+			{FriendsStore.isSearching && <FriendsContentSkeleton count={4} />}
+			{!FriendsStore.isSearching && FriendsStore.hasSearchResults && (
 				<div className={element('results')}>
 					<Title className={element('results-title')} tag="h4">
 						Найдено пользователей: {FriendsStore.searchResults.length}

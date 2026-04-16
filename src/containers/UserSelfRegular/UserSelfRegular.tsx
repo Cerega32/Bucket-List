@@ -5,12 +5,12 @@ import {scroller} from 'react-scroll';
 
 import {Button} from '@/components/Button/Button';
 import {RegularCard} from '@/components/Card/RegularCard';
+import {CatalogItemsSkeleton} from '@/components/CatalogItems/CatalogItemsSkeleton';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {FiltersDrawer, FilterGroup} from '@/components/FiltersDrawer/FiltersDrawer';
 import {Line} from '@/components/Line/Line';
 import {BlurLoader} from '@/components/Loader/BlurLoader';
-import {Loader} from '@/components/Loader/Loader';
 import {Pagination} from '@/components/Pagination/Pagination';
 import Select, {OptionSelect} from '@/components/Select/Select';
 import {Switch} from '@/components/Switch/Switch';
@@ -459,9 +459,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		return true;
 	};
 
-	if (isLoading && statisticsData.length === 0) {
-		return <Loader isLoading isPageLoader />;
-	}
+	const isInitialLoading = isLoading && statisticsData.length === 0;
 
 	if (!isLoading && statisticsData.length === 0) {
 		return (
@@ -525,23 +523,27 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 						</div>
 					)}
 				</div>
-				<BlurLoader active={isLoading}>
-					<div id="user-self-regular-goals">
-						{activeTab === 'today'
-							? renderGoalsList(
-									todayGoals,
-									areAllTodayCompleted ? 'Все цели на сегодня выполнены!' : 'На сегодня нет регулярных целей',
-									areAllTodayCompleted
-										? 'Отличная работа! Возвращайтесь завтра, чтобы продолжить серию.'
-										: 'Отметьте регулярные цели, которые хотите выполнить сегодня.'
-							  )
-							: renderGoalsList(
-									allGoals,
-									'Нет регулярных целей',
-									'Добавьте регулярные цели из каталога, чтобы отслеживать привычки и прогресс.'
-							  )}
-					</div>
-				</BlurLoader>
+				{isInitialLoading ? (
+					<CatalogItemsSkeleton columns="3" />
+				) : (
+					<BlurLoader active={isLoading}>
+						<div id="user-self-regular-goals">
+							{activeTab === 'today'
+								? renderGoalsList(
+										todayGoals,
+										areAllTodayCompleted ? 'Все цели на сегодня выполнены!' : 'На сегодня нет регулярных целей',
+										areAllTodayCompleted
+											? 'Отличная работа! Возвращайтесь завтра, чтобы продолжить серию.'
+											: 'Отметьте регулярные цели, которые хотите выполнить сегодня.'
+								  )
+								: renderGoalsList(
+										allGoals,
+										'Нет регулярных целей',
+										'Добавьте регулярные цели из каталога, чтобы отслеживать привычки и прогресс.'
+								  )}
+						</div>
+					</BlurLoader>
+				)}
 
 				{activeTab === 'all' && pagination && pagination.totalPages > 1 && (
 					<Pagination currentPage={currentPage} totalPages={pagination.totalPages} goToPage={goToPage} />

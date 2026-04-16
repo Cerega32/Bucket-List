@@ -1,10 +1,11 @@
 import {FC, useEffect, useState} from 'react';
 
 import {AllCategories} from '@/components/AllCategories/AllCategories';
-import {Loader} from '@/components/Loader/Loader';
 import {ICategoryDetailed} from '@/typings/goal';
 import {getCategories} from '@/utils/api/get/getCategories';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
+
+import {CategoriesSkeleton} from './CategoriesSkeleton';
 
 interface CategoriesProps {
 	tag?: 'h1' | 'h2' | 'h3';
@@ -26,9 +27,9 @@ export const Categories: FC<CategoriesProps> = ({tag = 'h1', title = 'Катег
 		})();
 	}, []);
 
-	return (
-		<Loader isLoading={isLoading}>
-			<AllCategories categories={categories} tag={tag} title={title} variant="minimal" />
-		</Loader>
-	);
+	if (isLoading) {
+		return <CategoriesSkeleton />;
+	}
+
+	return <AllCategories categories={categories} tag={tag} title={title} variant="minimal" />;
 };
