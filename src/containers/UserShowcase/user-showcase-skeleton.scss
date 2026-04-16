@@ -1,0 +1,87 @@
+.user-showcase-skeleton {
+	display: flex;
+	gap: 24px;
+	max-width: var(--max-width);
+	margin: 40px auto 0;
+
+	@include md {
+		flex-direction: column-reverse;
+	}
+
+	&__comments {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		flex: 1;
+		min-width: 0;
+
+		@include md {
+			width: 100%;
+		}
+	}
+
+	&__photos {
+		display: flex;
+		gap: 8px;
+		margin-bottom: 8px;
+		overflow: hidden;
+	}
+
+	&__photo {
+		flex-shrink: 0;
+	}
+
+	&__comment-card {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		padding: 16px;
+		background: var(--color-white);
+		border: 1px solid var(--color-gray-9);
+		border-radius: 8px;
+	}
+
+	&__comment-head {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 4px;
+	}
+
+	&__comment-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		flex: 1;
+	}
+
+	&__sidebar {
+		display: flex;
+		flex-direction: column;
+		flex-shrink: 0;
+		width: 336px;
+
+		@include md {
+			width: 100%;
+		}
+	}
+
+	&__sidebar-title {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 24px;
+	}
+
+	&__stats {
+		margin-bottom: 56px;
+	}
+
+	&__achievement {
+		margin-bottom: 24px;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+}

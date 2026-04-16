@@ -11,21 +11,30 @@ import {WeeklySchedule} from '@/components/WeeklySchedule/WeeklySchedule';
 import {useBem} from '@/hooks/useBem';
 import {IUserStatistics} from '@/typings/user';
 import {getStatistics} from '@/utils/api/get/getUserStatistics';
+
+import {UserSelfDashboardSkeleton} from './UserSelfDashboardSkeleton';
 import './user-self-dashboard.scss';
 
 export const UserSelfDashboard: FC = observer(() => {
 	const [block, element] = useBem('user-self-dashboard');
 
 	const [userStatistics, setUserStatistics] = useState<IUserStatistics | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		(async () => {
+			setIsLoading(true);
 			const res = await getStatistics();
 			if (res.success) {
 				setUserStatistics(res.data);
 			}
+			setIsLoading(false);
 		})();
 	}, []);
+
+	if (isLoading && !userStatistics) {
+		return <UserSelfDashboardSkeleton />;
+	}
 
 	return (
 		<section className={block()}>

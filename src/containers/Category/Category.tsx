@@ -7,9 +7,9 @@ import {AllCategories} from '@/components/AllCategories/AllCategories';
 import {Card} from '@/components/Card/Card';
 import {CatalogItems} from '@/components/CatalogItems/CatalogItems';
 import {HeaderCategory} from '@/components/HeaderCategory/HeaderCategory';
-import {Loader} from '@/components/Loader/Loader';
 import {RegularGoalSettingsModal} from '@/components/RegularGoalSettingsModal/RegularGoalSettingsModal';
 import {Title} from '@/components/Title/Title';
+import {CategoriesSkeleton} from '@/containers/Categories/CategoriesSkeleton';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {NotificationStore} from '@/store/NotificationStore';
@@ -31,6 +31,7 @@ import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 
+import {CategorySkeleton} from './CategorySkeleton';
 import './category.scss';
 
 const CategoryComponent: FC<IPage> = ({subPage, page}) => {
@@ -121,6 +122,10 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 	useEffect(() => {
 		(async () => {
 			setIsLoading(true);
+
+			if (!id) {
+				setCategory(null);
+			}
 
 			const promises = [];
 
@@ -297,6 +302,10 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 		}
 	};
 
+	const showSkeleton = isLoading;
+	const skeletonWithHeader = !!(id && id !== 'all' && !category);
+	const skeletonWithSubs = page === 'isSubCategories' || !!category?.category.parentCategory;
+
 	return (
 		<main
 			className={block({sub: page === 'isSubCategories', empty: !category?.subcategories.length, all: !id})}
@@ -312,83 +321,87 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 					onHeightChange={handleHeaderHeightChange}
 				/>
 			)}
-			<Loader isLoading={isLoading}>
-				{!!popularGoals.length && (
-					<>
-						<div className={element('wrapper-title')}>
-							<Title tag="h2">Популярные цели этой недели</Title>
-							{/* <Button
-								type="Link"
-								theme="blue"
-								icon="plus"
-								href={`/goals/create${id && id !== 'all' ? `?category=${id}` : ''}`}
-								size="small"
-							>
-								Добавить цель
-							</Button> */}
-						</div>
+			{showSkeleton && <CategorySkeleton withHeader={skeletonWithHeader} withSubcategories={skeletonWithSubs} />}
+			{!!popularGoals.length && (
+				<>
+					<div className={element('wrapper-title')}>
+						<Title tag="h2">Популярные цели этой недели</Title>
+						{/* <Button
+							type="Link"
+							theme="blue"
+							icon="plus"
+							href={`/goals/create${id && id !== 'all' ? `?category=${id}` : ''}`}
+							size="small"
+						>
+							Добавить цель
+						</Button> */}
+					</div>
 
-						<section className={element('popular-goals')}>
-							{popularGoals.map((goal, i) => (
-								<Card
-									goal={goal}
-									className={element('popular-goal')}
-									key={goal.code}
-									onClickAdd={() => updateGoal(goal.code, i, 'add')}
-									onClickDelete={() => updateGoal(goal.code, i, 'delete')}
-									onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
-								/>
-							))}
-						</section>
-					</>
-				)}
-				{!!popularLists.length && (
-					<>
-						<div className={element('wrapper-title')}>
-							<Title tag="h2">Популярные списки этой недели</Title>
-							{/* <Button
-								type="Link"
-								theme="blue"
-								icon="plus"
-								href={`/list/create${id && id !== 'all' ? `?category=${id}` : ''}`}
-								size="small"
-							>
-								Добавить список целей
-							</Button> */}
-						</div>
-						<section className={element('popular-lists')}>
-							{popularLists.map((list, i) => (
-								<Card
-									horizontal={!isScreenSmallMobile}
-									isList
-									goal={list}
-									className={element('popular-list')}
-									key={list.code}
-									onClickAdd={() => updateList(list.code, i, 'add')}
-									onClickDelete={() => updateList(list.code, i, 'delete')}
-								/>
-							))}
-						</section>
-					</>
-				)}
+					<section className={element('popular-goals')}>
+						{popularGoals.map((goal, i) => (
+							<Card
+								goal={goal}
+								className={element('popular-goal')}
+								key={goal.code}
+								onClickAdd={() => updateGoal(goal.code, i, 'add')}
+								onClickDelete={() => updateGoal(goal.code, i, 'delete')}
+								onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
+							/>
+						))}
+					</section>
+				</>
+			)}
+			{!!popularLists.length && (
+				<>
+					<div className={element('wrapper-title')}>
+						<Title tag="h2">Популярные списки этой недели</Title>
+						{/* <Button
+							type="Link"
+							theme="blue"
+							icon="plus"
+							href={`/list/create${id && id !== 'all' ? `?category=${id}` : ''}`}
+							size="small"
+						>
+							Добавить список целей
+						</Button> */}
+					</div>
+					<section className={element('popular-lists')}>
+						{popularLists.map((list, i) => (
+							<Card
+								horizontal={!isScreenSmallMobile}
+								isList
+								goal={list}
+								className={element('popular-list')}
+								key={list.code}
+								onClickAdd={() => updateList(list.code, i, 'add')}
+								onClickDelete={() => updateList(list.code, i, 'delete')}
+							/>
+						))}
+					</section>
+				</>
+			)}
 
-				<div id="all-goals-and-lists">
-					<Title className={element('title')} tag="h2">
-						Все цели и списки
-					</Title>
-					<CatalogItems
-						code={id || 'all'}
-						className={element('all-goals')}
-						subPage={subPage}
-						category={category}
-						beginUrl={id ? '/categories/' : '/categories/all'}
-						categories={categories}
-						initialSearch={searchQuery}
-						onSearchChange={!id ? handleCatalogSearchChange : undefined}
-					/>
-					{!id && <AllCategories categories={categories} tag="h2" title="Категории" variant="minimal" />}
-				</div>
-			</Loader>
+			<div id="all-goals-and-lists">
+				<Title className={element('title')} tag="h2">
+					Все цели и списки
+				</Title>
+				<CatalogItems
+					code={id || 'all'}
+					className={element('all-goals')}
+					subPage={subPage}
+					category={category}
+					beginUrl={id ? '/categories/' : '/categories/all'}
+					categories={categories}
+					initialSearch={searchQuery}
+					onSearchChange={!id ? handleCatalogSearchChange : undefined}
+				/>
+				{!id &&
+					(showSkeleton ? (
+						<CategoriesSkeleton />
+					) : (
+						<AllCategories categories={categories} tag="h2" title="Категории" variant="minimal" />
+					))}
+			</div>
 
 			{/* Модалка настройки регулярности */}
 			{showRegularModal && regularGoalData?.regular_settings && (

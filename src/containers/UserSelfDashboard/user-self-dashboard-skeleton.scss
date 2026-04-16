@@ -1,0 +1,89 @@
+.user-self-dashboard-skeleton {
+	display: flex;
+	flex-direction: column;
+	gap: 56px;
+	flex: 1;
+	min-width: 0;
+
+	@include md {
+		gap: 24px;
+		width: 100%;
+	}
+
+	&__info-wrapper {
+		display: grid;
+		gap: 24px;
+		margin-bottom: 56px;
+		grid-template-columns: 1fr 1fr 1fr;
+
+		@include xl {
+			gap: 24px;
+			display: flex;
+			flex-wrap: wrap;
+		}
+
+		@include lg {
+			gap: 16px;
+		}
+
+		@include md {
+			margin-bottom: 24px;
+		}
+	}
+
+	&__info-group {
+		display: grid;
+		gap: 24px;
+		width: 100%;
+		grid-template-columns: 1fr 1fr 1fr;
+		grid-column: 1 / -1;
+
+		@include lg {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 16px;
+		}
+	}
+
+	&__info-card {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 16px;
+		background: var(--color-white);
+		border: 1px solid var(--color-gray-9);
+		border-radius: 8px;
+
+		@include lg {
+			min-width: 200px;
+			flex: 1 1 auto;
+		}
+
+		@include sm {
+			min-width: 100%;
+		}
+	}
+
+	&__chart {
+		height: 280px;
+
+		@include xl {
+			width: auto;
+			min-width: 280px;
+			max-width: 100%;
+			flex: 1 1 auto;
+		}
+
+		@include sm {
+			min-width: 100%;
+		}
+	}
+
+	&__heatmap {
+		height: 400px;
+	}
+
+	&__timers {
+		height: 300px;
+	}
+}

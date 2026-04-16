@@ -6,7 +6,9 @@ import {useBem} from '@/hooks/useBem';
 import {newsStore} from '@/store/NewsStore';
 import {ThemeStore} from '@/store/ThemeStore';
 import {pluralize} from '@/utils/text/pluralize';
-import './NewsPage.scss';
+
+import {NewsPageSkeleton} from './NewsPageSkeleton';
+import './news-page.scss';
 
 export const NewsPage = observer(() => {
 	const [searchQuery, setSearchQuery] = useState('');
@@ -101,7 +103,7 @@ export const NewsPage = observer(() => {
 				{/* Список новостей */}
 				<div className={element('content')}>
 					{newsStore.loading && displayedNews.length === 0 ? (
-						<div className={element('loading')}>Загрузка новостей...</div>
+						<NewsPageSkeleton />
 					) : displayedNews.length === 0 ? (
 						<div className={element('empty')}>
 							{newsStore.searchQuery ? 'По вашему запросу ничего не найдено' : 'Новостей пока нет'}

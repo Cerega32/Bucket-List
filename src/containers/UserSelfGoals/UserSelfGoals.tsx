@@ -3,7 +3,6 @@ import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
 import {CatalogItems} from '@/components/CatalogItems/CatalogItems';
-import {Loader} from '@/components/Loader/Loader';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ICategoryDetailed} from '@/typings/goal';
@@ -22,22 +21,19 @@ export const UserSelfGoals: FC<UserSelfGoalsProps> = observer((props) => {
 	const {subPage, completed, pendingCatalogReview = false} = props;
 
 	const [block, element] = useBem('user-self-goals');
-	const [isLoading, setIsLoading] = useState(true);
 	const [categories, setCategories] = useState<Array<ICategoryDetailed>>([]);
 
 	useEffect(() => {
 		(async () => {
-			setIsLoading(true);
 			const res = await getCategories();
 			if (res.success) {
 				setCategories(sortMainCategories(res.data));
 			}
-			setIsLoading(false);
 		})();
 	}, []);
 
 	return (
-		<Loader isLoading={isLoading} className={block()}>
+		<div className={block()}>
 			<Title tag="h2" className={element('title')}>
 				{pendingCatalogReview ? 'На рассмотрении' : completed ? 'Выполненные цели и списки' : 'Все активные цели и списки'}
 			</Title>
@@ -51,6 +47,6 @@ export const UserSelfGoals: FC<UserSelfGoalsProps> = observer((props) => {
 				searchWrapperWrap
 				pendingCatalogReview={pendingCatalogReview}
 			/>
-		</Loader>
+		</div>
 	);
 });

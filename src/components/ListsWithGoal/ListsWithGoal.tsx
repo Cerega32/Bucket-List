@@ -8,10 +8,11 @@ import {getListsWithGoals} from '@/utils/api/get/getListsWithGoal';
 import {addListGoal} from '@/utils/api/post/addListGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
 
+import {ListsWithGoalSkeleton} from './ListsWithGoalSkeleton';
 import {Card} from '../Card/Card';
 import {EmptyState} from '../EmptyState/EmptyState';
-import {Loader} from '../Loader/Loader';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
+
 import './lists-with-goal.scss';
 
 interface ListsWithGoalProps {
@@ -84,7 +85,7 @@ export const ListsWithGoal: FC<ListsWithGoalProps> = observer((props) => {
 	return (
 		<section className={block()} id="goal-lists-section">
 			{!isFresh ? (
-				<Loader isLoading />
+				<ListsWithGoalSkeleton />
 			) : lists && lists.length > 0 ? (
 				lists.map((list, i) => (
 					<Card

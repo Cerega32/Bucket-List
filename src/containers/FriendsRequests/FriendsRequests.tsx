@@ -10,6 +10,7 @@ import {NotificationStore} from '@/store/NotificationStore';
 import {IFriendRequest} from '@/typings/user';
 import {respondToFriendRequest, getFriendRequests} from '@/utils/api/friends';
 
+import {FriendsContentSkeleton} from '../FriendsContent/FriendsContentSkeleton';
 import '../FriendsContent/friends-content.scss';
 
 type FriendCardActionsIncomingProps = {request: IFriendRequest};
@@ -105,9 +106,7 @@ export const FriendsRequests: FC = observer(() => {
 	if (FriendsStore.isLoading) {
 		return (
 			<section className={block()}>
-				<div className={element('loading')}>
-					<p>Загрузка...</p>
-				</div>
+				<FriendsContentSkeleton withActions />
 			</section>
 		);
 	}

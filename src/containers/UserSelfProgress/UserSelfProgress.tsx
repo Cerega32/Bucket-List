@@ -5,12 +5,12 @@ import {scroller} from 'react-scroll';
 
 import {Button} from '@/components/Button/Button';
 import {RegularCard} from '@/components/Card/RegularCard';
+import {CatalogItemsSkeleton} from '@/components/CatalogItems/CatalogItemsSkeleton';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {FiltersDrawer, FilterGroup} from '@/components/FiltersDrawer/FiltersDrawer';
 import {Line} from '@/components/Line/Line';
 import {BlurLoader} from '@/components/Loader/BlurLoader';
-import {Loader} from '@/components/Loader/Loader';
 import {Pagination} from '@/components/Pagination/Pagination';
 import Select, {OptionSelect} from '@/components/Select/Select';
 import {Switch} from '@/components/Switch/Switch';
@@ -270,9 +270,7 @@ export const UserSelfProgress: FC = observer(() => {
 		return true;
 	};
 
-	if (isLoading && goals.length === 0) {
-		return <Loader isLoading isPageLoader />;
-	}
+	const isInitialLoading = isLoading && goals.length === 0;
 
 	const buttonsSwitch = [
 		{url: '#today', name: 'На сегодня', page: 'today' as const, count: todayCount},
@@ -329,43 +327,47 @@ export const UserSelfProgress: FC = observer(() => {
 					)}
 				</div>
 
-				<BlurLoader active={isPageLoading}>
-					{goals.length === 0 ? (
-						<EmptyState
-							title="Прогресс для целей не установлен"
-							description="Задайте отслеживание прогресса выполнения в любой активной цели"
-						>
-							<Button theme="blue" width="auto" type="Link" href="/user/self/active-goals">
-								Перейти к активным целям
-							</Button>
-						</EmptyState>
-					) : filteredGoals.length === 0 ? (
-						<EmptyState
-							title={activeTab === 'today' ? 'Нет целей на сегодня' : 'Нет целей'}
-							description={
-								activeTab === 'today'
-									? goals.length > 0 && !goals.some((g) => !g.isWorkingToday)
-										? 'На этой странице все цели уже отмечены на сегодня. Переключитесь на «Все цели» или другую страницу.'
-										: 'Список целей, по которым ещё не отмечено «работал сегодня».'
-									: 'Не найдено ни одной цели с заданным прогрессом'
-							}
-						/>
-					) : (
-						<div className={element('goals-grid')} id="user-self-progress-goals">
-							{filteredGoals.map((goal) => (
-								<RegularCard
-									key={goal.id}
-									variant="progress"
-									progressGoal={goal}
-									onOpenProgressModal={() => openProgressModal(goal)}
-									onMarkToday={() => markToday(goal)}
-									onMarkCompleted={() => markGoalCompleted(goal)}
-									className="catalog-items__goal catalog-items__goal--full"
-								/>
-							))}
-						</div>
-					)}
-				</BlurLoader>
+				{isInitialLoading ? (
+					<CatalogItemsSkeleton columns="3" />
+				) : (
+					<BlurLoader active={isPageLoading}>
+						{goals.length === 0 ? (
+							<EmptyState
+								title="Прогресс для целей не установлен"
+								description="Задайте отслеживание прогресса выполнения в любой активной цели"
+							>
+								<Button theme="blue" width="auto" type="Link" href="/user/self/active-goals">
+									Перейти к активным целям
+								</Button>
+							</EmptyState>
+						) : filteredGoals.length === 0 ? (
+							<EmptyState
+								title={activeTab === 'today' ? 'Нет целей на сегодня' : 'Нет целей'}
+								description={
+									activeTab === 'today'
+										? goals.length > 0 && !goals.some((g) => !g.isWorkingToday)
+											? 'На этой странице все цели уже отмечены на сегодня. Переключитесь на «Все цели» или другую страницу.'
+											: 'Список целей, по которым ещё не отмечено «работал сегодня».'
+										: 'Не найдено ни одной цели с заданным прогрессом'
+								}
+							/>
+						) : (
+							<div className={element('goals-grid')} id="user-self-progress-goals">
+								{filteredGoals.map((goal) => (
+									<RegularCard
+										key={goal.id}
+										variant="progress"
+										progressGoal={goal}
+										onOpenProgressModal={() => openProgressModal(goal)}
+										onMarkToday={() => markToday(goal)}
+										onMarkCompleted={() => markGoalCompleted(goal)}
+										className="catalog-items__goal catalog-items__goal--full"
+									/>
+								))}
+							</div>
+						)}
+					</BlurLoader>
+				)}
 
 				{pagination && pagination.totalPages > 1 && (
 					<Pagination currentPage={currentPage} totalPages={pagination.totalPages} goToPage={goToPage} />

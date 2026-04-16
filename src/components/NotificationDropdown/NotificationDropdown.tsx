@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useRef} from 'react';
+import {FC, useEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
@@ -8,11 +8,13 @@ import {HeaderNotificationsStore} from '@/store/HeaderNotificationsStore';
 import {IHeaderNotification} from '@/typings/notification';
 import {respondToFriendRequest} from '@/utils/api/friends';
 
+import {NotificationDropdownSkeleton} from './NotificationDropdownSkeleton';
 import {Avatar} from '../Avatar/Avatar';
 import {Button} from '../Button/Button';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {Line} from '../Line/Line';
 import {Svg} from '../Svg/Svg';
+
 import './notification-dropdown.scss';
 
 interface NotificationDropdownProps {
@@ -95,6 +97,41 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 	const dropdownRef = useRef<HTMLDivElement>(null);
 	const navigate = useNavigate();
 	const {isScreenSmallMobile} = useScreenSize();
+	const [imagesReady, setImagesReady] = useState(false);
+
+	const {notifications} = HeaderNotificationsStore;
+	const urls = Array.from(
+		new Set(
+			(notifications || [])
+				.flatMap((n) => [n.relatedObjectImage, n.sender?.avatar, n.userAvatar])
+				.filter((url): url is string => typeof url === 'string' && url.length > 0)
+		)
+	);
+	const urlsKey = urls.join('|');
+
+	useEffect(() => {
+		if (urls.length === 0) {
+			setImagesReady(true);
+			return undefined;
+		}
+		setImagesReady(false);
+		let cancelled = false;
+		let pending = urls.length;
+		const done = () => {
+			pending -= 1;
+			if (pending <= 0 && !cancelled) setImagesReady(true);
+		};
+		urls.forEach((url) => {
+			const img = new Image();
+			img.onload = done;
+			img.onerror = done;
+			img.src = url;
+		});
+		return () => {
+			cancelled = true;
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [urlsKey]);
 
 	useEffect(() => {
 		if (disableClickOutside) return;
@@ -156,7 +193,9 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 			<Line margin="8px 0" />
 
 			<div className={element('content')}>
-				{!HeaderNotificationsStore.notifications || HeaderNotificationsStore.notifications.length === 0 ? (
+				{HeaderNotificationsStore.isLoading || !imagesReady ? (
+					<NotificationDropdownSkeleton />
+				) : !HeaderNotificationsStore.notifications || HeaderNotificationsStore.notifications.length === 0 ? (
 					<EmptyState
 						title="Нет уведомлений"
 						description="Все уведомления появятся здесь"

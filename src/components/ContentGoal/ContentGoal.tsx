@@ -16,12 +16,12 @@ import {postLikeComment} from '@/utils/api/post/postLikeComment';
 import {Banner} from '../Banner/Banner';
 import {CommentImagesGallery} from '../CommentImagesGallery/CommentImagesGallery';
 import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
+import {CommentsGoalSkeleton} from '../CommentsGoal/CommentsGoalSkeleton';
 import {ComplexityDisplay} from '../ComplexityDisplay/ComplexityDisplay';
 import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
 import {GoalProgressHistory} from '../GoalProgressHistory/GoalProgressHistory';
 import {InfoGoal} from '../InfoGoal/InfoGoal';
 import {ListsWithGoal} from '../ListsWithGoal/ListsWithGoal';
-import {Loader} from '../Loader/Loader';
 import {MyReview} from '../MyReview/MyReview';
 import {RegularGoalHistory} from '../RegularGoalHistory/RegularGoalHistory';
 import {RegularGoalRating} from '../RegularGoalRating/RegularGoalRating';
@@ -136,7 +136,7 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 		switch (page) {
 			case 'isGoal':
 				if (!isCommentsFresh) {
-					return <Loader isLoading />;
+					return <CommentsGoalSkeleton />;
 				}
 				return (
 					<>

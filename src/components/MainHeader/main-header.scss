@@ -2,10 +2,12 @@
 	$block: &;
 
 	display: flex;
+	justify-content: space-between;
 
 	&__slider {
 		flex-shrink: 0;
 		width: 216px;
+		min-height: 400px;
 		max-height: 600px;
 	}
 
@@ -106,6 +108,11 @@
 
 	&__completed-number {
 		color: var(--color-text);
+
+		&--blurred {
+			filter: blur(2px);
+			user-select: none;
+		}
 	}
 }
 

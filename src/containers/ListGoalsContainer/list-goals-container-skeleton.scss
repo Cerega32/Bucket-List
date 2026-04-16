@@ -1,0 +1,214 @@
+.list-goals-container-skeleton {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	background: var(--color-gray-3);
+
+	&__header {
+		width: 100%;
+		padding: 175px 24px 24px;
+
+		@include lg {
+			padding: 176px 24px 56px;
+		}
+
+		@include md {
+			display: flex;
+			flex-direction: column;
+			gap: 16px;
+			padding: 128px 24px 40px;
+		}
+	}
+
+	&__header-wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		max-width: 1440px;
+		margin: 0 auto;
+		padding-left: 400px;
+
+		@include xl {
+			padding-left: 360px;
+		}
+
+		@include lg {
+			padding-left: 0;
+			width: calc(100% - 24px);
+			margin: 0;
+		}
+	}
+
+	&__header-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-top: 8px;
+	}
+
+	&__wrapper {
+		display: flex;
+		gap: 24px;
+		max-width: 1416px;
+		width: 100%;
+		padding: 0 24px 96px;
+		margin: 0 auto;
+
+		@include lg {
+			flex-direction: column;
+		}
+	}
+
+	&__aside {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		flex-shrink: 0;
+		width: 336px;
+		position: relative;
+		top: -120px;
+
+		@include lg {
+			flex-direction: row;
+			width: 100%;
+			top: 0;
+			align-items: end;
+		}
+
+		@include md {
+			flex-direction: column;
+		}
+	}
+
+	&__aside-image {
+		width: 100%;
+		height: 336px;
+		flex-shrink: 0;
+
+		@include lg {
+			flex: 1 1 0;
+			width: auto;
+			height: auto;
+			min-height: 240px;
+		}
+
+		@include md {
+			display: block;
+			width: 100%;
+			height: 280px;
+		}
+	}
+
+	&__aside-info {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		padding: 16px 24px;
+		background: var(--color-white);
+		border: 1px solid var(--color-gray-9);
+		border-radius: 8px;
+		flex: 1;
+		max-height: min-content;
+
+		@include lg {
+			flex-direction: row;
+		}
+
+		@include md {
+			flex-direction: column;
+			width: 100%;
+		}
+	}
+
+	&__content {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__content-wrapper {
+		display: flex;
+		gap: 24px;
+		flex: 1;
+
+		@include md {
+			flex-direction: column;
+		}
+	}
+
+	&__description {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		width: 100%;
+	}
+
+	&__progress {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		padding: 16px;
+		background: var(--color-white);
+		border: 1px solid var(--color-gray-9);
+		border-radius: 8px;
+	}
+
+	&__grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 24px;
+
+		@include xl {
+			grid-template-columns: repeat(2, 1fr);
+		}
+
+		@include md {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	&__card {
+		display: flex;
+		flex-direction: column;
+		padding: 8px;
+		background: var(--color-white);
+		border: 1px solid var(--color-gray-9);
+		border-radius: 8px;
+		gap: 12px;
+	}
+
+	&__card-image {
+		width: 100%;
+		height: 160px;
+	}
+
+	&__card-body {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 8px;
+	}
+
+	&__card-tags {
+		display: flex;
+		gap: 8px;
+		margin-bottom: 4px;
+	}
+
+	&__card-text {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		margin: 8px 0;
+	}
+
+	&__card-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: auto;
+		padding-top: 8px;
+	}
+}

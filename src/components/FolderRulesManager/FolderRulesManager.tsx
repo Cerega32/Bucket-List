@@ -20,8 +20,8 @@ import {FieldSelect} from '../FieldSelect/FieldSelect';
 import {Loader} from '../Loader/Loader';
 import {Modal} from '../Modal/Modal';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
-
 import './folder-rules-manager.scss';
+import Select from '../Select/Select';
 
 interface FolderRulesManagerProps {
 	className?: string;
@@ -185,14 +185,16 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 
 		return (
 			<div className={element('form')}>
-				<FieldSelect
-					id="rule-type"
+				<Select
 					text="Тип правила"
-					value={formData.ruleType || ''}
-					setValue={(value: string) => setFormData({...formData, ruleType: value})}
-					options={ruleOptions?.ruleTypes.map((type) => ({value: type.value, text: type.label})) || []}
+					className={element('rule-type-select')}
+					options={ruleOptions?.ruleTypes.map((type) => ({name: type.label, value: type.value})) || []}
+					activeOption={formData.ruleType ? ruleOptions?.ruleTypes.findIndex((t) => t.value === formData.ruleType) ?? null : null}
+					onSelect={(active) => {
+						const value = ruleOptions?.ruleTypes[active]?.value;
+						if (value) setFormData({...formData, ruleType: value});
+					}}
 					placeholder="Выберите тип правила"
-					required
 				/>
 
 				{formData.ruleType && (

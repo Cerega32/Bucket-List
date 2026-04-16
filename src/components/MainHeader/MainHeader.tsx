@@ -6,6 +6,7 @@ import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
 import {pluralize} from '@/utils/text/pluralize';
 
+import {MainHeaderSlidersSkeleton} from './MainHeaderSlidersSkeleton';
 import {Button} from '../Button/Button';
 import {Title} from '../Title/Title';
 import {VerticalSlider} from '../VerticalSlider/VerticalSlider';
@@ -17,10 +18,12 @@ interface MainHeaderProps {
 	leftPhotos: any[];
 	rightPhotos: any[];
 	totalCompleted: number;
+	isPhotosLoading?: boolean;
+	isCounterLoading?: boolean;
 }
 
 export const MainHeader: FC<MainHeaderProps> = observer((props) => {
-	const {className, leftPhotos, rightPhotos, totalCompleted} = props;
+	const {className, leftPhotos, rightPhotos, totalCompleted, isPhotosLoading, isCounterLoading} = props;
 
 	const [block, element] = useBem('main-header', className);
 	const {setWindow, setIsOpen} = ModalStore;
@@ -36,14 +39,18 @@ export const MainHeader: FC<MainHeaderProps> = observer((props) => {
 	return (
 		<section className={block()}>
 			<div className={element('slider slider-left')}>
-				{leftPhotos.length > 0 && (
-					<VerticalSlider
-						slides={leftPhotos.map((photo) => (
-							<img className={element('slider-image')} src={photo.imageUrl} alt="Фотография из комментария" />
-						))}
-						direction="up"
-						speed={60}
-					/>
+				{isPhotosLoading ? (
+					<MainHeaderSlidersSkeleton />
+				) : (
+					leftPhotos.length > 0 && (
+						<VerticalSlider
+							slides={leftPhotos.map((photo) => (
+								<img className={element('slider-image')} src={photo.imageUrl} alt="Фотография из комментария" />
+							))}
+							direction="up"
+							speed={60}
+						/>
+					)
 				)}
 			</div>
 			<div className={element('info')}>
@@ -70,18 +77,24 @@ export const MainHeader: FC<MainHeaderProps> = observer((props) => {
 				</Button>
 				<p className={element('completed')}>
 					🔥 Уже выполнено:{' '}
-					<span className={element('completed-number')}>{pluralize(totalCompleted, ['цель', 'цели', 'целей'])}</span>
+					<span className={element('completed-number', {blurred: isCounterLoading})}>
+						{pluralize(totalCompleted, ['цель', 'цели', 'целей'])}
+					</span>
 				</p>
 			</div>
 			<div className={element('slider slider-right')}>
-				{rightPhotos.length > 0 && (
-					<VerticalSlider
-						slides={rightPhotos.map((photo) => (
-							<img className={element('slider-image')} src={photo.imageUrl} alt="Фотография из комментария" />
-						))}
-						direction="down"
-						speed={60}
-					/>
+				{isPhotosLoading ? (
+					<MainHeaderSlidersSkeleton />
+				) : (
+					rightPhotos.length > 0 && (
+						<VerticalSlider
+							slides={rightPhotos.map((photo) => (
+								<img className={element('slider-image')} src={photo.imageUrl} alt="Фотография из комментария" />
+							))}
+							direction="down"
+							speed={60}
+						/>
+					)
 				)}
 			</div>
 		</section>

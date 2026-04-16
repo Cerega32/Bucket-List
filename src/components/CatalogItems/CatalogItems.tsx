@@ -25,15 +25,16 @@ import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
 import {defaultPagination} from '@/utils/data/default';
 
+import {CatalogItemsSkeleton} from './CatalogItemsSkeleton';
 import {Card} from '../Card/Card';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FiltersDrawer, FilterGroup} from '../FiltersDrawer/FiltersDrawer';
 import {Line} from '../Line/Line';
-import {Loader} from '../Loader/Loader';
 import {Pagination} from '../Pagination/Pagination';
 import Select, {OptionSelect} from '../Select/Select';
 import {Switch} from '../Switch/Switch';
+
 import './catalog-items.scss';
 
 interface CatalogItemsProps {
@@ -46,6 +47,8 @@ interface CatalogItemsProps {
 	onSearchChange?: (query: string) => void;
 	/** Личный кабинет: раздел «На рассмотрении» (неодобренные для каталога) */
 	pendingCatalogReview?: boolean;
+	/** Если передан — родитель берёт на себя показ лоадера начальной загрузки. */
+	onInitialLoadingChange?: (loading: boolean) => void;
 }
 
 interface CatalogItemsCategoriesProps extends CatalogItemsProps {
@@ -129,6 +132,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		searchWrapperWrap = false,
 		onSearchChange,
 		pendingCatalogReview = false,
+		onInitialLoadingChange,
 	} = props;
 
 	const {isAuth} = UserStore;
@@ -329,6 +333,13 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 	useEffect(() => {
 		setSearch(initialSearch);
 	}, [initialSearch, beginUrl]);
+
+	// Сообщаем родителю о состоянии начальной загрузки, чтобы он мог показать единый лоадер
+	useEffect(() => {
+		if (!onInitialLoadingChange) return;
+		const initialLoading = (subPage === 'goals' && !goalsLoaded) || (subPage === 'lists' && !listsLoaded);
+		onInitialLoadingChange(initialLoading);
+	}, [goalsLoaded, listsLoaded, subPage, onInitialLoadingChange]);
 
 	const fetchData = async (sortValue: string, page?: number, filtersOverride?: Record<string, string[]>): Promise<boolean> => {
 		setLoading(true);
@@ -632,6 +643,8 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		}
 	};
 
+	const isInitialLoading = (subPage === 'goals' && !goalsLoaded) || (subPage === 'lists' && !listsLoaded);
+
 	return (
 		<section className={block()} key={code}>
 			<div className={element('filters')}>
@@ -662,85 +675,89 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 					</div>
 				</div>
 			</div>
-			<Loader isLoading={loading || searchLoading || (subPage === 'goals' && !goalsLoaded) || (subPage === 'lists' && !listsLoaded)}>
-				{subPage === 'goals' ? (
-					!goalsLoaded ? null : goals.data.length === 0 ? (
+			{isInitialLoading || loading || searchLoading ? (
+				<CatalogItemsSkeleton isList={subPage === 'lists'} columns={columns as '3' | '4'} />
+			) : (
+				<>
+					{subPage === 'goals' ? (
+						!goalsLoaded ? null : goals.data.length === 0 ? (
+							<EmptyState
+								title={
+									isSearchMode
+										? 'По запросу ничего не найдено'
+										: pendingCatalogReview
+										? 'Нет целей на рассмотрении'
+										: completed
+										? 'У вас пока нет выполненных целей'
+										: 'У вас пока нет активных целей'
+								}
+								description={
+									isSearchMode
+										? 'Попробуйте изменить параметры поиска'
+										: pendingCatalogReview
+										? 'Созданные вами цели и списки появятся здесь до публикации в общий каталог. Выполненные — в разделе «Выполненные».'
+										: completed
+										? 'Начните выполнять цели, чтобы они появились в списке выполненных'
+										: 'Добавьте цели из каталога, чтобы они появились в списке активных'
+								}
+							/>
+						) : (
+							<section className={element('goals', {columns})} id="catalog-items-goals">
+								{goals.data.map((goal, i) => (
+									<Card
+										className={element('goal')}
+										goal={goal}
+										key={goal.code}
+										onClickAdd={() => updateGoal(goal.code, i, 'add')}
+										onClickDelete={() => updateGoal(goal.code, i, 'delete')}
+										onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
+									/>
+								))}
+							</section>
+						)
+					) : !listsLoaded ? null : lists.data.length === 0 ? (
 						<EmptyState
 							title={
 								isSearchMode
 									? 'По запросу ничего не найдено'
 									: pendingCatalogReview
-									? 'Нет целей на рассмотрении'
+									? 'Нет списков на рассмотрении'
 									: completed
-									? 'У вас пока нет выполненных целей'
-									: 'У вас пока нет активных целей'
+									? 'У вас пока нет выполненных списков'
+									: 'У вас пока нет активных списков'
 							}
 							description={
 								isSearchMode
 									? 'Попробуйте изменить параметры поиска'
 									: pendingCatalogReview
-									? 'Созданные вами цели и списки появятся здесь до публикации в общий каталог. Выполненные — в разделе «Выполненные».'
+									? 'После одобрения модератором список появится в общем каталоге. Выполненные — в разделе «Выполненные».'
 									: completed
-									? 'Начните выполнять цели, чтобы они появились в списке выполненных'
-									: 'Добавьте цели из каталога, чтобы они появились в списке активных'
+									? 'Начните выполнять списки целей, чтобы они появились в списке выполненных'
+									: 'Добавьте списки из каталога, чтобы они появились в списке активных'
 							}
 						/>
 					) : (
-						<section className={element('goals', {columns})} id="catalog-items-goals">
-							{goals.data.map((goal, i) => (
+						<section className={element('goals', {columns})} id="catalog-items-lists">
+							{lists.data.map((goal, i) => (
 								<Card
-									className={element('goal')}
+									className={element('list')}
 									goal={goal}
 									key={goal.code}
-									onClickAdd={() => updateGoal(goal.code, i, 'add')}
-									onClickDelete={() => updateGoal(goal.code, i, 'delete')}
-									onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
+									horizontal={!isScreenSmallMobile}
+									isList
+									onClickAdd={() => updateList(goal.code, i, 'add')}
+									onClickDelete={() => updateList(goal.code, i, 'delete')}
 								/>
 							))}
 						</section>
-					)
-				) : !listsLoaded ? null : lists.data.length === 0 ? (
-					<EmptyState
-						title={
-							isSearchMode
-								? 'По запросу ничего не найдено'
-								: pendingCatalogReview
-								? 'Нет списков на рассмотрении'
-								: completed
-								? 'У вас пока нет выполненных списков'
-								: 'У вас пока нет активных списков'
-						}
-						description={
-							isSearchMode
-								? 'Попробуйте изменить параметры поиска'
-								: pendingCatalogReview
-								? 'После одобрения модератором список появится в общем каталоге. Выполненные — в разделе «Выполненные».'
-								: completed
-								? 'Начните выполнять списки целей, чтобы они появились в списке выполненных'
-								: 'Добавьте списки из каталога, чтобы они появились в списке активных'
-						}
-					/>
-				) : (
-					<section className={element('goals', {columns})} id="catalog-items-lists">
-						{lists.data.map((goal, i) => (
-							<Card
-								className={element('list')}
-								goal={goal}
-								key={goal.code}
-								horizontal={!isScreenSmallMobile}
-								isList
-								onClickAdd={() => updateList(goal.code, i, 'add')}
-								onClickDelete={() => updateList(goal.code, i, 'delete')}
-							/>
-						))}
-					</section>
-				)}
-			</Loader>
-			{subPage === 'lists' && lists.data.length > 0 && (
-				<Pagination currentPage={lists.pagination.page} totalPages={lists.pagination.totalPages} goToPage={goToPage} />
-			)}
-			{subPage === 'goals' && goals.data.length > 0 && (
-				<Pagination currentPage={goals.pagination.page} totalPages={goals.pagination.totalPages} goToPage={goToPage} />
+					)}
+					{subPage === 'lists' && lists.data.length > 0 && (
+						<Pagination currentPage={lists.pagination.page} totalPages={lists.pagination.totalPages} goToPage={goToPage} />
+					)}
+					{subPage === 'goals' && goals.data.length > 0 && (
+						<Pagination currentPage={goals.pagination.page} totalPages={goals.pagination.totalPages} goToPage={goToPage} />
+					)}
+				</>
 			)}
 
 			{/* Модалка настройки регулярности */}

@@ -1,0 +1,24 @@
+.notification-dropdown-skeleton {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+
+	&__item {
+		display: flex;
+		gap: 16px;
+		padding: 8px;
+		border-radius: 6px;
+	}
+
+	&__avatar {
+		flex-shrink: 0;
+	}
+
+	&__content {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		flex: 1;
+		min-width: 0;
+	}
+}

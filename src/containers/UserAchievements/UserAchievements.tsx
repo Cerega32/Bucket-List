@@ -3,11 +3,12 @@ import {FC, useEffect} from 'react';
 
 import {Achievement} from '@/components/Achievement/Achievement';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
-import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
 import {UserStore} from '@/store/UserStore';
 import {IAchievement} from '@/typings/achievements';
 import {GET} from '@/utils/fetch/requests';
+
+import {UserAchievementsSkeleton} from './UserAchievementsSkeleton';
 import './user-achievements.scss';
 
 interface UserAchievementsProps {
@@ -43,11 +44,11 @@ export const UserAchievements: FC<UserAchievementsProps> = observer((props) => {
 	const isFresh = achievementsLoadedForId === id;
 
 	if (!isFresh) {
-		return <Loader isLoading className={block({empty: true})} />;
+		return <UserAchievementsSkeleton />;
 	}
 
 	return (
-		<Loader isLoading={false} className={block({empty: achievements.length === 0})}>
+		<div className={block({empty: achievements.length === 0})}>
 			{achievements.length === 0 ? (
 				<EmptyState title="У этого пользователя пока нет достижений" description="Выполняйте цели, чтобы получать достижения" />
 			) : (
@@ -55,6 +56,6 @@ export const UserAchievements: FC<UserAchievementsProps> = observer((props) => {
 					<Achievement key={achievement.id} className={element('achievement')} achievement={achievement} />
 				))
 			)}
-		</Loader>
+		</div>
 	);
 });

@@ -8,10 +8,10 @@ import {IShortGoal, IShortList} from '@/typings/goal';
 import {getAllGoals} from '@/utils/api/get/getAllGoals';
 import {getAllLists} from '@/utils/api/get/getAllLists';
 
+import {GlobalGoalsSearchSkeleton} from './GlobalGoalsSearchSkeleton';
 import {Button} from '../Button/Button';
 import {CardShort} from '../CardShort/CardShort';
 import {FieldInput} from '../FieldInput/FieldInput';
-import {Loader} from '../Loader/Loader';
 import {Svg} from '../Svg/Svg';
 
 import './global-goals-search.scss';
@@ -82,6 +82,7 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 		}
 
 		setIsSearching(true);
+		setIsDropdownOpen(true);
 
 		try {
 			const limit = isModal ? 8 : 10;
@@ -316,11 +317,6 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 						theme={!isModal && theme === 'transparent' ? 'transparent' : undefined}
 						focusBorder="white"
 					/>
-					{isSearching && (
-						<div className={element('loading')}>
-							<Loader isLoading />
-						</div>
-					)}
 				</div>
 			)}
 
@@ -342,14 +338,11 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 								focusBorder="white"
 								inputRef={inputRef}
 							/>
-							{isSearching && (
-								<div className={element('loading')}>
-									<Loader isLoading />
-								</div>
-							)}
 						</div>
 					)}
-					{results.length > 0 ? (
+					{isSearching ? (
+						<GlobalGoalsSearchSkeleton />
+					) : results.length > 0 ? (
 						<>
 							<ScrollableResults />
 

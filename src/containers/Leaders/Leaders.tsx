@@ -4,12 +4,13 @@ import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {InfoGoal} from '@/components/InfoGoal/InfoGoal';
 import {LeaderBoard} from '@/components/LeaderBoard/LeaderBoard';
 import {LeaderPedestal} from '@/components/Leaders/LeaderPedestal';
-import {Loader} from '@/components/Loader/Loader';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {IInfoStats, IWeeklyLeader} from '@/typings/user';
 import {getWeeklyLeaders} from '@/utils/api/get/getWeeklyLeaders';
 import {defaultInfoStats} from '@/utils/data/default';
+
+import {LeadersSkeleton} from './LeadersSkeleton';
 import './leaders.scss';
 
 export const Leaders: FC = () => {
@@ -29,8 +30,12 @@ export const Leaders: FC = () => {
 		})();
 	}, []);
 
+	if (isLoading) {
+		return <LeadersSkeleton className={block()} />;
+	}
+
 	return (
-		<Loader isLoading={isLoading} className={block()}>
+		<div className={block()}>
 			<div className={element('wrapper')}>
 				<Title className={element('title')} tag="h1">
 					Лидеры прошлой недели
@@ -59,6 +64,6 @@ export const Leaders: FC = () => {
 					description="У вас есть шанс занять первое место"
 				/>
 			)}
-		</Loader>
+		</div>
 	);
 };

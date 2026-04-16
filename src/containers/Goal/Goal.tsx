@@ -4,10 +4,10 @@ import {useParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {Card} from '@/components/Card/Card';
+import {CatalogItemsSkeleton} from '@/components/CatalogItems/CatalogItemsSkeleton';
 import {ContentGoal} from '@/components/ContentGoal/ContentGoal';
 import {EditGoal} from '@/components/EditGoal/EditGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
-import {Loader} from '@/components/Loader/Loader';
 import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
 import {SEO} from '@/components/SEO/SEO';
 import {Title} from '@/components/Title/Title';
@@ -25,6 +25,7 @@ import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 
+import {GoalSkeleton} from './GoalSkeleton';
 import {useSimilarGoalsByCategory} from './hooks/useSimilarGoalsByCategory';
 
 import './goal.scss';
@@ -50,7 +51,6 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const listId = params?.['id'];
 	const [goal, setGoal] = useState<IGoal | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
 	const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0); // Триггер для обновления истории
 
 	const {setIsOpen, setWindow} = ModalStore;
@@ -60,7 +60,6 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		if (!listId) return undefined;
 		let cancelled = false;
 		setGoal(null);
-		setIsLoading(true);
 		(async () => {
 			const res = await getGoal(listId);
 			if (cancelled) return;
@@ -68,7 +67,6 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				setGoal(normalizeGoalFromApi(res.data.goal));
 				setId(res.data.goal.id);
 			}
-			setIsLoading(false);
 		})();
 		return () => {
 			cancelled = true;
@@ -221,12 +219,10 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		}
 		if (goal && listId) {
 			// Иначе перезагружаем цель из API
-			setIsLoading(true);
 			const res = await getGoal(listId);
 			if (res.success && res.data.goal) {
 				setGoal(normalizeGoalFromApi(res.data.goal));
 			}
-			setIsLoading(false);
 		}
 	};
 
@@ -304,7 +300,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		};
 	}, []);
 
-	const {similarGoals} = useSimilarGoalsByCategory(goal?.code || null, !!goal);
+	const {similarGoals, isLoading: isSimilarLoading} = useSimilarGoalsByCategory(goal?.code || null, !!goal);
 
 	// Генерируем динамическое OG изображение
 	const {imageUrl: ogImageUrl} = useOGImage({
@@ -400,7 +396,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	}
 
 	if (!goal || goal.code !== listId) {
-		return <Loader isLoading={isLoading || !goal || goal.code !== listId} isPageLoader />;
+		return <GoalSkeleton />;
 	}
 
 	const expandedHeaderHeight = expandedHeaderHeightRef.current ?? headerHeight;
@@ -463,23 +459,27 @@ export const Goal: FC<IPage> = observer(({page}) => {
 						/>
 					</div>
 				</section>
-				{similarGoals.length > 0 && (
+				{(isSimilarLoading || similarGoals.length > 0) && (
 					<section className={element('similar-wrapper')}>
 						<Title tag="h2" className={element('similar-title')}>
 							Похожие цели
 						</Title>
-						<div className="catalog-items__goals">
-							{similarGoals.map((similarGoal) => (
-								<Card
-									key={similarGoal.id}
-									className="catalog-items__goal"
-									goal={similarGoal}
-									onClickAdd={async () => Promise.resolve()}
-									onClickDelete={async () => Promise.resolve()}
-									onClickMark={async () => Promise.resolve()}
-								/>
-							))}
-						</div>
+						{isSimilarLoading ? (
+							<CatalogItemsSkeleton count={8} />
+						) : (
+							<div className="catalog-items__goals">
+								{similarGoals.map((similarGoal) => (
+									<Card
+										key={similarGoal.id}
+										className="catalog-items__goal"
+										goal={similarGoal}
+										onClickAdd={async () => Promise.resolve()}
+										onClickDelete={async () => Promise.resolve()}
+										onClickMark={async () => Promise.resolve()}
+									/>
+								))}
+							</div>
+						)}
 					</section>
 				)}
 				<ScrollToTop />

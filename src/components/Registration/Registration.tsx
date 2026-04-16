@@ -3,11 +3,12 @@ import {Link} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
 import {Card} from '@/components/Card/Card';
+import {CatalogItemsSkeleton} from '@/components/CatalogItems/CatalogItemsSkeleton';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
-import {Loader} from '@/components/Loader/Loader';
 import {MainCards} from '@/components/MainCards/MainCards';
 import {Svg} from '@/components/Svg/Svg';
+import {User100GoalsSkeleton} from '@/containers/User100Goals/User100GoalsSkeleton';
 import {useBem} from '@/hooks/useBem';
 import {ICategoryGoals, IMainGoals} from '@/store/UserStore';
 import {IComplexity, IGoal} from '@/typings/goal';
@@ -307,7 +308,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 						Отметьте то, что вы уже сделали, чтобы увидеть свой текущий прогресс. Необязательно отмечать всё сейчас — это можно
 						изменить позже
 					</p>
-					<Loader isLoading={mainGoalsLoading} />
+					{mainGoalsLoading && <User100GoalsSkeleton withStats={false} />}
 					{!mainGoalsLoading && mainGoalsLoaded && mainGoals.easyGoals.data.length === 0 && (
 						<div className={element('empty')}>
 							<p>Список 100 целей будет доступен в личном кабинете после регистрации</p>
@@ -352,7 +353,9 @@ export const Registration: FC<RegistrationProps> = (props) => {
 						Добавьте цели из каталога
 					</Title>
 					<p className={element('step-desc')}>В каталоге есть сотни идей по категориям — от путешествий до саморазвития</p>
-					<Loader isLoading={catalogLoading}>
+					{catalogLoading ? (
+						<CatalogItemsSkeleton />
+					) : (
 						<section className={element('catalog-goals')}>
 							{catalogGoals.map((goal, i) => (
 								<Card
@@ -368,7 +371,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 								/>
 							))}
 						</section>
-					</Loader>
+					)}
 				</div>
 
 				{/* Step 3: Registration form */}

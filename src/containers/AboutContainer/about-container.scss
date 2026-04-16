@@ -1,11 +1,18 @@
 .about-container {
-	max-width: 1200px;
-	padding: 56px 24px 96px;
+	max-width: var(--max-width);
+	padding: 56px 0 96px;
 	margin: 0 auto;
-	background: var(--color-gray-3);
+
+	@include xl {
+		padding: 56px 24px 96px;
+	}
 
 	@include md {
-		padding: 40px 24px 96px;
+		padding: 0 24px 96px;
+	}
+
+	@include sm {
+		padding: 24px 24px 96px;
 	}
 
 	&__hero {

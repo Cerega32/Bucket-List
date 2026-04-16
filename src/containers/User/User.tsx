@@ -2,8 +2,8 @@ import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
-import {Loader} from '@/components/Loader/Loader';
 import {UserInfo} from '@/components/UserInfo/UserInfo';
+import {UserInfoSkeleton} from '@/components/UserInfo/UserInfoSkeleton';
 import {useBem} from '@/hooks/useBem';
 import {FriendsStore} from '@/store/FriendsStore';
 import {UserStore} from '@/store/UserStore';
@@ -20,9 +20,8 @@ import {UserShowcase} from '../UserShowcase/UserShowcase';
 export const User: FC<IPage> = observer(({page, subPage}) => {
 	const [block] = useBem('user');
 
-	const {userInfo} = UserStore;
+	const {userInfo, userInfoLoadedForId} = UserStore;
 	const {id} = useParams();
-	const [, setIsLoading] = useState(true);
 	const [hasVisited, setHasVisited] = useState(false);
 
 	if (!id) {
@@ -31,12 +30,10 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 
 	useEffect(() => {
 		if (UserStore.userInfoLoadedForId === id) {
-			setIsLoading(false);
 			return undefined;
 		}
 		let cancelled = false;
 		UserStore.resetUserInfo();
-		setIsLoading(true);
 		(async () => {
 			await getUser(id);
 			if (cancelled) return;
@@ -68,8 +65,6 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 				// Прогресс заданий обновляется автоматически на бэкенде
 				setHasVisited(true);
 			}
-
-			setIsLoading(false);
 		})();
 		return () => {
 			cancelled = true;
@@ -93,32 +88,32 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 		}
 	};
 
-	const isUserLoaded = !!userInfo.id && userInfo.id !== 0;
+	const isUserLoaded = !!userInfo.id && userInfo.id !== 0 && userInfoLoadedForId === id;
 
 	return (
 		<main className={block()}>
-			<Loader isLoading={!isUserLoaded} isPageLoader={!isUserLoaded}>
-				{isUserLoaded && (
-					<UserInfo
-						avatar={userInfo.avatar || null}
-						name={userInfo.name || userInfo.username}
-						firstName={userInfo.firstName}
-						lastName={userInfo.lastName}
-						country={userInfo.country}
-						about={userInfo.aboutMe}
-						totalAdded={userInfo.totalAddedGoals}
-						totalCompleted={userInfo.totalCompletedGoals}
-						page={page}
-						id={id}
-						totalAddedLists={userInfo.totalAddedLists}
-						totalCompletedLists={userInfo.totalCompletedLists}
-						totalAchievements={userInfo.totalAchievements}
-						background={userInfo.coverImage}
-						subscriptionType={userInfo.subscriptionType}
-						level={userInfo.level}
-					/>
-				)}
-			</Loader>
+			{isUserLoaded ? (
+				<UserInfo
+					avatar={userInfo.avatar || null}
+					name={userInfo.name || userInfo.username}
+					firstName={userInfo.firstName}
+					lastName={userInfo.lastName}
+					country={userInfo.country}
+					about={userInfo.aboutMe}
+					totalAdded={userInfo.totalAddedGoals}
+					totalCompleted={userInfo.totalCompletedGoals}
+					page={page}
+					id={id}
+					totalAddedLists={userInfo.totalAddedLists}
+					totalCompletedLists={userInfo.totalCompletedLists}
+					totalAchievements={userInfo.totalAchievements}
+					background={userInfo.coverImage}
+					subscriptionType={userInfo.subscriptionType}
+					level={userInfo.level}
+				/>
+			) : (
+				<UserInfoSkeleton />
+			)}
 			{getUserContent()}
 		</main>
 	);

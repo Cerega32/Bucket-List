@@ -6,7 +6,6 @@ import {Button} from '@/components/Button/Button';
 import {CommentsGoal} from '@/components/CommentsGoal/CommentsGoal';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
-import {Loader} from '@/components/Loader/Loader';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {UserStore} from '@/store/UserStore';
@@ -14,6 +13,8 @@ import {IAchievement} from '@/typings/achievements';
 import {get100Goals} from '@/utils/api/get/get100Goals';
 import {getUserImpressionImages, getUserInitialComments, getUserMoreComments} from '@/utils/api/get/getComments';
 import {GET} from '@/utils/fetch/requests';
+
+import {UserShowcaseSkeleton} from './UserShowcaseSkeleton';
 import './user-showcase.scss';
 
 interface UserShowcaseProps {
@@ -120,11 +121,11 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 	const isFresh = showcaseLoadedForId === id && mainGoalsLoadedForId === id;
 
 	if (!isFresh) {
-		return <Loader isLoading className={block()} />;
+		return <UserShowcaseSkeleton className={block()} />;
 	}
 
 	return (
-		<Loader isLoading={false} className={block()}>
+		<div className={block()}>
 			<CommentsGoal
 				comments={showcaseComments}
 				setComments={setShowcaseComments}
@@ -172,6 +173,6 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 					))
 				)}
 			</aside>
-		</Loader>
+		</div>
 	);
 });

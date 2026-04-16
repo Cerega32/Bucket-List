@@ -3,11 +3,12 @@ import React, {useEffect, useState} from 'react';
 
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {GoalMapMulti} from '@/components/GoalMap/GoalMapMulti';
-import {Loader} from '@/components/Loader/Loader';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ThemeStore} from '@/store/ThemeStore';
 import {MapData, mapApi} from '@/utils/mapApi';
+
+import {UserMapPageSkeleton} from './UserMapPageSkeleton';
 import './UserMapPage.scss';
 
 const UserMapPage: React.FC = observer(() => {
@@ -39,8 +40,12 @@ const UserMapPage: React.FC = observer(() => {
 		loadUserMapData();
 	}, []);
 
+	if (loading) {
+		return <UserMapPageSkeleton />;
+	}
+
 	return (
-		<Loader isLoading={loading} className={block()}>
+		<div className={block()}>
 			<div className={element('content')}>
 				<Title tag="h2" className={element('title')}>
 					Мои карты
@@ -137,7 +142,7 @@ const UserMapPage: React.FC = observer(() => {
 					)} */}
 				</div>
 			</div>
-		</Loader>
+		</div>
 	);
 });
 
