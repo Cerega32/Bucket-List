@@ -9,11 +9,6 @@
 		gap: 16px;
 	}
 
-	&__select .select__list {
-		max-height: 125px;
-		box-shadow: 0 2px 8px rgb(var(--color-black-rgb) / 8%);
-	}
-
 	&__btns-wrapper {
 		display: flex;
 		gap: 8px;
