@@ -12,7 +12,7 @@ import {useBem} from '@/hooks/useBem';
 import {newsStore} from '@/store/NewsStore';
 import {ThemeStore} from '@/store/ThemeStore';
 import {pluralize} from '@/utils/text/pluralize';
-import './NewsDetailPage.scss';
+import './news-detail-page.scss';
 
 export const NewsDetailPage = observer(() => {
 	const {id} = useParams<{id: string}>();

@@ -1,50 +1,22 @@
 .folder-rules-manager {
-	&__rule-type-select {
-		.select__list {
-			max-height: 140px;
-			overflow-y: auto;
-		}
-	}
-
 	&__header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 24px;
 
-		h3 {
-			max-width: 500px;
-			margin: 0;
-			color: var(--text-primary);
-			font-size: 20px;
-			font-weight: 600;
-			text-overflow: ellipsis;
-			overflow: hidden;
+		@include sm {
+			flex-direction: column;
 		}
+	}
+
+	&__btn {
+		margin-bottom: 16px;
 	}
 
 	&__rules-list {
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
-	}
-
-	&__empty {
-		padding: 40px 20px;
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-primary);
-		border-radius: 12px;
-		text-align: center;
-
-		p {
-			margin: 0 0 8px;
-			color: var(--text-secondary);
-
-			&:first-child {
-				color: var(--text-primary);
-				font-weight: 500;
-			}
-		}
 	}
 
 	&__rules {
@@ -58,31 +30,31 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 16px;
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-primary);
+		background: var(--color-white);
+		box-shadow: 0 1px 3px var(--color-border);
 		border-radius: 8px;
-		transition: all 0.2s ease;
+		gap: 12px;
+
+		@include sm {
+			flex-direction: column;
+			align-items: start;
+		}
 
 		&:hover {
-			border-color: var(--border-hover);
+			box-shadow: 0 1px 10px var(--color-border);
 		}
 
 		&--inactive {
-			border-style: dashed;
-			opacity: 0.6;
+			opacity: 0.8;
 		}
 	}
 
 	&__rule-info {
-		flex: 1;
 		margin-right: 16px;
 	}
 
 	&__rule-title {
-		margin: 0 0 8px;
-		color: var(--text-primary);
-		font-size: 16px;
-		font-weight: 500;
+		margin-bottom: 8px;
 	}
 
 	&__rule-details {
@@ -90,121 +62,107 @@
 		flex-wrap: wrap;
 		gap: 12px;
 		margin-bottom: 4px;
+	}
 
-		span {
-			padding: 4px 8px;
-			background: var(--bg-tertiary);
-			border-radius: 6px;
-			color: var(--text-secondary);
-			font-size: 13px;
-		}
+	&__rule-item {
+		padding: 4px 8px;
+		background: var(--color-secondary);
+		color: var(--color-text-primary);
+		border-radius: 6px;
+		font-size: 13px;
 	}
 
 	&__inactive-badge {
 		display: inline-block;
 		padding: 2px 6px;
 		margin-top: 4px;
-		background: var(--error-bg);
-		border-radius: 3px;
-		color: var(--error-color);
+		background: var(--color-red-4);
+		border-radius: 6px;
+		color: var(--color-white);
 		font-size: 12px;
-		font-weight: 500;
 	}
 
 	&__rule-actions {
 		display: flex;
+		flex-direction: column;
 		gap: 8px;
+
+		@include sm {
+			flex-direction: row;
+			width: 100%;
+			justify-content: end;
+		}
 	}
 
 	&__form {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 8px;
 	}
 
 	&__rule-description {
-		padding: 12px;
-		margin: -8px 0 8px;
-		background: var(--info-bg);
-		border-radius: 6px;
-		color: var(--text-secondary);
-		font-size: 14px;
-		border-left: 4px solid var(--info-color);
-	}
-
-	&__test-result {
-		padding: 16px;
-		background: var(--success-bg);
-		border: 1px solid var(--success-color);
-		border-radius: 8px;
-
-		h4 {
-			margin: 0 0 8px;
-			color: var(--success-color);
-			font-size: 16px;
-		}
-
-		p {
-			margin: 0 0 12px;
-			color: var(--text-primary);
-			font-weight: 500;
-		}
-	}
-
-	&__matching-goals {
-		strong {
-			display: block;
-			margin-bottom: 8px;
-			color: var(--text-primary);
-		}
-
-		ul {
-			padding-left: 20px;
-			margin: 0;
-
-			li {
-				margin-bottom: 4px;
-				color: var(--text-secondary);
-				font-size: 14px;
-			}
-		}
+		padding-bottom: 8px;
 	}
 
 	&__form-actions {
 		display: flex;
-		flex-wrap: wrap;
 		gap: 12px;
 		margin-top: 8px;
+
+		@include sm {
+			flex-direction: column;
+		}
 	}
 
-	// Медиа запросы
-	@include md {
-		&__header {
+	&__rule-skeleton {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 12px;
+		padding: 16px;
+		background: var(--color-white);
+		border-radius: 8px;
+		box-shadow: 0 1px 3px var(--color-border);
+
+		@include sm {
 			flex-direction: column;
-			align-items: stretch;
-			gap: 16px;
-
-			h3 {
-				text-align: center;
-			}
+			align-items: start;
 		}
+	}
 
-		&__rule {
-			flex-direction: column;
-			align-items: stretch;
-			gap: 12px;
-		}
+	&__rule-skeleton-info {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		gap: 8px;
+	}
 
-		&__rule-info {
-			margin-right: 0;
-		}
+	&__rule-skeleton-details {
+		display: flex;
+		gap: 12px;
+	}
 
-		&__rule-actions {
-			align-self: center;
-		}
+	&__rule-skeleton-actions {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
 
-		&__form-actions {
-			flex-direction: column;
+		@include sm {
+			flex-direction: row;
+			justify-content: end;
+			width: 100%;
 		}
 	}
 }
+
+/* stylelint-disable selector-class-pattern */
+.folder-rules-modal {
+	.modal__window {
+		overflow: visible;
+	}
+
+	.modal__content {
+		overflow: visible;
+	}
+}
+/* stylelint-enable selector-class-pattern */

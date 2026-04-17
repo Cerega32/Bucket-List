@@ -42,6 +42,13 @@
 		}
 	}
 
+	&__error {
+		margin-top: 4px;
+		color: var(--color-sentiment-negative);
+		font-size: 12px;
+		font-weight: var(--weight-medium);
+	}
+
 	&__option-text {
 		min-width: 0;
 		overflow: hidden;
@@ -144,6 +151,13 @@
 				padding: 8px;
 				// box-shadow: 0 2px 4px rgb(var(--color-black) / 8%);
 			}
+		}
+	}
+
+	&--open-up {
+		#{$block}__list {
+			top: auto;
+			bottom: calc(100% + 4px);
 		}
 	}
 
