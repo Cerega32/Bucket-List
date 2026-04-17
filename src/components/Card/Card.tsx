@@ -26,6 +26,7 @@ interface BaseCardProps {
 	disableNavigation?: boolean;
 	disableMark?: boolean;
 	allowAddWithoutAuth?: boolean;
+	skipDeleteConfirm?: boolean;
 }
 
 interface CardListProps extends BaseCardProps {
@@ -47,7 +48,7 @@ interface CardGoalProps extends BaseCardProps {
 type CardProps = CardListProps | CardGoalProps;
 
 export const Card: FC<CardProps> = (props) => {
-	const {className, horizontal, disableNavigation, disableMark, allowAddWithoutAuth, ...restProps} = props;
+	const {className, horizontal, disableNavigation, disableMark, allowAddWithoutAuth, skipDeleteConfirm, ...restProps} = props;
 
 	const [block, element] = useBem('card', className);
 	const {isScreenXs} = useScreenSize();
@@ -82,6 +83,11 @@ export const Card: FC<CardProps> = (props) => {
 				title: 'Цель удалена',
 				message: 'Мы убрали её из вашего списка.',
 			});
+			return;
+		}
+
+		if (skipDeleteConfirm) {
+			await onClickDelete();
 			return;
 		}
 

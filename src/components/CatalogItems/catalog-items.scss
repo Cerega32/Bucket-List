@@ -14,7 +14,7 @@
 		@include lg {
 			flex-direction: column;
 			gap: 16px;
-			align-items: start;
+			align-items: flex-start;
 		}
 	}
 
@@ -64,7 +64,7 @@
 
 	&__search-wrapper {
 		display: flex;
-		justify-content: end;
+		justify-content: flex-end;
 		gap: 16px;
 		width: 100%;
 

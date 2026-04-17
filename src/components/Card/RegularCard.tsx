@@ -60,7 +60,9 @@ const getSeriesText = (statistics: IRegularGoalStatistics): string => {
 	const isWeeklyUnit = frequency !== 'daily';
 	let current = statistics.currentStreak || 0;
 
-	if (statistics.isSeriesCompleted) {
+	if (statistics.isInterrupted && statistics.interruptedStreak !== null && statistics.interruptedStreak !== undefined) {
+		current = statistics.interruptedStreak;
+	} else if (statistics.isSeriesCompleted) {
 		if (isWeeklyUnit) {
 			current = statistics.completedWeeks > 0 ? statistics.completedWeeks : current;
 		} else {

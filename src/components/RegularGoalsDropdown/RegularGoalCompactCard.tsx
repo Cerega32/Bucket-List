@@ -12,6 +12,7 @@ interface RegularGoalCompactCardProps {
 	statistics: IRegularGoalStatistics;
 	onQuickComplete: (regularGoalId: number, currentlyCompleted: boolean) => void;
 	onRestart: (regularGoalId: number) => void;
+	onNavigate?: () => void;
 }
 
 type RegularDayState = 'completed' | 'completedBg' | 'allowedSkip' | 'active' | 'inactive' | 'blocked';
@@ -30,7 +31,9 @@ const getSeriesText = (statistics: IRegularGoalStatistics): string => {
 	const isWeeklyUnit = frequency !== 'daily';
 	let value = statistics.currentStreak || 0;
 
-	if (statistics.isSeriesCompleted) {
+	if (statistics.isInterrupted && statistics.interruptedStreak !== null && statistics.interruptedStreak !== undefined) {
+		value = statistics.interruptedStreak;
+	} else if (statistics.isSeriesCompleted) {
 		if (isWeeklyUnit) {
 			value = statistics.completedWeeks > 0 ? statistics.completedWeeks : value;
 		} else {
@@ -118,7 +121,7 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 	return 'inactive';
 };
 
-export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statistics, onQuickComplete, onRestart}) => {
+export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statistics, onQuickComplete, onRestart, onNavigate}) => {
 	const [block, element] = useBem('regular-goal-compact-card');
 	const [hovered, setHovered] = useState(false);
 	const currentDayIndex = getCurrentDayOfWeek();
@@ -165,7 +168,7 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 
 	return (
 		<div className={block()}>
-			<Link to={`/goals/${goalData.goalCode}`} className={element('link-area')}>
+			<Link to={`/goals/${goalData.goalCode}`} className={element('link-area')} onClick={onNavigate}>
 				<div className={element('image-wrapper')}>
 					<img src={goalData.goalImage} alt={goalData.goalTitle} className={element('image')} />
 				</div>

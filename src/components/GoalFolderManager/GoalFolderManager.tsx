@@ -1,36 +1,46 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useCallback, useEffect, useState} from 'react';
-import {Link, useNavigate, useParams} from 'react-router-dom';
+import {FC, useCallback, useEffect, useRef, useState} from 'react';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
-import {ICreateFolderData} from '@/typings/goal';
+import {ModalStore} from '@/store/ModalStore';
+import {UserStore} from '@/store/UserStore';
+import {ICreateFolderData, IShortGoal} from '@/typings/goal';
+import {IGoalsPagination} from '@/typings/list';
 import {
 	createGoalFolder,
 	deleteGoalFolder,
 	getFolderGoals,
 	getGoalFolders,
 	IGoalFolder,
-	IGoalFolderItem,
 	removeGoalFromFolder,
 	updateGoalFolder,
 } from '@/utils/api/goals';
+import {addGoal} from '@/utils/api/post/addGoal';
+import {markGoal} from '@/utils/api/post/markGoal';
 
 import {GoalFolderManagerSkeleton} from './GoalFolderManagerSkeleton';
+import {Banner} from '../Banner/Banner';
 import {Button} from '../Button/Button';
+import {Card} from '../Card/Card';
+import {CatalogItemsSkeleton} from '../CatalogItems/CatalogItemsSkeleton';
 import {CharCount} from '../CharCount/CharCount';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {FolderRulesManager} from '../FolderRulesManager/FolderRulesManager';
-import {ItemGoal} from '../ItemGoal/ItemGoal';
 import {Line} from '../Line/Line';
+import {Loader} from '../Loader/Loader';
 import {Modal} from '../Modal/Modal';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
 import Select, {OptionSelect} from '../Select/Select';
 import {Switch} from '../Switch/Switch';
+import {ITabs, Tabs} from '../Tabs/Tabs';
 import {Title} from '../Title/Title';
 
 import './goal-folder-manager.scss';
+
+const FOLDER_GOALS_PAGE_SIZE = 30;
 
 interface GoalFolderManagerProps {
 	className?: string;
@@ -55,16 +65,23 @@ interface GoalFolderManagerProps {
 export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({className}) => {
 	const [block, element] = useBem('goal-folder-manager', className);
 	const navigate = useNavigate();
+	const location = useLocation();
 	const {folderId} = useParams<{folderId: string}>();
 	const {isScreenXs} = useScreenSize();
+	const {isAuth} = UserStore;
+	const {setIsOpen, setWindow} = ModalStore;
+
+	const activeTab: 'goals' | 'rules' = location.hash === '#rules' ? 'rules' : 'goals';
 
 	const [folders, setFolders] = useState<IGoalFolder[]>([]);
 	const [selectedFolder, setSelectedFolder] = useState<IGoalFolder | null>(null);
-	const [folderGoals, setFolderGoals] = useState<IGoalFolderItem[]>([]);
+	const [folderGoals, setFolderGoals] = useState<IShortGoal[]>([]);
+	const [folderGoalsPagination, setFolderGoalsPagination] = useState<IGoalsPagination | null>(null);
+	const [isLoadingFolderGoals, setIsLoadingFolderGoals] = useState(false);
+	const [isLoadingMore, setIsLoadingMore] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isCreating, setIsCreating] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
-	const [activeTab, setActiveTab] = useState<'goals' | 'rules'>('goals');
 	const [formData, setFormData] = useState<ICreateFolderData>({
 		name: '',
 		description: '',
@@ -76,6 +93,16 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	const [search, setSearch] = useState('');
 	const [selectedFilters] = useState<string[]>([]);
 	const [activeSort, setActiveSort] = useState(0);
+
+	const loadMoreRef = useRef<HTMLDivElement>(null);
+	const loaderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const isLoadingMoreRef = useRef(false);
+	const lastRequestedPageRef = useRef(0);
+	const folderGoalsPaginationRef = useRef<IGoalsPagination | null>(null);
+	folderGoalsPaginationRef.current = folderGoalsPagination;
+	const selectedFolderIdRef = useRef<number | null>(null);
+	selectedFolderIdRef.current = selectedFolder?.id ?? null;
+	const loadedFolderGoalsIdRef = useRef<number | null>(null);
 
 	const isSearchMode = search.trim().length > 0;
 
@@ -166,14 +193,51 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	];
 
 	const loadFolderGoals = useCallback(async (folderIdNumber: number) => {
+		lastRequestedPageRef.current = 1;
+		loadedFolderGoalsIdRef.current = folderIdNumber;
+		setFolderGoals([]);
+		setFolderGoalsPagination(null);
+		setIsLoadingFolderGoals(true);
 		try {
-			const response = await getFolderGoals(folderIdNumber);
+			const response = await getFolderGoals(folderIdNumber, 1, FOLDER_GOALS_PAGE_SIZE);
 			if (response.success && response.data) {
-				setFolderGoals(response.data.items || []);
+				setFolderGoals(response.data.goals || []);
+				setFolderGoalsPagination(response.data.goalsPagination || null);
 			}
 		} catch (error) {
 			console.error('Ошибка загрузки целей папки:', error);
 		}
+		setIsLoadingFolderGoals(false);
+	}, []);
+
+	const loadMoreFolderGoals = useCallback(async () => {
+		const pagination = folderGoalsPaginationRef.current;
+		const folderIdNumber = selectedFolderIdRef.current;
+		if (isLoadingMoreRef.current || !pagination?.hasMore || !folderIdNumber) return;
+
+		const nextPage = pagination.page + 1;
+		if (lastRequestedPageRef.current >= nextPage) return;
+		lastRequestedPageRef.current = nextPage;
+
+		isLoadingMoreRef.current = true;
+		loaderTimerRef.current = setTimeout(() => setIsLoadingMore(true), 300);
+
+		try {
+			const response = await getFolderGoals(folderIdNumber, nextPage, FOLDER_GOALS_PAGE_SIZE);
+			if (response.success && response.data) {
+				setFolderGoals((prev) => [...prev, ...(response.data.goals || [])]);
+				setFolderGoalsPagination(response.data.goalsPagination || null);
+			} else {
+				lastRequestedPageRef.current = nextPage - 1;
+			}
+		} catch (error) {
+			console.error('Ошибка подгрузки целей папки:', error);
+			lastRequestedPageRef.current = nextPage - 1;
+		}
+
+		if (loaderTimerRef.current) clearTimeout(loaderTimerRef.current);
+		isLoadingMoreRef.current = false;
+		setIsLoadingMore(false);
 	}, []);
 
 	useEffect(() => {
@@ -186,11 +250,44 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 			const id = Number(folderId);
 			const found = folders.find((f) => f.id === id);
 			if (found) {
-				setSelectedFolder(found);
-				loadFolderGoals(found.id);
+				setSelectedFolder((prev) => (prev?.id === found.id ? prev : found));
+				if (loadedFolderGoalsIdRef.current !== found.id) {
+					loadFolderGoals(found.id);
+				}
 			}
 		}
 	}, [folders, folderId]);
+
+	useEffect(() => {
+		if (!folderGoalsPagination?.hasMore) return undefined;
+
+		const intersectionObserver = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting) {
+					loadMoreFolderGoals();
+				}
+			},
+			{rootMargin: '400px'}
+		);
+
+		const ref = loadMoreRef.current;
+		if (ref) {
+			intersectionObserver.observe(ref);
+		}
+
+		return () => {
+			if (ref) {
+				intersectionObserver.unobserve(ref);
+			}
+		};
+	}, [folderGoalsPagination?.hasMore, folderGoalsPagination?.page, loadMoreFolderGoals]);
+
+	useEffect(
+		() => () => {
+			if (loaderTimerRef.current) clearTimeout(loaderTimerRef.current);
+		},
+		[]
+	);
 
 	const handleCreateFolder = async () => {
 		if (!formData.name.trim()) return;
@@ -258,17 +355,61 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		setIsEditing(true);
 	};
 
-	const handleRemoveGoalFromFolder = async (goalId: number) => {
+	const handleRemoveGoalFromFolder = async (goal: IShortGoal) => {
 		if (!selectedFolder) return;
 
 		try {
-			const response = await removeGoalFromFolder(selectedFolder.id, goalId);
+			const response = await removeGoalFromFolder(selectedFolder.id, goal.id);
 			if (response.success) {
-				await loadFolderGoals(selectedFolder.id);
-				await loadFolders();
+				setFolderGoals((prev) => prev.filter((g) => g.id !== goal.id));
+				setFolderGoalsPagination((prev) => (prev ? {...prev, totalGoals: Math.max(prev.totalGoals - 1, 0)} : prev));
+				setFolders((prev) =>
+					prev.map((f) => (f.id === selectedFolder.id ? {...f, goalsCount: Math.max((f.goalsCount ?? 0) - 1, 0)} : f))
+				);
+				setSelectedFolder((prev) => (prev ? {...prev, goalsCount: Math.max((prev.goalsCount ?? 0) - 1, 0)} : prev));
 			}
 		} catch (error) {
 			console.error('Ошибка удаления цели из папки:', error);
+		}
+	};
+
+	const requireAuth = () => {
+		if (!isAuth) {
+			setWindow('login');
+			setIsOpen(true);
+			return false;
+		}
+		return true;
+	};
+
+	const updateGoalInList = (code: string, patch: Partial<IShortGoal>, data?: {usersAddedCount?: number}) => {
+		setFolderGoals((prev) =>
+			prev.map((goal) =>
+				goal.code === code
+					? {
+							...goal,
+							...patch,
+							...(data?.usersAddedCount !== undefined ? {totalAdded: data.usersAddedCount} : {}),
+					  }
+					: goal
+			)
+		);
+	};
+
+	const handleGoalAdd = async (goal: IShortGoal) => {
+		if (!requireAuth()) return;
+		const res = await addGoal(goal.code);
+		if (res.success) {
+			updateGoalInList(goal.code, {addedByUser: true}, {usersAddedCount: res.data?.users_added_count ?? res.data?.usersAddedCount});
+		}
+	};
+
+	const handleGoalMark = async (goal: IShortGoal) => {
+		if (!requireAuth()) return;
+		const done = !goal.completedByUser;
+		const res = await markGoal(goal.code, done);
+		if (res.success) {
+			updateGoalInList(goal.code, {completedByUser: done});
 		}
 	};
 
@@ -416,50 +557,61 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 									{/* {selectedFolder.isPrivate && <span className={element('folder-private-label')}> (Приватная)</span>} */}
 								</span>
 							</Title>
-							<div className={element('folder-tabs')}>
-								<button
-									type="button"
-									className={element('tab', {active: activeTab === 'goals'})}
-									onClick={() => setActiveTab('goals')}
-								>
-									Цели ({folderGoals.length})
-								</button>
-								<button
-									type="button"
-									className={element('tab', {active: activeTab === 'rules'})}
-									onClick={() => setActiveTab('rules')}
-								>
-									Правила ({selectedFolder.rules?.length || 0})
-								</button>
-							</div>
+							<Tabs
+								className={element('folder-tabs')}
+								tabs={
+									[
+										{
+											url: '#goals',
+											name: 'Цели',
+											page: 'goals',
+											count: folderGoalsPagination?.totalGoals ?? folderGoals.length,
+										},
+										{
+											url: '#rules',
+											name: 'Правила',
+											page: 'rules',
+											count: selectedFolder.rules?.length || 0,
+										},
+									] as ITabs[]
+								}
+								active={activeTab}
+								preventScrollReset
+							/>
 						</div>
 
 						{activeTab === 'goals' && (
 							<div className={element('tab-content')}>
-								{folderGoals.length === 0 ? (
+								{isLoadingFolderGoals ? (
+									<CatalogItemsSkeleton count={6} columns="3" />
+								) : folderGoals.length === 0 ? (
 									<EmptyState title="В этой папке пока нет целей" description="Добавьте цели в папку из страницы цели" />
 								) : (
-									<div className={element('goals')}>
-										{folderGoals.map((folderGoal) => (
-											<div key={folderGoal.id} className={element('goal-item')}>
-												<Link to={`/goals/${folderGoal.code}`} className={element('goal-link')}>
-													<ItemGoal
-														img={folderGoal.image || '/public/svg/goal-default.svg'}
-														title={folderGoal.title}
-														className={element('goal-card')}
-													/>
-												</Link>
-												<Button
-													theme="red"
-													icon="trash"
-													size="small"
-													onClick={() => handleRemoveGoalFromFolder(folderGoal.goal)}
-												>
-													Удалить из папки
-												</Button>
+									<>
+										<Banner
+											type="info"
+											className={element('banner')}
+											message="Кнопка удаления в карточке уберёт цель только из этой папки — сама цель останется у вас в списке."
+										/>
+										<div className={element('goals')}>
+											{folderGoals.map((folderGoal) => (
+												<Card
+													key={folderGoal.id}
+													goal={folderGoal}
+													className={element('goal-card')}
+													skipDeleteConfirm
+													onClickAdd={() => handleGoalAdd(folderGoal)}
+													onClickDelete={() => handleRemoveGoalFromFolder(folderGoal)}
+													onClickMark={() => handleGoalMark(folderGoal)}
+												/>
+											))}
+										</div>
+										{folderGoalsPagination?.hasMore && (
+											<div ref={loadMoreRef} className={element('load-more')}>
+												<Loader isLoading={isLoadingMore} />
 											</div>
-										))}
-									</div>
+										)}
+									</>
 								)}
 							</div>
 						)}

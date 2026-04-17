@@ -417,9 +417,10 @@ export const deleteGoalFolder = async (
 	}
 };
 
-export const getFolderGoals = (folderId: number) =>
+export const getFolderGoals = (folderId: number, page = 1, pageSize: number | 'all' = 30) =>
 	GET(`goals/folders/${folderId}/goals`, {
 		auth: true,
+		get: {page, page_size: pageSize},
 	});
 
 export const addGoalToFolder = (folderId: number, goalId: number, order?: number) =>
