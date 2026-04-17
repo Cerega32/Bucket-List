@@ -1725,7 +1725,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 										: regularConfig.statistics?.remainingSkipDays !== undefined
 										? regularConfig.statistics.remainingSkipDays
 										: regularConfig.allowSkipDays || 0;
-								return skipDays > 0 ? (
+								return skipDays > 0 || regularConfig.resetOnSkip ? (
 									<div className={element('regular-info-row')}>
 										<span className={element('regular-info-label')}>Разрешенные пропуски:</span>
 										<span className={element('regular-info-value')}>{skipDays}</span>
@@ -2111,7 +2111,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 									: regularConfig.statistics?.remainingSkipDays !== undefined
 									? regularConfig.statistics.remainingSkipDays
 									: regularConfig.allowSkipDays || 0;
-							return skipDays > 0 ? (
+							return skipDays > 0 || regularConfig.resetOnSkip ? (
 								<div className={element('regular-info-row')}>
 									<span className={element('regular-info-label')}>Разрешенные пропуски:</span>
 									<span className={element('regular-info-value')}>{skipDays}</span>

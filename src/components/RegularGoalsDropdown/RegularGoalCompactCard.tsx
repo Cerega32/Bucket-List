@@ -31,7 +31,9 @@ const getSeriesText = (statistics: IRegularGoalStatistics): string => {
 	const isWeeklyUnit = frequency !== 'daily';
 	let value = statistics.currentStreak || 0;
 
-	if (statistics.isSeriesCompleted) {
+	if (statistics.isInterrupted && statistics.interruptedStreak !== null && statistics.interruptedStreak !== undefined) {
+		value = statistics.interruptedStreak;
+	} else if (statistics.isSeriesCompleted) {
 		if (isWeeklyUnit) {
 			value = statistics.completedWeeks > 0 ? statistics.completedWeeks : value;
 		} else {
