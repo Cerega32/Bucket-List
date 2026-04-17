@@ -92,7 +92,7 @@
 	&__btn-change {
 		grid-column: 1 / 2;
 		grid-row: 2 / 3;
-		justify-content: start;
+		justify-content: flex-start;
 	}
 
 	&__email-field {
@@ -125,7 +125,7 @@
 
 	&__email-not-confirmed-row {
 		display: flex;
-		justify-content: end;
+		justify-content: flex-end;
 		align-items: center;
 		gap: 4px;
 		flex-wrap: wrap;

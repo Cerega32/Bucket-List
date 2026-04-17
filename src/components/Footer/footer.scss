@@ -38,7 +38,7 @@
 		gap: 16px;
 
 		@include lg {
-			align-items: start;
+			align-items: flex-start;
 			text-align: start;
 		}
 	}

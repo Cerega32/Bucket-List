@@ -11,7 +11,7 @@
 		@include lg {
 			display: flex;
 			gap: 24px;
-			align-items: end;
+			align-items: flex-end;
 			padding: 176px 24px 56px;
 		}
 
@@ -20,7 +20,7 @@
 			flex-direction: column;
 			gap: 16px;
 			padding: 128px 24px 40px;
-			align-items: start;
+			align-items: flex-start;
 		}
 	}
 
