@@ -400,7 +400,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		if (!requireAuth()) return;
 		const res = await addGoal(goal.code);
 		if (res.success) {
-			updateGoalInList(goal.code, {addedByUser: true}, {usersAddedCount: res.data?.users_added_count ?? res.data?.usersAddedCount});
+			updateGoalInList(goal.code, {addedByUser: true}, {usersAddedCount: res.data?.totalAdded});
 		}
 	};
 

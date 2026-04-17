@@ -543,7 +543,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 				...goals.data[i],
 				addedByUser: operation !== 'delete',
 				completedByUser: operation === 'mark' ? !done : operation === 'delete' ? false : goals.data[i].completedByUser,
-				totalAdded: res.data.users_added_count,
+				totalAdded: res.data.totalAdded,
 			};
 
 			const newGoals = [...goals.data];
@@ -565,7 +565,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			const updatedList = {
 				...lists.data[i],
 				addedByUser: operation === 'add',
-				totalAdded: res.data.users_added_count,
+				totalAdded: res.data.totalAdded,
 			};
 
 			const newLists = [...lists.data];
