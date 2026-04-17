@@ -299,12 +299,13 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			// Добавляем поисковый запрос, если он есть
 			const searchParams = initialSearch ? {search: initialSearch} : {};
 
-			const res = await getAllGoals(code, {...tempGet, ...searchParams});
+			const res = await getAllGoals(code, {...tempGet, sort_by: sortOptions[0].value, ...searchParams});
 			if (res.success) {
 				setGoals(res.data);
 			}
 			setGoalsLoaded(true);
 		})();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [subPage, code, completed, userId, initialSearch, pendingCatalogReview, isAuth]);
 
 	useEffect(() => {
@@ -316,12 +317,13 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			// Добавляем поисковый запрос, если он есть
 			const searchParams = initialSearch ? {search: initialSearch} : {};
 
-			const res = await getAllLists(code, {...tempGet, ...searchParams});
+			const res = await getAllLists(code, {...tempGet, sort_by: sortOptions[0].value, ...searchParams});
 			if (res.success) {
 				setLists(res.data);
 			}
 			setListsLoaded(true);
 		})();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [subPage, code, completed, userId, initialSearch, pendingCatalogReview, isAuth]);
 
 	useEffect(() => {
