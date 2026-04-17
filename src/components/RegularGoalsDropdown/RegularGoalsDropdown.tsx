@@ -232,6 +232,7 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 											progress={progress}
 											onMarkToday={() => handleProgressMarkToday(progress)}
 											onChangeProgress={() => handleProgressChange(progress)}
+											onNavigate={onClose}
 										/>
 									))}
 								</div>
@@ -251,6 +252,7 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 										statistics={statistics}
 										onQuickComplete={(id, completed) => handleQuickComplete(id, completed)}
 										onRestart={(id) => handleRestart(id)}
+										onNavigate={onClose}
 									/>
 								))}
 							</div>

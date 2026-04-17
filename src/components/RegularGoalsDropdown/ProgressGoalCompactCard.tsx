@@ -12,6 +12,7 @@ interface ProgressGoalCompactCardProps {
 	progress: IGoalProgress;
 	onMarkToday: () => void;
 	onChangeProgress: () => void;
+	onNavigate?: () => void;
 }
 
 const WEEK_DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -59,7 +60,7 @@ const getProgressWeekDayState = (progress: IGoalProgress, index: number): DaySta
 	return 'inactive';
 };
 
-export const ProgressGoalCompactCard: FC<ProgressGoalCompactCardProps> = ({progress, onMarkToday, onChangeProgress}) => {
+export const ProgressGoalCompactCard: FC<ProgressGoalCompactCardProps> = ({progress, onMarkToday, onChangeProgress, onNavigate}) => {
 	const [block, element] = useBem('progress-goal-compact-card');
 	const currentDayIndex = getCurrentDayOfWeek();
 
@@ -77,7 +78,7 @@ export const ProgressGoalCompactCard: FC<ProgressGoalCompactCardProps> = ({progr
 
 	return (
 		<div className={block()}>
-			<Link to={`/goals/${progress.goalCode}`} className={element('link-area')}>
+			<Link to={`/goals/${progress.goalCode}`} className={element('link-area')} onClick={onNavigate}>
 				<div className={element('image-wrapper')}>
 					<img src={progress.goalImage} alt={progress.goalTitle} className={element('image')} />
 				</div>

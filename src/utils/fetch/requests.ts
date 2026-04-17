@@ -15,9 +15,9 @@ const refreshCsrfToken = async (): Promise<void> => {
 	await fetch('/api/categories/', {method: 'GET', credentials: 'include'});
 };
 
-/** Очистить авторизацию при ошибке CSRF — избежать рассинхрона (модалка логина + «вы авторизованы» в шапке).
- * httpOnly cookie 'token' может снять только сервер, поэтому тут трогаем только JS-видимые. */
-const clearAuthOnCsrfError = (): void => {
+/** Привести фронт в «незалогиненное» состояние: снять JS-видимые auth-cookies и сбросить MobX-стор.
+ * httpOnly cookie 'token' снимает сервер (middleware при 401 / logout view) — из JS её не достать. */
+const clearAuthState = (): void => {
 	Cookies.remove('is_authenticated');
 	Cookies.remove('avatar');
 	Cookies.remove('name');
@@ -99,11 +99,20 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 
 				// Повтор не помог — очищаем авторизацию, чтобы не было рассинхрона (модалка логина + «вы авторизованы»)
 				if (isCsrfError && isRetryAfterCsrfRefresh) {
-					clearAuthOnCsrfError();
+					clearAuthState();
 				}
-				if (response.status === 401 && params.auth) {
-					ModalStore.setWindow('login');
-					ModalStore.setIsOpen(true);
+				if (response.status === 401) {
+					// Сервер через ClearStaleAuthCookieMiddleware сам снимает auth-cookies, если токен
+					// был протухший. Здесь подтягиваем MobX-стор к реальности — только когда маркер
+					// действительно пропал, чтобы не разлогинить пользователя с валидной сессией
+					// (например, опечатка в пароле при открытой форме логина в другой вкладке).
+					if (!Cookies.get('is_authenticated')) {
+						clearAuthState();
+					}
+					if (params.auth) {
+						ModalStore.setWindow('login');
+						ModalStore.setIsOpen(true);
+					}
 					return {
 						success: false,
 						errors: data?.detail || data?.error,
