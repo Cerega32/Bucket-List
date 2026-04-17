@@ -25,6 +25,7 @@ import {
 import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
 import {updateRegularGoalSettings} from '@/utils/api/post/updateRegularGoalSettings';
 import {GoalWithLocation} from '@/utils/mapApi';
+import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
 import {
 	addDays,
 	endOfISOWeekFromMonday,
@@ -1021,16 +1022,16 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					if (page === 'isGoalProgressHistory' && onHistoryRefresh) {
 						onHistoryRefresh();
 					}
-					// Обновляем счётчик прогресса в шапке
-					HeaderProgressGoalsStore.loadGoalsInProgress();
+					// Обновляем счётчик прогресса в шапке (counts в профиле + стор)
+					refreshHeaderGoalCounts();
 				},
 				onGoalCompleted: () => {
 					setIsCompleted(true);
 					if (onGoalCompleted) {
 						onGoalCompleted();
 					}
-					// Обновляем счётчик прогресса в шапке
-					HeaderProgressGoalsStore.loadGoalsInProgress();
+					// Обновляем счётчик прогресса в шапке (counts в профиле + стор)
+					refreshHeaderGoalCounts();
 				},
 			});
 		}
@@ -1244,7 +1245,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		}
 
 		// Обновляем счётчик прогресса в шапке (прогресс мог быть сброшен или цель завершена)
-		HeaderProgressGoalsStore.loadGoalsInProgress();
+		refreshHeaderGoalCounts();
 	};
 
 	/** Отмена выполнения: при активном прогрессе — сначала подтверждение (прогресс будет удалён) */
@@ -2694,6 +2695,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					if (onHistoryRefresh) {
 						onHistoryRefresh();
 					}
+					refreshHeaderGoalCounts();
 				}}
 			/>
 			{/* Отмена выполнения цели с прогрессом — прогресс удаляется вместе с отметкой */}

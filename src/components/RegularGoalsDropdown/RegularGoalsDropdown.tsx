@@ -15,6 +15,7 @@ import {
 	restartRegularGoal,
 	updateGoalProgress,
 } from '@/utils/api/goals';
+import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
 
 import {ProgressGoalCompactCard} from './ProgressGoalCompactCard';
 import {RegularGoalCompactCard} from './RegularGoalCompactCard';
@@ -133,11 +134,11 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 				if (updated.progressPercentage >= 100) {
 					setProgressGoals((prev) => prev.filter((g) => g.id !== updated.id));
 				}
-				HeaderProgressGoalsStore.loadGoalsInProgress();
+				refreshHeaderGoalCounts();
 			},
 			onGoalCompleted: () => {
 				setProgressGoals((prev) => prev.filter((g) => g.id !== goal.id));
-				HeaderProgressGoalsStore.loadGoalsInProgress();
+				refreshHeaderGoalCounts();
 			},
 		});
 	};
