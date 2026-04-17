@@ -175,7 +175,7 @@ const ListGoalsContainerComponent: FC = () => {
 			...list.goals[i],
 			addedByUser: operation !== 'delete',
 			completedByUser: operation === 'mark' ? !done : operation === 'delete' ? false : list.goals[i].completedByUser,
-			totalAdded: res.data.users_added_count,
+			totalAdded: res.data.totalAdded,
 		};
 
 		const newGoals = [...list.goals];

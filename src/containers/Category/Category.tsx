@@ -206,7 +206,7 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 				...popularGoals[i],
 				addedByUser: operation !== 'delete',
 				completedByUser: operation === 'mark' ? !done : operation === 'delete' ? false : popularGoals[i].completedByUser,
-				totalAdded: res.data.users_added_count,
+				totalAdded: res.data.totalAdded,
 			};
 
 			const newGoals = [...popularGoals];
@@ -223,7 +223,7 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 			const updatedList = {
 				...popularLists[i],
 				addedByUser: operation === 'add',
-				totalAdded: res.data.users_added_count,
+				totalAdded: res.data.totalAdded,
 			};
 
 			const newLists = [...popularLists];
