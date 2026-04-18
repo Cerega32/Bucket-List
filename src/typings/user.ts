@@ -19,6 +19,9 @@ export interface IUserInfo {
 	subscriptionExpiresAt?: string | null;
 	subscriptionAutoRenew?: boolean;
 	level?: number;
+	limits?: {
+		maxFolders: number | null;
+	};
 	counts?: {
 		regularGoals: number;
 		progressGoals: number;

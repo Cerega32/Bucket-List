@@ -80,11 +80,13 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 			});
 
 			const contentType = response.headers.get('content-type');
-			let data;
-			if (contentType?.includes('application/json')) {
-				data = await response.json();
-			} else {
-				throw new Error(`Server returned non-JSON. Status: ${response.status}`);
+			let data: any = null;
+			if (response.status !== 204 && response.status !== 205) {
+				if (contentType?.includes('application/json')) {
+					data = await response.json();
+				} else {
+					throw new Error(`Server returned non-JSON. Status: ${response.status}`);
+				}
 			}
 
 			if (!response.ok) {

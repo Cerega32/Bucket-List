@@ -68,7 +68,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	const location = useLocation();
 	const {folderId} = useParams<{folderId: string}>();
 	const {isScreenXs} = useScreenSize();
-	const {isAuth} = UserStore;
+	const {isAuth, userSelf} = UserStore;
 	const {setIsOpen, setWindow} = ModalStore;
 
 	const activeTab: 'goals' | 'rules' = location.hash === '#rules' ? 'rules' : 'goals';
@@ -103,6 +103,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	const selectedFolderIdRef = useRef<number | null>(null);
 	selectedFolderIdRef.current = selectedFolder?.id ?? null;
 	const loadedFolderGoalsIdRef = useRef<number | null>(null);
+	const hasLoadedFoldersOnceRef = useRef(false);
 
 	const isSearchMode = search.trim().length > 0;
 
@@ -122,7 +123,8 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	];
 
 	const loadFolders = useCallback(async () => {
-		setIsLoading(true);
+		const isFirstLoad = !hasLoadedFoldersOnceRef.current;
+		if (isFirstLoad) setIsLoading(true);
 		try {
 			const response = await getGoalFolders();
 			if (response.success && response.data) {
@@ -131,7 +133,8 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		} catch (error) {
 			console.error('Ошибка загрузки папок:', error);
 		}
-		setIsLoading(false);
+		hasLoadedFoldersOnceRef.current = true;
+		if (isFirstLoad) setIsLoading(false);
 	}, []);
 
 	const filteredFolders = folders
@@ -420,14 +423,31 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		}
 	};
 
+	const maxFolders = userSelf.limits?.maxFolders ?? null;
+	const foldersLimitReached = maxFolders !== null && folders.length >= maxFolders;
+
+	const handleCreateButtonClick = () => {
+		if (foldersLimitReached) {
+			navigate('/user/self/subs');
+			return;
+		}
+		setIsCreating(true);
+	};
+
 	return (
 		<div className={block()}>
 			<div className={element('header')}>
 				<Title tag="h2" className={element('title')}>
 					Папки целей
 				</Title>
-				<Button theme="blue" icon="plus" onClick={() => setIsCreating(true)} size="small" width={isScreenXs ? 'full' : 'auto'}>
-					Создать папку
+				<Button
+					theme="blue"
+					icon={foldersLimitReached ? 'lock' : 'plus'}
+					onClick={handleCreateButtonClick}
+					size="small"
+					width={isScreenXs ? 'full' : 'auto'}
+				>
+					{foldersLimitReached ? 'Безлимит с Premium' : 'Создать папку'}
 				</Button>
 			</div>
 
