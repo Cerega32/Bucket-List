@@ -243,6 +243,14 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		setIsLoadingMore(false);
 	}, []);
 
+	const handleRulesUpdate = useCallback(async () => {
+		await loadFolders();
+		const folderIdNumber = selectedFolderIdRef.current;
+		if (folderIdNumber) {
+			await loadFolderGoals(folderIdNumber);
+		}
+	}, [loadFolders, loadFolderGoals]);
+
 	useEffect(() => {
 		loadFolders();
 	}, []);
@@ -253,7 +261,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 			const id = Number(folderId);
 			const found = folders.find((f) => f.id === id);
 			if (found) {
-				setSelectedFolder((prev) => (prev?.id === found.id ? prev : found));
+				setSelectedFolder(found);
 				if (loadedFolderGoalsIdRef.current !== found.id) {
 					loadFolderGoals(found.id);
 				}
@@ -425,6 +433,9 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 
 	const maxFolders = userSelf.limits?.maxFolders ?? null;
 	const foldersLimitReached = maxFolders !== null && folders.length >= maxFolders;
+	const maxFolderRules = userSelf.limits?.maxFolderRules ?? 10;
+	const totalRulesCount = folders.reduce((sum, f) => sum + (f.rules?.length ?? 0), 0);
+	const isPremium = userSelf.subscriptionType === 'premium';
 
 	const handleCreateButtonClick = () => {
 		if (foldersLimitReached) {
@@ -641,7 +652,10 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 								<FolderRulesManager
 									folder={selectedFolder}
 									rules={selectedFolder.rules || []}
-									onRulesUpdate={loadFolders}
+									onRulesUpdate={handleRulesUpdate}
+									totalRulesCount={totalRulesCount}
+									maxRules={maxFolderRules}
+									isPremium={isPremium}
 									className={element('rules-manager')}
 								/>
 							</div>

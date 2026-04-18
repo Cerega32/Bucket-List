@@ -1025,6 +1025,29 @@ export const updateFolderRule = async (
 	}
 };
 
+// Применить все правила пользователя ко всем его целям
+export const applyAllFolderRules = async (): Promise<{
+	success: boolean;
+	data?: {
+		message: string;
+		added: number;
+		removed: number;
+		goalsProcessed: number;
+		rulesApplied: number;
+	};
+	error?: string;
+}> => {
+	try {
+		const response = await POST('goals/folders/rules/apply-all', {auth: true});
+		return response;
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
 // Удалить правило папки
 export const deleteFolderRule = async (
 	folderId: number,

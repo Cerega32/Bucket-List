@@ -13,6 +13,16 @@
 		margin-bottom: 16px;
 	}
 
+	&__header-actions {
+		display: flex;
+		gap: 8px;
+
+		@include sm {
+			flex-direction: column;
+			width: 100%;
+		}
+	}
+
 	&__rules-list {
 		display: flex;
 		flex-direction: column;
@@ -152,6 +162,10 @@
 			justify-content: end;
 			width: 100%;
 		}
+	}
+
+	&__banner {
+		margin-bottom: 16px;
 	}
 }
 

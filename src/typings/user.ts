@@ -21,6 +21,7 @@ export interface IUserInfo {
 	level?: number;
 	limits?: {
 		maxFolders: number | null;
+		maxFolderRules: number;
 	};
 	counts?: {
 		regularGoals: number;

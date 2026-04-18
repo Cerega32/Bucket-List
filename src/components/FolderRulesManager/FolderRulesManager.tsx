@@ -1,8 +1,11 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
+import {NotificationStore} from '@/store/NotificationStore';
 import {
+	applyAllFolderRules,
 	createFolderRule,
 	deleteFolderRule,
 	getFolderRuleOptions,
@@ -13,21 +16,25 @@ import {
 } from '@/utils/api/goals';
 
 import {FolderRulesManagerSkeleton} from './FolderRulesManagerSkeleton';
+import {Banner} from '../Banner/Banner';
 import {Button} from '../Button/Button';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '../FieldInput/FieldInput';
 import {Modal} from '../Modal/Modal';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
-import './folder-rules-manager.scss';
 import Select from '../Select/Select';
 import {Title} from '../Title/Title';
+import './folder-rules-manager.scss';
 
 interface FolderRulesManagerProps {
 	className?: string;
 	folder: IGoalFolder;
 	rules: IGoalFolderRule[];
 	onRulesUpdate: () => void;
+	totalRulesCount: number;
+	maxRules: number;
+	isPremium: boolean;
 }
 
 const RULE_FIELD_MAPPING = {
@@ -68,8 +75,12 @@ const getRelevantDisplayFields = (rule: IGoalFolderRule) => {
 	return fields;
 };
 
-export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({className, folder, rules, onRulesUpdate}) => {
+export const FolderRulesManager: FC<FolderRulesManagerProps> = observer((props) => {
+	const {className, folder, rules, onRulesUpdate, totalRulesCount, maxRules, isPremium} = props;
 	const [block, element] = useBem('folder-rules-manager', className);
+	const navigate = useNavigate();
+
+	const rulesLimitReached = totalRulesCount >= maxRules;
 
 	const [ruleOptions, setRuleOptions] = useState<IRuleOptions | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -78,6 +89,8 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 	const [isEditing, setIsEditing] = useState(false);
 	const [editingRule, setEditingRule] = useState<IGoalFolderRule | null>(null);
 	const [deleteRuleId, setDeleteRuleId] = useState<number | null>(null);
+	const [isApplyingAll, setIsApplyingAll] = useState(false);
+	const [isConfirmApplyOpen, setIsConfirmApplyOpen] = useState(false);
 
 	const [formData, setFormData] = useState<Partial<IGoalFolderRule>>({
 		folder: folder.id,
@@ -176,6 +189,26 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 			console.error('Ошибка обновления правила:', error);
 		}
 		setIsSaving(false);
+	};
+
+	const handleApplyAllRules = async () => {
+		setIsApplyingAll(true);
+		try {
+			const response = await applyAllFolderRules();
+			if (response.success && response.data) {
+				const {added, removed, goalsProcessed} = response.data;
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Правила применены',
+					message: `Обработано целей: ${goalsProcessed}. Добавлено: ${added}, удалено: ${removed}.`,
+				});
+				onRulesUpdate();
+			}
+		} catch (error) {
+			console.error('Ошибка применения правил:', error);
+		}
+		setIsApplyingAll(false);
+		setIsConfirmApplyOpen(false);
 	};
 
 	const handleDeleteRule = async (ruleId: number) => {
@@ -387,14 +420,55 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 		return <FolderRulesManagerSkeleton className={className} />;
 	}
 
+	const handleCreateButtonClick = () => {
+		if (rulesLimitReached) return;
+		setIsCreating(true);
+	};
+
 	return (
 		<div className={block()}>
 			<div className={element('header')}>
 				<Title tag="h3">Правила папки &quot;{folder.name}&quot;</Title>
-				<Button className={element('btn')} theme="blue" icon="plus" width="auto" onClick={() => setIsCreating(true)} size="small">
-					Добавить правило
-				</Button>
+				<div className={element('header-actions')}>
+					{isPremium && rules.length > 0 && (
+						<Button
+							className={element('btn')}
+							theme="blue-light"
+							icon="magic"
+							width="auto"
+							onClick={() => setIsConfirmApplyOpen(true)}
+							size="small"
+							disabled={isApplyingAll}
+							loading={isApplyingAll}
+							loadingText="Применение..."
+						>
+							Применить правила
+						</Button>
+					)}
+					<Button
+						className={element('btn')}
+						theme="blue"
+						icon={rulesLimitReached ? 'lock' : 'plus'}
+						width="auto"
+						onClick={handleCreateButtonClick}
+						size="small"
+						disabled={rulesLimitReached}
+					>
+						{rulesLimitReached ? `Лимит ${maxRules} правил` : 'Добавить правило'}
+					</Button>
+				</div>
 			</div>
+
+			{!isPremium && (
+				<Banner
+					type="warning"
+					className={element('banner')}
+					message={`Автоматические правила сохранены, но пока подписка неактивна — они не срабатывают.
+						Оформите Premium, чтобы автоматика снова заработала.`}
+					actionText="Оформить Premium"
+					onAction={() => navigate('/user/self/subs')}
+				/>
+			)}
 
 			<div className={element('rules-list')}>
 				{rules.length === 0 ? (
@@ -471,6 +545,17 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 				textBtn="Удалить"
 				text="Вы уверены, что хотите удалить это правило? Действие нельзя отменить."
 				themeBtn="red"
+			/>
+
+			{/* Подтверждение массового применения правил */}
+			<ModalConfirm
+				title="Применить все правила?"
+				isOpen={isConfirmApplyOpen}
+				onClose={() => setIsConfirmApplyOpen(false)}
+				handleBtn={handleApplyAllRules}
+				textBtn="Применить"
+				text="Все ваши активные правила будут применены ко всем вашим целям. Цели могут быть добавлены или удалены из папок согласно правилам."
+				themeBtn="blue"
 			/>
 		</div>
 	);
