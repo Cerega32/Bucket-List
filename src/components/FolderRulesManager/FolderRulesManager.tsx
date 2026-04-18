@@ -12,16 +12,16 @@ import {
 	updateFolderRule,
 } from '@/utils/api/goals';
 
+import {FolderRulesManagerSkeleton} from './FolderRulesManagerSkeleton';
 import {Button} from '../Button/Button';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '../FieldInput/FieldInput';
-import {FieldSelect} from '../FieldSelect/FieldSelect';
-import {Loader} from '../Loader/Loader';
 import {Modal} from '../Modal/Modal';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
 import './folder-rules-manager.scss';
 import Select from '../Select/Select';
+import {Title} from '../Title/Title';
 
 interface FolderRulesManagerProps {
 	className?: string;
@@ -73,6 +73,7 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 
 	const [ruleOptions, setRuleOptions] = useState<IRuleOptions | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isSaving, setIsSaving] = useState(false);
 	const [isCreating, setIsCreating] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editingRule, setEditingRule] = useState<IGoalFolderRule | null>(null);
@@ -86,6 +87,12 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 		progressThreshold: 80,
 		daysWithoutProgress: 7,
 	});
+	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+	const getRequiredFields = () => {
+		if (!formData.ruleType) return [];
+		return RULE_FIELD_MAPPING[formData.ruleType as keyof typeof RULE_FIELD_MAPPING] || [];
+	};
 
 	const loadRuleOptions = useCallback(async () => {
 		setIsLoading(true);
@@ -113,10 +120,31 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 			progressThreshold: 80,
 			daysWithoutProgress: 7,
 		});
+		setFormErrors({});
+	};
+
+	const validateForm = (): boolean => {
+		const errors: Record<string, string> = {};
+		const requiredFields = getRequiredFields();
+
+		if (requiredFields.includes('category') && !formData.category) {
+			errors['category'] = 'Выберите категорию';
+		}
+		if (requiredFields.includes('complexity') && !formData.complexity) {
+			errors['complexity'] = 'Выберите сложность';
+		}
+		if (requiredFields.includes('keywords') && !formData.keywords?.trim()) {
+			errors['keywords'] = 'Введите ключевые слова';
+		}
+
+		setFormErrors(errors);
+		return Object.keys(errors).length === 0;
 	};
 
 	const handleCreateRule = async () => {
 		if (!formData.ruleType) return;
+		if (!validateForm()) return;
+		setIsSaving(true);
 
 		try {
 			const response = await createFolderRule(folder.id, formData);
@@ -128,10 +156,13 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 		} catch (error) {
 			console.error('Ошибка создания правила:', error);
 		}
+		setIsSaving(false);
 	};
 
 	const handleUpdateRule = async () => {
 		if (!editingRule?.id || !formData.ruleType) return;
+		if (!validateForm()) return;
+		setIsSaving(true);
 
 		try {
 			const response = await updateFolderRule(folder.id, editingRule.id, formData);
@@ -144,6 +175,7 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 		} catch (error) {
 			console.error('Ошибка обновления правила:', error);
 		}
+		setIsSaving(false);
 	};
 
 	const handleDeleteRule = async (ruleId: number) => {
@@ -175,11 +207,6 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 		setIsEditing(true);
 	};
 
-	const getRequiredFields = () => {
-		if (!formData.ruleType) return [];
-		return RULE_FIELD_MAPPING[formData.ruleType as keyof typeof RULE_FIELD_MAPPING] || [];
-	};
-
 	const renderRuleForm = () => {
 		const requiredFields = getRequiredFields();
 
@@ -187,12 +214,14 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 			<div className={element('form')}>
 				<Select
 					text="Тип правила"
-					className={element('rule-type-select')}
 					options={ruleOptions?.ruleTypes.map((type) => ({name: type.label, value: type.value})) || []}
 					activeOption={formData.ruleType ? ruleOptions?.ruleTypes.findIndex((t) => t.value === formData.ruleType) ?? null : null}
 					onSelect={(active) => {
 						const value = ruleOptions?.ruleTypes[active]?.value;
-						if (value) setFormData({...formData, ruleType: value});
+						if (value) {
+							setFormData({...formData, ruleType: value});
+							setFormErrors({});
+						}
 					}}
 					placeholder="Выберите тип правила"
 				/>
@@ -204,26 +233,45 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 				)}
 
 				{requiredFields.includes('category') && (
-					<FieldSelect
-						id="rule-category"
+					<Select
 						text="Категория"
-						value={formData.category?.toString() || ''}
-						setValue={(value: string) => setFormData({...formData, category: Number(value)})}
-						options={ruleOptions?.categories.map((cat) => ({value: cat.id.toString(), text: cat.name})) || []}
+						options={ruleOptions?.categories.map((cat) => ({name: cat.name, value: cat.id.toString()})) || []}
+						activeOption={
+							formData.category ? ruleOptions?.categories.findIndex((cat) => cat.id === formData.category) ?? null : null
+						}
+						onSelect={(active) => {
+							const cat = ruleOptions?.categories[active];
+							if (cat) {
+								setFormData({...formData, category: cat.id});
+								setFormErrors((prev) => ({...prev, category: ''}));
+							}
+						}}
 						placeholder="Выберите категорию"
-						required
+						searchInControl
+						error={!!formErrors['category']}
+						errorText={formErrors['category']}
 					/>
 				)}
 
 				{requiredFields.includes('complexity') && (
-					<FieldSelect
-						id="rule-complexity"
+					<Select
 						text="Сложность"
-						value={formData.complexity || ''}
-						setValue={(value: string) => setFormData({...formData, complexity: value})}
-						options={ruleOptions?.complexities.map((comp) => ({value: comp.value, text: comp.label})) || []}
+						options={ruleOptions?.complexities.map((comp) => ({name: comp.label, value: comp.value})) || []}
+						activeOption={
+							formData.complexity
+								? ruleOptions?.complexities.findIndex((comp) => comp.value === formData.complexity) ?? null
+								: null
+						}
+						onSelect={(active) => {
+							const comp = ruleOptions?.complexities[active];
+							if (comp) {
+								setFormData({...formData, complexity: comp.value});
+								setFormErrors((prev) => ({...prev, complexity: ''}));
+							}
+						}}
 						placeholder="Выберите сложность"
-						required
+						error={!!formErrors['complexity']}
+						errorText={formErrors['complexity']}
 					/>
 				)}
 
@@ -232,9 +280,13 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 						id="rule-keywords"
 						text="Ключевые слова"
 						value={formData.keywords || ''}
-						setValue={(value: string) => setFormData({...formData, keywords: value})}
+						setValue={(value: string) => {
+							setFormData({...formData, keywords: value});
+							if (value.trim()) setFormErrors((prev) => ({...prev, keywords: ''}));
+						}}
 						placeholder="Введите слова через запятую"
 						required
+						error={formErrors['keywords'] ? [formErrors['keywords']] : undefined}
 					/>
 				)}
 
@@ -284,7 +336,13 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 				<div className={element('form-actions')}>
 					{isEditing ? (
 						<>
-							<Button theme="blue" onClick={handleUpdateRule} disabled={!formData.ruleType}>
+							<Button
+								theme="blue"
+								onClick={handleUpdateRule}
+								disabled={!formData.ruleType || isSaving}
+								loading={isSaving}
+								loadingText="Сохранение..."
+							>
 								Сохранить изменения
 							</Button>
 							<Button
@@ -300,7 +358,13 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 						</>
 					) : (
 						<>
-							<Button theme="blue" onClick={handleCreateRule} disabled={!formData.ruleType}>
+							<Button
+								theme="blue"
+								onClick={handleCreateRule}
+								disabled={!formData.ruleType || isSaving}
+								loading={isSaving}
+								loadingText="Создание..."
+							>
 								Создать правило
 							</Button>
 							<Button
@@ -320,14 +384,14 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 	};
 
 	if (isLoading) {
-		return <Loader isLoading />;
+		return <FolderRulesManagerSkeleton className={className} />;
 	}
 
 	return (
 		<div className={block()}>
 			<div className={element('header')}>
-				<h3>Правила папки &quot;{folder.name}&quot;</h3>
-				<Button theme="blue" icon="plus" width="auto" onClick={() => setIsCreating(true)} size="medium">
+				<Title tag="h3">Правила папки &quot;{folder.name}&quot;</Title>
+				<Button className={element('btn')} theme="blue" icon="plus" width="auto" onClick={() => setIsCreating(true)} size="small">
 					Добавить правило
 				</Button>
 			</div>
@@ -343,10 +407,14 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 						{rules.map((rule) => (
 							<div key={rule.id} className={element('rule', {inactive: !rule.isActive})}>
 								<div className={element('rule-info')}>
-									<h4 className={element('rule-title')}>{rule.ruleTypeDisplay}</h4>
+									<Title tag="h4" className={element('rule-title')}>
+										{rule.ruleTypeDisplay}
+									</Title>
 									<div className={element('rule-details')}>
 										{getRelevantDisplayFields(rule).map((field, index) => (
-											<span key={index}>{field}</span>
+											<span className={element('rule-item')} key={index}>
+												{field}
+											</span>
 										))}
 									</div>
 									{!rule.isActive && <span className={element('inactive-badge')}>Неактивно</span>}
@@ -367,6 +435,8 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 
 			{/* Модальное окно создания правила */}
 			<Modal
+				className="folder-rules-modal"
+				size="medium"
 				isOpen={isCreating}
 				onClose={() => {
 					setIsCreating(false);
@@ -379,6 +449,8 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 
 			{/* Модальное окно редактирования правила */}
 			<Modal
+				className="folder-rules-modal"
+				size="medium"
 				isOpen={isEditing}
 				onClose={() => {
 					setIsEditing(false);

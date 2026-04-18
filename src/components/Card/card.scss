@@ -141,7 +141,7 @@
 		justify-content: flex-end;
 		align-items: center;
 		gap: 8px;
-		height: 32px;
+		min-height: 32px;
 
 		@include xs {
 			width: 100%;
@@ -164,7 +164,7 @@
 			pointer-events: auto;
 		}
 
-		@media (hover: none) {
+		@media (hover: none), (pointer: coarse) {
 			opacity: 1;
 			visibility: visible;
 			pointer-events: auto;
@@ -186,7 +186,7 @@
 				display: flex;
 			}
 
-			@media (hover: none) {
+			@media (hover: none), (pointer: coarse) {
 				opacity: unset;
 				visibility: unset;
 				pointer-events: unset;

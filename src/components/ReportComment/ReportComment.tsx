@@ -62,7 +62,6 @@ export const ReportComment: FC<ReportCommentProps> = ({commentId, closeModal}) =
 			</Title>
 			<div className={element('wrapper')}>
 				<Select
-					className={element('select')}
 					placeholder="Укажите причину обращения"
 					options={REASON_OPTIONS}
 					activeOption={activeReason}

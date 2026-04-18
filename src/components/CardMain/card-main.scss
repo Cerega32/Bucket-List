@@ -87,7 +87,7 @@
 		width: auto;
 	}
 
-	@media (hover: hover) {
+	@media (hover: hover) and (pointer: fine) {
 		&--withBtn:hover {
 			#{$block} {
 				&__text {
@@ -110,7 +110,7 @@
 		}
 	}
 
-	@media (hover: none) {
+	@media (hover: none), (pointer: coarse) {
 		&--withBtn {
 			#{$block} {
 				&__line {

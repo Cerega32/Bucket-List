@@ -400,7 +400,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		if (!requireAuth()) return;
 		const res = await addGoal(goal.code);
 		if (res.success) {
-			updateGoalInList(goal.code, {addedByUser: true}, {usersAddedCount: res.data?.users_added_count ?? res.data?.usersAddedCount});
+			updateGoalInList(goal.code, {addedByUser: true}, {usersAddedCount: res.data?.totalAdded});
 		}
 	};
 
@@ -426,7 +426,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 				<Title tag="h2" className={element('title')}>
 					Папки целей
 				</Title>
-				<Button theme="blue" icon="plus" onClick={() => setIsCreating(true)} size="medium" width={isScreenXs ? 'full' : 'auto'}>
+				<Button theme="blue" icon="plus" onClick={() => setIsCreating(true)} size="small" width={isScreenXs ? 'full' : 'auto'}>
 					Создать папку
 				</Button>
 			</div>
