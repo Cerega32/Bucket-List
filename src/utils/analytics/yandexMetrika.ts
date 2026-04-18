@@ -28,7 +28,7 @@ export const initYandexMetrika = (counterId: string): void => {
 		}
 	}
 
-	const stub: YandexMetrikaFn = function stub(...args: unknown[]) {
+	const stub: YandexMetrikaFn = (...args: unknown[]) => {
 		(stub.a = stub.a || []).push(args);
 	};
 	stub.l = Number(new Date());

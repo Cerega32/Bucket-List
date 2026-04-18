@@ -10,7 +10,7 @@ import {initYandexMetrika} from './utils/analytics/yandexMetrika';
 
 (async () => {
 	if (import.meta.env.PROD) {
-		initYandexMetrika(import.meta.env.VITE_YANDEX_METRIKA_ID ?? '');
+		initYandexMetrika(import.meta.env['VITE_YANDEX_METRIKA_ID'] ?? '');
 	}
 
 	const root = document.getElementById('root')!;
