@@ -4,6 +4,7 @@ import {Link} from 'react-router-dom';
 import './header-category.scss';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {ICategoryWithSubcategories} from '@/typings/goal';
 
 import {Title} from '../Title/Title';
@@ -21,6 +22,7 @@ export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
 	const {className, category, isSub, refHeader, onCompactChange, onHeightChange} = props;
 
 	const [block, element] = useBem('header-category', className);
+	const {isScreenMobile} = useScreenSize();
 	const [compact, setCompact] = useState(false);
 	const compactRef = useRef(false);
 	const expandedHeightRef = useRef<number | null>(null);
@@ -113,7 +115,7 @@ export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
 				{isSub && category.category.parentCategory && (
 					<Link className={element('title-link')} to={`/categories/${category.category.parentCategory.nameEn}`}>
 						<Title className={element('title-link-text')} tag="h1">
-							{category.category.parentCategory.name}
+							{compact && isScreenMobile ? '. . .' : category.category.parentCategory.name}
 						</Title>
 					</Link>
 				)}

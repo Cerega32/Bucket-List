@@ -806,6 +806,15 @@
 	}
 
 	&--theme-transparent {
+		&::before {
+			position: absolute;
+			z-index: -1;
+			inset: 0;
+			backdrop-filter: brightness(var(--header-backdrop-brightness, 1)) blur(var(--header-backdrop-blur, 0px));
+			content: '';
+			pointer-events: none;
+		}
+
 		#{$block} {
 			&__logo {
 				path {

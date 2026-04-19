@@ -42,11 +42,21 @@
 	}
 
 	&--fixed &__title-wrapper {
-		overflow: hidden;
+		display: flex;
+		align-items: baseline;
 		max-height: 52px;
-		flex-wrap: nowrap;
+		overflow: hidden;
 		// stylelint-disable-next-line no-unknown-animations -- defined in scaffolding.scss
 		animation: rise-from-bottom 0.3s ease-out;
+
+		// Сбрасываем inline flow из базового стиля
+		> * {
+			display: revert;
+		}
+
+		> * > * {
+			display: revert;
+		}
 	}
 
 	&__title-separator {
@@ -75,11 +85,23 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+		flex-shrink: 0;
 
 		> * {
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
+		}
+
+		@include md {
+			max-width: none;
+			overflow: visible;
+			text-overflow: clip;
+
+			> * {
+				overflow: visible;
+				text-overflow: clip;
+			}
 		}
 	}
 
@@ -87,6 +109,20 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	&--fixed &__title-group {
+		display: flex;
+		align-items: baseline;
+		flex: 1;
+		min-width: 0;
+	}
+
+	&--fixed &__title-group > &__title {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		min-width: 0;
 	}
 
 	&__title,
