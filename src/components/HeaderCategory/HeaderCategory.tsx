@@ -22,7 +22,7 @@ export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
 	const {className, category, isSub, refHeader, onCompactChange, onHeightChange} = props;
 
 	const [block, element] = useBem('header-category', className);
-	const {isScreenMobile} = useScreenSize();
+	const {isScreenMobile, isScreenSmallMobile} = useScreenSize();
 	const [compact, setCompact] = useState(false);
 	const compactRef = useRef(false);
 	const expandedHeightRef = useRef<number | null>(null);
@@ -31,6 +31,7 @@ export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
 		compactRef.current = compact;
 		if (compact && refHeader.current) {
 			refHeader.current.style.clipPath = '';
+			refHeader.current.style.transform = '';
 		}
 		onCompactChange?.(compact);
 	}, [compact]);
@@ -76,20 +77,47 @@ export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
 
 				if (expandedH <= 0) return;
 
-				const newHeight = Math.max(minHeight, expandedH - scrollY);
+				if (isScreenSmallMobile) {
+					// Мобильные (sm/xs): шапка прокручивается вместе с контентом через translateY
+					const threshold = expandedH - minHeight;
 
-				if (newHeight <= minHeight && !currentCompact) {
-					setCompact(true);
-				} else if (newHeight > minHeight && currentCompact) {
-					setCompact(false);
-				}
+					if (scrollY >= threshold && !currentCompact) {
+						setCompact(true);
+					} else if (scrollY < threshold && currentCompact) {
+						setCompact(false);
+					}
 
-				if (!currentCompact && !(newHeight <= minHeight)) {
-					const clipBottom = expandedH - newHeight;
-					if (refHeader.current) {
-						refHeader.current.style.clipPath = clipBottom > 0 ? `inset(0 0 ${clipBottom}px 0)` : '';
+					if (!currentCompact && scrollY < threshold) {
+						if (refHeader.current) {
+							refHeader.current.style.transform = `translateY(${-scrollY}px)`;
+							refHeader.current.style.clipPath = '';
+						}
+					}
+				} else {
+					// Десктоп/планшет: clip-path
+					const newHeight = Math.max(minHeight, expandedH - scrollY);
+
+					if (newHeight <= minHeight && !currentCompact) {
+						setCompact(true);
+					} else if (newHeight > minHeight && currentCompact) {
+						setCompact(false);
+					}
+
+					if (!currentCompact && !(newHeight <= minHeight)) {
+						const clipBottom = expandedH - newHeight;
+						if (refHeader.current) {
+							refHeader.current.style.clipPath = clipBottom > 0 ? `inset(0 0 ${clipBottom}px 0)` : '';
+						}
 					}
 				}
+
+				// Плавное затемнение и блюр прозрачной шапки навигации при скролле
+				const isNowCompact =
+					currentCompact || (isScreenSmallMobile ? scrollY >= expandedH - minHeight : expandedH - scrollY <= minHeight);
+				const brightness = isNowCompact ? 1 : Math.max(0.7, 1 - (scrollY / 150) * 0.3);
+				const blur = isNowCompact ? 0 : Math.min(5, (scrollY / 150) * 5);
+				document.documentElement.style.setProperty('--header-backdrop-brightness', brightness.toFixed(3));
+				document.documentElement.style.setProperty('--header-backdrop-blur', `${blur.toFixed(1)}px`);
 			});
 		};
 
@@ -99,8 +127,14 @@ export const HeaderCategory: FC<HeaderCategoryProps> = (props) => {
 		return () => {
 			window.removeEventListener('scroll', onScroll);
 			if (rafId != null) window.cancelAnimationFrame(rafId);
+			if (refHeader.current) {
+				refHeader.current.style.transform = '';
+				refHeader.current.style.clipPath = '';
+			}
+			document.documentElement.style.removeProperty('--header-backdrop-brightness');
+			document.documentElement.style.removeProperty('--header-backdrop-blur');
 		};
-	}, []);
+	}, [isScreenSmallMobile]);
 
 	return (
 		<header
