@@ -9,12 +9,14 @@ import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
+import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {ThemeStore} from '@/store/ThemeStore';
-import {ICategory, IGoal} from '@/typings/goal';
+import {ICategory, IGoal, ILocation} from '@/typings/goal';
 import {deleteGoal} from '@/utils/api/delete/deleteGoal';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {updateGoal} from '@/utils/api/put/updateGoal';
+import {mapApi} from '@/utils/mapApi';
 import {pluralize} from '@/utils/text/pluralize';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
@@ -56,7 +58,9 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	const [canEdit, setCanEdit] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [selectedGoalLocation, setSelectedGoalLocation] = useState<Partial<ILocation> | null>(goal.location || null);
 	const {setHeader} = ThemeStore;
+	const {setIsOpen, setWindow, setModalProps} = ModalStore;
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 	const [customSchedule, setCustomSchedule] = useState<WeekDaySchedule>({
 		monday: false,
@@ -346,6 +350,35 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 		return true;
 	};
 
+	const handleLocationFromPicker = (selectedLocation: Partial<ILocation>) => {
+		const fullLocation: Partial<ILocation> = {
+			name: selectedLocation.name || '',
+			longitude: selectedLocation.longitude || 0,
+			latitude: selectedLocation.latitude || 0,
+			country: selectedLocation.country || '',
+			city: selectedLocation.city || undefined,
+			description: selectedLocation.description || undefined,
+			place_type: 'other',
+			address: undefined,
+			created_at: new Date().toISOString(),
+		};
+		setSelectedGoalLocation(fullLocation);
+		setIsOpen(false);
+	};
+
+	const clearSelectedLocation = () => {
+		setSelectedGoalLocation(null);
+	};
+
+	const openLocationPicker = () => {
+		setIsOpen(true);
+		setWindow('goal-map-add');
+		setModalProps({
+			onLocationSelect: handleLocationFromPicker,
+			initialLocation: selectedGoalLocation || undefined,
+		});
+	};
+
 	const handleUpdateGoal = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
@@ -403,6 +436,39 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 			if (estimatedTime) {
 				const standardTime = convertTimeToStandardFormat(estimatedTime);
 				formData.append('estimated_time', standardTime);
+			}
+
+			// Обрабатываем изменения места на карте
+			const initialLocationId = goal.location?.id;
+			const currentLocationId = selectedGoalLocation?.id;
+
+			if (selectedGoalLocation) {
+				if (!currentLocationId) {
+					try {
+						const newLocation = await mapApi.createLocation({
+							name: selectedGoalLocation.name! || title,
+							longitude: selectedGoalLocation.longitude!,
+							latitude: selectedGoalLocation.latitude!,
+							country: selectedGoalLocation.country!,
+							city: selectedGoalLocation.city,
+							description: selectedGoalLocation.description,
+							place_type: selectedGoalLocation.place_type || 'other',
+						});
+						formData.append('location_id', newLocation.id.toString());
+					} catch (error) {
+						NotificationStore.addNotification({
+							type: 'error',
+							title: 'Ошибка',
+							message: error instanceof Error ? error.message : 'Не удалось создать место',
+						});
+						setIsLoading(false);
+						return;
+					}
+				} else if (currentLocationId !== initialLocationId) {
+					formData.append('location_id', currentLocationId.toString());
+				}
+			} else if (initialLocationId) {
+				formData.append('location_id', '');
 			}
 
 			// Добавляем данные о регулярности, если это регулярная цель
@@ -614,6 +680,51 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 									onSelect={setActiveSubcategory}
 									text="Подкатегория"
 								/>
+							)}
+
+							{activeCategory !== null && parentCategories[activeCategory]?.nameEn === 'travel' && (
+								<div className={element('location-field-container')}>
+									<p className={element('field-title')}>Место на карте</p>
+
+									{selectedGoalLocation ? (
+										<div className={element('selected-location')}>
+											<div className={element('selected-location-info')}>
+												<Svg icon="map" className={element('location-icon')} />
+												<div>
+													<div className={element('selected-location-name')}>{selectedGoalLocation?.name}</div>
+													<div className={element('selected-location-details')}>
+														{selectedGoalLocation?.city && `${selectedGoalLocation.city}, `}
+														{selectedGoalLocation?.country}
+													</div>
+													{selectedGoalLocation?.description && (
+														<div className={element('selected-location-description')}>
+															{selectedGoalLocation.description}
+														</div>
+													)}
+												</div>
+											</div>
+											<div className={element('location-actions')}>
+												<Button theme="blue-light" size="small" onClick={openLocationPicker}>
+													Изменить место
+												</Button>
+												<Button theme="red" size="small" onClick={clearSelectedLocation}>
+													Удалить место
+												</Button>
+											</div>
+										</div>
+									) : (
+										<div className={element('location-empty')}>
+											<p>Выберите географическое место на карте</p>
+											<Button theme="blue" onClick={openLocationPicker}>
+												Выбрать место на карте
+											</Button>
+										</div>
+									)}
+
+									<small className={element('format-hint')}>
+										Выберите географическое место на карте. Это поможет отслеживать ваши путешествия на карте.
+									</small>
+								</div>
 							)}
 
 							<Select
