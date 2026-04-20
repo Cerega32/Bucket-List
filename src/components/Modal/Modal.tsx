@@ -332,7 +332,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		);
 	}
 
-	const effectiveSize = size || (window === 'compare-friend' ? 'medium' : undefined);
+	const effectiveSize = size || (window === 'compare-friend' ? 'large' : undefined);
 	const windowModifiers: Record<string, boolean | string | undefined> = {
 		fullscreen: window === 'goal-map' || window === 'goal-map-multi' || window === 'goal-map-add',
 		...(effectiveSize ? {[effectiveSize]: true} : {}),

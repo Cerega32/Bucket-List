@@ -43,7 +43,7 @@
 			overflow: hidden;
 			white-space: nowrap;
 			text-overflow: ellipsis;
-			overflow-wrap: anywhere;
+			overflow-wrap: break-word;
 			-webkit-box-orient: vertical;
 			-webkit-line-clamp: 1;
 		}
@@ -55,7 +55,7 @@
 			overflow: hidden;
 			white-space: normal;
 			text-overflow: ellipsis;
-			overflow-wrap: anywhere;
+			overflow-wrap: break-word;
 			-webkit-box-orient: vertical;
 			-webkit-line-clamp: 3;
 			line-clamp: 3;
