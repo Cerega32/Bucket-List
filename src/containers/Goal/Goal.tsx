@@ -42,7 +42,7 @@ const normalizeGoalFromApi = (raw: IGoal & {added_from_list?: string[]}): IGoal 
 
 export const Goal: FC<IPage> = observer(({page}) => {
 	const [block, element] = useBem('goal');
-	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
+	const {isScreenMobile, isScreenSmallTablet, isScreenSmallMobile} = useScreenSize();
 	const headerRef = useRef<HTMLElement | null>(null);
 	const {isAuth} = UserStore;
 
@@ -274,7 +274,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	};
 
 	const [compact, setCompact] = useState(false);
-	const [headerHeight, setHeaderHeight] = useState<number>(0);
+	const [headerHeight, setHeaderHeight] = useState<number>(340);
 	const headerHeightRef = useRef(headerHeight);
 	const compactRef = useRef(false);
 	const expandedHeaderHeightRef = useRef<number | null>(null);
@@ -286,9 +286,10 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	useEffect(() => {
 		compactRef.current = compact;
 		ThemeStore.setPreHeaderHiddenOverride(compact);
-		// Сбрасываем clip-path после того, как compact-класс применён к DOM
+		// Сбрасываем инлайн-стили после того, как compact-класс применён к DOM
 		if (compact && headerRef.current) {
 			headerRef.current.style.clipPath = '';
+			headerRef.current.style.transform = '';
 		}
 	}, [compact]);
 
@@ -323,6 +324,8 @@ export const Goal: FC<IPage> = observer(({page}) => {
 					expandedHeaderHeightRef.current = h;
 				}
 			}
+			// Пересчитать scroll-состояние (compact, translateY, backdrop) с актуальной высотой
+			window.dispatchEvent(new Event('scroll'));
 		} else {
 			setHeaderHeight(340);
 		}
@@ -354,27 +357,53 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				const scrollY = window.scrollY || 0;
 				const currentCompact = compactRef.current;
 				const expandedH = expandedHeaderHeightRef.current ?? headerHeightRef.current;
-				const minHeight = 136;
+				const minHeight = isScreenSmallMobile ? 168 : 136;
 
-				// Визуальная высота 1:1 со скроллом через clip-path на всех разрешениях
 				if (expandedH <= 0) return;
 
-				const newHeight = Math.max(minHeight, expandedH - scrollY);
+				if (isScreenSmallMobile) {
+					// Мобильные (sm/xs): шапка прокручивается вместе с контентом через translateY
+					const threshold = expandedH - minHeight;
 
-				if (newHeight <= minHeight && !currentCompact) {
-					// clip-path сбросится в useEffect после применения compact-класса
-					setCompact(true);
-				} else if (newHeight > minHeight && currentCompact) {
-					setCompact(false);
-				}
+					if (scrollY >= threshold && !currentCompact) {
+						setCompact(true);
+					} else if (scrollY < threshold && currentCompact) {
+						setCompact(false);
+					}
 
-				// clip-path только когда НЕ compact
-				if (!currentCompact && !(newHeight <= minHeight)) {
-					const clipBottom = expandedH - newHeight;
-					if (headerRef.current) {
-						headerRef.current.style.clipPath = clipBottom > 0 ? `inset(0 0 ${clipBottom}px 0)` : '';
+					// translateY только когда НЕ compact
+					if (!currentCompact && scrollY < threshold) {
+						if (headerRef.current) {
+							headerRef.current.style.transform = `translateY(${-scrollY}px)`;
+							headerRef.current.style.clipPath = '';
+						}
+					}
+				} else {
+					// Десктоп/планшет: clip-path
+					const newHeight = Math.max(minHeight, expandedH - scrollY);
+
+					if (newHeight <= minHeight && !currentCompact) {
+						setCompact(true);
+					} else if (newHeight > minHeight && currentCompact) {
+						setCompact(false);
+					}
+
+					if (!currentCompact && !(newHeight <= minHeight)) {
+						const clipBottom = expandedH - newHeight;
+						if (headerRef.current) {
+							headerRef.current.style.clipPath = clipBottom > 0 ? `inset(0 0 ${clipBottom}px 0)` : '';
+						}
 					}
 				}
+
+				// Плавное затемнение прозрачной шапки навигации при скролле (1 → 0.7 за 150px),
+				// но только пока шапка цели не свернулась в compact — после этого затемнение убираем
+				const isNowCompact =
+					currentCompact || (isScreenSmallMobile ? scrollY >= expandedH - minHeight : expandedH - scrollY <= minHeight);
+				const brightness = isNowCompact ? 1 : Math.max(0.6, 1 - (scrollY / 150) * 0.3);
+				const blur = isNowCompact ? 0 : Math.min(5, (scrollY / 150) * 5);
+				document.documentElement.style.setProperty('--header-backdrop-brightness', brightness.toFixed(3));
+				document.documentElement.style.setProperty('--header-backdrop-blur', `${blur.toFixed(1)}px`);
 			});
 		};
 
@@ -384,8 +413,15 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		return () => {
 			window.removeEventListener('scroll', onScroll);
 			if (rafId != null) window.cancelAnimationFrame(rafId);
+			// Очищаем инлайн-стили при смене экрана
+			if (headerRef.current) {
+				headerRef.current.style.transform = '';
+				headerRef.current.style.clipPath = '';
+			}
+			document.documentElement.style.removeProperty('--header-backdrop-brightness');
+			document.documentElement.style.removeProperty('--header-backdrop-blur');
 		};
-	}, [isScreenMobile]);
+	}, [isScreenMobile, isScreenSmallMobile]);
 
 	if (isEditing && goal) {
 		return (
