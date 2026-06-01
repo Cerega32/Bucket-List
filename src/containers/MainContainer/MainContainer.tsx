@@ -19,6 +19,7 @@ import {getTopLikedComments} from '@/utils/api/get/getTopLikedComments';
 import {getTotalCompleted} from '@/utils/api/get/getTotalCompleted';
 
 import {Categories} from '../Categories/Categories';
+import {FeaturesShowcase} from '../FeaturesShowcase/FeaturesShowcase';
 
 import './main-container.scss';
 
@@ -101,12 +102,13 @@ const MainContainerComponent: FC<IPage> = () => {
 				isPhotosLoading={photosLoading}
 				isCounterLoading={totalLoading}
 			/>
+			<MainInfo />
+			<FeaturesShowcase />
 			{popularLoading ? (
 				<MainPopularSkeleton />
 			) : (
 				<MainPopular goalsForDay={popularGoalsForDay} goalsForAllTime={popularGoalsForAllTime} />
 			)}
-			<MainInfo />
 			{commentsLoading ? <MainCommentsSkeleton /> : <MainComments comments={[...commentsTopLiked, ...commentsTopLiked]} />}
 			<Categories tag="h2" title="Что тебе интересно?" />
 		</div>

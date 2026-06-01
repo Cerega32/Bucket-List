@@ -115,8 +115,12 @@
 
 	&__features {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		grid-template-columns: repeat(3, 1fr);
 		gap: 24px;
+
+		@include lg {
+			grid-template-columns: repeat(2, 1fr);
+		}
 
 		@include md {
 			grid-template-columns: 1fr;
@@ -128,12 +132,12 @@
 		padding: 32px;
 		background: var(--color-gray-11);
 		border: 1px solid var(--color-border);
-		border-radius: 16px;
+		border-radius: 8px;
 		text-align: center;
 		transition: all 0.3s ease;
 
 		@include xs {
-			padding: 20px;
+			padding: 16px;
 		}
 
 		&:hover {
@@ -151,7 +155,7 @@
 		height: 64px;
 		margin-bottom: 24px;
 		background: linear-gradient(135deg, rgb(var(--color-primary-rgb) / 15%) 0%, rgb(var(--color-primary-rgb) / 5%) 100%);
-		border-radius: 16px;
+		border-radius: 8px;
 
 		svg {
 			width: 32px;
@@ -188,7 +192,7 @@
 		padding: 32px;
 		background: linear-gradient(135deg, rgb(var(--color-primary-rgb) / 10%) 0%, rgb(var(--color-primary-rgb) / 5%) 100%);
 		border: 1px solid var(--color-border);
-		border-radius: 16px;
+		border-radius: 8px;
 		transition: all 0.3s ease;
 
 		&:hover {

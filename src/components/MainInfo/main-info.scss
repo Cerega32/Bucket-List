@@ -34,6 +34,11 @@
 	&__item {
 		position: relative;
 		overflow: hidden;
+		transition: all 0.3s ease;
+
+		&:hover {
+			transform: translateY(-4px);
+		}
 
 		@include block-radius(24px, var(--color-gray-11));
 
@@ -85,12 +90,37 @@
 		}
 	}
 
+	&__item-half {
+		overflow: hidden;
+		grid-row: 4 / 4;
+
+		&:hover {
+			transform: translateY(-4px);
+		}
+
+		@include block-radius(24px, var(--color-gray-11));
+
+		@include xl {
+			grid-column: span 3;
+		}
+
+		@include lg {
+			grid-column: span 1;
+		}
+	}
+
 	&__icon {
 		margin-bottom: 16px;
 
-		&--apps {
+		&--bullseye {
 			svg * {
 				fill: var(--color-logo);
+			}
+		}
+
+		&--level {
+			svg * {
+				fill: var(--color-green-1);
 			}
 		}
 	}
@@ -107,18 +137,18 @@
 		color: var(--color-text);
 
 		@include md {
-			right: 120px;
-			bottom: 290px;
-		}
-
-		@include sm {
 			right: 20px;
 			bottom: 250px;
 		}
 
+		@include sm {
+			right: 20px;
+			bottom: 210px;
+		}
+
 		@include xs {
 			right: 0;
-			bottom: 150px;
+			bottom: 140px;
 			width: auto;
 		}
 	}
@@ -129,10 +159,6 @@
 		font-size: 14px;
 		font-weight: var(--weight-regular);
 		line-height: var(--line-height-14);
-
-		@include xs {
-			display: none;
-		}
 	}
 
 	&__info-count {
@@ -147,17 +173,20 @@
 	&__achievement {
 		position: absolute;
 		z-index: 1;
-		right: 24px;
+		right: 30px;
 		bottom: 20%;
 		width: 336px;
 		box-shadow: 0 0 20px -2px rgb(var(--color-text-primary-rgb) / 8%);
 
 		@include md {
-			bottom: 240px;
+			display: none;
 		}
 
-		@include sm {
-			display: none;
+		@include xs {
+			display: flex;
+			width: auto;
+			bottom: 4%;
+			right: 20px;
 		}
 	}
 
@@ -169,6 +198,11 @@
 
 		@include sm {
 			width: 280px;
+			bottom: -50px;
+		}
+
+		@include xs {
+			display: none;
 		}
 	}
 }

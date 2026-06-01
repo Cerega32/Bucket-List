@@ -65,6 +65,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const navigate = useNavigate();
 	const homePath = isAuth ? '/categories/all' : '/';
+	const isPremium = userSelf.subscriptionType === 'premium';
 
 	useEffect(() => {
 		if (categoriesTree.length > 0) return;
@@ -324,9 +325,11 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			>
 				Цели на модерации
 			</NavLink>
-			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/subs" end>
-				Больше функционала
-			</NavLink>
+			{!isPremium && (
+				<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/subs" end>
+					Больше функционала
+				</NavLink>
+			)}
 			{isScreenMobile && (
 				<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/goals/create" end>
 					Создать цель
