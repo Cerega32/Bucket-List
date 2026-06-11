@@ -23,10 +23,11 @@ interface CommentGoalProps {
 	onClickScore?: (id: number, like: boolean) => Promise<void>;
 	isUser?: boolean;
 	isMain?: boolean;
+	hideReport?: boolean;
 }
 
 export const CommentGoal: FC<CommentGoalProps> = (props) => {
-	const {className, comment, isUser, onClickScore, isMain} = props;
+	const {className, comment, isUser, onClickScore, isMain, hideReport} = props;
 	const [block, element] = useBem('comment-goal', className);
 
 	const photoSlides = comment.photos?.map((p) => ({src: p.image, id: p.id})) ?? [];
@@ -66,7 +67,6 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 						<div className={element('user-wrapper')}>
 							<Title tag="h4">{comment.userNickname}</Title>
 							<p className={element('user-level')}>
-								{/* {comment.level} уровень&nbsp; */}
 								{pluralize(comment.userTotalCompletedGoals, ['цель выполнена', 'цели выполнено', 'целей выполнено'])}
 							</p>
 						</div>
@@ -100,7 +100,6 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 								small
 								theme={comment.hasLiked ? 'green' : 'blue-light'}
 								onClick={() => onClickScore(comment.id, true)}
-								className={element('like')}
 							>
 								{comment.likesCount}
 							</Button>
@@ -114,7 +113,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 							</Button>
 						</div>
 					)}
-					{!isOwnComment && (
+					{!hideReport && !isOwnComment && (
 						<Button
 							icon="exclamation-triangle"
 							width="auto"

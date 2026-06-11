@@ -1,15 +1,22 @@
 import {FC, useEffect, useRef} from 'react';
 
+import {useBem} from '@/hooks/useBem';
 import {GoalWithLocation} from '@/utils/mapApi';
 import './goal-map.scss';
 
 export interface GoalMapMultiProps {
+	className?: string;
 	goals: GoalWithLocation[];
+	/** Индекс маркера, у которого открыть балун после загрузки карты */
+	openBalloonAt?: number;
 }
 
-export const GoalMapMulti: FC<GoalMapMultiProps> = ({goals}) => {
+export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
+	const {className, goals, openBalloonAt} = props;
+	const [block, element] = useBem('goal-map', className);
 	const mapContainer = useRef<HTMLDivElement>(null);
 	const mapInstance = useRef<any>(null);
+	const markersRef = useRef<any[]>([]);
 
 	useEffect(() => {
 		const validGoals = goals.filter(
@@ -20,13 +27,17 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = ({goals}) => {
 		const initMap = () => {
 			if (!mapContainer.current || mapInstance.current || !window.ymaps) return;
 
+			const avgLat = validGoals.reduce((sum, g) => sum + g.location.latitude, 0) / validGoals.length;
+			const avgLon = validGoals.reduce((sum, g) => sum + g.location.longitude, 0) / validGoals.length;
+
 			const map = new window.ymaps.Map(mapContainer.current, {
-				center: [validGoals[0].location.latitude, validGoals[0].location.longitude],
+				center: [avgLat, avgLon],
 				zoom: 4,
 				controls: ['zoomControl', 'typeSelector'],
 			});
 
 			mapInstance.current = map;
+			markersRef.current = [];
 
 			const points: number[][] = [];
 
@@ -51,19 +62,26 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = ({goals}) => {
 					},
 					{
 						preset: userVisitedLocation ? 'islands#greenDotIcon' : 'islands#redDotIcon',
-						openBalloonOnHover: true,
+						openBalloonOnHover: openBalloonAt === undefined,
 						balloonCloseButton: true,
 						hideIconOnBalloonOpen: false,
+						balloonAutoPan: true,
+						balloonAutoPanMargin: [48, 48, 48, 48],
 					}
 				);
 				map.geoObjects.add(marker);
+				markersRef.current.push(marker);
 				points.push([location.latitude, location.longitude]);
 			});
 
 			if (points.length > 1) {
-				map.setBounds(window.ymaps.util.bounds.fromPoints(points), {checkZoomRange: true, zoomMargin: 40});
+				map.setBounds(window.ymaps.util.bounds.fromPoints(points), {checkZoomRange: true, zoomMargin: 64});
 			} else {
 				map.setCenter([validGoals[0].location.latitude, validGoals[0].location.longitude], 13);
+			}
+
+			if (openBalloonAt !== undefined && markersRef.current[openBalloonAt]) {
+				window.setTimeout(() => markersRef.current[openBalloonAt].balloon.open(), 500);
 			}
 		};
 
@@ -87,12 +105,13 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = ({goals}) => {
 				mapInstance.current.destroy();
 				mapInstance.current = null;
 			}
+			markersRef.current = [];
 		};
-	}, [goals]);
+	}, [goals, openBalloonAt]);
 
 	return (
-		<div className="goal-map">
-			<div ref={mapContainer} className="goal-map__container" />
+		<div className={block()}>
+			<div ref={mapContainer} className={element('container')} />
 		</div>
 	);
 };

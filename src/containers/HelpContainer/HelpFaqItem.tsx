@@ -1,0 +1,47 @@
+import {motion} from 'framer-motion';
+import {FC} from 'react';
+import {Link} from 'react-router-dom';
+
+import {Svg} from '@/components/Svg/Svg';
+import {useBem} from '@/hooks/useBem';
+
+import {FaqItem} from './help-data';
+
+type Props = {
+	item: FaqItem;
+	isOpen: boolean;
+	onToggle: () => void;
+};
+
+export const HelpFaqItem: FC<Props> = ({item, isOpen, onToggle}) => {
+	const [, element] = useBem('help-container');
+
+	return (
+		<motion.div
+			className={element('faq-item', {open: isOpen})}
+			initial={{opacity: 0, y: 10}}
+			whileInView={{opacity: 1, y: 0}}
+			transition={{duration: 0.3}}
+			viewport={{once: true}}
+		>
+			<button className={element('faq-question')} onClick={onToggle} type="button">
+				<span>{item.question}</span>
+				<Svg icon="arrow--down" className={element('faq-icon', {open: isOpen})} />
+			</button>
+
+			{isOpen && (
+				<div className={element('faq-answer')}>
+					{item.answer.map((paragraph, index) => (
+						<p key={index}>{paragraph}</p>
+					))}
+
+					{item.link && (
+						<Link to={item.link} className={element('faq-link')}>
+							{item.linkText}
+						</Link>
+					)}
+				</div>
+			)}
+		</motion.div>
+	);
+};

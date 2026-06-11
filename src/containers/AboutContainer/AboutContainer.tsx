@@ -12,6 +12,7 @@ import {getTotalCompleted} from '@/utils/api/get/getTotalCompleted';
 import {pluralize} from '@/utils/text/pluralize';
 
 import './about-container.scss';
+import {FeaturesShowcase} from '../FeaturesShowcase/FeaturesShowcase';
 
 export const AboutContainer: FC = () => {
 	const [block, element] = useBem('about-container');
@@ -38,34 +39,34 @@ export const AboutContainer: FC = () => {
 	const features = [
 		{
 			icon: 'rocket',
-			title: 'Ставьте цели',
+			title: 'Ставь цели',
 			description:
-				'Выбирайте из тысяч готовых целей или создавайте свои собственные. Организуйте их по категориям и отслеживайте прогресс.',
-		},
-		{
-			icon: 'level',
-			title: 'Отслеживайте прогресс',
-			description: 'Ведите дневник достижений, отмечайте выполнение целей и смотрите на свой рост в реальном времени.',
+				'Формулируй личные задачи и выбирай из готовых сценариев развития. Настраивай их под свои приоритеты и жизненные направления.',
 		},
 		{
 			icon: 'star',
-			title: 'Вдохновляйтесь',
-			description: 'Смотрите, какие цели ставят другие пользователи, делитесь своими достижениями и находите единомышленников.',
+			title: 'Вдохновляйся',
+			description: 'Изучай цели других людей, делись своими результатами и находи идеи для собственного развития.',
+		},
+		{
+			icon: 'level',
+			title: 'Следи за динамикой',
+			description: 'Дашборд прогресса: визуальные метрики, активность и ключевые показатели в одном месте.',
+		},
+		{
+			icon: 'regular-empty',
+			title: 'Настраивай привычки',
+			description: 'Регулярные задачи: формируй устойчивые привычки с помощью гибких расписаний.',
 		},
 		{
 			icon: 'map',
-			title: 'Путешествуйте',
-			description: 'Отмечайте места, где вы побывали, и создавайте карту своих приключений и открытий.',
-		},
-		{
-			icon: 'apps',
-			title: 'Организуйте',
-			description: 'Создавайте папки целей, составляйте списки желаний и упорядочивайте свои мечты по темам.',
+			title: 'Путешествуй',
+			description: 'Фиксируй посещённые места и собирай персональную карту впечатлений и открытий.',
 		},
 		{
 			icon: 'trophy',
-			title: 'Достигайте',
-			description: 'Получайте достижения за свои успехи, участвуйте в рейтингах и становитесь лидером по выполненным целям.',
+			title: 'Получай награды',
+			description: 'Достигай новых высот: участвуй в рейтингах и отслеживай личные вехи роста.',
 		},
 	];
 
@@ -135,6 +136,8 @@ export const AboutContainer: FC = () => {
 						))}
 					</div>
 				</section>
+
+				{isAuth && <FeaturesShowcase />}
 
 				<section className={element('section', {stats: true})}>
 					<Title tag="h2" className={element('section-title')}>

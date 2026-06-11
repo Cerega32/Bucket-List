@@ -9,6 +9,7 @@ export interface INotification {
 	message?: string | {[key: string]: Array<string>};
 	actionText?: string;
 	action?: () => void;
+	duration?: number;
 }
 
 class Store {
@@ -33,7 +34,7 @@ class Store {
 			if (nextNotification) {
 				this.visibleNotifications.push(nextNotification);
 
-				setTimeout(() => this.removeNotification(nextNotification.id), 7000);
+				setTimeout(() => this.removeNotification(nextNotification.id), nextNotification.duration ?? 7000);
 			}
 		}
 	}

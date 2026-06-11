@@ -1,4 +1,6 @@
 .compare-friend-modal {
+	$block: &;
+
 	&__header {
 		display: flex;
 		justify-content: center;
@@ -44,6 +46,7 @@
 		color: var(--color-text-primary);
 		font-size: 22px;
 		font-weight: var(--weight-bold);
+		background: var(--color-gray-4);
 	}
 
 	&__name {
@@ -52,11 +55,6 @@
 		font-weight: var(--weight-semi-bold);
 		text-align: center;
 		word-break: break-word;
-	}
-
-	&__realName {
-		color: var(--color-text-secondary);
-		font-size: 12px;
 	}
 
 	&__badge {
@@ -185,15 +183,16 @@
 	&__val {
 		display: flex;
 		justify-content: center;
+		width: 100%;
 	}
 
 	&__val-inner {
-		display: grid;
-		grid-template-columns: 14px 1fr;
+		display: inline-grid;
+		grid-template-columns: 14px auto;
 		align-items: center;
 		gap: 6px;
-		width: 100%;
-		max-width: 80px;
+		width: auto;
+		max-width: 100%;
 		color: var(--color-text-primary);
 		font-size: 14px;
 		font-weight: var(--weight-medium);
@@ -267,5 +266,60 @@
 
 	&__result-icon {
 		flex-shrink: 0;
+	}
+
+	&--showcase {
+		width: 100%;
+		min-width: 288px;
+
+		#{$block}__header {
+			width: 100%;
+			margin-bottom: 16px;
+
+			@include md {
+				flex-direction: column;
+				gap: 16px;
+				padding: 16px 0;
+			}
+		}
+
+		#{$block}__player {
+			flex: 1 1 88px;
+			min-width: 0;
+			max-width: 200px;
+
+			@include md {
+				top: 0;
+				max-width: none;
+			}
+		}
+
+		#{$block}__grid-head,
+		#{$block}__row {
+			grid-template-columns: minmax(96px, 1fr) minmax(56px, 0.3fr) minmax(56px, 0.3fr);
+		}
+
+		#{$block}__grid-head,
+		#{$block}__grid {
+			overflow: visible;
+			width: 100%;
+			font-size: 13px;
+		}
+
+		#{$block}__grid-inner {
+			width: 100%;
+			min-width: 0;
+		}
+
+		#{$block}__col-label {
+			min-width: 0;
+			word-break: break-word;
+		}
+
+		#{$block}__col-val {
+			margin-left: 0;
+			justify-self: center;
+			text-align: center;
+		}
 	}
 }

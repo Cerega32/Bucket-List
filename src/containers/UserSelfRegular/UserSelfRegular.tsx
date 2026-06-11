@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useMemo, useState} from 'react';
+import {FC, useCallback, useEffect, useMemo, useState} from 'react';
 import {useLocation} from 'react-router-dom';
 import {scroller} from 'react-scroll';
 
@@ -16,9 +16,11 @@ import Select, {OptionSelect} from '@/components/Select/Select';
 import {Switch} from '@/components/Switch/Switch';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {useTodayTabDisplayList} from '@/hooks/useTodayTabDisplayList';
 import {CategoriesStore} from '@/store/CategoriesStore';
 import {HeaderRegularGoalsStore} from '@/store/HeaderRegularGoalsStore';
 import {NotificationStore} from '@/store/NotificationStore';
+import {ICategoryTree, IGoal} from '@/typings/goal';
 import {IPaginationPage} from '@/typings/request';
 import {getRegularGoalStatistics, IRegularGoalStatistics, markRegularProgress, restartRegularGoal} from '@/utils/api/goals';
 import './user-self-regular.scss';
@@ -26,6 +28,30 @@ import './user-self-regular.scss';
 interface UserSelfRegularProps {
 	className?: string;
 }
+
+const extractMarkProgressStatistics = (
+	responseData: {data?: {statistics?: IRegularGoalStatistics}; statistics?: IRegularGoalStatistics} | undefined
+): IRegularGoalStatistics | undefined => responseData?.data?.statistics ?? responseData?.statistics;
+
+const buildCompletedSnapshot = (stats: IRegularGoalStatistics): IRegularGoalStatistics => {
+	const progress = stats.currentPeriodProgress;
+
+	if (progress?.type === 'daily') {
+		return {
+			...stats,
+			canCompleteToday: false,
+			currentPeriodProgress: {
+				...progress,
+				completedToday: true,
+			},
+		};
+	}
+
+	return {
+		...stats,
+		canCompleteToday: false,
+	};
+};
 
 export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) => {
 	const [block, element] = useBem('user-self-regular', className);
@@ -56,8 +82,10 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		},
 	];
 
-	const loadRegularGoalStatistics = async (page = 1) => {
-		setIsLoading(true);
+	const loadRegularGoalStatistics = async (page = 1, options?: {silent?: boolean}) => {
+		if (!options?.silent) {
+			setIsLoading(true);
+		}
 		try {
 			const response = await getRegularGoalStatistics({page, page_size: 100});
 			if (response.success && response.data) {
@@ -89,7 +117,9 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				message: 'Не удалось загрузить регулярные цели',
 			});
 		} finally {
-			setIsLoading(false);
+			if (!options?.silent) {
+				setIsLoading(false);
+			}
 		}
 	};
 
@@ -139,6 +169,67 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 
 		return result;
 	};
+
+	const isStatsCompletedToday = (stats: IRegularGoalStatistics): boolean => {
+		const progress = stats.currentPeriodProgress;
+		if (progress?.type === 'daily') {
+			return !!progress.completedToday;
+		}
+		return !stats.isInterrupted && !stats.canCompleteToday;
+	};
+
+	const getTodayRelevantGoals = () => {
+		return filteredStatistics().filter((stats) => {
+			if (!stats) return false;
+			return stats.isInterrupted || stats.canCompleteToday || isStatsCompletedToday(stats);
+		});
+	};
+
+	const buildPendingTodayGoals = useCallback(() => {
+		return getTodayRelevantGoals()
+			.filter((stats) => stats.isInterrupted || !isStatsCompletedToday(stats))
+			.sort((a, b) => {
+				if (a.isInterrupted !== b.isInterrupted) return a.isInterrupted ? 1 : -1;
+				return 0;
+			});
+	}, [statisticsData, search, filterValues, activeSort]);
+
+	const mergeStatisticsUpdate = useCallback((updated: IRegularGoalStatistics) => {
+		setStatisticsData((prev) => {
+			const index = prev.findIndex((item) => item.regularGoal === updated.regularGoal);
+			if (index === -1) {
+				return [...prev, updated];
+			}
+
+			const next = [...prev];
+			next[index] = updated;
+			return next;
+		});
+	}, []);
+
+	const {
+		displayItems: todayDisplayGoals,
+		todayTabCount,
+		applyMarkedItem,
+		applyUnmarkedItem,
+		revertMarkedItem,
+		markAllItems,
+		unmarkAllItems,
+	} = useTodayTabDisplayList({
+		activeTab,
+		isSourceReady: !isLoading && statisticsData.length > 0,
+		buildPendingItems: buildPendingTodayGoals,
+		getItemId: (stats) => stats.regularGoal,
+	});
+
+	useEffect(() => {
+		if (activeTab !== 'today') {
+			return;
+		}
+
+		setSearch('');
+		setFilterValues({categories: [], complexity: [], hundredGoals: []});
+	}, [activeTab]);
 
 	const handleSortSelect = async (active: number): Promise<void> => {
 		setActiveSort(active);
@@ -190,9 +281,11 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	}, [categoryFilters]);
 
 	const handleProgressUpdate = async (stats: IRegularGoalStatistics) => {
+		let newCompletedState = false;
+
 		try {
 			// Определяем текущее состояние выполнения по статистике
-			const progress = stats.currentPeriodProgress as any;
+			const progress = stats.currentPeriodProgress;
 			let currentlyCompleted = false;
 
 			if (progress?.type === 'daily') {
@@ -202,7 +295,13 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				currentlyCompleted = !stats.canCompleteToday || false;
 			}
 
-			const newCompletedState = !currentlyCompleted;
+			newCompletedState = !currentlyCompleted;
+
+			if (newCompletedState) {
+				applyMarkedItem(stats, buildCompletedSnapshot(stats));
+			} else {
+				applyUnmarkedItem(stats);
+			}
 
 			const response = await markRegularProgress({
 				regular_goal_id: stats.regularGoal,
@@ -210,19 +309,38 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				notes: '',
 			});
 
-			if (response.success && response.data) {
-				// Полностью перезагружаем данные вместо частичного обновления
-				// чтобы избежать проблем с неполными объектами
-				await loadRegularGoalStatistics(currentPage);
+			if (response.success) {
+				const updatedStats = extractMarkProgressStatistics(response.data);
+				const snapshot = updatedStats ?? (newCompletedState ? buildCompletedSnapshot(stats) : stats);
+
+				if (updatedStats) {
+					mergeStatisticsUpdate(updatedStats);
+				} else if (newCompletedState) {
+					mergeStatisticsUpdate(buildCompletedSnapshot(stats));
+				}
+
+				if (newCompletedState) {
+					applyMarkedItem(stats, snapshot);
+				} else {
+					applyUnmarkedItem(snapshot);
+				}
+
+				loadRegularGoalStatistics(currentPage, {silent: true}).catch(() => {});
 				HeaderRegularGoalsStore.loadTodayCount();
 
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успешно!',
-					message: 'Прогресс отмечен',
+					message: newCompletedState ? 'Цель отмечена как выполненная' : 'Отметка о выполнении снята',
 				});
+			} else if (newCompletedState) {
+				revertMarkedItem(stats);
 			}
 		} catch (error) {
+			if (newCompletedState) {
+				revertMarkedItem(stats);
+			}
+
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -253,40 +371,11 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		}
 	};
 
-	const isStatsCompletedToday = (stats: IRegularGoalStatistics): boolean => {
-		const progress = stats.currentPeriodProgress;
-		if (progress?.type === 'daily') {
-			return !!progress.completedToday;
-		}
-		// Для weekly/custom: если нельзя выполнить сегодня и цель не прервана — значит уже выполнено
-		return !stats.isInterrupted && !stats.canCompleteToday;
-	};
-
-	const getTodayRelevantGoals = () => {
-		// Все цели, которые относятся к "сегодня": можно выполнить, уже выполнены или прерваны
-		return filteredStatistics().filter((stats) => {
-			if (!stats) return false;
-			const completedToday = stats.currentPeriodProgress?.completedToday || false;
-			return stats.isInterrupted || stats.canCompleteToday || completedToday;
-		});
-	};
-
-	const getTodayGoals = () => {
-		// Отображаем только невыполненные и прерванные — выполненные скрываем
-		return getTodayRelevantGoals()
-			.filter((stats) => stats.isInterrupted || !isStatsCompletedToday(stats))
-			.sort((a, b) => {
-				if (a.isInterrupted !== b.isInterrupted) return a.isInterrupted ? 1 : -1;
-				return 0;
-			});
-	};
-
 	const getAllGoals = () => {
 		return filteredStatistics();
 	};
 
 	const todayRelevantGoals = getTodayRelevantGoals();
-	const todayGoals = getTodayGoals();
 	const allGoals = getAllGoals();
 
 	const completableTodayGoals = todayRelevantGoals.filter((s) => !s.isInterrupted);
@@ -297,7 +386,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 			url: '#today',
 			name: 'На сегодня',
 			page: 'today',
-			count: todayGoals.length,
+			count: todayTabCount,
 		},
 		{
 			url: '#all',
@@ -308,7 +397,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	];
 
 	// Функция для поиска категории по имени в дереве категорий
-	const findCategoryByName = (name: string, categories: any[]): any => {
+	const findCategoryByName = (name: string, categories: ICategoryTree[]): ICategoryTree | null => {
 		const found = categories.find((category) => category.name === name);
 		if (found) {
 			return found;
@@ -323,7 +412,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	};
 
 	// Конвертируем статистику в формат IGoal для совместимости с RegularGoalCard
-	const convertStatsToGoal = (stats: IRegularGoalStatistics): any => {
+	const convertStatsToGoal = (stats: IRegularGoalStatistics): IGoal => {
 		const categoryName = stats.regularGoalData.goalCategory;
 		const foundCategory = findCategoryByName(categoryName, CategoriesStore.categoriesTree);
 		const categoryNameEn = foundCategory?.nameEn || categoryName;
@@ -339,6 +428,15 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				nameEn: categoryNameEn,
 				parentCategory: foundCategory?.parentCategory || null,
 			},
+			subcategory: {
+				id: foundCategory?.id || 0,
+				name: categoryName,
+				nameEn: categoryNameEn,
+				parentCategory: foundCategory?.parentCategory || null,
+			},
+			lists: [],
+			listsCount: 0,
+			hasMyComment: false,
 			complexity: 'medium' as const,
 			image: stats.regularGoalData.goalImage,
 			code: stats.regularGoalData.goalCode,
@@ -357,10 +455,6 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 			addedFromList: [],
 			timer: null,
 			userVisitedLocation: false,
-
-			progressPercentage: 0,
-			isCompletedByUser: false,
-			isDailyGoal: false,
 			userFolders: [],
 			regularConfig: {
 				id: stats.regularGoal,
@@ -372,6 +466,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				endDate: stats.regularGoalData.endDate,
 				allowSkipDays: stats.regularGoalData.allowSkipDays,
 				resetOnSkip: stats.regularGoalData.resetOnSkip,
+				allowCustomSettings: false,
 				isActive: stats.regularGoalData.isActive,
 				createdAt: stats.regularGoalData.createdAt,
 				statistics: stats,
@@ -419,7 +514,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		const targetCompleted = !areAllTodayCompleted;
 
 		try {
-			await Promise.all(
+			const responses = await Promise.all(
 				completableTodayGoals.map((stats) =>
 					markRegularProgress({
 						regular_goal_id: stats.regularGoal,
@@ -429,7 +524,29 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				)
 			);
 
-			await loadRegularGoalStatistics(currentPage);
+			if (targetCompleted) {
+				markAllItems(completableTodayGoals, buildCompletedSnapshot);
+			} else {
+				unmarkAllItems(completableTodayGoals);
+			}
+
+			responses.forEach((response, index) => {
+				const stats = completableTodayGoals[index];
+				const updatedStats = extractMarkProgressStatistics(response.data);
+				const snapshot = updatedStats ?? (targetCompleted ? buildCompletedSnapshot(stats) : stats);
+
+				if (updatedStats) {
+					mergeStatisticsUpdate(updatedStats);
+				}
+
+				if (targetCompleted) {
+					applyMarkedItem(stats, snapshot);
+				} else {
+					applyUnmarkedItem(snapshot);
+				}
+			});
+
+			loadRegularGoalStatistics(currentPage, {silent: true}).catch(() => {});
 			HeaderRegularGoalsStore.loadTodayCount();
 
 			NotificationStore.addNotification({
@@ -530,7 +647,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 						<div id="user-self-regular-goals">
 							{activeTab === 'today'
 								? renderGoalsList(
-										todayGoals,
+										todayDisplayGoals,
 										areAllTodayCompleted ? 'Все цели на сегодня выполнены!' : 'На сегодня нет регулярных целей',
 										areAllTodayCompleted
 											? 'Отличная работа! Возвращайтесь завтра, чтобы продолжить серию.'

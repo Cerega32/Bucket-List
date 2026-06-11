@@ -67,15 +67,6 @@
 		font-weight: var(--weight-medium);
 		border-top: 1px solid var(--color-border);
 	}
-
-	// Если потребуется кастомная иконка маркера:
-	&__marker-icon {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 32px;
-		height: 32px;
-	}
 }
 
 .ymaps-2-1-79-balloon {

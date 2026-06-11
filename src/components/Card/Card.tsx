@@ -27,6 +27,7 @@ interface BaseCardProps {
 	disableMark?: boolean;
 	allowAddWithoutAuth?: boolean;
 	skipDeleteConfirm?: boolean;
+	hideActions?: boolean;
 }
 
 interface CardListProps extends BaseCardProps {
@@ -48,7 +49,8 @@ interface CardGoalProps extends BaseCardProps {
 type CardProps = CardListProps | CardGoalProps;
 
 export const Card: FC<CardProps> = (props) => {
-	const {className, horizontal, disableNavigation, disableMark, allowAddWithoutAuth, skipDeleteConfirm, ...restProps} = props;
+	const {className, horizontal, disableNavigation, disableMark, allowAddWithoutAuth, skipDeleteConfirm, hideActions, ...restProps} =
+		props;
 
 	const [block, element] = useBem('card', className);
 	const {isScreenXs} = useScreenSize();
@@ -239,10 +241,11 @@ export const Card: FC<CardProps> = (props) => {
 								<Progress done={goal.userCompletedGoals} all={goal.goalsCount} />
 							)}
 							{(() => {
-								const showAddButton = !goal.addedByUser;
-								const showDeleteButton = goal.addedByUser && !(isList && goal.code === '100-goals');
+								const showAddButton = !hideActions && !goal.addedByUser;
+								const showDeleteButton = !hideActions && goal.addedByUser && !(isList && goal.code === '100-goals');
 								const isRegularGoal = !isList && 'regularConfig' in goal && !!goal.regularConfig;
 								const showMarkButton =
+									!hideActions &&
 									!disableMark &&
 									!isRegularGoal &&
 									(goal.addedByUser || goal.completedByUser) &&
