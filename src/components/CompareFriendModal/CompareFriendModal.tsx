@@ -144,11 +144,15 @@ function getWinner(uv: number, fv: number, invert?: boolean): {userWin: boolean;
 const ICON_SIZE = '20px';
 
 interface CompareFriendModalProps {
+	className?: string;
 	data: CompareFriendData;
+	showcase?: boolean;
+	hideResult?: boolean;
 }
 
-export const CompareFriendModal: FC<CompareFriendModalProps> = ({data}) => {
-	const [block, element] = useBem('compare-friend-modal');
+export const CompareFriendModal: FC<CompareFriendModalProps> = (props) => {
+	const {className, data, showcase, hideResult} = props;
+	const [block, element] = useBem('compare-friend-modal', className);
 	const {user, friend, achievements} = data;
 
 	const headRef = useRef<HTMLDivElement>(null);
@@ -168,14 +172,14 @@ export const CompareFriendModal: FC<CompareFriendModalProps> = ({data}) => {
 	const userAchCount = visibleAchievements.filter((a) => a.userHas).length;
 	const friendAchCount = visibleAchievements.filter((a) => a.friendHas).length;
 
-	const sections: MetricSection[] = [
+	const allSections: MetricSection[] = [
 		{
 			icon: 'bullseye',
 			iconColor: 'var(--color-sentiment-negative)',
 			label: 'Выполнено целей',
 			userVal: uAct.goalsCompleted,
 			friendVal: fAct.goalsCompleted,
-			rows: categoryRows,
+			rows: showcase ? undefined : categoryRows,
 		},
 		{icon: 'apps', label: 'Выполнено списков', userVal: uAct.listsCompleted, friendVal: fAct.listsCompleted},
 		{
@@ -211,11 +215,7 @@ export const CompareFriendModal: FC<CompareFriendModalProps> = ({data}) => {
 			label: 'Выполнено из 100 целей',
 			userVal: uAct.hundredGoals.easy + uAct.hundredGoals.medium + uAct.hundredGoals.hard,
 			friendVal: fAct.hundredGoals.easy + fAct.hundredGoals.medium + fAct.hundredGoals.hard,
-			rows: [
-				{label: 'Лёгкие', userVal: uAct.hundredGoals.easy, friendVal: fAct.hundredGoals.easy},
-				{label: 'Средние', userVal: uAct.hundredGoals.medium, friendVal: fAct.hundredGoals.medium},
-				{label: 'Сложные', userVal: uAct.hundredGoals.hard, friendVal: fAct.hundredGoals.hard},
-			],
+			rows: [{label: 'Лёгкие', userVal: uAct.hundredGoals.easy, friendVal: fAct.hundredGoals.easy}],
 		},
 		{
 			icon: 'signal',
@@ -226,12 +226,15 @@ export const CompareFriendModal: FC<CompareFriendModalProps> = ({data}) => {
 		},
 	];
 
+	const showcaseLabels = new Set(['Выполнено целей', 'Выполнено из 100 целей', 'Активность на сайте (дней)']);
+	const sections = showcase ? allSections.filter((s) => showcaseLabels.has(s.label)) : allSections;
+
 	// Подсчёт побед
 	const {userWins: sectionUserWins, friendWins: sectionFriendWins} = sections.reduce(
 		(acc, s) => {
 			const uNum = typeof s.userVal === 'number' ? s.userVal : 0;
 			const fNum = typeof s.friendVal === 'number' ? s.friendVal : 0;
-			if (s.label === 'Активность на сайте') {
+			if (s.label === 'Активность на сайте (дней)') {
 				if (uAct.siteActivity.activeDays > fAct.siteActivity.activeDays) acc.userWins += 1;
 				else if (fAct.siteActivity.activeDays > uAct.siteActivity.activeDays) acc.friendWins += 1;
 			} else {
@@ -264,7 +267,7 @@ export const CompareFriendModal: FC<CompareFriendModalProps> = ({data}) => {
 	);
 
 	return (
-		<div className={block()}>
+		<div className={block({showcase})}>
 			<div className={element('header')}>
 				<div className={element('player')}>
 					<div className={element('avatar-wrap')}>
@@ -304,7 +307,7 @@ export const CompareFriendModal: FC<CompareFriendModalProps> = ({data}) => {
 						const uNum = typeof s.userVal === 'number' ? s.userVal : 0;
 						const fNum = typeof s.friendVal === 'number' ? s.friendVal : 0;
 						let mainWin = {userWin: false, friendWin: false};
-						if (s.label === 'Активность на сайте') {
+						if (s.label === 'Активность на сайте (дней)') {
 							mainWin = getWinner(uAct.siteActivity.activeDays, fAct.siteActivity.activeDays);
 						} else {
 							mainWin = getWinner(uNum, fNum, s.invertWin);
@@ -381,24 +384,25 @@ export const CompareFriendModal: FC<CompareFriendModalProps> = ({data}) => {
 				</div>
 			</div>
 
-			{/* Итог */}
-			<div className={element('result')}>
-				{userWins > friendWins && (
-					<div className={element('result-badge', {you: true})}>
-						<Svg icon="trophy" width="24px" height="24px" className={element('result-icon')} />
-						Вы впереди по {userWins} из {totalMetrics} показателей
-					</div>
-				)}
-				{friendWins > userWins && (
-					<div className={element('result-badge', {friend: true})}>
-						<Svg icon="trophy" width="24px" height="24px" className={element('result-icon')} />
-						Друг впереди по {friendWins} из {totalMetrics} показателей
-					</div>
-				)}
-				{userWins === friendWins && (
-					<div className={element('result-badge', {equal: true})}>Ничья — {totalMetrics} показателей</div>
-				)}
-			</div>
+			{!hideResult && (
+				<div className={element('result')}>
+					{userWins > friendWins && (
+						<div className={element('result-badge', {you: true})}>
+							<Svg icon="trophy" width="24px" height="24px" className={element('result-icon')} />
+							Вы впереди по {userWins} из {totalMetrics} показателей
+						</div>
+					)}
+					{friendWins > userWins && (
+						<div className={element('result-badge', {friend: true})}>
+							<Svg icon="trophy" width="24px" height="24px" className={element('result-icon')} />
+							Друг впереди по {friendWins} из {totalMetrics} показателей
+						</div>
+					)}
+					{userWins === friendWins && (
+						<div className={element('result-badge', {equal: true})}>Ничья — {totalMetrics} показателей</div>
+					)}
+				</div>
+			)}
 		</div>
 	);
 };

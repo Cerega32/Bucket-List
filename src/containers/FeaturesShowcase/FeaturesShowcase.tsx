@@ -1,201 +1,96 @@
-import {motion, AnimatePresence} from 'framer-motion';
-import {FC, useMemo, useState} from 'react';
+import {AnimatePresence, motion} from 'framer-motion';
+import {FC, useState} from 'react';
 
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 
-import './features-showcase.scss';
+import {FeaturePreviews} from './FeaturePreviews';
+import {ROADMAP_SCENARIO, SHOWCASE_SCENARIOS, ShowcaseScenarioId} from './features-showcase-data';
 
-interface Feature {
-	id: string;
-	title: string;
-	description: string;
-	icon: string;
-	preview: React.ReactNode;
-}
+import './features-showcase.scss';
 
 interface FeaturesShowcaseProps {
 	className?: string;
 }
 
-export const FeaturesShowcase: FC<FeaturesShowcaseProps> = ({className}) => {
+export const FeaturesShowcase: FC<FeaturesShowcaseProps> = (props) => {
+	const {className} = props;
 	const [block, element] = useBem('features-showcase', className);
-	const [active, setActive] = useState('goals');
+	const [active, setActive] = useState<ShowcaseScenarioId>('organize');
 
-	const features: Feature[] = useMemo(
-		() => [
-			{
-				id: 'goals',
-				title: '100 целей',
-				description: 'Собери систему целей и отслеживай реальный прогресс как личную стратегию развития.',
-				icon: 'star',
-				preview: (
-					<div className={element('preview-card')}>
-						<div>🏁 Прогресс целей</div>
-						<div>• Бег — 70%</div>
-						<div>• Книги — 40%</div>
-						<div>• Путешествия — 20%</div>
-					</div>
-				),
-			},
-			{
-				id: 'travel',
-				title: 'Путешествия',
-				description: 'Фиксируй страны и создавай карту своих открытий.',
-				icon: 'map',
-				preview: (
-					<div className={element('preview-card')}>
-						<div>🌍 Карта стран</div>
-						<div>🇫🇷 🇮🇹 🇯🇵 🇹🇷</div>
-						<div>Visited: 4</div>
-					</div>
-				),
-			},
-			{
-				id: 'books',
-				title: 'Активности',
-				description: 'Отслеживай любые сферы жизни: чтение, обучение, проекты и личные достижения.',
-				icon: 'apps',
-				preview: (
-					<div className={element('preview-card')}>
-						<div>📦 Мои активности</div>
-						<div>Atomic Habits — книга ✔</div>
-						<div>Deep Work — обучение 60%</div>
-						<div>Workout — завершено</div>
-						<div>Side project — в работе</div>
-					</div>
-				),
-			},
-			{
-				id: 'friends',
-				title: 'Друзья',
-				description: 'Сравнивай прогресс и находи мотивацию в других.',
-				icon: 'people',
-				preview: (
-					<div className={element('preview-card')}>
-						<div>👥 Активность</div>
-						<div>Alex — 32</div>
-						<div>Maria — 28</div>
-						<div>You — 34 🔥</div>
-					</div>
-				),
-			},
-			{
-				id: 'progress',
-				title: 'Прогресс',
-				description: 'Вся активность превращается в понятную систему роста.',
-				icon: 'trophy',
-				preview: (
-					<div className={element('preview-card')}>
-						<div>📊 Уровень 7 → 8</div>
+	const isRoadmap = active === 'roadmap';
+	const scenario = isRoadmap ? ROADMAP_SCENARIO : SHOWCASE_SCENARIOS.find((s) => s.id === active);
 
-						<div className={element('bar')}>
-							<div className={element('bar-fill')} />
-						</div>
-
-						<div>78% завершено</div>
-					</div>
-				),
-			},
-			{
-				id: 'regular',
-				title: 'Привычки',
-				description: 'Формируй стабильные действия через регулярные задачи.',
-				icon: 'level',
-				preview: (
-					<div className={element('preview-card')}>
-						<div>🔥 Streak: 12 дней</div>
-					</div>
-				),
-			},
-		],
-		[element]
-	);
-
-	const activeFeature = features.find((f) => f.id === active);
-
-	const comingSoon = [
-		{
-			icon: 'trophy',
-			text: 'Соревнования с друзьями',
-		},
-		{
-			icon: 'map',
-			text: 'Расширенная карта стран',
-		},
-		{
-			icon: 'star',
-			text: 'Новые игровые механики',
-		},
-	];
+	const toggleRoadmap = () => {
+		setActive((current) => (current === 'roadmap' ? 'organize' : 'roadmap'));
+	};
 
 	return (
 		<section className={block()}>
-			<div className={element('header')}>
+			<header className={element('header')}>
 				<Title tag="h2" className={element('title')}>
-					Используй систему как хочешь
+					Зачем тебе это нужно?
 				</Title>
-
 				<p className={element('subtitle')}>
-					Цели, привычки, путешествия, книги и социальная мотивация — всё в одной системе развития.
+					Узнаёшь себя в ситуации — видишь, как платформа решает её на живом интерфейсе. Без абстракций: конкретные цели, не
+					«что-то когда-нибудь».
 				</p>
-			</div>
+			</header>
 
 			<div className={element('layout')}>
-				<div className={element('list')}>
-					{features.map((feature) => (
+				<nav className={element('list')} aria-label="Сценарии использования">
+					{SHOWCASE_SCENARIOS.map((item) => (
 						<motion.button
-							key={feature.id}
-							className={element('item', {
-								active: active === feature.id,
-							})}
-							onClick={() => setActive(feature.id)}
-							whileHover={{x: 6}}
+							key={item.id}
+							type="button"
+							className={element('item', {active: active === item.id})}
+							onClick={() => setActive(item.id)}
 							whileTap={{scale: 0.98}}
 							transition={{duration: 0.2}}
 						>
-							<Svg icon={feature.icon} width="20px" height="20px" />
-							<span>{feature.title}</span>
+							<span className={element('item-icon', {[item.id]: true})}>
+								<Svg icon={item.icon} width="20px" height="20px" />
+							</span>
+							<span className={element('item-label')}>{item.navLabel}</span>
 						</motion.button>
 					))}
 
-					<div className={element('coming')}>
-						<div className={element('coming-title')}>Дальше больше возможностей</div>
+					<button
+						type="button"
+						className={element('item', {active: isRoadmap, roadmap: true})}
+						onClick={toggleRoadmap}
+						aria-expanded={isRoadmap}
+					>
+						<span className={element('item-icon')}>
+							<Svg icon="rocket" width="20px" height="20px" />
+						</span>
+						<span className={element('item-label')}>
+							<span>Скоро в платформе</span>
+							<span className={element('item-hint')}>6 в разработке</span>
+						</span>
+						<Svg icon="arrow--down" className={element('item-arrow', {open: isRoadmap})} width="16px" height="16px" />
+					</button>
+				</nav>
 
-						<div className={element('coming-grid')}>
-							{comingSoon.map((item) => (
-								<div key={item.text} className={element('coming-card')}>
-									<div className={element('coming-icon')}>
-										<Svg icon={item.icon} width="16px" height="16px" />
-									</div>
-									<div className={element('coming-text')}>{item.text}</div>
-								</div>
-							))}
-						</div>
-
-						<div className={element('coming-hint')}>И ещё больше функций в разработке…</div>
-					</div>
-				</div>
-
-				<div className={element('preview')}>
+				<section className={element('preview')}>
 					<AnimatePresence mode="wait">
-						<motion.div
-							key={activeFeature?.id}
+						<motion.article
+							key={active}
 							className={element('preview-inner')}
-							initial={{opacity: 0, y: 20, scale: 0.98}}
-							animate={{opacity: 1, y: 0, scale: 1}}
-							exit={{opacity: 0, y: -10}}
-							transition={{duration: 0.35, ease: 'easeOut'}}
+							initial={{opacity: 0, y: 12}}
+							animate={{opacity: 1, y: 0}}
+							exit={{opacity: 0, y: -8}}
+							transition={{duration: 0.3, ease: 'easeOut'}}
 						>
-							<div className={element('preview-title')}>{activeFeature?.title}</div>
-
-							<p className={element('preview-desc')}>{activeFeature?.description}</p>
-
-							<div className={element('preview-box')}>{activeFeature?.preview}</div>
-						</motion.div>
+							{scenario?.problem && <p className={element('problem')}>{scenario.problem}</p>}
+							{scenario?.solution && <p className={element('solution')}>{scenario.solution}</p>}
+							<div className={element('preview-box', {demo: true, [active]: true})}>
+								<FeaturePreviews scenarioId={active} />
+							</div>
+						</motion.article>
 					</AnimatePresence>
-				</div>
+				</section>
 			</div>
 		</section>
 	);

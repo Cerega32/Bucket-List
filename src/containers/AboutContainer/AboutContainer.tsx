@@ -12,6 +12,7 @@ import {getTotalCompleted} from '@/utils/api/get/getTotalCompleted';
 import {pluralize} from '@/utils/text/pluralize';
 
 import './about-container.scss';
+import {FeaturesShowcase} from '../FeaturesShowcase/FeaturesShowcase';
 
 export const AboutContainer: FC = () => {
 	const [block, element] = useBem('about-container');
@@ -43,32 +44,29 @@ export const AboutContainer: FC = () => {
 				'Формулируй личные задачи и выбирай из готовых сценариев развития. Настраивай их под свои приоритеты и жизненные направления.',
 		},
 		{
+			icon: 'star',
+			title: 'Вдохновляйся',
+			description: 'Изучай цели других людей, делись своими результатами и находи идеи для собственного развития.',
+		},
+		{
+			icon: 'level',
+			title: 'Следи за динамикой',
+			description: 'Дашборд прогресса: визуальные метрики, активность и ключевые показатели в одном месте.',
+		},
+		{
+			icon: 'regular-empty',
+			title: 'Настраивай привычки',
+			description: 'Регулярные задачи: формируй устойчивые привычки с помощью гибких расписаний.',
+		},
+		{
 			icon: 'map',
 			title: 'Путешествуй',
 			description: 'Фиксируй посещённые места и собирай персональную карту впечатлений и открытий.',
 		},
 		{
-			icon: 'apps',
-			title: 'Регулярные цели',
-			description: 'Настраивай повторяющиеся задачи и формируй устойчивые привычки с помощью гибких расписаний и напоминаний.',
-		},
-		{
-			icon: 'star',
-			title: 'Вдохновляйся',
-			description: 'Изучай цели других людей, делись своими результатами и находи идеи для собственного развития.',
-		},
-
-		{
-			icon: 'level',
-			title: 'Дашборд прогресса',
-			description:
-				'Следи за динамикой выполнения в удобной панели: визуальные метрики, активность и ключевые показатели в одном месте.',
-		},
-
-		{
 			icon: 'trophy',
-			title: 'Достижения',
-			description: 'Получай награды за выполненные задачи, участвуй в рейтингах и отслеживай личные вехи роста.',
+			title: 'Получай награды',
+			description: 'Достигай новых высот: участвуй в рейтингах и отслеживай личные вехи роста.',
 		},
 	];
 
@@ -138,6 +136,8 @@ export const AboutContainer: FC = () => {
 						))}
 					</div>
 				</section>
+
+				{isAuth && <FeaturesShowcase />}
 
 				<section className={element('section', {stats: true})}>
 					<Title tag="h2" className={element('section-title')}>

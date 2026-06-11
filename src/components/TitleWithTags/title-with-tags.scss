@@ -51,14 +51,10 @@
 
 	&--list {
 		#{$block}__title {
-			display: -webkit-box;
-			overflow: hidden;
+			display: block;
+			overflow: visible;
 			white-space: normal;
-			text-overflow: ellipsis;
 			overflow-wrap: break-word;
-			-webkit-box-orient: vertical;
-			-webkit-line-clamp: 3;
-			line-clamp: 3;
 		}
 
 		#{$block}__copy-icon {

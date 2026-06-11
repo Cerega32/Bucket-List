@@ -1,30 +1,10 @@
 .main-info {
-	$block: &;
-
 	display: grid;
-	grid-template-columns: 1fr 1fr;
-	grid-template-rows: repeat(3, 1fr);
+	grid-template-columns: repeat(3, 1fr);
 	gap: 24px;
-
-	@include xl {
-		grid-template-columns: repeat(5, 1fr);
-	}
 
 	@include lg {
 		grid-template-columns: 1fr;
-		grid-template-rows: repeat(5, 1fr);
-	}
-
-	@include md {
-		grid-template-rows: 200px 1fr 1fr 1fr;
-	}
-
-	@include sm {
-		grid-template-rows: 160px 1fr 1fr 1fr;
-	}
-
-	@include xs {
-		grid-template-rows: 50px 1fr 1fr 1fr;
 	}
 
 	&__title {
@@ -32,8 +12,6 @@
 	}
 
 	&__item {
-		position: relative;
-		overflow: hidden;
 		transition: all 0.3s ease;
 
 		&:hover {
@@ -41,72 +19,6 @@
 		}
 
 		@include block-radius(24px, var(--color-gray-11));
-
-		@include xl {
-			grid-column: span 2;
-		}
-
-		@include lg {
-			grid-column: span 1;
-		}
-
-		&:first-child {
-			grid-row: 1 / 4;
-
-			#{$block}__head {
-				display: flex;
-				flex-direction: column;
-				gap: 12px;
-				margin-bottom: 16px;
-
-				#{$block}__head-row {
-					display: flex;
-					align-items: center;
-					justify-content: space-between;
-					gap: 16px;
-				}
-
-				#{$block}__icon {
-					margin-bottom: 0;
-				}
-
-				#{$block}__title {
-					margin-bottom: 0;
-				}
-			}
-
-			@include xl {
-				grid-column: span 3;
-			}
-
-			@include lg {
-				grid-column: span 1;
-				grid-row: span 3;
-			}
-
-			@include xs {
-				padding: 12px;
-			}
-		}
-	}
-
-	&__item-half {
-		overflow: hidden;
-		grid-row: 4 / 4;
-
-		&:hover {
-			transform: translateY(-4px);
-		}
-
-		@include block-radius(24px, var(--color-gray-11));
-
-		@include xl {
-			grid-column: span 3;
-		}
-
-		@include lg {
-			grid-column: span 1;
-		}
 	}
 
 	&__icon {
@@ -116,93 +28,6 @@
 			svg * {
 				fill: var(--color-logo);
 			}
-		}
-
-		&--level {
-			svg * {
-				fill: var(--color-green-1);
-			}
-		}
-	}
-
-	&__example {
-		@include block-radius;
-
-		position: absolute;
-		z-index: 1;
-		right: 96px;
-		bottom: 43%;
-		width: 336px;
-		box-shadow: 0 0 20px -2px rgb(var(--color-text-primary-rgb) / 8%);
-		color: var(--color-text);
-
-		@include md {
-			right: 20px;
-			bottom: 250px;
-		}
-
-		@include sm {
-			right: 20px;
-			bottom: 210px;
-		}
-
-		@include xs {
-			right: 0;
-			bottom: 140px;
-			width: auto;
-		}
-	}
-
-	&__info-title {
-		margin-bottom: 4px;
-		color: var(--color-text-secondary);
-		font-size: 14px;
-		font-weight: var(--weight-regular);
-		line-height: var(--line-height-14);
-	}
-
-	&__info-count {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-size: 22px;
-		font-weight: var(--weight-semi-bold);
-		line-height: var(--line-height-22);
-	}
-
-	&__achievement {
-		position: absolute;
-		z-index: 1;
-		right: 30px;
-		bottom: 20%;
-		width: 336px;
-		box-shadow: 0 0 20px -2px rgb(var(--color-text-primary-rgb) / 8%);
-
-		@include md {
-			display: none;
-		}
-
-		@include xs {
-			display: flex;
-			width: auto;
-			bottom: 4%;
-			right: 20px;
-		}
-	}
-
-	&__info-100-goals {
-		position: absolute;
-		bottom: -15px;
-		width: 336px;
-		box-shadow: 0 0 20px -2px rgb(var(--color-text-primary-rgb) / 8%);
-
-		@include sm {
-			width: 280px;
-			bottom: -50px;
-		}
-
-		@include xs {
-			display: none;
 		}
 	}
 }
