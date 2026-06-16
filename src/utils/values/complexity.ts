@@ -18,6 +18,12 @@ export const getComplexityCategoryPlural = {
 	easy: 'Ты разогрелся! Первая вершина покорена',
 };
 
+export const getComplexityCategoryCompletedHint = {
+	hard: 'Все цели тяжёлой категории выполнены',
+	medium: 'Все цели средней категории выполнены',
+	easy: 'Все цели лёгкой категории выполнены',
+};
+
 export const selectComplexity: Array<{name: string; value: IComplexity}> = [
 	{name: 'Легко', value: 'easy'},
 	{name: 'Средне', value: 'medium'},

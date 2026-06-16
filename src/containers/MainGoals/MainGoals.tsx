@@ -1,6 +1,7 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
+import {Banner} from '@/components/Banner/Banner';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
 import {MainCards} from '@/components/MainCards/MainCards';
@@ -14,6 +15,14 @@ import {markGoal} from '@/utils/api/post/markGoal';
 
 import {MainGoalsSkeleton} from './MainGoalsSkeleton';
 import './main-goals.scss';
+
+const ALL_GOALS_COMPLETED_MESSAGE =
+	'Поздравляем — ты выполнил все 100 целей. Это редкий подвиг, и впереди ещё целый мир новых открытий: ' +
+	'создавай свои цели, списки, а также пользуйся готовым каталогом. Самое главное — продолжай путь вместе с нами. ' +
+	'Скоро ты получишь своё достижение!';
+const ALL_GOALS_COMPLETED_GIF =
+	'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHYxaXJnZWF2NXB2ODVpeXF2MGFnMHBvaXU4czBoYTJtZHpwOXQzeCZlcD12MV9naWZzX3NlYXJjaCZjdD1n' +
+	'/g9582DNuQppxC/giphy.gif';
 
 const MainGoalsComponent: FC<IPage> = () => {
 	const [block, element] = useBem('main-goals');
@@ -85,6 +94,11 @@ const MainGoalsComponent: FC<IPage> = () => {
 		}
 	};
 
+	const isCategoryCompleted = (key: keyof IMainGoals) => {
+		const section = mainGoals[key];
+		return section.data.length > 0 && section.countCompleted === section.data.length;
+	};
+
 	if (isLoading) {
 		return (
 			<main className={block()}>
@@ -119,17 +133,16 @@ const MainGoalsComponent: FC<IPage> = () => {
 			</div>
 			<div className={element('filter')}>
 				{allGoalsCompleted && (
-					<div className={element('all-completed-container')}>
-						<p className={element('all-completed')}>
-							Поздравляем! Ты достиг всего, что задумал. Но не спеши грустить — впереди ещё целый мир открытий, идей и
-							впечатлений, которые ждут именно тебя, а мы уже готовы помочь тебе сделать следующий шаг.
-						</p>
-						<img // TODO
-							className={element('all-completed-image')} // eslint-disable-next-line max-len
-							src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHYxaXJnZWF2NXB2ODVpeXF2MGFnMHBvaXU4czBoYTJtZHpwOXQzeCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/g9582DNuQppxC/giphy.gif"
-							alt="Наши поздравления"
-						/>
-					</div>
+					<Banner
+						variant="accent"
+						size="large"
+						type="gold"
+						icon={null}
+						className={element('all-completed-banner')}
+						title="Сотня покорена!"
+						message={ALL_GOALS_COMPLETED_MESSAGE}
+						endContent={<img src={ALL_GOALS_COMPLETED_GIF} alt="Наши поздравления" />}
+					/>
 				)}
 				<FieldCheckbox id="hide-completed-main" text="Скрыть выполненные" checked={hideCompleted} setChecked={setHideCompleted} />
 			</div>
@@ -140,7 +153,7 @@ const MainGoalsComponent: FC<IPage> = () => {
 				topInfoClassName="gradient__top-info--main-goals"
 				withBtn
 				updateGoal={updateGoal}
-				allGoalsCompleted={allGoalsCompleted}
+				categoryCompleted={isCategoryCompleted('easyGoals')}
 			/>
 			<MainCards
 				className={element('goals')}
@@ -149,7 +162,7 @@ const MainGoalsComponent: FC<IPage> = () => {
 				topInfoClassName="gradient__top-info--main-goals"
 				withBtn
 				updateGoal={updateGoal}
-				allGoalsCompleted={allGoalsCompleted}
+				categoryCompleted={isCategoryCompleted('mediumGoals')}
 			/>
 			<MainCards
 				className={element('goals')}
@@ -158,7 +171,7 @@ const MainGoalsComponent: FC<IPage> = () => {
 				topInfoClassName="gradient__top-info--main-goals"
 				withBtn
 				updateGoal={updateGoal}
-				allGoalsCompleted={allGoalsCompleted}
+				categoryCompleted={isCategoryCompleted('hardGoals')}
 			/>
 		</main>
 	);

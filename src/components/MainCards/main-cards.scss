@@ -10,6 +10,14 @@
 		}
 	}
 
+	&__banner {
+		margin-bottom: 16px;
+
+		@include md {
+			margin-bottom: 12px;
+		}
+	}
+
 	&__cards {
 		display: flex;
 		flex-wrap: wrap;
@@ -67,11 +75,5 @@
 				max-height: 216px;
 			}
 		}
-	}
-
-	&__empty {
-		color: var(--color-text-secondary);
-		font-size: 16px;
-		line-height: var(--line-height-16);
 	}
 }

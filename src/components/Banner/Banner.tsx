@@ -7,23 +7,71 @@ import {Svg} from '../Svg/Svg';
 
 import './banner.scss';
 
-export type BannerType = 'success' | 'info' | 'warning' | 'danger';
+export type BannerType = 'success' | 'info' | 'warning' | 'danger' | 'gold';
+export type BannerVariant = 'default' | 'accent';
+export type BannerSize = 'default' | 'large';
+export type BannerIconVariant = 'default' | 'target';
 
 export interface BannerProps {
 	type: BannerType;
+	variant?: BannerVariant;
+	size?: BannerSize;
 	title?: string;
 	message?: string | ReactNode;
 	actionText?: string;
 	onAction?: () => void;
+	icon?: ReactNode | null;
+	iconVariant?: BannerIconVariant;
+	endContent?: ReactNode;
 	className?: string;
 }
 
-export const Banner: React.FC<BannerProps> = ({type, title, message, actionText, onAction, className}) => {
+export const Banner: React.FC<BannerProps> = (props) => {
+	const {
+		type,
+		variant = 'default',
+		size = 'default',
+		title,
+		message,
+		actionText,
+		onAction,
+		icon,
+		iconVariant = 'default',
+		endContent,
+		className,
+	} = props;
 	const [block, element] = useBem('banner', className);
 
+	const renderIcon = () => {
+		if (icon === null) {
+			return null;
+		}
+
+		if (icon !== undefined) {
+			return <div className={element('icon', {custom: true})}>{icon}</div>;
+		}
+
+		if (iconVariant === 'target') {
+			return (
+				<div className={element('icon-target')}>
+					<img src="/assets/achievements/target-default.svg" alt="" className={element('icon-target-image')} />
+				</div>
+			);
+		}
+
+		return <Svg icon="info" className={element('icon', {type})} />;
+	};
+
 	return (
-		<div className={block({type})}>
-			<Svg icon="info" className={element('icon', {type})} />
+		<div
+			className={block({
+				type,
+				variant: variant === 'accent' ? 'accent' : undefined,
+				size: size === 'large' ? 'large' : undefined,
+				'with-end': Boolean(endContent),
+			})}
+		>
+			{renderIcon()}
 			<div className={element('content')}>
 				{title != null && <h3 className={element('title')}>{title}</h3>}
 				{message != null &&
@@ -38,6 +86,7 @@ export const Banner: React.FC<BannerProps> = ({type, title, message, actionText,
 					</Button>
 				)}
 			</div>
+			{endContent != null && <div className={element('end')}>{endContent}</div>}
 		</div>
 	);
 };
