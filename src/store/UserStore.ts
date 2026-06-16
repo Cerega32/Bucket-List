@@ -109,6 +109,12 @@ class Store implements IUserStore {
 
 	achievements: Array<IAchievement> = [];
 
+	selfAchievements: Array<IAchievement> = [];
+
+	selfAchievementsLoaded = false;
+
+	selfAchievementsStale = false;
+
 	/** id пользователя, для которого уже загружены showcase-комментарии и впечатления */
 	showcaseLoadedForId: string | null = null;
 
@@ -161,6 +167,9 @@ class Store implements IUserStore {
 		this.mainGoalsLoadedForId = null;
 		this.achievementsLoadedForId = null;
 		this.achievements = [];
+		this.selfAchievements = [];
+		this.selfAchievementsLoaded = false;
+		this.selfAchievementsStale = false;
 		this.showcaseLoadedForId = null;
 		this.showcaseComments = [];
 		this.showcaseCommentPhotos = [];
@@ -183,6 +192,32 @@ class Store implements IUserStore {
 
 	setAchievements = (achievements: Array<IAchievement>) => {
 		this.achievements = achievements;
+	};
+
+	setSelfAchievements = (achievements: Array<IAchievement>) => {
+		this.selfAchievements = achievements;
+		this.selfAchievementsLoaded = true;
+		this.selfAchievementsStale = false;
+	};
+
+	markSelfAchievementsStale = () => {
+		this.selfAchievementsStale = true;
+		this.selfAchievementsLoaded = false;
+	};
+
+	mergeSelfAchievements = (incoming: Array<IAchievement>) => {
+		if (!incoming.length) {
+			return;
+		}
+
+		const byId = new Map(this.selfAchievements.map((achievement) => [achievement.id, achievement]));
+		incoming.forEach((achievement) => {
+			const existing = byId.get(achievement.id);
+			byId.set(achievement.id, existing ? {...existing, ...achievement, isAchieved: true} : {...achievement, isAchieved: true});
+		});
+		this.selfAchievements = Array.from(byId.values());
+		this.selfAchievementsLoaded = true;
+		this.selfAchievementsStale = false;
 	};
 
 	setShowcaseLoadedForId = (id: string | null) => {

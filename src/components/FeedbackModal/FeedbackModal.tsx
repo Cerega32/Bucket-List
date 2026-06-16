@@ -6,7 +6,9 @@ import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
+import {IAchievement} from '@/typings/achievements';
 import {postFeedback} from '@/utils/api/post/postFeedback';
+import {applyNewAchievements} from '@/utils/applyNewAchievements';
 import './feedback-modal.scss';
 
 interface FeedbackModalProps {
@@ -40,6 +42,7 @@ export const FeedbackModal: FC<FeedbackModalProps> = ({isOpen, onClose}) => {
 				title: 'Спасибо за отзыв',
 				message: 'Ваш отзыв отправлен команде Delting.',
 			});
+			await applyNewAchievements(res.data?.newAchievements as IAchievement[] | undefined);
 			onClose();
 			setRating(0);
 			setHoverRating(null);
