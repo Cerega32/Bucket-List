@@ -9,8 +9,8 @@ import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
 import {IAchievement} from '@/typings/achievements';
-import {applyNewAchievements} from '@/utils/applyNewAchievements';
 import {postFeedback} from '@/utils/api/post/postFeedback';
+import {applyNewAchievements} from '@/utils/applyNewAchievements';
 import './feedback-modal.scss';
 
 interface FeedbackModalProps {

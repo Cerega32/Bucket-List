@@ -41,8 +41,7 @@ export const HelpContainer: FC = observer(() => {
 			.map((item) => ({
 				...item,
 				link: resolveFaqLink(item.link, userSelf.id),
-				linkText:
-					item.link === FAQ_LINK_USER_SHOWCASE && !isAuth ? 'Войти, чтобы открыть витрину' : item.linkText,
+				linkText: item.link === FAQ_LINK_USER_SHOWCASE && !isAuth ? 'Войти, чтобы открыть витрину' : item.linkText,
 			}));
 	}, [search, activeCategory, userSelf.id, isAuth]);
 
