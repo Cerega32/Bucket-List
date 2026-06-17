@@ -138,8 +138,11 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 		return todayData?.isAllowed === false;
 	})();
 
-	// Для daily: completedToday; для weekly/custom: !canCompleteToday (если не заблокировано по расписанию)
-	const isCompletedToday = isBlockedBySchedule
+	const isExecutionBlocked = statistics.isExecutionEnabled === false;
+	const isActionBlocked = isBlockedBySchedule || isExecutionBlocked;
+
+	// Для daily: completedToday; для weekly/custom: !canCompleteToday (если не заблокировано)
+	const isCompletedToday = isActionBlocked
 		? false
 		: progress?.type === 'daily'
 		? !!progress.completedToday
@@ -147,8 +150,8 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 
 	const actionIcon = isSeriesInterrupted
 		? 'regular-empty'
-		: isBlockedBySchedule
-		? 'cross'
+		: isActionBlocked
+		? 'lock'
 		: isCompletedToday && hovered
 		? 'cross'
 		: isCompletedToday
@@ -158,7 +161,7 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 	const handleActionClick = (e: React.MouseEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
-		if (isBlockedBySchedule) return;
+		if (isActionBlocked) return;
 		if (isSeriesInterrupted) {
 			onRestart(statistics.regularGoal);
 		} else {
@@ -217,13 +220,15 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 			</Link>
 			<button
 				type="button"
-				className={element('action-button', {completed: isCompletedToday && !isSeriesInterrupted, blocked: isBlockedBySchedule})}
+				className={element('action-button', {completed: isCompletedToday && !isSeriesInterrupted, blocked: isActionBlocked})}
 				onClick={handleActionClick}
 				onMouseEnter={() => setHovered(true)}
 				onMouseLeave={() => setHovered(false)}
-				disabled={isBlockedBySchedule}
+				disabled={isActionBlocked}
 				aria-label={
-					isBlockedBySchedule
+					isExecutionBlocked
+						? 'Цель на паузе'
+						: isBlockedBySchedule
 						? 'Сегодня нельзя выполнить'
 						: isSeriesInterrupted
 						? 'Начать заново'

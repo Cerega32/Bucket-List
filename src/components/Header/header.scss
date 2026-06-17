@@ -511,6 +511,7 @@
 	}
 
 	&__regular-goals-badge {
+		position: relative;
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -518,6 +519,18 @@
 		border: none;
 		border-radius: 6px;
 		color: var(--color-white);
+
+		&--attention::after {
+			position: absolute;
+			top: -2px;
+			left: -2px;
+			width: 8px;
+			height: 8px;
+			background: var(--color-orange);
+			border: 2px solid var(--color-white);
+			border-radius: 50%;
+			content: '';
+		}
 	}
 
 	&__regular-goals-badge-icon {

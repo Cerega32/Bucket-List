@@ -28,6 +28,7 @@ interface RegularCardPropsRegular extends RegularCardPropsBase {
 	statistics: IRegularGoalStatistics;
 	onMarkRegular: () => Promise<void> | void;
 	onRestart?: () => Promise<void> | void;
+	isPrimaryActionLoading?: boolean;
 	progressGoal?: never;
 	onOpenProgressModal?: never;
 	// onMarkCompleted?: never;
@@ -342,7 +343,7 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 		);
 	}
 
-	const {regularGoal: goal, statistics, onMarkRegular, onRestart} = props;
+	const {regularGoal: goal, statistics, onMarkRegular, onRestart, isPrimaryActionLoading} = props;
 	const isInterrupted = !!statistics.isInterrupted;
 	const completionPercent = Math.round(statistics.completionPercentage || 0);
 	const currentDayIndex = getCurrentDayOfWeek();
@@ -358,12 +359,13 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 		const todayData = weekDays.find((d: {dayIndex: number}) => d.dayIndex === currentDayIndex);
 		return todayData?.isAllowed === false;
 	})();
-	const isCompletedToday = isBlockedBySchedule
+	const isExecutionBlocked = statistics.isExecutionEnabled === false;
+	const isActionBlocked = isBlockedBySchedule || isExecutionBlocked;
+	const isCompletedToday = isActionBlocked
 		? false
 		: progress?.type === 'daily'
 		? !!progress.completedToday
 		: !statistics.canCompleteToday;
-	const isBlockedOrUnavailableToday = isBlockedBySchedule;
 	const isCurrentPeriodCompleted = getIsCurrentPeriodCompleted(statistics);
 	const isSeriesActiveState =
 		statistics.isSeriesCompleted ||
@@ -442,11 +444,13 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 				<Line />
 				<div className={element('actions')}>
 					<Button
-						theme={isInterrupted ? 'blue' : isCompletedToday ? 'green' : isBlockedOrUnavailableToday ? 'blue-light' : 'blue'}
-						onClick={isInterrupted && onRestart ? onRestart : isBlockedOrUnavailableToday ? undefined : onMarkRegular}
-						icon={isInterrupted && onRestart ? 'regular-empty' : isBlockedOrUnavailableToday ? undefined : 'regular'}
+						theme={isInterrupted ? 'blue' : isCompletedToday ? 'green' : isActionBlocked ? 'blue-light' : 'blue'}
+						onClick={isInterrupted && onRestart ? onRestart : isActionBlocked ? undefined : onMarkRegular}
+						icon={isInterrupted && onRestart ? 'regular-empty' : isActionBlocked ? undefined : 'regular'}
 						className={element('primary-button')}
-						disabled={!isInterrupted && isBlockedOrUnavailableToday}
+						disabled={(!isInterrupted && isActionBlocked) || isPrimaryActionLoading}
+						loading={isPrimaryActionLoading}
+						loadingText={isInterrupted ? 'Запуск...' : 'Сохранение...'}
 						hoverContent={isCompletedToday && !isInterrupted ? 'Отменить выполнение' : undefined}
 						hoverIcon={isCompletedToday && !isInterrupted ? 'cross' : undefined}
 					>
@@ -454,7 +458,9 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 							? 'Начать заново'
 							: isCompletedToday
 							? 'Выполнено сегодня'
-							: isBlockedOrUnavailableToday
+							: isExecutionBlocked
+							? 'На паузе'
+							: isBlockedBySchedule
 							? 'Сегодня нельзя выполнить'
 							: 'Выполнить сегодня'}
 					</Button>

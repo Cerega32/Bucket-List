@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useRef, useState} from 'react';
-import {useParams, useSearchParams} from 'react-router-dom';
+import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {scroller} from 'react-scroll';
 
 import {AllCategories} from '@/components/AllCategories/AllCategories';
@@ -29,6 +29,8 @@ import {addRegularGoalToUser, RegularGoalSettings} from '@/utils/api/post/addReg
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
+import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
+import {blockRegularGoalsAddIfLimitReached} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 
 import {CategorySkeleton} from './CategorySkeleton';
@@ -51,6 +53,12 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 	const [regularGoalData, setRegularGoalData] = useState<any>(null);
 	const [pendingGoalIndex, setPendingGoalIndex] = useState<number | null>(null);
 	const [isRegularLoading, setIsRegularLoading] = useState(false);
+	const navigate = useNavigate();
+
+	const blockRegularGoalAdd = () =>
+		blockRegularGoalsAddIfLimitReached({
+			onPremium: () => navigate('/user/self/subs'),
+		});
 
 	const {id} = useParams();
 	const [searchParams, setSearchParams] = useSearchParams();
@@ -166,6 +174,10 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 				const regularSettings = await getRegularGoalSettings(code);
 
 				if (regularSettings.success && regularSettings.data) {
+					if (blockRegularGoalAdd()) {
+						return;
+					}
+
 					// Если настройки можно изменить, показываем модалку
 					if (regularSettings.data.regular_settings?.allowCustomSettings) {
 						setRegularGoalData(regularSettings.data);
@@ -190,8 +202,8 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 							title: 'Успех',
 							message: 'Регулярная цель успешно добавлена!',
 						});
-						return;
 					}
+					return;
 				}
 			} catch (error) {
 				// Если API регулярности не отвечает или цель не регулярная, продолжаем обычное добавление
@@ -278,6 +290,7 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 				const newGoals = [...popularGoals];
 				newGoals[pendingGoalIndex] = updatedGoal;
 				setPopularGoals(newGoals);
+				refreshHeaderGoalCounts();
 
 				NotificationStore.addNotification({
 					type: 'success',

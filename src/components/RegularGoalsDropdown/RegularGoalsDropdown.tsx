@@ -1,12 +1,16 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useRef, useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 
+import {Banner} from '@/components/Banner/Banner';
 import {useBem} from '@/hooks/useBem';
+import {TODAY_TAB_HIDE_DELAY_MS} from '@/hooks/useTodayTabDisplayList';
 import {HeaderProgressGoalsStore} from '@/store/HeaderProgressGoalsStore';
 import {HeaderRegularGoalsStore} from '@/store/HeaderRegularGoalsStore';
 import {ModalStore} from '@/store/ModalStore';
+import {UserStore} from '@/store/UserStore';
 import {IRegularGoalStatistics} from '@/typings/goal';
+import {getUser} from '@/utils/api/get/getUser';
 import {
 	getGoalsInProgress,
 	getRegularGoalStatistics,
@@ -16,6 +20,12 @@ import {
 	updateGoalProgress,
 } from '@/utils/api/goals';
 import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {
+	computeRegularGoalsHeaderStats,
+	extractRegularGoalStatistics,
+	isRegularGoalShownInTodayViews,
+} from '@/utils/regularGoal/regularGoalTodayVisibility';
 
 import {ProgressGoalCompactCard} from './ProgressGoalCompactCard';
 import {RegularGoalCompactCard} from './RegularGoalCompactCard';
@@ -31,18 +41,72 @@ interface RegularGoalsDropdownProps {
 	variant?: 'regular' | 'progress';
 }
 
+const sortRegularGoalsList = (list: IRegularGoalStatistics[]): IRegularGoalStatistics[] =>
+	[...list].sort((a, b) => {
+		if (a.isInterrupted !== b.isInterrupted) return a.isInterrupted ? 1 : -1;
+		const aDone = a.currentPeriodProgress?.completedToday === true;
+		const bDone = b.currentPeriodProgress?.completedToday === true;
+		if (aDone === bDone) return 0;
+		return aDone ? 1 : -1;
+	});
+
+const prepareRegularGoalsForDropdown = (statistics: IRegularGoalStatistics[]): IRegularGoalStatistics[] =>
+	sortRegularGoalsList(
+		statistics.filter((stat) => stat.isActive && stat.isExecutionEnabled !== false && isRegularGoalShownInTodayViews(stat))
+	);
+
+const syncHeaderRegularGoalsStats = (statistics: IRegularGoalStatistics[], selectionPending: boolean) => {
+	const {userSelf} = UserStore;
+	const slotsLocked = userSelf.regularGoalsSlotsLocked ?? false;
+	const stats = computeRegularGoalsHeaderStats(statistics, selectionPending, slotsLocked, isPremiumSubscriptionActive(userSelf));
+	HeaderRegularGoalsStore.setStats(stats.totalCount, stats.completedTodayCount, stats.needsAttention);
+};
+
 export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({isOpen, onClose, variant = 'regular'}) => {
 	const [block, element] = useBem('regular-goals-dropdown');
 	const dropdownRef = useRef<HTMLDivElement>(null);
+	const navigate = useNavigate();
+	const {userSelf} = UserStore;
+	const selectionPending = userSelf.regularGoalsSelectionPending ?? false;
 	const [regularGoals, setRegularGoals] = useState<IRegularGoalStatistics[]>([]);
 	const [progressGoals, setProgressGoals] = useState<IGoalProgress[]>([]);
 	const [loading, setLoading] = useState(true);
 	const isProgress = variant === 'progress';
+	const hideTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+
+	const scheduleDropdownGoalRemoval = (goalId: number) => {
+		const existingTimeout = hideTimeoutsRef.current.get(goalId);
+		if (existingTimeout) {
+			clearTimeout(existingTimeout);
+		}
+
+		const timeoutId = setTimeout(() => {
+			hideTimeoutsRef.current.delete(goalId);
+			setRegularGoals((prev) => {
+				const next = prev.filter((item) => item.regularGoal !== goalId);
+				syncHeaderRegularGoalsStats(next, selectionPending);
+				return next;
+			});
+		}, TODAY_TAB_HIDE_DELAY_MS);
+
+		hideTimeoutsRef.current.set(goalId, timeoutId);
+	};
+
+	useEffect(() => {
+		return () => {
+			hideTimeoutsRef.current.forEach((timeoutId) => clearTimeout(timeoutId));
+			hideTimeoutsRef.current.clear();
+		};
+	}, []);
 
 	// Загрузка данных
 	useEffect(() => {
 		const load = async () => {
 			if (!isOpen) return;
+
+			if (!isProgress) {
+				await getUser();
+			}
 
 			setLoading(true);
 			try {
@@ -58,25 +122,12 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 						setProgressGoals(list || []);
 					}
 				} else {
-					const response = await getRegularGoalStatistics({page_size: 100});
+					const response = await getRegularGoalStatistics();
 					if (response.success && response.data) {
 						const statistics = Array.isArray(response.data) ? response.data : response.data.data;
-						const active = statistics
-							.filter((stat) => stat.isActive)
-							.sort((a, b) => {
-								// Прерванные — в конец
-								if (a.isInterrupted !== b.isInterrupted) return a.isInterrupted ? 1 : -1;
-								// Выполненные сегодня — после невыполненных
-								const aDone = a.currentPeriodProgress?.completedToday === true;
-								const bDone = b.currentPeriodProgress?.completedToday === true;
-								if (aDone === bDone) return 0;
-								return aDone ? 1 : -1;
-							});
+						syncHeaderRegularGoalsStats(statistics, selectionPending);
+						const active = prepareRegularGoalsForDropdown(statistics);
 						setRegularGoals(active);
-						const completedCount = active.filter(
-							(s) => !s.isInterrupted && (s.currentPeriodProgress?.completedToday === true || s.canCompleteToday === false)
-						).length;
-						HeaderRegularGoalsStore.setStats(active.length, completedCount);
 					}
 				}
 			} catch (error) {
@@ -144,28 +195,16 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 	};
 
 	const refreshRegularGoals = async () => {
-		const updatedResponse = await getRegularGoalStatistics({page_size: 100});
+		const updatedResponse = await getRegularGoalStatistics();
 		if (updatedResponse.success && updatedResponse.data) {
 			const statistics = Array.isArray(updatedResponse.data) ? updatedResponse.data : updatedResponse.data.data;
-			const active = statistics
-				.filter((stat) => stat.isActive)
-				.sort((a, b) => {
-					if (a.isInterrupted !== b.isInterrupted) return a.isInterrupted ? 1 : -1;
-					const aDone = a.currentPeriodProgress?.completedToday === true;
-					const bDone = b.currentPeriodProgress?.completedToday === true;
-					if (aDone === bDone) return 0;
-					return aDone ? 1 : -1;
-				});
+			syncHeaderRegularGoalsStats(statistics, selectionPending);
+			const active = prepareRegularGoalsForDropdown(statistics);
 			setRegularGoals(active);
-			const completedCount = active.filter(
-				(s) => !s.isInterrupted && (s.currentPeriodProgress?.completedToday === true || s.canCompleteToday === false)
-			).length;
-			HeaderRegularGoalsStore.setStats(active.length, completedCount);
 		}
 	};
 
 	const handleQuickComplete = async (regularGoalId: number, currentlyCompleted: boolean) => {
-		setLoading(true);
 		try {
 			const response = await markRegularProgress({
 				regular_goal_id: regularGoalId,
@@ -173,26 +212,52 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 			});
 
 			if (response.success) {
-				await refreshRegularGoals();
+				const updatedStats = response.data?.statistics;
+				if (updatedStats) {
+					setRegularGoals((prev) => {
+						const next = sortRegularGoalsList(
+							prev
+								.map((item) => (item.regularGoal === regularGoalId ? updatedStats : item))
+								.filter((stat) => stat.isActive && isRegularGoalShownInTodayViews(stat))
+						);
+						syncHeaderRegularGoalsStats(next, selectionPending);
+						return next;
+					});
+					if (!isRegularGoalShownInTodayViews(updatedStats)) {
+						scheduleDropdownGoalRemoval(regularGoalId);
+					}
+				} else {
+					await refreshRegularGoals();
+				}
+				HeaderRegularGoalsStore.loadTodayCount(selectionPending);
+				refreshHeaderGoalCounts();
 			}
 		} catch (error) {
 			console.error('Ошибка отметки регулярной цели:', error);
-		} finally {
-			setLoading(false);
 		}
 	};
 
 	const handleRestart = async (regularGoalId: number) => {
-		setLoading(true);
 		try {
 			const response = await restartRegularGoal(regularGoalId);
 			if (response.success) {
-				await refreshRegularGoals();
+				const updatedStats = extractRegularGoalStatistics(response.data);
+				if (updatedStats) {
+					setRegularGoals((prev) => {
+						const next = sortRegularGoalsList(prev.map((item) => (item.regularGoal === regularGoalId ? updatedStats : item)));
+						syncHeaderRegularGoalsStats(next, selectionPending);
+						return next;
+					});
+					if (!isRegularGoalShownInTodayViews(updatedStats)) {
+						scheduleDropdownGoalRemoval(regularGoalId);
+					}
+				} else {
+					await refreshRegularGoals();
+				}
+				HeaderRegularGoalsStore.loadTodayCount(selectionPending);
 			}
 		} catch (error) {
 			console.error('Ошибка рестарта регулярной цели:', error);
-		} finally {
-			setLoading(false);
 		}
 	};
 
@@ -211,6 +276,18 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 
 	return (
 		<div ref={dropdownRef} className={block()}>
+			{!isProgress && selectionPending && (
+				<Banner
+					type="warning"
+					className={element('banner')}
+					message="Не все регулярные цели доступны. Выберите активные на странице регулярных целей."
+					actionText="Перейти к выбору"
+					onAction={() => {
+						onClose();
+						navigate('/user/self/regular');
+					}}
+				/>
+			)}
 			<div className={element('content')}>
 				{loading && (isProgress ? progressGoals.length === 0 : regularGoals.length === 0) ? (
 					<RegularGoalsDropdownSkeleton variant={variant} />

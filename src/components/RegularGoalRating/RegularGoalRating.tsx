@@ -64,7 +64,8 @@ export const RegularGoalRating: FC<RegularGoalRatingProps> = ({regularGoalId, cl
 						execution = serverData.currentExecution;
 					}
 
-					setUsers(usersArray);
+					const uniqueUsers = usersArray.filter((user, index, arr) => arr.findIndex((item) => item.id === user.id) === index);
+					setUsers(uniqueUsers);
 					setCurrentUserId(userId);
 					setCurrentExecution(execution);
 				}
@@ -141,7 +142,7 @@ export const RegularGoalRating: FC<RegularGoalRatingProps> = ({regularGoalId, cl
 						</tr>
 					</thead>
 					<tbody>
-						{users.map((user) => renderRow(user, false))}
+						{users.filter((user) => !currentExecution || user.id !== currentExecution.id).map((user) => renderRow(user, false))}
 						{currentExecution && (
 							<>
 								<tr className={element('separator')}>

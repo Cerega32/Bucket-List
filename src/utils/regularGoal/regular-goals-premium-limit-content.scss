@@ -1,0 +1,16 @@
+.regular-goals-premium-limit {
+	&__message {
+		display: block;
+	}
+
+	&__email {
+		color: var(--color-primary);
+		font-weight: var(--weight-medium);
+		text-decoration: underline;
+		word-break: break-all;
+
+		&:hover {
+			color: var(--color-primary-hover);
+		}
+	}
+}

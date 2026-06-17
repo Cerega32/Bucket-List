@@ -262,6 +262,8 @@ export interface IRegularGoalStatistics {
 	remainingSkipDays?: number; // Количество использованных разрешенных пропусков
 	daysUntilEarnedSkip?: number | null;
 	isActive: boolean;
+	isExecutionEnabled?: boolean;
+	slotExecutionLocked?: boolean;
 	isPaused: boolean;
 	resetCount: number;
 	isInterrupted?: boolean;

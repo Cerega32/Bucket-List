@@ -1,11 +1,30 @@
 import {makeAutoObservable} from 'mobx';
 
+import {UserStore} from '@/store/UserStore';
+import {IRegularGoalStatistics} from '@/typings/goal';
 import {getRegularGoalStatistics} from '@/utils/api/goals';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/isPremiumSubscriptionActive';
+import {computeRegularGoalsHeaderStats} from '@/utils/regularGoal/regularGoalTodayVisibility';
+
+const parseRegularGoalStatisticsList = (payload: unknown): IRegularGoalStatistics[] => {
+	if (!payload || typeof payload !== 'object') {
+		return [];
+	}
+
+	if (Array.isArray(payload)) {
+		return payload;
+	}
+
+	const {data} = payload as {data?: IRegularGoalStatistics[]};
+	return Array.isArray(data) ? data : [];
+};
 
 class Store {
 	totalCount = 0;
 
 	completedTodayCount = 0;
+
+	needsAttention = false;
 
 	isLoading = false;
 
@@ -13,9 +32,10 @@ class Store {
 		makeAutoObservable(this);
 	}
 
-	setStats(total: number, completedToday: number) {
+	setStats(total: number, completedToday: number, needsAttention = false) {
 		this.totalCount = total;
 		this.completedTodayCount = completedToday;
+		this.needsAttention = needsAttention;
 	}
 
 	setLoading(loading: boolean) {
@@ -30,24 +50,25 @@ class Store {
 		return this.totalCount > 0 && this.completedTodayCount === this.totalCount;
 	}
 
-	async loadTodayCount() {
+	async loadTodayCount(selectionPending = false) {
 		this.setLoading(true);
 		try {
-			const response = await getRegularGoalStatistics({page_size: 100});
+			const response = await getRegularGoalStatistics();
 			if (response.success && response.data) {
-				const statistics = Array.isArray(response.data) ? response.data : response.data.data;
-				const active = statistics.filter((s: {isActive: boolean}) => s.isActive);
-				const completedToday = active.filter(
-					(s: {isInterrupted?: boolean; canCompleteToday?: boolean; currentPeriodProgress?: {completedToday?: boolean}}) =>
-						!s.isInterrupted && (s.currentPeriodProgress?.completedToday === true || s.canCompleteToday === false)
+				const statistics = parseRegularGoalStatisticsList(response.data);
+				const stats = computeRegularGoalsHeaderStats(
+					statistics,
+					selectionPending,
+					UserStore.userSelf.regularGoalsSlotsLocked ?? false,
+					isPremiumSubscriptionActive(UserStore.userSelf)
 				);
-				this.setStats(active.length, completedToday.length);
+				this.setStats(stats.totalCount, stats.completedTodayCount, stats.needsAttention);
 			} else {
-				this.setStats(0, 0);
+				this.setStats(0, 0, false);
 			}
 		} catch (error) {
 			console.error('Ошибка загрузки количества регулярных целей:', error);
-			this.setStats(0, 0);
+			this.setStats(0, 0, false);
 		} finally {
 			this.setLoading(false);
 		}
@@ -56,6 +77,7 @@ class Store {
 	clear() {
 		this.totalCount = 0;
 		this.completedTodayCount = 0;
+		this.needsAttention = false;
 	}
 }
 

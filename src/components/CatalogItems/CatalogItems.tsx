@@ -1,5 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useMemo, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import {scroller} from 'react-scroll';
 
 import {RegularGoalSettingsModal} from '@/components/RegularGoalSettingsModal/RegularGoalSettingsModal';
@@ -24,6 +25,8 @@ import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
 import {defaultPagination} from '@/utils/data/default';
+import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
+import {blockRegularGoalsAddIfLimitReached} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 
 import {CatalogItemsSkeleton} from './CatalogItemsSkeleton';
 import {Card} from '../Card/Card';
@@ -167,6 +170,12 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 	const [regularGoalData, setRegularGoalData] = useState<any>(null);
 	const [pendingGoalIndex, setPendingGoalIndex] = useState<number | null>(null);
 	const [isRegularLoading, setIsRegularLoading] = useState(false);
+	const navigate = useNavigate();
+
+	const blockRegularGoalAdd = () =>
+		blockRegularGoalsAddIfLimitReached({
+			onPremium: () => navigate('/user/self/subs'),
+		});
 
 	const sortOptions = useMemo(() => getSortOptions(!!userId, !!completed, subPage), [userId, completed, subPage]);
 
@@ -498,6 +507,10 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 				const regularSettings = await getRegularGoalSettings(codeGoal);
 
 				if (regularSettings.success && regularSettings.data) {
+					if (blockRegularGoalAdd()) {
+						return;
+					}
+
 					// Если настройки можно изменить, показываем модалку
 					if (regularSettings.data.regular_settings?.allowCustomSettings) {
 						setRegularGoalData(regularSettings.data);
@@ -523,8 +536,8 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 							title: 'Успех',
 							message: 'Регулярная цель успешно добавлена!',
 						});
-						return;
 					}
+					return;
 				}
 			} catch (error) {
 				// Если API регулярности не отвечает или цель не регулярная, продолжаем обычное добавление
@@ -620,7 +633,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 				const newGoals = [...goals.data];
 				newGoals[pendingGoalIndex] = updatedGoal;
 				setGoals({...goals, data: newGoals});
-				HeaderRegularGoalsStore.loadTodayCount();
+				refreshHeaderGoalCounts();
 
 				NotificationStore.addNotification({
 					type: 'success',
