@@ -13,7 +13,10 @@ export type NotificationType =
 	| 'goal_merged'
 	| 'merge_request'
 	| 'daily_challenge'
-	| 'weekly_challenge';
+	| 'weekly_challenge'
+	| 'subscription_expiring_5d'
+	| 'subscription_expiring_1d'
+	| 'subscription_expired';
 
 export interface IHeaderNotification {
 	id: number;
@@ -33,7 +36,7 @@ export interface IHeaderNotification {
 		avatar?: string;
 	};
 	relatedObjectId?: number;
-	relatedObjectType?: 'goal' | 'achievement' | 'user' | 'list' | 'friendship';
+	relatedObjectType?: 'goal' | 'achievement' | 'user' | 'list' | 'friendship' | 'subscription';
 	relatedObjectImage?: string;
 	relatedObjectCode?: string;
 }

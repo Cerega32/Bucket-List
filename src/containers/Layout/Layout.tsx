@@ -8,6 +8,7 @@ import {Footer} from '@/components/Footer/Footer';
 import {Header} from '@/components/Header/Header';
 import {Modal} from '@/components/Modal/Modal';
 import {SEO} from '@/components/SEO/SEO';
+import {SubscriptionExpiryBanner} from '@/components/SubscriptionExpiryBanner/SubscriptionExpiryBanner';
 import {useBem} from '@/hooks/useBem';
 import {ThemeStore} from '@/store/ThemeStore';
 
@@ -38,6 +39,7 @@ const Layout: FC = observer(() => {
 			<Footer />
 			<CookieBanner />
 			<EmailConfirmationBanner />
+			<SubscriptionExpiryBanner />
 		</BrowserRouter>
 	);
 });

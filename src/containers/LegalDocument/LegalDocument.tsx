@@ -11,7 +11,7 @@ interface LegalDocumentProps {
 	className?: string;
 }
 
-const UPDATE_DATE = '7 февраля 2026 г.';
+const UPDATE_DATE = '16 июня 2025 г.';
 
 export const LegalDocument: FC<LegalDocumentProps> = ({title, children, className}) => {
 	const [block, element] = useBem('legal-document', className);

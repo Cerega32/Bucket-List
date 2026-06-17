@@ -119,6 +119,10 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(({peri
 							/>
 							<label htmlFor="terms" className={element('terms-label')}>
 								Я согласен с{' '}
+								<Link to="/consent" target="_blank" className={element('link')}>
+									Согласием на обработку персональных данных
+								</Link>
+								,{' '}
 								<Link to="/terms" target="_blank" className={element('link')}>
 									условиями использования
 								</Link>{' '}

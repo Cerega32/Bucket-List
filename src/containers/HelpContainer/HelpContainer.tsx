@@ -1,12 +1,14 @@
 import {motion} from 'framer-motion';
+import {observer} from 'mobx-react-lite';
 import {FC, useMemo, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {UserStore} from '@/store/UserStore';
 
-import {faq, quickLinks} from './help-data';
+import {faq, FAQ_LINK_USER_SHOWCASE, quickLinks, resolveFaqLink} from './help-data';
 import {HelpFaqItem} from './HelpFaqItem';
 
 import './help-container.scss';
@@ -21,21 +23,27 @@ const categories = [
 	{label: 'Социальные', value: 'social'},
 ];
 
-export const HelpContainer: FC = () => {
+export const HelpContainer: FC = observer(() => {
 	const [block, element] = useBem('help-container');
 	const [openSection, setOpenSection] = useState<string | null>(null);
 	const [search, setSearch] = useState('');
 	const [activeCategory, setActiveCategory] = useState('all');
+	const {userSelf, isAuth} = UserStore;
 
 	const filteredFaq = useMemo(() => {
-		return faq.filter((item) => {
-			const matchesSearch = item.question.toLowerCase().includes(search.toLowerCase());
+		return faq
+			.filter((item) => {
+				const matchesSearch = item.question.toLowerCase().includes(search.toLowerCase());
+				const matchesCategory = activeCategory === 'all' || item.category === activeCategory;
 
-			const matchesCategory = activeCategory === 'all' || item.category === activeCategory;
-
-			return matchesSearch && matchesCategory;
-		});
-	}, [search, activeCategory]);
+				return matchesSearch && matchesCategory;
+			})
+			.map((item) => ({
+				...item,
+				link: resolveFaqLink(item.link, userSelf.id),
+				linkText: item.link === FAQ_LINK_USER_SHOWCASE && !isAuth ? 'Войти, чтобы открыть витрину' : item.linkText,
+			}));
+	}, [search, activeCategory, userSelf.id, isAuth]);
 
 	return (
 		<main className={block()}>
@@ -145,4 +153,4 @@ export const HelpContainer: FC = () => {
 			</div>
 		</main>
 	);
-};
+});

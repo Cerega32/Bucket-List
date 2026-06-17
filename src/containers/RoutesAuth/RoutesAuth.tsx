@@ -9,6 +9,7 @@ import {PageAbout} from '@/pages/PageAbout/PageAbout';
 import {PageAgreement} from '@/pages/PageAgreement/PageAgreement';
 import {PageCategories} from '@/pages/PageCategories/PageCategories';
 import {PageCategory} from '@/pages/PageCategory/PageCategory';
+import {PageConsent} from '@/pages/PageConsent/PageConsent';
 import {PageContacts} from '@/pages/PageContacts/PageContacts';
 import {PageCookies} from '@/pages/PageCookies/PageCookies';
 import {PageCreateGoal} from '@/pages/PageCreateGoal/PageCreateGoal';
@@ -113,6 +114,7 @@ export const RoutesAuth: FC = observer(() => {
 
 				{/* Правовые документы */}
 				<Route path="/privacy" element={<PagePrivacy page="isPrivacy" />} />
+				<Route path="/consent" element={<PageConsent page="isConsent" />} />
 				<Route path="/terms" element={<PageTerms page="isTerms" />} />
 				<Route path="/premium" element={<PagePremium />} />
 				<Route path="/agreement" element={<PageAgreement page="isAgreement" />} />
