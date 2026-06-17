@@ -1,6 +1,8 @@
 import {IPaginationPage} from '@/typings/request';
 import {DELETE, GET, POST, PUT} from '@/utils/fetch/requests';
 
+import type {IRegularGoalStatistics} from '@/typings/goal';
+
 // ========== PROGRESS API ==========
 
 export interface IGoalProgress {
@@ -575,42 +577,7 @@ export interface IRegularProgress {
 	updatedAt: string;
 }
 
-export interface IRegularGoalStatistics {
-	id: number;
-	user: number;
-	userUsername: string;
-	regularGoal: number;
-	regularGoalData: IRegularGoal;
-	totalCompletions: number;
-	totalDays: number;
-	completionPercentage: number;
-	currentStreak: number;
-	maxStreak: number;
-	startDate?: string;
-	lastCompletionDate?: string;
-	totalWeeks: number;
-	completedWeeks: number;
-	currentWeekCompletions: number;
-	isActive: boolean;
-	isPaused: boolean;
-	resetCount: number;
-	isInterrupted: boolean;
-	isSeriesCompleted?: boolean;
-	completedSeriesCount?: number;
-	currentPeriodProgress?: {
-		type: 'daily' | 'weekly' | 'custom';
-		completedToday?: boolean;
-		streak?: number;
-		currentWeekCompletions?: number;
-		requiredPerWeek?: number;
-		weekProgress?: number;
-		weekStart?: string;
-	};
-	nextTargetDate?: string;
-	canCompleteToday: boolean;
-	createdAt: string;
-	updatedAt: string;
-}
+export type {IRegularGoalStatistics} from '@/typings/goal';
 
 export interface IRegularProgressCalendar {
 	regularGoal: IRegularGoal;
@@ -700,27 +667,20 @@ export const markRegularProgress = async (data: {
 	}
 };
 
-// Получить статистику регулярных целей
-// Поддерживает как обычный ответ (массив),
-// так и пагинированный ({ pagination, data }) — на случай,
-// если на бэкенде включена пагинация.
-export const getRegularGoalStatistics = async (params?: {
-	page?: number;
-	page_size?: number;
-}): Promise<{
+// Получить статистику регулярных целей (все активные цели пользователя)
+export const getRegularGoalStatistics = async (): Promise<{
 	success: boolean;
 	data?:
 		| IRegularGoalStatistics[]
 		| {
-				pagination: IPaginationPage;
 				data: IRegularGoalStatistics[];
+				todayCount?: number;
 		  };
 	error?: string;
 }> => {
 	try {
 		const response = await GET('goals/regular/statistics', {
 			auth: true,
-			...(params ? {get: params} : {}),
 		});
 		return response;
 	} catch (error) {

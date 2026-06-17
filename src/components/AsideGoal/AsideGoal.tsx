@@ -1,4 +1,5 @@
 import {type KeyboardEvent, FC, useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 import {LightboxWithScrollLock} from '@/components/LightboxWithScrollLock/LightboxWithScrollLock';
 import {WeekDaySchedule} from '@/components/WeekDaySelector/WeekDaySelector';
@@ -6,7 +7,6 @@ import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {GoalStore} from '@/store/GoalStore';
 import {HeaderProgressGoalsStore} from '@/store/HeaderProgressGoalsStore';
-import {HeaderRegularGoalsStore} from '@/store/HeaderRegularGoalsStore';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
@@ -26,6 +26,7 @@ import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
 import {updateRegularGoalSettings} from '@/utils/api/post/updateRegularGoalSettings';
 import {GoalWithLocation} from '@/utils/mapApi';
 import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
+import {blockRegularGoalsAddIfLimitReached} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 import {
 	addDays,
 	endOfISOWeekFromMonday,
@@ -150,6 +151,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const [isAddingListGoal, setIsAddingListGoal] = useState(false);
 	const [isAdded, setIsAdded] = useState(added);
 	const [localStatistics, setLocalStatistics] = useState<IRegularGoalStatistics | null>(regularConfig?.statistics || null);
+
+	const navigate = useNavigate();
 
 	const {myComment} = GoalStore;
 	const hasMyComment = !isList && (props as AsideGoalProps).hasMyComment;
@@ -536,8 +539,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					onHistoryRefresh();
 				}
 
-				// Обновляем счётчик регулярных целей в шапке
-				HeaderRegularGoalsStore.loadTodayCount();
+				// Обновляем счётчик регулярных целей в шапке и лимиты в профиле
+				refreshHeaderGoalCounts();
 			}
 		} catch (error) {
 			console.error('Ошибка отметки регулярной цели:', error);
@@ -623,8 +626,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					},
 				} as any);
 
-				// Обновляем счётчик регулярных целей в шапке
-				HeaderRegularGoalsStore.loadTodayCount();
+				// Обновляем счётчик регулярных целей в шапке и лимиты в профиле
+				refreshHeaderGoalCounts();
 
 				// Перезагружаем цель, чтобы обновить regularConfig.statistics и показать вкладку "История выполнения"
 				if (onGoalUpdate) {
@@ -703,8 +706,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					setIsRegularGoalCompletedToday(false);
 				}
 
-				// Обновляем счётчик регулярных целей в шапке
-				HeaderRegularGoalsStore.loadTodayCount();
+				// Обновляем счётчик регулярных целей в шапке и лимиты в профиле
+				refreshHeaderGoalCounts();
 
 				NotificationStore.addNotification({
 					type: 'success',
@@ -851,8 +854,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					setIsRegularGoalCompletedToday(false);
 				}
 
-				// Обновляем счётчик регулярных целей в шапке
-				HeaderRegularGoalsStore.loadTodayCount();
+				// Обновляем счётчик регулярных целей в шапке и лимиты в профиле
+				refreshHeaderGoalCounts();
 
 				NotificationStore.addNotification({
 					type: 'success',
@@ -902,7 +905,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					}
 					setLocalStatistics(newStatistics);
 				}
-				HeaderRegularGoalsStore.loadTodayCount();
+				refreshHeaderGoalCounts();
 				if (onGoalCompleted) onGoalCompleted();
 				if (onHistoryRefresh) onHistoryRefresh();
 				NotificationStore.addNotification({
@@ -973,8 +976,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					setIsRegularGoalCompletedToday(false);
 				}
 
-				// Обновляем счётчик регулярных целей в шапке
-				HeaderRegularGoalsStore.loadTodayCount();
+				// Обновляем счётчик регулярных целей в шапке и лимиты в профиле
+				refreshHeaderGoalCounts();
 
 				NotificationStore.addNotification({
 					type: 'success',
@@ -1130,6 +1133,14 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		}
 
 		if (regularConfig) {
+			if (
+				blockRegularGoalsAddIfLimitReached({
+					onPremium: () => navigate('/user/self/subs'),
+				})
+			) {
+				return;
+			}
+
 			// Если настройки нельзя изменить, используем обычный endpoint /add/ с базовыми настройками
 			if (!regularConfig.allowCustomSettings) {
 				setIsAddingRegularGoal(true);
@@ -1138,8 +1149,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 					await updateGoal(code, 'add');
 					setIsAdded(true);
 
-					// Обновляем счётчик регулярных целей в шапке
-					HeaderRegularGoalsStore.loadTodayCount();
+					// Обновляем счётчик регулярных целей в шапке и лимиты в профиле
+					refreshHeaderGoalCounts();
 
 					NotificationStore.addNotification({
 						type: 'success',

@@ -100,6 +100,23 @@ export const useTodayTabDisplayList = <T>({
 		[activeTab, cancelRemoveItem, upsertItem, getItemId]
 	);
 
+	const applyRestartedItem = useCallback(
+		(restartedItem: T, staysOnTodayTab: boolean) => {
+			if (activeTab !== 'today') {
+				return;
+			}
+
+			upsertItem(restartedItem);
+			if (staysOnTodayTab) {
+				cancelRemoveItem(getItemId(restartedItem));
+				return;
+			}
+
+			scheduleRemoveItem(getItemId(restartedItem));
+		},
+		[activeTab, upsertItem, cancelRemoveItem, scheduleRemoveItem, getItemId]
+	);
+
 	const markAllItems = useCallback(
 		(items: T[], toMarked: (item: T) => T) => {
 			if (activeTab !== 'today') {
@@ -150,6 +167,10 @@ export const useTodayTabDisplayList = <T>({
 		}
 	}, [activeTab, isSourceReady, buildPendingItems]);
 
+	const resetDisplayItems = useCallback(() => {
+		setDisplayItems(buildPendingItems());
+	}, [buildPendingItems]);
+
 	const pendingCount = buildPendingItems().length;
 	const todayTabCount = activeTab === 'today' ? displayItems.length : pendingCount;
 
@@ -157,10 +178,12 @@ export const useTodayTabDisplayList = <T>({
 		displayItems,
 		pendingCount,
 		todayTabCount,
+		resetDisplayItems,
 		upsertItem,
 		applyMarkedItem,
 		applyUnmarkedItem,
 		revertMarkedItem,
+		applyRestartedItem,
 		markAllItems,
 		unmarkAllItems,
 	};

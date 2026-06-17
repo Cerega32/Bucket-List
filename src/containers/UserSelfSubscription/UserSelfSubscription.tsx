@@ -4,7 +4,9 @@ import {FC, useEffect, useState} from 'react';
 import {Button} from '@/components/Button/Button';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {UserStore} from '@/store/UserStore';
 import {getUserSubscription, updateSubscription, createPayment, IPayment} from '@/utils/api/subscription';
+import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
 
 import {CurrentSubscription} from './CurrentSubscription/CurrentSubscription';
 import {QRPaymentModal} from './QRPaymentModal/QRPaymentModal';
@@ -61,15 +63,14 @@ export const UserSelfSubscription: FC = observer(() => {
 	};
 
 	const handlePaymentSuccess = async () => {
-		// Обновляем информацию о подписке
-		const response = await getUserSubscription();
-		if (response.success && response.data) {
-			setSubscription({
-				type: response.data.subscriptionType,
-				expiresAt: response.data.subscriptionExpiresAt,
-				isAutoRenew: response.data.subscriptionAutoRenew,
-			});
-		}
+		await refreshHeaderGoalCounts();
+
+		const {userSelf} = UserStore;
+		setSubscription({
+			type: userSelf.subscriptionType ?? 'free',
+			expiresAt: userSelf.subscriptionExpiresAt ?? null,
+			isAutoRenew: userSelf.subscriptionAutoRenew ?? false,
+		});
 	};
 
 	const handleToggleAutoRenew = async (value: boolean) => {

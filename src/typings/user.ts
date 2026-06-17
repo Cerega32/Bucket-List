@@ -22,7 +22,10 @@ export interface IUserInfo {
 	limits?: {
 		maxFolders: number | null;
 		maxFolderRules: number;
+		maxRegularGoals: number;
 	};
+	regularGoalsSelectionPending?: boolean;
+	regularGoalsSlotsLocked?: boolean;
 	counts?: {
 		regularGoals: number;
 		progressGoals: number;

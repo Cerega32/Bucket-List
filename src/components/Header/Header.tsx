@@ -19,6 +19,9 @@ import {UserStore} from '@/store/UserStore';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getUser} from '@/utils/api/get/getUser';
 import {postLogout} from '@/utils/api/post/postLogout';
+import {registerHeaderGoalCountsRefresh} from '@/utils/headerGoalCountsRefresh';
+import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 
 import {ThemeStore} from '../../store/ThemeStore';
@@ -65,7 +68,9 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const navigate = useNavigate();
 	const homePath = isAuth ? '/categories/all' : '/';
-	const isPremium = userSelf.subscriptionType === 'premium';
+	const isPremium = isPremiumSubscriptionActive(userSelf);
+	const regularGoalsNeedAttention = (userSelf.regularGoalsSelectionPending ?? false) || HeaderRegularGoalsStore.needsAttention;
+	const showRegularGoalsBadge = HeaderRegularGoalsStore.hasRegularGoals || regularGoalsNeedAttention;
 
 	useEffect(() => {
 		if (categoriesTree.length > 0) return;
@@ -191,11 +196,70 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		}
 	};
 
-	// Загружаем полный профиль при авторизации, чтобы level и totalCompletedGoals были везде (в т.ч. в хедере)
+	// Загружаем профиль и бейдж регулярных целей при авторизации
 	useEffect(() => {
-		if (isAuth) {
-			getUser();
+		if (!isAuth) {
+			HeaderRegularGoalsStore.clear();
+			return;
 		}
+
+		let cancelled = false;
+
+		(async () => {
+			await getUser();
+			if (!cancelled) {
+				await HeaderRegularGoalsStore.loadTodayCount(UserStore.userSelf.regularGoalsSelectionPending ?? false);
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [isAuth]);
+
+	useEffect(() => {
+		if (!isAuth) {
+			return;
+		}
+
+		return registerHeaderGoalCountsRefresh(() => refreshHeaderGoalCounts());
+	}, [isAuth]);
+
+	// После смены тарифа пересчитываем бейдж регулярных целей (оплата Premium, даунгрейд, выбор слотов)
+	useEffect(() => {
+		if (!isAuth) {
+			return;
+		}
+
+		HeaderRegularGoalsStore.loadTodayCount(userSelf.regularGoalsSelectionPending ?? false).catch(() => undefined);
+	}, [
+		isAuth,
+		userSelf.subscriptionType,
+		userSelf.subscriptionExpiresAt,
+		userSelf.regularGoalsSelectionPending,
+		userSelf.regularGoalsSlotsLocked,
+		userSelf.limits?.maxRegularGoals,
+	]);
+
+	// После смены тарифа в админке профиль подтягиваем при возврате на вкладку/окно
+	useEffect(() => {
+		if (!isAuth) {
+			return;
+		}
+
+		const refreshProfile = () => {
+			if (document.visibilityState === 'visible') {
+				getUser().then(() => HeaderRegularGoalsStore.loadTodayCount(UserStore.userSelf.regularGoalsSelectionPending ?? false));
+			}
+		};
+
+		window.addEventListener('focus', refreshProfile);
+		document.addEventListener('visibilitychange', refreshProfile);
+
+		return () => {
+			window.removeEventListener('focus', refreshProfile);
+			document.removeEventListener('visibilitychange', refreshProfile);
+		};
 	}, [isAuth]);
 
 	// Скрываем pre-header при прокрутке страницы
@@ -217,15 +281,6 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			window.removeEventListener('scroll', handleScroll);
 		};
 	}, [preHeaderHiddenOverride]);
-
-	// Загрузка количества регулярных целей на сегодня для бейджа
-	useEffect(() => {
-		if (isAuth) {
-			HeaderRegularGoalsStore.loadTodayCount();
-		} else {
-			HeaderRegularGoalsStore.clear();
-		}
-	}, [isAuth]);
 
 	// Загрузка уведомлений при авторизации, очистка при разлогине
 	useEffect(() => {
@@ -742,24 +797,34 @@ export const Header: FC<HeaderProps> = observer((props) => {
 													onClick={toggleRegularGoals}
 													aria-label="Регулярные цели"
 												>
-													{HeaderRegularGoalsStore.hasRegularGoals ? (
+													{showRegularGoalsBadge ? (
 														<span
 															className={element('regular-goals-badge', {
-																allCompleted: HeaderRegularGoalsStore.allCompletedToday,
+																allCompleted:
+																	HeaderRegularGoalsStore.hasRegularGoals &&
+																	HeaderRegularGoalsStore.allCompletedToday,
+																attention: regularGoalsNeedAttention,
 															})}
 														>
 															<Svg
 																icon={
-																	HeaderRegularGoalsStore.allCompletedToday ? 'regular' : 'regular-empty'
+																	HeaderRegularGoalsStore.hasRegularGoals &&
+																	HeaderRegularGoalsStore.allCompletedToday
+																		? 'regular'
+																		: 'regular-empty'
 																}
 																className={element('regular-goals-badge-icon', {
 																	theme: header,
-																	completed: HeaderRegularGoalsStore.allCompletedToday,
+																	completed:
+																		HeaderRegularGoalsStore.hasRegularGoals &&
+																		HeaderRegularGoalsStore.allCompletedToday,
 																})}
 															/>
-															<span className={element('regular-goals-badge-count', {theme: header})}>
-																{HeaderRegularGoalsStore.totalCount}
-															</span>
+															{HeaderRegularGoalsStore.totalCount > 0 && (
+																<span className={element('regular-goals-badge-count', {theme: header})}>
+																	{HeaderRegularGoalsStore.totalCount}
+																</span>
+															)}
 														</span>
 													) : (
 														<Svg

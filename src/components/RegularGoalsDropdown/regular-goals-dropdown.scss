@@ -19,6 +19,33 @@
 		@include header-anchor-dropdown-max-height(696px, var(--height-header-compact), 20px);
 	}
 
+	&__banner {
+		flex-shrink: 0;
+		box-sizing: border-box;
+		width: calc(100% - 24px);
+		min-width: 0;
+		margin: 12px 12px 0;
+
+		&.banner {
+			max-width: 100%;
+		}
+
+		.banner__content {
+			min-width: 0;
+		}
+
+		.banner__message {
+			overflow-wrap: anywhere;
+			word-break: break-word;
+		}
+
+		.banner__action {
+			max-width: 100%;
+			white-space: normal;
+			text-align: left;
+		}
+	}
+
 	&__header {
 		flex-shrink: 0;
 		display: flex;

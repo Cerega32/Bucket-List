@@ -4,6 +4,8 @@ import {ModalStore} from '@/store/ModalStore';
 import {INotification, NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
 import {withRetry} from '@/utils/api/apiRetry';
+import {scheduleHeaderGoalCountsRefresh} from '@/utils/headerGoalCountsRefresh';
+import {isRegularGoalsLimitApiError, notifyRegularGoalsLimitApiError} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 
 /** Получить CSRF-токен из cookie (Django: csrftoken) */
 const getCsrfToken = (): string | undefined => {
@@ -128,6 +130,16 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 							retry_after: data.retry_after || 1,
 							api_name: data.api_name || 'API',
 						},
+					};
+				}
+
+				if (isRegularGoalsLimitApiError(data?.code)) {
+					notifyRegularGoalsLimitApiError(data.code);
+					scheduleHeaderGoalCountsRefresh();
+					return {
+						success: false,
+						errors: data?.error,
+						code: data?.code,
 					};
 				}
 

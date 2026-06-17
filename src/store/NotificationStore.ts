@@ -1,4 +1,5 @@
 import {makeAutoObservable} from 'mobx';
+import {ReactNode} from 'react';
 
 type NotificationType = 'success' | 'error' | 'warning';
 
@@ -6,7 +7,7 @@ export interface INotification {
 	id: string;
 	type: NotificationType;
 	title: string;
-	message?: string | {[key: string]: Array<string>};
+	message?: string | ReactNode | {[key: string]: Array<string>};
 	actionText?: string;
 	action?: () => void;
 	duration?: number;
