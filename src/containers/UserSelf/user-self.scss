@@ -100,9 +100,13 @@
 		white-space: nowrap;
 	}
 
-	&__profile-subscription-badge {
+	&__profile-subscription-badge-link {
 		flex-shrink: 0;
+		text-decoration: none;
+		cursor: pointer;
+	}
 
+	&__profile-subscription-badge {
 		&--premium {
 			position: relative;
 			overflow: hidden;

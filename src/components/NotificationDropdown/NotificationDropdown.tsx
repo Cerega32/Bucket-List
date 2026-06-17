@@ -47,6 +47,10 @@ const getNotificationIcon = (type: string) => {
 		case 'daily_challenge':
 		case 'weekly_challenge':
 			return 'zap';
+		case 'subscription_expiring_5d':
+		case 'subscription_expiring_1d':
+		case 'subscription_expired':
+			return 'award';
 		case 'daily_goal_streak_broken':
 			return 'signal';
 		default:
@@ -83,6 +87,14 @@ const getNotificationLink = (notification: IHeaderNotification): string | null =
 
 	if (relatedObjectType === 'friendship' && relatedObjectCode) {
 		return `/user/${relatedObjectCode}/showcase`;
+	}
+
+	if (relatedObjectType === 'subscription') {
+		return '/user/self/subs';
+	}
+
+	if (type === 'subscription_expiring_5d' || type === 'subscription_expiring_1d' || type === 'subscription_expired') {
+		return '/user/self/subs';
 	}
 
 	if (type === 'friend_request' || type === 'friend_accepted' || type === 'friend_rejected') {

@@ -4,6 +4,7 @@ import {BrowserRouter} from 'react-router-dom';
 
 import {CookieBanner} from '@/components/CookieBanner/CookieBanner';
 import {EmailConfirmationBanner} from '@/components/EmailConfirmationBanner/EmailConfirmationBanner';
+import {SubscriptionExpiryBanner} from '@/components/SubscriptionExpiryBanner/SubscriptionExpiryBanner';
 import {Footer} from '@/components/Footer/Footer';
 import {Header} from '@/components/Header/Header';
 import {Modal} from '@/components/Modal/Modal';
@@ -38,6 +39,7 @@ const Layout: FC = observer(() => {
 			<Footer />
 			<CookieBanner />
 			<EmailConfirmationBanner />
+			<SubscriptionExpiryBanner />
 		</BrowserRouter>
 	);
 });

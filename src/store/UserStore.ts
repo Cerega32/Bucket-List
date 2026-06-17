@@ -6,6 +6,7 @@ import {IComment} from '@/typings/comments';
 import {IGoal, IShortGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import {IUserInfo} from '@/typings/user';
+import {SUBSCRIPTION_SHOW_EXPIRED_KEY} from '@/utils/subscription/getSubscriptionExpiryState';
 
 interface IAddedGoals {
 	goals: Array<IShortGoal>;
@@ -114,6 +115,8 @@ class Store implements IUserStore {
 	selfAchievementsLoaded = false;
 
 	selfAchievementsStale = false;
+
+	subscriptionExpiredBanner = !!Cookies.get(SUBSCRIPTION_SHOW_EXPIRED_KEY);
 
 	/** id пользователя, для которого уже загружены showcase-комментарии и впечатления */
 	showcaseLoadedForId: string | null = null;
@@ -263,12 +266,22 @@ class Store implements IUserStore {
 	};
 
 	setUserSelf = (userSelf: IUserInfo) => {
+		const prevSubscriptionType = this.userSelf.subscriptionType;
 		this.userSelf = userSelf;
 		if (userSelf.isEmailConfirmed !== undefined) {
 			this.setEmailConfirmed(userSelf.isEmailConfirmed);
 		}
 		if (userSelf.email) {
 			this.setEmail(userSelf.email);
+		}
+		if (prevSubscriptionType === 'premium' && userSelf.subscriptionType === 'free') {
+			this.setSubscriptionExpiredBanner(true);
+			Cookies.set(SUBSCRIPTION_SHOW_EXPIRED_KEY, '1', {expires: 7});
+		}
+		if (userSelf.subscriptionType === 'premium') {
+			this.setSubscriptionExpiredBanner(false);
+			Cookies.remove(SUBSCRIPTION_SHOW_EXPIRED_KEY);
+			Cookies.remove('subscription_expired_banner_dismissed');
 		}
 		// Сохраняем в куки для отображения до следующей загрузки профиля
 		if (userSelf.subscriptionType) {
@@ -317,6 +330,10 @@ class Store implements IUserStore {
 		} else {
 			Cookies.remove('email');
 		}
+	};
+
+	setSubscriptionExpiredBanner = (value: boolean) => {
+		this.subscriptionExpiredBanner = value;
 	};
 }
 

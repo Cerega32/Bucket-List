@@ -6,12 +6,10 @@ import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 import 'yet-another-react-lightbox/styles.css';
 import App from './containers/App/App';
-import {initYandexMetrika} from './utils/analytics/yandexMetrika';
+import {initAnalyticsIfConsented} from './utils/legal/cookieConsent';
 
 (async () => {
-	if (import.meta.env.PROD) {
-		initYandexMetrika(import.meta.env['VITE_YANDEX_METRIKA_ID'] ?? '');
-	}
+	initAnalyticsIfConsented();
 
 	const root = document.getElementById('root')!;
 	createRoot(root).render(<App />);

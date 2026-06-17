@@ -73,6 +73,7 @@ export const Footer: FC<FooterProps> = observer((props) => {
 			title: 'Правовая информация',
 			links: [
 				{to: '/privacy', label: 'Политика конфиденциальности'},
+				{to: '/consent', label: 'Согласие на обработку ПДн'},
 				{to: '/agreement', label: 'Пользовательское соглашение'},
 				{to: '/terms', label: 'Условия использования'},
 				{to: '/cookies', label: 'Cookie'},
