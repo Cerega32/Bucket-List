@@ -10,6 +10,7 @@ export interface IGoalProgress {
 	goal: number;
 	goalTitle: string;
 	goalCategory: string;
+	goalComplexity?: string;
 	goalCategoryNameEn: string;
 	goalImage: string;
 	goalCode: string;

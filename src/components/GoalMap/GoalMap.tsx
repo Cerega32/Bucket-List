@@ -1,25 +1,26 @@
-import {FC, useEffect, useRef} from 'react';
+import {FC, useEffect, useRef, useState} from 'react';
 
+import {Banner} from '@/components/Banner/Banner';
+import {useBem} from '@/hooks/useBem';
 import {ILocation} from '@/typings/goal';
+import {loadYandexMapsScript, YANDEX_MAP_LOAD_ERROR_MESSAGE, YANDEX_MAPS_LOAD_TIMEOUT_MS} from '@/utils/maps/loadYandexMapsScript';
 import './goal-map.scss';
-
-declare global {
-	interface Window {
-		ymaps: any;
-	}
-}
 
 interface GoalMapProps {
 	location: ILocation;
 	userVisitedLocation: boolean;
+	onLoadError?: () => void;
+	onLoadSuccess?: () => void;
 }
 
-export const GoalMap: FC<GoalMapProps> = ({location, userVisitedLocation}) => {
+export const GoalMap: FC<GoalMapProps> = (props) => {
+	const {location, userVisitedLocation, onLoadError, onLoadSuccess} = props;
+	const [block, element] = useBem('goal-map');
 	const mapContainer = useRef<HTMLDivElement>(null);
 	const mapInstance = useRef<any>(null);
 	const markerRef = useRef<any>(null);
+	const [mapLoadError, setMapLoadError] = useState(false);
 
-	// Функция инициализации карты
 	const initMap = () => {
 		if (!mapContainer.current || mapInstance.current || !window.ymaps) return;
 
@@ -61,29 +62,61 @@ export const GoalMap: FC<GoalMapProps> = ({location, userVisitedLocation}) => {
 	};
 
 	useEffect(() => {
-		// Проверяем, есть ли уже ymaps
-		if (window.ymaps && window.ymaps.Map) {
-			window.ymaps.ready(initMap);
-		} else {
-			// Если нет, добавляем скрипт только один раз
-			const existingScript = document.querySelector('script[src^="https://api-maps.yandex.ru/2.1/"]');
-			if (!existingScript) {
-				const script = document.createElement('script');
-				script.src = `https://api-maps.yandex.ru/2.1/?apikey=${process.env['NEXT_PUBLIC_YANDEX_API_KEY']}&lang=ru_RU`;
-				script.async = true;
-				script.onload = () => window.ymaps.ready(initMap);
-				document.head.appendChild(script);
-			} else {
-				existingScript.addEventListener('load', () => window.ymaps.ready(initMap));
+		let cancelled = false;
+		let loadTimeoutId: number | undefined;
+
+		const reportError = () => {
+			if (!cancelled) {
+				setMapLoadError(true);
+				onLoadError?.();
 			}
-		}
+		};
+
+		const reportSuccess = () => {
+			if (cancelled) {
+				return;
+			}
+			if (loadTimeoutId) {
+				clearTimeout(loadTimeoutId);
+				loadTimeoutId = undefined;
+			}
+			setMapLoadError(false);
+			onLoadSuccess?.();
+		};
+
+		loadTimeoutId = window.setTimeout(() => {
+			if (!mapInstance.current) {
+				reportError();
+			}
+		}, YANDEX_MAPS_LOAD_TIMEOUT_MS);
+
+		loadYandexMapsScript()
+			.then(() => {
+				if (cancelled) {
+					return;
+				}
+				try {
+					initMap();
+					if (mapInstance.current) {
+						reportSuccess();
+					}
+				} catch {
+					reportError();
+				}
+			})
+			.catch(() => {
+				reportError();
+			});
 
 		return () => {
+			cancelled = true;
+			if (loadTimeoutId) {
+				clearTimeout(loadTimeoutId);
+			}
 			if (mapInstance.current) {
 				mapInstance.current.destroy();
 				mapInstance.current = null;
 			}
-			// Не удаляем скрипт из head!
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
@@ -111,9 +144,12 @@ export const GoalMap: FC<GoalMapProps> = ({location, userVisitedLocation}) => {
 		mapInstance.current.setCenter([location.latitude, location.longitude]);
 	}, [location, userVisitedLocation]);
 
+	const showInlineBanner = mapLoadError && !onLoadError;
+
 	return (
-		<div className="goal-map">
-			<div ref={mapContainer} className="goal-map__container" />
+		<div className={block()}>
+			{showInlineBanner && <Banner type="warning" className={element('load-banner')} message={YANDEX_MAP_LOAD_ERROR_MESSAGE} />}
+			<div ref={mapContainer} className={element('container')} />
 		</div>
 	);
 };

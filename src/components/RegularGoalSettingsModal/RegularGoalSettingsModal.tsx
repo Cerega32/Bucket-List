@@ -13,6 +13,14 @@ import {Title} from '@/components/Title/Title';
 import {WeekDaySchedule, WeekDaySelector} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {
+	canEditCustomSchedule,
+	getRegularFrequencyActiveOption,
+	getRegularFrequencySelectOptions,
+	handleRegularFrequencySelect,
+} from '@/utils/regularGoal/regularFrequencySelectOptions';
 
 import './regular-goal-settings-modal.scss';
 
@@ -66,6 +74,7 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 	isLoading = false,
 }) => {
 	const [block, element] = useBem('regular-goal-settings-modal');
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
 
 	// Состояния формы
 	const [frequency, setFrequency] = useState<'daily' | 'weekly' | 'custom'>(originalSettings.frequency);
@@ -122,6 +131,15 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 	}, [originalSettings]);
 
 	const handleSave = () => {
+		if (frequency === 'custom' && !isPremium) {
+			NotificationStore.addNotification({
+				type: 'warning',
+				title: 'Premium',
+				message: 'Пользовательский график доступен только с Premium',
+			});
+			return;
+		}
+
 		// Валидация
 		if (frequency === 'weekly' && (!weeklyFrequency || weeklyFrequency < 1 || weeklyFrequency > 7)) {
 			NotificationStore.addNotification({
@@ -266,16 +284,9 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 						<Select
 							className={element('field')}
 							placeholder="Выберите периодичность"
-							options={[
-								{name: 'Ежедневно', value: 'daily'},
-								{name: 'N раз в неделю', value: 'weekly'},
-								{name: 'Пользовательский график', value: 'custom'},
-							]}
-							activeOption={frequency === 'daily' ? 0 : frequency === 'weekly' ? 1 : 2}
-							onSelect={(index) => {
-								const frequencies = ['daily', 'weekly', 'custom'] as const;
-								setFrequency(frequencies[index]);
-							}}
+							options={getRegularFrequencySelectOptions(isPremium)}
+							activeOption={getRegularFrequencyActiveOption(frequency)}
+							onSelect={(index) => handleRegularFrequencySelect(index, isPremium, setFrequency)}
 							text="Периодичность"
 						/>
 
@@ -295,7 +306,7 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 							/>
 						)}
 
-						{frequency === 'custom' && (
+						{frequency === 'custom' && canEditCustomSchedule(isPremium) && (
 							<div className={element('custom-schedule-selector')}>
 								<p className={element('field-title')}>Выберите дни для выполнения цели</p>
 								<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />

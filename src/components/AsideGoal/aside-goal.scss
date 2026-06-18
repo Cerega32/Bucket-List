@@ -388,4 +388,23 @@
 			}
 		}
 	}
+
+	&__progress-premium-btn-content {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	&__progress-premium-tag {
+		padding: 0 5px;
+		border-radius: 4px;
+		font-size: 10px;
+		font-weight: var(--weight-regular);
+		line-height: 12px;
+
+		.tag__text {
+			font-size: 10px;
+			line-height: 12px;
+		}
+	}
 }

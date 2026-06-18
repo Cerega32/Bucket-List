@@ -7,6 +7,14 @@ import {FieldInput} from '@/components/FieldInput/FieldInput';
 import Select from '@/components/Select/Select';
 import {WeekDaySchedule, WeekDaySelector} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
+import {UserStore} from '@/store/UserStore';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {
+	canEditCustomSchedule,
+	getRegularFrequencyActiveOption,
+	getRegularFrequencySelectOptions,
+	handleRegularFrequencySelect,
+} from '@/utils/regularGoal/regularFrequencySelectOptions';
 
 interface RegularGoalSettingsProps {
 	className?: string;
@@ -54,6 +62,7 @@ export const RegularGoalSettings: FC<RegularGoalSettingsProps> = (props) => {
 	} = props;
 
 	const [, element] = useBem('add-goal', className);
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
 
 	return (
 		<div className={element('regular-section')}>
@@ -71,16 +80,9 @@ export const RegularGoalSettings: FC<RegularGoalSettingsProps> = (props) => {
 						<Select
 							className={element('field')}
 							placeholder="Выберите периодичность"
-							options={[
-								{name: 'Ежедневно', value: 'daily'},
-								{name: 'N раз в неделю', value: 'weekly'},
-								{name: 'Пользовательский график', value: 'custom'},
-							]}
-							activeOption={regularFrequency === 'daily' ? 0 : regularFrequency === 'weekly' ? 1 : 2}
-							onSelect={(index) => {
-								const frequencies = ['daily', 'weekly', 'custom'] as const;
-								setRegularFrequency(frequencies[index]);
-							}}
+							options={getRegularFrequencySelectOptions(isPremium)}
+							activeOption={getRegularFrequencyActiveOption(regularFrequency)}
+							onSelect={(index) => handleRegularFrequencySelect(index, isPremium, setRegularFrequency)}
 							text="Периодичность"
 						/>
 
@@ -100,7 +102,7 @@ export const RegularGoalSettings: FC<RegularGoalSettingsProps> = (props) => {
 							/>
 						)}
 
-						{regularFrequency === 'custom' && (
+						{regularFrequency === 'custom' && canEditCustomSchedule(isPremium) && (
 							<div className={element('custom-schedule-selector')}>
 								<p className={element('field-title')}>Выберите дни недели (обязательно хотя бы один)</p>
 								<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />

@@ -20,6 +20,9 @@
 	}
 
 	&__map-section {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
 		height: 600px;
 		padding: 12px;
 		background: var(--color-white);
@@ -30,6 +33,10 @@
 		@include md {
 			padding: 0px;
 		}
+	}
+
+	&__map-load-banner {
+		flex-shrink: 0;
 	}
 
 	&__section-header {

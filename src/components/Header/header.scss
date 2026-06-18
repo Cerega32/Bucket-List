@@ -667,6 +667,7 @@
 
 	&__menu-item {
 		display: flex;
+		align-items: center;
 		padding: 8px;
 		border-radius: 6px;
 		color: var(--color-text-primary);
@@ -684,6 +685,25 @@
 
 		@include md {
 			padding: 10px 8px;
+		}
+	}
+
+	&__menu-item-text {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	&__menu-item-premium-tag {
+		padding: 0 5px;
+		border-radius: 4px;
+		font-size: 10px;
+		font-weight: var(--weight-regular);
+		line-height: 12px;
+
+		.tag__text {
+			font-size: 10px;
+			line-height: 12px;
 		}
 	}
 

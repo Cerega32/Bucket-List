@@ -37,9 +37,11 @@ interface RegularCardPropsRegular extends RegularCardPropsBase {
 interface RegularCardPropsProgress extends RegularCardPropsBase {
 	variant: 'progress';
 	progressGoal: IGoalProgress;
-	onOpenProgressModal: () => void;
-	onMarkToday: () => void;
+	onOpenProgressModal?: () => void;
+	onMarkToday?: () => void;
 	onMarkCompleted?: () => void | Promise<void>;
+	canEditProgress?: boolean;
+	demoMode?: boolean;
 	regularGoal?: never;
 	statistics?: never;
 	onMarkRegular?: never;
@@ -261,12 +263,22 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 	const isProgress = variant === 'progress';
 
 	if (isProgress) {
-		const {progressGoal: goal, onOpenProgressModal, onMarkToday} = props;
+		const {progressGoal: goal, onOpenProgressModal, onMarkToday, onMarkCompleted, canEditProgress = true, demoMode = false} = props;
 		const currentDayIndex = getCurrentDayOfWeek();
 		const percent = Math.round(goal.progressPercentage);
+		const canEdit = canEditProgress && !demoMode;
+
+		const renderPremiumProgressButton = (label: string) => (
+			<Button type="Link" href="/premium" theme="blue-light" icon="lock" className={element('premium-progress-btn')}>
+				<span className={element('premium-progress-btn-content')} title="Доступно с Premium">
+					{label}
+					<Tag text="Premium" theme="gold" className={element('premium-progress-tag')} />
+				</span>
+			</Button>
+		);
 
 		return (
-			<section className={block({horizontal, regular: true})}>
+			<section className={block({horizontal, regular: true, demo: demoMode})}>
 				<Link to={`/goals/${goal.goalCode}`} className={element('image-wrapper')}>
 					<img src={goal.goalImage} alt={goal.goalTitle} className={element('image')} />
 					<Tag text={goal.goalCategory} category={goal.goalCategoryNameEn} className={element('category-badge')} />
@@ -324,19 +336,32 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 					</div>
 					<Line />
 					<div className={element('actions')}>
-						<Button
-							theme={goal.isWorkingToday ? 'green' : 'blue'}
-							onClick={onMarkToday}
-							icon={goal.isWorkingToday ? 'regular' : 'regular-empty'}
-							className={element('primary-button')}
-							hoverContent={goal.isWorkingToday ? 'Снять отметку' : undefined}
-							hoverIcon={goal.isWorkingToday ? 'cross' : undefined}
-						>
-							{goal.isWorkingToday ? 'Отмечено сегодня' : 'Отметить сегодня'}
-						</Button>
-						<Button theme="blue-light" onClick={onOpenProgressModal} icon="signal">
-							Изменить прогресс
-						</Button>
+						{canEdit ? (
+							<>
+								<Button
+									theme={goal.isWorkingToday ? 'green' : 'blue'}
+									onClick={onMarkToday}
+									icon={goal.isWorkingToday ? 'regular' : 'regular-empty'}
+									className={element('primary-button')}
+									hoverContent={goal.isWorkingToday ? 'Снять отметку' : undefined}
+									hoverIcon={goal.isWorkingToday ? 'cross' : undefined}
+								>
+									{goal.isWorkingToday ? 'Отмечено сегодня' : 'Отметить сегодня'}
+								</Button>
+								<Button theme="blue-light" onClick={onOpenProgressModal} icon="signal">
+									Изменить прогресс
+								</Button>
+							</>
+						) : (
+							<>
+								{onMarkCompleted && (
+									<Button theme="green" onClick={onMarkCompleted} icon="done" className={element('primary-button')}>
+										Выполнить
+									</Button>
+								)}
+								{renderPremiumProgressButton('Изменить прогресс')}
+							</>
+						)}
 					</div>
 				</div>
 			</section>

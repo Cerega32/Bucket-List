@@ -1,13 +1,18 @@
 import {FC, useEffect, useRef, useState} from 'react';
+import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
 import './select.scss';
 
 import {Svg} from '../Svg/Svg';
+import {Tag} from '../Tag/Tag';
 
 export interface OptionSelect {
 	name: string;
 	value: string;
+	disabled?: boolean;
+	badge?: string;
+	badgeHref?: string;
 }
 
 interface SelectProps {
@@ -73,10 +78,31 @@ const Select: FC<SelectProps> = ({
 	};
 
 	const handleOptionClick = (active: number) => {
-		if (disabled) return;
+		if (disabled || options[active]?.disabled) return;
 
 		onSelect(active);
 		setIsOpen(false);
+	};
+
+	const renderOptionBadge = (option: OptionSelect) => {
+		if (!option.badge) return null;
+
+		const tag = <Tag text={option.badge} theme="gold" className={element('item-badge')} />;
+
+		if (!option.badgeHref) {
+			return tag;
+		}
+
+		return (
+			<Link
+				to={option.badgeHref}
+				className={element('item-badge-link')}
+				onClick={(event) => event.stopPropagation()}
+				onMouseDown={(event) => event.stopPropagation()}
+			>
+				{tag}
+			</Link>
+		);
 	};
 
 	const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -127,7 +153,10 @@ const Select: FC<SelectProps> = ({
 			case ' ':
 				event.preventDefault();
 				if (highlightedIndex !== null && visibleOptions[highlightedIndex]) {
-					handleOptionClick(visibleOptions[highlightedIndex].index);
+					const optionIndex = visibleOptions[highlightedIndex].index;
+					if (!options[optionIndex]?.disabled) {
+						handleOptionClick(optionIndex);
+					}
 				}
 				break;
 			default:
@@ -221,14 +250,17 @@ const Select: FC<SelectProps> = ({
 							className={element('item', {
 								active: activeOption === index,
 								highlighted: highlightedIndex === i,
+								disabled: option.disabled,
 							})}
 							onClick={() => handleOptionClick(index)}
 							onKeyDown={(e) => handleOptionKeyDown(e, index)}
 							role="option"
 							aria-selected={activeOption === index}
-							tabIndex={0}
+							aria-disabled={option.disabled}
+							tabIndex={option.disabled ? -1 : 0}
 						>
-							{option.name}
+							<span className={element('item-label')}>{option.name}</span>
+							{renderOptionBadge(option)}
 						</li>
 					))}
 				</ul>

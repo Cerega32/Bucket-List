@@ -38,6 +38,14 @@
 		&--blocked {
 			opacity: 0.5;
 		}
+
+		&--locked {
+			cursor: default;
+
+			&:hover {
+				border-color: var(--color-primary);
+			}
+		}
 	}
 
 	&__day-icon {

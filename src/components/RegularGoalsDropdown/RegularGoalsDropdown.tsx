@@ -72,6 +72,7 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 	const [progressGoals, setProgressGoals] = useState<IGoalProgress[]>([]);
 	const [loading, setLoading] = useState(true);
 	const isProgress = variant === 'progress';
+	const canEditProgress = isPremiumSubscriptionActive(userSelf);
 	const hideTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
 	const scheduleDropdownGoalRemoval = (goalId: number) => {
@@ -158,6 +159,9 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 	}, [isOpen, onClose]);
 
 	const handleProgressMarkToday = async (goal: IGoalProgress) => {
+		if (!canEditProgress) {
+			return;
+		}
 		try {
 			const response = await updateGoalProgress(goal.goal, {
 				progress_percentage: goal.progressPercentage,
@@ -174,6 +178,10 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 	};
 
 	const handleProgressChange = (goal: IGoalProgress) => {
+		if (!canEditProgress) {
+			navigate('/premium');
+			return;
+		}
 		ModalStore.setWindow('progress-update');
 		ModalStore.setIsOpen(true);
 		ModalStore.setModalProps({
@@ -307,6 +315,7 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(({is
 										<ProgressGoalCompactCard
 											key={progress.id}
 											progress={progress}
+											canEditProgress={canEditProgress}
 											onMarkToday={() => handleProgressMarkToday(progress)}
 											onChangeProgress={() => handleProgressChange(progress)}
 											onNavigate={onClose}

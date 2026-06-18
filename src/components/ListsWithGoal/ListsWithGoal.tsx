@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
+import {FC, useEffect} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
@@ -11,7 +11,6 @@ import {removeListGoal} from '@/utils/api/post/removeListGoal';
 import {ListsWithGoalSkeleton} from './ListsWithGoalSkeleton';
 import {Card} from '../Card/Card';
 import {EmptyState} from '../EmptyState/EmptyState';
-import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
 
 import './lists-with-goal.scss';
 
@@ -27,8 +26,6 @@ export const ListsWithGoal: FC<ListsWithGoalProps> = observer((props) => {
 	const [block] = useBem('lists-with-goal', className);
 	const {lists, setLists, setInfoPaginationLists, listsLoadedForCode, setListsLoadedForCode} = GoalStore;
 
-	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-	const [deleteTarget, setDeleteTarget] = useState<{code: string; index: number; title: string} | null>(null);
 	const {isScreenSmallMobile} = useScreenSize();
 
 	useEffect(() => {
@@ -69,19 +66,6 @@ export const ListsWithGoal: FC<ListsWithGoalProps> = observer((props) => {
 		}
 	};
 
-	const handleDeleteClick = (listCode: string, index: number, title: string) => {
-		setDeleteTarget({code: listCode, index, title});
-		setIsDeleteModalOpen(true);
-	};
-
-	const handleConfirmDelete = async () => {
-		if (deleteTarget) {
-			await updateListGoal(deleteTarget.code, deleteTarget.index, 'delete');
-		}
-		setIsDeleteModalOpen(false);
-		setDeleteTarget(null);
-	};
-
 	return (
 		<section className={block()} id="goal-lists-section">
 			{!isFresh ? (
@@ -93,27 +77,13 @@ export const ListsWithGoal: FC<ListsWithGoalProps> = observer((props) => {
 						isList
 						horizontal={!isScreenSmallMobile}
 						onClickAdd={() => updateListGoal(list.code, i, 'add')}
-						onClickDelete={async () => handleDeleteClick(list.code, i, list.title)}
+						onClickDelete={() => updateListGoal(list.code, i, 'delete')}
 						key={list.code}
 					/>
 				))
 			) : (
 				<EmptyState title="Пока нет списков с этой целью" description="Создайте список, чтобы включить в него эту цель" />
 			)}
-			<ModalConfirm
-				title="Удалить список?"
-				isOpen={isDeleteModalOpen}
-				onClose={() => {
-					setIsDeleteModalOpen(false);
-					setDeleteTarget(null);
-				}}
-				themeBtn="red"
-				handleBtn={handleConfirmDelete}
-				textBtn="Удалить"
-				text={`Вы уверены, что хотите удалить список "${
-					deleteTarget?.title || ''
-				}" из ваших списков?\nВсе цели, которые были добавлены с этим списком, будут также удалены вместе с впечатлениями.`}
-			/>
 		</section>
 	);
 });

@@ -5,6 +5,7 @@ import {Link} from 'react-router-dom';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
 
+import {FAQ_DEMOS} from './faq-demos';
 import {FaqItem} from './help-data';
 
 type Props = {
@@ -15,6 +16,7 @@ type Props = {
 
 export const HelpFaqItem: FC<Props> = ({item, isOpen, onToggle}) => {
 	const [, element] = useBem('help-container');
+	const DemoComponent = item.demo ? FAQ_DEMOS[item.demo] : null;
 
 	return (
 		<motion.div
@@ -26,7 +28,7 @@ export const HelpFaqItem: FC<Props> = ({item, isOpen, onToggle}) => {
 		>
 			<button className={element('faq-question')} onClick={onToggle} type="button">
 				<span>{item.question}</span>
-				<Svg icon="arrow--down" className={element('faq-icon', {open: isOpen})} />
+				<Svg icon="arrow--right" className={element('faq-icon', {open: isOpen})} />
 			</button>
 
 			{isOpen && (
@@ -34,6 +36,12 @@ export const HelpFaqItem: FC<Props> = ({item, isOpen, onToggle}) => {
 					{item.answer.map((paragraph, index) => (
 						<p key={index}>{paragraph}</p>
 					))}
+
+					{DemoComponent && (
+						<div className={element('faq-demo')}>
+							<DemoComponent />
+						</div>
+					)}
 
 					{item.link && (
 						<Link to={item.link} className={element('faq-link')}>

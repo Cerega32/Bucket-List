@@ -9,6 +9,7 @@ import UserMapPage from '@/pages/UserMapPage/UserMapPage';
 import {FriendsStore} from '@/store/FriendsStore';
 import {UserStore} from '@/store/UserStore';
 import {IPage} from '@/typings/page';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 
 import {UserSelfProfile} from './UserSelfProfile';
 import {UserSelfAchievements} from '../UserSelfAchievements/UserSelfAchievements';
@@ -60,7 +61,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 	};
 
 	const {userSelf} = UserStore;
-	const isPremium = userSelf.subscriptionType === 'premium';
+	const isPremiumActive = isPremiumSubscriptionActive(userSelf);
 
 	const activeGoalsAndListsCount =
 		userSelf.totalAddedGoals + userSelf.totalAddedLists - userSelf.totalCompletedGoals - userSelf.totalCompletedLists;
@@ -94,6 +95,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			name: 'Прогресс целей',
 			page: 'isUserSelfProgress',
 			count: progressGoalsCount,
+			...(!isPremiumActive ? {premiumTag: true} : {}),
 		},
 		{
 			url: '/user/self/regular',
@@ -136,7 +138,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			name: 'Цели на модерации',
 			page: 'isUserSelfPending',
 		},
-		...(isPremium
+		...(isPremiumActive
 			? []
 			: [
 					{
