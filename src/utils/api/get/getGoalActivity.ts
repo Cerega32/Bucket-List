@@ -1,20 +1,28 @@
 import {GET} from '@/utils/fetch/requests';
 
-export const getGoalActivity = async (
-	period: 'year' | 'halfyear' | 'quarter' | 'month' = 'year'
-): Promise<{success: boolean; data?: any; errors?: string}> => {
+export interface GetGoalActivityOptions {
+	period?: 'year' | 'halfyear' | 'quarter' | 'month';
+	calendarYear?: number;
+}
+
+export const getGoalActivity = async (options: GetGoalActivityOptions = {}): Promise<{success: boolean; data?: any; errors?: string}> => {
+	const {period = 'year', calendarYear} = options;
+
 	try {
-		// Используем существующую функцию GET
+		const get: Record<string, string> = {period};
+		if (calendarYear !== undefined) {
+			get['calendar_year'] = String(calendarYear);
+		}
+
 		const response = await GET('users/activity', {
-			auth: true, // Требуется аутентификация
-			get: {period}, // Параметры GET-запроса
+			auth: true,
+			get,
 			showErrorNotification: true,
-			showSuccessNotification: false, // Не показываем уведомление об успехе
+			showSuccessNotification: false,
 		});
 
 		return response;
 	} catch (error) {
-		// Просто возвращаем объект с ошибкой вместо моковых данных
 		return {
 			success: false,
 			errors: 'Не удалось загрузить данные активности',

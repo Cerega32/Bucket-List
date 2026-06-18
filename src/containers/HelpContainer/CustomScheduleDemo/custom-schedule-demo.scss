@@ -1,0 +1,54 @@
+.custom-schedule-demo {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 16px;
+	background: var(--color-secondary);
+	border: 1px solid var(--color-border);
+	border-radius: 12px;
+
+	&__caption {
+		margin: 0;
+		color: var(--color-text);
+		font-size: 14px;
+		line-height: var(--line-height-20);
+	}
+
+	&__selector {
+		justify-content: flex-start;
+	}
+
+	&__legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px 16px;
+		margin: 0;
+	}
+
+	&__legend-item {
+		color: var(--color-text-secondary);
+		font-size: 13px;
+		line-height: var(--line-height-16);
+
+		&--active {
+			&::before {
+				content: '✓ ';
+				color: var(--color-green-3);
+			}
+		}
+
+		&:not(&--active) {
+			&::before {
+				content: '× ';
+				color: var(--color-sentiment-negative);
+			}
+		}
+	}
+
+	&__result {
+		margin: 0;
+		color: var(--color-text-primary);
+		font-size: 14px;
+		line-height: var(--line-height-20);
+	}
+}

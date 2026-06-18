@@ -286,7 +286,7 @@
 		fill: var(--color-text-secondary);
 
 		&--open {
-			transform: rotate(180deg);
+			transform: rotate(-90deg);
 			fill: var(--color-primary);
 		}
 	}
@@ -317,6 +317,10 @@
 			padding: 0 20px 20px;
 			font-size: 14px;
 		}
+	}
+
+	&__faq-demo {
+		margin: 16px 0;
 	}
 
 	&__link {

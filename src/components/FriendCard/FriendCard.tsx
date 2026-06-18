@@ -3,11 +3,14 @@ import React, {useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
+import {Tag} from '@/components/Tag/Tag';
 import {useBem} from '@/hooks/useBem';
 import {FriendsStore} from '@/store/FriendsStore';
 import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
 import {IFriend} from '@/typings/user';
 import {removeFriend} from '@/utils/api/friends';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 
 import {Avatar} from '../Avatar/Avatar';
 import {Loader} from '../Loader/Loader';
@@ -36,6 +39,7 @@ export const FriendCard: React.FC<FriendCardProps> = observer(
 	({friend, variant = 'friend', onRemove, onCompare, showActions = true, actions, sinceText, outgoing, className}) => {
 		const [block, element] = useBem('friends-card', className);
 		const [isRemoving, setIsRemoving] = useState(false);
+		const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
 
 		const handleRemoveFriend = async () => {
 			try {
@@ -104,9 +108,25 @@ export const FriendCard: React.FC<FriendCardProps> = observer(
 					<div className={element('actions')}>
 						{actions ?? (
 							<>
-								<Button theme="blue-light" size="small" onClick={handleCompare}>
-									Сравнить
-								</Button>
+								{isPremium ? (
+									<Button theme="blue-light" size="small" onClick={handleCompare}>
+										Сравнить
+									</Button>
+								) : (
+									<Button
+										type="Link"
+										href="/premium"
+										theme="blue-light"
+										size="small"
+										icon="lock"
+										className={element('compare-btn')}
+									>
+										<span className={element('compare-btn-content')} title="Доступно с Premium">
+											Сравнить
+											<Tag text="Premium" theme="gold" className={element('compare-tag')} />
+										</span>
+									</Button>
+								)}
 
 								<Button theme="red" size="small" onClick={handleRemoveFriend}>
 									Удалить

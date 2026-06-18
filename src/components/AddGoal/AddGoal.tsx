@@ -14,11 +14,19 @@ import {WeekDaySchedule, WeekDaySelector} from '@/components/WeekDaySelector/Wee
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
 import {ICategory, IGoal, ILocation} from '@/typings/goal';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {postCreateGoal} from '@/utils/api/post/postCreateGoal';
 import {mapApi} from '@/utils/mapApi';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {
+	canEditCustomSchedule,
+	getRegularFrequencyActiveOption,
+	getRegularFrequencySelectOptions,
+	handleRegularFrequencySelect,
+} from '@/utils/regularGoal/regularFrequencySelectOptions';
 import {pluralize} from '@/utils/text/pluralize';
 import {debounce} from '@/utils/time/debounce';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
@@ -62,6 +70,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const location = useLocation();
 
 	const [block, element] = useBem('add-goal', className);
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
 
 	// Основные поля
 	const [title, setTitle] = useState('');
@@ -554,6 +563,15 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			return;
 		}
 
+		if (isRegular && regularFrequency === 'custom' && !isPremium) {
+			NotificationStore.addNotification({
+				type: 'warning',
+				title: 'Premium',
+				message: 'Пользовательский график доступен только с Premium',
+			});
+			return;
+		}
+
 		if (isRegular && regularFrequency === 'custom' && !Object.values(customSchedule).some(Boolean)) {
 			NotificationStore.addNotification({
 				type: 'error',
@@ -612,7 +630,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			}
 
 			// Если задан дедлайн, добавляем его в formData
-			if (deadline) {
+			if (deadline && isPremium) {
 				formData.append('deadline', deadline);
 			}
 
@@ -740,6 +758,15 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			return;
 		}
 
+		if (isRegular && regularFrequency === 'custom' && !isPremium) {
+			NotificationStore.addNotification({
+				type: 'warning',
+				title: 'Premium',
+				message: 'Пользовательский график доступен только с Premium',
+			});
+			return;
+		}
+
 		if (isRegular && regularFrequency === 'custom' && !Object.values(customSchedule).some(Boolean)) {
 			NotificationStore.addNotification({
 				type: 'error',
@@ -798,7 +825,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			}
 
 			// Если задан дедлайн, добавляем его в formData
-			if (deadline) {
+			if (deadline && isPremium) {
 				formData.append('deadline', deadline);
 			}
 
@@ -1262,16 +1289,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 										<Select
 											className={element('field')}
 											placeholder="Выберите периодичность"
-											options={[
-												{name: 'Ежедневно', value: 'daily'},
-												{name: 'N раз в неделю', value: 'weekly'},
-												{name: 'Пользовательский график', value: 'custom'},
-											]}
-											activeOption={regularFrequency === 'daily' ? 0 : regularFrequency === 'weekly' ? 1 : 2}
-											onSelect={(index) => {
-												const frequencies = ['daily', 'weekly', 'custom'] as const;
-												setRegularFrequency(frequencies[index]);
-											}}
+											options={getRegularFrequencySelectOptions(isPremium)}
+											activeOption={getRegularFrequencyActiveOption(regularFrequency)}
+											onSelect={(index) => handleRegularFrequencySelect(index, isPremium, setRegularFrequency)}
 											text="Периодичность"
 										/>
 
@@ -1291,7 +1311,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 											/>
 										)}
 
-										{regularFrequency === 'custom' && (
+										{regularFrequency === 'custom' && canEditCustomSchedule(isPremium) && (
 											<div className={element('custom-schedule-selector')}>
 												<p className={element('field-title')}>Выберите дни недели (обязательно хотя бы один)</p>
 												<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
@@ -1463,26 +1483,27 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							</small>
 						</div>
 
-						<div className={element('date-field-container')}>
-							<p className={element('field-title')}>Планируемая дата реализации</p>
-							<DatePicker
-								selected={deadline ? new Date(deadline) : null}
-								onChange={(date) => {
-									if (date) {
-										// Форматируем дату в строку в формате YYYY-MM-DD
-										setDeadline(format(date, 'yyyy-MM-dd'));
-									} else {
-										setDeadline('');
-									}
-								}}
-								className={element('date-input')}
-								placeholderText="ДД.ММ.ГГГГ"
-								minDate={new Date(new Date().setDate(new Date().getDate() + 1))} // завтра
-							/>
-							<small id="date-format-hint" className={element('format-hint')}>
-								Укажите планируемую дату достижения цели (не ранее завтрашнего дня)
-							</small>
-						</div>
+						{isPremium && (
+							<div className={element('date-field-container')}>
+								<p className={element('field-title')}>Планируемая дата реализации</p>
+								<DatePicker
+									selected={deadline ? new Date(deadline) : null}
+									onChange={(date) => {
+										if (date) {
+											setDeadline(format(date, 'yyyy-MM-dd'));
+										} else {
+											setDeadline('');
+										}
+									}}
+									className={element('date-input')}
+									placeholderText="ДД.ММ.ГГГГ"
+									minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
+								/>
+								<small id="date-format-hint" className={element('format-hint')}>
+									Укажите планируемую дату достижения цели (не ранее завтрашнего дня)
+								</small>
+							</div>
+						)}
 
 						<div className={element('btns-wrapper')}>
 							{!hideNavigation && (

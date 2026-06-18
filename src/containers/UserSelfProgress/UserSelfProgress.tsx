@@ -1,8 +1,9 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useCallback, useEffect, useMemo, useState} from 'react';
-import {useLocation} from 'react-router-dom';
+import {FC, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
 import {scroller} from 'react-scroll';
 
+import {Banner} from '@/components/Banner/Banner';
 import {Button} from '@/components/Button/Button';
 import {RegularCard} from '@/components/Card/RegularCard';
 import {CatalogItemsSkeleton} from '@/components/CatalogItems/CatalogItemsSkeleton';
@@ -19,9 +20,12 @@ import {useBem} from '@/hooks/useBem';
 import {useTodayTabDisplayList} from '@/hooks/useTodayTabDisplayList';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
 import {IPaginationPage} from '@/typings/request';
 import {getUser} from '@/utils/api/get/getUser';
 import {getGoalsInProgress, IGoalProgress, updateGoalProgress} from '@/utils/api/goals';
+import {DEMO_PROGRESS_GOALS} from '@/utils/goalProgress/progressDemoGoals';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 
 import '@/components/CatalogItems/catalog-items.scss';
 import './user-self-progress.scss';
@@ -41,7 +45,12 @@ const buildMarkedProgressGoal = (goal: IGoalProgress, isWorkingToday: boolean): 
 export const UserSelfProgress: FC = observer(() => {
 	const [block, element] = useBem('user-self-progress');
 	const location = useLocation();
+	const navigate = useNavigate();
 	const activeTab = (location.hash === '#all' ? 'all' : 'today') as 'today' | 'all';
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
+	const canEditProgress = isPremium;
+	const progressGoalsCount = UserStore.userSelf.counts?.progressGoals;
+	const skipProgressCountSyncRef = useRef(true);
 
 	const [goals, setGoals] = useState<IGoalProgress[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -103,6 +112,10 @@ export const UserSelfProgress: FC = observer(() => {
 
 			if (filterValues['categories'].length > 0) {
 				result = result.filter((g) => filterValues['categories'].includes(g.goalCategory));
+			}
+
+			if (filterValues['complexity'].length > 0) {
+				result = result.filter((g) => g.goalComplexity && filterValues['complexity'].includes(g.goalComplexity));
 			}
 
 			const sortKey = SORT_OPTIONS[activeSort]?.value;
@@ -211,6 +224,15 @@ export const UserSelfProgress: FC = observer(() => {
 	}, []);
 
 	useEffect(() => {
+		if (skipProgressCountSyncRef.current) {
+			skipProgressCountSyncRef.current = false;
+			return;
+		}
+
+		loadGoalsInProgress(currentPage, {silent: goals.length > 0}).catch(() => {});
+	}, [progressGoalsCount, currentPage]);
+
+	useEffect(() => {
 		if (activeTab === 'today') {
 			setSearch('');
 			setFilterValues({categories: [], complexity: []});
@@ -218,6 +240,9 @@ export const UserSelfProgress: FC = observer(() => {
 	}, [activeTab]);
 
 	const openProgressModal = (goal: IGoalProgress) => {
+		if (!canEditProgress) {
+			return;
+		}
 		const pageAtOpen = currentPage;
 		setWindow('progress-update');
 		setIsOpen(true);
@@ -232,6 +257,9 @@ export const UserSelfProgress: FC = observer(() => {
 	};
 
 	const markToday = async (goal: IGoalProgress) => {
+		if (!canEditProgress) {
+			return;
+		}
 		const marking = !goal.isWorkingToday;
 
 		if (marking) {
@@ -298,7 +326,7 @@ export const UserSelfProgress: FC = observer(() => {
 	const allMarkedOnPage = goals.length > 0 && pendingTodayOnPage.length === 0;
 
 	const handleToggleCompleteAllToday = async () => {
-		if (activeTab !== 'today' || isBulkTodayUpdating || goals.length === 0) {
+		if (!canEditProgress || activeTab !== 'today' || isBulkTodayUpdating || goals.length === 0) {
 			return;
 		}
 
@@ -370,6 +398,7 @@ export const UserSelfProgress: FC = observer(() => {
 
 	const isInitialLoading = isLoading && goals.length === 0;
 	const goalsToRender = activeTab === 'today' ? todayDisplayGoals : filteredAllGoals;
+	const showPremiumDemo = !isPremium && !isInitialLoading && goals.length === 0;
 
 	const buttonsSwitch = [
 		{url: '#today', name: 'На сегодня', page: 'today' as const, count: activeTab === 'today' ? todayTabCount : todayCount},
@@ -384,92 +413,129 @@ export const UserSelfProgress: FC = observer(() => {
 				</Title>
 			</div>
 			<div className={element('content')}>
-				<div className="catalog-items__filters">
-					<Switch className="catalog-items__switch" buttons={buttonsSwitch} active={activeTab} />
-					<Line className="catalog-items__line" />
-					{activeTab === 'today' ? (
-						<div>
-							<Button
-								theme="blue-light"
-								size="medium"
-								width="full"
-								icon={allMarkedOnPage ? 'regular' : 'regular-empty'}
-								onClick={handleToggleCompleteAllToday}
-								disabled={isBulkTodayUpdating || goals.length === 0}
-								hoverContent={allMarkedOnPage ? 'Снять отметку со всех на странице' : undefined}
-								hoverIcon={allMarkedOnPage ? 'cross' : undefined}
-							>
-								{allMarkedOnPage ? 'Все отмечены на сегодня' : 'Отметить все сегодня'}
-							</Button>
-						</div>
-					) : (
-						<div className="catalog-items__search-wrapper catalog-items__search-wrapper--wrap-on-lg">
-							<FieldInput
-								className="catalog-items__search"
-								placeholder="Поиск по названию цели"
-								id="user-self-progress-search"
-								value={search}
-								setValue={handleSearchChange}
-								iconBegin="search"
-							/>
-							<div className="catalog-items__categories-wrapper">
-								<FiltersDrawer
-									filters={drawerFilters}
-									values={filterValues}
-									onChange={handleFilterChange}
-									onReset={handleFilterReset}
-									totalCount={filteredAllGoals.length}
+				{showPremiumDemo ? (
+					<>
+						<Banner
+							type="gold"
+							className={element('premium-banner')}
+							title="Прогресс по целям — Premium"
+							message="Отслеживайте выполнение, отмечайте работу по дням и ведите историю прогресса. Функция доступна с подпиской Premium."
+							actionText="Оформить Premium"
+							onAction={() => navigate('/premium')}
+						/>
+						<p className={element('demo-caption')}>Так мог бы выглядеть ваш раздел:</p>
+						<div className={element('goals-grid', {demo: true})}>
+							{DEMO_PROGRESS_GOALS.map((goal) => (
+								<RegularCard
+									key={goal.id}
+									variant="progress"
+									progressGoal={goal}
+									demoMode
+									className="catalog-items__goal catalog-items__goal--full"
 								/>
-								<Select options={SORT_OPTIONS} activeOption={activeSort} onSelect={handleSortSelect} filter />
-							</div>
+							))}
 						</div>
-					)}
-				</div>
-
-				{isInitialLoading ? (
-					<CatalogItemsSkeleton columns="3" />
+					</>
 				) : (
-					<BlurLoader active={isPageLoading}>
-						{goals.length === 0 ? (
-							<EmptyState
-								title="Прогресс для целей не установлен"
-								description="Задайте отслеживание прогресса выполнения в любой активной цели"
-							>
-								<Button theme="blue" width="auto" type="Link" href="/user/self/active-goals">
-									Перейти к активным целям
-								</Button>
-							</EmptyState>
-						) : goalsToRender.length === 0 ? (
-							<EmptyState
-								title={activeTab === 'today' ? 'Нет целей на сегодня' : 'Нет целей'}
-								description={
-									activeTab === 'today'
-										? goals.length > 0 && !goals.some((g) => !g.isWorkingToday)
-											? 'На этой странице все цели уже отмечены на сегодня. Переключитесь на «Все цели» или другую страницу.'
-											: 'Список целей, по которым ещё не отмечено «работал сегодня».'
-										: 'Не найдено ни одной цели с заданным прогрессом'
-								}
+					<>
+						{!isPremium && goals.length > 0 && (
+							<Banner
+								type="info"
+								className={element('premium-banner')}
+								message="Редактирование прогресса доступно с Premium. Вы можете выполнить цель или удалить её из активных."
+								actionText="Оформить Premium"
+								onAction={() => navigate('/premium')}
 							/>
-						) : (
-							<div className={element('goals-grid')} id="user-self-progress-goals">
-								{goalsToRender.map((goal) => (
-									<RegularCard
-										key={goal.id}
-										variant="progress"
-										progressGoal={goal}
-										onOpenProgressModal={() => openProgressModal(goal)}
-										onMarkToday={() => markToday(goal)}
-										onMarkCompleted={() => markGoalCompleted(goal)}
-										className="catalog-items__goal catalog-items__goal--full"
-									/>
-								))}
-							</div>
 						)}
-					</BlurLoader>
-				)}
+						<div className="catalog-items__filters">
+							<Switch className="catalog-items__switch" buttons={buttonsSwitch} active={activeTab} />
+							<Line className="catalog-items__line" />
+							{activeTab === 'today' ? (
+								<div>
+									<Button
+										theme="blue-light"
+										size="medium"
+										width="full"
+										icon={allMarkedOnPage ? 'regular' : 'regular-empty'}
+										onClick={handleToggleCompleteAllToday}
+										disabled={!canEditProgress || isBulkTodayUpdating || goals.length === 0}
+										hoverContent={allMarkedOnPage ? 'Снять отметку со всех на странице' : undefined}
+										hoverIcon={allMarkedOnPage ? 'cross' : undefined}
+									>
+										{allMarkedOnPage ? 'Все отмечены на сегодня' : 'Отметить все сегодня'}
+									</Button>
+								</div>
+							) : (
+								<div className="catalog-items__search-wrapper catalog-items__search-wrapper--wrap-on-lg">
+									<FieldInput
+										className="catalog-items__search"
+										placeholder="Поиск по названию цели"
+										id="user-self-progress-search"
+										value={search}
+										setValue={handleSearchChange}
+										iconBegin="search"
+									/>
+									<div className="catalog-items__categories-wrapper">
+										<FiltersDrawer
+											filters={drawerFilters}
+											values={filterValues}
+											onChange={handleFilterChange}
+											onReset={handleFilterReset}
+											totalCount={filteredAllGoals.length}
+										/>
+										<Select options={SORT_OPTIONS} activeOption={activeSort} onSelect={handleSortSelect} filter />
+									</div>
+								</div>
+							)}
+						</div>
 
-				{pagination && pagination.totalPages > 1 && (
-					<Pagination currentPage={currentPage} totalPages={pagination.totalPages} goToPage={goToPage} />
+						{isInitialLoading ? (
+							<CatalogItemsSkeleton columns="3" />
+						) : (
+							<BlurLoader active={isPageLoading}>
+								{goals.length === 0 ? (
+									<EmptyState
+										title="Прогресс для целей не установлен"
+										description="Задайте отслеживание прогресса выполнения в любой активной цели"
+									>
+										<Button theme="blue" width="auto" type="Link" href="/user/self/active-goals">
+											Перейти к активным целям
+										</Button>
+									</EmptyState>
+								) : goalsToRender.length === 0 ? (
+									<EmptyState
+										title={activeTab === 'today' ? 'Нет целей на сегодня' : 'Нет целей'}
+										description={
+											activeTab === 'today'
+												? goals.length > 0 && !goals.some((g) => !g.isWorkingToday)
+													? 'На этой странице все цели уже отмечены на сегодня. Переключитесь на «Все цели» или другую страницу.'
+													: 'Список целей, по которым ещё не отмечено «работал сегодня».'
+												: 'Не найдено ни одной цели с заданным прогрессом'
+										}
+									/>
+								) : (
+									<div className={element('goals-grid')} id="user-self-progress-goals">
+										{goalsToRender.map((goal) => (
+											<RegularCard
+												key={goal.id}
+												variant="progress"
+												progressGoal={goal}
+												canEditProgress={canEditProgress}
+												onOpenProgressModal={() => openProgressModal(goal)}
+												onMarkToday={() => markToday(goal)}
+												onMarkCompleted={() => markGoalCompleted(goal)}
+												className="catalog-items__goal catalog-items__goal--full"
+											/>
+										))}
+									</div>
+								)}
+							</BlurLoader>
+						)}
+
+						{pagination && pagination.totalPages > 1 && (
+							<Pagination currentPage={currentPage} totalPages={pagination.totalPages} goToPage={goToPage} />
+						)}
+					</>
 				)}
 			</div>
 		</section>

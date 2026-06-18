@@ -12,11 +12,19 @@ import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {ThemeStore} from '@/store/ThemeStore';
+import {UserStore} from '@/store/UserStore';
 import {ICategory, IGoal, ILocation} from '@/typings/goal';
 import {deleteGoal} from '@/utils/api/delete/deleteGoal';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {updateGoal} from '@/utils/api/put/updateGoal';
 import {mapApi} from '@/utils/mapApi';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {
+	canEditCustomSchedule,
+	getRegularFrequencyActiveOption,
+	getRegularFrequencySelectOptions,
+	handleRegularFrequencySelect,
+} from '@/utils/regularGoal/regularFrequencySelectOptions';
 import {pluralize} from '@/utils/text/pluralize';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
@@ -44,6 +52,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	const navigate = useNavigate();
 
 	const [block, element] = useBem('add-goal', className); // Используем те же стили, что и для добавления
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
 	const [title, setTitle] = useState(goal.title ? goal.title.slice(0, GOAL_TITLE_MAX_LENGTH) : '');
 	const [description, setDescription] = useState(goal.description || '');
 	const [estimatedTime, setEstimatedTime] = useState(goal.estimatedTime || '');
@@ -383,6 +392,15 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 		e.preventDefault();
 
 		if (!validateRequiredFields()) {
+			return;
+		}
+
+		if (isRegular && regularFrequency === 'custom' && !isPremium) {
+			NotificationStore.addNotification({
+				type: 'warning',
+				title: 'Premium',
+				message: 'Пользовательский график доступен только с Premium',
+			});
 			return;
 		}
 
@@ -784,15 +802,10 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 												<Select
 													className={element('field')}
 													placeholder="Выберите периодичность"
-													options={[
-														{name: 'Ежедневно', value: 'daily'},
-														{name: 'N раз в неделю', value: 'weekly'},
-														{name: 'Пользовательский график', value: 'custom'},
-													]}
-													activeOption={regularFrequency === 'daily' ? 0 : regularFrequency === 'weekly' ? 1 : 2}
+													options={getRegularFrequencySelectOptions(isPremium)}
+													activeOption={getRegularFrequencyActiveOption(regularFrequency)}
 													onSelect={(index) => {
-														const frequencies = ['daily', 'weekly', 'custom'] as const;
-														setRegularFrequency(frequencies[index]);
+														handleRegularFrequencySelect(index, isPremium, setRegularFrequency);
 													}}
 													text="Периодичность"
 												/>
@@ -813,7 +826,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 													/>
 												)}
 
-												{regularFrequency === 'custom' && (
+												{regularFrequency === 'custom' && canEditCustomSchedule(isPremium) && (
 													<div className={element('custom-schedule-selector')}>
 														<p className={element('field-title')}>
 															Выберите дни недели (обязательно хотя бы один)

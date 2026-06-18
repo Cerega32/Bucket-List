@@ -87,10 +87,35 @@
 		}
 	}
 
+	&__link-start {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		min-width: 0;
+	}
+
+	&__link-icon {
+		flex-shrink: 0;
+	}
+
+	&__premium-tag {
+		padding: 0 5px;
+		border-radius: 4px;
+		font-size: 10px;
+		font-weight: var(--weight-regular);
+		line-height: 12px;
+
+		.tag__text {
+			font-size: 10px;
+			line-height: 12px;
+		}
+	}
+
 	&__count {
 		display: inline-block;
+		flex-shrink: 0;
 		padding: 1px 8px;
-		margin-left: 4px;
+		margin-left: 8px;
 		background: var(--color-gray-3);
 		border: 1px solid var(--color-border);
 		border-radius: 6px;

@@ -1,5 +1,7 @@
 export type FaqCategory = 'goals' | 'progress' | 'premium' | 'profile' | 'social' | 'system' | 'showcase';
 
+export type FaqDemoId = 'custom-schedule';
+
 export type FaqItem = {
 	id: string;
 	question: string;
@@ -7,6 +9,7 @@ export type FaqItem = {
 	category: FaqCategory;
 	link?: string;
 	linkText?: string;
+	demo?: FaqDemoId;
 };
 
 /** Подставляется id текущего пользователя в HelpContainer */
@@ -184,6 +187,24 @@ export const faq: FaqItem[] = [
 		],
 		link: '/user/self/regular',
 		linkText: 'Настроить регулярные цели',
+	},
+	{
+		id: 'custom-schedule',
+		category: 'premium',
+		question: 'Что такое пользовательский график?',
+		answer: [
+			'Пользовательский график — Premium-функция для регулярных целей. ' +
+				'Вместо «каждый день» или «N раз в неделю» вы сами отмечаете конкретные дни недели, ' +
+				'когда нужно выполнить цель.',
+			'Например: только по понедельникам, средам и пятницам — удобно для тренировок, языковых занятий ' +
+				'или любых привычек с фиксированным расписанием. Цель будет ожидать выполнения только в выбранные дни; ' +
+				'в остальные дни она не будет «просрочена».',
+			'Ниже — интерактивная демонстрация на том же компоненте, что используется при настройке регулярной цели. ' +
+				'Попробуйте включить и выключить дни — хотя бы один день всегда должен остаться в графике.',
+		],
+		demo: 'custom-schedule',
+		link: '/premium',
+		linkText: 'Подключить Premium',
 	},
 	{
 		id: 'impressions',

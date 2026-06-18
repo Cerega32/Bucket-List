@@ -110,6 +110,10 @@
 	}
 
 	&__item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 8px;
 		padding: 8px;
 		border-radius: 6px;
 		cursor: pointer;
@@ -121,6 +125,35 @@
 		&--active {
 			background-color: var(--color-white);
 			color: var(--color-primary);
+		}
+
+		&--disabled {
+			cursor: not-allowed;
+			opacity: 0.65;
+
+			&:hover {
+				background-color: transparent;
+			}
+		}
+	}
+
+	&__item-label {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__item-badge {
+		flex-shrink: 0;
+		font-size: 12px;
+	}
+
+	&__item-badge-link {
+		flex-shrink: 0;
+		text-decoration: none;
+		cursor: pointer;
+
+		&:hover {
+			opacity: 0.85;
 		}
 	}
 

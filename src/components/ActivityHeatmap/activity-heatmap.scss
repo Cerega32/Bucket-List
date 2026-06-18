@@ -5,7 +5,58 @@
 	box-shadow: 0 2px 8px rgb(var(--color-black-rgb) / 8%);
 
 	&__title {
+		margin-bottom: 0;
+	}
+
+	&__header {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		gap: 12px 16px;
 		margin-bottom: 16px;
+	}
+
+	&__period-toolbar {
+		display: flex;
+		align-items: center;
+		min-width: 0;
+	}
+
+	&__period-select {
+		min-width: 100px;
+		max-width: 160px;
+
+		.select__list {
+			width: max-content;
+			min-width: 100%;
+		}
+
+		.select__item {
+			gap: 10px;
+		}
+
+		.select__item-label {
+			flex: 0 0 auto;
+		}
+
+		.select__item-badge {
+			padding: 0 5px;
+			border-radius: 4px;
+			font-size: 10px;
+			font-weight: var(--weight-regular);
+			line-height: 12px;
+
+			.tag__text {
+				font-size: 10px;
+				line-height: 12px;
+			}
+		}
+
+		@include xs {
+			min-width: 0;
+			flex: 1;
+		}
 	}
 
 	&__stats {

@@ -19,6 +19,8 @@ import Select from '../Select/Select';
 import {Title} from '../Title/Title';
 import './add-review.scss';
 
+const MAX_REVIEW_PHOTOS = 10;
+
 interface AddReviewProps {
 	className?: string;
 	closeModal: () => void;
@@ -43,21 +45,23 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	const [showErrors, setShowErrors] = useState(false);
 	const {setComments, comments, id} = GoalStore;
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
+	const totalPhotoCount = existingPhotos.length + photos.length;
+	const canAddPhotos = totalPhotoCount < MAX_REVIEW_PHOTOS;
 
 	const onDrop = useCallback(
 		(acceptedFiles: FileList) => {
 			const filesArray = Array.from(acceptedFiles);
-			if (filesArray.length + photos.length > 10) {
+			if (filesArray.length + totalPhotoCount > MAX_REVIEW_PHOTOS) {
 				NotificationStore.addNotification({
 					type: 'error',
 					title: 'Слишком много фотографий',
-					message: 'Можно загрузить не более 10 фотографий.',
+					message: `Можно загрузить не более ${MAX_REVIEW_PHOTOS} фотографий.`,
 				});
 				return;
 			}
 			setPhotos((prevPhotos) => [...prevPhotos, ...filesArray]);
 		},
-		[photos]
+		[totalPhotoCount]
 	);
 
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -143,14 +147,19 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	};
 
 	const handleFileInputClick = () => {
-		if (fileInputRef.current) {
-			fileInputRef.current.click();
+		if (!canAddPhotos || !fileInputRef.current) {
+			return;
 		}
+		fileInputRef.current.click();
 	};
 
 	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (event.target.files) {
-			onDrop(event.target.files);
+		const {files} = event.target;
+		if (files) {
+			onDrop(files);
+		}
+		if (fileInputRef.current) {
+			fileInputRef.current.value = '';
 		}
 	};
 
@@ -197,19 +206,8 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 			/>
 			<p className={element('field-title')}>Фотографии</p>
 			<div className={element('dropzone')}>
-				<FileDrop onDrop={(files) => files && onDrop(files)}>
-					<div
-						className={element('photos')}
-						onClick={handleFileInputClick}
-						role="button"
-						tabIndex={0}
-						aria-label="Добавить фотографии"
-						onKeyPress={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') {
-								handleFileInputClick();
-							}
-						}}
-					>
+				<FileDrop onDrop={(files) => files && canAddPhotos && onDrop(files)}>
+					<div className={element('photos')}>
 						<input
 							type="file"
 							multiple
@@ -250,9 +248,16 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 								</button>
 							</div>
 						))}
-						<div className={element('btn-add')}>
-							<Svg icon="plus" />
-						</div>
+						{canAddPhotos && (
+							<button
+								type="button"
+								className={element('btn-add')}
+								onClick={handleFileInputClick}
+								aria-label="Добавить фотографии"
+							>
+								<Svg icon="plus" />
+							</button>
+						)}
 					</div>
 				</FileDrop>
 			</div>

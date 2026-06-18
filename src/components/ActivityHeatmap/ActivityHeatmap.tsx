@@ -1,14 +1,28 @@
+import {observer} from 'mobx-react-lite';
 import React, {FC, useEffect, useMemo, useState} from 'react';
 
+import Select from '@/components/Select/Select';
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {UserStore} from '@/store/UserStore';
+import {
+	ActivityPeriodSelection,
+	buildActivityPeriodSelectOptions,
+	getActivityPeriodActiveOption,
+	parseActivityPeriodSelectIndex,
+} from '@/utils/activity/activityHeatmapPeriods';
 import {getGoalActivity} from '@/utils/api/get/getGoalActivity';
+import {applyNewAchievements} from '@/utils/applyNewAchievements';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 import {pluralize} from '@/utils/text/pluralize';
 
 import {ActivityHeatmapSkeleton} from './ActivityHeatmapSkeleton';
-import './activity-heatmap.scss';
 import {EmptyState} from '../EmptyState/EmptyState';
+
+import type {IAchievement} from '@/typings/achievements';
+
+import './activity-heatmap.scss';
 
 interface ICompletedItem {
 	id: number;
@@ -93,6 +107,10 @@ type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
 
 const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period = 'year'}) => {
 	const [block, element] = useBem('activity-heatmap', className);
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
+
+	const [periodSelection, setPeriodSelection] = useState<ActivityPeriodSelection>({mode: 'rolling'});
+	const periodOptions = useMemo(() => buildActivityPeriodSelectOptions(isPremium), [isPremium]);
 
 	const [activityData, setActivityData] = useState<{
 		dates: IActivityDay[];
@@ -107,9 +125,13 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 	useEffect(() => {
 		const fetchActivityData = async () => {
 			setFetchStatus('loading');
+			setSelectedDay(null);
 
 			try {
-				const response = await getGoalActivity(period);
+				const response = await getGoalActivity({
+					period,
+					calendarYear: periodSelection.mode === 'calendar' ? periodSelection.calendarYear : undefined,
+				});
 
 				if (response.success && response.data) {
 					// Преобразуем snake_case в camelCase для совместимости с интерфейсами
@@ -118,6 +140,7 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 					}
 					setActivityData(response.data);
 					setFetchStatus('success');
+					await applyNewAchievements(response.data.newAchievements as IAchievement[] | undefined);
 				} else {
 					setFetchStatus('error');
 				}
@@ -127,7 +150,15 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 		};
 
 		fetchActivityData();
-	}, [period]);
+	}, [period, periodSelection]);
+
+	const handlePeriodSelect = (index: number) => {
+		const nextSelection = parseActivityPeriodSelectIndex(index, periodOptions);
+		if (!nextSelection) {
+			return;
+		}
+		setPeriodSelection(nextSelection);
+	};
 
 	// Преобразуем линейный массив дат в матрицу для отображения сетки
 	const prepareGridData = (): IWeekData[] => {
@@ -310,7 +341,7 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 		[activityData]
 	);
 
-	// Ширина недели в пикселях (соответствует CSS)
+	// Ширина недели в пикселях для горизонтальной прокрутки
 	const weekWidth = 19;
 
 	// Функция рендеринга ячейки для дня
@@ -492,9 +523,21 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 
 	return (
 		<div className={block()}>
-			<Title className={element('title')} tag="h2">
-				Активность выполнения целей и списков
-			</Title>
+			<div className={element('header')}>
+				<Title className={element('title')} tag="h2">
+					Активность выполнения целей и списков
+				</Title>
+
+				<div className={element('period-toolbar')}>
+					<Select
+						className={element('period-select')}
+						placeholder="Выберите период"
+						options={periodOptions}
+						activeOption={getActivityPeriodActiveOption(periodSelection, periodOptions)}
+						onSelect={handlePeriodSelect}
+					/>
+				</div>
+			</div>
 
 			{fetchStatus === 'loading' ? (
 				<ActivityHeatmapSkeleton />
@@ -673,4 +716,4 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 };
 
 // Оборачиваем компонент в React.memo для предотвращения лишних рендеров
-export const ActivityHeatmap = React.memo(ActivityHeatmapComponent);
+export const ActivityHeatmap = React.memo(observer(ActivityHeatmapComponent));

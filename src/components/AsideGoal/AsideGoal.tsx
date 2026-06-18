@@ -1,3 +1,4 @@
+import {observer} from 'mobx-react-lite';
 import {type KeyboardEvent, FC, useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
@@ -26,7 +27,7 @@ import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
 import {updateRegularGoalSettings} from '@/utils/api/post/updateRegularGoalSettings';
 import {GoalWithLocation} from '@/utils/mapApi';
 import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
-import {blockRegularGoalsAddIfLimitReached} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {blockRegularGoalsAddIfLimitReached, isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 import {
 	addDays,
 	endOfISOWeekFromMonday,
@@ -45,6 +46,7 @@ import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
 import {Progress} from '../Progress/Progress';
 import {RegularGoalSettings, SetRegularGoalModal} from '../SetRegularGoalModal/SetRegularGoalModal';
 import {Svg} from '../Svg/Svg';
+import {Tag} from '../Tag/Tag';
 
 import './aside-goal.scss';
 
@@ -118,7 +120,7 @@ export interface AsideListsProps extends AsideProps {
 	page?: never;
 }
 
-export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
+export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) => {
 	const {
 		className,
 		title,
@@ -175,6 +177,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	const [isGoalImageLightboxOpen, setIsGoalImageLightboxOpen] = useState(false);
 
 	const [block, element] = useBem('aside-goal', className);
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
+	const canEditProgress = isPremium;
 
 	// Синхронизируем локальное состояние с пропсом
 	useEffect(() => {
@@ -1007,6 +1011,9 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	};
 
 	const openProgressModal = (progressOverride?: IGoalProgress) => {
+		if (!canEditProgress) {
+			return;
+		}
 		const current = progressOverride ?? progress;
 		if (!isList && goalId && current) {
 			setWindow('progress-update');
@@ -1041,7 +1048,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	};
 
 	const handleOpenProgressModalOrStart = () => {
-		if (isList || !goalId || !isAdded || regularConfig) return;
+		if (isList || !goalId || !isAdded || regularConfig || !canEditProgress) return;
 		if (!progress) {
 			openProgressModal(buildDraftGoalProgress({goalId, title, code, image}));
 		} else {
@@ -1177,18 +1184,40 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	};
 
 	const handleProgressBarClick = () => {
+		if (!canEditProgress) {
+			return;
+		}
 		openProgressModal();
 	};
 
 	const handleProgressBarKeyDown = (e: React.KeyboardEvent) => {
+		if (!canEditProgress) {
+			return;
+		}
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
 			openProgressModal();
 		}
 	};
 
+	const renderPremiumProgressButton = (label: string) => (
+		<Button
+			type="Link"
+			href="/premium"
+			theme="blue-light"
+			icon="lock"
+			className={`${element('btn')} ${element('progress-premium-btn')}`}
+			size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+		>
+			<span className={element('progress-premium-btn-content')} title="Доступно с Premium">
+				{label}
+				<Tag text="Premium" theme="gold" className={element('progress-premium-tag')} />
+			</span>
+		</Button>
+	);
+
 	const handleMarkToday = async () => {
-		if (!goalId || !progress) return;
+		if (!goalId || !progress || !canEditProgress) return;
 		const newWorkingToday = !progress.isWorkingToday;
 		try {
 			const response = await updateGoalProgress(goalId, {
@@ -1213,8 +1242,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 	};
 
 	const handleMarkGoal = async (isCurrentlyCompleted: boolean) => {
-		// Если цель снимается с выполнения и есть прогресс, сбрасываем его
-		if (isCurrentlyCompleted && progress && goalId) {
+		// Если цель снимается с выполнения и есть прогресс — сброс только с Premium
+		if (isCurrentlyCompleted && progress && goalId && canEditProgress) {
 			try {
 				await resetGoalProgress(goalId);
 				setProgress(null);
@@ -1259,9 +1288,9 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 		refreshHeaderGoalCounts();
 	};
 
-	/** Отмена выполнения: при активном прогрессе — сначала подтверждение (прогресс будет удалён) */
+	/** Отмена выполнения: при активном прогрессе и Premium — подтверждение (прогресс будет удалён) */
 	const handleMarkGoalClick = () => {
-		if (!isList && isCompleted && progress && goalId) {
+		if (!isList && isCompleted && progress && goalId && canEditProgress) {
 			setIsUncompleteWithProgressModalOpen(true);
 			return;
 		}
@@ -2351,22 +2380,31 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 							<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
 
 							{/* Прогресс */}
-							<div
-								className={element('progress-bar')}
-								onClick={handleProgressBarClick}
-								onKeyDown={handleProgressBarKeyDown}
-								role="button"
-								tabIndex={0}
-								aria-label={`Изменить прогресс цели, текущий прогресс ${progress.progressPercentage}%`}
-								style={{cursor: 'pointer'}}
-							>
-								<div className={element('regular-series-progress')}>
-									<span className={element('regular-series-progress-label')}>Прогресс:</span>
-									<div className={element('regular-series-progress-bar')}>
-										<Progress done={progress.progressPercentage} all={100} goal />
+							{canEditProgress ? (
+								<button
+									type="button"
+									className={element('progress-bar')}
+									onClick={handleProgressBarClick}
+									onKeyDown={handleProgressBarKeyDown}
+									aria-label={`Изменить прогресс цели, текущий прогресс ${progress.progressPercentage}%`}
+								>
+									<div className={element('regular-series-progress')}>
+										<span className={element('regular-series-progress-label')}>Прогресс:</span>
+										<div className={element('regular-series-progress-bar')}>
+											<Progress done={progress.progressPercentage} all={100} goal />
+										</div>
+									</div>
+								</button>
+							) : (
+								<div className={element('progress-bar', {readonly: true})} style={{cursor: 'default'}}>
+									<div className={element('regular-series-progress')}>
+										<span className={element('regular-series-progress-label')}>Прогресс:</span>
+										<div className={element('regular-series-progress-bar')}>
+											<Progress done={progress.progressPercentage} all={100} goal />
+										</div>
 									</div>
 								</div>
-							</div>
+							)}
 							<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
 						</>
 					)}
@@ -2388,31 +2426,34 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 
 					{/* Кнопки прогресса: при 100% — только сброс прогресса */}
 					<div className={element('regular-series-actions')}>
-						{!isProgressGoalComplete && (
-							<>
-								<Button
-									theme={progress.isWorkingToday ? 'green' : 'blue'}
-									onClick={handleMarkToday}
-									icon={progress.isWorkingToday ? 'regular-checked' : 'regular-empty'}
-									className={element('btn')}
-									size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-									hoverContent={progress.isWorkingToday ? 'Снять отметку' : undefined}
-									hoverIcon={progress.isWorkingToday ? 'cross' : undefined}
-								>
-									{progress.isWorkingToday ? 'Отмечено сегодня' : 'Отметить сегодня'}
-								</Button>
-								<Button
-									theme="blue-light"
-									onClick={handleOpenProgressModalOrStart}
-									icon="signal"
-									className={element('btn')}
-									size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-								>
-									Изменить прогресс
-								</Button>
-							</>
-						)}
-						{goalId && (
+						{!isProgressGoalComplete &&
+							(canEditProgress ? (
+								<>
+									<Button
+										theme={progress.isWorkingToday ? 'green' : 'blue'}
+										onClick={handleMarkToday}
+										icon={progress.isWorkingToday ? 'regular-checked' : 'regular-empty'}
+										className={element('btn')}
+										size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+										hoverContent={progress.isWorkingToday ? 'Снять отметку' : undefined}
+										hoverIcon={progress.isWorkingToday ? 'cross' : undefined}
+									>
+										{progress.isWorkingToday ? 'Отмечено сегодня' : 'Отметить сегодня'}
+									</Button>
+									<Button
+										theme="blue-light"
+										onClick={handleOpenProgressModalOrStart}
+										icon="signal"
+										className={element('btn')}
+										size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+									>
+										Изменить прогресс
+									</Button>
+								</>
+							) : (
+								renderPremiumProgressButton('Изменить прогресс')
+							))}
+						{goalId && canEditProgress && (
 							<Button
 								theme="blue-light"
 								onClick={() => setIsDeleteProgressModalOpen(true)}
@@ -2525,17 +2566,24 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 				{isAdded && !isCompleted && !isList && !regularConfig && (
 					<GoalTimer timer={timer} goalCode={code} onTimerUpdate={handleTimerUpdate} />
 				)}
-				{!isList && isAdded && !isCompleted && !regularConfig && !progress && (
-					<Button
-						theme="blue-light"
-						onClick={handleOpenProgressModalOrStart}
-						icon="signal"
-						className={element('btn')}
-						size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-					>
-						Задать прогресс
-					</Button>
-				)}
+				{!isList &&
+					isAdded &&
+					!isCompleted &&
+					!regularConfig &&
+					!progress &&
+					(canEditProgress ? (
+						<Button
+							theme="blue-light"
+							onClick={handleOpenProgressModalOrStart}
+							icon="signal"
+							className={element('btn')}
+							size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+						>
+							Задать прогресс
+						</Button>
+					) : (
+						renderPremiumProgressButton('Задать прогресс')
+					))}
 				{isAdded && !regularConfig && !isList && (
 					<Button
 						theme="blue-light"
@@ -2803,4 +2851,4 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = (props) => {
 			)}
 		</aside>
 	);
-};
+});

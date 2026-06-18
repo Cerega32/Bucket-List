@@ -1,21 +1,32 @@
 import {observer} from 'mobx-react-lite';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 
+import {Banner} from '@/components/Banner/Banner';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {GoalMapMulti} from '@/components/GoalMap/GoalMapMulti';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ThemeStore} from '@/store/ThemeStore';
 import {MapData, mapApi} from '@/utils/mapApi';
+import {YANDEX_MAP_LOAD_ERROR_MESSAGE} from '@/utils/maps/loadYandexMapsScript';
 
 import {UserMapPageSkeleton} from './UserMapPageSkeleton';
-import './UserMapPage.scss';
+import './user-map-page.scss';
 
 const UserMapPage: React.FC = observer(() => {
 	const [mapData, setMapData] = useState<MapData | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [mapLoadError, setMapLoadError] = useState(false);
 	const [activeTab] = useState<'locations' | 'countries'>('locations');
 	const [block, element] = useBem('user-map-page');
+
+	const handleMapLoadError = useCallback(() => {
+		setMapLoadError(true);
+	}, []);
+
+	const handleMapLoadSuccess = useCallback(() => {
+		setMapLoadError(false);
+	}, []);
 
 	const {setHeader, setFull} = ThemeStore;
 
@@ -29,8 +40,8 @@ const UserMapPage: React.FC = observer(() => {
 			setLoading(true);
 			const data = await mapApi.getUserMapData();
 			setMapData(data);
-		} catch (error) {
-			console.error('Error loading user map data:', error);
+		} catch {
+			setMapData(null);
 		} finally {
 			setLoading(false);
 		}
@@ -86,22 +97,33 @@ const UserMapPage: React.FC = observer(() => {
 								{/* </div> */}
 
 								{mapData && mapData.goals?.length > 0 ? (
-									<GoalMapMulti
-										goals={mapData.goals
-											.filter(
-												(goal) =>
-													goal.location &&
-													typeof goal.location.latitude === 'number' &&
-													typeof goal.location.longitude === 'number'
-											)
-											.map((goal) => ({
-												location: goal.location!,
-												userVisitedLocation: goal.completedByUser,
-												name: goal.title,
-												address: goal.location!.address,
-												description: goal.description,
-											}))}
-									/>
+									<>
+										{mapLoadError && (
+											<Banner
+												type="warning"
+												className={element('map-load-banner')}
+												message={YANDEX_MAP_LOAD_ERROR_MESSAGE}
+											/>
+										)}
+										<GoalMapMulti
+											goals={mapData.goals
+												.filter(
+													(goal) =>
+														goal.location &&
+														typeof goal.location.latitude === 'number' &&
+														typeof goal.location.longitude === 'number'
+												)
+												.map((goal) => ({
+													location: goal.location!,
+													userVisitedLocation: goal.completedByUser,
+													name: goal.title,
+													address: goal.location!.address,
+													description: goal.description,
+												}))}
+											onLoadError={handleMapLoadError}
+											onLoadSuccess={handleMapLoadSuccess}
+										/>
+									</>
 								) : (
 									<EmptyState
 										title="У вас пока нет целей с местами"

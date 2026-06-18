@@ -42,13 +42,15 @@ export const getGoalTimer = async (goalCode: string) => {
  * @param includeExpired - включать ли истекшие таймеры
  * @returns результат запроса со списком таймеров
  */
-export const getUserTimers = async (includeExpired = true) => {
+export const getUserTimers = async (options: {includeExpired?: boolean; expiredOnly?: boolean} = {}) => {
+	const {includeExpired = false, expiredOnly = false} = options;
+
 	try {
-		// Запрос всех таймеров пользователя с учетом параметра include_expired
 		const response = await GET('timers', {
 			auth: true,
 			get: {
 				include_expired: includeExpired.toString(),
+				expired_only: expiredOnly.toString(),
 			},
 			showSuccessNotification: false,
 			showErrorNotification: false,

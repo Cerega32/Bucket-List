@@ -31,6 +31,7 @@ import {GlobalGoalsSearch} from '../GlobalGoalsSearch/GlobalGoalsSearch';
 import {Line} from '../Line/Line';
 import {ModalPhone} from '../ModalPhone/ModalPhone';
 import {Svg} from '../Svg/Svg';
+import {Tag} from '../Tag/Tag';
 
 import './header.scss';
 
@@ -291,14 +292,15 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		}
 	}, [isAuth]);
 
-	// Загрузка целей в процессе для бейджа прогресса
+	// Загрузка целей в процессе для бейджа прогресса (только Premium)
 	useEffect(() => {
-		if (isAuth) {
+		if (isAuth && isPremium) {
 			HeaderProgressGoalsStore.loadGoalsInProgress();
 		} else {
 			HeaderProgressGoalsStore.clear();
+			setIsProgressOpen(false);
 		}
-	}, [isAuth]);
+	}, [isAuth, isPremium]);
 
 	// Добавляем обработчик клика вне элементов
 	useEffect(() => {
@@ -344,7 +346,10 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				Активные цели и списки
 			</NavLink>
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/progress" end>
-				Прогресс целей
+				<span className={element('menu-item-text')}>
+					Прогресс целей
+					{!isPremium && <Tag text="Premium" theme="gold" className={element('menu-item-premium-tag')} />}
+				</span>
 			</NavLink>
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/regular" end>
 				Регулярные цели
@@ -722,8 +727,8 @@ export const Header: FC<HeaderProps> = observer((props) => {
 											)}
 										</button>
 
-										{/* Кнопка прогресса */}
-										{!isScreenMobile && (
+										{/* Кнопка прогресса — только Premium */}
+										{!isScreenMobile && isPremium && (
 											<div className={element('progress-wrapper')} ref={progressRef}>
 												<button
 													type="button"

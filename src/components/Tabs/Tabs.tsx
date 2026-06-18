@@ -4,6 +4,7 @@ import {Link, useNavigate} from 'react-router-dom';
 import {useBem} from '@/hooks/useBem';
 
 import {Svg} from '../Svg/Svg';
+import {Tag} from '../Tag/Tag';
 
 import './tabs.scss';
 
@@ -13,6 +14,7 @@ export interface ITabs {
 	page: string;
 	count?: number;
 	icon?: string;
+	premiumTag?: boolean;
 }
 
 interface TabsProps {
@@ -101,8 +103,11 @@ export const Tabs: FC<TabsProps> = (props) => {
 
 						return (
 							<Link key={tab.name} to={to} className={element('link', {active: active === tab.page})} onClick={handleClick}>
-								{tab.icon && <Svg icon={tab.icon} />}
-								{tab.name}
+								<span className={element('link-start')}>
+									{tab.name}
+									{tab.icon && <Svg icon={tab.icon} className={element('link-icon')} width="16px" height="16px" />}
+									{tab.premiumTag && <Tag text="Premium" theme="gold" className={element('premium-tag')} />}
+								</span>
 								{!!tab.count && <span className={element('count')}>{tab.count}</span>}
 							</Link>
 						);

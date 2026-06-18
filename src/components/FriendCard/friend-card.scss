@@ -90,9 +90,33 @@
 		flex-wrap: wrap;
 		gap: 8px;
 		justify-content: flex-end;
+		align-items: center;
 
 		@include xs {
 			align-items: center;
+		}
+	}
+
+	&__compare-btn {
+		width: auto;
+	}
+
+	&__compare-btn-content {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	&__compare-tag {
+		padding: 0 5px;
+		border-radius: 4px;
+		font-size: 10px;
+		font-weight: var(--weight-regular);
+		line-height: 12px;
+
+		.tag__text {
+			font-size: 10px;
+			line-height: 12px;
 		}
 	}
 }
