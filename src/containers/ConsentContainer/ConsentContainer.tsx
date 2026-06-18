@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom';
 
 import {
 	OPERATOR_EMAIL,
-	OPERATOR_FULL_NAME,
+	// OPERATOR_FULL_NAME,
 	OPERATOR_INN,
 	OPERATOR_LOCATION,
 	OPERATOR_PLATFORM,
@@ -22,11 +22,14 @@ export const ConsentContainer: FC = () => {
 					персональных данных на обработку моих персональных данных на условиях, изложенных ниже.
 				</p>
 				<p>
-					<strong>Оператор:</strong> {OPERATOR_FULL_NAME}
+					{/* <strong>Оператор:</strong> {OPERATOR_FULL_NAME} */}
+					{/* TODO: Add operator name and INN */}
+					<strong>Оператор:</strong> _
 					{OPERATOR_INN ? (
 						<>
 							<br />
-							<strong>ИНН:</strong> {OPERATOR_INN}
+							{/* <strong>ИНН:</strong> {OPERATOR_INN} */}
+							<strong>ИНН:</strong> _
 						</>
 					) : null}
 					<br />
