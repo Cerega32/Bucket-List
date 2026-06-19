@@ -48,6 +48,11 @@ interface CardGoalProps extends BaseCardProps {
 
 type CardProps = CardListProps | CardGoalProps;
 
+const isListFullyCompleted = (goal: IShortList): boolean => goal.goalsCount > 0 && goal.userCompletedGoals >= goal.goalsCount;
+
+const isCardCompleted = (goal: IShortGoal | IShortList, isList: boolean | undefined): boolean =>
+	goal.completedByUser || (!!isList && isListFullyCompleted(goal as IShortList));
+
 export const Card: FC<CardProps> = (props) => {
 	const {className, horizontal, disableNavigation, disableMark, allowAddWithoutAuth, skipDeleteConfirm, hideActions, ...restProps} =
 		props;
@@ -56,6 +61,8 @@ export const Card: FC<CardProps> = (props) => {
 	const {isScreenXs} = useScreenSize();
 
 	const {goal, isList, onClickAdd, onClickDelete, onClickMark} = restProps as CardListProps | CardGoalProps;
+
+	const isCompleted = isCardCompleted(goal, isList);
 
 	const {isAuth} = UserStore;
 	const {setIsOpen, setWindow, setFuncModal, setModalProps} = ModalStore;
@@ -101,7 +108,7 @@ export const Card: FC<CardProps> = (props) => {
 
 	const onClickMarkHandler = async (e: MouseEvent<HTMLButtonElement>) => {
 		const buttonEl = e.currentTarget;
-		const shouldCelebrate = !goal.completedByUser;
+		const shouldCelebrate = !isCompleted;
 		await onClickMark?.();
 		if (shouldCelebrate) {
 			emitConfettiFromElement(buttonEl);
@@ -111,6 +118,9 @@ export const Card: FC<CardProps> = (props) => {
 	const getProgress = () => {
 		if (!isList) return null;
 		if ('userCompletedGoals' in goal && 'goalsCount' in goal) {
+			if (goal.goalsCount === 0 || goal.userCompletedGoals >= goal.goalsCount) {
+				return null;
+			}
 			return `${Math.round((goal.userCompletedGoals / goal.goalsCount) * 100)}%`;
 		}
 		return null;
@@ -120,11 +130,11 @@ export const Card: FC<CardProps> = (props) => {
 		<section className={block({horizontal, list: isList})}>
 			{disableNavigation ? (
 				<div className={element('gradient')}>
-					<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} show={goal.completedByUser}>
+					<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} show={isCompleted}>
 						<div className={element('img-tags-wrapper')}>
 							<div className={element('img-tags')}>
 								{goal.addedByUser &&
-									!goal.completedByUser &&
+									!isCompleted &&
 									(() => {
 										const progress = getProgress();
 										return (
@@ -137,7 +147,7 @@ export const Card: FC<CardProps> = (props) => {
 											/>
 										);
 									})()}
-								{goal.completedByUser && (
+								{isCompleted && (
 									<Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
 								)}
 								{!isList && goal.regularConfig && (
@@ -163,11 +173,11 @@ export const Card: FC<CardProps> = (props) => {
 				</div>
 			) : (
 				<Link to={`/${isList ? 'list' : 'goals'}/${goal.code}`} className={element('gradient')}>
-					<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} show={goal.completedByUser}>
+					<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} show={isCompleted}>
 						<div className={element('img-tags-wrapper')}>
 							<div className={element('img-tags')}>
 								{goal.addedByUser &&
-									!goal.completedByUser &&
+									!isCompleted &&
 									(() => {
 										const progress = getProgress();
 										return (
@@ -180,7 +190,7 @@ export const Card: FC<CardProps> = (props) => {
 											/>
 										);
 									})()}
-								{goal.completedByUser && (
+								{isCompleted && (
 									<Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
 								)}
 								{!isList && goal.regularConfig && (

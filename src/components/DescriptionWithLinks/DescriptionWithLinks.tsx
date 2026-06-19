@@ -13,10 +13,6 @@ interface DescriptionWithLinksProps {
 	className?: string;
 }
 
-interface DescriptionWithLinksProps {
-	className?: string;
-}
-
 interface DescriptionListProps extends DescriptionWithLinksProps {
 	isList: true;
 	goal: IList;
@@ -29,50 +25,120 @@ interface DescriptionGoalProps extends DescriptionWithLinksProps {
 	isList?: never;
 }
 
-export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProps> = (props) => {
+type DescriptionWithLinksPropsUnion = DescriptionListProps | DescriptionGoalProps;
+
+const COLLAPSED_LINE_COUNT = 3;
+
+const getLineHeight = (element: HTMLElement, styles: CSSStyleDeclaration): number => {
+	const parsed = parseFloat(styles.lineHeight);
+	if (Number.isFinite(parsed) && parsed > 0) {
+		return parsed;
+	}
+	const fontSize = parseFloat(styles.fontSize);
+	return Number.isFinite(fontSize) ? fontSize * 1.2 : 0;
+};
+
+/** С -webkit-line-clamp scrollHeight/clientHeight на элементе ненадёжны — сравниваем полную высоту с 3 строками. */
+const measureDescriptionOverflow = (element: HTMLElement): boolean => {
+	const width = element.clientWidth;
+	if (width <= 0) {
+		return false;
+	}
+
+	const styles = window.getComputedStyle(element);
+	const lineHeight = getLineHeight(element, styles);
+	if (lineHeight <= 0) {
+		return false;
+	}
+
+	const maxCollapsedHeight = lineHeight * COLLAPSED_LINE_COUNT;
+	const clone = element.cloneNode(true) as HTMLElement;
+	clone.className = element.className.replace(/(?:^|\s)\S*--collapsed\b/g, '').trim();
+	clone.style.cssText = `
+		position: absolute;
+		left: -9999px;
+		top: 0;
+		visibility: hidden;
+		pointer-events: none;
+		box-sizing: border-box;
+		height: auto;
+		max-height: none;
+		overflow: visible;
+		display: block;
+		width: ${width}px;
+		font: ${styles.font};
+		letter-spacing: ${styles.letterSpacing};
+		word-spacing: ${styles.wordSpacing};
+		-webkit-line-clamp: unset;
+		line-clamp: unset;
+	`;
+	document.body.appendChild(clone);
+	const fullHeight = clone.getBoundingClientRect().height;
+	clone.remove();
+
+	return fullHeight > maxCollapsedHeight + 1;
+};
+
+export const DescriptionWithLinks: FC<DescriptionWithLinksPropsUnion> = (props) => {
 	const {className, goal, page, isList} = props;
 
 	const [block, element] = useBem('description-with-links', className);
 
 	const [isShortDesc, setIsShortDesc] = useState(true);
-	const [isTextOverflowing, setIsTextOverflowing] = useState(false);
+	const [showToggleButton, setShowToggleButton] = useState(false);
 	const textRef = useRef<HTMLParagraphElement>(null);
-	const wasOverflowingRef = useRef<boolean>(false);
 
 	useEffect(() => {
-		wasOverflowingRef.current = false;
-		setIsTextOverflowing(false);
+		setShowToggleButton(false);
+		setIsShortDesc(true);
 	}, [goal.description]);
 
 	useEffect(() => {
 		const textElement = textRef.current;
-		if (!textElement || !isShortDesc) return;
+		if (!textElement || !isShortDesc) {
+			return;
+		}
+
+		let cancelled = false;
+		let rafId = 0;
+		let timeoutId = 0;
 
 		const checkOverflow = () => {
-			const isOverflowing = textElement.scrollHeight > textElement.clientHeight;
-			setIsTextOverflowing(isOverflowing);
-			if (isOverflowing) {
-				wasOverflowingRef.current = true;
+			if (cancelled || !textRef.current) {
+				return;
 			}
+			setShowToggleButton(measureDescriptionOverflow(textRef.current));
 		};
 
-		const timeoutId = setTimeout(() => {
-			requestAnimationFrame(checkOverflow);
-		}, 0);
+		const scheduleCheck = () => {
+			cancelAnimationFrame(rafId);
+			window.clearTimeout(timeoutId);
+			rafId = requestAnimationFrame(checkOverflow);
+			timeoutId = window.setTimeout(checkOverflow, 150);
+		};
 
-		const resizeObserver = new ResizeObserver(() => {
-			requestAnimationFrame(checkOverflow);
-		});
+		scheduleCheck();
+
+		const resizeObserver = new ResizeObserver(scheduleCheck);
 		resizeObserver.observe(textElement);
 
+		window.addEventListener('resize', scheduleCheck);
+		document.fonts?.ready
+			.then(() => {
+				if (!cancelled) {
+					scheduleCheck();
+				}
+			})
+			.catch(() => {});
+
 		return () => {
-			clearTimeout(timeoutId);
+			cancelled = true;
+			cancelAnimationFrame(rafId);
+			window.clearTimeout(timeoutId);
 			resizeObserver.disconnect();
+			window.removeEventListener('resize', scheduleCheck);
 		};
 	}, [isShortDesc, goal.description]);
-
-	const shouldShowButton =
-		goal.shortDescription !== goal.description && (isTextOverflowing || (!isShortDesc && wasOverflowingRef.current));
 
 	const handleToggleMore = () => {
 		setIsShortDesc(!isShortDesc);
@@ -144,7 +210,7 @@ export const DescriptionWithLinks: FC<DescriptionListProps | DescriptionGoalProp
 					<p ref={textRef} className={element('short-text', {collapsed: isShortDesc})}>
 						{goal.description}
 					</p>
-					{shouldShowButton && (
+					{showToggleButton && (
 						<button type="button" className={element('toggle-button')} onClick={handleToggleMore}>
 							{isShortDesc ? 'Показать полностью' : 'Скрыть'}
 						</button>

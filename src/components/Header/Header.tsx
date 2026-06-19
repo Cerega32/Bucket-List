@@ -42,7 +42,7 @@ interface HeaderProps {
 export const Header: FC<HeaderProps> = observer((props) => {
 	const {className} = props;
 
-	const {header, page, preHeaderHiddenOverride} = ThemeStore;
+	const {header, page, preHeaderHiddenOverride, pageCategory} = ThemeStore;
 	const {setIsOpen, setWindow} = ModalStore;
 	const {categoriesTree, setCategories} = CategoriesStore;
 	const {isScreenDesktop, isScreenSmallTablet, isScreenMobile, isScreenSmallMobile, isScreenTablet} = useScreenSize();
@@ -70,6 +70,9 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const navigate = useNavigate();
 	const homePath = isAuth ? '/categories/all' : '/';
 	const isPremium = isPremiumSubscriptionActive(userSelf);
+	const guestProfileIconClass = element('profile-icon', {
+		category: !isAuth && isScreenMobile && header === 'transparent' && pageCategory ? pageCategory : undefined,
+	});
 	const regularGoalsNeedAttention = (userSelf.regularGoalsSelectionPending ?? false) || HeaderRegularGoalsStore.needsAttention;
 	const showRegularGoalsBadge = HeaderRegularGoalsStore.hasRegularGoals || regularGoalsNeedAttention;
 
@@ -89,8 +92,6 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const menuRef = useRef<HTMLElement>(null);
 	const profileMenuRef = useRef<HTMLDivElement>(null);
 	const notificationsRef = useRef<HTMLDivElement>(null);
-	const regularGoalsRef = useRef<HTMLButtonElement>(null);
-	const progressRef = useRef<HTMLDivElement>(null);
 	const categoriesRef = useRef<HTMLLIElement>(null);
 
 	const openLogin = () => {
@@ -126,20 +127,36 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const toggleNotifications = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		if (!isNotificationsOpen) {
-			HeaderNotificationsStore.fetchNotifications();
+		if (isNotificationsOpen) {
+			setIsNotificationsOpen(false);
+			return;
 		}
-		setIsNotificationsOpen(!isNotificationsOpen);
+		HeaderNotificationsStore.fetchNotifications();
+		setIsProgressOpen(false);
+		setIsRegularGoalsOpen(false);
+		setIsNotificationsOpen(true);
 	};
 
 	const toggleRegularGoals = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		setIsRegularGoalsOpen(!isRegularGoalsOpen);
+		if (isRegularGoalsOpen) {
+			setIsRegularGoalsOpen(false);
+			return;
+		}
+		setIsProgressOpen(false);
+		setIsNotificationsOpen(false);
+		setIsRegularGoalsOpen(true);
 	};
 
 	const toggleProgress = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		setIsProgressOpen(!isProgressOpen);
+		if (isProgressOpen) {
+			setIsProgressOpen(false);
+			return;
+		}
+		setIsRegularGoalsOpen(false);
+		setIsNotificationsOpen(false);
+		setIsProgressOpen(true);
 	};
 
 	// Обработчик клика вне элементов для закрытия меню
@@ -161,19 +178,11 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			setHoveredParentId(null);
 		}
 
-		// Закрытие уведомлений
+		// Закрытие уведомлений, прогресса и регулярных целей — только клик вне общей обёртки
 		if (notificationsRef.current && !notificationsRef.current.contains(target)) {
 			setIsNotificationsOpen(false);
-		}
-
-		// Закрытие регулярных целей
-		if (regularGoalsRef.current && !regularGoalsRef.current.contains(target)) {
-			setIsRegularGoalsOpen(false);
-		}
-
-		// Закрытие всплывашки прогресса
-		if (progressRef.current && !progressRef.current.contains(target)) {
 			setIsProgressOpen(false);
+			setIsRegularGoalsOpen(false);
 		}
 	}, []);
 
@@ -541,7 +550,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 										onClick={() => setIsUserMenuOpen(true)}
 										aria-label="Открыть меню пользователя"
 									>
-										<Svg icon="user" width="16px" height="16px" className={element('profile-icon')} />
+										<Svg icon="user" width="16px" height="16px" className={guestProfileIconClass} />
 									</button>
 								</div>
 							)}
@@ -729,7 +738,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 										{/* Кнопка прогресса — только Premium */}
 										{!isScreenMobile && isPremium && (
-											<div className={element('progress-wrapper')} ref={progressRef}>
+											<div className={element('progress-wrapper')}>
 												<button
 													type="button"
 													className={element('notifications-button', {
@@ -770,6 +779,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 																variant="progress"
 																isOpen={isProgressOpen}
 																onClose={() => setIsProgressOpen(false)}
+																disableClickOutside
 															/>
 														</motion.div>
 													)}
@@ -789,6 +799,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 													<NotificationDropdown
 														isOpen={isNotificationsOpen}
 														onClose={() => setIsNotificationsOpen(false)}
+														disableClickOutside
 													/>
 												</motion.div>
 											)}
@@ -850,6 +861,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 															<RegularGoalsDropdown
 																isOpen={isRegularGoalsOpen}
 																onClose={() => setIsRegularGoalsOpen(false)}
+																disableClickOutside
 															/>
 														</motion.div>
 													)}
@@ -891,7 +903,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 										onClick={() => setIsUserMenuOpen(true)}
 										aria-label="Открыть меню пользователя"
 									>
-										<Svg icon="user" width="16px" height="16px" className={element('profile-icon')} />
+										<Svg icon="user" width="16px" height="16px" className={guestProfileIconClass} />
 									</button>
 								</div>
 							</div>

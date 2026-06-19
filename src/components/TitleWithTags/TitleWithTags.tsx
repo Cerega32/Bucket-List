@@ -49,14 +49,12 @@ export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
 				type: 'success',
 				title: 'Скопировано',
 				message: 'Название скопировано в буфер обмена',
-				duration: 2500,
 			});
 		} catch {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
 				message: 'Не удалось скопировать название',
-				duration: 2500,
 			});
 		}
 	}, [title]);
