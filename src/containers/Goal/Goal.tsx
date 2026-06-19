@@ -54,7 +54,16 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0); // Триггер для обновления истории
 
 	const {setIsOpen, setWindow} = ModalStore;
-	const {setHeader} = ThemeStore;
+	const {setHeader, setPageCategory} = ThemeStore;
+
+	useEffect(() => {
+		if (!goal?.category?.nameEn) {
+			setPageCategory(null);
+			return undefined;
+		}
+		setPageCategory(goal.category.nameEn);
+		return () => setPageCategory(null);
+	}, [goal?.category?.nameEn, setPageCategory]);
 
 	useEffect(() => {
 		if (!listId) return undefined;

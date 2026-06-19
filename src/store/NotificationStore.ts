@@ -3,6 +3,8 @@ import {ReactNode} from 'react';
 
 type NotificationType = 'success' | 'error' | 'warning';
 
+export const NOTIFICATION_DISPLAY_DURATION_MS = 5000;
+
 export interface INotification {
 	id: string;
 	type: NotificationType;
@@ -35,7 +37,10 @@ class Store {
 			if (nextNotification) {
 				this.visibleNotifications.push(nextNotification);
 
-				setTimeout(() => this.removeNotification(nextNotification.id), nextNotification.duration ?? 7000);
+				setTimeout(
+					() => this.removeNotification(nextNotification.id),
+					nextNotification.duration ?? NOTIFICATION_DISPLAY_DURATION_MS
+				);
 			}
 		}
 	}

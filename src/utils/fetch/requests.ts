@@ -4,6 +4,7 @@ import {ModalStore} from '@/store/ModalStore';
 import {INotification, NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
 import {withRetry} from '@/utils/api/apiRetry';
+import {getUserFacingFetchError, getUserFacingHttpStatusError} from '@/utils/fetch/getUserFacingFetchError';
 import {scheduleHeaderGoalCountsRefresh} from '@/utils/headerGoalCountsRefresh';
 import {isRegularGoalsLimitApiError, notifyRegularGoalsLimitApiError} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 
@@ -86,6 +87,11 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 			if (response.status !== 204 && response.status !== 205) {
 				if (contentType?.includes('application/json')) {
 					data = await response.json();
+				} else if (!response.ok) {
+					return {
+						success: false,
+						errors: getUserFacingHttpStatusError(response.status),
+					};
 				} else {
 					throw new Error(`Server returned non-JSON. Status: ${response.status}`);
 				}
@@ -130,6 +136,13 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 							retry_after: data.retry_after || 1,
 							api_name: data.api_name || 'API',
 						},
+					};
+				}
+
+				if (response.status === 429) {
+					return {
+						success: false,
+						errors: getUserFacingHttpStatusError(429),
 					};
 				}
 
@@ -181,16 +194,17 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 				data,
 			};
 		} catch (error) {
+			const userMessage = getUserFacingFetchError(error instanceof Error ? error.message : error);
 			if (showErrorNotification) {
 				NotificationStore.addNotification({
 					type: 'error',
 					title: 'Ошибка сервера',
-					message: error instanceof Error ? error.message : 'Что-то пошло не так',
+					message: userMessage,
 				});
 			}
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Ошибка при выполнении запроса',
+				error: userMessage,
 			};
 		}
 	};

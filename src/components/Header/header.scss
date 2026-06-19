@@ -860,6 +860,22 @@
 					fill: var(--color-white);
 				}
 			}
+
+			&__profile-icon {
+				background: rgb(var(--color-white-rgb) / 10%);
+
+				svg *,
+				path {
+					fill: var(--color-white);
+				}
+
+				@each $category in $main-categories {
+					&--category-#{$category} {
+						background: rgb(var(--color-#{$category}-rgb) / 16%);
+						border: 1px solid rgb(var(--color-#{$category}-rgb) / 22%);
+					}
+				}
+			}
 		}
 
 		// Кнопка "Создать" (theme=\"light\")

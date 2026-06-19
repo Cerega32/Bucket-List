@@ -5,6 +5,7 @@ import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
 import {postLogin} from '@/utils/api/post/postLogin';
+import {getUserFacingFetchError} from '@/utils/fetch/getUserFacingFetchError';
 import {normalizeEmail} from '@/utils/text/normalizeEmail';
 import './login.scss';
 
@@ -27,8 +28,9 @@ export const Login: FC<LoginProps> = (props) => {
 	const [error, setError] = useState('');
 	const [emailError, setEmailError] = useState<Array<string> | undefined>(undefined);
 	const [passwordError, setPasswordError] = useState<Array<string> | undefined>(undefined);
-	// const [rememberMe, setRememberMe] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
+
+	const loginErrorFallback = 'Не удалось войти. Проверьте email и пароль или попробуйте позже.';
 
 	const signIn = async (e: FormEvent) => {
 		const normalizedEmail = normalizeEmail(email.trim().toLowerCase());
@@ -37,7 +39,7 @@ export const Login: FC<LoginProps> = (props) => {
 		setPasswordError(undefined);
 		e.preventDefault();
 		setIsLoading(true);
-		const res = await postLogin(normalizedEmail, password, true);
+		const res = await postLogin(normalizedEmail, password);
 		setIsLoading(false);
 		if (res.success) {
 			// Прогресс заданий обновляется автоматически на бэкенде
@@ -65,19 +67,16 @@ export const Login: FC<LoginProps> = (props) => {
 					setError('Неверный email или пароль');
 				}
 			} else if (typeof res.errors === 'string') {
-				// Если ошибка - строка
-				setError(res.errors);
+				setError(getUserFacingFetchError(res.errors, loginErrorFallback));
 			} else if (Array.isArray(res.errors)) {
-				// Если ошибка - массив
-				setError(res.errors[0] || 'Неверный email или пароль');
+				setError(getUserFacingFetchError(res.errors[0], loginErrorFallback) || loginErrorFallback);
 			} else {
-				setError('Неверный email или пароль');
+				setError(loginErrorFallback);
 			}
 		} else if (res.error) {
-			// Если ошибка в формате {error: "..."}
-			setError(res.error);
+			setError(getUserFacingFetchError(res.error, loginErrorFallback));
 		} else {
-			setError('Неверный email или пароль');
+			setError(loginErrorFallback);
 		}
 	};
 
@@ -111,7 +110,6 @@ export const Login: FC<LoginProps> = (props) => {
 				/>
 				{error && <p className={element('error')}>{error}</p>}
 				<div className={element('move')}>
-					{/* <FieldCheckbox id="remember" text="Запомнить меня" checked={rememberMe} setChecked={setRememberMe} /> */}
 					{openForgotPassword && (
 						<Button
 							theme="no-border"

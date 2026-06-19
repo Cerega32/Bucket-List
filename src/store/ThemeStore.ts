@@ -13,6 +13,9 @@ class Store implements IThemeStore {
 
 	page = 'isMainPage';
 
+	/** Slug категории текущей страницы (например, страница цели) — для акцентов в хедере */
+	pageCategory: string | null = null;
+
 	full = true;
 
 	/** Внешнее управление compact-состоянием хедера (например, со страницы цели) */
@@ -28,6 +31,10 @@ class Store implements IThemeStore {
 
 	setPage = (page: string) => {
 		this.page = page;
+	};
+
+	setPageCategory = (category: string | null) => {
+		this.pageCategory = category;
 	};
 
 	setFull = (full: boolean) => {

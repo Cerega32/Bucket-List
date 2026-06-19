@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
+import {ModalStore} from '@/store/ModalStore';
 import {IGoalProgress, updateGoalProgress} from '@/utils/api/goals';
 
 import {Button} from '../Button/Button';
@@ -28,12 +29,22 @@ interface ProgressUpdateModalProps {
 export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 	({goalId, currentProgress, onProgressUpdate, onGoalCompleted, onClose}) => {
 		const [block, element] = useBem('progress-update-modal');
+		const {isOpen} = ModalStore;
 
 		const [newProgress, setNewProgress] = useState(currentProgress.progressPercentage.toString());
-		const [notes, setNotes] = useState(currentProgress.dailyNotes || '');
+		const [notes, setNotes] = useState('');
 		const [workedToday, setWorkedToday] = useState(false);
 		const [isLoading, setIsLoading] = useState(false);
 		const [isSliderDragging, setIsSliderDragging] = useState(false);
+
+		useEffect(() => {
+			if (!isOpen) {
+				return;
+			}
+			setNewProgress(currentProgress.progressPercentage.toString());
+			setNotes('');
+			setWorkedToday(false);
+		}, [isOpen, goalId, currentProgress.progressPercentage]);
 
 		useEffect(() => {
 			if (!isSliderDragging) return;
@@ -76,7 +87,8 @@ export const ProgressUpdateModal: FC<ProgressUpdateModalProps> = observer(
 						}
 					}
 
-					onProgressUpdate(response.data);
+					setNotes('');
+					onProgressUpdate({...response.data, dailyNotes: ''});
 					onClose();
 				}
 			} catch (error) {
