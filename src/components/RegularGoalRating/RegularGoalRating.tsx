@@ -34,10 +34,12 @@ const getPlaceModifier = (place: number): string | undefined => {
 	return undefined;
 };
 
+const RATING_SEPARATOR_PLACE_THRESHOLD = 11;
+
 export const RegularGoalRating: FC<RegularGoalRatingProps> = ({regularGoalId, className, refreshTrigger}) => {
 	const [block, element] = useBem('regular-goal-rating', className);
 	const [users, setUsers] = useState<RegularGoalRatingUser[]>([]);
-	const [, setCurrentUserId] = useState<number | null>(null);
+	const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 	const [currentExecution, setCurrentExecution] = useState<RegularGoalRatingUser | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
@@ -129,6 +131,23 @@ export const RegularGoalRating: FC<RegularGoalRatingProps> = ({regularGoalId, cl
 		);
 	};
 
+	const currentUserEntry = currentUserId != null ? users.find((user) => user.id === currentUserId) : undefined;
+	const currentUserMainPlace = currentUserEntry?.place;
+	const isCurrentUserBelowSeparator = currentUserMainPlace != null && currentUserMainPlace > RATING_SEPARATOR_PLACE_THRESHOLD;
+
+	const topUsers = users.filter((user) => {
+		if (isCurrentUserBelowSeparator && user.id === currentUserId) {
+			return false;
+		}
+		return true;
+	});
+
+	const tailRow = currentExecution ?? (isCurrentUserBelowSeparator && currentUserEntry ? currentUserEntry : null);
+
+	const showSeparator = Boolean(
+		tailRow && topUsers.length > 0 && (isCurrentUserBelowSeparator || tailRow.place > RATING_SEPARATOR_PLACE_THRESHOLD)
+	);
+
 	return (
 		<section className={block()}>
 			<div className={element('board')}>
@@ -142,21 +161,19 @@ export const RegularGoalRating: FC<RegularGoalRatingProps> = ({regularGoalId, cl
 						</tr>
 					</thead>
 					<tbody>
-						{users.filter((user) => !currentExecution || user.id !== currentExecution.id).map((user) => renderRow(user, false))}
-						{currentExecution && (
-							<>
-								<tr className={element('separator')}>
-									<td colSpan={4} aria-label="Разделитель">
-										<div className={element('dots')}>
-											<span className={element('dot')} />
-											<span className={element('dot')} />
-											<span className={element('dot')} />
-										</div>
-									</td>
-								</tr>
-								{renderRow(currentExecution, true)}
-							</>
+						{topUsers.map((user) => renderRow(user, false))}
+						{showSeparator && (
+							<tr className={element('separator')}>
+								<td colSpan={4} aria-label="Разделитель">
+									<div className={element('dots')}>
+										<span className={element('dot')} />
+										<span className={element('dot')} />
+										<span className={element('dot')} />
+									</div>
+								</td>
+							</tr>
 						)}
+						{tailRow && renderRow(tailRow, Boolean(currentExecution))}
 					</tbody>
 				</table>
 			</div>

@@ -1735,7 +1735,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 								<span className={element('regular-info-label')}>Выполнено раз:</span>
 								<span className={element('regular-info-value')}>{regularConfig.completedSeriesCount}</span>
 							</div>
-							<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+							<Line className={element('line')} />
 						</>
 					)}
 					{regularConfig.allowCustomSettings ? (
@@ -2071,7 +2071,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 							})}
 						</div>
 					)}
-					<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+					<Line className={element('line')} />
 
 					{(() => {
 						const stats = localStatistics || regularConfig.statistics;
@@ -2081,9 +2081,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 						const showMaxStreak =
 							durationType === 'indefinite' &&
 							!resetOnSkip &&
-							seriesInfo.maxStreak > 0 &&
 							!seriesInfo.isCompleted &&
-							(seriesInfo.isInterrupted || seriesInfo.maxStreak > seriesInfo.value);
+							(seriesInfo.isInterrupted || (seriesInfo.maxStreak > 0 && seriesInfo.maxStreak > seriesInfo.value));
 						const showCompletedCount =
 							regularConfig.completedSeriesCount !== undefined && regularConfig.completedSeriesCount > 0;
 						const hasBelow = showMaxStreak || showCompletedCount;
@@ -2126,7 +2125,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 					{(seriesInfo.isCompleted ||
 						seriesInfo.isInterrupted ||
 						(regularConfig.completedSeriesCount !== undefined && regularConfig.completedSeriesCount > 0)) && (
-						<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+						<Line className={element('line')} />
 					)}
 					{/* Детали */}
 					<div className={element('regular-info-details')}>
@@ -2185,7 +2184,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 							</div>
 						) : null}
 					</div>
-					<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+					<Line className={element('line')} />
 					{/* Блок кнопок для регулярной цели */}
 					{regularConfig && isAdded && !isList && (
 						<div className={element('regular-series-actions')}>
@@ -2344,7 +2343,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 							{pluralize(getProgressMarkedDaysCount(progress), ['день', 'дня', 'дней'])}
 						</span>
 					</div>
-					<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+					<Line className={element('line')} />
 
 					{!isProgressGoalComplete && (
 						<>
@@ -2377,7 +2376,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 									);
 								})}
 							</div>
-							<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+							<Line className={element('line')} />
 
 							{/* Прогресс */}
 							{canEditProgress ? (
@@ -2405,7 +2404,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 									</div>
 								</div>
 							)}
-							<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+							<Line className={element('line')} />
 						</>
 					)}
 
@@ -2422,7 +2421,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 							</span>
 						</div>
 					</div>
-					<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+					<Line className={element('line')} />
 
 					{/* Кнопки прогресса: при 100% — только сброс прогресса */}
 					<div className={element('regular-series-actions')}>
@@ -2501,7 +2500,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 						>
 							Удалить
 						</Button>
-						<Line className={element('line')} margin={isScreenMobile ? '8px 0' : undefined} />
+						<Line className={element('line')} />
 						<Button
 							theme="blue-light"
 							icon="share"
