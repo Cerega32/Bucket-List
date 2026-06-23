@@ -80,7 +80,7 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 		return (
 			<div className={block({compact})}>
 				<div className={element('loading')}>
-					<Svg icon="loader" className={element('loading-icon')} />
+					<Svg icon="icon-loader" className={element('loading-icon')} />
 					<span>Загрузка заданий...</span>
 				</div>
 			</div>
@@ -111,7 +111,7 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 
 					<div className={element('week-stats')}>
 						<div className={element('experience')}>
-							<Svg icon="zap" className={element('experience-icon')} />
+							<Svg icon="signal" className={element('experience-icon')} />
 							<span className={element('experience-value')}>{weeklyChallenge.totalExperience} XP</span>
 						</div>
 

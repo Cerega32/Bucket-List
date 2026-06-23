@@ -19,7 +19,7 @@ export const LeadersSkeleton: FC<LeadersSkeletonProps> = (props) => {
 		<div className={block()}>
 			<div className={element('wrapper')}>
 				<Title className={element('title')} tag="h1">
-					Лидеры прошлой недели
+					Лидеры недели
 				</Title>
 				<p className={element('description')}>
 					Выполняйте цели, оставляйте впечатления, зарабатывайте очки и попадайте в число лучших пользователей за неделю.

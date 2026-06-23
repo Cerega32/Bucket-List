@@ -51,6 +51,18 @@ export interface IInfoStats {
 	experienceEarned: number;
 	goalsCompleted: number;
 	reviewsAdded: number;
+	participantsCount?: number;
+}
+
+export interface IWeekPeriod {
+	start: string;
+	end: string;
+}
+
+export interface IPreviousWeekLeaders extends IWeekPeriod {
+	leaders: Array<IWeeklyLeader>;
+	currentUserPlace?: number;
+	currentUser?: IWeeklyLeader;
 }
 
 export interface ICurrentStats {

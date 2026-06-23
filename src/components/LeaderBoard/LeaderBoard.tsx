@@ -12,11 +12,32 @@ import './leader-board.scss';
 interface LeaderBoardProps {
 	users: Array<IWeeklyLeader>;
 	className?: string;
+	highlightUserId?: number;
+	extraUser?: IWeeklyLeader;
 }
 
 export const LeaderBoard: FC<LeaderBoardProps> = (props) => {
-	const {users, className} = props;
+	const {users, className, highlightUserId, extraUser} = props;
 	const [block, element] = useBem('leader-board', className);
+
+	const renderRow = (user: IWeeklyLeader, highlighted?: boolean) => (
+		<tr className={element('row', {current: highlighted})} key={user.id}>
+			<td className={element('item')}>{user.place}</td>
+			<td className={element('item')}>
+				<Link to={`/user/${user.id}/showcase`} className={element('row-link')}>
+					<Avatar noBorder className={element('avatar')} size="medium" avatar={user.avatar} />
+					<p>{user.name}</p>
+					<p className={element('info')}>
+						{pluralize(user.level, ['уровень'])}&nbsp;
+						{pluralize(user.totalCompletedGoals, ['цель выполнена', 'цели выполнено', 'целей выполнено'])}
+					</p>
+				</Link>
+			</td>
+			<td className={element('item')}>{user.weekCompletedGoals}</td>
+			<td className={element('item')}>{user.reviewsAddedWeek}</td>
+			<td className={element('item')}>{user.experienceEarnedWeek}</td>
+		</tr>
+	);
 
 	return (
 		<section className={block()}>
@@ -31,24 +52,17 @@ export const LeaderBoard: FC<LeaderBoardProps> = (props) => {
 					</tr>
 				</thead>
 				<tbody>
-					{users.map((user) => (
-						<tr className={element('row')} key={user.id}>
-							<td className={element('item')}>{user.place}</td>
-							<td className={element('item')}>
-								<Link to={`/user/${user.id}/showcase`} className={element('row-link')}>
-									<Avatar noBorder className={element('avatar')} size="medium" avatar={user.avatar} />
-									<p>{user.name}</p>
-									<p className={element('info')}>
-										{pluralize(user.level, ['уровень'])}&nbsp;
-										{pluralize(user.totalCompletedGoals, ['цель выполнена', 'цели выполнено', 'целей выполнено'])}
-									</p>
-								</Link>
-							</td>
-							<td className={element('item')}>{user.weekCompletedGoals}</td>
-							<td className={element('item')}>{user.reviewsAddedWeek}</td>
-							<td className={element('item')}>{user.experienceEarnedWeek}</td>
-						</tr>
-					))}
+					{users.map((user) => renderRow(user, highlightUserId === user.id))}
+					{extraUser && (
+						<>
+							<tr className={element('separator-row')}>
+								<td colSpan={5} className={element('separator')}>
+									<span className={element('separator-text')}>Ваше место</span>
+								</td>
+							</tr>
+							{renderRow(extraUser, true)}
+						</>
+					)}
 				</tbody>
 			</table>
 		</section>
