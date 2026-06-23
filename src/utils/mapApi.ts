@@ -41,7 +41,14 @@ export interface GoalWithLocation {
 	description?: string;
 }
 
-export const goalsToMapPoints = (goals: IGoal[]): GoalWithLocation[] =>
+export interface GoalMapPointSource {
+	title: string;
+	description: string;
+	completedByUser: boolean;
+	location?: ILocation;
+}
+
+export const goalsToMapPoints = (goals: GoalMapPointSource[]): GoalWithLocation[] =>
 	goals
 		.filter((goal) => goal.location && typeof goal.location.latitude === 'number' && typeof goal.location.longitude === 'number')
 		.map((goal) => ({
