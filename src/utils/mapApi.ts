@@ -41,6 +41,24 @@ export interface GoalWithLocation {
 	description?: string;
 }
 
+export interface GoalMapPointSource {
+	title: string;
+	description: string;
+	completedByUser: boolean;
+	location?: ILocation;
+}
+
+export const goalsToMapPoints = (goals: GoalMapPointSource[]): GoalWithLocation[] =>
+	goals
+		.filter((goal) => goal.location && typeof goal.location.latitude === 'number' && typeof goal.location.longitude === 'number')
+		.map((goal) => ({
+			location: goal.location!,
+			userVisitedLocation: Boolean(goal.completedByUser),
+			name: goal.title,
+			address: goal.location?.address,
+			description: goal.description,
+		}));
+
 // API функции
 export const mapApi = {
 	// Получить данные карты пользователя
