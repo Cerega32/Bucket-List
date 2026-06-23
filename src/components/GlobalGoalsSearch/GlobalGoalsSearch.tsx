@@ -171,7 +171,11 @@ export const GlobalGoalsSearch: FC<GlobalGoalsSearchProps> = observer((props) =>
 		if (value.trim().length < 2 && location.pathname === '/categories/all' && searchParams.get('search')) {
 			if (searchTimer) clearTimeout(searchTimer);
 			setSearchTimer(null);
-			setSearchParams({});
+			setSearchParams((prev) => {
+				const next = new URLSearchParams(prev);
+				next.delete('search');
+				return next;
+			});
 			return;
 		}
 
