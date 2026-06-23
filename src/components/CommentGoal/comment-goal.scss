@@ -1,4 +1,6 @@
 .comment-goal {
+	$block: &;
+
 	padding: 16px;
 	background: var(--color-white);
 	border: 1px solid var(--color-gray-9);
@@ -198,5 +200,24 @@
 	&__report {
 		margin-left: auto;
 		padding: 8px;
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+		transition: opacity 0.2s ease, visibility 0.2s ease;
+
+		@media (hover: none), (pointer: coarse) {
+			opacity: 1;
+			visibility: visible;
+			pointer-events: auto;
+		}
+	}
+
+	&:hover,
+	&:focus-within {
+		#{$block}__report {
+			opacity: 1;
+			visibility: visible;
+			pointer-events: auto;
+		}
 	}
 }

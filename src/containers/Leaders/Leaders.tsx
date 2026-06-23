@@ -1,4 +1,5 @@
-import {FC, useEffect, useState} from 'react';
+import Cookies from 'js-cookie';
+import {FC, useEffect, useMemo, useState} from 'react';
 
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {InfoGoal} from '@/components/InfoGoal/InfoGoal';
@@ -6,29 +7,70 @@ import {LeaderBoard} from '@/components/LeaderBoard/LeaderBoard';
 import {LeaderPedestal} from '@/components/Leaders/LeaderPedestal';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
-import {IInfoStats, IWeeklyLeader} from '@/typings/user';
+import {IInfoStats, IPreviousWeekLeaders, IWeekPeriod, IWeeklyLeader} from '@/typings/user';
 import {getWeeklyLeaders} from '@/utils/api/get/getWeeklyLeaders';
 import {defaultInfoStats} from '@/utils/data/default';
+import {pluralize} from '@/utils/text/pluralize';
 
 import {LeadersSkeleton} from './LeadersSkeleton';
 import './leaders.scss';
 
+type LeadersPeriod = 'current' | 'previous';
+
+const formatWeekRange = (start: string, end: string) => {
+	const startDate = new Date(start);
+	const endDate = new Date(end);
+	const formatter = new Intl.DateTimeFormat('ru-RU', {day: 'numeric', month: 'long'});
+	return `${formatter.format(startDate)} — ${formatter.format(endDate)}`;
+};
+
 export const Leaders: FC = () => {
 	const [block, element] = useBem('leaders');
 	const [leaders, setLeaders] = useState<Array<IWeeklyLeader>>([]);
+	const [previousWeek, setPreviousWeek] = useState<IPreviousWeekLeaders | null>(null);
+	const [currentPeriod, setCurrentPeriod] = useState<IWeekPeriod | null>(null);
 	const [infoStats, setInfoStats] = useState<IInfoStats>(defaultInfoStats);
 	const [isLoading, setIsLoading] = useState(true);
+	const [activePeriod, setActivePeriod] = useState<LeadersPeriod>('current');
+	const currentUserId = parseInt(Cookies.get('user-id') || '0', 10);
+
 	useEffect(() => {
 		(async () => {
 			setIsLoading(true);
 			const response = await getWeeklyLeaders();
 			if (response.success) {
 				setLeaders(response.data.leaders);
+				setPreviousWeek(response.data.previousWeek);
+				setCurrentPeriod(response.data.period);
 				setInfoStats(response.data.totalStats);
 			}
 			setIsLoading(false);
 		})();
 	}, []);
+
+	const activeLeaders = activePeriod === 'current' ? leaders : previousWeek?.leaders ?? [];
+	const showPedestal = activePeriod === 'current' && leaders.length > 0;
+	const highlightUserId =
+		currentUserId > 0
+			? activePeriod === 'previous'
+				? previousWeek?.currentUserPlace && previousWeek.currentUserPlace <= 10
+					? currentUserId
+					: undefined
+				: currentUserId
+			: undefined;
+	const extraUser = activePeriod === 'previous' && currentUserId > 0 ? previousWeek?.currentUser : undefined;
+
+	const statsCaption = useMemo(() => {
+		const participants = infoStats.participantsCount ?? 0;
+		if (participants > 0) {
+			return `Суммарная активность всех участников рейтинга за текущую неделю — ${pluralize(participants, [
+				'человек',
+				'человека',
+				'человек',
+			])} соревнуются за место в топе.`;
+		}
+		return 'Суммарная активность всех участников рейтинга за текущую неделю.';
+	}, [infoStats.participantsCount]);
 
 	if (isLoading) {
 		return <LeadersSkeleton className={block()} />;
@@ -38,7 +80,7 @@ export const Leaders: FC = () => {
 		<div className={block()}>
 			<div className={element('wrapper')}>
 				<Title className={element('title')} tag="h1">
-					Лидеры прошлой недели
+					Лидеры недели
 				</Title>
 				<p className={element('description')}>
 					Выполняйте цели, оставляйте впечатления, зарабатывайте очки и попадайте в число лучших пользователей за неделю.
@@ -47,6 +89,7 @@ export const Leaders: FC = () => {
 			</div>
 			<InfoGoal
 				className={element('info')}
+				caption={statsCaption}
 				items={[
 					{title: 'Целей выполнено', value: infoStats.goalsCompleted},
 					{title: 'Добавлено впечатлений', value: infoStats.reviewsAdded},
@@ -54,16 +97,51 @@ export const Leaders: FC = () => {
 				]}
 				backgroundOff
 			/>
-			{leaders.length > 0 && <LeaderPedestal users={leaders.slice(0, 3)} className={element('pedestal')} />}
-			{leaders.length > 0 ? (
-				<LeaderBoard className={element('board')} users={leaders} />
-			) : (
-				<EmptyState
-					className={element('empty')}
-					title="Лидер недели ещё не определён"
-					description="У вас есть шанс занять первое место"
-				/>
-			)}
+			{showPedestal && <LeaderPedestal users={leaders.slice(0, 3)} className={element('pedestal')} />}
+			<div className={element('ranking')}>
+				<div className={element('period')}>
+					<div className={element('tabs')}>
+						<button
+							type="button"
+							className={element('tab', {active: activePeriod === 'current'})}
+							onClick={() => setActivePeriod('current')}
+						>
+							<span className={element('tab-label')}>Текущая неделя</span>
+							{currentPeriod && (
+								<span className={element('tab-range')}>{formatWeekRange(currentPeriod.start, currentPeriod.end)}</span>
+							)}
+						</button>
+						<button
+							type="button"
+							className={element('tab', {active: activePeriod === 'previous'})}
+							onClick={() => setActivePeriod('previous')}
+						>
+							<span className={element('tab-label')}>Прошлая неделя</span>
+							{previousWeek && (
+								<span className={element('tab-range')}>{formatWeekRange(previousWeek.start, previousWeek.end)}</span>
+							)}
+						</button>
+					</div>
+				</div>
+				{activeLeaders.length > 0 ? (
+					<LeaderBoard
+						className={element('board')}
+						users={activeLeaders}
+						highlightUserId={highlightUserId}
+						extraUser={extraUser}
+					/>
+				) : (
+					<EmptyState
+						className={element('empty')}
+						title={activePeriod === 'current' ? 'Лидер недели ещё не определён' : 'Рейтинг прошлой недели пуст'}
+						description={
+							activePeriod === 'current'
+								? 'У вас есть шанс занять первое место'
+								: 'На прошлой неделе никто не заработал очки в рейтинге'
+						}
+					/>
+				)}
+			</div>
 		</div>
 	);
 };

@@ -55,9 +55,33 @@
 			}
 		}
 
+		&--current {
+			background: var(--color-blue-50);
+
+			#{$block}__item:first-child {
+				color: var(--color-primary);
+				font-weight: var(--weight-bold);
+			}
+		}
+
 		&:last-child {
 			border: none;
 		}
+	}
+
+	&__separator-row {
+		border-bottom: 1px solid var(--color-gray-9);
+	}
+
+	&__separator {
+		padding: 8px 16px;
+		text-align: center;
+	}
+
+	&__separator-text {
+		color: var(--color-text-secondary);
+		font-size: 12px;
+		line-height: var(--line-height-12);
 	}
 
 	&__row-link {

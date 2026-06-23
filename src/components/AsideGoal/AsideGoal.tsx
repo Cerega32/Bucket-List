@@ -1640,6 +1640,25 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 		(regularStatsForActions?.totalCompletions ?? 0) > 0 || Boolean(regularStatsForActions?.lastCompletionDate);
 	const currentDayIndex = getCurrentDayOfWeek();
 	const progressPercentage = getProgressPercentage();
+	const regularDurationType = regularStatsForActions?.regularGoalData?.durationType || regularConfig?.durationType;
+	const regularResetOnSkip = regularStatsForActions?.regularGoalData?.resetOnSkip ?? regularConfig?.resetOnSkip ?? false;
+	const showRegularMaxStreak =
+		Boolean(regularConfig) &&
+		regularDurationType === 'indefinite' &&
+		!seriesInfo.isCompleted &&
+		(seriesInfo.isInterrupted || (!regularResetOnSkip && (seriesInfo.maxStreak === 0 || seriesInfo.maxStreak > seriesInfo.value)));
+	const showRegularCompletedCount = regularConfig?.completedSeriesCount !== undefined && regularConfig.completedSeriesCount > 0;
+	const isRegularCompletedWithFinite = seriesInfo.isCompleted && regularDurationType !== 'indefinite';
+	const regularDisplayProgress = isRegularCompletedWithFinite ? 100 : progressPercentage;
+	const showRegularProgress =
+		Boolean(regularConfig) &&
+		regularDurationType !== 'indefinite' &&
+		regularDisplayProgress !== null &&
+		(isRegularCompletedWithFinite || !seriesInfo.isCompleted);
+	const hasRegularSeriesMeta = showRegularMaxStreak || showRegularCompletedCount || showRegularProgress;
+	const showRegularCalendar = !seriesInfo.isInterrupted && !seriesInfo.isCompleted;
+	const showRegularLineBeforeDetails =
+		hasRegularSeriesMeta || seriesInfo.isCompleted || seriesInfo.isInterrupted || showRegularCompletedCount;
 	const isProgressGoalComplete = progress != null && progress.progressPercentage >= 100;
 	const daysForEarnedSkip =
 		(localStatistics?.regularGoalData as any)?.daysForEarnedSkip ??
@@ -1883,7 +1902,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 					})()}
 
 					{/* Календарь дней недели - показываем только если серия не прервана и не завершена */}
-					{!seriesInfo.isInterrupted && !seriesInfo.isCompleted && (
+					{showRegularCalendar && (
 						<div className={element('regular-series-days')}>
 							{Array.from({length: 7}, (_, i) => {
 								const dayName = getDayName(i);
@@ -2071,62 +2090,40 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 							})}
 						</div>
 					)}
-					<Line className={element('line')} />
+					{showRegularCalendar && <Line className={element('line')} />}
+					{!showRegularCalendar && hasRegularSeriesMeta && <Line className={element('line')} />}
 
-					{(() => {
-						const stats = localStatistics || regularConfig.statistics;
-						const source = isAdded && stats?.regularGoalData ? stats.regularGoalData : regularConfig;
-						const durationType = source.durationType || regularConfig.durationType;
-						const resetOnSkip = source.resetOnSkip ?? regularConfig.resetOnSkip;
-						const showMaxStreak =
-							durationType === 'indefinite' &&
-							!resetOnSkip &&
-							!seriesInfo.isCompleted &&
-							(seriesInfo.isInterrupted || seriesInfo.maxStreak === 0 || seriesInfo.maxStreak > seriesInfo.value);
-						const showCompletedCount =
-							regularConfig.completedSeriesCount !== undefined && regularConfig.completedSeriesCount > 0;
-						const hasBelow = showMaxStreak || showCompletedCount;
-						const isCompletedWithFinite = seriesInfo.isCompleted && durationType !== 'indefinite';
-						const displayProgress = isCompletedWithFinite ? 100 : progressPercentage;
-						const showProgress =
-							durationType !== 'indefinite' && displayProgress !== null && (isCompletedWithFinite || !seriesInfo.isCompleted);
-						return (
-							<>
-								{/* Прогресс - показывается только для целей с определенной длительностью */}
-								{showProgress && (
-									<div className={element('regular-series-progress', {tight: hasBelow})}>
-										<span className={element('regular-series-progress-label')}>Прогресс:</span>
-										<div className={element('regular-series-progress-bar')}>
-											<Progress done={displayProgress as number} all={100} goal />
-										</div>
+					{hasRegularSeriesMeta && (
+						<>
+							{showRegularProgress && (
+								<div className={element('regular-series-progress', {tight: hasRegularSeriesMeta})}>
+									<span className={element('regular-series-progress-label')}>Прогресс:</span>
+									<div className={element('regular-series-progress-bar')}>
+										<Progress done={regularDisplayProgress as number} all={100} goal />
+									</div>
+								</div>
+							)}
+							<div
+								className={element('regular-info-details', {
+									tight: showRegularProgress,
+								})}
+							>
+								{showRegularCompletedCount && (
+									<div className={element('regular-info-row')}>
+										<span className={element('regular-info-label')}>Выполнено раз:</span>
+										<span className={element('regular-info-value')}>{regularConfig.completedSeriesCount}</span>
 									</div>
 								)}
-								<div
-									className={element('regular-info-details', {
-										tight: showProgress,
-									})}
-								>
-									{showCompletedCount && (
-										<div className={element('regular-info-row')}>
-											<span className={element('regular-info-label')}>Выполнено раз:</span>
-											<span className={element('regular-info-value')}>{regularConfig.completedSeriesCount}</span>
-										</div>
-									)}
-									{showMaxStreak && (
-										<div className={element('regular-info-row')}>
-											<span className={element('regular-info-label')}>Макс. серия без пропусков:</span>
-											<span className={element('regular-info-value')}>{seriesInfo.maxStreakUnit}</span>
-										</div>
-									)}
-								</div>
-							</>
-						);
-					})()}
-					{(seriesInfo.isCompleted ||
-						seriesInfo.isInterrupted ||
-						(regularConfig.completedSeriesCount !== undefined && regularConfig.completedSeriesCount > 0)) && (
-						<Line className={element('line')} />
+								{showRegularMaxStreak && (
+									<div className={element('regular-info-row')}>
+										<span className={element('regular-info-label')}>Макс. серия без пропусков:</span>
+										<span className={element('regular-info-value')}>{seriesInfo.maxStreakUnit}</span>
+									</div>
+								)}
+							</div>
+						</>
 					)}
+					{showRegularLineBeforeDetails && <Line className={element('line')} />}
 					{/* Детали */}
 					<div className={element('regular-info-details')}>
 						<div className={element('regular-info-row')}>

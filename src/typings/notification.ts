@@ -14,6 +14,7 @@ export type NotificationType =
 	| 'merge_request'
 	| 'daily_challenge'
 	| 'weekly_challenge'
+	| 'weekly_leaderboard'
 	| 'subscription_expiring_5d'
 	| 'subscription_expiring_1d'
 	| 'subscription_expired';

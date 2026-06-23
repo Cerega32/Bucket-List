@@ -27,18 +27,18 @@ interface NotificationDropdownProps {
 const getNotificationIcon = (type: string) => {
 	switch (type) {
 		case 'friend_request':
-			return 'user-plus';
+			return 'user';
 		case 'friend_accepted':
-			return 'user-check';
+			return 'regular-checked';
 		case 'friend_rejected':
-			return 'user-x';
+			return 'regular-cancel';
 		case 'achievement':
 			return 'award';
 		case 'goal_completed':
 		case 'list_completed':
 			return 'done';
 		case 'goal_approved':
-			return 'check';
+			return 'done';
 		case 'goal_rejected':
 			return 'cross';
 		case 'level_up':
@@ -46,7 +46,9 @@ const getNotificationIcon = (type: string) => {
 		case 'daily_goal_reminder':
 		case 'daily_challenge':
 		case 'weekly_challenge':
-			return 'zap';
+			return 'signal';
+		case 'weekly_leaderboard':
+			return 'chart';
 		case 'subscription_expiring_5d':
 		case 'subscription_expiring_1d':
 		case 'subscription_expired':
@@ -95,6 +97,10 @@ const getNotificationLink = (notification: IHeaderNotification): string | null =
 
 	if (type === 'subscription_expiring_5d' || type === 'subscription_expiring_1d' || type === 'subscription_expired') {
 		return '/user/self/subs';
+	}
+
+	if (type === 'weekly_leaderboard') {
+		return '/leaders';
 	}
 
 	if (type === 'friend_request' || type === 'friend_accepted' || type === 'friend_rejected') {

@@ -22,15 +22,17 @@ interface InfoGoalProps {
 		total: number;
 	};
 	backgroundOff?: boolean;
+	caption?: string;
 }
 
 export const InfoGoal: FC<InfoGoalProps> = (props) => {
-	const {className, items, progressData, progress, horizontal, backgroundOff, size} = props;
+	const {className, items, progressData, progress, horizontal, backgroundOff, size, caption} = props;
 
 	const [block, element] = useBem('info-goal', className);
 
 	return (
 		<section className={block({horizontal, backgroundOff, small: size === 'small'})}>
+			{caption && <p className={element('caption')}>{caption}</p>}
 			<div className={element('wrapper')}>
 				{items.map((item, index) => (
 					// eslint-disable-next-line react/no-array-index-key
