@@ -22,7 +22,7 @@ import {markAllGoalsFromList} from '@/utils/api/post/markAllGoalsFromList';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
-import {GoalWithLocation} from '@/utils/mapApi';
+import {goalsToMapPoints} from '@/utils/mapApi';
 
 import {ListGoalsContainerSkeleton} from './ListGoalsContainerSkeleton';
 import './list-goals-container.scss';
@@ -207,16 +207,8 @@ const ListGoalsContainerComponent: FC = () => {
 		return <ListGoalsContainerSkeleton />;
 	}
 
-	// ��обираем массив целей с локацией для карты
-	const goalsWithLocation = list.goals
-		.filter((goal) => goal.location && typeof goal.location.latitude === 'number' && typeof goal.location.longitude === 'number')
-		.map((goal) => ({
-			location: goal.location!,
-			userVisitedLocation: goal.completedByUser,
-			name: goal.title,
-			address: goal.location?.address,
-			description: goal.description,
-		})) as GoalWithLocation[];
+	// Точки для кнопки «Открыть карту» (превью из загруженной страницы; полный набор — через maps/list API)
+	const goalsWithLocation = goalsToMapPoints(list.goals);
 
 	return (
 		<>

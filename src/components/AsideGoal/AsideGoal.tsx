@@ -25,7 +25,7 @@ import {
 } from '@/utils/api/goals';
 import {addRegularGoalToUser} from '@/utils/api/post/addRegularGoalToUser';
 import {updateRegularGoalSettings} from '@/utils/api/post/updateRegularGoalSettings';
-import {GoalWithLocation} from '@/utils/mapApi';
+import {goalsToMapPoints, GoalWithLocation, mapApi} from '@/utils/mapApi';
 import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
 import {blockRegularGoalsAddIfLimitReached, isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 import {
@@ -177,6 +177,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 	const [isUncompleteWithProgressModalOpen, setIsUncompleteWithProgressModalOpen] = useState(false);
 	const [isGoalImageLightboxOpen, setIsGoalImageLightboxOpen] = useState(false);
 	const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+	const [isMapLoading, setIsMapLoading] = useState(false);
 
 	const [block, element] = useBem('aside-goal', className);
 	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
@@ -1080,7 +1081,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 		setFuncModal(() => updateGoal(code, 'delete'));
 	};
 
-	const openMapModal = () => {
+	const openMapModal = async () => {
 		if (!isList) {
 			setWindow('goal-map');
 			setIsOpen(true);
@@ -1088,12 +1089,39 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 				location,
 				userVisitedLocation: isCompleted,
 			});
-		} else {
+			return;
+		}
+
+		const listMapCode = listCode || code;
+		setIsMapLoading(true);
+		try {
+			const data = await mapApi.getGoalListMapData(listMapCode);
+			const goals = goalsToMapPoints(data.goals);
+			if (!goals.length) {
+				NotificationStore.addNotification({
+					type: 'error',
+					title: 'Карта недоступна',
+					message: 'В этом списке нет целей с координатами',
+				});
+				return;
+			}
 			setWindow('goal-map-multi');
 			setIsOpen(true);
-			setModalProps({
-				goals: location,
+			setModalProps({goals});
+		} catch {
+			if (location?.length) {
+				setWindow('goal-map-multi');
+				setIsOpen(true);
+				setModalProps({goals: location});
+				return;
+			}
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Не удалось загрузить карту',
+				message: 'Попробуйте ещё раз позже',
 			});
+		} finally {
+			setIsMapLoading(false);
 		}
 	};
 
@@ -2648,8 +2676,9 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 								onClick={openMapModal}
 								className={element('btn')}
 								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+								disabled={isMapLoading}
 							>
-								Открыть карту
+								{isMapLoading ? 'Загрузка...' : 'Открыть карту'}
 							</Button>
 						)}
 						<Button theme="blue-light" className={element('btn')} onClick={handleRandomPick} icon="magic">
