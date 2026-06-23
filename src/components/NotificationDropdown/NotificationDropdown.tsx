@@ -258,7 +258,11 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 											) : userName ? (
 												<Avatar avatar={userAvatar} size="medium" noBorder />
 											) : (
-												<div className={element('item-icon')}>
+												<div
+													className={element('item-icon', {
+														blue: notification.type === 'weekly_leaderboard',
+													})}
+												>
 													<Svg width="24px" height="24px" icon={getNotificationIcon(notification.type)} />
 												</div>
 											)}

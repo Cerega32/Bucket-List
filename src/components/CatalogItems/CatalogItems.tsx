@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useMemo, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {FC, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 import {scroller} from 'react-scroll';
 
 import {RegularGoalSettingsModal} from '@/components/RegularGoalSettingsModal/RegularGoalSettingsModal';
@@ -120,6 +120,78 @@ function getSortOptions(isUser: boolean, isCompleted: boolean, page?: string): A
 	];
 }
 
+const EMPTY_FILTER_VALUES: Record<string, string[]> = {
+	categories: [],
+	goalType: [],
+	complexity: [],
+	hundredGoals: [],
+	goalDisplaying: [],
+};
+
+function parseFilterValuesFromSearchParams(searchParams: URLSearchParams): Record<string, string[]> {
+	return {
+		categories: searchParams.get('categories')?.split(',').filter(Boolean) ?? [],
+		goalType: searchParams.get('goal_type') ? [searchParams.get('goal_type') as string] : [],
+		complexity: searchParams.get('complexity') ? [searchParams.get('complexity') as string] : [],
+		hundredGoals: searchParams.get('hundred_goals') ? [searchParams.get('hundred_goals') as string] : [],
+		goalDisplaying: searchParams.get('display')?.split(',').filter(Boolean) ?? [],
+	};
+}
+
+function getSortIndexFromSearchParams(searchParams: URLSearchParams, sortOptions: Array<OptionSelect>): number {
+	const sortValue = searchParams.get('sort');
+	if (!sortValue) return 0;
+	const index = sortOptions.findIndex((option) => option.value === sortValue);
+	return index >= 0 ? index : 0;
+}
+
+function syncCatalogParamsToUrl(
+	prev: URLSearchParams,
+	sortValue: string,
+	filters: Record<string, string[]>,
+	defaultSortValue: string
+): URLSearchParams {
+	const next = new URLSearchParams(prev);
+
+	if (sortValue && sortValue !== defaultSortValue) {
+		next.set('sort', sortValue);
+	} else {
+		next.delete('sort');
+	}
+
+	if (filters['categories'].length > 0) {
+		next.set('categories', filters['categories'].join(','));
+	} else {
+		next.delete('categories');
+	}
+
+	if (filters['complexity'].length > 0) {
+		next.set('complexity', filters['complexity'][0]);
+	} else {
+		next.delete('complexity');
+	}
+
+	if (filters['goalType'].length > 0) {
+		next.set('goal_type', filters['goalType'][0]);
+	} else {
+		next.delete('goal_type');
+	}
+
+	if (filters['hundredGoals'].length > 0) {
+		next.set('hundred_goals', filters['hundredGoals'][0]);
+	} else {
+		next.delete('hundred_goals');
+	}
+
+	if (filters['goalDisplaying'].length > 0) {
+		next.set('display', filters['goalDisplaying'].join(','));
+	} else {
+		next.delete('display');
+	}
+
+	return next;
+}
+
 const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersProps> = (props) => {
 	const {
 		className,
@@ -149,17 +221,11 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		data: Array<IList>;
 		pagination: IPaginationPage;
 	}>({data: [], pagination: defaultPagination});
-	const [activeSort, setActiveSort] = useState(0);
+	const [searchParams, setSearchParams] = useSearchParams();
+	const searchParamsKey = searchParams.toString();
 	const [search, setSearch] = useState(initialSearch);
 	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 	const [get, setGet] = useState(userId ? {user_id: userId, completed} : {});
-	const [filterValues, setFilterValues] = useState<Record<string, string[]>>({
-		categories: [],
-		goalType: [],
-		complexity: [],
-		hundredGoals: [],
-		goalDisplaying: [],
-	});
 	const [loading, setLoading] = useState(false);
 	const [searchLoading, setSearchLoading] = useState(false);
 	const [goalsLoaded, setGoalsLoaded] = useState(false);
@@ -171,6 +237,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 	const [pendingGoalIndex, setPendingGoalIndex] = useState<number | null>(null);
 	const [isRegularLoading, setIsRegularLoading] = useState(false);
 	const navigate = useNavigate();
+	const skipUrlFetchRef = useRef(true);
 
 	const blockRegularGoalAdd = () =>
 		blockRegularGoalsAddIfLimitReached({
@@ -178,6 +245,15 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		});
 
 	const sortOptions = useMemo(() => getSortOptions(!!userId, !!completed, subPage), [userId, completed, subPage]);
+	const filterValues = useMemo(() => parseFilterValuesFromSearchParams(searchParams), [searchParamsKey]);
+	const activeSort = useMemo(() => getSortIndexFromSearchParams(searchParams, sortOptions), [searchParamsKey, sortOptions]);
+
+	const updateCatalogUrl = useCallback(
+		(sortValue: string, filters: Record<string, string[]>) => {
+			setSearchParams((prev) => syncCatalogParamsToUrl(prev, sortValue, filters, sortOptions[0].value), {replace: true});
+		},
+		[setSearchParams, sortOptions]
+	);
 
 	// Активен ли сейчас режим поиска
 	const isSearchMode = search.trim().length >= 3;
@@ -299,19 +375,76 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		return groups;
 	}, [categoryFilters, subPage, pendingCatalogReview, code, userId]);
 
+	const fetchData = useCallback(
+		async (
+			sortValue: string,
+			page?: number,
+			filtersOverride?: Record<string, string[]>,
+			queryBase?: Record<string, unknown>,
+			options?: {dataType?: 'goals' | 'lists'; silent?: boolean}
+		): Promise<boolean> => {
+			const dataType = options?.dataType ?? (subPage === 'goals' ? 'goals' : 'lists');
+			if (!options?.silent) {
+				setLoading(true);
+			}
+			try {
+				let res;
+				const currentFilters = filtersOverride ?? filterValues;
+				const goalTypeValue = currentFilters['goalType']?.[0] || 'all';
+				const categoriesSort = currentFilters['categories'] || [];
+				const goalDisplaying = currentFilters['goalDisplaying'] || [];
+				const queryParams = {
+					...(queryBase ?? get),
+					sort_by: sortValue,
+					page,
+					...(initialSearch ? {search: initialSearch} : search.trim().length >= 2 ? {search: search.trim()} : {}),
+					...(categoriesSort.length > 0 ? {categories: categoriesSort.join(',')} : {}),
+					...(currentFilters['complexity']?.length > 0 ? {complexity: currentFilters['complexity'][0]} : {}),
+					...(currentFilters['hundredGoals']?.length > 0 ? {hundred_goals: currentFilters['hundredGoals'][0]} : {}),
+					...(goalDisplaying.includes('added') ? {exclude_added: true} : {}),
+					...(goalDisplaying.includes('completed') ? {exclude_completed: true} : {}),
+				};
+
+				if (dataType === 'goals') {
+					if (pendingCatalogReview && userId) {
+						res = await getAllGoals(code, queryParams);
+					} else if (goalTypeValue === 'regular') {
+						res = await getRegularGoals(code, queryParams);
+					} else if (goalTypeValue === 'usual') {
+						res = await getUsualGoals(code, queryParams);
+					} else {
+						res = await getAllGoals(code, queryParams);
+					}
+				} else {
+					res = await getAllLists(code, queryParams);
+				}
+
+				if (res.success) {
+					if (dataType === 'goals') {
+						setGoals(res.data);
+					} else {
+						setLists(res.data);
+					}
+					return true;
+				}
+				return false;
+			} catch (error) {
+				return false;
+			} finally {
+				if (!options?.silent) {
+					setLoading(false);
+				}
+			}
+		},
+		[subPage, filterValues, get, initialSearch, search, pendingCatalogReview, userId, code]
+	);
+
 	useEffect(() => {
 		setGoalsLoaded(false);
 		(async () => {
 			const tempGet = {...userListQueryBase};
 			setGet(tempGet);
-
-			// Добавляем поисковый запрос, если он есть
-			const searchParams = initialSearch ? {search: initialSearch} : {};
-
-			const res = await getAllGoals(code, {...tempGet, sort_by: sortOptions[0].value, ...searchParams});
-			if (res.success) {
-				setGoals(res.data);
-			}
+			await fetchData(sortOptions[activeSort].value, undefined, filterValues, tempGet, {dataType: 'goals', silent: true});
 			setGoalsLoaded(true);
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -322,23 +455,21 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		(async () => {
 			const tempGet = {...userListQueryBase};
 			setGet(tempGet);
-
-			// Добавляем поисковый запрос, если он есть
-			const searchParams = initialSearch ? {search: initialSearch} : {};
-
-			const res = await getAllLists(code, {...tempGet, sort_by: sortOptions[0].value, ...searchParams});
-			if (res.success) {
-				setLists(res.data);
-			}
+			await fetchData(sortOptions[activeSort].value, undefined, filterValues, tempGet, {dataType: 'lists', silent: true});
 			setListsLoaded(true);
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [subPage, code, completed, userId, initialSearch, pendingCatalogReview, isAuth]);
 
 	useEffect(() => {
-		setActiveSort(0);
-		setFilterValues({categories: [], goalType: [], complexity: [], hundredGoals: [], goalDisplaying: []});
-	}, [subPage]);
+		if (skipUrlFetchRef.current) {
+			skipUrlFetchRef.current = false;
+			return;
+		}
+		const dataType = subPage === 'goals' ? 'goals' : 'lists';
+		fetchData(sortOptions[activeSort].value, undefined, filterValues, userListQueryBase, {dataType});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [searchParamsKey]);
 
 	// Синхронизируем поиск с URL при смене страницы/контекста (без смены вкладки)
 	useEffect(() => {
@@ -352,73 +483,16 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		onInitialLoadingChange(initialLoading);
 	}, [goalsLoaded, listsLoaded, subPage, onInitialLoadingChange]);
 
-	const fetchData = async (sortValue: string, page?: number, filtersOverride?: Record<string, string[]>): Promise<boolean> => {
-		setLoading(true);
-		try {
-			let res;
-			const currentFilters = filtersOverride ?? filterValues;
-			const goalTypeValue = currentFilters['goalType']?.[0] || 'all';
-			const categoriesSort = currentFilters['categories'] || [];
-			const goalDisplaying = currentFilters['goalDisplaying'] || [];
-			const queryParams = {
-				...get,
-				sort_by: sortValue,
-				page,
-				...(search.trim().length >= 2 ? {search: search.trim()} : {}),
-				...(categoriesSort.length > 0 ? {categories: categoriesSort.join(',')} : {}),
-				...(currentFilters['complexity']?.length > 0 ? {complexity: currentFilters['complexity'][0]} : {}),
-				...(currentFilters['hundredGoals']?.length > 0 ? {hundred_goals: currentFilters['hundredGoals'][0]} : {}),
-				...(goalDisplaying.includes('added') ? {exclude_added: true} : {}),
-				...(goalDisplaying.includes('completed') ? {exclude_completed: true} : {}),
-			};
-
-			if (subPage === 'goals') {
-				if (pendingCatalogReview && userId) {
-					res = await getAllGoals(code, queryParams);
-				} else if (goalTypeValue === 'regular') {
-					res = await getRegularGoals(code, queryParams);
-				} else if (goalTypeValue === 'usual') {
-					res = await getUsualGoals(code, queryParams);
-				} else {
-					res = await getAllGoals(code, queryParams);
-				}
-			} else {
-				res = await getAllLists(code, queryParams);
-			}
-
-			if (res.success) {
-				if (subPage === 'goals') {
-					setGoals(res.data);
-				} else {
-					setLists(res.data);
-				}
-				return true;
-			}
-			return false;
-		} catch (error) {
-			return false;
-		} finally {
-			setLoading(false);
-		}
-	};
-
 	const onSelect = async (active: number): Promise<void> => {
-		setActiveSort(active);
-		await fetchData(sortOptions[active].value, undefined, filterValues);
+		updateCatalogUrl(sortOptions[active].value, filterValues);
 	};
 
 	const handleFilterChange = (key: string, selected: string[]) => {
-		setFilterValues((prev) => {
-			const newFilters = {...prev, [key]: selected};
-			fetchData(sortOptions[activeSort].value, undefined, newFilters);
-			return newFilters;
-		});
+		updateCatalogUrl(sortOptions[activeSort].value, {...filterValues, [key]: selected});
 	};
 
 	const handleFilterReset = () => {
-		const emptyFilters = {categories: [], goalType: [], complexity: [], hundredGoals: [], goalDisplaying: []};
-		setFilterValues(emptyFilters);
-		fetchData(sortOptions[activeSort].value, undefined, emptyFilters);
+		updateCatalogUrl(sortOptions[activeSort].value, {...EMPTY_FILTER_VALUES});
 	};
 
 	const goToPage = async (active: number): Promise<boolean> => {

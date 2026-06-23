@@ -72,11 +72,19 @@ const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 				urlUpdateTimerRef.current = null;
 			}
 			if (query.trim().length < 2) {
-				setSearchParams({});
+				setSearchParams((prev) => {
+					const next = new URLSearchParams(prev);
+					next.delete('search');
+					return next;
+				});
 				return;
 			}
 			urlUpdateTimerRef.current = setTimeout(() => {
-				setSearchParams({search: query});
+				setSearchParams((prev) => {
+					const next = new URLSearchParams(prev);
+					next.set('search', query);
+					return next;
+				});
 				urlUpdateTimerRef.current = null;
 			}, 300);
 		},
