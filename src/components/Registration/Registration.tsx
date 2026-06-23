@@ -375,7 +375,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 				</div>
 
 				{/* Step 3: Registration form */}
-				<div className={element('step', {active: step === 3})}>
+				<div className={element('step', {active: step === 3, form: true})}>
 					<Title tag="h1" className={element('step-title')}>
 						Сохраните свой прогресс
 					</Title>
@@ -495,63 +495,65 @@ export const Registration: FC<RegistrationProps> = (props) => {
 
 			{/* Footer navigation */}
 			<div className={element('footer')}>
-				<Button
-					theme="blue-light"
-					icon="arrow--bottom"
-					className={element('footer-back', {hidden: step === 1})}
-					onClick={goBack}
-					width="auto"
-				>
-					Назад
-				</Button>
-
-				<div className={element('step-indicator')}>
-					<div className={element('step-rocket-wrap')}>
-						<Svg icon="rocket" className={element('step-rocket-icon')} />
-						<svg viewBox="0 0 40 40" className={element('step-progress-svg')}>
-							<circle cx="20" cy="20" r="18" fill="none" strokeWidth={3} className={element('step-progress-bg')} />
-							<circle
-								cx="20"
-								cy="20"
-								r="18"
-								fill="none"
-								strokeWidth={3}
-								strokeDasharray={circumference}
-								strokeDashoffset={progressOffset}
-								strokeLinecap="round"
-								transform="rotate(-90 20 20)"
-								className={element('step-progress-fill')}
-							/>
-						</svg>
-					</div>
-					<span className={element('step-text')}>
-						<span className={element('step-text-label')}>Шаг </span>
-						<span className={element('step-text-number')}>{`${step} из ${TOTAL_STEPS}`}</span>
-					</span>
-				</div>
-
-				{step < TOTAL_STEPS ? (
-					<div className={element('footer-actions')}>
-						<Button theme="blue-light" className={element('footer-skip')} onClick={skipStep} width="auto">
-							Пропустить
-						</Button>
-						<Button theme="blue" onClick={goNext} width="auto">
-							Далее
-						</Button>
-					</div>
-				) : (
+				<div className={element('footer-inner')}>
 					<Button
-						theme="blue"
-						className={element('footer-submit')}
-						onClick={handleSubmitClick}
-						disabled={!isFormValid}
-						loading={isLoading}
-						loadingText="Регистрация"
+						theme="blue-light"
+						icon="arrow--bottom"
+						className={element('footer-back', {hidden: step === 1})}
+						onClick={goBack}
 						width="auto"
 					>
-						Создать аккаунт и сохранить
+						Назад
 					</Button>
-				)}
+
+					<div className={element('step-indicator')}>
+						<div className={element('step-rocket-wrap')}>
+							<Svg icon="rocket" className={element('step-rocket-icon')} />
+							<svg viewBox="0 0 40 40" className={element('step-progress-svg')}>
+								<circle cx="20" cy="20" r="18" fill="none" strokeWidth={3} className={element('step-progress-bg')} />
+								<circle
+									cx="20"
+									cy="20"
+									r="18"
+									fill="none"
+									strokeWidth={3}
+									strokeDasharray={circumference}
+									strokeDashoffset={progressOffset}
+									strokeLinecap="round"
+									transform="rotate(-90 20 20)"
+									className={element('step-progress-fill')}
+								/>
+							</svg>
+						</div>
+						<span className={element('step-text')}>
+							<span className={element('step-text-label')}>Шаг </span>
+							<span className={element('step-text-number')}>{`${step} из ${TOTAL_STEPS}`}</span>
+						</span>
+					</div>
+
+					{step < TOTAL_STEPS ? (
+						<div className={element('footer-actions')}>
+							<Button theme="blue-light" className={element('footer-skip')} onClick={skipStep} width="auto">
+								Пропустить
+							</Button>
+							<Button theme="blue" onClick={goNext} width="auto">
+								Далее
+							</Button>
+						</div>
+					) : (
+						<Button
+							theme="blue"
+							className={element('footer-submit')}
+							onClick={handleSubmitClick}
+							disabled={!isFormValid}
+							loading={isLoading}
+							loadingText="Регистрация"
+							width="auto"
+						>
+							Создать аккаунт и сохранить
+						</Button>
+					)}
+				</div>
 			</div>
 		</div>
 	);

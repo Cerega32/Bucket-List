@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useRef, useState} from 'react';
+import {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
@@ -283,14 +283,18 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	};
 
 	const [compact, setCompact] = useState(false);
-	const [headerHeight, setHeaderHeight] = useState<number>(340);
-	const headerHeightRef = useRef(headerHeight);
+	const [layoutHeaderOffset, setLayoutHeaderOffset] = useState(396);
+	const headerHeightRef = useRef(396);
 	const compactRef = useRef(false);
 	const expandedHeaderHeightRef = useRef<number | null>(null);
 
 	useEffect(() => {
-		headerHeightRef.current = headerHeight;
-	}, [headerHeight]);
+		expandedHeaderHeightRef.current = null;
+		headerHeightRef.current = 396;
+		setLayoutHeaderOffset(396);
+		setCompact(false);
+		compactRef.current = false;
+	}, [listId]);
 
 	useEffect(() => {
 		compactRef.current = compact;
@@ -319,38 +323,48 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		height: 630,
 	});
 
-	const updateHeaderHeight = () => {
-		if (headerRef.current) {
-			// Временно сбрасываем clip-path чтобы измерить натуральную высоту
-			const savedClip = headerRef.current.style.clipPath;
-			headerRef.current.style.clipPath = '';
-			const h = headerRef.current.offsetHeight;
-			headerRef.current.style.clipPath = savedClip;
-			setHeaderHeight(h);
-			if (!compactRef.current) {
-				const prevExpanded = expandedHeaderHeightRef.current;
-				if (prevExpanded == null || h > prevExpanded) {
-					expandedHeaderHeightRef.current = h;
-				}
-			}
-			// Пересчитать scroll-состояние (compact, translateY, backdrop) с актуальной высотой
-			window.dispatchEvent(new Event('scroll'));
-		} else {
-			setHeaderHeight(340);
-		}
-	};
-
-	useEffect(() => {
+	const updateHeaderHeight = useCallback(() => {
 		const el = headerRef.current;
 		if (!el) return;
-		updateHeaderHeight();
-	}, [compact, isScreenMobile, isScreenSmallTablet]);
 
-	// Измеряем высоту шапки при первом появлении HeaderGoal (после загрузки goal)
+		// Временно сбрасываем clip-path/transform, чтобы измерить натуральную высоту
+		const savedClip = el.style.clipPath;
+		const savedTransform = el.style.transform;
+		el.style.clipPath = '';
+		el.style.transform = '';
+		const h = el.offsetHeight;
+		el.style.clipPath = savedClip;
+		el.style.transform = savedTransform;
+
+		headerHeightRef.current = h;
+
+		if (!compactRef.current) {
+			expandedHeaderHeightRef.current = h;
+			setLayoutHeaderOffset(h);
+		}
+
+		window.dispatchEvent(new Event('scroll'));
+	}, []);
+
 	useEffect(() => {
-		if (!headerRef.current || expandedHeaderHeightRef.current != null) return;
+		if (!goal) return;
+
+		const el = headerRef.current;
+		if (!el) return;
+
 		updateHeaderHeight();
-	});
+
+		const resizeObserver = new ResizeObserver(() => {
+			updateHeaderHeight();
+		});
+		resizeObserver.observe(el);
+		window.addEventListener('resize', updateHeaderHeight);
+
+		return () => {
+			resizeObserver.disconnect();
+			window.removeEventListener('resize', updateHeaderHeight);
+		};
+	}, [goal?.code, compact, isScreenMobile, isScreenSmallTablet, updateHeaderHeight]);
 
 	useEffect(() => {
 		let rafId: number | null = null;
@@ -444,8 +458,6 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		return <GoalSkeleton />;
 	}
 
-	const expandedHeaderHeight = expandedHeaderHeightRef.current ?? headerHeight;
-
 	return (
 		<>
 			<SEO
@@ -456,7 +468,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			/>
 			<main
 				className={block({category: goal.category.nameEn})}
-				style={{'--height-header-goal': `${expandedHeaderHeight}px`} as React.CSSProperties}
+				style={{'--height-header-goal': `${layoutHeaderOffset}px`} as React.CSSProperties}
 			>
 				<HeaderGoal
 					ref={headerRef}

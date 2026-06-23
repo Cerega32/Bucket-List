@@ -443,7 +443,7 @@ export const UserSelfProgress: FC = observer(() => {
 								type="info"
 								className={element('premium-banner')}
 								message="Редактирование прогресса доступно с Premium. Вы можете выполнить цель или удалить её из активных."
-								actionText="Оформить Premium"
+								actionText="Premium"
 								onAction={() => navigate('/premium')}
 							/>
 						)}

@@ -392,6 +392,17 @@
 	&__hundred-stats {
 		grid-column: 1 / -1;
 		width: 100%;
+
+		.info-100-goals__wrapper:not(.info-100-goals__wrapper--column) {
+			@include md {
+				flex-direction: column;
+				gap: 8px;
+
+				.line__vertical-wrap {
+					display: none;
+				}
+			}
+		}
 	}
 
 	&__demo-folder-lists {

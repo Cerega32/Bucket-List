@@ -45,6 +45,7 @@ import {Modal} from '../Modal/Modal';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
 import {Progress} from '../Progress/Progress';
 import {RegularGoalSettings, SetRegularGoalModal} from '../SetRegularGoalModal/SetRegularGoalModal';
+import {ShareGoalModal} from '../ShareGoalModal/ShareGoalModal';
 import {Svg} from '../Svg/Svg';
 import {Tag} from '../Tag/Tag';
 
@@ -175,6 +176,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 	const [isDeleteProgressModalOpen, setIsDeleteProgressModalOpen] = useState(false);
 	const [isUncompleteWithProgressModalOpen, setIsUncompleteWithProgressModalOpen] = useState(false);
 	const [isGoalImageLightboxOpen, setIsGoalImageLightboxOpen] = useState(false);
+	const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
 	const [block, element] = useBem('aside-goal', className);
 	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
@@ -1113,10 +1115,8 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 		}
 	};
 
-	const handleShare = async () => {
-		// Прогресс заданий обновляется автоматически на бэкенде
-
-		window.open(`https://telegram.me/share/url?url=${window.location.href}`, 'sharer', 'status=0,toolbar=0,width=650,height=500');
+	const handleShare = () => {
+		setIsShareModalOpen(true);
 	};
 
 	const handleAddListGoal = async () => {
@@ -2082,7 +2082,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 							durationType === 'indefinite' &&
 							!resetOnSkip &&
 							!seriesInfo.isCompleted &&
-							(seriesInfo.isInterrupted || (seriesInfo.maxStreak > 0 && seriesInfo.maxStreak > seriesInfo.value));
+							(seriesInfo.isInterrupted || seriesInfo.maxStreak === 0 || seriesInfo.maxStreak > seriesInfo.value);
 						const showCompletedCount =
 							regularConfig.completedSeriesCount !== undefined && regularConfig.completedSeriesCount > 0;
 						const hasBelow = showMaxStreak || showCompletedCount;
@@ -2704,6 +2704,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 					</>
 				)}
 			</div>
+			<ShareGoalModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} />
 			{/* Модалка подтверждения завершения серии */}
 			{regularConfig && isAdded && (
 				<ModalConfirm
