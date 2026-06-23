@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import {FC, useEffect, useMemo, useState} from 'react';
+import {FC, useEffect, useState} from 'react';
 
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {InfoGoal} from '@/components/InfoGoal/InfoGoal';
@@ -10,7 +10,6 @@ import {useBem} from '@/hooks/useBem';
 import {IInfoStats, IPreviousWeekLeaders, IWeekPeriod, IWeeklyLeader} from '@/typings/user';
 import {getWeeklyLeaders} from '@/utils/api/get/getWeeklyLeaders';
 import {defaultInfoStats} from '@/utils/data/default';
-import {pluralize} from '@/utils/text/pluralize';
 
 import {LeadersSkeleton} from './LeadersSkeleton';
 import './leaders.scss';
@@ -60,25 +59,13 @@ export const Leaders: FC = () => {
 			: undefined;
 	const extraUser = activePeriod === 'previous' && currentUserId > 0 ? previousWeek?.currentUser : undefined;
 
-	const statsCaption = useMemo(() => {
-		const participants = infoStats.participantsCount ?? 0;
-		if (participants > 0) {
-			return `Суммарная активность всех участников рейтинга за текущую неделю — ${pluralize(participants, [
-				'человек',
-				'человека',
-				'человек',
-			])} соревнуются за место в топе.`;
-		}
-		return 'Суммарная активность всех участников рейтинга за текущую неделю.';
-	}, [infoStats.participantsCount]);
-
 	if (isLoading) {
 		return <LeadersSkeleton className={block()} />;
 	}
 
 	return (
 		<div className={block()}>
-			<div className={element('wrapper')}>
+			<div className={element('intro')}>
 				<Title className={element('title')} tag="h1">
 					Лидеры недели
 				</Title>
@@ -86,42 +73,39 @@ export const Leaders: FC = () => {
 					Выполняйте цели, оставляйте впечатления, зарабатывайте очки и попадайте в число лучших пользователей за неделю.
 					Соревнуйтесь с другими и зарабатывайте награды в свой профиль. Покажите всем, что вы живёте полной жизнью!
 				</p>
+				<p className={element('info-caption')}>Активность всех участников рейтинга за текущую неделю.</p>
+				<InfoGoal
+					items={[
+						{title: 'Целей выполнено', value: infoStats.goalsCompleted},
+						{title: 'Добавлено впечатлений', value: infoStats.reviewsAdded},
+						{title: 'Опыта заработано', value: infoStats.experienceEarned},
+					]}
+					backgroundOff
+				/>
 			</div>
-			<InfoGoal
-				className={element('info')}
-				caption={statsCaption}
-				items={[
-					{title: 'Целей выполнено', value: infoStats.goalsCompleted},
-					{title: 'Добавлено впечатлений', value: infoStats.reviewsAdded},
-					{title: 'Опыта заработано', value: infoStats.experienceEarned},
-				]}
-				backgroundOff
-			/>
 			{showPedestal && <LeaderPedestal users={leaders.slice(0, 3)} className={element('pedestal')} />}
 			<div className={element('ranking')}>
-				<div className={element('period')}>
-					<div className={element('tabs')}>
-						<button
-							type="button"
-							className={element('tab', {active: activePeriod === 'current'})}
-							onClick={() => setActivePeriod('current')}
-						>
-							<span className={element('tab-label')}>Текущая неделя</span>
-							{currentPeriod && (
-								<span className={element('tab-range')}>{formatWeekRange(currentPeriod.start, currentPeriod.end)}</span>
-							)}
-						</button>
-						<button
-							type="button"
-							className={element('tab', {active: activePeriod === 'previous'})}
-							onClick={() => setActivePeriod('previous')}
-						>
-							<span className={element('tab-label')}>Прошлая неделя</span>
-							{previousWeek && (
-								<span className={element('tab-range')}>{formatWeekRange(previousWeek.start, previousWeek.end)}</span>
-							)}
-						</button>
-					</div>
+				<div className={element('tabs')}>
+					<button
+						type="button"
+						className={element('tab', {active: activePeriod === 'current'})}
+						onClick={() => setActivePeriod('current')}
+					>
+						<span className={element('tab-label')}>Текущая неделя</span>
+						{currentPeriod && (
+							<span className={element('tab-range')}>{formatWeekRange(currentPeriod.start, currentPeriod.end)}</span>
+						)}
+					</button>
+					<button
+						type="button"
+						className={element('tab', {active: activePeriod === 'previous'})}
+						onClick={() => setActivePeriod('previous')}
+					>
+						<span className={element('tab-label')}>Прошлая неделя</span>
+						{previousWeek && (
+							<span className={element('tab-range')}>{formatWeekRange(previousWeek.start, previousWeek.end)}</span>
+						)}
+					</button>
 				</div>
 				{activeLeaders.length > 0 ? (
 					<LeaderBoard

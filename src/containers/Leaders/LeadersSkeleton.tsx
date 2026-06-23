@@ -17,7 +17,7 @@ export const LeadersSkeleton: FC<LeadersSkeletonProps> = (props) => {
 
 	return (
 		<div className={block()}>
-			<div className={element('wrapper')}>
+			<div className={element('intro')}>
 				<Title className={element('title')} tag="h1">
 					Лидеры недели
 				</Title>
@@ -25,15 +25,15 @@ export const LeadersSkeleton: FC<LeadersSkeletonProps> = (props) => {
 					Выполняйте цели, оставляйте впечатления, зарабатывайте очки и попадайте в число лучших пользователей за неделю.
 					Соревнуйтесь с другими и зарабатывайте награды в свой профиль. Покажите всем, что вы живёте полной жизнью!
 				</p>
-			</div>
-
-			<div className={element('info')}>
-				{Array.from({length: 3}).map((_, i) => (
-					<div key={i} className={element('info-item')}>
-						<Skeleton width="80%" height={14} />
-						<Skeleton width="60%" height={24} />
-					</div>
-				))}
+				<Skeleton className={element('info-caption')} width="90%" height={12} />
+				<div className={element('info')}>
+					{Array.from({length: 3}).map((_, i) => (
+						<div key={i} className={element('info-item')}>
+							<Skeleton width="80%" height={14} />
+							<Skeleton width="60%" height={24} />
+						</div>
+					))}
+				</div>
 			</div>
 
 			<div className={element('pedestal')}>

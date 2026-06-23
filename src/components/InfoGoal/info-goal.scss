@@ -7,13 +7,6 @@
 	border: 1px solid var(--color-gray-9);
 	border-radius: 8px;
 
-	&__caption {
-		margin-bottom: 12px;
-		color: var(--color-text-secondary);
-		font-size: 14px;
-		line-height: var(--line-height-14);
-	}
-
 	&__wrapper {
 		display: flex;
 		flex-shrink: 0;
