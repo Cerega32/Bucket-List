@@ -95,9 +95,21 @@
 		}
 	}
 
+	&__step--form {
+		width: 100%;
+		max-width: 696px;
+		margin-inline: auto;
+
+		#{$block}__step-title,
+		#{$block}__step-desc,
+		#{$block}__form {
+			max-width: 100%;
+		}
+	}
+
 	&__form {
 		width: 100%;
-		max-width: 480px;
+		max-width: 696px;
 	}
 
 	&__field {
@@ -148,11 +160,7 @@
 	}
 
 	&__footer {
-		display: grid;
-		grid-template-columns: 1fr auto 1fr;
 		flex-shrink: 0;
-		gap: 10px;
-		align-items: center;
 		padding: 14px 40px;
 		border-top: 1px solid var(--color-gray-9);
 		background: var(--color-white);
@@ -163,6 +171,19 @@
 
 		@include md {
 			padding: 12px 20px;
+		}
+	}
+
+	&__footer-inner {
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		gap: 10px;
+		align-items: center;
+		width: 100%;
+		max-width: var(--max-width);
+		margin: 0 auto;
+
+		@include md {
 			gap: 8px;
 		}
 

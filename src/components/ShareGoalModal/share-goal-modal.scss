@@ -1,0 +1,67 @@
+.share-goal-modal {
+	&__content {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	&__label {
+		color: var(--color-text-secondary);
+		font-size: 14px;
+		font-weight: var(--weight-medium);
+	}
+
+	&__link-row {
+		display: flex;
+		align-items: stretch;
+		gap: 8px;
+	}
+
+	&__link-input {
+		flex: 1;
+		min-width: 0;
+		padding: 10px 12px;
+		color: var(--color-text-primary);
+		font-size: 14px;
+		line-height: var(--line-height-14);
+		background: var(--color-gray-3);
+		border: 1px solid var(--color-gray-9);
+		border-radius: 8px;
+		cursor: text;
+
+		&:focus {
+			border-color: var(--color-primary);
+			outline: none;
+		}
+	}
+
+	&__copy-btn {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		padding: 0;
+		color: var(--color-text-secondary);
+		background: var(--color-gray-3);
+		border: 1px solid var(--color-gray-9);
+		border-radius: 8px;
+		cursor: pointer;
+		transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+
+		&:hover {
+			color: var(--color-text-primary);
+			background: var(--color-white);
+			border-color: var(--color-primary);
+		}
+
+		&:focus-visible {
+			border-color: var(--color-primary);
+			outline: none;
+		}
+	}
+
+	&__telegram-btn {
+		margin-top: 8px;
+	}
+}
