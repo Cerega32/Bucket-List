@@ -1,13 +1,16 @@
 import {observer} from 'mobx-react-lite';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {useLocation} from 'react-router-dom';
 
 import {Banner} from '@/components/Banner/Banner';
+import {CountriesScratchMap} from '@/components/CountriesScratchMap/CountriesScratchMap';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {GoalMapMulti} from '@/components/GoalMap/GoalMapMulti';
+import {Switch} from '@/components/Switch/Switch';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ThemeStore} from '@/store/ThemeStore';
-import {MapData, mapApi} from '@/utils/mapApi';
+import {goalsToMapPoints, MapData, mapApi} from '@/utils/mapApi';
 import {YANDEX_MAP_LOAD_ERROR_MESSAGE} from '@/utils/maps/loadYandexMapsScript';
 
 import {UserMapPageSkeleton} from './UserMapPageSkeleton';
@@ -17,8 +20,17 @@ const UserMapPage: React.FC = observer(() => {
 	const [mapData, setMapData] = useState<MapData | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [mapLoadError, setMapLoadError] = useState(false);
-	const [activeTab] = useState<'locations' | 'countries'>('locations');
+	const location = useLocation();
+	const activeTab = (location.hash === '#countries' ? 'countries' : 'locations') as 'locations' | 'countries';
 	const [block, element] = useBem('user-map-page');
+
+	const mapSwitchButtons = useMemo(
+		() => [
+			{url: '#locations', name: 'Карта мест', page: 'locations'},
+			{url: '#countries', name: 'Скретч-карта', page: 'countries'},
+		],
+		[]
+	);
 
 	const handleMapLoadError = useCallback(() => {
 		setMapLoadError(true);
@@ -62,22 +74,7 @@ const UserMapPage: React.FC = observer(() => {
 					Мои карты
 				</Title>
 
-				{/* <div className={element('map-tabs')}>
-					<button
-						type="button"
-						className={`${element('tab-button', {active: activeTab === 'locations'})}`}
-						onClick={() => setActiveTab('locations')}
-					>
-						Карта мест
-					</button>
-					<button
-						type="button"
-						className={`${element('tab-button', {active: activeTab === 'countries'})}`}
-						onClick={() => setActiveTab('countries')}
-					>
-						Скретч-карта стран
-					</button>
-				</div> */}
+				<Switch className={element('switch')} buttons={mapSwitchButtons} active={activeTab} />
 
 				<div className={element('map-content')}>
 					{activeTab === 'locations' && (
@@ -106,20 +103,7 @@ const UserMapPage: React.FC = observer(() => {
 											/>
 										)}
 										<GoalMapMulti
-											goals={mapData.goals
-												.filter(
-													(goal) =>
-														goal.location &&
-														typeof goal.location.latitude === 'number' &&
-														typeof goal.location.longitude === 'number'
-												)
-												.map((goal) => ({
-													location: goal.location!,
-													userVisitedLocation: goal.completedByUser,
-													name: goal.title,
-													address: goal.location!.address,
-													description: goal.description,
-												}))}
+											goals={goalsToMapPoints(mapData.goals)}
 											onLoadError={handleMapLoadError}
 											onLoadSuccess={handleMapLoadSuccess}
 										/>
@@ -157,11 +141,11 @@ const UserMapPage: React.FC = observer(() => {
 						</div>
 					)}
 
-					{/* {activeTab === 'countries' && (
+					{activeTab === 'countries' && (
 						<div className={element('countries-tab')}>
-							<ScratchMap height="600px" />
+							<CountriesScratchMap />
 						</div>
-					)} */}
+					)}
 				</div>
 			</div>
 		</div>

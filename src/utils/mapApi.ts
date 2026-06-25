@@ -2,26 +2,10 @@ import {IGoal, ILocation} from '@/typings/goal';
 
 import {DELETE, GET, POST} from './fetch/requests';
 
-export interface Country {
-	id: number;
-	name: string;
-	name_en: string;
-	iso_code: string;
-	continent: string;
-	color_hex: string;
-}
-
 export interface UserVisitedLocation {
 	id: number;
 	location: ILocation;
 	goal_title?: string;
-	visited_at: string;
-	notes?: string;
-}
-
-export interface UserVisitedCountry {
-	id: number;
-	country: Country;
 	visited_at: string;
 	notes?: string;
 }
@@ -31,6 +15,25 @@ export interface MapData {
 	visited_locations: UserVisitedLocation[];
 	list_title?: string;
 	category_name?: string;
+}
+
+export interface ScratchMapCountry {
+	iso: string;
+	mapIso?: string;
+	mapNames?: string[];
+	name: string;
+	code: string;
+	completed: boolean;
+	description?: string;
+	image?: string;
+}
+
+export interface ScratchMapData {
+	total: number;
+	completedCount: number;
+	countries: ScratchMapCountry[];
+	listCode?: string;
+	listTitle?: string;
 }
 
 export interface GoalWithLocation {
@@ -67,6 +70,17 @@ export const mapApi = {
 
 		if (!response.success) {
 			throw new Error(response.errors || 'Failed to fetch user map data');
+		}
+
+		return response.data;
+	},
+
+	// Данные для скретч-карты мира (страны списка «Все страны мира» + статус выполнения)
+	getScratchMapData: async (): Promise<ScratchMapData> => {
+		const response = await GET('maps/scratch', {auth: true, showSuccessNotification: false, showErrorNotification: false});
+
+		if (!response.success) {
+			throw new Error(response.errors || 'Failed to fetch scratch map data');
 		}
 
 		return response.data;
@@ -148,53 +162,5 @@ export const mapApi = {
 		}
 
 		return response.data;
-	},
-
-	// Получить список всех стран
-	getCountriesList: async (): Promise<Country[]> => {
-		const response = await GET('maps/countries', {auth: true, showSuccessNotification: false});
-
-		if (!response.success) {
-			throw new Error(response.errors || 'Failed to fetch countries list');
-		}
-
-		return response.data;
-	},
-
-	// Получить список посещенных стран пользователя
-	getUserVisitedCountries: async (): Promise<UserVisitedCountry[]> => {
-		const response = await GET('maps/countries/visited', {auth: true, showSuccessNotification: false});
-
-		if (!response.success) {
-			throw new Error(response.errors || 'Failed to fetch visited countries');
-		}
-
-		return response.data;
-	},
-
-	// Отметить страну как посещенную
-	markCountryVisited: async (countryId: number, notes?: string): Promise<UserVisitedCountry> => {
-		const response = await POST('maps/countries/visit', {
-			auth: true,
-			body: {
-				country_id: countryId,
-				notes: notes || '',
-			},
-		});
-
-		if (!response.success) {
-			throw new Error(response.errors || 'Failed to mark country as visited');
-		}
-
-		return response.data;
-	},
-
-	// Убрать отметку о посещении страны
-	unmarkCountryVisited: async (countryId: number): Promise<void> => {
-		const response = await DELETE(`maps/countries/${countryId}/unvisit`, {auth: true});
-
-		if (!response.success) {
-			throw new Error(response.errors || 'Failed to unmark country as visited');
-		}
 	},
 };

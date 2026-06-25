@@ -7,6 +7,7 @@ import {MainHeader} from '@/components/MainHeader/MainHeader';
 import {MainInfo} from '@/components/MainInfo/MainInfo';
 import {MainPopular} from '@/components/MainPopular/MainPopular';
 import {MainPopularSkeleton} from '@/components/MainPopular/MainPopularSkeleton';
+import {MainPopularLists} from '@/components/MainPopularLists/MainPopularLists';
 import {useBem} from '@/hooks/useBem';
 import {UserStore} from '@/store/UserStore';
 import {IComment} from '@/typings/comments';
@@ -109,6 +110,7 @@ const MainContainerComponent: FC<IPage> = () => {
 			) : (
 				<MainPopular goalsForDay={popularGoalsForDay} goalsForAllTime={popularGoalsForAllTime} />
 			)}
+			<MainPopularLists />
 			{commentsLoading ? <MainCommentsSkeleton /> : <MainComments comments={[...commentsTopLiked, ...commentsTopLiked]} />}
 			<Categories tag="h2" title="Что тебе интересно?" />
 		</div>

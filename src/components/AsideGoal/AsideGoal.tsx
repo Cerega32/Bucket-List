@@ -34,6 +34,7 @@ import {
 	startOfISOWeek,
 	weeklyProratedHintForFirstDayOnCalendar,
 } from '@/utils/regularGoal/weeklyProratedHint';
+import {SCRATCH_MAP_PAGE_URL} from '@/utils/scratchMapList';
 import {pluralize} from '@/utils/text/pluralize';
 
 import {Button} from '../Button/Button';
@@ -116,6 +117,7 @@ export interface AsideListsProps extends AsideProps {
 	location?: GoalWithLocation[];
 	list?: IShortGoal[];
 	listCode?: string;
+	hasScratchMap?: boolean;
 	onGoalCompleted?: never;
 	onHistoryRefresh?: never;
 	page?: never;
@@ -144,6 +146,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 		page,
 	} = props;
 	const listCode = isList ? (props as AsideListsProps).listCode : undefined;
+	const hasScratchMap = isList ? (props as AsideListsProps).hasScratchMap : false;
 	const onGoalUpdate = !isList ? (props as AsideGoalProps).onGoalUpdate : undefined;
 	const goalUserProgress = !isList ? (props as AsideGoalProps).userProgress : undefined;
 	const [timer, setTimer] = useState<TimerInfo | null>(null);
@@ -1089,6 +1092,16 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 				location,
 				userVisitedLocation: isCompleted,
 			});
+			return;
+		}
+
+		if (hasScratchMap) {
+			if (!UserStore.isAuth) {
+				setIsOpen(true);
+				setWindow('login');
+				return;
+			}
+			navigate(SCRATCH_MAP_PAGE_URL);
 			return;
 		}
 
@@ -2669,16 +2682,16 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 								Редактировать
 							</Button>
 						)}
-						{!!location?.length && (
+						{(hasScratchMap || !!location?.length) && (
 							<Button
 								theme="blue-light"
 								icon="map"
 								onClick={openMapModal}
 								className={element('btn')}
 								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
-								disabled={isMapLoading}
+								disabled={!hasScratchMap && isMapLoading}
 							>
-								{isMapLoading ? 'Загрузка...' : 'Открыть карту'}
+								{hasScratchMap ? 'Скретч-карта' : isMapLoading ? 'Загрузка...' : 'Открыть карту'}
 							</Button>
 						)}
 						<Button theme="blue-light" className={element('btn')} onClick={handleRandomPick} icon="magic">

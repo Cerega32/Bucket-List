@@ -244,6 +244,7 @@ const ListGoalsContainerComponent: FC = () => {
 						location={goalsWithLocation}
 						list={list.goals}
 						listCode={list.code}
+						hasScratchMap={list.hasScratchMap}
 					/>
 					<div className={element('content-wrapper')}>
 						<ContentListGoals className={element('content')} list={list} updateGoal={updateGoal} />

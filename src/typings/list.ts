@@ -28,4 +28,5 @@ export interface IList {
 	isCanAddGoals: boolean;
 	catalogApproved?: boolean;
 	goalsPagination?: IGoalsPagination;
+	hasScratchMap?: boolean;
 }
