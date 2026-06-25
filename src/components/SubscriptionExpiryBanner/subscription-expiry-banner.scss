@@ -1,7 +1,7 @@
 .subscription-expiry-banner {
 	position: fixed;
 	z-index: 998;
-	top: var(--height-header);
+	top: var(--header-stack-height);
 	right: 0;
 	left: 0;
 	padding: 8px 20px;
@@ -12,14 +12,14 @@
 	animation: subscription-banner-slide-down 0.3s ease-out;
 
 	&--compact {
-		top: var(--height-header-compact);
+		top: var(--header-stack-height-compact);
 	}
 
 	&--with-email-banner {
-		top: calc(var(--height-header) + 72px);
+		top: calc(var(--header-stack-height) + 72px);
 
 		&.subscription-expiry-banner--compact {
-			top: calc(var(--height-header-compact) + 72px);
+			top: calc(var(--header-stack-height-compact) + 72px);
 		}
 	}
 

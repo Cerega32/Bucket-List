@@ -9,25 +9,27 @@
 
 	position: fixed;
 	z-index: 1100;
-	top: 0;
+	top: var(--safari-viewport-offset, 0px);
 	width: 100%;
-	height: var(--height-header);
+	height: var(--header-stack-height);
 	padding: 16px 0;
+	padding-top: calc(16px + var(--safe-area-top));
 	border-bottom: 1px solid rgb(var(--color-white-rgb) / 16%);
 	transition: height 0.25s ease-in-out, padding 0.25s ease-in-out;
 
 	@include md {
-		height: var(--height-header-compact);
+		height: var(--header-stack-height-compact);
 	}
 
 	@include xl {
 		padding: 16px 24px;
+		padding-top: calc(16px + var(--safe-area-top));
 	}
 
 	@include sm {
 		height: auto;
-		min-height: var(--height-header-compact);
-		padding-top: 12px;
+		min-height: var(--header-stack-height-compact);
+		padding-top: calc(12px + var(--safe-area-top));
 		padding-bottom: 12px;
 	}
 
@@ -774,6 +776,18 @@
 		background: var(--color-white);
 		border: 1px solid var(--color-border);
 
+		&::before {
+			position: absolute;
+			z-index: -1;
+			top: calc(-1 * var(--header-extra-top));
+			right: 0;
+			bottom: 0;
+			left: 0;
+			background: var(--color-white);
+			content: '';
+			pointer-events: none;
+		}
+
 		#{$block} {
 			&__categories-icon {
 				path {
@@ -842,7 +856,10 @@
 		&::before {
 			position: absolute;
 			z-index: -1;
-			inset: 0;
+			top: calc(-1 * var(--header-extra-top));
+			right: 0;
+			bottom: 0;
+			left: 0;
 			backdrop-filter: brightness(var(--header-backdrop-brightness, 1)) blur(var(--header-backdrop-blur, 0px));
 			content: '';
 			pointer-events: none;
@@ -902,10 +919,10 @@
 
 	// Компактный режим (когда скрыт pre-header при прокрутке)
 	&--compact {
-		height: var(--height-header-compact);
+		height: var(--header-stack-height-compact);
 
 		@include sm {
-			height: var(--height-header);
+			height: var(--header-stack-height);
 		}
 	}
 }

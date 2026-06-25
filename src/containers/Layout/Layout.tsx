@@ -10,6 +10,7 @@ import {Modal} from '@/components/Modal/Modal';
 import {SEO} from '@/components/SEO/SEO';
 import {SubscriptionExpiryBanner} from '@/components/SubscriptionExpiryBanner/SubscriptionExpiryBanner';
 import {useBem} from '@/hooks/useBem';
+import {useVisualViewportOffset} from '@/hooks/useVisualViewportOffset';
 import {ThemeStore} from '@/store/ThemeStore';
 
 import NotificationContainer from '../Notifications/NotificationContainer';
@@ -22,6 +23,8 @@ import './layout.scss';
 const Layout: FC = observer(() => {
 	const [block] = useBem('layout');
 	const {full} = ThemeStore;
+
+	useVisualViewportOffset();
 
 	return (
 		<BrowserRouter
