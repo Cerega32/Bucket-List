@@ -68,6 +68,8 @@ interface CountryVisual {
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 
+const getPointerDistance = (a: {x: number; y: number}, b: {x: number; y: number}): number => Math.hypot(a.x - b.x, a.y - b.y);
+
 /** Цели из списка «Страны и территории мира»; остальное на карте — нейтральный фон. */
 const resolveMapCountry = (
 	byMapIso: Map<string, ScratchMapCountry>,
@@ -141,9 +143,13 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 
 	const mapRef = useRef<HTMLDivElement>(null);
 	const dragRef = useRef<{x: number; y: number; rot: [number, number]} | null>(null);
+	const pointersRef = useRef<Map<number, {x: number; y: number}>>(new Map());
+	const pinchRef = useRef<{dist: number; scale: number} | null>(null);
 	const movedRef = useRef(false);
 	const scaleRef = useRef(scale);
+	const rotationRef = useRef(rotation);
 	scaleRef.current = scale;
+	rotationRef.current = rotation;
 
 	useEffect(() => {
 		let cancelled = false;
@@ -219,13 +225,63 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 	const projectionConfig = useMemo(() => ({scale, rotate: [rotation[0], rotation[1], 0] as [number, number, number]}), [rotation, scale]);
 
 	const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-		dragRef.current = {x: event.clientX, y: event.clientY, rot: rotation};
-		movedRef.current = false;
+		const pointers = pointersRef.current;
+		pointers.set(event.pointerId, {x: event.clientX, y: event.clientY});
+
+		if (pointers.size === 1) {
+			dragRef.current = {x: event.clientX, y: event.clientY, rot: rotationRef.current};
+			pinchRef.current = null;
+			movedRef.current = false;
+		} else if (pointers.size === 2) {
+			dragRef.current = null;
+			const pts = [...pointers.values()];
+			const dist = getPointerDistance(pts[0], pts[1]);
+			if (dist > 0) {
+				pinchRef.current = {dist, scale: scaleRef.current};
+				movedRef.current = true;
+			}
+		}
+
 		setTooltip(null);
 	};
 
 	useEffect(() => {
+		const clearPointer = (pointerId: number) => {
+			const pointers = pointersRef.current;
+			pointers.delete(pointerId);
+
+			if (pointers.size < 2) {
+				pinchRef.current = null;
+			}
+
+			if (pointers.size === 1) {
+				const pt = [...pointers.values()][0];
+				dragRef.current = {x: pt.x, y: pt.y, rot: rotationRef.current};
+			} else if (pointers.size === 0) {
+				dragRef.current = null;
+			}
+		};
+
 		const onMove = (event: PointerEvent) => {
+			const pointers = pointersRef.current;
+			if (!pointers.has(event.pointerId)) {
+				return;
+			}
+
+			pointers.set(event.pointerId, {x: event.clientX, y: event.clientY});
+
+			if (pointers.size === 2 && pinchRef.current) {
+				event.preventDefault();
+				const pts = [...pointers.values()];
+				const dist = getPointerDistance(pts[0], pts[1]);
+				if (dist > 0 && pinchRef.current.dist > 0) {
+					movedRef.current = true;
+					const ratio = dist / pinchRef.current.dist;
+					setScale(clamp(pinchRef.current.scale * ratio, MIN_SCALE, MAX_SCALE));
+				}
+				return;
+			}
+
 			const drag = dragRef.current;
 			if (!drag) {
 				return;
@@ -240,14 +296,22 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 			const phi = clamp(drag.rot[1] - dy * sensitivity, -90, 90);
 			setRotation([lambda, phi]);
 		};
-		const onUp = () => {
-			dragRef.current = null;
+
+		const onUp = (event: PointerEvent) => {
+			clearPointer(event.pointerId);
 		};
+
+		const onCancel = (event: PointerEvent) => {
+			clearPointer(event.pointerId);
+		};
+
 		window.addEventListener('pointermove', onMove);
 		window.addEventListener('pointerup', onUp);
+		window.addEventListener('pointercancel', onCancel);
 		return () => {
 			window.removeEventListener('pointermove', onMove);
 			window.removeEventListener('pointerup', onUp);
+			window.removeEventListener('pointercancel', onCancel);
 		};
 	}, []);
 
@@ -267,6 +331,72 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 		node.addEventListener('wheel', onWheel, {passive: false});
 		return () => node.removeEventListener('wheel', onWheel);
 	}, [loading, error, total, applyZoom]);
+
+	useEffect(() => {
+		const node = mapRef.current;
+		if (!node || loading || error || total === 0) {
+			return undefined;
+		}
+
+		const getTouchDistance = (touches: TouchList): number => {
+			if (touches.length < 2) {
+				return 0;
+			}
+			return getPointerDistance({x: touches[0].clientX, y: touches[0].clientY}, {x: touches[1].clientX, y: touches[1].clientY});
+		};
+
+		let touchPinch: {dist: number; scale: number} | null = null;
+
+		const onTouchStart = (event: TouchEvent) => {
+			if (event.touches.length !== 2) {
+				return;
+			}
+			dragRef.current = null;
+			pointersRef.current.clear();
+			pinchRef.current = null;
+			const dist = getTouchDistance(event.touches);
+			if (dist > 0) {
+				touchPinch = {dist, scale: scaleRef.current};
+				movedRef.current = true;
+			}
+			event.preventDefault();
+		};
+
+		const onTouchMove = (event: TouchEvent) => {
+			if (event.touches.length !== 2 || !touchPinch) {
+				return;
+			}
+			event.preventDefault();
+			const dist = getTouchDistance(event.touches);
+			if (dist > 0 && touchPinch.dist > 0) {
+				movedRef.current = true;
+				const ratio = dist / touchPinch.dist;
+				setScale(clamp(touchPinch.scale * ratio, MIN_SCALE, MAX_SCALE));
+			}
+		};
+
+		const onTouchEnd = (event: TouchEvent) => {
+			if (event.touches.length < 2) {
+				touchPinch = null;
+			}
+			if (event.touches.length === 0) {
+				pointersRef.current.clear();
+				dragRef.current = null;
+				pinchRef.current = null;
+			}
+		};
+
+		node.addEventListener('touchstart', onTouchStart, {passive: false});
+		node.addEventListener('touchmove', onTouchMove, {passive: false});
+		node.addEventListener('touchend', onTouchEnd);
+		node.addEventListener('touchcancel', onTouchEnd);
+		return () => {
+			node.removeEventListener('touchstart', onTouchStart);
+			node.removeEventListener('touchmove', onTouchMove);
+			node.removeEventListener('touchend', onTouchEnd);
+			node.removeEventListener('touchcancel', onTouchEnd);
+		};
+	}, [loading, error, total]);
 
 	const handleCountryClick = (country?: ScratchMapCountry) => {
 		if (movedRef.current || !country) {
