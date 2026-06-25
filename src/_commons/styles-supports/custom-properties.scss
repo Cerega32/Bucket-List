@@ -229,8 +229,14 @@
 
 	//////
 	//////
+	--safe-area-top: env(safe-area-inset-top, 0px);
+	--safe-area-bottom: env(safe-area-inset-bottom, 0px);
+	--safari-viewport-offset: 0px;
+	--header-extra-top: calc(var(--safe-area-top) + var(--safari-viewport-offset));
 	--height-header: 120px;
 	--height-header-compact: 72px;
+	--header-stack-height: calc(var(--height-header) + var(--header-extra-top));
+	--header-stack-height-compact: calc(var(--height-header-compact) + var(--header-extra-top));
 	--height-header-goal: 396px;
 	--max-width: 1416px;
 	--height-header-goal-collapsed: 136px;

@@ -1,10 +1,10 @@
 .header-category {
 	position: fixed;
 	z-index: 109;
-	top: 0;
+	top: var(--safari-viewport-offset, 0px);
 	left: 0;
 	width: 100vw;
-	padding: calc(var(--height-header) + 56px) 0 56px;
+	padding: calc(var(--header-stack-height) + 56px) 0 56px;
 	background-repeat: no-repeat;
 	background-position: 50% 50%;
 	background-size: cover;
@@ -193,10 +193,10 @@
 	}
 
 	&--fixed {
-		padding: calc(var(--height-header-compact) + 16px) 0 16px;
+		padding: calc(var(--header-stack-height-compact) + 16px) 0 16px;
 
 		@include sm {
-			padding: calc(var(--height-header-compact) + 60px) 0 12px;
+			padding: calc(var(--header-stack-height-compact) + 60px) 0 12px;
 		}
 	}
 

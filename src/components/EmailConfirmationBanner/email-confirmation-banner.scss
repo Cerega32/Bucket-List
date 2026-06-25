@@ -1,7 +1,7 @@
 .email-confirmation-banner {
 	position: fixed;
 	z-index: 999;
-	top: var(--height-header);
+	top: var(--header-stack-height);
 	right: 0;
 	left: 0;
 	padding: 8px 20px;
@@ -12,7 +12,7 @@
 	animation: slide-down 0.3s ease-out;
 
 	&--compact {
-		top: var(--height-header-compact);
+		top: var(--header-stack-height-compact);
 	}
 
 	&__content {

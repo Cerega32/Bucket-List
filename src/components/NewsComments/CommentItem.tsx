@@ -2,7 +2,7 @@ import {observer} from 'mobx-react-lite';
 import {useState} from 'react';
 
 import {useBem} from '@/hooks/useBem';
-import {NewsComment} from '@/typings/news';
+import {Author, NewsComment} from '@/typings/news';
 
 import {CommentForm} from './CommentForm';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
@@ -15,6 +15,17 @@ interface CommentItemProps {
 	onEdit?: (commentId: number, content: string) => Promise<void>;
 	onDelete?: (commentId: number) => Promise<void>;
 }
+
+const formatAuthorName = (author?: Author): string => {
+	if (!author) return 'Пользователь';
+
+	const fullName = [author.firstName, author.lastName]
+		.map((part) => part?.trim())
+		.filter(Boolean)
+		.join(' ');
+
+	return fullName || author.username || 'Пользователь';
+};
 
 const formatDate = (dateString: string): string => {
 	const date = new Date(dateString);
@@ -76,9 +87,7 @@ export const CommentItem = observer(({comment, newsId, level = 0, onReply, onEdi
 			<div className={element('content')}>
 				{/* Заголовок комментария */}
 				<div className={element('header')}>
-					<div className={element('author')}>
-						{comment.author?.firstName} {comment.author?.lastName}
-					</div>
+					<div className={element('author')}>{formatAuthorName(comment.author)}</div>
 					<div className={element('date')}>{formatDate(comment.createdAt)}</div>
 				</div>
 

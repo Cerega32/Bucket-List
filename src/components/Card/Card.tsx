@@ -7,6 +7,7 @@ import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
 import {IShortGoal, IShortList} from '@/typings/goal';
+import {isScratchMapList, SCRATCH_MAP_PAGE_URL} from '@/utils/scratchMapList';
 import {emitConfettiFromElement} from '@/utils/ui/emitConfetti';
 
 import {Button} from '../Button/Button';
@@ -63,6 +64,7 @@ export const Card: FC<CardProps> = (props) => {
 	const {goal, isList, onClickAdd, onClickDelete, onClickMark} = restProps as CardListProps | CardGoalProps;
 
 	const isCompleted = isCardCompleted(goal, isList);
+	const showScratchMap = Boolean(isList && isScratchMapList(goal as IShortList));
 
 	const {isAuth} = UserStore;
 	const {setIsOpen, setWindow, setFuncModal, setModalProps} = ModalStore;
@@ -158,6 +160,14 @@ export const Card: FC<CardProps> = (props) => {
 										title="Регулярная цель"
 									/>
 								)}
+								{showScratchMap && (
+									<Tag
+										icon="map"
+										theme="green"
+										classNameIcon={element('img-tag-icon-done')}
+										title="Интерактивная скретч-карта в профиле"
+									/>
+								)}
 								<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
 							</div>
 							{goal.catalogApproved === false && (
@@ -199,6 +209,14 @@ export const Card: FC<CardProps> = (props) => {
 										theme="gold"
 										classNameIcon={element('img-tag-icon-done')}
 										title="Регулярная цель"
+									/>
+								)}
+								{showScratchMap && (
+									<Tag
+										icon="map"
+										theme="green"
+										classNameIcon={element('img-tag-icon-done')}
+										title="Интерактивная скретч-карта в профиле"
 									/>
 								)}
 								<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
@@ -249,6 +267,9 @@ export const Card: FC<CardProps> = (props) => {
 						<div className={element('buttons-wrapper')}>
 							{isList && goal.addedByUser && 'userCompletedGoals' in goal && 'goalsCount' in goal && (
 								<Progress done={goal.userCompletedGoals} all={goal.goalsCount} />
+							)}
+							{showScratchMap && (
+								<Button theme="blue-light" icon="map" size="small" type="Link" href={SCRATCH_MAP_PAGE_URL} />
 							)}
 							{(() => {
 								const showAddButton = !hideActions && !goal.addedByUser;

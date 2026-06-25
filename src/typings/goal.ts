@@ -44,6 +44,7 @@ export interface IShortList {
 	estimatedTime?: never;
 	/** false — ждёт одобрения для общего каталога */
 	catalogApproved?: boolean;
+	hasScratchMap?: boolean;
 }
 
 export interface IGoal {
