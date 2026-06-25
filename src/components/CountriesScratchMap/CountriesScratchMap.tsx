@@ -33,7 +33,11 @@ const MAP_SIZE = 640;
 const MAP_CENTER = MAP_SIZE / 2;
 const BASE_SCALE = 300;
 const MIN_SCALE = 280;
-const MAX_SCALE = BASE_SCALE * 12;
+const MAX_SCALE_DESKTOP = BASE_SCALE * 20;
+const MAX_SCALE_MOBILE = BASE_SCALE * 100;
+const WHEEL_ZOOM_IN = 1.12;
+const WHEEL_ZOOM_OUT = 0.89;
+const MICRO_STATE_TOUCH_BOOST = 1.4;
 const DRAG_THRESHOLD = 4;
 
 const MAP_HINT_DESKTOP =
@@ -127,6 +131,8 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 	const {isScreenDesktop} = useScreenSize();
 
 	const mapHintMessage = isScreenDesktop ? MAP_HINT_DESKTOP : MAP_HINT_MOBILE;
+	const maxScale = isScreenDesktop ? MAX_SCALE_DESKTOP : MAX_SCALE_MOBILE;
+	const microStateBoost = isScreenDesktop ? 1 : MICRO_STATE_TOUCH_BOOST;
 
 	const [countries, setCountries] = useState<ScratchMapCountry[]>([]);
 	const [total, setTotal] = useState(0);
@@ -144,12 +150,18 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 	const mapRef = useRef<HTMLDivElement>(null);
 	const dragRef = useRef<{x: number; y: number; rot: [number, number]} | null>(null);
 	const pointersRef = useRef<Map<number, {x: number; y: number}>>(new Map());
-	const pinchRef = useRef<{dist: number; scale: number} | null>(null);
+	const pinchRef = useRef<{dist: number} | null>(null);
 	const movedRef = useRef(false);
 	const scaleRef = useRef(scale);
 	const rotationRef = useRef(rotation);
+	const maxScaleRef = useRef(maxScale);
 	scaleRef.current = scale;
 	rotationRef.current = rotation;
+	maxScaleRef.current = maxScale;
+
+	useEffect(() => {
+		setScale((prev) => clamp(prev, MIN_SCALE, maxScale));
+	}, [maxScale]);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -237,7 +249,7 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 			const pts = [...pointers.values()];
 			const dist = getPointerDistance(pts[0], pts[1]);
 			if (dist > 0) {
-				pinchRef.current = {dist, scale: scaleRef.current};
+				pinchRef.current = {dist};
 				movedRef.current = true;
 			}
 		}
@@ -277,7 +289,8 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 				if (dist > 0 && pinchRef.current.dist > 0) {
 					movedRef.current = true;
 					const ratio = dist / pinchRef.current.dist;
-					setScale(clamp(pinchRef.current.scale * ratio, MIN_SCALE, MAX_SCALE));
+					setScale((prev) => clamp(prev * ratio, MIN_SCALE, maxScaleRef.current));
+					pinchRef.current.dist = dist;
 				}
 				return;
 			}
@@ -316,7 +329,7 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 	}, []);
 
 	const applyZoom = useCallback((deltaY: number) => {
-		setScale((prev) => clamp(prev * (deltaY < 0 ? 1.15 : 0.87), MIN_SCALE, MAX_SCALE));
+		setScale((prev) => clamp(prev * (deltaY < 0 ? WHEEL_ZOOM_IN : WHEEL_ZOOM_OUT), MIN_SCALE, maxScaleRef.current));
 	}, []);
 
 	useEffect(() => {
@@ -345,7 +358,7 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 			return getPointerDistance({x: touches[0].clientX, y: touches[0].clientY}, {x: touches[1].clientX, y: touches[1].clientY});
 		};
 
-		let touchPinch: {dist: number; scale: number} | null = null;
+		let touchPinch: {dist: number} | null = null;
 
 		const onTouchStart = (event: TouchEvent) => {
 			if (event.touches.length !== 2) {
@@ -356,7 +369,7 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 			pinchRef.current = null;
 			const dist = getTouchDistance(event.touches);
 			if (dist > 0) {
-				touchPinch = {dist, scale: scaleRef.current};
+				touchPinch = {dist};
 				movedRef.current = true;
 			}
 			event.preventDefault();
@@ -371,7 +384,8 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 			if (dist > 0 && touchPinch.dist > 0) {
 				movedRef.current = true;
 				const ratio = dist / touchPinch.dist;
-				setScale(clamp(touchPinch.scale * ratio, MIN_SCALE, MAX_SCALE));
+				setScale((prev) => clamp(prev * ratio, MIN_SCALE, maxScaleRef.current));
+				touchPinch.dist = dist;
 			}
 		};
 
@@ -442,7 +456,7 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 		const rawIso = resolveGeoIso(geo);
 		const visual = getCountryVisual(byMapIso, byMapName, isoColorIndex, {rawIso, mapName});
 		const colorIso = visual.country ? colorKeyForCountry(visual.country, rawIso) : rawIso;
-		const microTransform = visual.inList && colorIso ? getMicroStateTransform(geo, colorIso, projection) : undefined;
+		const microTransform = visual.inList && colorIso ? getMicroStateTransform(geo, colorIso, projection, microStateBoost) : undefined;
 		const strokeWidth = microTransform ? 0.5 : 0.35;
 
 		return (
@@ -507,7 +521,7 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 			<div className={block()}>
 				<div className={element('empty')}>
 					<h3>Карта стран недоступна</h3>
-					<p>Список «Страны и территории мира» ещё не наполнен. Запустите populate_scratch_map_list на сервере.</p>
+					<p>Список «Глобус без пробелов» ещё не наполнен. Запустите populate_scratch_map_list на сервере.</p>
 				</div>
 			</div>
 		);
@@ -574,7 +588,10 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 			{selected && (
 				<Modal isOpen onClose={() => setSelected(null)} size="small">
 					<div className={element('card')}>
-						{selected.image && <div className={element('card-image')} style={{backgroundImage: `url(${selected.image})`}} />}
+						<div
+							className={element('card-image', {placeholder: !selected.image})}
+							style={selected.image ? {backgroundImage: `url(${selected.image})`} : undefined}
+						/>
 						<div className={element('card-body')}>
 							<div className={element('card-head')}>
 								<h3 className={element('card-title')}>{selected.name}</h3>

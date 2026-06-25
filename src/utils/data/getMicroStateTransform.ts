@@ -3,8 +3,13 @@ import {GeoProjection, geoCentroid} from 'd3-geo';
 import {getMicroStateVisualScale} from './microStateVisualScale';
 
 /** SVG transform: слегка увеличить полигон микрогосударства вокруг его центра (в координатах текущей проекции). */
-export const getMicroStateTransform = (geo: {type?: string}, iso: string, projection: GeoProjection): string | undefined => {
-	const visualScale = getMicroStateVisualScale(iso);
+export const getMicroStateTransform = (
+	geo: {type?: string},
+	iso: string,
+	projection: GeoProjection,
+	scaleBoost = 1
+): string | undefined => {
+	const visualScale = getMicroStateVisualScale(iso, scaleBoost);
 	if (!visualScale) {
 		return undefined;
 	}

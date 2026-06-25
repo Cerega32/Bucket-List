@@ -49,10 +49,18 @@
 		width: 100%;
 		max-width: 640px;
 		margin: 0 auto;
-		border-radius: 12px;
+		border-radius: 8px;
 		cursor: grab;
 		overflow: hidden;
+		clip-path: inset(0 round 8px);
 		touch-action: none;
+
+		> svg {
+			display: block;
+			width: 100%;
+			height: auto;
+			border-radius: 8px;
+		}
 
 		&:active {
 			cursor: grabbing;
@@ -165,6 +173,14 @@
 		background-position: center;
 		background-size: cover;
 		border-radius: 10px;
+
+		&--placeholder {
+			background: linear-gradient(
+				135deg,
+				color-mix(in srgb, var(--color-travel) 55%, var(--color-primary)),
+				color-mix(in srgb, var(--color-education) 45%, var(--color-primary))
+			);
+		}
 	}
 
 	&__card-body {
@@ -177,7 +193,7 @@
 		display: flex;
 		align-items: flex-start;
 		gap: 10px;
-		margin-right: 40px;
+		margin-top: 20px;
 	}
 
 	&__card-title {
