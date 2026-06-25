@@ -29,6 +29,12 @@ export const MICRO_STATE_VISUAL_SCALE: Record<string, number> = {
 	vc: 2.5,
 	gd: 2.5,
 	dm: 2.5,
+	xs: 2.5,
+	xn: 2.5,
+	gi: 3,
 };
 
-export const getMicroStateVisualScale = (iso: string): number | undefined => MICRO_STATE_VISUAL_SCALE[iso];
+export const getMicroStateVisualScale = (iso: string, boost = 1): number | undefined => {
+	const scale = MICRO_STATE_VISUAL_SCALE[iso];
+	return scale ? scale * boost : undefined;
+};
