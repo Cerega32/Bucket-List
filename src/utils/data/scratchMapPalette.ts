@@ -22,7 +22,7 @@ export const SCRATCH_MAP_GLOBE_FILL = 'var(--color-primary)';
 
 /** Невыполненные страны — тёмно-серый с заметным оттенком цвета категории. */
 export const SCRATCH_MAP_UNVISITED_PALETTE = SCRATCH_MAP_COUNTRY_PALETTE.map(
-	(color) => `color-mix(in srgb, ${color} 14%, var(--color-gray-12))`
+	(color) => `color-mix(in srgb, ${color} 2%, var(--color-gray-12))`
 );
 
 /** Территории вне челленджа — чуть светлее океана. */
