@@ -268,9 +268,6 @@ export const Card: FC<CardProps> = (props) => {
 							{isList && goal.addedByUser && 'userCompletedGoals' in goal && 'goalsCount' in goal && (
 								<Progress done={goal.userCompletedGoals} all={goal.goalsCount} />
 							)}
-							{showScratchMap && (
-								<Button theme="blue-light" icon="map" size="small" type="Link" href={SCRATCH_MAP_PAGE_URL} />
-							)}
 							{(() => {
 								const showAddButton = !hideActions && !goal.addedByUser;
 								const showDeleteButton = !hideActions && goal.addedByUser && !(isList && goal.code === '100-goals');
@@ -283,12 +280,15 @@ export const Card: FC<CardProps> = (props) => {
 									!isList &&
 									typeof onClickMark === 'function';
 
-								if (!showAddButton && !showDeleteButton && !showMarkButton) {
+								if (!showAddButton && !showDeleteButton && !showMarkButton && !showScratchMap) {
 									return null;
 								}
 
 								return (
 									<div className={element('buttons')}>
+										{showScratchMap && (
+											<Button theme="blue-light" icon="map" size="small" type="Link" href={SCRATCH_MAP_PAGE_URL} />
+										)}
 										{showAddButton &&
 											(isScreenXs ? (
 												<Button theme="blue" size="small" onClick={onClickAddHandler}>

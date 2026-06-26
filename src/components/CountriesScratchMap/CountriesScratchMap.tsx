@@ -21,9 +21,9 @@ import {ScratchMapCountry, mapApi} from '@/utils/mapApi';
 
 import {Banner} from '../Banner/Banner';
 import {Button} from '../Button/Button';
+import {InfoGoal} from '../InfoGoal/InfoGoal';
 import {Loader} from '../Loader/Loader';
 import {Modal} from '../Modal/Modal';
-import {Progress} from '../Progress/Progress';
 import {Tag} from '../Tag/Tag';
 
 import './countries-scratch-map.scss';
@@ -530,14 +530,17 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 	return (
 		<div className={block()}>
 			<div className={element('header')}>
-				<div className={element('score')}>
-					<p className={element('score-text')}>Прогресс:</p>
-					<Progress className={element('score-progress')} done={progressDone} all={progressTotal} goal />
-					<span className={element('score-count')}>
-						{progressDone}/{progressTotal}
-					</span>
-				</div>
 				<Banner type="info" className={element('hint')} title="Как пользоваться картой" message={<p>{mapHintMessage}</p>} />
+				<InfoGoal
+					className={element('info')}
+					items={[]}
+					progress
+					horizontal
+					progressData={{
+						completed: progressDone,
+						total: progressTotal,
+					}}
+				/>
 			</div>
 
 			<div ref={mapRef} className={element('map')} onPointerDown={handlePointerDown} onMouseLeave={() => setTooltip(null)}>
