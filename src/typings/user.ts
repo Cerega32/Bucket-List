@@ -37,6 +37,7 @@ export interface IUserInfo {
 
 export interface IWeeklyLeader {
 	avatar: string;
+	activityExperienceWeek: number;
 	experienceEarnedWeek: number;
 	totalCompletedGoals: number;
 	weekCompletedGoals: number;
@@ -51,6 +52,7 @@ export interface IInfoStats {
 	experienceEarned: number;
 	goalsCompleted: number;
 	reviewsAdded: number;
+	activityEarned?: number;
 	participantsCount?: number;
 }
 
