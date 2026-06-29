@@ -8,19 +8,24 @@ import './content-list-goals.scss';
 import {DescriptionWithLinks} from '../DescriptionWithLinks/DescriptionWithLinks';
 import {InfoGoal} from '../InfoGoal/InfoGoal';
 import {ListGoals} from '../ListGoals/ListGoals';
+import {ListGoalsFilters} from '../ListGoalsFilters/ListGoalsFilters';
 import {TitleWithTags} from '../TitleWithTags/TitleWithTags';
 
 interface ContentListGoalsProps {
 	className?: string;
 	list: IList;
+	search: string;
+	onSearchChange: (query: string) => void;
 	updateGoal: (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void | boolean>;
 }
 
 export const ContentListGoals: FC<ContentListGoalsProps> = (props) => {
-	const {className, list, updateGoal} = props;
+	const {className, list, search, onSearchChange, updateGoal} = props;
 
 	const {isScreenTablet, isScreenDesktop, isScreenSmallTablet} = useScreenSize();
 	const [block, element] = useBem('content-list-goals', className);
+
+	const filteredGoalsCount = list.goalsPagination?.totalGoals ?? list.goals.length;
 
 	return (
 		<article className={block()}>
@@ -50,7 +55,13 @@ export const ContentListGoals: FC<ContentListGoalsProps> = (props) => {
 				/>
 			)}
 
-			<ListGoals list={list.goals} updateGoal={updateGoal} columns="three" />
+			<ListGoalsFilters
+				className={element('filters')}
+				search={search}
+				onSearchChange={onSearchChange}
+				totalCount={filteredGoalsCount}
+			/>
+			<ListGoals list={list.goals} updateGoal={updateGoal} columns="three" searchQuery={search} />
 		</article>
 	);
 };

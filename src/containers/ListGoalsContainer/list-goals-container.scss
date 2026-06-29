@@ -86,6 +86,12 @@
 		min-width: 0;
 	}
 
+	&__loader {
+		display: flex;
+		justify-content: center;
+		padding: 8px 0;
+	}
+
 	&__folder-manager {
 		width: 100%;
 	}

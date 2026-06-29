@@ -52,6 +52,8 @@ const COLOR_LOADING_FALLBACK = 'var(--color-gray-5)';
 
 interface CountriesScratchMapProps {
 	className?: string;
+	/** Демо-данные для витрины: без API, без модалки с действиями */
+	showcaseCountries?: ScratchMapCountry[];
 }
 
 interface TooltipState {
@@ -125,7 +127,8 @@ const getCountryVisual = (
 };
 
 export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props) => {
-	const {className} = props;
+	const {className, showcaseCountries} = props;
+	const isShowcase = Boolean(showcaseCountries?.length);
 	const [block, element] = useBem('countries-scratch-map', className);
 	const navigate = useNavigate();
 	const {isScreenDesktop} = useScreenSize();
@@ -164,6 +167,15 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 	}, [maxScale]);
 
 	useEffect(() => {
+		if (showcaseCountries?.length) {
+			setCountries(showcaseCountries);
+			setTotal(showcaseCountries.length);
+			setCompletedCount(showcaseCountries.filter((country) => country.completed).length);
+			setLoading(false);
+			setError(false);
+			return undefined;
+		}
+
 		let cancelled = false;
 		(async () => {
 			try {
@@ -190,7 +202,7 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 		return () => {
 			cancelled = true;
 		};
-	}, [UserStore.isAuth]);
+	}, [showcaseCountries, UserStore.isAuth]);
 
 	useEffect(() => {
 		if (countries.length === 0) {
@@ -413,7 +425,7 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 	}, [loading, error, total]);
 
 	const handleCountryClick = (country?: ScratchMapCountry) => {
-		if (movedRef.current || !country) {
+		if (movedRef.current || !country || isShowcase) {
 			return;
 		}
 		setSelected(country);
@@ -528,9 +540,11 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 	}
 
 	return (
-		<div className={block()}>
+		<div className={block({showcase: isShowcase})}>
 			<div className={element('header')}>
-				<Banner type="info" className={element('hint')} title="Как пользоваться картой" message={<p>{mapHintMessage}</p>} />
+				{!isShowcase && (
+					<Banner type="info" className={element('hint')} title="Как пользоваться картой" message={<p>{mapHintMessage}</p>} />
+				)}
 				<InfoGoal
 					className={element('info')}
 					items={[]}
@@ -588,7 +602,7 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 				</div>
 			</div>
 
-			{selected && (
+			{selected && !isShowcase && (
 				<Modal isOpen onClose={() => setSelected(null)} size="small">
 					<div className={element('card')}>
 						<div

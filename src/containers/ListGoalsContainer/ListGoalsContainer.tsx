@@ -1,9 +1,10 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useRef, useState} from 'react';
-import {useParams} from 'react-router-dom';
+import {FC, useCallback, useEffect, useRef, useState} from 'react';
+import {useParams, useSearchParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {ContentListGoals} from '@/components/ContentListGoals/ContentListGoals';
+import {buildListGoalsApiQuery, parseListGoalsFilterValues} from '@/components/ListGoalsFilters/listGoalsFiltersUtils';
 import {Loader} from '@/components/Loader/Loader';
 import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
 import {SEO} from '@/components/SEO/SEO';
@@ -14,7 +15,6 @@ import useScreenSize from '@/hooks/useScreenSize';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
 import {IList} from '@/typings/list';
-import {getList} from '@/utils/api/get/getList';
 import {getListGoalsPage} from '@/utils/api/get/getListGoalsPage';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {addListGoal} from '@/utils/api/post/addListGoal';
@@ -24,20 +24,26 @@ import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
 import {goalsToMapPoints} from '@/utils/mapApi';
 
-import {ListGoalsContainerSkeleton} from './ListGoalsContainerSkeleton';
 import './list-goals-container.scss';
+import {ListGoalsContainerSkeleton} from './ListGoalsContainerSkeleton';
 
 const ListGoalsContainerComponent: FC = () => {
 	const [block, element] = useBem('list-goals-container');
 	const [list, setList] = useState<IList | null>(null);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const [search, setSearch] = useState('');
+	const [searchTimer, setSearchTimer] = useState<NodeJS.Timeout | null>(null);
 	const {isAuth} = UserStore;
 	const {setIsOpen, setWindow} = ModalStore;
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
 	const loadMoreRef = useRef<HTMLDivElement>(null);
 	const loaderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const [searchParams] = useSearchParams();
+	const searchParamsKey = searchParams.toString();
+	const skipUrlFetchRef = useRef(true);
+	const lastRequestedPageRef = useRef(0);
 
-	// Ге��ерируем динамич��ское OG изображение для списка
 	const {imageUrl: ogImageUrl} = useOGImage({
 		list,
 		width: 1200,
@@ -47,29 +53,75 @@ const ListGoalsContainerComponent: FC = () => {
 	const params = useParams();
 	const listId = params?.['id'];
 
+	const buildQuery = useCallback(() => buildListGoalsApiQuery(searchParams, search), [searchParams, search]);
+
+	const fetchList = useCallback(
+		async (options?: {silent?: boolean}) => {
+			if (!listId) return false;
+
+			if (!options?.silent) {
+				setIsLoading(true);
+			}
+
+			try {
+				const res = await getListGoalsPage(listId, {page: 1, pageSize: 30, ...buildQuery()});
+				if (res.success) {
+					setList(res.data.list);
+					lastRequestedPageRef.current = 0;
+					return true;
+				}
+				return false;
+			} finally {
+				if (!options?.silent) {
+					setIsLoading(false);
+				}
+			}
+		},
+		[listId, buildQuery]
+	);
+
 	useEffect(() => {
 		let cancelled = false;
+		skipUrlFetchRef.current = true;
 		setList(null);
+		setSearch('');
+
 		(async () => {
-			const res = await getList(`goal-lists/${listId}`);
+			if (!listId) return;
+			const res = await getListGoalsPage(listId, {
+				page: 1,
+				pageSize: 30,
+				...buildListGoalsApiQuery(searchParams, ''),
+			});
 			if (cancelled) return;
 			if (res.success) {
 				setList(res.data.list);
+				lastRequestedPageRef.current = 0;
 			}
 		})();
+
 		return () => {
 			cancelled = true;
 			if (loaderTimerRef.current) clearTimeout(loaderTimerRef.current);
+			if (searchTimer) clearTimeout(searchTimer);
 		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [listId, isAuth]);
 
-	// Ref для предотвращения повторных запросов (не вызывает ре-рендер)
+	useEffect(() => {
+		if (skipUrlFetchRef.current) {
+			skipUrlFetchRef.current = false;
+			return;
+		}
+		if (!listId || !list || list.code !== listId) return;
+		fetchList();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [searchParamsKey]);
+
 	const isLoadingMoreRef = useRef(false);
-	const lastRequestedPageRef = useRef(0);
 	const listRef = useRef(list);
 	listRef.current = list;
 
-	// Подгрузка следующей страницы целей
 	const loadMoreGoals = async () => {
 		const currentList = listRef.current;
 		if (isLoadingMoreRef.current || !currentList || !currentList.goalsPagination?.hasMore) return;
@@ -80,10 +132,13 @@ const ListGoalsContainerComponent: FC = () => {
 
 		isLoadingMoreRef.current = true;
 
-		// Показываем лоудер только если запрос занимает больше 300ms
 		loaderTimerRef.current = setTimeout(() => setIsLoadingMore(true), 300);
 
-		const res = await getListGoalsPage(currentList.code, nextPage, currentList.goalsPagination.pageSize);
+		const res = await getListGoalsPage(currentList.code, {
+			page: nextPage,
+			pageSize: currentList.goalsPagination.pageSize,
+			...buildQuery(),
+		});
 
 		if (res.success) {
 			const newGoals = res.data.list.goals;
@@ -105,7 +160,6 @@ const ListGoalsContainerComponent: FC = () => {
 		setIsLoadingMore(false);
 	};
 
-	// IntersectionObserver для бесконечной прокрутки
 	useEffect(() => {
 		if (!list?.goalsPagination?.hasMore) return;
 
@@ -128,7 +182,42 @@ const ListGoalsContainerComponent: FC = () => {
 				intersectionObserver.unobserve(ref);
 			}
 		};
-	}, [list?.goalsPagination?.hasMore, list?.goalsPagination?.page]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [list?.goalsPagination?.hasMore, list?.goalsPagination?.page, searchParamsKey, search]);
+
+	const onSearchChange = (query: string) => {
+		setSearch(query);
+
+		if (searchTimer) {
+			clearTimeout(searchTimer);
+		}
+
+		setSearchTimer(
+			setTimeout(() => {
+				if (!listId) return;
+				setIsLoading(true);
+				getListGoalsPage(listId, {page: 1, pageSize: 30, ...buildListGoalsApiQuery(searchParams, query)})
+					.then((res) => {
+						if (res.success) {
+							setList(res.data.list);
+							lastRequestedPageRef.current = 0;
+						}
+					})
+					.finally(() => setIsLoading(false));
+			}, 300)
+		);
+	};
+
+	const shouldRemoveGoalAfterUpdate = (operation: 'add' | 'delete' | 'mark', done?: boolean, completedByUser?: boolean) => {
+		const completionFilter = parseListGoalsFilterValues(searchParams)['completionStatus'][0];
+		if (completionFilter === 'not_completed' && operation === 'mark' && !done && !completedByUser) {
+			return true;
+		}
+		if (completionFilter === 'completed' && operation === 'mark' && done && completedByUser) {
+			return true;
+		}
+		return false;
+	};
 
 	const updateList = async (code: string, operation: 'add' | 'delete' | 'mark-all'): Promise<boolean> => {
 		if (!isAuth) {
@@ -144,13 +233,14 @@ const ListGoalsContainerComponent: FC = () => {
 			: markAllGoalsFromList(code));
 
 		if (res.success) {
-			// ��рогресс заданий обновляется автоматически на бэкенде
-
 			setList({
 				...list,
 				...res.data,
 			});
 			lastRequestedPageRef.current = Number.MAX_SAFE_INTEGER;
+			if (operation === 'mark-all') {
+				await fetchList({silent: true});
+			}
 			return true;
 		}
 		return res.success;
@@ -169,17 +259,20 @@ const ListGoalsContainerComponent: FC = () => {
 			return false;
 		}
 
-		// Прогресс заданий обновляется автоматически на бэкенде
-
+		const currentGoal = list.goals[i];
 		const updatedGoal = {
-			...list.goals[i],
+			...currentGoal,
 			addedByUser: operation !== 'delete',
-			completedByUser: operation === 'mark' ? !done : operation === 'delete' ? false : list.goals[i].completedByUser,
+			completedByUser: operation === 'mark' ? !done : operation === 'delete' ? false : currentGoal.completedByUser,
 			totalAdded: res.data.totalAdded,
 		};
 
-		const newGoals = [...list.goals];
-		newGoals[i] = updatedGoal;
+		let newGoals = [...list.goals];
+		if (shouldRemoveGoalAfterUpdate(operation, done, currentGoal.completedByUser)) {
+			newGoals = newGoals.filter((_, index) => index !== i);
+		} else {
+			newGoals[i] = updatedGoal;
+		}
 
 		let {userCompletedGoals} = list;
 
@@ -199,6 +292,12 @@ const ListGoalsContainerComponent: FC = () => {
 			userCompletedGoals,
 			completedByUser,
 			totalCompleted: completedByUser ? list.totalCompleted + 1 : list.totalCompleted,
+			goalsPagination: list.goalsPagination
+				? {
+						...list.goalsPagination,
+						totalGoals: Math.max(0, list.goalsPagination.totalGoals - (newGoals.length < list.goals.length ? 1 : 0)),
+				  }
+				: undefined,
 		});
 		return true;
 	};
@@ -247,7 +346,18 @@ const ListGoalsContainerComponent: FC = () => {
 						hasScratchMap={list.hasScratchMap}
 					/>
 					<div className={element('content-wrapper')}>
-						<ContentListGoals className={element('content')} list={list} updateGoal={updateGoal} />
+						<ContentListGoals
+							className={element('content')}
+							list={list}
+							search={search}
+							onSearchChange={onSearchChange}
+							updateGoal={updateGoal}
+						/>
+						{isLoading && (
+							<div className={element('loader')}>
+								<Loader isLoading />
+							</div>
+						)}
 						{list.goalsPagination?.hasMore && (
 							<div ref={loadMoreRef}>
 								<Loader isLoading={isLoadingMore} />
