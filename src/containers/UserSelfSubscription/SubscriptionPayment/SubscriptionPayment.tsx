@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useState} from 'react';
+import {FC, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
@@ -29,15 +29,26 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(({peri
 	const [selectedPeriod, setSelectedPeriod] = useState<number>(12);
 	const [isAutoRenew, setIsAutoRenew] = useState(false);
 	const [agreedToTerms, setAgreedToTerms] = useState(false);
+	const [agreedToAutoRenew, setAgreedToAutoRenew] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string>('');
 
 	const selectedPeriodData = periods.find((p) => p.value === selectedPeriod) || periods[0];
 	const isPreview = variant === 'preview';
 
+	useEffect(() => {
+		if (!isAutoRenew) {
+			setAgreedToAutoRenew(false);
+		}
+	}, [isAutoRenew]);
+
 	const handlePayment = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 		if (!agreedToTerms) {
-			setErrorMessage('Необходимо согласиться с условиями использования');
+			setErrorMessage('Необходимо согласиться с условиями оформления подписки');
+			return;
+		}
+		if (isAutoRenew && !agreedToAutoRenew) {
+			setErrorMessage('Необходимо согласиться на автоматическое продление подписки');
 			return;
 		}
 		setErrorMessage('');
@@ -45,6 +56,8 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(({peri
 			onPayment(selectedPeriod, isAutoRenew);
 		}
 	};
+
+	const isPaymentDisabled = !agreedToTerms || (isAutoRenew && !agreedToAutoRenew);
 
 	return (
 		<div className={block()}>
@@ -105,6 +118,30 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(({peri
 							checked={isAutoRenew}
 							setChecked={setIsAutoRenew}
 						/>
+						{isAutoRenew && (
+							<div className={element('terms')}>
+								<FieldCheckbox
+									id="auto-renew-consent"
+									text=""
+									checked={agreedToAutoRenew}
+									setChecked={(value) => {
+										setAgreedToAutoRenew(value);
+										if (value) {
+											setErrorMessage('');
+										}
+									}}
+								/>
+								<label htmlFor="auto-renew-consent" className={element('terms-label')}>
+									Согласен на автоматическое списание средств при продлении подписки на условиях{' '}
+									<Link to="/subscription-offer#auto-renewal" target="_blank" className={element('link')}>
+										раздела об автопродлении
+									</Link>{' '}
+									<Link to="/subscription-offer" target="_blank" className={element('link')}>
+										оферты Premium
+									</Link>
+								</label>
+							</div>
+						)}
 						<div className={element('terms')}>
 							<FieldCheckbox
 								id="terms"
@@ -119,6 +156,10 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(({peri
 							/>
 							<label htmlFor="terms" className={element('terms-label')}>
 								Я согласен с{' '}
+								<Link to="/subscription-offer" target="_blank" className={element('link')}>
+									офертой на подписку Premium
+								</Link>
+								,{' '}
 								<Link to="/consent" target="_blank" className={element('link')}>
 									Согласием на обработку персональных данных
 								</Link>
@@ -141,7 +182,7 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(({peri
 						</div>
 					)}
 
-					<Button theme="blue" className={element('button')} onClick={handlePayment} disabled={!agreedToTerms}>
+					<Button theme="blue" className={element('button')} onClick={handlePayment} disabled={isPaymentDisabled}>
 						{`Оплатить ${String(selectedPeriodData.price)}₽`}
 					</Button>
 				</>

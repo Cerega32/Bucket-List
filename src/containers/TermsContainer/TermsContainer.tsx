@@ -1,6 +1,8 @@
 import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
+import {OPERATOR_EMAIL} from '@/utils/legal/operatorInfo';
+
 import {LegalDocument} from '../LegalDocument/LegalDocument';
 
 export const TermsContainer: FC = () => {
@@ -25,6 +27,11 @@ export const TermsContainer: FC = () => {
 
 			<section>
 				<h2>2. Использование сервиса</h2>
+				<p>
+					Платная подписка Premium оформляется на условиях{' '}
+					<Link to="/subscription-offer">Публичной оферты на подписку Premium</Link>. Возврат и отмена — в{' '}
+					<Link to="/subscription-refund">Политике возврата и отмены подписки</Link>.
+				</p>
 				<p>Платформа Delting предоставляет следующие возможности:</p>
 				<ul>
 					<li>Создание и управление списками целей;</li>
@@ -147,7 +154,7 @@ export const TermsContainer: FC = () => {
 				<p>
 					По вопросам условий использования обращайтесь:
 					<br />
-					Email: <Link to="mailto:delting-help@yandex.com">delting-help@yandex.com</Link>
+					Email: <Link to={`mailto:${OPERATOR_EMAIL}`}>{OPERATOR_EMAIL}</Link>
 				</p>
 				<p>
 					Для получения полной информации о правах и обязанностях сторон, порядке использования Платформы и других условиях

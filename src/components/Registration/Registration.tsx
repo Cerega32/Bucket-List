@@ -477,10 +477,14 @@ export const Registration: FC<RegistrationProps> = (props) => {
 										Даю согласие на обработку моих персональных данных в соответствии с{' '}
 										<Link to="/consent" className={element('consent-link')} target="_blank" rel="noopener noreferrer">
 											Согласием на обработку персональных данных
-										</Link>{' '}
-										и{' '}
+										</Link>
+										,{' '}
 										<Link to="/privacy" className={element('consent-link')} target="_blank" rel="noopener noreferrer">
 											Политикой конфиденциальности
+										</Link>{' '}
+										и принимаю{' '}
+										<Link to="/agreement" className={element('consent-link')} target="_blank" rel="noopener noreferrer">
+											Пользовательское соглашение
 										</Link>
 									</div>
 								}

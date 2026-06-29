@@ -28,6 +28,8 @@ import {PagePremium} from '@/pages/PagePremium/PagePremium';
 import {PagePrivacy} from '@/pages/PagePrivacy/PagePrivacy';
 import {PageRegistration} from '@/pages/PageRegistration/PageRegistration';
 import {PageResetPassword} from '@/pages/PageResetPassword/PageResetPassword';
+import {PageSubscriptionOffer} from '@/pages/PageSubscriptionOffer/PageSubscriptionOffer';
+import {PageSubscriptionRefund} from '@/pages/PageSubscriptionRefund/PageSubscriptionRefund';
 import {PageTariffs} from '@/pages/PageTariffs/PageTariffs';
 import {PageTerms} from '@/pages/PageTerms/PageTerms';
 import {PageUser} from '@/pages/PageUser/PageUser';
@@ -118,6 +120,8 @@ export const RoutesAuth: FC = observer(() => {
 				<Route path="/terms" element={<PageTerms page="isTerms" />} />
 				<Route path="/premium" element={<PagePremium />} />
 				<Route path="/agreement" element={<PageAgreement page="isAgreement" />} />
+				<Route path="/subscription-offer" element={<PageSubscriptionOffer page="isSubscriptionOffer" />} />
+				<Route path="/subscription-refund" element={<PageSubscriptionRefund page="isSubscriptionRefund" />} />
 				<Route path="/cookies" element={<PageCookies page="isCookies" />} />
 
 				{/* Остальные маршруты остаются без изменений */}
