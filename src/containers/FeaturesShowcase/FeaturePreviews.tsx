@@ -5,7 +5,6 @@ import {RegularCard} from '@/components/Card/RegularCard';
 import {CardMain} from '@/components/CardMain/CardMain';
 import {CommentGoal} from '@/components/CommentGoal/CommentGoal';
 import {CompareFriendModal} from '@/components/CompareFriendModal/CompareFriendModal';
-import {GoalMapMulti} from '@/components/GoalMap/GoalMapMulti';
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
@@ -22,10 +21,10 @@ import {
 	DEMO_ORGANIZE_GOALS,
 	DEMO_PROGRESS_ENTRIES,
 	DEMO_SHOWCASE_FOLDERS,
-	DEMO_WORLD_MAP_GOALS,
 	ShowcaseScenarioId,
 } from './features-showcase-data';
 import {GoalFoldersShowcase} from './GoalFoldersShowcase';
+import {ShowcaseMapsSlideshow} from './ShowcaseMapsSlideshow';
 import {ShowcaseUserSelfDashboard} from './ShowcaseUserSelfDashboard';
 
 import './features-showcase.scss';
@@ -152,7 +151,7 @@ export const FeaturePreviews: FC<FeaturePreviewsProps> = (props) => {
 			);
 
 		case 'travel':
-			return <GoalMapMulti className={element('demo-map')} goals={DEMO_WORLD_MAP_GOALS} openBalloonAt={0} />;
+			return <ShowcaseMapsSlideshow className={element('maps-slideshow')} />;
 
 		case 'impressions':
 			return <CommentGoal comment={DEMO_COMMENT} isUser hideReport />;

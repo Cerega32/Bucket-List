@@ -1,6 +1,9 @@
 import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
+import {OperatorRequisites} from '@/components/OperatorRequisites/OperatorRequisites';
+import {OPERATOR_EMAIL, OPERATOR_FULL_NAME, OPERATOR_INN, OPERATOR_PLATFORM, OPERATOR_STATUS} from '@/utils/legal/operatorInfo';
+
 import {LegalDocument} from '../LegalDocument/LegalDocument';
 
 export const AgreementContainer: FC = () => {
@@ -22,6 +25,11 @@ export const AgreementContainer: FC = () => {
 					состав указанной платформы, а также любая документация по ее использованию.
 				</p>
 				<p>
+					<strong>Правообладатель</strong> — {OPERATOR_FULL_NAME}
+					{OPERATOR_INN ? `, ИНН ${OPERATOR_INN}` : ''}, {OPERATOR_STATUS}, владелец исключительных прав на Платформу{' '}
+					{OPERATOR_PLATFORM}.
+				</p>
+				<p>
 					<strong>Пользователь</strong> — лицо, изъявившее желание пользоваться Платформой и зарегистрировавшееся на Платформе.
 				</p>
 				<p>
@@ -40,8 +48,8 @@ export const AgreementContainer: FC = () => {
 					рекомендуется не заключать Договор и не совершать действия, трактуемые как акцепт.
 				</p>
 				<p>
-					Данный документ в соответствии со статьей 435 и частью 2 статьи 437 Гражданского кодекса РФ является публичной офертой
-					владельца платформы Delting (далее — Правообладатель), и содержит предложение всем физическим лицам заключить договор на
+					Данный документ в соответствии со статьей 435 и частью 2 статьи 437 Гражданского кодекса РФ является публичной офертой{' '}
+					{OPERATOR_FULL_NAME} (далее — Правообладатель), и содержит предложение всем физическим лицам заключить договор на
 					предоставление права пользования платформой на нижеуказанных условиях.
 				</p>
 				<p>
@@ -53,6 +61,10 @@ export const AgreementContainer: FC = () => {
 					<li>регистрация в качестве пользователя, создание учетной записи в Платформе;</li>
 					<li>использование функционала Платформы после регистрации.</li>
 				</ul>
+				<p>
+					Платная подписка Premium оформляется на условиях отдельной{' '}
+					<Link to="/subscription-offer">Публичной оферты на подписку Premium</Link>.
+				</p>
 			</section>
 
 			<section>
@@ -306,8 +318,8 @@ export const AgreementContainer: FC = () => {
 				</p>
 				<p>
 					Пользователь направляет свою претензию на адрес электронной почты{' '}
-					<Link to="mailto:delting-help@yandex.com">delting-help@yandex.com</Link>, с приложением подтверждающих документов или
-					данных. Срок рассмотрения претензии - не более 10 рабочих дней с даты ее поступления.
+					<Link to={`mailto:${OPERATOR_EMAIL}`}>{OPERATOR_EMAIL}</Link>, с приложением подтверждающих документов или данных. Срок
+					рассмотрения претензии - не более 10 рабочих дней с даты ее поступления.
 				</p>
 			</section>
 
@@ -328,10 +340,11 @@ export const AgreementContainer: FC = () => {
 
 			<section>
 				<h2>10. Контактная информация</h2>
+				<OperatorRequisites />
 				<p>
 					По вопросам, связанным с настоящим Соглашением, обращайтесь:
 					<br />
-					Email: <Link to="mailto:delting-help@yandex.com">delting-help@yandex.com</Link>
+					Email: <Link to={`mailto:${OPERATOR_EMAIL}`}>{OPERATOR_EMAIL}</Link>
 				</p>
 			</section>
 		</LegalDocument>

@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie';
 import {FC, useEffect, useState} from 'react';
+import {useSearchParams} from 'react-router-dom';
 
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {InfoGoal} from '@/components/InfoGoal/InfoGoal';
@@ -16,6 +17,8 @@ import './leaders.scss';
 
 type LeadersPeriod = 'current' | 'previous';
 
+const parseLeadersPeriod = (value: string | null): LeadersPeriod => (value === 'previous' ? 'previous' : 'current');
+
 const formatWeekRange = (start: string, end: string) => {
 	const startDate = new Date(start);
 	const endDate = new Date(end);
@@ -25,13 +28,29 @@ const formatWeekRange = (start: string, end: string) => {
 
 export const Leaders: FC = () => {
 	const [block, element] = useBem('leaders');
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [leaders, setLeaders] = useState<Array<IWeeklyLeader>>([]);
 	const [previousWeek, setPreviousWeek] = useState<IPreviousWeekLeaders | null>(null);
 	const [currentPeriod, setCurrentPeriod] = useState<IWeekPeriod | null>(null);
 	const [infoStats, setInfoStats] = useState<IInfoStats>(defaultInfoStats);
 	const [isLoading, setIsLoading] = useState(true);
-	const [activePeriod, setActivePeriod] = useState<LeadersPeriod>('current');
+	const activePeriod = parseLeadersPeriod(searchParams.get('period'));
 	const currentUserId = parseInt(Cookies.get('user-id') || '0', 10);
+
+	const setActivePeriod = (period: LeadersPeriod) => {
+		setSearchParams(
+			(prev) => {
+				const next = new URLSearchParams(prev);
+				if (period === 'current') {
+					next.delete('period');
+				} else {
+					next.set('period', period);
+				}
+				return next;
+			},
+			{replace: true}
+		);
+	};
 
 	useEffect(() => {
 		(async () => {

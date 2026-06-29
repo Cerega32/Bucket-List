@@ -3,7 +3,7 @@ import {IComment} from '@/typings/comments';
 import {ICategory, IGoal, IGoalFolder, IRegularGoalStatistics, IShortGoal, IShortList} from '@/typings/goal';
 import {IUserStatistics, IWeeklyProgressItem} from '@/typings/user';
 import {IGoalProgressEntry} from '@/utils/api/goals';
-import {GoalWithLocation} from '@/utils/mapApi';
+import {GoalWithLocation, ScratchMapCountry} from '@/utils/mapApi';
 
 export type ShowcaseScenarioId =
 	| 'organize'
@@ -78,9 +78,13 @@ export const SHOWCASE_SCENARIOS: ShowcaseScenario[] = [
 	},
 	{
 		id: 'travel',
-		navLabel: 'Карта',
-		problem: 'Был в Париже, Токио и на даче у бабушки — а где ты уже побывал, если собрать всё в одну картину мира?',
-		solution: 'Карта путешествий: отмечай точки по целям, смотри посещённые места и планируй следующие.',
+		navLabel: 'Карты',
+		problem:
+			'Был в Париже, Токио и на даче у бабушки — а где ты уже побывал, если собрать всё в одну картину мира? ' +
+			'И сколько стран из списка «посетить» ещё ждут своей отметки?',
+		solution:
+			'Две карты в одном месте: точки по целям на маршрутах и скретч-карта — закрашивай страны и регионы по мере выполнения. ' +
+			'Видишь и конкретные места, и общий прогресс по миру.',
 		icon: 'map',
 	},
 	{
@@ -375,6 +379,16 @@ export const DEMO_WORLD_MAP_GOALS: GoalWithLocation[] = [
 	loc(4, 'Кейптаун', 'ЮАР', -33.9249, 18.4241, false, 'Столовая гора, Кейптаун', 'Подъём на Table Mountain.'),
 	loc(5, 'Сидней', 'Австралия', -33.8688, 151.2093, false, 'Оперный театр, Сидней', 'Увидеть паруса оперного театра.'),
 	loc(6, 'Рио-де-Жанейро', 'Бразилия', -22.9068, -43.1729, true, 'Копакабана, Рио-де-Жанейро', 'Пляж и карнавальная атмосфера города.'),
+];
+
+/** Демо-данные для скретч-карты на витрине (согласованы с точками DEMO_WORLD_MAP_GOALS). */
+export const DEMO_SCRATCH_MAP_COUNTRIES: ScratchMapCountry[] = [
+	{iso: 'fr', mapIso: 'FRA', mapNames: ['France'], name: 'Франция', code: 'demo-france', completed: true},
+	{iso: 'jp', mapIso: 'JPN', mapNames: ['Japan'], name: 'Япония', code: 'demo-japan', completed: true},
+	{iso: 'us', mapIso: 'USA', mapNames: ['United States of America'], name: 'США', code: 'demo-usa', completed: true},
+	{iso: 'br', mapIso: 'BRA', mapNames: ['Brazil'], name: 'Бразилия', code: 'demo-brazil', completed: true},
+	{iso: 'za', mapIso: 'ZAF', mapNames: ['South Africa'], name: 'Южная Африка', code: 'demo-south-africa', completed: false},
+	{iso: 'au', mapIso: 'AUS', mapNames: ['Australia'], name: 'Австралия', code: 'demo-australia', completed: false},
 ];
 
 export const DEMO_COMPARE_FRIEND: CompareFriendData = {

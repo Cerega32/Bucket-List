@@ -4,6 +4,7 @@ import {FC, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import {FeedbackModal} from '@/components/FeedbackModal/FeedbackModal';
+import {OperatorRequisites} from '@/components/OperatorRequisites/OperatorRequisites';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {ThemeStore} from '@/store/ThemeStore';
@@ -75,6 +76,8 @@ export const Footer: FC<FooterProps> = observer((props) => {
 				{to: '/privacy', label: 'Политика конфиденциальности'},
 				{to: '/consent', label: 'Согласие на обработку ПДн'},
 				{to: '/agreement', label: 'Пользовательское соглашение'},
+				{to: '/subscription-offer', label: 'Оферта Premium'},
+				{to: '/subscription-refund', label: 'Возврат и отмена подписки'},
 				{to: '/terms', label: 'Условия использования'},
 				{to: '/cookies', label: 'Cookie'},
 			],
@@ -145,10 +148,13 @@ export const Footer: FC<FooterProps> = observer((props) => {
 				>
 					<div className={element('divider')} />
 					<div className={element('bottom-content')}>
-						<div className={element('copyright')}>
-							<span>©</span>
-							<span>{currentYear} Delting. Все права защищены.</span>
-						</div>
+						<p className={element('copyright')}>
+							<span className={element('copyright-line')}>
+								© {currentYear} Delting. Все права защищены
+								<span className={element('sep')}>|</span>
+								<OperatorRequisites className={element('requisites')} variant="compact" />
+							</span>
+						</p>
 						{!isScreenMobile && (
 							<div className={element('additional-info')}>
 								<span>Сделано с ❤️ для вашего развития</span>

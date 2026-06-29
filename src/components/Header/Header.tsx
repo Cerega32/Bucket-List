@@ -137,6 +137,13 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		setIsNotificationsOpen(true);
 	};
 
+	const closeNotificationsUi = useCallback(() => {
+		setIsNotificationsOpen(false);
+		setIsNotificationsModalOpen(false);
+		setIsMenuOpen(false);
+		setIsUserMenuOpen(false);
+	}, []);
+
 	const toggleRegularGoals = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (isRegularGoalsOpen) {
@@ -334,6 +341,8 @@ export const Header: FC<HeaderProps> = observer((props) => {
 						className={element('menu-item')}
 						onClick={() => {
 							HeaderNotificationsStore.fetchNotifications();
+							setIsUserMenuOpen(false);
+							setIsMenuOpen(false);
 							setIsNotificationsModalOpen(true);
 						}}
 					>
@@ -798,7 +807,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 												>
 													<NotificationDropdown
 														isOpen={isNotificationsOpen}
-														onClose={() => setIsNotificationsOpen(false)}
+														onClose={closeNotificationsUi}
 														disableClickOutside
 													/>
 												</motion.div>
@@ -966,13 +975,8 @@ export const Header: FC<HeaderProps> = observer((props) => {
 					))}
 				</div>
 			</ModalPhone>
-			<ModalPhone title="Уведомления" isOpen={isNotificationsModalOpen} onClose={() => setIsNotificationsModalOpen(false)}>
-				<NotificationDropdown
-					isOpen={isNotificationsModalOpen}
-					onClose={() => setIsNotificationsModalOpen(false)}
-					disableClickOutside
-					inModal
-				/>
+			<ModalPhone title="Уведомления" isOpen={isNotificationsModalOpen} onClose={closeNotificationsUi}>
+				<NotificationDropdown isOpen={isNotificationsModalOpen} onClose={closeNotificationsUi} disableClickOutside inModal />
 			</ModalPhone>
 			<FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
 		</header>

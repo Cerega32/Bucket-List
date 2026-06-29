@@ -206,4 +206,16 @@
 		gap: 10px;
 		margin-top: 6px;
 	}
+
+	&--showcase {
+		gap: 8px;
+
+		.countries-scratch-map__map {
+			max-width: 100%;
+		}
+
+		.countries-scratch-map__loading {
+			height: 280px;
+		}
+	}
 }

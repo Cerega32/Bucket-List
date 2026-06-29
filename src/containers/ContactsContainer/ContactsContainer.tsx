@@ -1,9 +1,11 @@
 import {motion} from 'framer-motion';
 import {FC} from 'react';
 
+import {OperatorRequisites} from '@/components/OperatorRequisites/OperatorRequisites';
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {OPERATOR_EMAIL} from '@/utils/legal/operatorInfo';
 
 import './contacts-container.scss';
 
@@ -22,8 +24,8 @@ export const ContactsContainer: FC = () => {
 			icon: 'email',
 			title: 'Email',
 			description: 'Напишите нам на почту',
-			href: 'mailto:delting-help@yandex.com',
-			label: 'delting-help@yandex.com',
+			href: `mailto:${OPERATOR_EMAIL}`,
+			label: OPERATOR_EMAIL,
 		},
 	];
 
@@ -116,6 +118,18 @@ export const ContactsContainer: FC = () => {
 								<p className={element('contact-description')}>{contact.description}</p>
 							</motion.a>
 						))}
+					</div>
+				</section>
+
+				<section className={element('section')}>
+					<Title tag="h2" className={element('section-title')}>
+						Реквизиты исполнителя
+					</Title>
+					<p className={element('section-description')}>
+						По вопросам оплаты подписки Premium, возврата средств и обработки персональных данных.
+					</p>
+					<div className={element('requisites-card')}>
+						<OperatorRequisites />
 					</div>
 				</section>
 

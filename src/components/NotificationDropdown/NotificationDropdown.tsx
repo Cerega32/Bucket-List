@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
@@ -75,6 +76,19 @@ const isAchievementImage = (notification: IHeaderNotification) => {
 const getNotificationLink = (notification: IHeaderNotification): string | null => {
 	const {type, relatedObjectType, relatedObjectCode, sender} = notification;
 
+	if (type === 'achievement') {
+		const userId = Cookies.get('user-id');
+		return userId ? `/user/${userId}/achievements` : '/user/self/achievements';
+	}
+
+	if (type === 'weekly_leaderboard') {
+		return '/leaders?period=previous';
+	}
+
+	if (type === 'level_up') {
+		return '/user/self';
+	}
+
 	if (relatedObjectType === 'goal' && relatedObjectCode) {
 		return `/goals/${relatedObjectCode}`;
 	}
@@ -97,10 +111,6 @@ const getNotificationLink = (notification: IHeaderNotification): string | null =
 
 	if (type === 'subscription_expiring_5d' || type === 'subscription_expiring_1d' || type === 'subscription_expired') {
 		return '/user/self/subs';
-	}
-
-	if (type === 'weekly_leaderboard') {
-		return '/leaders';
 	}
 
 	if (type === 'friend_request' || type === 'friend_accepted' || type === 'friend_rejected') {
@@ -170,13 +180,13 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 	}, [isOpen, onClose, disableClickOutside]);
 
 	const handleNotificationClick = async (notification: IHeaderNotification) => {
-		if (!notification.isRead) {
-			await HeaderNotificationsStore.markAsRead(notification.id);
-		}
 		const link = getNotificationLink(notification);
 		if (link) {
 			onClose();
 			navigate(link);
+		}
+		if (!notification.isRead) {
+			await HeaderNotificationsStore.markAsRead(notification.id);
 		}
 	};
 

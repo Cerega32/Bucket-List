@@ -24,6 +24,14 @@
 		}
 	}
 
+	&__filters {
+		margin-bottom: 24px;
+
+		@include md {
+			margin-bottom: 16px;
+		}
+	}
+
 	&__view-toggle {
 		display: flex;
 		gap: 4px;

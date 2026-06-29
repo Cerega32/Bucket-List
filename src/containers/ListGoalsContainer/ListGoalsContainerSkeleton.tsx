@@ -43,7 +43,7 @@ export const ListGoalsContainerSkeleton: FC<ListGoalsContainerSkeletonProps> = (
 							<Skeleton height={14} />
 							<Skeleton height={14} />
 							<Skeleton height={14} />
-							<Skeleton height={14} width="85%" />
+							<Skeleton height={14} width="25%" style={{marginTop: '5px'}} />
 						</div>
 
 						<div className={element('progress')}>
@@ -53,7 +53,13 @@ export const ListGoalsContainerSkeleton: FC<ListGoalsContainerSkeletonProps> = (
 						</div>
 					</div>
 
-					<Skeleton width={220} height={20} />
+					<div className={element('filters')}>
+						<Skeleton className={element('filters-search')} height={40} borderRadius={8} />
+						<div className={element('filters-actions')}>
+							<Skeleton width={120} height={40} borderRadius={8} />
+							<Skeleton width={160} height={40} borderRadius={8} />
+						</div>
+					</div>
 
 					<div className={element('grid')}>
 						{Array.from({length: goalsCount}).map((_, i) => (

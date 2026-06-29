@@ -11,17 +11,34 @@ export interface GoalMapMultiProps {
 	goals: GoalWithLocation[];
 	/** Индекс маркера, у которого открыть балун после загрузки карты */
 	openBalloonAt?: number;
+	/** Пересчитать размер карты при появлении (например, после смены слайда) */
+	isVisible?: boolean;
 	onLoadError?: () => void;
 	onLoadSuccess?: () => void;
 }
 
 export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
-	const {className, goals, openBalloonAt, onLoadError, onLoadSuccess} = props;
+	const {className, goals, openBalloonAt, isVisible = true, onLoadError, onLoadSuccess} = props;
 	const [block, element] = useBem('goal-map', className);
 	const mapContainer = useRef<HTMLDivElement>(null);
 	const mapInstance = useRef<any>(null);
 	const markersRef = useRef<any[]>([]);
 	const [mapLoadError, setMapLoadError] = useState(false);
+	const [mapReady, setMapReady] = useState(false);
+
+	const fitMapToContainer = () => {
+		mapInstance.current?.container?.fitToViewport?.();
+	};
+
+	useEffect(() => {
+		if (!isVisible || !mapReady) {
+			return undefined;
+		}
+
+		fitMapToContainer();
+		const frameId = window.requestAnimationFrame(fitMapToContainer);
+		return () => window.cancelAnimationFrame(frameId);
+	}, [isVisible, mapReady]);
 
 	useEffect(() => {
 		const validGoals = goals.filter(
@@ -31,6 +48,7 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
 
 		let cancelled = false;
 		let loadTimeoutId: number | undefined;
+		let resizeObserver: ResizeObserver | undefined;
 
 		const reportError = () => {
 			if (!cancelled) {
@@ -125,6 +143,15 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
 					window.setTimeout(() => markersRef.current[openBalloonAt].balloon.open(), 500);
 				}
 
+				if (mapContainer.current) {
+					resizeObserver = new ResizeObserver(() => {
+						fitMapToContainer();
+					});
+					resizeObserver.observe(mapContainer.current);
+				}
+
+				window.requestAnimationFrame(fitMapToContainer);
+				setMapReady(true);
 				reportSuccess();
 			} catch {
 				reportError();
@@ -144,6 +171,8 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
 
 		return () => {
 			cancelled = true;
+			setMapReady(false);
+			resizeObserver?.disconnect();
 			if (loadTimeoutId) {
 				clearTimeout(loadTimeoutId);
 			}
