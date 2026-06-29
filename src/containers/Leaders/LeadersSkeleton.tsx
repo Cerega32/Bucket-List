@@ -27,7 +27,7 @@ export const LeadersSkeleton: FC<LeadersSkeletonProps> = (props) => {
 				</p>
 				<Skeleton className={element('info-caption')} width="90%" height={12} />
 				<div className={element('info')}>
-					{Array.from({length: 3}).map((_, i) => (
+					{Array.from({length: 4}).map((_, i) => (
 						<div key={i} className={element('info-item')}>
 							<Skeleton width="80%" height={14} />
 							<Skeleton width="60%" height={24} />
@@ -52,6 +52,8 @@ export const LeadersSkeleton: FC<LeadersSkeletonProps> = (props) => {
 					<Skeleton width={160} height={16} />
 					<Skeleton width={80} height={16} />
 					<Skeleton width={80} height={16} />
+					<Skeleton width={80} height={16} />
+					<Skeleton width={80} height={16} />
 				</div>
 				{Array.from({length: rowsCount}).map((_, i) => (
 					<div key={i} className={element('board-row')}>
@@ -63,6 +65,8 @@ export const LeadersSkeleton: FC<LeadersSkeletonProps> = (props) => {
 								<Skeleton width={90} height={12} />
 							</div>
 						</div>
+						<Skeleton width={60} height={14} />
+						<Skeleton width={60} height={14} />
 						<Skeleton width={60} height={14} />
 						<Skeleton width={60} height={14} />
 					</div>

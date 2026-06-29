@@ -1,6 +1,7 @@
 import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
+import {InfoTooltip} from '@/components/InfoTooltip/InfoTooltip';
 import {useBem} from '@/hooks/useBem';
 import {IWeeklyLeader} from '@/typings/user';
 import {pluralize} from '@/utils/text/pluralize';
@@ -8,6 +9,14 @@ import {pluralize} from '@/utils/text/pluralize';
 import {Avatar} from '../Avatar/Avatar';
 
 import './leader-board.scss';
+
+const ACTIVITY_TOOLTIP_PARAGRAPHS = [
+	'Что сюда входит:',
+	'- Бонус за серию выполнения целей.',
+	'- Выполнение списков целей (с учётом сложности).',
+	'- Создание целей, списков и папок.',
+	'- Прогресс по целям и получение достижений.',
+];
 
 interface LeaderBoardProps {
 	users: Array<IWeeklyLeader>;
@@ -35,6 +44,7 @@ export const LeaderBoard: FC<LeaderBoardProps> = (props) => {
 			</td>
 			<td className={element('item')}>{user.weekCompletedGoals}</td>
 			<td className={element('item')}>{user.reviewsAddedWeek}</td>
+			<td className={element('item')}>{user.activityExperienceWeek}</td>
 			<td className={element('item')}>{user.experienceEarnedWeek}</td>
 		</tr>
 	);
@@ -48,6 +58,12 @@ export const LeaderBoard: FC<LeaderBoardProps> = (props) => {
 						<th className={element('head-item')}>Пользователь</th>
 						<th className={element('head-item')}>Целей выполнено</th>
 						<th className={element('head-item')}>Добавлено впечатлений</th>
+						<th className={element('head-item')}>
+							<span className={element('head-label')}>
+								Активность
+								<InfoTooltip paragraphs={ACTIVITY_TOOLTIP_PARAGRAPHS} />
+							</span>
+						</th>
 						<th className={element('head-item')}>Опыта заработано</th>
 					</tr>
 				</thead>
@@ -56,7 +72,7 @@ export const LeaderBoard: FC<LeaderBoardProps> = (props) => {
 					{extraUser && (
 						<>
 							<tr className={element('separator-row')}>
-								<td colSpan={5} className={element('separator')}>
+								<td colSpan={6} className={element('separator')}>
 									<span className={element('separator-text')}>Ваше место</span>
 								</td>
 							</tr>

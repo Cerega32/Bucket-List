@@ -97,6 +97,7 @@ export const Leaders: FC = () => {
 					items={[
 						{title: 'Целей выполнено', value: infoStats.goalsCompleted},
 						{title: 'Добавлено впечатлений', value: infoStats.reviewsAdded},
+						{title: 'Активность', value: infoStats.activityEarned ?? 0},
 						{title: 'Опыта заработано', value: infoStats.experienceEarned},
 					]}
 					backgroundOff
