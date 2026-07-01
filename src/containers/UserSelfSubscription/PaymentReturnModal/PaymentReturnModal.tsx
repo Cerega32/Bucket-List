@@ -124,7 +124,7 @@ export const PaymentReturnModal: FC<PaymentReturnModalProps> = observer((props) 
 	const isFailed = paymentStatus === 'failed' || paymentStatus === 'cancelled';
 
 	return (
-		<Modal isOpen={isOpen} onClose={handleClose} className={block()} size="small">
+		<Modal isOpen={isOpen} onClose={handleClose} className={block({success: isPaid})} size="small">
 			<div className={element('header')}>
 				<Title tag="h2" className={element('title')}>
 					{isPaid ? 'Premium активирован' : 'Оплата подписки'}

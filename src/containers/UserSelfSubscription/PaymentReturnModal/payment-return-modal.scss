@@ -1,5 +1,5 @@
 .payment-return-modal {
-	&.modal--isOpen .modal__window {
+	&--success.modal--isOpen .modal__window {
 		background: linear-gradient(
 			155deg,
 			var(--color-secondary) 0%,
