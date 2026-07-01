@@ -12,62 +12,74 @@ interface CurrentSubscriptionProps {
 	type: 'free' | 'premium';
 	expiresAt: string | null;
 	isAutoRenew: boolean;
-	onToggleAutoRenew?: (value: boolean) => void;
+	hasSavedPaymentMethod: boolean;
+	onUnlinkCard?: () => void;
+	isUnlinkLoading?: boolean;
 }
 
-export const CurrentSubscription: FC<CurrentSubscriptionProps> = observer(({type, expiresAt, isAutoRenew, onToggleAutoRenew}) => {
-	const [block, element] = useBem('current-subscription');
-	const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+const formatExpiryDate = (dateString: string) => {
+	const date = new Date(dateString);
+	return date.toLocaleDateString('ru-RU', {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
+	});
+};
 
-	const formatExpiryDate = (dateString: string) => {
-		const date = new Date(dateString);
-		return date.toLocaleDateString('ru-RU', {
-			day: 'numeric',
-			month: 'long',
-			year: 'numeric',
-		});
-	};
+export const CurrentSubscription: FC<CurrentSubscriptionProps> = observer(
+	({type, expiresAt, isAutoRenew, hasSavedPaymentMethod, onUnlinkCard, isUnlinkLoading = false}) => {
+		const [block, element] = useBem('current-subscription');
+		const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
-	const handleDisableAutoRenew = () => {
-		if (onToggleAutoRenew) {
-			onToggleAutoRenew(false);
-		}
-	};
+		const showControl = type === 'premium' && (isAutoRenew || hasSavedPaymentMethod);
+		const expirySuffix = expiresAt ? ` до ${formatExpiryDate(expiresAt)}` : '';
+		const modalText =
+			'Повторные списания прекратятся. Сохранённый способ оплаты (карта или другой метод, ' +
+			'выбранный при оплате через ЮKassa) будет удалён из нашей системы. ' +
+			`Подписка Premium останется активной${expirySuffix}`;
 
-	return (
-		<>
-			<div className={block()}>
-				<Svg icon={type === 'premium' ? 'award' : 'rocket'} className={element('icon', {premium: type === 'premium'})} />
-				<div className={element('content')}>
-					<div className={element('text')}>
-						<strong>Текущая подписка:</strong> {type === 'premium' ? 'Премиум' : 'Базовый'}
-						{type === 'premium' && expiresAt && ` • Действует до ${formatExpiryDate(expiresAt)}`}
-						{isAutoRenew && type === 'premium' && ' • Автопродление включено'}
-					</div>
-					{type === 'premium' && isAutoRenew && (
-						<div className={element('auto-renew-control')}>
-							<Button
-								theme="blue"
-								size="small"
-								className={element('disable-button')}
-								onClick={() => setIsConfirmModalOpen(true)}
-							>
-								Отключить автопродление
-							</Button>
+		const handleConfirm = () => {
+			if (onUnlinkCard) {
+				onUnlinkCard();
+			}
+			setIsConfirmModalOpen(false);
+		};
+
+		return (
+			<>
+				<div className={block()}>
+					<Svg icon={type === 'premium' ? 'award' : 'rocket'} className={element('icon', {premium: type === 'premium'})} />
+					<div className={element('content')}>
+						<div className={element('text')}>
+							<strong>Текущая подписка:</strong> {type === 'premium' ? 'Премиум' : 'Базовый'}
+							{type === 'premium' && expiresAt && ` • Действует до ${formatExpiryDate(expiresAt)}`}
+							{isAutoRenew && type === 'premium' && ' • Автосписание включено'}
 						</div>
-					)}
+						{showControl && (
+							<div className={element('auto-renew-control')}>
+								<Button
+									theme="blue"
+									size="small"
+									className={element('disable-button')}
+									onClick={() => setIsConfirmModalOpen(true)}
+									disabled={isUnlinkLoading}
+								>
+									{isUnlinkLoading ? 'Отключение...' : 'Отключить автосписание'}
+								</Button>
+							</div>
+						)}
+					</div>
 				</div>
-			</div>
-			<ModalConfirm
-				isOpen={isConfirmModalOpen}
-				onClose={() => setIsConfirmModalOpen(false)}
-				title="Отключить автопродление?"
-				text={`Вы уверены, что хотите отключить автоматическое продление подписки? 
-          После окончания текущего периода подписка не будет продлена автоматически.`}
-				textBtn="Отключить"
-				themeBtn="red"
-				handleBtn={handleDisableAutoRenew}
-			/>
-		</>
-	);
-});
+				<ModalConfirm
+					isOpen={isConfirmModalOpen}
+					onClose={() => setIsConfirmModalOpen(false)}
+					title="Отключить автосписание?"
+					text={modalText}
+					textBtn="Отключить"
+					themeBtn="red"
+					handleBtn={handleConfirm}
+				/>
+			</>
+		);
+	}
+);

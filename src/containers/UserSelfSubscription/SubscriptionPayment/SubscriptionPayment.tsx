@@ -131,6 +131,12 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(
 								setChecked={setIsAutoRenew}
 							/>
 							{isAutoRenew && (
+								<p className={element('auto-renew-hint')}>
+									Списание в день продления пройдёт с тем же способом оплаты, который вы выберете на странице ЮKassa
+									(карта, T-Pay, СБП и др.). Надёжнее всего для автопродления — банковская карта.
+								</p>
+							)}
+							{isAutoRenew && (
 								<div className={element('terms')}>
 									<FieldCheckbox
 										id="auto-renew-consent"

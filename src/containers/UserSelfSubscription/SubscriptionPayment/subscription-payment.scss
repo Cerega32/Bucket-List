@@ -17,6 +17,13 @@
 		line-height: 1.5;
 	}
 
+	&__auto-renew-hint {
+		margin: -8px 0 12px;
+		color: var(--color-text-secondary);
+		font-size: 13px;
+		line-height: 1.45;
+	}
+
 	&__periods {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
