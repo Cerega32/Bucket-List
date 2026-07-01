@@ -1,4 +1,4 @@
-.qr-payment-modal {
+.payment-return-modal {
 	&__header {
 		display: flex;
 		justify-content: space-between;
@@ -20,113 +20,6 @@
 		gap: 6px;
 		min-height: 0;
 		overflow: hidden;
-	}
-
-	&__qr-wrapper {
-		display: flex;
-		flex-shrink: 1;
-		justify-content: center;
-		align-items: center;
-		width: 100%;
-		min-width: 0;
-		padding: 12px;
-	}
-
-	&__qr-code {
-		width: 100%;
-		max-width: 180px;
-		height: auto;
-		aspect-ratio: 1;
-
-		@include md {
-			max-width: 160px;
-		}
-
-		@include sm {
-			max-width: 140px;
-		}
-
-		@include xs {
-			max-width: 120px;
-		}
-	}
-
-	&__info {
-		display: flex;
-		flex-direction: column;
-		flex-shrink: 0;
-		gap: 8px;
-		width: 100%;
-		padding: 12px;
-
-		@include xs {
-			padding: 6px;
-		}
-	}
-
-	&__info-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 16px;
-	}
-
-	&__info-label {
-		color: var(--color-text-secondary);
-		font-size: 14px;
-	}
-
-	&__info-value {
-		color: var(--color-text-primary);
-		font-size: 16px;
-		font-weight: 600;
-		text-align: right;
-
-		&--small {
-			font-size: 12px;
-			word-break: break-word;
-		}
-	}
-
-	&__instructions {
-		display: flex;
-		flex-shrink: 0;
-		align-items: flex-start;
-		gap: 12px;
-		width: 100%;
-		padding: 12px;
-		background-color: var(--color-secondary);
-		border: 1px solid var(--color-primary);
-		border-radius: 8px;
-
-		@include xs {
-			padding: 6px;
-		}
-	}
-
-	&__instructions-icon {
-		flex-shrink: 0;
-		width: 16px;
-		height: 16px;
-		margin-top: 2px;
-	}
-
-	&__instructions-title {
-		margin: 0 0 8px;
-		color: var(--color-text);
-		font-size: 14px;
-		font-weight: 600;
-	}
-
-	&__instructions-list {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		margin: 0;
-
-		@include xs {
-			font-size: 12px;
-		}
 	}
 
 	&__status {
@@ -194,17 +87,6 @@
 		text-align: center;
 	}
 
-	@keyframes spin {
-		from {
-			transform: rotate(0deg);
-		}
-
-		to {
-			transform: rotate(360deg);
-		}
-	}
-
-	// Стили заглушки QR
 	&__placeholder {
 		display: flex;
 		flex-direction: column;
@@ -229,5 +111,15 @@
 	&__placeholder-text {
 		margin: 0;
 		color: var(--color-text-secondary);
+	}
+
+	@keyframes spin {
+		from {
+			transform: rotate(0deg);
+		}
+
+		to {
+			transform: rotate(360deg);
+		}
 	}
 }

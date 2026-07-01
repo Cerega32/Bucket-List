@@ -15,6 +15,16 @@ export function getDaysUntilExpiry(expiresAt: string): number {
 	return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 }
 
+/** Premium можно продлить вручную, когда до окончания осталось не больше days дней */
+export function isWithinEarlyRenewalWindow(expiresAt: string | null, days = 7): boolean {
+	if (!expiresAt) {
+		return false;
+	}
+
+	const daysLeft = getDaysUntilExpiry(expiresAt);
+	return daysLeft > 0 && daysLeft <= days;
+}
+
 export function formatExpiryDate(dateString: string): string {
 	const date = new Date(dateString);
 	return date.toLocaleDateString('ru-RU', {

@@ -68,23 +68,31 @@ export const MainPopularLists: FC = observer(() => {
 		return null;
 	}
 
+	const horizontalLists = lists.slice(0, 4);
+	const gridLists = lists.slice(4);
+
+	const renderCard = (list: IShortList, i: number, layout: 'horizontal' | 'grid') => (
+		<Card
+			key={list.code}
+			isList
+			goal={list}
+			className={element('list', {[layout]: true})}
+			horizontal={!isScreenSmallMobile}
+			onClickAdd={() => updateList(list.code, i, 'add')}
+			onClickDelete={() => updateList(list.code, i, 'delete')}
+		/>
+	);
+
 	return (
 		<section className={block()}>
 			<Title tag="h2" className={element('title')}>
 				Популярные списки
 			</Title>
 			<div className={element('lists')}>
-				{lists.map((list, i) => (
-					<Card
-						key={list.code}
-						isList
-						goal={list}
-						className={element('list', {featured: i === 0})}
-						horizontal={!isScreenSmallMobile && i === 0}
-						onClickAdd={() => updateList(list.code, i, 'add')}
-						onClickDelete={() => updateList(list.code, i, 'delete')}
-					/>
-				))}
+				{!!horizontalLists.length && (
+					<div className={element('horizontal-grid')}>{horizontalLists.map((list, i) => renderCard(list, i, 'horizontal'))}</div>
+				)}
+				{!!gridLists.length && <div className={element('grid')}>{gridLists.map((list, i) => renderCard(list, i + 4, 'grid'))}</div>}
 			</div>
 		</section>
 	);
