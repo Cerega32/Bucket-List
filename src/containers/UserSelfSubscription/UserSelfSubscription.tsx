@@ -5,12 +5,13 @@ import {useSearchParams} from 'react-router-dom';
 import {Button} from '@/components/Button/Button';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {NotificationStore} from '@/store/NotificationStore';
 import {createPayment, getUserSubscription, unlinkPaymentMethod} from '@/utils/api/subscription';
 import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
 import {isWithinEarlyRenewalWindow} from '@/utils/subscription/getSubscriptionExpiryState';
 
 import {CurrentSubscription} from './CurrentSubscription/CurrentSubscription';
-import {PaymentReturnModal} from './PaymentReturnModal/PaymentReturnModal';
+import {PaymentReturnModal, PaymentReturnModalCloseStatus} from './PaymentReturnModal/PaymentReturnModal';
 import {FREE_FEATURES, PREMIUM_FEATURES, SUBSCRIPTION_PERIODS} from './subscription-constants';
 import {SubscriptionComparisonModal} from './SubscriptionComparisonModal/SubscriptionComparisonModal';
 import {SubscriptionPayment} from './SubscriptionPayment/SubscriptionPayment';
@@ -39,8 +40,7 @@ export const UserSelfSubscription: FC = observer(() => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isUnlinkingCard, setIsUnlinkingCard] = useState(false);
 
-	const loadSubscription = useCallback(async () => {
-		setIsLoading(true);
+	const refreshSubscriptionSilently = useCallback(async () => {
 		const response = await getUserSubscription();
 		if (response.success && response.data) {
 			setSubscription({
@@ -50,8 +50,13 @@ export const UserSelfSubscription: FC = observer(() => {
 				hasSavedPaymentMethod: response.data.hasSavedPaymentMethod,
 			});
 		}
-		setIsLoading(false);
 	}, []);
+
+	const loadSubscription = useCallback(async () => {
+		setIsLoading(true);
+		await refreshSubscriptionSilently();
+		setIsLoading(false);
+	}, [refreshSubscriptionSilently]);
 
 	useEffect(() => {
 		loadSubscription();
@@ -81,7 +86,11 @@ export const UserSelfSubscription: FC = observer(() => {
 				return;
 			}
 
-			alert(response.error || 'Не удалось создать платеж');
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Не удалось создать платеж',
+				message: response.error || 'Попробуйте ещё раз позже',
+			});
 		} finally {
 			setIsCreatingPayment(false);
 		}
@@ -89,13 +98,19 @@ export const UserSelfSubscription: FC = observer(() => {
 
 	const handlePaymentSuccess = useCallback(async () => {
 		await refreshHeaderGoalCounts();
-		await loadSubscription();
-	}, [loadSubscription]);
+		await refreshSubscriptionSilently();
+	}, [refreshSubscriptionSilently]);
 
-	const handleCloseReturnModal = useCallback(() => {
-		setIsReturnModalOpen(false);
-		setReturnPaymentId(null);
-	}, []);
+	const handleCloseReturnModal = useCallback(
+		(statusAtClose: PaymentReturnModalCloseStatus) => {
+			setIsReturnModalOpen(false);
+			setReturnPaymentId(null);
+			if (statusAtClose === 'pending') {
+				refreshSubscriptionSilently().catch(() => undefined);
+			}
+		},
+		[refreshSubscriptionSilently]
+	);
 
 	const handleUnlinkCard = async () => {
 		setIsUnlinkingCard(true);
@@ -111,7 +126,11 @@ export const UserSelfSubscription: FC = observer(() => {
 				return;
 			}
 
-			alert(response.error || 'Не удалось отвязать карту');
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Не удалось отвязать карту',
+				message: response.error || 'Попробуйте ещё раз позже',
+			});
 		} finally {
 			setIsUnlinkingCard(false);
 		}
