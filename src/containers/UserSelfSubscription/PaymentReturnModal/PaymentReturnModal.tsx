@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useCallback, useEffect, useRef, useState} from 'react';
+import {FC, useEffect, useRef, useState} from 'react';
 
 import {Button} from '@/components/Button/Button';
 import {Modal} from '@/components/Modal/Modal';
@@ -17,81 +17,99 @@ interface PaymentReturnModalProps {
 	onPaymentSuccess?: () => void;
 }
 
-const POLL_INTERVAL_MS = 3000;
-const MAX_POLL_ATTEMPTS = 40;
+const POLL_INTERVAL_MS = 2000;
+const MAX_POLL_ATTEMPTS = 10;
+
+type PaymentStatus = 'pending' | 'paid' | 'failed' | 'cancelled';
+
+const isTerminalStatus = (status: PaymentStatus) => status === 'paid' || status === 'failed' || status === 'cancelled';
 
 export const PaymentReturnModal: FC<PaymentReturnModalProps> = observer(({isOpen, onClose, paymentId, onPaymentSuccess}) => {
 	const [block, element] = useBem('payment-return-modal');
-	const [paymentStatus, setPaymentStatus] = useState<'pending' | 'paid' | 'failed' | 'cancelled'>('pending');
-	const paymentIdRef = useRef<string | null>(null);
-	const pollAttemptsRef = useRef(0);
+	const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('pending');
+	const onPaymentSuccessRef = useRef(onPaymentSuccess);
+	const onCloseRef = useRef(onClose);
+
+	onPaymentSuccessRef.current = onPaymentSuccess;
+	onCloseRef.current = onClose;
 
 	useEffect(() => {
-		if (paymentId) {
-			paymentIdRef.current = paymentId;
-			setPaymentStatus('pending');
-			pollAttemptsRef.current = 0;
-		}
-	}, [paymentId]);
-
-	const handlePaymentSuccess = useCallback(() => {
-		if (onPaymentSuccess) {
-			onPaymentSuccess();
-		}
-	}, [onPaymentSuccess]);
-
-	const handleClose = useCallback(() => {
-		onClose();
-	}, [onClose]);
-
-	useEffect(() => {
-		if (!isOpen || !paymentId || paymentStatus === 'paid') {
+		if (!isOpen || !paymentId) {
 			return undefined;
 		}
 
 		let cancelled = false;
+		let timeoutId: ReturnType<typeof setTimeout> | undefined;
+		let attempts = 0;
+
+		const finishAsCancelled = () => {
+			if (!cancelled) {
+				setPaymentStatus('cancelled');
+			}
+		};
+
+		const scheduleNextPoll = (poll: () => void) => {
+			attempts += 1;
+			if (attempts >= MAX_POLL_ATTEMPTS) {
+				finishAsCancelled();
+				return;
+			}
+			timeoutId = setTimeout(poll, POLL_INTERVAL_MS);
+		};
 
 		const pollStatus = async () => {
-			if (cancelled || !paymentIdRef.current) {
+			if (cancelled) {
 				return;
 			}
 
-			const response = await checkPaymentStatus(paymentIdRef.current);
-			if (cancelled || !response.success || !response.data) {
+			const response = await checkPaymentStatus(paymentId);
+			if (cancelled) {
 				return;
 			}
 
-			setPaymentStatus(response.data.status);
+			if (!response.success || !response.data) {
+				scheduleNextPoll(pollStatus);
+				return;
+			}
 
-			if (response.data.status === 'paid') {
-				const confirmResponse = await confirmPayment(paymentIdRef.current);
+			const {status} = response.data;
+			setPaymentStatus(status);
+
+			if (status === 'paid') {
+				const confirmResponse = await confirmPayment(paymentId);
+				if (cancelled) {
+					return;
+				}
 				if (confirmResponse.success) {
-					handlePaymentSuccess();
-					setTimeout(() => {
-						handleClose();
+					onPaymentSuccessRef.current?.();
+					timeoutId = setTimeout(() => {
+						onCloseRef.current();
 					}, 2000);
 				}
 				return;
 			}
 
-			if (response.data.status === 'failed' || response.data.status === 'cancelled') {
+			if (isTerminalStatus(status)) {
 				return;
 			}
 
-			pollAttemptsRef.current += 1;
-			if (pollAttemptsRef.current < MAX_POLL_ATTEMPTS) {
-				setTimeout(pollStatus, POLL_INTERVAL_MS);
-			}
+			scheduleNextPoll(pollStatus);
 		};
 
+		setPaymentStatus('pending');
 		pollStatus();
 
 		return () => {
 			cancelled = true;
+			if (timeoutId !== undefined) {
+				clearTimeout(timeoutId);
+			}
 		};
-	}, [isOpen, paymentId, paymentStatus, handlePaymentSuccess, handleClose]);
+	}, [isOpen, paymentId]);
 
 	if (!isOpen || !paymentId) return null;
+
+	const isPolling = paymentStatus === 'pending';
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose} className={block()} size="small">
@@ -116,11 +134,11 @@ export const PaymentReturnModal: FC<PaymentReturnModalProps> = observer(({isOpen
 					</div>
 				) : (
 					<div className={element('status')}>
-						<div className={element('status-wrapper')}>
-							<div className={element('status-loader')} />
+						<div className={element('status-row')}>
+							<div className={element('status-loader')} aria-hidden="true" />
 							<p className={element('status-text')}>Проверяем статус оплаты...</p>
-							<p className={element('placeholder-text')}>Обычно это занимает несколько секунд. Не закрывайте окно.</p>
 						</div>
+						<p className={element('status-hint')}>Обычно это занимает несколько секунд. Не закрывайте окно.</p>
 					</div>
 				)}
 			</div>
@@ -128,7 +146,7 @@ export const PaymentReturnModal: FC<PaymentReturnModalProps> = observer(({isOpen
 			{paymentStatus !== 'paid' && (
 				<div className={element('footer')}>
 					<Button theme="blue-light" className={element('btn')} onClick={onClose} type="button">
-						{paymentStatus === 'pending' ? 'Закрыть' : 'Понятно'}
+						{isPolling ? 'Закрыть' : 'Понятно'}
 					</Button>
 				</div>
 			)}

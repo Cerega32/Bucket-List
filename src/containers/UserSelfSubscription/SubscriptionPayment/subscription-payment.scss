@@ -18,7 +18,8 @@
 	}
 
 	&__auto-renew-hint {
-		margin: -8px 0 12px;
+		margin: -4px 0 0;
+		padding-left: 32px;
 		color: var(--color-text-secondary);
 		font-size: 13px;
 		line-height: 1.45;
