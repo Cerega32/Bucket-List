@@ -5,8 +5,7 @@ import {useSearchParams} from 'react-router-dom';
 import {Button} from '@/components/Button/Button';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
-import {UserStore} from '@/store/UserStore';
-import {getUserSubscription, updateSubscription, createPayment} from '@/utils/api/subscription';
+import {createPayment, getUserSubscription, unlinkPaymentMethod} from '@/utils/api/subscription';
 import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
 import {isWithinEarlyRenewalWindow} from '@/utils/subscription/getSubscriptionExpiryState';
 
@@ -16,8 +15,8 @@ import {FREE_FEATURES, PREMIUM_FEATURES, SUBSCRIPTION_PERIODS} from './subscript
 import {SubscriptionComparisonModal} from './SubscriptionComparisonModal/SubscriptionComparisonModal';
 import {SubscriptionPayment} from './SubscriptionPayment/SubscriptionPayment';
 import {SubscriptionPlanCard} from './SubscriptionPlanCard/SubscriptionPlanCard';
-import {UserSelfSubscriptionSkeleton} from './UserSelfSubscriptionSkeleton';
 import './user-self-subscription.scss';
+import {UserSelfSubscriptionSkeleton} from './UserSelfSubscriptionSkeleton';
 
 export const UserSelfSubscription: FC = observer(() => {
 	const [block, element] = useBem('user-self-subscription');
@@ -30,12 +29,15 @@ export const UserSelfSubscription: FC = observer(() => {
 		type: 'free' | 'premium';
 		expiresAt: string | null;
 		isAutoRenew: boolean;
+		hasSavedPaymentMethod: boolean;
 	}>({
 		type: 'free',
 		expiresAt: null,
 		isAutoRenew: false,
+		hasSavedPaymentMethod: false,
 	});
 	const [isLoading, setIsLoading] = useState(true);
+	const [isUnlinkingCard, setIsUnlinkingCard] = useState(false);
 
 	const loadSubscription = useCallback(async () => {
 		setIsLoading(true);
@@ -45,6 +47,7 @@ export const UserSelfSubscription: FC = observer(() => {
 				type: response.data.subscriptionType,
 				expiresAt: response.data.subscriptionExpiresAt,
 				isAutoRenew: response.data.subscriptionAutoRenew,
+				hasSavedPaymentMethod: response.data.hasSavedPaymentMethod,
 			});
 		}
 		setIsLoading(false);
@@ -86,27 +89,26 @@ export const UserSelfSubscription: FC = observer(() => {
 
 	const handlePaymentSuccess = async () => {
 		await refreshHeaderGoalCounts();
-
-		const {userSelf} = UserStore;
-		setSubscription({
-			type: userSelf.subscriptionType ?? 'free',
-			expiresAt: userSelf.subscriptionExpiresAt ?? null,
-			isAutoRenew: userSelf.subscriptionAutoRenew ?? false,
-		});
+		await loadSubscription();
 	};
 
-	const handleToggleAutoRenew = async (value: boolean) => {
-		const response = await updateSubscription({
-			subscription_auto_renew: value,
-		});
+	const handleUnlinkCard = async () => {
+		setIsUnlinkingCard(true);
+		try {
+			const response = await unlinkPaymentMethod();
 
-		if (response.success) {
-			setSubscription((prev) => ({
-				...prev,
-				isAutoRenew: value,
-			}));
-		} else {
-			alert(response.error || 'Не удалось изменить настройки автопродления');
+			if (response.success) {
+				setSubscription((prev) => ({
+					...prev,
+					isAutoRenew: false,
+					hasSavedPaymentMethod: false,
+				}));
+				return;
+			}
+
+			alert(response.error || 'Не удалось отвязать карту');
+		} finally {
+			setIsUnlinkingCard(false);
 		}
 	};
 
@@ -135,7 +137,9 @@ export const UserSelfSubscription: FC = observer(() => {
 						type={subscription.type}
 						expiresAt={subscription.expiresAt}
 						isAutoRenew={subscription.isAutoRenew}
-						onToggleAutoRenew={handleToggleAutoRenew}
+						hasSavedPaymentMethod={subscription.hasSavedPaymentMethod}
+						onUnlinkCard={handleUnlinkCard}
+						isUnlinkLoading={isUnlinkingCard}
 					/>
 
 					<div className={element('plans')}>
@@ -162,8 +166,8 @@ export const UserSelfSubscription: FC = observer(() => {
 								Подписка продлится автоматически в день окончания текущего периода.
 							</p>
 							<p className={element('auto-renew-notice-text')}>
-								Чтобы сменить период (например, с месяца на год), отключите автопродление выше — после этого появится форма
-								оплаты.
+								Чтобы сменить период (например, с месяца на год), отключите автосписание в блоке выше — после этого появится
+								форма оплаты.
 							</p>
 						</div>
 					)}
