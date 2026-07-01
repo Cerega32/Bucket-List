@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
+import {FC, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
@@ -32,26 +32,15 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(
 		const [selectedPeriod, setSelectedPeriod] = useState<number>(12);
 		const [isAutoRenew, setIsAutoRenew] = useState(false);
 		const [agreedToTerms, setAgreedToTerms] = useState(false);
-		const [agreedToAutoRenew, setAgreedToAutoRenew] = useState(false);
 		const [errorMessage, setErrorMessage] = useState<string>('');
 
 		const selectedPeriodData = periods.find((p) => p.value === selectedPeriod) || periods[0];
 		const isPreview = variant === 'preview';
 
-		useEffect(() => {
-			if (!isAutoRenew) {
-				setAgreedToAutoRenew(false);
-			}
-		}, [isAutoRenew]);
-
 		const handlePayment = (e: React.MouseEvent<HTMLButtonElement>) => {
 			e.preventDefault();
 			if (!agreedToTerms) {
 				setErrorMessage('Необходимо согласиться с условиями оформления подписки');
-				return;
-			}
-			if (isAutoRenew && !agreedToAutoRenew) {
-				setErrorMessage('Необходимо согласиться на автоматическое продление подписки');
 				return;
 			}
 			setErrorMessage('');
@@ -60,7 +49,7 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(
 			}
 		};
 
-		const isPaymentDisabled = !agreedToTerms || (isAutoRenew && !agreedToAutoRenew);
+		const isPaymentDisabled = !agreedToTerms;
 
 		return (
 			<div className={block()}>
@@ -124,41 +113,33 @@ export const SubscriptionPayment: FC<SubscriptionPaymentProps> = observer(
 						</div>
 
 						<div className={element('checkboxes')}>
-							<FieldCheckbox
-								id="auto-renew"
-								text="Автоматически продлевать подписку"
-								checked={isAutoRenew}
-								setChecked={setIsAutoRenew}
-							/>
+							<div className={element('terms')}>
+								<FieldCheckbox
+									id="auto-renew"
+									text=""
+									checked={isAutoRenew}
+									setChecked={(value) => {
+										setIsAutoRenew(value);
+										if (value) {
+											setErrorMessage('');
+										}
+									}}
+								/>
+								<label htmlFor="auto-renew" className={element('terms-label')}>
+									Автоматически продлевать подписку и согласен на списание средств при продлении на условиях{' '}
+									<Link to="/subscription-offer#auto-renewal" target="_blank" className={element('link')}>
+										раздела об автопродлении
+									</Link>{' '}
+									<Link to="/subscription-offer" target="_blank" className={element('link')}>
+										оферты Premium
+									</Link>
+								</label>
+							</div>
 							{isAutoRenew && (
 								<p className={element('auto-renew-hint')}>
 									Списание в день продления пройдёт с тем же способом оплаты, который вы выберете на странице ЮKassa
 									(карта, T-Pay, СБП и др.). Надёжнее всего для автопродления — банковская карта.
 								</p>
-							)}
-							{isAutoRenew && (
-								<div className={element('terms')}>
-									<FieldCheckbox
-										id="auto-renew-consent"
-										text=""
-										checked={agreedToAutoRenew}
-										setChecked={(value) => {
-											setAgreedToAutoRenew(value);
-											if (value) {
-												setErrorMessage('');
-											}
-										}}
-									/>
-									<label htmlFor="auto-renew-consent" className={element('terms-label')}>
-										Согласен на автоматическое списание средств при продлении подписки на условиях{' '}
-										<Link to="/subscription-offer#auto-renewal" target="_blank" className={element('link')}>
-											раздела об автопродлении
-										</Link>{' '}
-										<Link to="/subscription-offer" target="_blank" className={element('link')}>
-											оферты Premium
-										</Link>
-									</label>
-								</div>
 							)}
 							<div className={element('terms')}>
 								<FieldCheckbox

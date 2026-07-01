@@ -87,10 +87,15 @@ export const UserSelfSubscription: FC = observer(() => {
 		}
 	};
 
-	const handlePaymentSuccess = async () => {
+	const handlePaymentSuccess = useCallback(async () => {
 		await refreshHeaderGoalCounts();
 		await loadSubscription();
-	};
+	}, [loadSubscription]);
+
+	const handleCloseReturnModal = useCallback(() => {
+		setIsReturnModalOpen(false);
+		setReturnPaymentId(null);
+	}, []);
 
 	const handleUnlinkCard = async () => {
 		setIsUnlinkingCard(true);
@@ -187,10 +192,7 @@ export const UserSelfSubscription: FC = observer(() => {
 
 			<PaymentReturnModal
 				isOpen={isReturnModalOpen}
-				onClose={() => {
-					setIsReturnModalOpen(false);
-					setReturnPaymentId(null);
-				}}
+				onClose={handleCloseReturnModal}
 				paymentId={returnPaymentId}
 				onPaymentSuccess={handlePaymentSuccess}
 			/>
