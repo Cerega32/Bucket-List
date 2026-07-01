@@ -1,15 +1,17 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
+import {FC, useCallback, useEffect, useState} from 'react';
+import {useSearchParams} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {UserStore} from '@/store/UserStore';
-import {getUserSubscription, updateSubscription, createPayment, IPayment} from '@/utils/api/subscription';
+import {getUserSubscription, updateSubscription, createPayment} from '@/utils/api/subscription';
 import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
+import {isWithinEarlyRenewalWindow} from '@/utils/subscription/getSubscriptionExpiryState';
 
 import {CurrentSubscription} from './CurrentSubscription/CurrentSubscription';
-import {QRPaymentModal} from './QRPaymentModal/QRPaymentModal';
+import {PaymentReturnModal} from './PaymentReturnModal/PaymentReturnModal';
 import {FREE_FEATURES, PREMIUM_FEATURES, SUBSCRIPTION_PERIODS} from './subscription-constants';
 import {SubscriptionComparisonModal} from './SubscriptionComparisonModal/SubscriptionComparisonModal';
 import {SubscriptionPayment} from './SubscriptionPayment/SubscriptionPayment';
@@ -19,9 +21,11 @@ import './user-self-subscription.scss';
 
 export const UserSelfSubscription: FC = observer(() => {
 	const [block, element] = useBem('user-self-subscription');
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [isComparisonOpen, setIsComparisonOpen] = useState(false);
-	const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-	const [currentPayment, setCurrentPayment] = useState<IPayment | null>(null);
+	const [returnPaymentId, setReturnPaymentId] = useState<string | null>(null);
+	const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+	const [isCreatingPayment, setIsCreatingPayment] = useState(false);
 	const [subscription, setSubscription] = useState<{
 		type: 'free' | 'premium';
 		expiresAt: string | null;
@@ -33,32 +37,50 @@ export const UserSelfSubscription: FC = observer(() => {
 	});
 	const [isLoading, setIsLoading] = useState(true);
 
-	useEffect(() => {
-		const loadSubscription = async () => {
-			setIsLoading(true);
-			const response = await getUserSubscription();
-			if (response.success && response.data) {
-				setSubscription({
-					type: response.data.subscriptionType,
-					expiresAt: response.data.subscriptionExpiresAt,
-					isAutoRenew: response.data.subscriptionAutoRenew,
-				});
-			}
-			setIsLoading(false);
-		};
-
-		loadSubscription();
+	const loadSubscription = useCallback(async () => {
+		setIsLoading(true);
+		const response = await getUserSubscription();
+		if (response.success && response.data) {
+			setSubscription({
+				type: response.data.subscriptionType,
+				expiresAt: response.data.subscriptionExpiresAt,
+				isAutoRenew: response.data.subscriptionAutoRenew,
+			});
+		}
+		setIsLoading(false);
 	}, []);
 
-	const handlePayment = async (period: number, autoRenew: boolean) => {
-		// Создаем платеж
-		const response = await createPayment(period, autoRenew);
+	useEffect(() => {
+		loadSubscription();
+	}, [loadSubscription]);
 
-		if (response.success && response.data) {
-			setCurrentPayment(response.data);
-			setIsPaymentModalOpen(true);
-		} else {
+	useEffect(() => {
+		const paymentId = searchParams.get('payment_id');
+		if (!paymentId) {
+			return;
+		}
+
+		setReturnPaymentId(paymentId);
+		setIsReturnModalOpen(true);
+
+		const nextParams = new URLSearchParams(searchParams);
+		nextParams.delete('payment_id');
+		setSearchParams(nextParams, {replace: true});
+	}, [searchParams, setSearchParams]);
+
+	const handlePayment = async (period: number, autoRenew: boolean) => {
+		setIsCreatingPayment(true);
+		try {
+			const response = await createPayment(period, autoRenew);
+
+			if (response.success && response.data?.confirmationUrl) {
+				window.location.href = response.data.confirmationUrl;
+				return;
+			}
+
 			alert(response.error || 'Не удалось создать платеж');
+		} finally {
+			setIsCreatingPayment(false);
 		}
 	};
 
@@ -84,9 +106,15 @@ export const UserSelfSubscription: FC = observer(() => {
 				isAutoRenew: value,
 			}));
 		} else {
-			alert('Не удалось изменить настройки автопродления');
+			alert(response.error || 'Не удалось изменить настройки автопродления');
 		}
 	};
+
+	const isEarlyRenewal = subscription.type === 'premium' && isWithinEarlyRenewalWindow(subscription.expiresAt);
+
+	const showPaymentForm = subscription.type === 'free' || (isEarlyRenewal && !subscription.isAutoRenew);
+
+	const showAutoRenewNotice = isEarlyRenewal && subscription.isAutoRenew;
 
 	return (
 		<section className={block()}>
@@ -128,19 +156,38 @@ export const UserSelfSubscription: FC = observer(() => {
 						/>
 					</div>
 
-					{subscription.type === 'free' && <SubscriptionPayment periods={SUBSCRIPTION_PERIODS} onPayment={handlePayment} />}
+					{showAutoRenewNotice && (
+						<div className={element('auto-renew-notice')}>
+							<p className={element('auto-renew-notice-text')}>
+								Подписка продлится автоматически в день окончания текущего периода.
+							</p>
+							<p className={element('auto-renew-notice-text')}>
+								Чтобы сменить период (например, с месяца на год), отключите автопродление выше — после этого появится форма
+								оплаты.
+							</p>
+						</div>
+					)}
+
+					{showPaymentForm && (
+						<SubscriptionPayment
+							periods={SUBSCRIPTION_PERIODS}
+							onPayment={handlePayment}
+							isPaymentLoading={isCreatingPayment}
+							mode={subscription.type === 'free' ? 'purchase' : 'renew'}
+						/>
+					)}
 				</>
 			)}
 
 			<SubscriptionComparisonModal isOpen={isComparisonOpen} onClose={() => setIsComparisonOpen(false)} />
 
-			<QRPaymentModal
-				isOpen={isPaymentModalOpen}
+			<PaymentReturnModal
+				isOpen={isReturnModalOpen}
 				onClose={() => {
-					setIsPaymentModalOpen(false);
-					setCurrentPayment(null);
+					setIsReturnModalOpen(false);
+					setReturnPaymentId(null);
 				}}
-				payment={currentPayment}
+				paymentId={returnPaymentId}
 				onPaymentSuccess={handlePaymentSuccess}
 			/>
 		</section>

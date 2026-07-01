@@ -81,6 +81,7 @@ export interface IPayment {
 	periodMonths: number;
 	autoRenew?: boolean;
 	expiresAt: string | null;
+	confirmationUrl?: string;
 }
 
 export interface IPaymentStatus {
@@ -123,13 +124,14 @@ export const createPayment = async (
 					periodMonths: response.data.periodMonths,
 					autoRenew: response.data.autoRenew,
 					expiresAt: response.data.expiresAt,
+					confirmationUrl: response.data.confirmationUrl,
 				},
 			};
 		}
 
 		return {
 			success: false,
-			error: response.error || 'Не удалось создать платеж',
+			error: response.error || response.errors || 'Не удалось создать платеж',
 		};
 	} catch (error) {
 		return {

@@ -29,4 +29,23 @@
 			grid-template-columns: 1fr;
 		}
 	}
+
+	&__auto-renew-notice {
+		@include block-radius(12px);
+
+		padding: 16px;
+		margin-bottom: 20px;
+		background: var(--color-secondary);
+	}
+
+	&__auto-renew-notice-text {
+		margin: 0;
+		color: var(--color-text-primary);
+		font-size: 14px;
+		line-height: 1.5;
+
+		& + & {
+			margin-top: 8px;
+		}
+	}
 }
