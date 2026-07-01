@@ -7,6 +7,7 @@ import {IGoal, IShortGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import {IUserInfo} from '@/typings/user';
 import {SUBSCRIPTION_SHOW_EXPIRED_KEY} from '@/utils/subscription/getSubscriptionExpiryState';
+import {clearSubscriptionExpiryTimersOnLogout, scheduleSubscriptionExpiryTimers} from '@/utils/subscription/subscriptionExpirySchedule';
 
 interface IAddedGoals {
 	goals: Array<IShortGoal>;
@@ -118,6 +119,8 @@ class Store implements IUserStore {
 
 	subscriptionExpiredBanner = !!Cookies.get(SUBSCRIPTION_SHOW_EXPIRED_KEY);
 
+	subscriptionExpiryTick = 0;
+
 	/** id пользователя, для которого уже загружены showcase-комментарии и впечатления */
 	showcaseLoadedForId: string | null = null;
 
@@ -137,6 +140,9 @@ class Store implements IUserStore {
 
 	setIsAuth = (isAuth: boolean) => {
 		this.isAuth = isAuth;
+		if (!isAuth) {
+			clearSubscriptionExpiryTimersOnLogout();
+		}
 	};
 
 	setName = (name: string) => {
@@ -296,6 +302,14 @@ class Store implements IUserStore {
 		} else {
 			Cookies.remove('user_level');
 		}
+
+		scheduleSubscriptionExpiryTimers({
+			isAuth: this.isAuth,
+			subscriptionType: userSelf.subscriptionType,
+			subscriptionExpiresAt: userSelf.subscriptionExpiresAt,
+			subscriptionAutoRenew: userSelf.subscriptionAutoRenew,
+			showExpiredBanner: this.subscriptionExpiredBanner,
+		});
 	};
 
 	setAddedGoals = (addedGoals: IAddedGoals) => {
@@ -334,6 +348,10 @@ class Store implements IUserStore {
 
 	setSubscriptionExpiredBanner = (value: boolean) => {
 		this.subscriptionExpiredBanner = value;
+	};
+
+	bumpSubscriptionExpiryTick = () => {
+		this.subscriptionExpiryTick += 1;
 	};
 }
 

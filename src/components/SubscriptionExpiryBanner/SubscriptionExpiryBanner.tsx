@@ -59,7 +59,8 @@ export const SubscriptionExpiryBanner: FC = observer(() => {
 	const navigate = useNavigate();
 	const [isVisible, setIsVisible] = useState(false);
 	const [isCompactHeader, setIsCompactHeader] = useState(false);
-	const {isAuth, emailConfirmed, userSelf, subscriptionExpiredBanner} = UserStore;
+	const {isAuth, emailConfirmed, userSelf, subscriptionExpiredBanner, subscriptionExpiryTick} = UserStore;
+	const showExpiredBanner = subscriptionExpiredBanner || Boolean(Cookies.get(SUBSCRIPTION_SHOW_EXPIRED_KEY));
 
 	const bannerState = useMemo(
 		() =>
@@ -68,9 +69,17 @@ export const SubscriptionExpiryBanner: FC = observer(() => {
 				subscriptionType: userSelf.subscriptionType,
 				subscriptionExpiresAt: userSelf.subscriptionExpiresAt,
 				subscriptionAutoRenew: userSelf.subscriptionAutoRenew,
-				showExpiredBanner: subscriptionExpiredBanner || Boolean(Cookies.get(SUBSCRIPTION_SHOW_EXPIRED_KEY)),
+				showExpiredBanner,
 			}),
-		[isAuth, userSelf.subscriptionType, userSelf.subscriptionExpiresAt, userSelf.subscriptionAutoRenew, subscriptionExpiredBanner]
+		[
+			isAuth,
+			userSelf.subscriptionType,
+			userSelf.subscriptionExpiresAt,
+			userSelf.subscriptionAutoRenew,
+			subscriptionExpiredBanner,
+			showExpiredBanner,
+			subscriptionExpiryTick,
+		]
 	);
 
 	useEffect(() => {

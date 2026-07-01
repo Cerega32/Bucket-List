@@ -73,3 +73,26 @@ export function getSubscriptionBannerState(params: GetSubscriptionBannerStatePar
 
 	return 'none';
 }
+
+interface SubscriptionExpiryWatchParams {
+	isAuth: boolean;
+	subscriptionType?: 'free' | 'premium';
+	subscriptionExpiresAt?: string | null;
+	subscriptionAutoRenew?: boolean;
+	showExpiredBanner?: boolean;
+}
+
+/** Нужно ли следить за сменой состояния баннера / синхронизацией профиля по таймеру */
+export function shouldWatchSubscriptionExpiry(params: SubscriptionExpiryWatchParams): boolean {
+	const {isAuth, subscriptionType, subscriptionExpiresAt, subscriptionAutoRenew, showExpiredBanner} = params;
+
+	if (!isAuth || !subscriptionExpiresAt || subscriptionAutoRenew) {
+		return false;
+	}
+
+	if (showExpiredBanner && subscriptionType !== 'premium') {
+		return false;
+	}
+
+	return subscriptionType === 'premium';
+}

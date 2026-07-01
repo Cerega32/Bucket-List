@@ -10,9 +10,13 @@ import {checkPaymentStatus, confirmPayment} from '@/utils/api/subscription';
 
 import './payment-return-modal.scss';
 
+type PaymentStatus = 'pending' | 'paid' | 'failed' | 'cancelled';
+
+export type PaymentReturnModalCloseStatus = PaymentStatus;
+
 interface PaymentReturnModalProps {
 	isOpen: boolean;
-	onClose: () => void;
+	onClose: (statusAtClose: PaymentReturnModalCloseStatus) => void;
 	paymentId: string | null;
 	onPaymentSuccess?: () => void;
 }
@@ -20,18 +24,24 @@ interface PaymentReturnModalProps {
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_ATTEMPTS = 10;
 
-type PaymentStatus = 'pending' | 'paid' | 'failed' | 'cancelled';
-
-const isTerminalStatus = (status: PaymentStatus) => status === 'paid' || status === 'failed' || status === 'cancelled';
-
-export const PaymentReturnModal: FC<PaymentReturnModalProps> = observer(({isOpen, onClose, paymentId, onPaymentSuccess}) => {
+export const PaymentReturnModal: FC<PaymentReturnModalProps> = observer((props) => {
+	const {isOpen, onClose, paymentId, onPaymentSuccess} = props;
 	const [block, element] = useBem('payment-return-modal');
 	const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('pending');
+	const paymentStatusRef = useRef<PaymentStatus>('pending');
 	const onPaymentSuccessRef = useRef(onPaymentSuccess);
 	const onCloseRef = useRef(onClose);
 
 	onPaymentSuccessRef.current = onPaymentSuccess;
 	onCloseRef.current = onClose;
+	paymentStatusRef.current = paymentStatus;
+
+	const handleClose = () => {
+		if (paymentStatusRef.current === 'paid') {
+			return;
+		}
+		onClose(paymentStatusRef.current);
+	};
 
 	useEffect(() => {
 		if (!isOpen || !paymentId) {
@@ -76,20 +86,18 @@ export const PaymentReturnModal: FC<PaymentReturnModalProps> = observer(({isOpen
 			setPaymentStatus(status);
 
 			if (status === 'paid') {
-				const confirmResponse = await confirmPayment(paymentId);
+				await confirmPayment(paymentId);
 				if (cancelled) {
 					return;
 				}
-				if (confirmResponse.success) {
-					onPaymentSuccessRef.current?.();
-					timeoutId = setTimeout(() => {
-						onCloseRef.current();
-					}, 2000);
-				}
+				onPaymentSuccessRef.current?.();
+				timeoutId = setTimeout(() => {
+					onCloseRef.current('paid');
+				}, 2000);
 				return;
 			}
 
-			if (isTerminalStatus(status)) {
+			if (status === 'failed' || status === 'cancelled') {
 				return;
 			}
 
@@ -107,26 +115,38 @@ export const PaymentReturnModal: FC<PaymentReturnModalProps> = observer(({isOpen
 		};
 	}, [isOpen, paymentId]);
 
-	if (!isOpen || !paymentId) return null;
+	if (!isOpen || !paymentId) {
+		return null;
+	}
 
 	const isPolling = paymentStatus === 'pending';
+	const isPaid = paymentStatus === 'paid';
+	const isFailed = paymentStatus === 'failed' || paymentStatus === 'cancelled';
 
 	return (
-		<Modal isOpen={isOpen} onClose={onClose} className={block()} size="small">
+		<Modal isOpen={isOpen} onClose={handleClose} className={block()} size="small">
 			<div className={element('header')}>
 				<Title tag="h2" className={element('title')}>
-					Оплата подписки
+					{isPaid ? 'Premium активирован' : 'Оплата подписки'}
 				</Title>
 			</div>
 
 			<div className={element('content')}>
-				{paymentStatus === 'paid' ? (
+				{isPaid ? (
 					<div className={element('success')}>
-						<Svg icon="done" className={element('success-icon')} />
-						<p className={element('success-text')}>Оплата успешно подтверждена!</p>
-						<p className={element('success-subtext')}>Ваша подписка Premium активирована</p>
+						<div className={element('success-icon-wrap')}>
+							<Svg icon="done" className={element('success-icon')} />
+						</div>
+						<p className={element('success-text')}>Оплата успешно подтверждена</p>
+						<p className={element('success-subtext')}>Все возможности Premium уже доступны в вашем аккаунте</p>
+						<div className={element('success-thanks')}>
+							<Svg icon="heart" className={element('success-thanks-icon')} />
+							<p className={element('success-thanks-text')}>
+								Спасибо, что поддерживаете Delting! Желаем удачи в достижении ваших целей.
+							</p>
+						</div>
 					</div>
-				) : paymentStatus === 'failed' || paymentStatus === 'cancelled' ? (
+				) : isFailed ? (
 					<div className={element('placeholder')}>
 						<Svg icon="crying" className={element('placeholder-icon')} />
 						<p className={element('placeholder-title')}>Оплата не завершена</p>
@@ -143,9 +163,9 @@ export const PaymentReturnModal: FC<PaymentReturnModalProps> = observer(({isOpen
 				)}
 			</div>
 
-			{paymentStatus !== 'paid' && (
+			{!isPaid && (
 				<div className={element('footer')}>
-					<Button theme="blue-light" className={element('btn')} onClick={onClose} type="button">
+					<Button theme="blue-light" className={element('btn')} onClick={handleClose} type="button">
 						{isPolling ? 'Закрыть' : 'Понятно'}
 					</Button>
 				</div>

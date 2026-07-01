@@ -2,7 +2,7 @@
 	@include block-radius(12px);
 
 	display: flex;
-	align-items: flex-start;
+	align-items: center;
 	gap: 12px;
 	padding: 16px;
 	margin-bottom: 20px;
@@ -10,14 +10,19 @@
 
 	&__icon {
 		flex-shrink: 0;
-		width: 20px;
-		height: 20px;
+		width: 30px;
+		height: 30px;
 		margin-top: 2px;
 		color: var(--color-primary);
 	}
 
 	&__content {
 		flex: 1;
+		display: flex;
+		gap: 12px;
+		justify-content: space-between;
+		align-items: center;
+		flex-wrap: wrap;
 	}
 
 	&__text {
@@ -33,6 +38,5 @@
 	&__auto-renew-control {
 		display: flex;
 		justify-content: flex-end;
-		margin-top: 12px;
 	}
 }
