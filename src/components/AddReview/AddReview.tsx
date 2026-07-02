@@ -14,6 +14,7 @@ import {deleteReview} from '@/utils/api/delete/deleteReview';
 import {postAddReview} from '@/utils/api/post/postAddReview';
 import {putEditReview} from '@/utils/api/put/putEditReview';
 import {selectComplexity} from '@/utils/values/complexity';
+import {COMMENT_TEXT_MAX_LENGTH} from '@/utils/values/goalConstants';
 
 import Select from '../Select/Select';
 import {Title} from '../Title/Title';
@@ -43,7 +44,8 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	const [photosToDelete, setPhotosToDelete] = useState<number[]>([]);
 	const [photos, setPhotos] = useState<File[]>([]);
 	const [showErrors, setShowErrors] = useState(false);
-	const {setComments, comments, id} = GoalStore;
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const {setComments, comments, id, setMyComment} = GoalStore;
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 	const totalPhotoCount = existingPhotos.length + photos.length;
 	const canAddPhotos = totalPhotoCount < MAX_REVIEW_PHOTOS;
@@ -82,58 +84,64 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 		}
 
 		setShowErrors(false);
+		setIsSubmitting(true);
 
-		if (isEditing && editingComment) {
-			const res = await putEditReview(editingComment.id, {
-				text: newComment,
-				complexity: selectComplexity[activeComplexity].value,
-				photosToDelete,
-				newPhotos: photos,
-			});
-
-			if (res.success && res.data) {
-				const updatedComment = res.data;
-				NotificationStore.addNotification({
-					type: 'success',
-					title: 'Успешно',
-					message: 'Отзыв успешно отредактирован',
+		try {
+			if (isEditing && editingComment) {
+				const res = await putEditReview(editingComment.id, {
+					text: newComment,
+					complexity: selectComplexity[activeComplexity].value,
+					photosToDelete,
+					newPhotos: photos,
 				});
 
-				setComments(comments.map((c) => (c.id === updatedComment.id ? updatedComment : c)));
-				closeModal();
+				if (res.success && res.data) {
+					const updatedComment = res.data;
+					NotificationStore.addNotification({
+						type: 'success',
+						title: 'Успешно',
+						message: 'Отзыв успешно отредактирован',
+					});
+
+					setMyComment(updatedComment);
+					setComments(comments.map((c) => (c.id === updatedComment.id ? updatedComment : c)));
+					closeModal();
+				} else {
+					NotificationStore.addNotification({
+						type: 'error',
+						title: 'Ошибка',
+						message: res.error || 'Не удалось отредактировать отзыв',
+					});
+				}
 			} else {
-				NotificationStore.addNotification({
-					type: 'error',
-					title: 'Ошибка',
-					message: res.error || 'Не удалось отредактировать отзыв',
+				const formData = new FormData();
+				formData.append('complexity', selectComplexity[activeComplexity].value);
+				formData.append('text', newComment);
+				formData.append('goal_id', id.toString());
+				photos.forEach((photo) => {
+					formData.append('photo', photo);
 				});
-			}
-		} else {
-			const formData = new FormData();
-			formData.append('complexity', selectComplexity[activeComplexity].value);
-			formData.append('text', newComment);
-			formData.append('goal_id', id.toString());
-			photos.forEach((photo) => {
-				formData.append('photo', photo);
-			});
 
-			const res = await postAddReview(formData);
+				const res = await postAddReview(formData);
 
-			if (res.success) {
-				NotificationStore.addNotification({
-					type: 'success',
-					title: 'Успешно',
-					message: 'Отзыв успешно опубликован',
-				});
-				closeModal();
-				setComments([res.data, ...comments]);
-			} else {
-				NotificationStore.addNotification({
-					type: 'error',
-					title: 'Ошибка',
-					message: (res as {error?: string}).error || 'Не удалось опубликовать отзыв',
-				});
+				if (res.success && res.data) {
+					NotificationStore.addNotification({
+						type: 'success',
+						title: 'Успешно',
+						message: 'Отзыв успешно опубликован',
+					});
+					setMyComment(res.data);
+					closeModal();
+				} else {
+					NotificationStore.addNotification({
+						type: 'error',
+						title: 'Ошибка',
+						message: (res as {error?: string}).error || 'Не удалось опубликовать отзыв',
+					});
+				}
 			}
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 
@@ -169,6 +177,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 		setFuncModal(async () => {
 			const res = await deleteReview(editingComment.id);
 			if (res.success) {
+				setMyComment(null);
 				setComments(comments.filter((c) => c.id !== editingComment.id));
 				return true;
 			}
@@ -202,6 +211,8 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 				className={element('field')}
 				type="textarea"
 				rows={isScreenSmallMobile ? 2 : 1}
+				maxLength={COMMENT_TEXT_MAX_LENGTH}
+				showCharCount
 				error={showErrors && !newComment.trim()}
 			/>
 			<p className={element('field-title')}>Фотографии</p>
@@ -276,10 +287,27 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 					</Button>
 				)}
 				<div className={element('btns-right', {full: !editingComment})}>
-					<Button theme="blue-light" className={element('btn')} typeBtn="button" width="full" onClick={closeModal} size="medium">
+					<Button
+						theme="blue-light"
+						className={element('btn')}
+						typeBtn="button"
+						width="full"
+						onClick={closeModal}
+						size="medium"
+						disabled={isSubmitting}
+					>
 						Отмена
 					</Button>
-					<Button theme="blue" className={element('btn')} typeBtn="submit" size="medium" width="full">
+					<Button
+						theme="blue"
+						className={element('btn')}
+						typeBtn="submit"
+						size="medium"
+						width="full"
+						loading={isSubmitting}
+						loadingText={editingComment ? 'Обновление...' : 'Публикация...'}
+						disabled={isSubmitting}
+					>
 						{editingComment ? 'Обновить' : 'Опубликовать'}
 					</Button>
 				</div>

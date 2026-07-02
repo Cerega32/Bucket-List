@@ -10,6 +10,7 @@ import {MainCards} from '@/components/MainCards/MainCards';
 import {Svg} from '@/components/Svg/Svg';
 import {User100GoalsSkeleton} from '@/containers/User100Goals/User100GoalsSkeleton';
 import {useBem} from '@/hooks/useBem';
+import {NotificationStore} from '@/store/NotificationStore';
 import {ICategoryGoals, IMainGoals} from '@/store/UserStore';
 import {IComplexity, IGoal} from '@/typings/goal';
 import {checkEmail} from '@/utils/api/get/checkEmail';
@@ -27,7 +28,7 @@ const TOTAL_STEPS = 3;
 
 interface RegistrationProps {
 	className?: string;
-	successRegistration: (data: {name: string; email_confirmed?: boolean; email?: string}) => void;
+	successRegistration: (data: {name: string; email_confirmed?: boolean; email?: string; premiumTrialGranted?: boolean}) => void;
 	isPage?: boolean;
 }
 
@@ -256,7 +257,21 @@ export const Registration: FC<RegistrationProps> = (props) => {
 				}
 			}
 
-			successRegistration(res.data ?? res);
+			const premiumTrialGranted = Boolean(res.data?.premiumTrialGranted ?? res.data?.premium_trial_granted);
+
+			successRegistration({
+				...(res.data ?? res),
+				premiumTrialGranted,
+			});
+
+			if (premiumTrialGranted) {
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Premium на 30 дней — ваш!',
+					message: 'Мы дали вам премиум бесплатно. Пожалуйста, напишите, если что-то сломается или если у вас есть идеи.',
+				});
+			}
+
 			setIsLoading(false);
 			return;
 		}

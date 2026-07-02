@@ -8,6 +8,7 @@ import {pluralize} from '@/utils/text/pluralize';
 
 import {MainHeaderSlidersSkeleton} from './MainHeaderSlidersSkeleton';
 import {Button} from '../Button/Button';
+import {LaunchPromoBanner} from '../LaunchPromoBanner/LaunchPromoBanner';
 import {Title} from '../Title/Title';
 import {VerticalSlider} from '../VerticalSlider/VerticalSlider';
 
@@ -54,6 +55,7 @@ export const MainHeader: FC<MainHeaderProps> = observer((props) => {
 				)}
 			</div>
 			<div className={element('info')}>
+				<LaunchPromoBanner />
 				<Title tag="h1" className={element('title')}>
 					<>
 						Превратите свои мечты в цели и начните своё путешествие в <p className={element('gradient')}>лучшую жизнь</p>

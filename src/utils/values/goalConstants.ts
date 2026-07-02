@@ -5,6 +5,8 @@
 // Максимальная длина заголовка цели (соответствует max_length в backend/goals/models.py)
 export const GOAL_TITLE_MAX_LENGTH = 200;
 export const GOAL_TITLE_MIN_LENGTH = 3;
+export const GOAL_DESCRIPTION_MAX_LENGTH = 10000;
+export const COMMENT_TEXT_MAX_LENGTH = 5000;
 
 /** Минимальная длина названия списка целей */
 export const GOAL_LIST_TITLE_MIN_LENGTH = 3;

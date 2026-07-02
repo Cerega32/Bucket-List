@@ -32,7 +32,13 @@ import {debounce} from '@/utils/time/debounce';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {selectComplexity} from '@/utils/values/complexity';
-import {getGoalTitleFieldErrors, GOAL_TITLE_MAX_LENGTH, GOAL_TITLE_MIN_LENGTH, isGoalTitleInvalid} from '@/utils/values/goalConstants';
+import {
+	getGoalTitleFieldErrors,
+	GOAL_DESCRIPTION_MAX_LENGTH,
+	GOAL_TITLE_MAX_LENGTH,
+	GOAL_TITLE_MIN_LENGTH,
+	isGoalTitleInvalid,
+} from '@/utils/values/goalConstants';
 
 import {AllowCustomSettingsField} from './components/AllowCustomSettingsField';
 import {Loader} from '../Loader/Loader';
@@ -1464,6 +1470,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							type="textarea"
 							rows={4}
 							required
+							maxLength={GOAL_DESCRIPTION_MAX_LENGTH}
+							showCharCount
 							error={showErrors && !description}
 						/>
 

@@ -29,7 +29,12 @@ import {pluralize} from '@/utils/text/pluralize';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {selectComplexity} from '@/utils/values/complexity';
-import {getGoalTitleFieldErrors, GOAL_TITLE_MAX_LENGTH, GOAL_TITLE_MIN_LENGTH} from '@/utils/values/goalConstants';
+import {
+	getGoalTitleFieldErrors,
+	GOAL_DESCRIPTION_MAX_LENGTH,
+	GOAL_TITLE_MAX_LENGTH,
+	GOAL_TITLE_MIN_LENGTH,
+} from '@/utils/values/goalConstants';
 
 import {AllowCustomSettingsField} from '../AddGoal/components/AllowCustomSettingsField';
 import {Loader} from '../Loader/Loader';
@@ -765,6 +770,8 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								type="textarea"
 								required
 								rows={4}
+								maxLength={GOAL_DESCRIPTION_MAX_LENGTH}
+								showCharCount
 								error={showErrors && !description}
 							/>
 
