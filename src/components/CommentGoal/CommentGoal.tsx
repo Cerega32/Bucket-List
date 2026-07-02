@@ -40,7 +40,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 	};
 
 	return (
-		<article className={block()}>
+		<article className={block({'is-main': isMain})}>
 			<div className={element('info')}>
 				<Link to={isUser ? `/goals/${comment.goalInfo.code}` : `/user/${comment.user}/showcase`} className={element('user-info')}>
 					{isUser ? (

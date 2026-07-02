@@ -99,6 +99,19 @@
 		white-space: pre-wrap;
 		overflow-wrap: break-word;
 		word-wrap: break-word;
+		line-height: var(--line-height-14);
+		font-size: 14px;
+	}
+
+	&--is-main {
+		#{$block}__text {
+			display: -webkit-box;
+			overflow: hidden;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 4;
+			line-clamp: 4;
+			white-space: pre-line;
+		}
 	}
 
 	&__comment-images-container {
