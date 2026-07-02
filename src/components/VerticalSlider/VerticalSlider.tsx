@@ -8,11 +8,14 @@ interface VerticalSliderProps {
 	className?: string;
 	slides: Array<ReactElement>;
 	direction?: 'up' | 'down';
+	/** Длительность одного цикла в секундах (legacy). При pixelsPerSecond игнорируется. */
 	speed?: number;
+	/** Скорость прокрутки в px/s — не зависит от количества слайдов. */
+	pixelsPerSecond?: number;
 }
 
 export const VerticalSlider: FC<VerticalSliderProps> = (props) => {
-	const {className, slides, direction = 'up', speed = 3} = props;
+	const {className, slides, direction = 'up', speed = 3, pixelsPerSecond} = props;
 	const controls = useAnimationControls();
 	const containerRef = useRef<HTMLDivElement>(null);
 	const sliderContainerRef = useRef<HTMLDivElement>(null);
@@ -113,6 +116,7 @@ export const VerticalSlider: FC<VerticalSliderProps> = (props) => {
 	useEffect(() => {
 		if (containerHeight > 0 && sliderContainerHeight > 0 && imagesLoaded) {
 			const moveDistance = sliderContainerHeight / 2; // Только оригинальные слайды
+			const loopDuration = pixelsPerSecond && pixelsPerSecond > 0 ? moveDistance / pixelsPerSecond : speed;
 
 			let isCancelled = false;
 
@@ -123,7 +127,7 @@ export const VerticalSlider: FC<VerticalSliderProps> = (props) => {
 					await controls.start({
 						y: 0,
 						transition: {
-							duration: speed,
+							duration: loopDuration,
 							ease: 'linear',
 						},
 					});
@@ -132,7 +136,7 @@ export const VerticalSlider: FC<VerticalSliderProps> = (props) => {
 					await controls.start({
 						y: -moveDistance,
 						transition: {
-							duration: speed,
+							duration: loopDuration,
 							ease: 'linear',
 						},
 					});
@@ -149,7 +153,7 @@ export const VerticalSlider: FC<VerticalSliderProps> = (props) => {
 		}
 		// обязательно вернуть undefined, чтобы не было ошибки useEffect
 		return undefined;
-	}, [controls, containerHeight, sliderContainerHeight, speed, slides, imagesLoaded, direction]);
+	}, [controls, containerHeight, sliderContainerHeight, speed, pixelsPerSecond, slides, imagesLoaded, direction]);
 
 	return (
 		<div className={block()} ref={containerRef}>

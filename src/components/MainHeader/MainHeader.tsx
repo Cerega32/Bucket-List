@@ -14,6 +14,9 @@ import {VerticalSlider} from '../VerticalSlider/VerticalSlider';
 
 import './main-header.scss';
 
+const MAIN_HEADER_LEFT_SLIDER_PX_PER_SEC = 24;
+const MAIN_HEADER_RIGHT_SLIDER_PX_PER_SEC = 48;
+
 interface MainHeaderProps {
 	className?: string;
 	leftPhotos: any[];
@@ -49,7 +52,7 @@ export const MainHeader: FC<MainHeaderProps> = observer((props) => {
 								<img className={element('slider-image')} src={photo.imageUrl} alt="Фотография из комментария" />
 							))}
 							direction="up"
-							speed={60}
+							pixelsPerSecond={MAIN_HEADER_LEFT_SLIDER_PX_PER_SEC}
 						/>
 					)
 				)}
@@ -94,7 +97,7 @@ export const MainHeader: FC<MainHeaderProps> = observer((props) => {
 								<img className={element('slider-image')} src={photo.imageUrl} alt="Фотография из комментария" />
 							))}
 							direction="down"
-							speed={60}
+							pixelsPerSecond={MAIN_HEADER_RIGHT_SLIDER_PX_PER_SEC}
 						/>
 					)
 				)}
