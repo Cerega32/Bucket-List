@@ -1,0 +1,136 @@
+@property --launch-promo-gradient-angle {
+	syntax: '<angle>';
+	inherits: false;
+	initial-value: 0deg;
+}
+
+@keyframes launch-promo-gradient-rotate {
+	to {
+		--launch-promo-gradient-angle: 360deg;
+	}
+}
+
+.launch-promo-banner {
+	position: relative;
+	align-self: stretch;
+	overflow: hidden;
+	width: 100%;
+	margin-bottom: 24px;
+	padding: 12px 16px;
+	background: conic-gradient(
+		from var(--launch-promo-gradient-angle),
+		rgb(192 132 252 / 17%) 0deg,
+		rgb(244 114 182 / 17%) 120deg,
+		rgb(56 189 248 / 17%) 240deg,
+		rgb(192 132 252 / 17%) 360deg
+	);
+	border-radius: 10px;
+	animation: launch-promo-gradient-rotate 6s linear infinite;
+
+	@include md {
+		padding: 12px 14px;
+	}
+
+	&__bg-icon {
+		position: absolute;
+		z-index: 0;
+		right: 20%;
+		bottom: -14px;
+		opacity: 0.12;
+		pointer-events: none;
+		transform: translateX(40%) rotate(-14deg);
+
+		* {
+			fill: var(--color-text-primary);
+		}
+
+		@include md {
+			right: 12%;
+			bottom: -18px;
+			transform: translateX(25%) rotate(-14deg);
+		}
+	}
+
+	&__inner {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+
+		@include md {
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 10px;
+		}
+	}
+
+	&__main {
+		flex: 1;
+		min-width: 0;
+		padding-right: 72px;
+
+		@include md {
+			padding-right: 56px;
+		}
+	}
+
+	&__title {
+		margin: 0 0 4px;
+		color: var(--color-text-primary);
+		font-size: 16px;
+		font-weight: var(--weight-semi-bold);
+		line-height: var(--line-height-18);
+	}
+
+	&__text {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 13px;
+		line-height: var(--line-height-16);
+	}
+
+	&__spots {
+		display: flex;
+		flex-shrink: 0;
+		flex-direction: column;
+		align-items: center;
+		min-width: 72px;
+		padding: 6px 10px;
+		background: rgb(var(--color-white-rgb) / 58%);
+		border-radius: 8px;
+		line-height: 1.1;
+		text-align: center;
+
+		@include md {
+			flex-direction: row;
+			flex-wrap: wrap;
+			align-items: baseline;
+			align-self: flex-start;
+			gap: 6px;
+			min-width: 0;
+			padding: 0;
+			background: none;
+			text-align: left;
+		}
+	}
+
+	&__spots-label {
+		color: var(--color-text-secondary);
+		font-size: 12px;
+		line-height: var(--line-height-14);
+	}
+
+	&__spots-number {
+		color: var(--color-primary);
+		font-size: 28px;
+		font-weight: var(--weight-bold);
+		line-height: 1;
+		letter-spacing: -0.02em;
+
+		@include md {
+			font-size: 24px;
+		}
+	}
+}

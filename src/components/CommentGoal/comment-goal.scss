@@ -96,6 +96,9 @@
 
 	&__text {
 		margin-bottom: 16px;
+		white-space: pre-wrap;
+		overflow-wrap: break-word;
+		word-wrap: break-word;
 	}
 
 	&__comment-images-container {
