@@ -1,4 +1,4 @@
-import {ICategory, IComplexity, IShortGoal} from '@/typings/goal';
+import {ICatalogReviewStatus, ICategory, IComplexity, IShortGoal} from '@/typings/goal';
 
 export interface IGoalsPagination {
 	page: number;
@@ -27,6 +27,7 @@ export interface IList {
 	isCanEdit: boolean;
 	isCanAddGoals: boolean;
 	catalogApproved?: boolean;
+	catalogReviewStatus?: ICatalogReviewStatus;
 	goalsPagination?: IGoalsPagination;
 	hasScratchMap?: boolean;
 }

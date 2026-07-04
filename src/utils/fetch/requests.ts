@@ -258,10 +258,10 @@ export const GET = async (url: string, params?: IFetchParams): Promise<any> => {
 			throw new Error(`Server returned non-JSON response. Status: ${response.status}`);
 		}
 
-		if (!response.ok) {
+		if (!response.ok || data?.valid === false) {
 			return {
 				success: false,
-				errors: data.error || data.errors || 'Ошибка сервера',
+				errors: data?.errors || data?.error || 'Ошибка сервера',
 			};
 		}
 

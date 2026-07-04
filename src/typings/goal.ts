@@ -2,6 +2,8 @@ import type {IGoalProgress} from '@/utils/api/goals';
 
 export type IComplexity = 'hard' | 'medium' | 'easy';
 
+export type ICatalogReviewStatus = 'pending' | 'approved' | 'rejected';
+
 export interface ICategory {
 	id: number;
 	name: string;
@@ -44,6 +46,7 @@ export interface IShortList {
 	estimatedTime?: never;
 	/** false — ждёт одобрения для общего каталога */
 	catalogApproved?: boolean;
+	catalogReviewStatus?: ICatalogReviewStatus;
 	hasScratchMap?: boolean;
 }
 
@@ -118,6 +121,7 @@ export interface IGoal {
 	// Количество записей в истории прогресса (для нерегулярных целей)
 	progressEntriesCount?: number;
 	catalogApproved?: boolean;
+	catalogReviewStatus?: ICatalogReviewStatus;
 }
 
 export interface IShortGoal {
@@ -138,6 +142,7 @@ export interface IShortGoal {
 	estimatedTime?: string;
 	regularConfig?: IRegularGoalConfig;
 	catalogApproved?: boolean;
+	catalogReviewStatus?: ICatalogReviewStatus;
 }
 
 // Типы для работы с картами

@@ -12,6 +12,29 @@
 		text-align: center;
 	}
 
+	&__limited-edit-banner {
+		margin-bottom: 1.5rem;
+	}
+
+	&__readonly-meta {
+		margin-bottom: 1.5rem;
+		padding: 1rem 1.25rem;
+		border-radius: 8px;
+		background: var(--color-bg-secondary, rgb(0 0 0 / 4%));
+	}
+
+	&__readonly-meta-title {
+		margin: 0 0 0.5rem;
+		font-size: 1.125rem;
+		font-weight: var(--weight-semi-bold);
+	}
+
+	&__readonly-meta-description {
+		margin: 0;
+		color: var(--color-text-secondary);
+		white-space: pre-wrap;
+	}
+
 	&__content {
 		display: flex;
 		flex-wrap: wrap;

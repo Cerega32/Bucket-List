@@ -3,6 +3,7 @@ import {FileDrop} from 'react-file-drop';
 import {useNavigate} from 'react-router-dom';
 
 import {AddGoal} from '@/components/AddGoal/AddGoal';
+import {Banner} from '@/components/Banner/Banner';
 import {Button} from '@/components/Button/Button';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
@@ -56,13 +57,22 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 	const [, setIsSearching] = useState(false);
 
 	// Добавляем состояние для перехода к созданию цели
-	const [canCreateGoal, setCanCreateGoal] = useState(false);
+	const [canCreateGoal, setCanCreateGoal] = useState(Boolean(listData.category?.id));
 
 	// Состояние для подсветки обязательных полей
 	const [showErrors, setShowErrors] = useState(false);
 
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
+
+	const limitedEditHint =
+		listData.catalogReviewStatus === 'approved'
+			? 'Список опубликован в каталоге после модерации — изменить название, описание и параметры нельзя.'
+			: 'Прошло более 24 часов с создания — изменить название, описание и параметры нельзя.';
+
+	const categoryLabel = listData.category?.parentCategory
+		? `${listData.category.parentCategory.name} / ${listData.category.name}`
+		: listData.category?.name || '';
 
 	// Инициализация данных списка при загрузке компонента
 	useEffect(() => {
@@ -236,8 +246,9 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 		setSearchQuery('');
 	};
 
-	// Удаление выбранной цели
+	// Удаление целей из списка — только при полном редактировании
 	const removeSelectedGoal = (goalId: number) => {
+		if (!canEditAll) return;
 		setSelectedGoals((prev) => prev.filter((goal) => goal.id !== goalId));
 	};
 
@@ -356,6 +367,15 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 				{canEditAll ? 'Редактирование списка целей' : 'Добавление целей в список'}
 			</Title>
 
+			{!canEditAll && (
+				<Banner
+					type="info"
+					className={element('limited-edit-banner')}
+					title="Ограниченное редактирование"
+					message={limitedEditHint}
+				/>
+			)}
+
 			<div className={element('content')}>
 				<div className={element('image-section')}>
 					<p className={element('field-title')}>Изображение списка</p>
@@ -385,9 +405,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 									/>
 									<Svg icon="mount" className={element('upload-icon')} />
 									<p>
-										{canEditAll
-											? 'Перетащите изображение сюда или кликните для выбора'
-											: 'Изображение нельзя изменить (прошло более 24 часов после создания)'}
+										{canEditAll ? 'Перетащите изображение сюда или кликните для выбора' : 'Изображение нельзя изменить'}
 									</p>
 								</div>
 							</FileDrop>
@@ -403,7 +421,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 				</div>
 
 				<div className={element('form')}>
-					{canEditAll && (
+					{canEditAll ? (
 						<>
 							<div className={element('field-wrapper')}>
 								<FieldInput
@@ -463,6 +481,15 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 								error={showErrors && !description}
 							/>
 						</>
+					) : (
+						<div className={element('readonly-meta')}>
+							<p className={element('readonly-meta-title')}>{listData.title}</p>
+							<p>
+								{categoryLabel}
+								{listData.complexity ? ` · ${getComplexity[listData.complexity]}` : ''}
+							</p>
+							{listData.description ? <p className={element('readonly-meta-description')}>{listData.description}</p> : null}
+						</div>
 					)}
 
 					<div className={element('goals-section')}>
@@ -516,11 +543,13 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 													<p className={element('goal-description')}>{goal.shortDescription}</p>
 												</div>
 											</div>
-											<Button
-												type="button-close"
-												className={element('goal-remove-btn')}
-												onClick={() => removeSelectedGoal(goal.id)}
-											/>
+											{canEditAll ? (
+												<Button
+													type="button-close"
+													className={element('goal-remove-btn')}
+													onClick={() => removeSelectedGoal(goal.id)}
+												/>
+											) : null}
 										</div>
 									))}
 								</div>

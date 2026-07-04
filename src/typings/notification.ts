@@ -6,6 +6,8 @@ export type NotificationType =
 	| 'goal_completed'
 	| 'goal_approved'
 	| 'goal_rejected'
+	| 'list_approved'
+	| 'list_rejected'
 	| 'list_completed'
 	| 'level_up'
 	| 'daily_goal_reminder'

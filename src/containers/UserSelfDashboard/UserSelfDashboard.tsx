@@ -3,6 +3,7 @@ import {FC, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import {ActivityHeatmap} from '@/components/ActivityHeatmap/ActivityHeatmap';
+import {DailyRandomGoal} from '@/components/DailyRandomGoal/DailyRandomGoal';
 import GoalTimers from '@/components/GoalTimers/GoalTimers';
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
 import {Svg} from '@/components/Svg/Svg';
@@ -90,6 +91,7 @@ export const UserSelfDashboard: FC = observer(() => {
 				{userStatistics?.weeklyProgress && <WeeklySchedule weeks={userStatistics?.weeklyProgress} className={element('weekly')} />}
 				{userStatistics && <UserStatistics statistics={userStatistics} className={element('user-statistics')} />}
 			</div>
+			<DailyRandomGoal />
 			<ActivityHeatmap />
 			<GoalTimers />
 			{/* <div className={element('title-wrapper')}>
