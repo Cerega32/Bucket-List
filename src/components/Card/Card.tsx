@@ -6,7 +6,7 @@ import useScreenSize from '@/hooks/useScreenSize';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
-import {IShortGoal, IShortList} from '@/typings/goal';
+import {ICatalogReviewStatus, IShortGoal, IShortList} from '@/typings/goal';
 import {isScratchMapList, SCRATCH_MAP_PAGE_URL} from '@/utils/scratchMapList';
 import {emitConfettiFromElement} from '@/utils/ui/emitConfetti';
 
@@ -29,6 +29,8 @@ interface BaseCardProps {
 	allowAddWithoutAuth?: boolean;
 	skipDeleteConfirm?: boolean;
 	hideActions?: boolean;
+	/** Показывать тег «В каталоге» для одобренных (раздел модерации) */
+	showCatalogReviewApproved?: boolean;
 }
 
 interface CardListProps extends BaseCardProps {
@@ -54,9 +56,46 @@ const isListFullyCompleted = (goal: IShortList): boolean => goal.goalsCount > 0 
 const isCardCompleted = (goal: IShortGoal | IShortList, isList: boolean | undefined): boolean =>
 	goal.completedByUser || (!!isList && isListFullyCompleted(goal as IShortList));
 
+const getCatalogModerationTag = (
+	status: ICatalogReviewStatus | undefined,
+	showApproved: boolean
+): {text: string; theme: 'gray' | 'green' | 'red'; title: string} | null => {
+	if (status === 'pending') {
+		return {
+			text: 'Ожидает проверки',
+			theme: 'gray',
+			title: 'Ожидает публикации в каталоге',
+		};
+	}
+	if (status === 'rejected') {
+		return {
+			text: 'Не прошло модерацию',
+			theme: 'red',
+			title: 'Не может быть добавлено в общий каталог. Создайте новую версию с другой формулировкой',
+		};
+	}
+	if (status === 'approved' && showApproved) {
+		return {
+			text: 'В каталоге',
+			theme: 'green',
+			title: 'Одобрено модератором и опубликовано в общем каталоге',
+		};
+	}
+	return null;
+};
+
 export const Card: FC<CardProps> = (props) => {
-	const {className, horizontal, disableNavigation, disableMark, allowAddWithoutAuth, skipDeleteConfirm, hideActions, ...restProps} =
-		props;
+	const {
+		className,
+		horizontal,
+		disableNavigation,
+		disableMark,
+		allowAddWithoutAuth,
+		skipDeleteConfirm,
+		hideActions,
+		showCatalogReviewApproved = false,
+		...restProps
+	} = props;
 
 	const [block, element] = useBem('card', className);
 	const {isScreenXs} = useScreenSize();
@@ -65,6 +104,7 @@ export const Card: FC<CardProps> = (props) => {
 
 	const isCompleted = isCardCompleted(goal, isList);
 	const showScratchMap = Boolean(isList && isScratchMapList(goal as IShortList));
+	const catalogModerationTag = getCatalogModerationTag(goal.catalogReviewStatus, showCatalogReviewApproved);
 
 	const {isAuth} = UserStore;
 	const {setIsOpen, setWindow, setFuncModal, setModalProps} = ModalStore;
@@ -170,12 +210,12 @@ export const Card: FC<CardProps> = (props) => {
 								)}
 								<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
 							</div>
-							{goal.catalogApproved === false && (
+							{catalogModerationTag && (
 								<Tag
-									text="Ожидает проверки"
-									theme="gray"
+									text={catalogModerationTag.text}
+									theme={catalogModerationTag.theme}
 									className={element('img-tag-pending')}
-									title="Ожидает публикации в каталоге"
+									title={catalogModerationTag.title}
 								/>
 							)}
 						</div>
@@ -221,12 +261,12 @@ export const Card: FC<CardProps> = (props) => {
 								)}
 								<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
 							</div>
-							{goal.catalogApproved === false && (
+							{catalogModerationTag && (
 								<Tag
-									text="Ожидает проверки"
-									theme="gray"
+									text={catalogModerationTag.text}
+									theme={catalogModerationTag.theme}
 									className={element('img-tag-pending')}
-									title="Ожидает публикации в каталоге"
+									title={catalogModerationTag.title}
 								/>
 							)}
 						</div>

@@ -13,7 +13,7 @@ interface TagProps {
 	text?: string | number;
 	title?: string;
 	category?: string;
-	theme?: 'light' | 'integrate' | 'blue' | 'green' | 'gold' | 'gray' | 'minimal';
+	theme?: 'light' | 'integrate' | 'blue' | 'green' | 'gold' | 'gray' | 'minimal' | 'red';
 	classNameIcon?: string;
 	complexity?: IComplexity;
 	style?: React.CSSProperties;

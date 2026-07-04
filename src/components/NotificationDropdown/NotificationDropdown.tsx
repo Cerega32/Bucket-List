@@ -39,8 +39,10 @@ const getNotificationIcon = (type: string) => {
 		case 'list_completed':
 			return 'done';
 		case 'goal_approved':
+		case 'list_approved':
 			return 'done';
 		case 'goal_rejected':
+		case 'list_rejected':
 			return 'cross';
 		case 'level_up':
 			return 'rocket';
@@ -64,7 +66,9 @@ const getNotificationIcon = (type: string) => {
 const hasObjectImage = (notification: IHeaderNotification) => {
 	return (
 		notification.relatedObjectImage &&
-		['achievement', 'goal_approved', 'goal_rejected', 'goal_completed', 'list_completed'].includes(notification.type)
+		['achievement', 'goal_approved', 'goal_rejected', 'list_approved', 'list_rejected', 'goal_completed', 'list_completed'].includes(
+			notification.type
+		)
 	);
 };
 
@@ -87,6 +91,10 @@ const getNotificationLink = (notification: IHeaderNotification): string | null =
 
 	if (type === 'level_up') {
 		return '/user/self';
+	}
+
+	if (type === 'goal_approved' || type === 'goal_rejected' || type === 'list_approved' || type === 'list_rejected') {
+		return '/user/self/pending-review';
 	}
 
 	if (relatedObjectType === 'goal' && relatedObjectCode) {

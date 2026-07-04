@@ -174,11 +174,11 @@ export const Registration: FC<RegistrationProps> = (props) => {
 		}
 	};
 
-	const checkEmailAsync = async (mail: string) => {
+	const checkEmailAsync = async (mail: string): Promise<string[] | undefined> => {
 		const trimmed = mail.trim();
 		if (!trimmed) {
 			setError((prev) => ({...prev, email: undefined}));
-			return;
+			return undefined;
 		}
 
 		setIsCheckingEmail(true);
@@ -193,10 +193,13 @@ export const Registration: FC<RegistrationProps> = (props) => {
 
 			if (serverErrors && serverErrors.length) {
 				setError((prev) => ({...prev, email: serverErrors}));
+				return serverErrors;
 			}
 		} else {
 			setError((prev) => ({...prev, email: undefined}));
 		}
+
+		return undefined;
 	};
 
 	const validatePassword = (pwd: string): Array<string> => {
@@ -239,10 +242,15 @@ export const Registration: FC<RegistrationProps> = (props) => {
 				username: usernameErrors.length ? usernameErrors : undefined,
 				password: passwordErrors.length ? passwordErrors : undefined,
 				repeatPassword: repeatPasswordErrors.length ? repeatPasswordErrors : undefined,
-				email: error.email,
 			});
 			return;
 		}
+
+		const emailErrors = await checkEmailAsync(normalizedEmail);
+		if (emailErrors?.length) {
+			return;
+		}
+
 		setIsLoading(true);
 		const res = await postRegistration(normalizeEmail(normalizedEmail), password, normalizedUsername);
 		if (res.success) {
@@ -258,6 +266,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 			}
 
 			const premiumTrialGranted = Boolean(res.data?.premiumTrialGranted ?? res.data?.premium_trial_granted);
+			const premiumTrialDays = Number(res.data?.premiumTrialDays ?? res.data?.premium_trial_days) || 60;
 
 			successRegistration({
 				...(res.data ?? res),
@@ -267,7 +276,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 			if (premiumTrialGranted) {
 				NotificationStore.addNotification({
 					type: 'success',
-					title: 'Premium на 30 дней — ваш!',
+					title: `Premium на ${premiumTrialDays} дней — ваш!`,
 					message: 'Мы дали вам премиум бесплатно. Пожалуйста, напишите, если что-то сломается или если у вас есть идеи.',
 				});
 			}

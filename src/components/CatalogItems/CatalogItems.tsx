@@ -32,7 +32,7 @@ import {CatalogItemsSkeleton} from './CatalogItemsSkeleton';
 import {Card} from '../Card/Card';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldInput} from '../FieldInput/FieldInput';
-import {FiltersDrawer, FilterGroup} from '../FiltersDrawer/FiltersDrawer';
+import {FilterGroup, FiltersDrawer} from '../FiltersDrawer/FiltersDrawer';
 import {Line} from '../Line/Line';
 import {Pagination} from '../Pagination/Pagination';
 import Select, {OptionSelect} from '../Select/Select';
@@ -70,8 +70,28 @@ interface CatalogItemsUsersProps extends CatalogItemsProps {
 	categories?: Array<ICategoryDetailed>;
 }
 
-/** Варианты сортировки зависят от контекста: каталог / активные / выполненные, цели / списки */
-function getSortOptions(isUser: boolean, isCompleted: boolean, page?: string): Array<OptionSelect> {
+/** Варианты сортировки зависят от контекста: каталог / активные / выполненные / публикации в каталог */
+function getSortOptions(isUser: boolean, isCompleted: boolean, page?: string, isPendingCatalogReview?: boolean): Array<OptionSelect> {
+	if (isPendingCatalogReview) {
+		if (page === 'lists') {
+			return [
+				{name: 'Новые', value: '-created_at'},
+				{name: 'Старые', value: 'created_at'},
+				{name: 'Недавно проверенные', value: '-catalog_moderated_at'},
+				{name: 'Легкие', value: 'complexity'},
+				{name: 'Сложные', value: '-complexity'},
+				{name: 'По кол-ву целей', value: '-goals_count'},
+			];
+		}
+		return [
+			{name: 'Новые', value: '-created_at'},
+			{name: 'Старые', value: 'created_at'},
+			{name: 'Недавно проверенные', value: '-catalog_moderated_at'},
+			{name: 'Легкие', value: 'complexity'},
+			{name: 'Сложные', value: '-complexity'},
+		];
+	}
+
 	if (!isUser) {
 		return [
 			{name: 'Новые', value: '-created_at'},
@@ -126,6 +146,7 @@ const EMPTY_FILTER_VALUES: Record<string, string[]> = {
 	complexity: [],
 	hundredGoals: [],
 	goalDisplaying: [],
+	catalogReviewStatus: [],
 };
 
 function parseFilterValuesFromSearchParams(searchParams: URLSearchParams): Record<string, string[]> {
@@ -135,6 +156,7 @@ function parseFilterValuesFromSearchParams(searchParams: URLSearchParams): Recor
 		complexity: searchParams.get('complexity') ? [searchParams.get('complexity') as string] : [],
 		hundredGoals: searchParams.get('hundred_goals') ? [searchParams.get('hundred_goals') as string] : [],
 		goalDisplaying: searchParams.get('display')?.split(',').filter(Boolean) ?? [],
+		catalogReviewStatus: searchParams.get('catalog_review_status') ? [searchParams.get('catalog_review_status') as string] : [],
 	};
 }
 
@@ -187,6 +209,12 @@ function syncCatalogParamsToUrl(
 		next.set('display', filters['goalDisplaying'].join(','));
 	} else {
 		next.delete('display');
+	}
+
+	if (filters['catalogReviewStatus'].length > 0) {
+		next.set('catalog_review_status', filters['catalogReviewStatus'][0]);
+	} else {
+		next.delete('catalog_review_status');
 	}
 
 	return next;
@@ -244,7 +272,10 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			onPremium: () => navigate('/user/self/subs'),
 		});
 
-	const sortOptions = useMemo(() => getSortOptions(!!userId, !!completed, subPage), [userId, completed, subPage]);
+	const sortOptions = useMemo(
+		() => getSortOptions(!!userId, !!completed, subPage, pendingCatalogReview),
+		[userId, completed, subPage, pendingCatalogReview]
+	);
 	const filterValues = useMemo(() => parseFilterValuesFromSearchParams(searchParams), [searchParamsKey]);
 	const activeSort = useMemo(() => getSortIndexFromSearchParams(searchParams, sortOptions), [searchParamsKey, sortOptions]);
 
@@ -325,18 +356,29 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			});
 		}
 
-		if (!pendingCatalogReview) {
+		if (pendingCatalogReview) {
 			groups.push({
-				key: 'complexity',
-				label: 'Сложность',
+				key: 'catalogReviewStatus',
+				label: 'Статус модерации',
 				options: [
-					{name: 'Легко', code: 'easy'},
-					{name: 'Средне', code: 'medium'},
-					{name: 'Тяжело', code: 'hard'},
+					{name: 'Ожидает проверки', code: 'pending'},
+					{name: 'В каталоге', code: 'approved'},
+					{name: 'Не прошло модерацию', code: 'rejected'},
 				],
-				allLabel: 'Все цели',
+				allLabel: 'Все статусы',
 			});
 		}
+
+		groups.push({
+			key: 'complexity',
+			label: 'Сложность',
+			options: [
+				{name: 'Легко', code: 'easy'},
+				{name: 'Средне', code: 'medium'},
+				{name: 'Тяжело', code: 'hard'},
+			],
+			allLabel: pendingCatalogReview ? 'Любая сложность' : 'Все цели',
+		});
 
 		if (code === 'all' && !userId && !pendingCatalogReview) {
 			groups.push({
@@ -350,16 +392,18 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			});
 		}
 
-		if (subPage === 'goals' && !pendingCatalogReview) {
-			groups.push({
-				key: 'hundredGoals',
-				label: '100 целей',
-				options: [
-					{name: 'Только из 100 целей', code: 'only'},
-					{name: 'Исключить 100 целей', code: 'exclude'},
-				],
-				allLabel: 'Все цели',
-			});
+		if (subPage === 'goals') {
+			if (!pendingCatalogReview) {
+				groups.push({
+					key: 'hundredGoals',
+					label: '100 целей',
+					options: [
+						{name: 'Только из 100 целей', code: 'only'},
+						{name: 'Исключить 100 целей', code: 'exclude'},
+					],
+					allLabel: 'Все цели',
+				});
+			}
 
 			groups.push({
 				key: 'goalType',
@@ -368,7 +412,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 					{name: 'Регулярные', code: 'regular'},
 					{name: 'Обычные', code: 'usual'},
 				],
-				allLabel: 'Все цели',
+				allLabel: pendingCatalogReview ? 'Все типы' : 'Все цели',
 			});
 		}
 
@@ -400,7 +444,11 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 					...(initialSearch ? {search: initialSearch} : search.trim().length >= 2 ? {search: search.trim()} : {}),
 					...(categoriesSort.length > 0 ? {categories: categoriesSort.join(',')} : {}),
 					...(currentFilters['complexity']?.length > 0 ? {complexity: currentFilters['complexity'][0]} : {}),
+					...(goalTypeValue === 'regular' || goalTypeValue === 'usual' ? {goal_type: goalTypeValue} : {}),
 					...(currentFilters['hundredGoals']?.length > 0 ? {hundred_goals: currentFilters['hundredGoals'][0]} : {}),
+					...(currentFilters['catalogReviewStatus']?.length > 0
+						? {catalog_review_status: currentFilters['catalogReviewStatus'][0]}
+						: {}),
 					...(goalDisplaying.includes('added') ? {exclude_added: true} : {}),
 					...(goalDisplaying.includes('completed') ? {exclude_completed: true} : {}),
 				};
@@ -775,7 +823,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 									isSearchMode
 										? 'По запросу ничего не найдено'
 										: pendingCatalogReview
-										? 'Нет целей на рассмотрении'
+										? 'Нет публикаций в каталог'
 										: completed
 										? 'У вас пока нет выполненных целей'
 										: 'У вас пока нет активных целей'
@@ -784,7 +832,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 									isSearchMode
 										? 'Попробуйте изменить параметры поиска'
 										: pendingCatalogReview
-										? 'Созданные вами цели и списки появятся здесь до публикации в общий каталог. Выполненные — в разделе «Выполненные».'
+										? 'Здесь отображаются ваши цели и списки для общего каталога: на проверке, одобренные и отклонённые.'
 										: completed
 										? 'Начните выполнять цели, чтобы они появились в списке выполненных'
 										: 'Добавьте цели из каталога, чтобы они появились в списке активных'
@@ -797,6 +845,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 										className={element('goal')}
 										goal={goal}
 										key={goal.code}
+										showCatalogReviewApproved={pendingCatalogReview}
 										onClickAdd={() => updateGoal(goal.code, i, 'add')}
 										onClickDelete={() => updateGoal(goal.code, i, 'delete')}
 										onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
@@ -810,7 +859,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 								isSearchMode
 									? 'По запросу ничего не найдено'
 									: pendingCatalogReview
-									? 'Нет списков на рассмотрении'
+									? 'Нет публикаций в каталог'
 									: completed
 									? 'У вас пока нет выполненных списков'
 									: 'У вас пока нет активных списков'
@@ -819,7 +868,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 								isSearchMode
 									? 'Попробуйте изменить параметры поиска'
 									: pendingCatalogReview
-									? 'После одобрения модератором список появится в общем каталоге. Выполненные — в разделе «Выполненные».'
+									? 'Здесь отображаются ваши списки для общего каталога: на проверке, одобренные и отклонённые.'
 									: completed
 									? 'Начните выполнять списки целей, чтобы они появились в списке выполненных'
 									: 'Добавьте списки из каталога, чтобы они появились в списке активных'
@@ -834,6 +883,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 									key={goal.code}
 									horizontal={!isScreenSmallMobile}
 									isList
+									showCatalogReviewApproved={pendingCatalogReview}
 									onClickAdd={() => updateList(goal.code, i, 'add')}
 									onClickDelete={() => updateList(goal.code, i, 'delete')}
 								/>

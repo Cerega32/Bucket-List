@@ -2,6 +2,7 @@ import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
+import {Banner} from '@/components/Banner/Banner';
 import {CatalogItems} from '@/components/CatalogItems/CatalogItems';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
@@ -13,7 +14,7 @@ import './user-self-goals.scss';
 interface UserSelfGoalsProps {
 	subPage: string;
 	completed: boolean;
-	/** Раздел «На рассмотрении» (неодобренные для каталога) */
+	/** Раздел «Публикации в каталог» (модерация и история) */
 	pendingCatalogReview?: boolean;
 }
 
@@ -35,8 +36,29 @@ export const UserSelfGoals: FC<UserSelfGoalsProps> = observer((props) => {
 	return (
 		<div className={block()}>
 			<Title tag="h2" className={element('title')}>
-				{pendingCatalogReview ? 'На рассмотрении' : completed ? 'Выполненные цели и списки' : 'Все активные цели и списки'}
+				{pendingCatalogReview ? 'Публикации в каталог' : completed ? 'Выполненные цели и списки' : 'Все активные цели и списки'}
 			</Title>
+			{pendingCatalogReview && (
+				<Banner
+					type="info"
+					className={element('moderation-info')}
+					title="Что означают статусы"
+					message={
+						<ul>
+							<li>
+								<strong>Ожидает проверки</strong> — цель или список на модерации, в общем каталоге пока не отображается.
+							</li>
+							<li>
+								<strong>В каталоге</strong> — одобрено модератором, доступно всем пользователям в каталоге.
+							</li>
+							<li>
+								<strong>Не прошло модерацию</strong> — не добавили в каталог; попробуйте создать новую версию с другой
+								формулировкой.
+							</li>
+						</ul>
+					}
+				/>
+			)}
 			<CatalogItems
 				userId={Cookies.get('user-id') as string}
 				beginUrl={pendingCatalogReview ? '/user/self/pending-review' : `/user/self/${completed ? 'done' : 'active'}-goals`}

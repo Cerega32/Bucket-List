@@ -126,7 +126,11 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 				if (goal.isCanEdit) {
 					setCanEdit(true);
 				} else {
-					setErrorMessage('Отредактировать цель невозможно. Возможно, прошло более 24 часов с момента создания.');
+					setErrorMessage(
+						goal.catalogReviewStatus === 'approved'
+							? 'Редактировать цель невозможно: она одобрена модератором и опубликована в общем каталоге.'
+							: 'Отредактировать цель невозможно. Возможно, прошло более 24 часов с момента создания.'
+					);
 					setCanEdit(false);
 				}
 
