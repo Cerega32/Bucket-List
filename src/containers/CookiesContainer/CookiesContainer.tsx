@@ -1,11 +1,18 @@
 import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
+import {Button} from '@/components/Button/Button';
+import {useBem} from '@/hooks/useBem';
+import {resetCookieConsent} from '@/utils/legal/cookieConsent';
 import {OPERATOR_EMAIL, YANDEX_METRIKA_POLICY_URL, YANDEX_METRIKA_TERMS_URL} from '@/utils/legal/operatorInfo';
 
 import {LegalDocument} from '../LegalDocument/LegalDocument';
 
+import './cookies-container.scss';
+
 export const CookiesContainer: FC = () => {
+	const [, element] = useBem('cookies-container');
+
 	return (
 		<LegalDocument title="Политика использования Cookie">
 			<section>
@@ -84,9 +91,18 @@ export const CookiesContainer: FC = () => {
 						<strong>Баннер на Сайте</strong> — при первом посещении выберите «Принять» или «Отклонить» аналитические cookie;
 					</li>
 					<li>
+						<strong>Настройки cookie на Сайте</strong> — в любой момент измените выбор через пункт «Настройки cookie» в футере
+						или кнопку ниже;
+					</li>
+					<li>
 						<strong>Настройки браузера</strong> — просмотр, блокировка или удаление cookie (см. инструкции ниже).
 					</li>
 				</ul>
+				<div className={element('settings-action')}>
+					<Button theme="blue-light" typeBtn="button" onClick={resetCookieConsent}>
+						Изменить настройки cookie
+					</Button>
+				</div>
 				<p>
 					Отключение обязательных cookie может сделать невозможным вход в аккаунт и использование Платформы. Отключение
 					аналитических cookie не влияет на основной функционал.

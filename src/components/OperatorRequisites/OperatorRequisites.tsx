@@ -2,7 +2,14 @@ import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
-import {OPERATOR_EMAIL, OPERATOR_FULL_NAME, OPERATOR_INN, OPERATOR_LOCATION, OPERATOR_STATUS} from '@/utils/legal/operatorInfo';
+import {
+	CONTACTS_REQUISITES_URL,
+	OPERATOR_EMAIL,
+	OPERATOR_FULL_NAME,
+	OPERATOR_INN,
+	OPERATOR_LOCATION,
+	OPERATOR_STATUS,
+} from '@/utils/legal/operatorInfo';
 
 import './operator-requisites.scss';
 
@@ -30,7 +37,7 @@ export const OperatorRequisites: FC<OperatorRequisitesProps> = (props) => {
 					{OPERATOR_EMAIL}
 				</Link>
 				<span className={element('sep')}>|</span>
-				<Link to="/contacts" className={element('link')}>
+				<Link to={CONTACTS_REQUISITES_URL} className={element('link')}>
 					Реквизиты
 				</Link>
 			</span>

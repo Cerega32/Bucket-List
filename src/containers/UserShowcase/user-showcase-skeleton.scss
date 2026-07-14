@@ -23,12 +23,16 @@
 	&__photos {
 		display: flex;
 		gap: 8px;
-		margin-bottom: 8px;
 		overflow: hidden;
 	}
 
 	&__photo {
 		flex-shrink: 0;
+	}
+
+	&__toolbar {
+		display: flex;
+		justify-content: flex-end;
 	}
 
 	&__comment-card {

@@ -1,6 +1,16 @@
 .comments-goal {
 	width: 100%;
 
+	&__toolbar {
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	&__sort {
+		flex: 0 0 auto;
+		min-width: 160px;
+	}
+
 	&__items {
 		display: flex;
 		flex-direction: column;

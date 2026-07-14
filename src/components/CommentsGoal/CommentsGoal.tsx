@@ -10,6 +10,7 @@ import {Button} from '../Button/Button';
 import {CommentGoal} from '../CommentGoal/CommentGoal';
 import {CommentImagesGallery} from '../CommentImagesGallery/CommentImagesGallery';
 import {EmptyState} from '../EmptyState/EmptyState';
+import Select, {OptionSelect} from '../Select/Select';
 import './comments-goal.scss';
 
 interface CommentsGoalProps {
@@ -22,6 +23,10 @@ interface CommentsGoalProps {
 	isLoadingMore?: boolean;
 	isShowcase?: boolean;
 	showcasePhotos?: string[];
+	sortOptions?: Array<OptionSelect>;
+	activeSort?: number;
+	isSorting?: boolean;
+	onSortChange?(active: number): void;
 	onLoadMore?(): void;
 	setComments(comments: Array<IComment>): void;
 }
@@ -39,6 +44,10 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 		onLoadMore,
 		isShowcase,
 		showcasePhotos,
+		sortOptions,
+		activeSort,
+		isSorting,
+		onSortChange,
 	} = props;
 
 	const [block, element] = useBem('comments-goal', className);
@@ -59,10 +68,24 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 		}
 	};
 
+	const showSort = Boolean(isShowcase && sortOptions?.length && onSortChange && typeof activeSort === 'number');
+
 	return (
 		<div className={block()}>
 			{isShowcase && showcasePhotos && showcasePhotos.length > 0 && (
 				<CommentImagesGallery images={showcasePhotos} navSuffix="showcase" imageShowcase />
+			)}
+			{showSort && (
+				<div className={element('toolbar')}>
+					<Select
+						className={element('sort')}
+						options={sortOptions!}
+						activeOption={activeSort!}
+						onSelect={onSortChange!}
+						filter
+						disabled={isSorting}
+					/>
+				</div>
 			)}
 			<section className={element('items')}>
 				{comments && !!comments.length ? (

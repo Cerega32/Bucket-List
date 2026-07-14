@@ -11,6 +11,7 @@ import {
 	OPERATOR_STATUS,
 	YANDEX_METRIKA_POLICY_URL,
 	YOOKASSA_LEGAL_URL,
+	YOOKASSA_POLICY_URL,
 } from '@/utils/legal/operatorInfo';
 
 import {LegalDocument} from '../LegalDocument/LegalDocument';
@@ -381,6 +382,10 @@ export const PrivacyContainer: FC = () => {
 					блокирование и обеспечивает уничтожение персональных данных в срок не более чем шесть месяцев.
 				</p>
 				<p>
+					Удаление учётной записи осуществляется по письменному запросу Пользователя на email Оператора:{' '}
+					<Link to={`mailto:${OPERATOR_EMAIL}`}>{OPERATOR_EMAIL}</Link>. В запросе укажите email, указанный при регистрации.
+				</p>
+				<p>
 					После удаления учетной записи персональные данные удаляются или обезличиваются в срок, не превышающий 30 дней, если иное
 					не предусмотрено законодательством.
 				</p>
@@ -445,7 +450,12 @@ export const PrivacyContainer: FC = () => {
 				<ul>
 					<li>
 						платёжному сервису <strong>ЮKassa</strong> (ООО НКО «ЮМани») — для приёма оплаты подписки Premium, идентификации
-						платежа и формирования чека. Политика и условия ЮKassa:{' '}
+						платежа и формирования чека. Оператор не хранит полные реквизиты банковской карты — они обрабатываются ЮKassa.
+						Политика конфиденциальности ЮKassa:{' '}
+						<a href={YOOKASSA_POLICY_URL} target="_blank" rel="noopener noreferrer">
+							yookassa.ru/docs/support/payments/onboarding/overview
+						</a>
+						. Условия и правовая информация:{' '}
 						<a href={YOOKASSA_LEGAL_URL} target="_blank" rel="noopener noreferrer">
 							yookassa.ru/legal
 						</a>

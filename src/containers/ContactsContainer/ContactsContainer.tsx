@@ -1,16 +1,27 @@
 import {motion} from 'framer-motion';
-import {FC} from 'react';
+import {FC, useEffect} from 'react';
+import {useLocation} from 'react-router-dom';
 
 import {OperatorRequisites} from '@/components/OperatorRequisites/OperatorRequisites';
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
-import {OPERATOR_EMAIL} from '@/utils/legal/operatorInfo';
+import {CONTACTS_REQUISITES_ANCHOR, OPERATOR_EMAIL} from '@/utils/legal/operatorInfo';
 
 import './contacts-container.scss';
 
 export const ContactsContainer: FC = () => {
 	const [block, element] = useBem('contacts-container');
+	const location = useLocation();
+
+	useEffect(() => {
+		if (location.hash !== `#${CONTACTS_REQUISITES_ANCHOR}`) {
+			return;
+		}
+
+		const requisitesSection = document.getElementById(CONTACTS_REQUISITES_ANCHOR);
+		requisitesSection?.scrollIntoView({behavior: 'smooth', block: 'start'});
+	}, [location.hash, location.pathname]);
 
 	const supportMethods = [
 		{
@@ -121,7 +132,7 @@ export const ContactsContainer: FC = () => {
 					</div>
 				</section>
 
-				<section className={element('section')}>
+				<section id={CONTACTS_REQUISITES_ANCHOR} className={element('section', {requisites: true})}>
 					<Title tag="h2" className={element('section-title')}>
 						Реквизиты исполнителя
 					</Title>

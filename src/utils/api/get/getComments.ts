@@ -59,17 +59,32 @@ export const getUserImpressionImages = async (userId: string): Promise<IImpressi
 	return response as IImpressionImagesResponse;
 };
 
+export type UserCommentsSortBy = '-date_created' | 'date_created' | '-likes_count' | 'with_photos';
+
 /** Первая загрузка комментариев пользователя (витрина): 3 шт. */
-export const getUserInitialComments = async (userId: string): Promise<ICommentsInitialResponse> => {
-	const response = await GET(`comments/${userId}`, {auth: true});
+export const getUserInitialComments = async (
+	userId: string,
+	sortBy: UserCommentsSortBy = '-date_created'
+): Promise<ICommentsInitialResponse> => {
+	const response = await GET(`comments/${userId}`, {
+		auth: true,
+		get: {sort_by: sortBy},
+	});
 	return response as ICommentsInitialResponse;
 };
 
 /** Дозагрузка комментариев пользователя: 10 шт., page >= 2 */
-export const getUserMoreComments = async (userId: string, page: number): Promise<ICommentsPageResponse> => {
+export const getUserMoreComments = async (
+	userId: string,
+	page: number,
+	sortBy: UserCommentsSortBy = '-date_created'
+): Promise<ICommentsPageResponse> => {
 	const response = await GET(`comments/${userId}`, {
 		auth: true,
-		get: {page: String(page)},
+		get: {
+			page: String(page),
+			sort_by: sortBy,
+		},
 	});
 	return response as ICommentsPageResponse;
 };
