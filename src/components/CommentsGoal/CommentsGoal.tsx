@@ -68,7 +68,7 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 		}
 	};
 
-	const showSort = Boolean(isShowcase && sortOptions?.length && onSortChange && typeof activeSort === 'number');
+	const showSort = Boolean(isShowcase && comments.length > 0 && sortOptions?.length && onSortChange && typeof activeSort === 'number');
 
 	return (
 		<div className={block()}>
