@@ -196,8 +196,15 @@
 		white-space: nowrap;
 	}
 
-	&__requisites {
-		display: inline;
+	&__requisites-link {
+		color: inherit;
+		text-decoration: underline;
+		text-decoration-color: transparent;
+		transition: text-decoration-color 0.2s ease;
+
+		&:hover {
+			text-decoration-color: currentcolor;
+		}
 	}
 
 	&__copyright-icon {

@@ -16,11 +16,13 @@ export const UserShowcaseSkeleton: FC<UserShowcaseSkeletonProps> = (props) => {
 	return (
 		<div className={block()}>
 			<div className={element('comments')}>
-				<Skeleton width={200} height={24} />
 				<div className={element('photos')}>
 					{Array.from({length: 5}).map((_, i) => (
 						<Skeleton key={i} width={160} height={160} borderRadius={8} className={element('photo')} />
 					))}
+				</div>
+				<div className={element('toolbar')}>
+					<Skeleton width={160} height={40} borderRadius={8} />
 				</div>
 				{Array.from({length: 3}).map((_, i) => (
 					<div key={i} className={element('comment-card')}>

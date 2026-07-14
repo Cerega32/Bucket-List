@@ -9,6 +9,8 @@ import {IUserInfo} from '@/typings/user';
 import {SUBSCRIPTION_SHOW_EXPIRED_KEY} from '@/utils/subscription/getSubscriptionExpiryState';
 import {clearSubscriptionExpiryTimersOnLogout, scheduleSubscriptionExpiryTimers} from '@/utils/subscription/subscriptionExpirySchedule';
 
+import type {UserCommentsSortBy} from '@/utils/api/get/getComments';
+
 interface IAddedGoals {
 	goals: Array<IShortGoal>;
 	totalAdded: number;
@@ -132,6 +134,8 @@ class Store implements IUserStore {
 
 	showcaseCommentsNextPage: number | null = null;
 
+	showcaseCommentsSort: UserCommentsSortBy = '-date_created';
+
 	showcaseAchievementsPreview: Array<IAchievement> = [];
 
 	constructor() {
@@ -184,6 +188,7 @@ class Store implements IUserStore {
 		this.showcaseCommentPhotos = [];
 		this.showcaseHasMoreComments = false;
 		this.showcaseCommentsNextPage = null;
+		this.showcaseCommentsSort = '-date_created';
 		this.showcaseAchievementsPreview = [];
 	};
 
@@ -251,6 +256,10 @@ class Store implements IUserStore {
 
 	setShowcaseCommentsNextPage = (page: number | null) => {
 		this.showcaseCommentsNextPage = page;
+	};
+
+	setShowcaseCommentsSort = (sort: UserCommentsSortBy) => {
+		this.showcaseCommentsSort = sort;
 	};
 
 	setShowcaseAchievementsPreview = (achievements: Array<IAchievement>) => {

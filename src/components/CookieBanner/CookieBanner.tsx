@@ -3,7 +3,13 @@ import {Link} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
 import {useBem} from '@/hooks/useBem';
-import {getCookieConsent, initAnalyticsIfConsented, setCookieConsent} from '@/utils/legal/cookieConsent';
+import {
+	COOKIE_CONSENT_RESET_EVENT,
+	clearYandexMetrikaCookies,
+	getCookieConsent,
+	initAnalyticsIfConsented,
+	setCookieConsent,
+} from '@/utils/legal/cookieConsent';
 
 import './cookie-banner.scss';
 
@@ -12,19 +18,45 @@ export const CookieBanner: FC = () => {
 	const [isVisible, setIsVisible] = useState(false);
 
 	useEffect(() => {
-		const consent = getCookieConsent();
-		if (!consent) {
-			const timer = setTimeout(() => {
-				setIsVisible(true);
-			}, 500);
-			return () => clearTimeout(timer);
-		}
+		let mountTimer: ReturnType<typeof setTimeout> | undefined;
 
-		if (consent === 'accepted') {
-			initAnalyticsIfConsented();
-		}
+		const syncBannerState = (immediate = false) => {
+			const consent = getCookieConsent();
+			if (!consent) {
+				if (immediate) {
+					setIsVisible(true);
+					return;
+				}
 
-		return undefined;
+				mountTimer = setTimeout(() => {
+					setIsVisible(true);
+				}, 500);
+				return;
+			}
+
+			setIsVisible(false);
+			if (consent === 'accepted') {
+				initAnalyticsIfConsented();
+			}
+		};
+
+		syncBannerState();
+
+		const handleReset = () => {
+			if (mountTimer) {
+				clearTimeout(mountTimer);
+			}
+			syncBannerState(true);
+		};
+
+		window.addEventListener(COOKIE_CONSENT_RESET_EVENT, handleReset);
+
+		return () => {
+			if (mountTimer) {
+				clearTimeout(mountTimer);
+			}
+			window.removeEventListener(COOKIE_CONSENT_RESET_EVENT, handleReset);
+		};
 	}, []);
 
 	const handleAccept = () => {
@@ -35,6 +67,7 @@ export const CookieBanner: FC = () => {
 
 	const handleReject = () => {
 		setCookieConsent('rejected');
+		clearYandexMetrikaCookies();
 		setIsVisible(false);
 	};
 
@@ -50,6 +83,10 @@ export const CookieBanner: FC = () => {
 						интерфейса. Подробнее — в{' '}
 						<Link to="/cookies" className={element('link')} target="_blank" rel="noopener noreferrer">
 							Политике использования cookie
+						</Link>{' '}
+						и{' '}
+						<Link to="/privacy" className={element('link')} target="_blank" rel="noopener noreferrer">
+							Политике конфиденциальности
 						</Link>
 						.
 					</p>

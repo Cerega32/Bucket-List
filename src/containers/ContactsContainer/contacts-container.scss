@@ -76,6 +76,10 @@
 			border-color: var(--color-primary);
 			text-align: center;
 		}
+
+		&--requisites {
+			scroll-margin-top: var(--header-stack-height);
+		}
 	}
 
 	&__section-title {
@@ -116,7 +120,7 @@
 	}
 
 	&__requisites-card {
-		max-width: 480px;
+		width: 100%;
 		padding: 32px;
 		background: var(--color-gray-11);
 		border: 1px solid var(--color-border);

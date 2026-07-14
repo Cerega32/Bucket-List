@@ -21,3 +21,7 @@ export const YANDEX_METRIKA_TERMS_URL = 'https://yandex.ru/legal/metrica_termsof
 export const YOOKASSA_POLICY_URL = 'https://yookassa.ru/docs/support/payments/onboarding/overview';
 
 export const YOOKASSA_LEGAL_URL = 'https://yookassa.ru/legal/';
+
+export const CONTACTS_REQUISITES_ANCHOR = 'requisites';
+
+export const CONTACTS_REQUISITES_URL = `/contacts#${CONTACTS_REQUISITES_ANCHOR}`;

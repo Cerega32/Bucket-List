@@ -1,17 +1,18 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
+import {FC, useEffect, useMemo, useState} from 'react';
 
 import {Achievement} from '@/components/Achievement/Achievement';
 import {Button} from '@/components/Button/Button';
 import {CommentsGoal} from '@/components/CommentsGoal/CommentsGoal';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
+import {OptionSelect} from '@/components/Select/Select';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {UserStore} from '@/store/UserStore';
 import {IAchievement} from '@/typings/achievements';
 import {get100Goals} from '@/utils/api/get/get100Goals';
-import {getUserImpressionImages, getUserInitialComments, getUserMoreComments} from '@/utils/api/get/getComments';
+import {getUserImpressionImages, getUserInitialComments, getUserMoreComments, UserCommentsSortBy} from '@/utils/api/get/getComments';
 import {GET} from '@/utils/fetch/requests';
 
 import {UserShowcaseSkeleton} from './UserShowcaseSkeleton';
@@ -21,11 +22,19 @@ interface UserShowcaseProps {
 	id: string;
 }
 
+const SHOWCASE_SORT_OPTIONS: Array<OptionSelect> = [
+	{name: 'Новые', value: '-date_created'},
+	{name: 'Популярные', value: '-likes_count'},
+	{name: 'Старые', value: 'date_created'},
+	{name: 'С фото', value: 'with_photos'},
+];
+
 export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 	const {id} = props;
 	const [block, element] = useBem('user-showcase');
 
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const [isSorting, setIsSorting] = useState(false);
 
 	const {
 		mainGoals,
@@ -43,9 +52,16 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 		setShowcaseHasMoreComments,
 		showcaseCommentsNextPage,
 		setShowcaseCommentsNextPage,
+		showcaseCommentsSort,
+		setShowcaseCommentsSort,
 		showcaseAchievementsPreview,
 		setShowcaseAchievementsPreview,
 	} = UserStore;
+
+	const activeSort = useMemo(() => {
+		const index = SHOWCASE_SORT_OPTIONS.findIndex((option) => option.value === showcaseCommentsSort);
+		return index >= 0 ? index : 0;
+	}, [showcaseCommentsSort]);
 
 	useEffect(() => {
 		if (showcaseLoadedForId === id && mainGoalsLoadedForId === id) return undefined;
@@ -60,6 +76,7 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 			setShowcaseCommentPhotos([]);
 			setShowcaseHasMoreComments(false);
 			setShowcaseCommentsNextPage(null);
+			setShowcaseCommentsSort('-date_created');
 			setShowcaseAchievementsPreview([]);
 		}
 		if (needMainGoals) {
@@ -75,7 +92,7 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 			const [goalsRes, achievementsRes, commentsRes, imagesRes] = await Promise.all([
 				needMainGoals ? get100Goals(id) : Promise.resolve(null),
 				needShowcase ? GET('achievements', {get: {user_id: id}}) : Promise.resolve(null),
-				needShowcase ? getUserInitialComments(id) : Promise.resolve(null),
+				needShowcase ? getUserInitialComments(id, '-date_created') : Promise.resolve(null),
 				needShowcase ? getUserImpressionImages(id) : Promise.resolve(null),
 			]);
 			if (cancelled) return;
@@ -106,10 +123,26 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id]);
 
+	const handleSortChange = async (active: number) => {
+		const nextSort = SHOWCASE_SORT_OPTIONS[active]?.value as UserCommentsSortBy | undefined;
+		if (!nextSort || nextSort === showcaseCommentsSort || isSorting) return;
+
+		setIsSorting(true);
+		setShowcaseCommentsSort(nextSort);
+
+		const res = await getUserInitialComments(id, nextSort);
+		if (res.success && res.data) {
+			setShowcaseComments(res.data.comments);
+			setShowcaseHasMoreComments(res.data.hasMore ?? (res.data as any).has_more ?? false);
+			setShowcaseCommentsNextPage(res.data.nextPage ?? (res.data as any).next_page ?? null);
+		}
+		setIsSorting(false);
+	};
+
 	const handleLoadMore = async () => {
 		if (!showcaseCommentsNextPage || isLoadingMore) return;
 		setIsLoadingMore(true);
-		const res = await getUserMoreComments(id, showcaseCommentsNextPage);
+		const res = await getUserMoreComments(id, showcaseCommentsNextPage, showcaseCommentsSort);
 		if (res.success && res.data) {
 			appendShowcaseComments(res.data.comments);
 			setShowcaseHasMoreComments(res.data.hasMore ?? (res.data as any).has_more ?? false);
@@ -133,8 +166,12 @@ export const UserShowcase: FC<UserShowcaseProps> = observer((props) => {
 				isShowcase
 				showcasePhotos={showcaseCommentPhotos}
 				hasMore={showcaseHasMoreComments}
-				isLoadingMore={isLoadingMore}
+				isLoadingMore={isLoadingMore || isSorting}
 				onLoadMore={handleLoadMore}
+				sortOptions={SHOWCASE_SORT_OPTIONS}
+				activeSort={activeSort}
+				isSorting={isSorting}
+				onSortChange={handleSortChange}
 				className={element('comment')}
 			/>
 			<aside className={element('sidebar')}>

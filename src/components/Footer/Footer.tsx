@@ -4,11 +4,12 @@ import {FC, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import {FeedbackModal} from '@/components/FeedbackModal/FeedbackModal';
-import {OperatorRequisites} from '@/components/OperatorRequisites/OperatorRequisites';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {ThemeStore} from '@/store/ThemeStore';
 import {UserStore} from '@/store/UserStore';
+import {resetCookieConsent} from '@/utils/legal/cookieConsent';
+import {CONTACTS_REQUISITES_URL} from '@/utils/legal/operatorInfo';
 
 import {Svg} from '../Svg/Svg';
 
@@ -80,6 +81,7 @@ export const Footer: FC<FooterProps> = observer((props) => {
 				{to: '/subscription-refund', label: 'Возврат и отмена подписки'},
 				{to: '/terms', label: 'Условия использования'},
 				{to: '/cookies', label: 'Cookie'},
+				{to: '', label: 'Настройки cookie', cookieSettings: true},
 			],
 		},
 	];
@@ -118,12 +120,16 @@ export const Footer: FC<FooterProps> = observer((props) => {
 								<ul className={element('nav-list')}>
 									{section.links.map((link) => (
 										<li key={link.to || link.label}>
-											{link.feedbackModal ? (
+											{'feedbackModal' in link && link.feedbackModal ? (
 												<button
 													type="button"
 													className={element('nav-link')}
 													onClick={() => setIsFeedbackModalOpen(true)}
 												>
+													{link.label}
+												</button>
+											) : 'cookieSettings' in link && link.cookieSettings ? (
+												<button type="button" className={element('nav-link')} onClick={resetCookieConsent}>
 													{link.label}
 												</button>
 											) : (
@@ -152,7 +158,9 @@ export const Footer: FC<FooterProps> = observer((props) => {
 							<span className={element('copyright-line')}>
 								© {currentYear} Delting. Все права защищены
 								<span className={element('sep')}>|</span>
-								<OperatorRequisites className={element('requisites')} variant="compact" />
+								<Link to={CONTACTS_REQUISITES_URL} className={element('requisites-link')}>
+									Реквизиты
+								</Link>
 							</span>
 						</p>
 						{!isScreenMobile && (
