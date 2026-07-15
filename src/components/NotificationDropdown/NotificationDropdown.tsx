@@ -58,10 +58,20 @@ const getNotificationIcon = (type: string) => {
 			return 'award';
 		case 'daily_goal_streak_broken':
 			return 'signal';
+		case 'comment_complaint':
+		case 'comment_complaint_staff':
+		case 'comment_removed':
+			return 'exclamation-triangle';
+		case 'comment_restored':
+			return 'done';
 		default:
 			return 'bell';
 	}
 };
+
+const isCommentModerationNotification = (type: string) =>
+	type === 'comment_complaint' || type === 'comment_complaint_staff' || type === 'comment_removed' || type === 'comment_restored';
+
 /** Определяет, нужно ли показывать картинку объекта вместо аватара/иконки */
 const hasObjectImage = (notification: IHeaderNotification) => {
 	return (
@@ -95,6 +105,14 @@ const getNotificationLink = (notification: IHeaderNotification): string | null =
 
 	if (type === 'goal_approved' || type === 'goal_rejected' || type === 'list_approved' || type === 'list_rejected') {
 		return '/user/self/pending-review';
+	}
+
+	if (type === 'comment_complaint' || type === 'comment_complaint_staff' || type === 'comment_restored' || type === 'comment_removed') {
+		if (relatedObjectCode) {
+			return `/goals/${relatedObjectCode}`;
+		}
+		const userId = Cookies.get('user-id');
+		return userId ? `/user/${userId}/showcase` : '/user/self';
 	}
 
 	if (relatedObjectType === 'goal' && relatedObjectCode) {
@@ -247,6 +265,7 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 							const userAvatar = notification.sender?.avatar || notification.userAvatar;
 							const showObjectImage = hasObjectImage(notification);
 							const isFriendRequest = notification.type === 'friend_request' && !notification.isRead;
+							const showModerationIcon = isCommentModerationNotification(notification.type);
 
 							return (
 								<div key={notification.id}>
@@ -273,6 +292,15 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 												</div>
 											) : showObjectImage ? (
 												<img src={notification.relatedObjectImage} alt="" className={element('item-image')} />
+											) : showModerationIcon ? (
+												<div
+													className={element('item-icon', {
+														red: notification.type !== 'comment_restored',
+														green: notification.type === 'comment_restored',
+													})}
+												>
+													<Svg width="24px" height="24px" icon={getNotificationIcon(notification.type)} />
+												</div>
 											) : userName ? (
 												<Avatar avatar={userAvatar} size="medium" noBorder />
 											) : (

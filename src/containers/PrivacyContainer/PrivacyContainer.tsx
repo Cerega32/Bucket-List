@@ -18,7 +18,7 @@ import {LegalDocument} from '../LegalDocument/LegalDocument';
 
 export const PrivacyContainer: FC = () => {
 	return (
-		<LegalDocument title="Политика конфиденциальности">
+		<LegalDocument title="Политика конфиденциальности" showRelatedLinks>
 			<section>
 				<h2>1. Общие положения</h2>
 				<p>

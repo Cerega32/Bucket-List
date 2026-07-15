@@ -32,6 +32,9 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 
 	const photoSlides = comment.photos?.map((p) => ({src: p.image, id: p.id})) ?? [];
 	const isOwnComment = UserStore.userSelf.id === comment.user;
+	const isPending = Boolean(comment.hasPendingComplaint);
+	/** Чужим блюрим контент; автор видит текст/фото как есть */
+	const blurContent = isPending && !isOwnComment;
 
 	const openReport = () => {
 		ModalStore.setModalProps({commentId: comment.id});
@@ -40,7 +43,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 	};
 
 	return (
-		<article className={block({'is-main': isMain})}>
+		<article className={block({'is-main': isMain, pending: isPending})}>
 			<div className={element('info')}>
 				<Link to={isUser ? `/goals/${comment.goalInfo.code}` : `/user/${comment.user}/showcase`} className={element('user-info')}>
 					{isUser ? (
@@ -74,6 +77,18 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 				</Link>
 				{!isMain && (
 					<div className={element('comment-info')}>
+						{isPending && (
+							<Tag
+								text="На модерации"
+								theme="gold"
+								className={element('moderation-tag')}
+								title={
+									isOwnComment
+										? 'Впечатление скрыто из публичных лент до решения модератора'
+										: 'Контент временно скрыт до решения модератора'
+								}
+							/>
+						)}
 						{comment.isEdited && (
 							<Tag
 								text="Изменено"
@@ -89,11 +104,20 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 				)}
 			</div>
 			<Line className={element('horizontal-line')} />
-			<p className={element('text')}>{comment.text}</p>
-			{photoSlides.length > 0 && <CommentImagesGallery images={photoSlides} navSuffix={String(comment.id)} />}
+			{blurContent ? (
+				<div className={element('moderation-content')}>
+					<p className={element('text', {blurred: true})} aria-hidden="true">
+						{comment.text}
+					</p>
+					<p className={element('moderation-note')}>На это впечатление поступила жалоба — информация временно скрыта</p>
+				</div>
+			) : (
+				<p className={element('text')}>{comment.text}</p>
+			)}
+			{photoSlides.length > 0 && <CommentImagesGallery images={photoSlides} navSuffix={String(comment.id)} blurred={blurContent} />}
 			{!isMain && (
 				<div className={element('footer')}>
-					{onClickScore && (
+					{onClickScore && !blurContent && (
 						<div className={element('score')}>
 							<Button
 								icon="like"
@@ -113,7 +137,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 							</Button>
 						</div>
 					)}
-					{!hideReport && !isOwnComment && (
+					{!hideReport && !isOwnComment && !isPending && (
 						<Button
 							icon="exclamation-triangle"
 							width="auto"

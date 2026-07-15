@@ -8,7 +8,7 @@ import {LegalDocument} from '../LegalDocument/LegalDocument';
 
 export const AgreementContainer: FC = () => {
 	return (
-		<LegalDocument title="Пользовательское соглашение">
+		<LegalDocument title="Пользовательское соглашение" showRelatedLinks>
 			<section>
 				<h2>Термины и определения</h2>
 				<p>

@@ -145,6 +145,14 @@
 		&--blue svg path {
 			fill: var(--color-primary);
 		}
+
+		&--red svg path {
+			fill: var(--color-red-1);
+		}
+
+		&--green svg path {
+			fill: var(--color-green-1);
+		}
 	}
 
 	&__item-content {

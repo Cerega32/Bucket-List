@@ -23,6 +23,8 @@ export interface IComment {
 	dislikesCount: number;
 	hasDisliked: boolean;
 	hasLiked: boolean;
+	/** Есть pending-жалоба: на странице цели чужим блюрим контент */
+	hasPendingComplaint?: boolean;
 	id: number;
 	likesCount: number;
 	photos: Array<IPhotoComment>;

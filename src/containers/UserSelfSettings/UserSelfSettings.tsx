@@ -2,6 +2,7 @@ import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
 import React, {FC, useEffect, useMemo, useRef, useState} from 'react';
 import {FileDrop} from 'react-file-drop';
+import {Link} from 'react-router-dom';
 
 import {Avatar} from '@/components/Avatar/Avatar';
 import {Button} from '@/components/Button/Button';
@@ -22,6 +23,7 @@ import {postCover} from '@/utils/api/post/postCover';
 import {postResendConfirmationEmail} from '@/utils/api/post/postResendConfirmationEmail';
 import {putUserInfo} from '@/utils/api/put/putUserInfo';
 import {countriesArr} from '@/utils/data/countries';
+import {resetCookieConsent} from '@/utils/legal/cookieConsent';
 import {normalizeEmail} from '@/utils/text/normalizeEmail';
 import './user-self-settings.scss';
 
@@ -593,6 +595,22 @@ export const UserSelfSettings: FC = observer(() => {
 						</div>
 						<Button className={element('btn-change')} theme="no-border" icon="lock" onClick={openChangePassword}>
 							Изменить пароль
+						</Button>
+					</div>
+					<Line margin="24px 0" />
+					<Title tag="h3" className={element('title')}>
+						Конфиденциальность
+					</Title>
+					<div className={element('privacy')}>
+						<p className={element('privacy-text')}>
+							Управляйте согласием на cookie и аналитику. Подробнее — в{' '}
+							<Link to="/cookies" className={element('privacy-link')}>
+								политике cookie
+							</Link>
+							.
+						</p>
+						<Button theme="no-border" icon="info" onClick={resetCookieConsent}>
+							Настройки cookie
 						</Button>
 					</div>
 					<Line margin="24px 0" />
