@@ -22,9 +22,11 @@ interface CommentImagesGalleryProps {
 	navSuffix: string;
 	imageBig?: boolean;
 	imageShowcase?: boolean;
+	/** Блюр превью и запрет открытия лайтбокса (модерация жалобы) */
+	blurred?: boolean;
 }
 
-export const CommentImagesGallery: FC<CommentImagesGalleryProps> = ({images, navSuffix, imageBig, imageShowcase}) => {
+export const CommentImagesGallery: FC<CommentImagesGalleryProps> = ({images, navSuffix, imageBig, imageShowcase, blurred}) => {
 	const [, element] = useBem('comment-goal');
 	const [isOpen, setIsOpen] = useState(false);
 	const [photoIndex, setPhotoIndex] = useState(0);
@@ -35,12 +37,13 @@ export const CommentImagesGallery: FC<CommentImagesGalleryProps> = ({images, nav
 	const nextSelector = `comment-goal__next-${navSuffix}`;
 
 	const openLightbox = (index: number) => {
+		if (blurred) return;
 		setPhotoIndex(index);
 		setIsOpen(true);
 	};
 
 	return (
-		<div className={element('comment-images-container')}>
+		<div className={element('comment-images-container', {blurred})}>
 			<Button
 				theme="blue-light"
 				icon="arrow--bottom"
@@ -75,27 +78,40 @@ export const CommentImagesGallery: FC<CommentImagesGalleryProps> = ({images, nav
 			>
 				{slides.map((slide, index) => (
 					<SwiperSlide key={slide.id ?? `${slide.src}-${index}`}>
-						<button type="button" className={element('comment-img-btn')} onClick={() => openLightbox(index)}>
-							<img
-								src={slide.src}
-								alt="Фото впечатления"
-								className={element('comment-img', {big: imageBig, showcase: imageShowcase})}
-							/>
-						</button>
+						{blurred ? (
+							<div className={element('comment-img-btn', {blurred: true})}>
+								<img
+									src={slide.src}
+									alt="Фото на модерации"
+									className={element('comment-img', {big: imageBig, showcase: imageShowcase, blurred: true})}
+									draggable={false}
+								/>
+							</div>
+						) : (
+							<button type="button" className={element('comment-img-btn')} onClick={() => openLightbox(index)}>
+								<img
+									src={slide.src}
+									alt="Фото впечатления"
+									className={element('comment-img', {big: imageBig, showcase: imageShowcase})}
+								/>
+							</button>
+						)}
 					</SwiperSlide>
 				))}
 			</Swiper>
-			<LightboxWithScrollLock
-				open={isOpen}
-				close={() => setIsOpen(false)}
-				slides={slides}
-				index={photoIndex}
-				className="comment-images-gallery__lightbox"
-				carousel={{finite: true, padding: '16px'}}
-				controller={{closeOnBackdropClick: true}}
-				animation={{fade: 300}}
-				render={{buttonPrev: () => null, buttonNext: () => null}}
-			/>
+			{!blurred && (
+				<LightboxWithScrollLock
+					open={isOpen}
+					close={() => setIsOpen(false)}
+					slides={slides}
+					index={photoIndex}
+					className="comment-images-gallery__lightbox"
+					carousel={{finite: true, padding: '16px'}}
+					controller={{closeOnBackdropClick: true}}
+					animation={{fade: 300}}
+					render={{buttonPrev: () => null, buttonNext: () => null}}
+				/>
+			)}
 		</div>
 	);
 };

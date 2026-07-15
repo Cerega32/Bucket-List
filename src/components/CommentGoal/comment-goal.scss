@@ -63,13 +63,19 @@
 
 	&__comment-info {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 8px;
 		align-items: center;
+		justify-content: flex-end;
 
 		@include sm {
 			flex-direction: column;
 			align-items: flex-end;
 		}
+	}
+
+	&__moderation-tag {
+		flex-shrink: 0;
 	}
 
 	&__date {
@@ -101,6 +107,33 @@
 		word-wrap: break-word;
 		line-height: var(--line-height-14);
 		font-size: 14px;
+
+		&--blurred {
+			filter: blur(6px);
+			user-select: none;
+			pointer-events: none;
+			margin-bottom: 0;
+		}
+	}
+
+	&__moderation-content {
+		position: relative;
+		margin-bottom: 16px;
+	}
+
+	&__moderation-note {
+		position: absolute;
+		z-index: 1;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 8px;
+		color: var(--color-text-secondary);
+		font-size: 13px;
+		line-height: var(--line-height-14);
+		text-align: center;
+		pointer-events: none;
 	}
 
 	&--is-main {
@@ -136,6 +169,13 @@
 			@include focus-outline;
 			border-radius: 8px;
 		}
+
+		&--blurred {
+			overflow: hidden;
+			border-radius: 8px;
+			cursor: default;
+			pointer-events: none;
+		}
 	}
 
 	&__comment-img {
@@ -152,6 +192,14 @@
 		&--showcase {
 			width: 160px;
 			height: 160px;
+		}
+
+		&--blurred {
+			filter: blur(8px);
+			user-select: none;
+			pointer-events: none;
+			// blur рисуется за пределами img — скругление на обёртке
+			border-radius: 0;
 		}
 
 		&:focus {

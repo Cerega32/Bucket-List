@@ -19,7 +19,11 @@ export type NotificationType =
 	| 'weekly_leaderboard'
 	| 'subscription_expiring_5d'
 	| 'subscription_expiring_1d'
-	| 'subscription_expired';
+	| 'subscription_expired'
+	| 'comment_complaint'
+	| 'comment_complaint_staff'
+	| 'comment_restored'
+	| 'comment_removed';
 
 export interface IHeaderNotification {
 	id: number;
@@ -39,7 +43,7 @@ export interface IHeaderNotification {
 		avatar?: string;
 	};
 	relatedObjectId?: number;
-	relatedObjectType?: 'goal' | 'achievement' | 'user' | 'list' | 'friendship' | 'subscription';
+	relatedObjectType?: 'goal' | 'achievement' | 'user' | 'list' | 'friendship' | 'subscription' | 'comment';
 	relatedObjectImage?: string;
 	relatedObjectCode?: string;
 }
