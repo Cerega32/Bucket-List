@@ -20,7 +20,7 @@ import Select from '../Select/Select';
 import {Title} from '../Title/Title';
 import './add-review.scss';
 
-const MAX_REVIEW_PHOTOS = 10;
+const MAX_REVIEW_PHOTOS = 20;
 
 interface AddReviewProps {
 	className?: string;
@@ -34,6 +34,10 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	const {modalProps, setFuncModal, setWindow, setIsOpen} = ModalStore;
 
 	const editingComment = modalProps?.editComment;
+	const goalListId = (modalProps?.goalListId as number | undefined) || GoalStore.goalListId || undefined;
+	const onReviewAdded = modalProps?.onReviewAdded as (() => void) | undefined;
+	const onReviewRemoved = modalProps?.onReviewRemoved as (() => void) | undefined;
+	const isListReview = !!goalListId || !!editingComment?.goalInfo?.isList;
 	const {isScreenSmallMobile} = useScreenSize();
 	const initialComplexityIndex =
 		editingComment != null ? selectComplexity.findIndex((opt) => opt.value === editingComment.complexity) : -1;
@@ -105,6 +109,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 
 					setMyComment(updatedComment);
 					setComments(comments.map((c) => (c.id === updatedComment.id ? updatedComment : c)));
+					onReviewAdded?.();
 					closeModal();
 				} else {
 					NotificationStore.addNotification({
@@ -117,7 +122,11 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 				const formData = new FormData();
 				formData.append('complexity', selectComplexity[activeComplexity].value);
 				formData.append('text', newComment);
-				formData.append('goal_id', id.toString());
+				if (goalListId) {
+					formData.append('goal_list_id', goalListId.toString());
+				} else {
+					formData.append('goal_id', id.toString());
+				}
 				photos.forEach((photo) => {
 					formData.append('photo', photo);
 				});
@@ -131,6 +140,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 						message: 'Отзыв успешно опубликован',
 					});
 					setMyComment(res.data);
+					onReviewAdded?.();
 					closeModal();
 				} else {
 					NotificationStore.addNotification({
@@ -179,6 +189,7 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 			if (res.success) {
 				setMyComment(null);
 				setComments(comments.filter((c) => c.id !== editingComment.id));
+				onReviewRemoved?.();
 				return true;
 			}
 			return false;
@@ -191,11 +202,17 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	return (
 		<form className={block()} onSubmit={onSubmit}>
 			<Title tag="h2" className={element('title')}>
-				{editingComment ? 'Редактирование впечатления к цели' : 'Оставить впечатление о цели'}
+				{editingComment
+					? isListReview
+						? 'Редактирование впечатления к списку'
+						: 'Редактирование впечатления к цели'
+					: isListReview
+					? 'Оставить впечатление о списке'
+					: 'Оставить впечатление о цели'}
 			</Title>
 			<Select
 				className={element('field')}
-				placeholder="Насколько вам было тяжело выполнить цель?"
+				placeholder={isListReview ? 'Насколько вам было тяжело выполнить список?' : 'Насколько вам было тяжело выполнить цель?'}
 				options={selectComplexity}
 				activeOption={activeComplexity}
 				onSelect={setActiveComplexity}

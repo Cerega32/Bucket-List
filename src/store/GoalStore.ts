@@ -34,6 +34,9 @@ class Store implements IGoalStore {
 
 	id = 0;
 
+	/** Если задан — AddReview пишет впечатление к списку, а не к цели */
+	goalListId: number | null = null;
+
 	constructor() {
 		makeAutoObservable(this);
 	}
@@ -76,6 +79,10 @@ class Store implements IGoalStore {
 
 	setId = (id: number) => {
 		this.id = id;
+	};
+
+	setGoalListId = (id: number | null) => {
+		this.goalListId = id;
 	};
 
 	setListsLoadedForCode = (code: string | null) => {

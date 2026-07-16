@@ -134,7 +134,7 @@ const MainGoalsComponent: FC<IPage> = () => {
 			<div className={element('filter')}>
 				{allGoalsCompleted && (
 					<Banner
-						variant="accent"
+						variant="filled"
 						size="large"
 						type="gold"
 						icon={null}

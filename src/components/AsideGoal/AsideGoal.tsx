@@ -111,7 +111,8 @@ interface AsideGoalProps extends AsideProps {
 export interface AsideListsProps extends AsideProps {
 	updateGoal: (code: string, operation: 'add' | 'delete' | 'mark-all') => Promise<void | boolean>;
 	isList: true;
-	openAddReview?: never;
+	openAddReview?: () => void;
+	hasMyComment?: boolean;
 	editGoal?: never;
 	canEdit?: boolean;
 	location?: GoalWithLocation[];
@@ -161,8 +162,10 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 	const navigate = useNavigate();
 
 	const {myComment} = GoalStore;
-	const hasMyComment = !isList && (props as AsideGoalProps).hasMyComment;
-	const hasOwnComment = !!myComment || !!hasMyComment;
+	const hasMyComment = isList ? (props as AsideListsProps).hasMyComment : (props as AsideGoalProps).hasMyComment;
+	const hasOwnComment = isList
+		? Boolean(hasMyComment || (myComment?.goalInfo?.isList && myComment.goalInfo.code === code))
+		: Boolean(myComment || hasMyComment);
 
 	// Синхронизируем localStatistics с regularConfig при его изменении
 	useEffect(() => {
@@ -2694,9 +2697,23 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 								{hasScratchMap ? 'Скретч-карта' : isMapLoading ? 'Загрузка...' : 'Открыть карту'}
 							</Button>
 						)}
-						<Button theme="blue-light" className={element('btn')} onClick={handleRandomPick} icon="magic">
-							Случайная цель
-						</Button>
+						{isAdded && isCompleted && !hasOwnComment && openAddReview ? (
+							<Button
+								theme="blue-light"
+								onClick={openAddReview}
+								icon="comment"
+								className={element('btn')}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								Оставить впечатление
+							</Button>
+						) : (
+							!isCompleted && (
+								<Button theme="blue-light" className={element('btn')} onClick={handleRandomPick} icon="magic">
+									Случайная цель
+								</Button>
+							)
+						)}
 					</>
 				)}
 				{/* Кнопки для одиночных целей */}

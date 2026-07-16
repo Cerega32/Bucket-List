@@ -30,7 +30,7 @@ export const DeleteReview: FC<DeleteReviewProps> = (props) => {
 			<Title tag="h2" className={element('title')}>
 				Удаление впечатления
 			</Title>
-			<p className={element('text')}>Вы действительно хотите удалить своё впечатление о цели?</p>
+			<p className={element('text')}>Вы действительно хотите удалить своё впечатление?</p>
 			<div className={element('btns-wrapper')}>
 				<Button theme="blue-light" className={element('btn')} onClick={closeModal}>
 					Отмена

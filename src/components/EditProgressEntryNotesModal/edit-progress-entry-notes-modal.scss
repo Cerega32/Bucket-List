@@ -1,0 +1,33 @@
+.edit-progress-entry-notes-modal {
+	&__content {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		margin-bottom: 8px;
+	}
+
+	&__field {
+		margin-bottom: 0;
+	}
+
+	&__footer {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+		padding-top: 16px;
+		border-top: 1px solid var(--color-border-light);
+
+		@include sm {
+			flex-direction: column;
+			gap: 8px;
+		}
+	}
+
+	&__btn {
+		min-width: 120px;
+
+		@include sm {
+			min-width: auto;
+		}
+	}
+}

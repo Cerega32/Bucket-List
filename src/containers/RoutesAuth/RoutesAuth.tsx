@@ -125,6 +125,7 @@ export const RoutesAuth: FC = observer(() => {
 				<Route path="/cookies" element={<PageCookies page="isCookies" />} />
 
 				{/* Остальные маршруты остаются без изменений */}
+				<Route path="/list/:id/impressions" element={<PageDetailList page="isListImpressions" />} />
 				<Route path="/list/:id" element={<PageDetailList page="isList" />} />
 				<Route path="/edit-list/:id" element={<PageEditGoalList page="isEditList" />} />
 				<Route path="/list/100-goals" element={<PageMainGoals page="isMainGoals" />} />

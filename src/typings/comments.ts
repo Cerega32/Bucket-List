@@ -13,6 +13,7 @@ export interface ICommentGoal {
 	totalAdded: number;
 	image: string | null;
 	estimatedTime?: string;
+	isList?: boolean;
 }
 
 export interface IComment {
@@ -34,7 +35,7 @@ export interface IComment {
 	userNickname: string;
 	userTotalCompletedGoals: number;
 	userAvatar: string | null;
-	goalCategory: ICategory;
+	goalCategory: ICategory | null;
 	goalInfo: ICommentGoal;
 }
 

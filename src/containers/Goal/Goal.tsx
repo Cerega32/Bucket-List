@@ -46,7 +46,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const headerRef = useRef<HTMLElement | null>(null);
 	const {isAuth} = UserStore;
 
-	const {setId} = GoalStore;
+	const {setId, setGoalListId} = GoalStore;
 	const params = useParams();
 	const listId = params?.['id'];
 	const [goal, setGoal] = useState<IGoal | null>(null);
@@ -75,6 +75,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			if (res.success) {
 				setGoal(normalizeGoalFromApi(res.data.goal));
 				setId(res.data.goal.id);
+				setGoalListId(null);
 			}
 		})();
 		return () => {
@@ -248,6 +249,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				if (res.success && res.data?.goal) {
 					setGoal(normalizeGoalFromApi(res.data.goal));
 					setId(res.data.goal.id);
+					setGoalListId(null);
 				}
 			} catch (error) {
 				console.error('Ошибка при перезагрузке цели:', error);

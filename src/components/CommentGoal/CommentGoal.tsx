@@ -45,7 +45,16 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 	return (
 		<article className={block({'is-main': isMain, pending: isPending})}>
 			<div className={element('info')}>
-				<Link to={isUser ? `/goals/${comment.goalInfo.code}` : `/user/${comment.user}/showcase`} className={element('user-info')}>
+				<Link
+					to={
+						isUser
+							? comment.goalInfo?.isList
+								? `/list/${comment.goalInfo.code}`
+								: `/goals/${comment.goalInfo.code}`
+							: `/user/${comment.user}/showcase`
+					}
+					className={element('user-info')}
+				>
 					{isUser ? (
 						<img src={comment.goalInfo.image || ''} alt={comment.goalInfo.title} className={element('goal-img')} />
 					) : (
@@ -55,7 +64,7 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 						<div className={element('user-wrapper', {goal: true})}>
 							<div className={element('goal-info')}>
 								<Title tag="h3">{comment.goalInfo.title}</Title>
-								<Tag category={comment.goalCategory.nameEn} text={comment.goalCategory.name} />
+								{comment.goalCategory && <Tag category={comment.goalCategory.nameEn} text={comment.goalCategory.name} />}
 							</div>
 							<Tags
 								complexity={comment.goalInfo.complexity}

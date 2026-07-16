@@ -28,6 +28,7 @@ interface CommentsGoalProps {
 	isSorting?: boolean;
 	onSortChange?(active: number): void;
 	onLoadMore?(): void;
+	onAddReview?(): void;
 	setComments(comments: Array<IComment>): void;
 }
 
@@ -42,6 +43,7 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 		hasMore,
 		isLoadingMore,
 		onLoadMore,
+		onAddReview,
 		isShowcase,
 		showcasePhotos,
 		sortOptions,
@@ -54,6 +56,10 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 	const {setIsOpen, setWindow} = ModalStore;
 
 	const openAddReview = () => {
+		if (onAddReview) {
+			onAddReview();
+			return;
+		}
 		setWindow('add-review');
 		setIsOpen(true);
 	};

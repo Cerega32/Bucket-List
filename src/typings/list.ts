@@ -8,6 +8,7 @@ export interface IGoalsPagination {
 }
 
 export interface IList {
+	id: number;
 	code: string;
 	title: string;
 	category: ICategory;
@@ -30,4 +31,6 @@ export interface IList {
 	catalogReviewStatus?: ICatalogReviewStatus;
 	goalsPagination?: IGoalsPagination;
 	hasScratchMap?: boolean;
+	hasMyComment?: boolean;
+	totalComments?: number;
 }

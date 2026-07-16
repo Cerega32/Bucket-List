@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useRef, useState} from 'react';
-import {useParams, useSearchParams} from 'react-router-dom';
+import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {ContentListGoals} from '@/components/ContentListGoals/ContentListGoals';
@@ -27,7 +27,12 @@ import {goalsToMapPoints} from '@/utils/mapApi';
 import './list-goals-container.scss';
 import {ListGoalsContainerSkeleton} from './ListGoalsContainerSkeleton';
 
-const ListGoalsContainerComponent: FC = () => {
+interface ListGoalsContainerProps {
+	page: string;
+}
+
+const ListGoalsContainerComponent: FC<ListGoalsContainerProps> = (props) => {
+	const {page} = props;
 	const [block, element] = useBem('list-goals-container');
 	const [list, setList] = useState<IList | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
@@ -35,8 +40,9 @@ const ListGoalsContainerComponent: FC = () => {
 	const [search, setSearch] = useState('');
 	const [searchTimer, setSearchTimer] = useState<NodeJS.Timeout | null>(null);
 	const {isAuth} = UserStore;
-	const {setIsOpen, setWindow} = ModalStore;
+	const {setIsOpen, setWindow, setModalProps} = ModalStore;
 	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
+	const navigate = useNavigate();
 	const loadMoreRef = useRef<HTMLDivElement>(null);
 	const loaderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const [searchParams] = useSearchParams();
@@ -161,7 +167,7 @@ const ListGoalsContainerComponent: FC = () => {
 	};
 
 	useEffect(() => {
-		if (!list?.goalsPagination?.hasMore) return;
+		if (page !== 'isList' || !list?.goalsPagination?.hasMore) return;
 
 		const intersectionObserver = new IntersectionObserver(
 			(entries) => {
@@ -183,7 +189,7 @@ const ListGoalsContainerComponent: FC = () => {
 			}
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [list?.goalsPagination?.hasMore, list?.goalsPagination?.page, searchParamsKey, search]);
+	}, [page, list?.goalsPagination?.hasMore, list?.goalsPagination?.page, searchParamsKey, search]);
 
 	const onSearchChange = (query: string) => {
 		setSearch(query);
@@ -309,6 +315,41 @@ const ListGoalsContainerComponent: FC = () => {
 	// Точки для кнопки «Открыть карту» (превью из загруженной страницы; полный набор — через maps/list API)
 	const goalsWithLocation = goalsToMapPoints(list.goals);
 
+	const openAddReview = () => {
+		if (page !== 'isListImpressions') {
+			navigate(`/list/${list.code}/impressions`);
+		}
+		setModalProps({
+			goalListId: list.id,
+			onReviewAdded: () => {
+				setList((prev) =>
+					prev
+						? {
+								...prev,
+								hasMyComment: true,
+								totalComments: (prev.totalComments ?? 0) + 1,
+						  }
+						: prev
+				);
+			},
+			onReviewRemoved: () => {
+				setList((prev) =>
+					prev
+						? {
+								...prev,
+								hasMyComment: false,
+								totalComments: Math.max(0, (prev.totalComments ?? 1) - 1),
+						  }
+						: prev
+				);
+			},
+		});
+		setWindow('add-review');
+		setIsOpen(true);
+	};
+
+	const isGoalsTab = page === 'isList';
+
 	return (
 		<>
 			<SEO
@@ -344,21 +385,37 @@ const ListGoalsContainerComponent: FC = () => {
 						list={list.goals}
 						listCode={list.code}
 						hasScratchMap={list.hasScratchMap}
+						openAddReview={openAddReview}
+						hasMyComment={list.hasMyComment}
 					/>
 					<div className={element('content-wrapper')}>
 						<ContentListGoals
 							className={element('content')}
 							list={list}
+							page={page}
 							search={search}
 							onSearchChange={onSearchChange}
 							updateGoal={updateGoal}
+							onMyCommentChange={(hasComment) => {
+								setList((prev) => {
+									if (!prev) return prev;
+									const wasComment = !!prev.hasMyComment;
+									let {totalComments} = prev;
+									if (hasComment && !wasComment) {
+										totalComments = (totalComments ?? 0) + 1;
+									} else if (!hasComment && wasComment) {
+										totalComments = Math.max(0, (totalComments ?? 1) - 1);
+									}
+									return {...prev, hasMyComment: hasComment, totalComments};
+								});
+							}}
 						/>
-						{isLoading && (
+						{isGoalsTab && isLoading && (
 							<div className={element('loader')}>
 								<Loader isLoading />
 							</div>
 						)}
-						{list.goalsPagination?.hasMore && (
+						{isGoalsTab && list.goalsPagination?.hasMore && (
 							<div ref={loadMoreRef}>
 								<Loader isLoading={isLoadingMore} />
 							</div>
