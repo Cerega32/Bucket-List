@@ -543,8 +543,6 @@
 		background: rgb(var(--color-primary-rgb) / 12%);
 
 		&--red {
-			background: rgb(var(--color-red-rgb-1) / 12%);
-
 			svg * {
 				fill: var(--color-red-1);
 			}
