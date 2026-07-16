@@ -13,14 +13,19 @@ export interface ICommentGoal {
 	totalAdded: number;
 	image: string | null;
 	estimatedTime?: string;
+	isList?: boolean;
 }
 
 export interface IComment {
 	complexity: IComplexity;
 	dateCreated: string;
+	dateEdited?: string | null;
+	isEdited?: boolean;
 	dislikesCount: number;
 	hasDisliked: boolean;
 	hasLiked: boolean;
+	/** Есть pending-жалоба: на странице цели чужим блюрим контент */
+	hasPendingComplaint?: boolean;
 	id: number;
 	likesCount: number;
 	photos: Array<IPhotoComment>;
@@ -30,7 +35,7 @@ export interface IComment {
 	userNickname: string;
 	userTotalCompletedGoals: number;
 	userAvatar: string | null;
-	goalCategory: ICategory;
+	goalCategory: ICategory | null;
 	goalInfo: ICommentGoal;
 }
 

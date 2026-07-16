@@ -1,0 +1,92 @@
+.user-map-page {
+	width: 100%;
+	min-width: 0;
+
+	&__title {
+		margin-bottom: 24px;
+	}
+
+	&__content {
+		width: 100%;
+	}
+
+	&__map-content {
+		min-height: 400px;
+	}
+
+	&__switch {
+		width: fit-content;
+		max-width: 100%;
+		margin-bottom: 18px;
+	}
+
+	&__locations-tab,
+	&__countries-tab {
+		width: 100%;
+	}
+
+	&__map-section {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		height: 600px;
+		padding: 12px;
+		background: var(--color-white);
+		border-radius: 12px;
+		box-shadow: 0 4px 20px var(--color-secondary);
+		backdrop-filter: blur(10px);
+
+		@include md {
+			height: min(600px, 70vh);
+			padding: 0;
+			background: transparent;
+			border-radius: 8px;
+			box-shadow: none;
+			backdrop-filter: none;
+		}
+	}
+
+	&__map-load-banner {
+		flex-shrink: 0;
+	}
+
+	&__visited-locations-list {
+		margin-top: 24px;
+
+		h3 {
+			margin: 0 0 16px;
+			color: var(--color-primary);
+			font-size: 18px;
+			font-weight: 600;
+		}
+	}
+
+	&__locations-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+		gap: 12px;
+	}
+
+	&__location-card {
+		padding: 16px;
+		background: var(--color-white);
+		border-radius: 10px;
+		box-shadow: 0 2px 8px var(--color-secondary);
+
+		h4 {
+			margin: 0 0 8px;
+			color: var(--color-text-primary);
+			font-size: 16px;
+		}
+
+		p {
+			margin: 0 0 4px;
+			color: var(--color-text-secondary);
+			font-size: 14px;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}
+	}
+}

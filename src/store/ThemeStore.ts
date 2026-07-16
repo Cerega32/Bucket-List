@@ -13,7 +13,13 @@ class Store implements IThemeStore {
 
 	page = 'isMainPage';
 
+	/** Slug категории текущей страницы (например, страница цели) — для акцентов в хедере */
+	pageCategory: string | null = null;
+
 	full = true;
+
+	/** Внешнее управление compact-состоянием хедера (например, со страницы цели) */
+	preHeaderHiddenOverride: boolean | null = null;
 
 	constructor() {
 		makeAutoObservable(this);
@@ -27,12 +33,20 @@ class Store implements IThemeStore {
 		this.page = page;
 	};
 
+	setPageCategory = (category: string | null) => {
+		this.pageCategory = category;
+	};
+
 	setFull = (full: boolean) => {
 		this.full = full;
 	};
 
 	setFooter = (footer: boolean) => {
 		this.footer = footer;
+	};
+
+	setPreHeaderHiddenOverride = (value: boolean | null) => {
+		this.preHeaderHiddenOverride = value;
 	};
 }
 

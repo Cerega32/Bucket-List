@@ -18,6 +18,11 @@ import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getUser} from '@/utils/api/get/getUser';
+import {postLogout} from '@/utils/api/post/postLogout';
+import {registerHeaderGoalCountsRefresh} from '@/utils/headerGoalCountsRefresh';
+import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 
 import {ThemeStore} from '../../store/ThemeStore';
 import {Avatar} from '../Avatar/Avatar';
@@ -26,6 +31,7 @@ import {GlobalGoalsSearch} from '../GlobalGoalsSearch/GlobalGoalsSearch';
 import {Line} from '../Line/Line';
 import {ModalPhone} from '../ModalPhone/ModalPhone';
 import {Svg} from '../Svg/Svg';
+import {Tag} from '../Tag/Tag';
 
 import './header.scss';
 
@@ -36,12 +42,16 @@ interface HeaderProps {
 export const Header: FC<HeaderProps> = observer((props) => {
 	const {className} = props;
 
-	const {header, page} = ThemeStore;
+	const {header, page, preHeaderHiddenOverride, pageCategory} = ThemeStore;
 	const {setIsOpen, setWindow} = ModalStore;
 	const {categoriesTree, setCategories} = CategoriesStore;
 	const {isScreenDesktop, isScreenSmallTablet, isScreenMobile, isScreenSmallMobile, isScreenTablet} = useScreenSize();
 	const isCategoriesLabelVisible = isScreenDesktop || (isScreenTablet && !isScreenSmallTablet);
 	const {isAuth, avatar, setAvatar, setIsAuth, setName, userSelf} = UserStore;
+
+	/** Бейдж: общее число из GET /api/user/ (counts.progressGoals); иначе длина первой страницы списка */
+	const progressGoalsBadgeCount = userSelf.counts?.progressGoals ?? HeaderProgressGoalsStore.goalsCount;
+	const showProgressGoalsBadge = progressGoalsBadgeCount > 0;
 	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 	const [isRegularGoalsOpen, setIsRegularGoalsOpen] = useState(false);
 	const [isProgressOpen, setIsProgressOpen] = useState(false);
@@ -51,19 +61,29 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
+	const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
 	const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
 	const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
 
 	const [block, element] = useBem('header', className);
 
 	const navigate = useNavigate();
+	const homePath = isAuth ? '/categories/all' : '/';
+	const isPremium = isPremiumSubscriptionActive(userSelf);
+	const guestProfileIconClass = element('profile-icon', {
+		category: !isAuth && isScreenMobile && header === 'transparent' && pageCategory ? pageCategory : undefined,
+	});
+	const regularGoalsNeedAttention = (userSelf.regularGoalsSelectionPending ?? false) || HeaderRegularGoalsStore.needsAttention;
+	const showRegularGoalsBadge = HeaderRegularGoalsStore.hasRegularGoals || regularGoalsNeedAttention;
 
 	useEffect(() => {
 		if (categoriesTree.length > 0) return;
 
 		const loadCategories = async () => {
 			const data = await getAllCategories();
-			setCategories(data.data);
+			if (data.success) {
+				setCategories(sortMainCategories(data.data));
+			}
 		};
 		loadCategories();
 	}, []);
@@ -72,28 +92,30 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const menuRef = useRef<HTMLElement>(null);
 	const profileMenuRef = useRef<HTMLDivElement>(null);
 	const notificationsRef = useRef<HTMLDivElement>(null);
-	const regularGoalsRef = useRef<HTMLButtonElement>(null);
-	const progressRef = useRef<HTMLDivElement>(null);
 	const categoriesRef = useRef<HTMLLIElement>(null);
 
 	const openLogin = () => {
-		setIsOpen(true);
 		setWindow('login');
+		setIsOpen(true);
 	};
 
 	const openRegistration = () => {
-		setIsOpen(true);
 		setWindow('registration');
+		setIsOpen(true);
 	};
 
-	const handleLogout = () => {
-		Cookies.remove('token');
+	const handleLogout = async () => {
+		// httpOnly cookie 'token' и маркер 'is_authenticated' снимает сервер — JS их не трогает.
+		await postLogout();
+		// Оставшиеся JS-видимые cookie с отображаемыми данными удаляем на клиенте.
 		Cookies.remove('avatar');
 		Cookies.remove('name');
 		Cookies.remove('user-id');
 		Cookies.remove('subscription_type');
 		Cookies.remove('user_level');
 		Cookies.remove('user_total_completed_goals');
+		Cookies.remove('email_confirmed');
+		Cookies.remove('email');
 		setAvatar('');
 		setIsAuth(false);
 		setName('');
@@ -105,17 +127,43 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const toggleNotifications = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		setIsNotificationsOpen(!isNotificationsOpen);
+		if (isNotificationsOpen) {
+			setIsNotificationsOpen(false);
+			return;
+		}
+		HeaderNotificationsStore.fetchNotifications();
+		setIsProgressOpen(false);
+		setIsRegularGoalsOpen(false);
+		setIsNotificationsOpen(true);
 	};
+
+	const closeNotificationsUi = useCallback(() => {
+		setIsNotificationsOpen(false);
+		setIsNotificationsModalOpen(false);
+		setIsMenuOpen(false);
+		setIsUserMenuOpen(false);
+	}, []);
 
 	const toggleRegularGoals = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		setIsRegularGoalsOpen(!isRegularGoalsOpen);
+		if (isRegularGoalsOpen) {
+			setIsRegularGoalsOpen(false);
+			return;
+		}
+		setIsProgressOpen(false);
+		setIsNotificationsOpen(false);
+		setIsRegularGoalsOpen(true);
 	};
 
 	const toggleProgress = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		setIsProgressOpen(!isProgressOpen);
+		if (isProgressOpen) {
+			setIsProgressOpen(false);
+			return;
+		}
+		setIsRegularGoalsOpen(false);
+		setIsNotificationsOpen(false);
+		setIsProgressOpen(true);
 	};
 
 	// Обработчик клика вне элементов для закрытия меню
@@ -137,20 +185,17 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			setHoveredParentId(null);
 		}
 
-		// Закрытие уведомлений
+		// Закрытие уведомлений, прогресса и регулярных целей — только клик вне общей обёртки
 		if (notificationsRef.current && !notificationsRef.current.contains(target)) {
 			setIsNotificationsOpen(false);
-		}
-
-		// Закрытие регулярных целей
-		if (regularGoalsRef.current && !regularGoalsRef.current.contains(target)) {
+			setIsProgressOpen(false);
 			setIsRegularGoalsOpen(false);
 		}
+	}, []);
 
-		// Закрытие всплывашки прогресса
-		if (progressRef.current && !progressRef.current.contains(target)) {
-			setIsProgressOpen(false);
-		}
+	const closeCategoriesMenu = useCallback(() => {
+		setIsCategoriesOpen(false);
+		setHoveredParentId(null);
 	}, []);
 
 	// Обработчик клика по аватару на мобильных устройствах
@@ -168,15 +213,80 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		}
 	};
 
-	// Загружаем полный профиль при авторизации, чтобы level и totalCompletedGoals были везде (в т.ч. в хедере)
+	// Загружаем профиль и бейдж регулярных целей при авторизации
 	useEffect(() => {
-		if (isAuth) {
-			getUser();
+		if (!isAuth) {
+			HeaderRegularGoalsStore.clear();
+			return;
 		}
+
+		let cancelled = false;
+
+		(async () => {
+			await getUser();
+			if (!cancelled) {
+				await HeaderRegularGoalsStore.loadTodayCount(UserStore.userSelf.regularGoalsSelectionPending ?? false);
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [isAuth]);
+
+	useEffect(() => {
+		if (!isAuth) {
+			return;
+		}
+
+		return registerHeaderGoalCountsRefresh(() => refreshHeaderGoalCounts());
+	}, [isAuth]);
+
+	// После смены тарифа пересчитываем бейдж регулярных целей (оплата Premium, даунгрейд, выбор слотов)
+	useEffect(() => {
+		if (!isAuth) {
+			return;
+		}
+
+		HeaderRegularGoalsStore.loadTodayCount(userSelf.regularGoalsSelectionPending ?? false).catch(() => undefined);
+	}, [
+		isAuth,
+		userSelf.subscriptionType,
+		userSelf.subscriptionExpiresAt,
+		userSelf.regularGoalsSelectionPending,
+		userSelf.regularGoalsSlotsLocked,
+		userSelf.limits?.maxRegularGoals,
+	]);
+
+	// После смены тарифа в админке профиль подтягиваем при возврате на вкладку/окно
+	useEffect(() => {
+		if (!isAuth) {
+			return;
+		}
+
+		const refreshProfile = () => {
+			if (document.visibilityState === 'visible') {
+				getUser().then(() => HeaderRegularGoalsStore.loadTodayCount(UserStore.userSelf.regularGoalsSelectionPending ?? false));
+			}
+		};
+
+		window.addEventListener('focus', refreshProfile);
+		document.addEventListener('visibilitychange', refreshProfile);
+
+		return () => {
+			window.removeEventListener('focus', refreshProfile);
+			document.removeEventListener('visibilitychange', refreshProfile);
+		};
 	}, [isAuth]);
 
 	// Скрываем pre-header при прокрутке страницы
 	useEffect(() => {
+		// Если страница (например, Goal) управляет compact-состоянием хедера — не слушаем скролл
+		if (preHeaderHiddenOverride !== null) {
+			setIsPreHeaderHidden(preHeaderHiddenOverride);
+			return;
+		}
+
 		const handleScroll = () => {
 			setIsPreHeaderHidden(window.scrollY > 0);
 		};
@@ -187,25 +297,26 @@ export const Header: FC<HeaderProps> = observer((props) => {
 		return () => {
 			window.removeEventListener('scroll', handleScroll);
 		};
-	}, []);
+	}, [preHeaderHiddenOverride]);
 
-	// Загрузка количества регулярных целей на сегодня для бейджа
+	// Загрузка уведомлений при авторизации, очистка при разлогине
 	useEffect(() => {
 		if (isAuth) {
-			HeaderRegularGoalsStore.loadTodayCount();
+			HeaderNotificationsStore.startPolling();
 		} else {
-			HeaderRegularGoalsStore.clear();
+			HeaderNotificationsStore.clearNotifications();
 		}
 	}, [isAuth]);
 
-	// Загрузка целей в процессе для бейджа прогресса
+	// Загрузка целей в процессе для бейджа прогресса (только Premium)
 	useEffect(() => {
-		if (isAuth) {
+		if (isAuth && isPremium) {
 			HeaderProgressGoalsStore.loadGoalsInProgress();
 		} else {
 			HeaderProgressGoalsStore.clear();
+			setIsProgressOpen(false);
 		}
-	}, [isAuth]);
+	}, [isAuth, isPremium]);
 
 	// Добавляем обработчик клика вне элементов
 	useEffect(() => {
@@ -223,14 +334,16 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const menuProfile = (
 		<div className={element('profile-menu')}>
 			<UserSelfProfile hideSubscriptionButton noBorder />
-			{isScreenMobile ? (
+			{isScreenSmallMobile ? (
 				<>
 					<button
 						type="button"
 						className={element('menu-item')}
 						onClick={() => {
-							setIsUserMenuOpen(true);
-							setIsNotificationsOpen(true);
+							HeaderNotificationsStore.fetchNotifications();
+							setIsUserMenuOpen(false);
+							setIsMenuOpen(false);
+							setIsNotificationsModalOpen(true);
 						}}
 					>
 						Уведомления
@@ -238,7 +351,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 					<Line margin="8px 0" />
 				</>
 			) : (
-				<Line margin="8px 0" />
+				<div />
 			)}
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self" end>
 				Дашборд
@@ -251,7 +364,10 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				Активные цели и списки
 			</NavLink>
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/progress" end>
-				Прогресс целей
+				<span className={element('menu-item-text')}>
+					Прогресс целей
+					{!isPremium && <Tag text="Premium" theme="gold" className={element('menu-item-premium-tag')} />}
+				</span>
 			</NavLink>
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/regular" end>
 				Регулярные цели
@@ -266,6 +382,9 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			>
 				Выполненные
 			</NavLink>
+			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/maps" end>
+				Мои карты
+			</NavLink>
 			<NavLink
 				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
 				to="/user/self/achievements"
@@ -276,13 +395,24 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/friends" end>
 				Друзья
 			</NavLink>
-			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/maps" end>
-				Мои карты
-			</NavLink>
 			<Line margin="8px 0" />
-			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/subs" end>
-				Больше функционала
+			<NavLink
+				className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
+				to="/user/self/pending-review"
+				end
+			>
+				Публикации в каталог
 			</NavLink>
+			{!isPremium && (
+				<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/subs" end>
+					Больше функционала
+				</NavLink>
+			)}
+			{isScreenMobile && (
+				<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/goals/create" end>
+					Создать цель
+				</NavLink>
+			)}
 			<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/settings" end>
 				Настройки
 			</NavLink>
@@ -307,7 +437,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 			)}
 
 			<li className={element('item')}>
-				<Link className={element('item-link', {active: page === 'isMainGoals'})} to="/list/100-goals">
+				<Link className={element('item-link', {active: page === 'isMainGoals', is100Goals: true})} to="/list/100-goals">
 					100 целей
 				</Link>
 			</li>
@@ -346,20 +476,27 @@ export const Header: FC<HeaderProps> = observer((props) => {
 
 	const buttonsAuth = (
 		<div className={element('profile')}>
-			<Button className={element('sign-in')} theme="blue-light" size={isScreenMobile ? 'medium' : 'small'} onClick={openLogin}>
+			<Button className={element('sign-in')} theme="blue-light" size="medium" onClick={openLogin}>
 				Войти
 			</Button>
-			<Button
-				className={element('registration')}
-				theme="blue"
-				size={isScreenMobile ? 'medium' : 'small'}
-				icon="rocket"
-				onClick={openRegistration}
-			>
+			<Button className={element('registration')} theme="blue" size="medium" onClick={openRegistration}>
 				Регистрация
 			</Button>
 		</div>
 	);
+
+	// На desktop/tablet — инлайн-поиск, на md и ниже — кнопка, открывающая модалку
+	const searchBlock =
+		isScreenDesktop || isScreenTablet ? (
+			<GlobalGoalsSearch className={element('search')} theme={header} />
+		) : (
+			<Button className={element('search-trigger')} onClick={() => setIsSearchOpen(true)} aria-label="Поиск">
+				<>
+					Поиск целей и списков
+					<Svg icon="search" className={element('categories-icon')} width="16px" height="16px" />
+				</>
+			</Button>
+		);
 
 	return (
 		<header className={block({theme: header, compact: isPreHeaderHidden})}>
@@ -373,7 +510,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 					className={element('item-link', {active: page === 'isReview'})}
 					onClick={() => setIsFeedbackModalOpen(true)}
 				>
-					Оставить отзыв
+					{isScreenSmallTablet ? 'Отзыв' : 'Оставить отзыв'}
 				</button>
 			</div>
 			<div className={element('wrapper')}>
@@ -387,7 +524,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 								</Button>
 							</div>
 							<div className={element('logo-wrap')}>
-								<Link className={element('logo')} to="/" aria-label="Главная">
+								<Link className={element('logo')} to={homePath} aria-label="Главная">
 									<Svg icon="delting" />
 								</Link>
 							</div>
@@ -422,7 +559,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 										onClick={() => setIsUserMenuOpen(true)}
 										aria-label="Открыть меню пользователя"
 									>
-										<Svg icon="user" width="16px" height="16px" className={element('profile-icon')} />
+										<Svg icon="user" width="16px" height="16px" className={guestProfileIconClass} />
 									</button>
 								</div>
 							)}
@@ -444,14 +581,12 @@ export const Header: FC<HeaderProps> = observer((props) => {
 									<Svg icon="apps" className={element('categories-icon')} />
 								</Button>
 							</li>
-							<li className={element('search-item')}>
-								<GlobalGoalsSearch className={element('search')} theme={header} />
-							</li>
+							<li className={element('search-item')}>{searchBlock}</li>
 						</ul>
 					</>
 				) : (
 					<>
-						<Link className={element('logo')} to="/" aria-label="Главная">
+						<Link className={element('logo')} to={homePath} aria-label="Главная">
 							{isScreenMobile ? <Svg icon="icon-logo" className={element('logo-icon')} /> : <Svg icon="delting" />}
 						</Link>
 						{isScreenMobile && !isScreenSmallMobile && (
@@ -499,10 +634,18 @@ export const Header: FC<HeaderProps> = observer((props) => {
 												<li
 													key={category.id}
 													className={element('categories-item-parent')}
-													onMouseEnter={() => setHoveredParentId(category.id)}
-													onMouseLeave={() => setHoveredParentId(null)}
+													onMouseEnter={() => {
+														if (isScreenDesktop) setHoveredParentId(category.id);
+													}}
+													onMouseLeave={() => {
+														if (isScreenDesktop) setHoveredParentId(null);
+													}}
 												>
-													<Link className={element('category-link')} to={`/categories/${category.nameEn}`}>
+													<Link
+														className={element('category-link')}
+														to={`/categories/${category.nameEn}`}
+														onClick={() => closeCategoriesMenu()}
+													>
 														{category?.icon ? (
 															<img
 																src={category?.icon}
@@ -513,7 +656,30 @@ export const Header: FC<HeaderProps> = observer((props) => {
 															<Svg icon={category?.icon || 'apps'} />
 														)}
 														{category.name}
-														<Svg icon="arrow" className={element('categories-arrow')} />
+														<span
+															className={element('categories-arrow')}
+															role="button"
+															tabIndex={0}
+															onClick={(e) => {
+																if (isScreenDesktop) return;
+																e.preventDefault();
+																e.stopPropagation();
+																setHoveredParentId((prev) => (prev === category.id ? null : category.id));
+															}}
+															aria-label="Открыть подкатегории"
+															onKeyDown={(e) => {
+																if (isScreenDesktop) return;
+																if (e.key === 'Enter' || e.key === ' ') {
+																	e.preventDefault();
+																	e.stopPropagation();
+																	setHoveredParentId((prev) =>
+																		prev === category.id ? null : category.id
+																	);
+																}
+															}}
+														>
+															<Svg icon="arrow" />
+														</span>
 													</Link>
 													<AnimatePresence>
 														{category.children.length > 0 && hoveredParentId === category.id && (
@@ -528,7 +694,8 @@ export const Header: FC<HeaderProps> = observer((props) => {
 																	<Link
 																		key={child.id}
 																		className={element('category-link', {child: true})}
-																		to={`/categories/${child.nameEn}`}
+																		to={`/categories/${category.nameEn}/${child.nameEn}`}
+																		onClick={() => closeCategoriesMenu()}
 																	>
 																		{child.name}
 																	</Link>
@@ -544,9 +711,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 							</li>
 
 							{/* Поиск по целям */}
-							<li className={element('search-item')}>
-								<GlobalGoalsSearch className={element('search')} theme={header} />
-							</li>
+							<li className={element('search-item')}>{searchBlock}</li>
 						</ul>
 
 						{isAuth ? (
@@ -562,32 +727,37 @@ export const Header: FC<HeaderProps> = observer((props) => {
 										{/* Кнопка уведомлений */}
 										<button
 											type="button"
-											className={element('notifications-button')}
+											className={element('notifications-button', {active: isNotificationsOpen})}
 											onClick={toggleNotifications}
 											aria-label="Уведомления"
 										>
-											<Svg icon="bell" className={element('notifications-icon', {theme: header})} />
-											{HeaderNotificationsStore.hasUnreadNotifications && (
-												<span className={element('notifications-badge')}>
-													{HeaderNotificationsStore.unreadCount > 99
-														? '99+'
-														: HeaderNotificationsStore.unreadCount}
+											{HeaderNotificationsStore.hasUnreadNotifications ? (
+												<span className={element('regular-goals-badge')}>
+													<Svg icon="bell" className={element('regular-goals-badge-icon', {theme: header})} />
+													<span className={element('regular-goals-badge-count', {theme: header})}>
+														{HeaderNotificationsStore.unreadCount > 99
+															? '99+'
+															: HeaderNotificationsStore.unreadCount}
+													</span>
 												</span>
+											) : (
+												<Svg icon="bell" className={element('notifications-icon', {theme: header})} />
 											)}
 										</button>
 
-										{/* Кнопка прогресса */}
-										{!isScreenMobile && (
-											<div className={element('progress-wrapper')} ref={progressRef}>
+										{/* Кнопка прогресса — только Premium */}
+										{!isScreenMobile && isPremium && (
+											<div className={element('progress-wrapper')}>
 												<button
 													type="button"
 													className={element('notifications-button', {
 														progress: true,
+														active: isProgressOpen,
 													})}
 													onClick={toggleProgress}
 													aria-label="Прогресс"
 												>
-													{HeaderProgressGoalsStore.hasRegularGoalsToday ? (
+													{showProgressGoalsBadge ? (
 														<span
 															className={element('regular-goals-badge', {
 																allCompleted: isProgressOpen,
@@ -598,9 +768,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 																className={element('regular-goals-badge-icon', {theme: header})}
 															/>
 															<span className={element('regular-goals-badge-count', {theme: header})}>
-																{HeaderProgressGoalsStore.goalsCount > 99
-																	? '99+'
-																	: HeaderProgressGoalsStore.goalsCount}
+																{progressGoalsBadgeCount > 99 ? '99+' : progressGoalsBadgeCount}
 															</span>
 														</span>
 													) : (
@@ -620,6 +788,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 																variant="progress"
 																isOpen={isProgressOpen}
 																onClose={() => setIsProgressOpen(false)}
+																disableClickOutside
 															/>
 														</motion.div>
 													)}
@@ -627,32 +796,60 @@ export const Header: FC<HeaderProps> = observer((props) => {
 											</div>
 										)}
 
+										<AnimatePresence>
+											{isNotificationsOpen && (
+												<motion.div
+													initial={{opacity: 0, y: -10}}
+													animate={{opacity: 1, y: 0}}
+													exit={{opacity: 0, y: -10}}
+													transition={{duration: 0.2, ease: 'easeOut'}}
+													className={element('notifications-dropdown')}
+												>
+													<NotificationDropdown
+														isOpen={isNotificationsOpen}
+														onClose={closeNotificationsUi}
+														disableClickOutside
+													/>
+												</motion.div>
+											)}
+										</AnimatePresence>
 										{/* Кнопка регулярных целей */}
 										{!isScreenMobile && (
 											<>
 												<button
 													type="button"
-													className={element('notifications-button')}
+													className={element('notifications-button', {active: isRegularGoalsOpen})}
 													onClick={toggleRegularGoals}
 													aria-label="Регулярные цели"
 												>
-													{HeaderRegularGoalsStore.hasRegularGoalsToday ? (
+													{showRegularGoalsBadge ? (
 														<span
 															className={element('regular-goals-badge', {
-																allCompleted: HeaderRegularGoalsStore.allCompletedToday,
+																allCompleted:
+																	HeaderRegularGoalsStore.hasRegularGoals &&
+																	HeaderRegularGoalsStore.allCompletedToday,
+																attention: regularGoalsNeedAttention,
 															})}
 														>
 															<Svg
 																icon={
-																	HeaderRegularGoalsStore.allCompletedToday ? 'regular' : 'regular-empty'
+																	HeaderRegularGoalsStore.hasRegularGoals &&
+																	HeaderRegularGoalsStore.allCompletedToday
+																		? 'regular'
+																		: 'regular-empty'
 																}
-																className={element('regular-goals-badge-icon', {theme: header})}
+																className={element('regular-goals-badge-icon', {
+																	theme: header,
+																	completed:
+																		HeaderRegularGoalsStore.hasRegularGoals &&
+																		HeaderRegularGoalsStore.allCompletedToday,
+																})}
 															/>
-															<span className={element('regular-goals-badge-count', {theme: header})}>
-																{HeaderRegularGoalsStore.todayCount > 99
-																	? '99+'
-																	: HeaderRegularGoalsStore.todayCount}
-															</span>
+															{HeaderRegularGoalsStore.totalCount > 0 && (
+																<span className={element('regular-goals-badge-count', {theme: header})}>
+																	{HeaderRegularGoalsStore.totalCount}
+																</span>
+															)}
 														</span>
 													) : (
 														<Svg
@@ -661,22 +858,6 @@ export const Header: FC<HeaderProps> = observer((props) => {
 														/>
 													)}
 												</button>
-												<AnimatePresence>
-													{isNotificationsOpen && (
-														<motion.div
-															initial={{opacity: 0, y: -10}}
-															animate={{opacity: 1, y: 0}}
-															exit={{opacity: 0, y: -10}}
-															transition={{duration: 0.2, ease: 'easeOut'}}
-															className={element('notifications-dropdown')}
-														>
-															<NotificationDropdown
-																isOpen={isNotificationsOpen}
-																onClose={() => setIsNotificationsOpen(false)}
-															/>
-														</motion.div>
-													)}
-												</AnimatePresence>
 												<AnimatePresence>
 													{isRegularGoalsOpen && (
 														<motion.div
@@ -689,6 +870,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 															<RegularGoalsDropdown
 																isOpen={isRegularGoalsOpen}
 																onClose={() => setIsRegularGoalsOpen(false)}
+																disableClickOutside
 															/>
 														</motion.div>
 													)}
@@ -730,7 +912,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 										onClick={() => setIsUserMenuOpen(true)}
 										aria-label="Открыть меню пользователя"
 									>
-										<Svg icon="user" width="16px" height="16px" className={element('profile-icon')} />
+										<Svg icon="user" width="16px" height="16px" className={guestProfileIconClass} />
 									</button>
 								</div>
 							</div>
@@ -757,7 +939,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				<div className={element('menu-wrapper')}>{isAuth ? menuProfile : buttonsAuth}</div>
 			</ModalPhone>
 			<ModalPhone title="Поиск" isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)}>
-				<GlobalGoalsSearch className={element('search')} isModal />
+				<GlobalGoalsSearch className={element('search')} isModal onModalClose={() => setIsSearchOpen(false)} />
 			</ModalPhone>
 			<ModalPhone title="Категории" isOpen={isCategoriesModalOpen} onClose={() => setIsCategoriesModalOpen(false)}>
 				<div className={element('categories-modal')}>
@@ -781,7 +963,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 										<Link
 											key={child.id}
 											className={element('category-child-link')}
-											to={`/categories/${child.nameEn}`}
+											to={`/categories/${category.nameEn}/${child.nameEn}`}
 											onClick={() => setIsCategoriesModalOpen(false)}
 										>
 											{child.name}
@@ -792,6 +974,9 @@ export const Header: FC<HeaderProps> = observer((props) => {
 						</div>
 					))}
 				</div>
+			</ModalPhone>
+			<ModalPhone title="Уведомления" isOpen={isNotificationsModalOpen} onClose={closeNotificationsUi}>
+				<NotificationDropdown isOpen={isNotificationsModalOpen} onClose={closeNotificationsUi} disableClickOutside inModal />
 			</ModalPhone>
 			<FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
 		</header>

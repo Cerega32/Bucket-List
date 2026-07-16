@@ -1,6 +1,6 @@
-import {GET} from '@/utils/fetch/requests';
+import {GET, IRequestGet} from '@/utils/fetch/requests';
 
-export const getList = async (url: string) => {
-	const response = await GET(url, {auth: true});
+export const getList = async (url: string, queryParams?: IRequestGet) => {
+	const response = await GET(url, {auth: true, get: queryParams});
 	return response;
 };

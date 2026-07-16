@@ -2,11 +2,13 @@ import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
-import {Loader} from '@/components/Loader/Loader';
 import {UserInfo} from '@/components/UserInfo/UserInfo';
+import {UserInfoSkeleton} from '@/components/UserInfo/UserInfoSkeleton';
 import {useBem} from '@/hooks/useBem';
+import {FriendsStore} from '@/store/FriendsStore';
 import {UserStore} from '@/store/UserStore';
 import {IPage} from '@/typings/page';
+import {getFriendRequests, getFriends} from '@/utils/api/friends';
 import {getUser} from '@/utils/api/get/getUser';
 import './user.scss';
 
@@ -18,9 +20,8 @@ import {UserShowcase} from '../UserShowcase/UserShowcase';
 export const User: FC<IPage> = observer(({page, subPage}) => {
 	const [block] = useBem('user');
 
-	const {userInfo} = UserStore;
+	const {userInfo, userInfoLoadedForId} = UserStore;
 	const {id} = useParams();
-	const [isLoading, setIsLoading] = useState(true);
 	const [hasVisited, setHasVisited] = useState(false);
 
 	if (!id) {
@@ -28,18 +29,46 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 	}
 
 	useEffect(() => {
+		if (UserStore.userInfoLoadedForId === id) {
+			return undefined;
+		}
+		let cancelled = false;
+		UserStore.resetUserInfo();
 		(async () => {
-			setIsLoading(true);
 			await getUser(id);
+			if (cancelled) return;
+			UserStore.setUserInfoLoadedForId(id);
 
+			// Ленивая загрузка списка друзей и заявок,
+			// чтобы корректно отображать состояние кнопки дружбы
+			try {
+				if (FriendsStore.friends.length === 0) {
+					const friendsResponse = await getFriends();
+					if (cancelled) return;
+					FriendsStore.setFriends(friendsResponse.results);
+				}
+
+				if (FriendsStore.friendRequests.length === 0) {
+					const requestsResponse = await getFriendRequests();
+					if (cancelled) return;
+					FriendsStore.setFriendRequests(requestsResponse.results);
+				}
+			} catch (error) {
+				// Если не удалось загрузить друзей/заявки, не блокируем загрузку профиля
+				// eslint-disable-next-line no-console
+				console.error('Не удалось загрузить список друзей или заявок:', error);
+			}
+
+			if (cancelled) return;
 			// Обновляем прогресс заданий при посещении профиля (только один раз за сессию)
 			if (!hasVisited) {
 				// Прогресс заданий обновляется автоматически на бэкенде
 				setHasVisited(true);
 			}
-
-			setIsLoading(false);
 		})();
+		return () => {
+			cancelled = true;
+		};
 	}, [id, hasVisited]);
 
 	const getUserContent = () => {
@@ -59,14 +88,18 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 		}
 	};
 
+	const isUserLoaded = !!userInfo.id && userInfo.id !== 0 && userInfoLoadedForId === id;
+
 	return (
 		<main className={block()}>
-			<Loader isLoading={isLoading}>
+			{isUserLoaded ? (
 				<UserInfo
 					avatar={userInfo.avatar || null}
 					name={userInfo.name || userInfo.username}
 					firstName={userInfo.firstName}
 					lastName={userInfo.lastName}
+					country={userInfo.country}
+					about={userInfo.aboutMe}
 					totalAdded={userInfo.totalAddedGoals}
 					totalCompleted={userInfo.totalCompletedGoals}
 					page={page}
@@ -76,8 +109,11 @@ export const User: FC<IPage> = observer(({page, subPage}) => {
 					totalAchievements={userInfo.totalAchievements}
 					background={userInfo.coverImage}
 					subscriptionType={userInfo.subscriptionType}
+					level={userInfo.level}
 				/>
-			</Loader>
+			) : (
+				<UserInfoSkeleton />
+			)}
 			{getUserContent()}
 		</main>
 	);

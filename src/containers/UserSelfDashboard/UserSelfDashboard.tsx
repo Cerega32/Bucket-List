@@ -3,6 +3,7 @@ import {FC, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import {ActivityHeatmap} from '@/components/ActivityHeatmap/ActivityHeatmap';
+import {DailyRandomGoal} from '@/components/DailyRandomGoal/DailyRandomGoal';
 import GoalTimers from '@/components/GoalTimers/GoalTimers';
 import {Info100Goals} from '@/components/Info100Goals/Info100Goals';
 import {Svg} from '@/components/Svg/Svg';
@@ -11,21 +12,30 @@ import {WeeklySchedule} from '@/components/WeeklySchedule/WeeklySchedule';
 import {useBem} from '@/hooks/useBem';
 import {IUserStatistics} from '@/typings/user';
 import {getStatistics} from '@/utils/api/get/getUserStatistics';
+
+import {UserSelfDashboardSkeleton} from './UserSelfDashboardSkeleton';
 import './user-self-dashboard.scss';
 
 export const UserSelfDashboard: FC = observer(() => {
 	const [block, element] = useBem('user-self-dashboard');
 
 	const [userStatistics, setUserStatistics] = useState<IUserStatistics | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		(async () => {
+			setIsLoading(true);
 			const res = await getStatistics();
 			if (res.success) {
 				setUserStatistics(res.data);
 			}
+			setIsLoading(false);
 		})();
 	}, []);
+
+	if (isLoading && !userStatistics) {
+		return <UserSelfDashboardSkeleton />;
+	}
 
 	return (
 		<section className={block()}>
@@ -79,8 +89,9 @@ export const UserSelfDashboard: FC = observer(() => {
 				)}
 
 				{userStatistics?.weeklyProgress && <WeeklySchedule weeks={userStatistics?.weeklyProgress} className={element('weekly')} />}
-				{userStatistics && <UserStatistics statistics={userStatistics} />}
+				{userStatistics && <UserStatistics statistics={userStatistics} className={element('user-statistics')} />}
 			</div>
+			<DailyRandomGoal />
 			<ActivityHeatmap />
 			<GoalTimers />
 			{/* <div className={element('title-wrapper')}>

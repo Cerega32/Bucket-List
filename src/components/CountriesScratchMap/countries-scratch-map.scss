@@ -1,0 +1,221 @@
+.countries-scratch-map {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	width: 100%;
+
+	&__header {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	&__info {
+		width: 100%;
+
+		@include xs {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+	}
+
+	&__hint {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 13px;
+		line-height: 1.5;
+	}
+
+	&__map {
+		position: relative;
+		width: 100%;
+		max-width: 640px;
+		margin: 0 auto;
+		border-radius: 8px;
+		cursor: grab;
+		overflow: hidden;
+		clip-path: inset(0 round 8px);
+		touch-action: none;
+
+		> svg {
+			display: block;
+			width: 100%;
+			height: auto;
+			border-radius: 8px;
+		}
+
+		&:active {
+			cursor: grabbing;
+		}
+	}
+
+	&__loading {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 400px;
+	}
+
+	&__empty {
+		padding: 48px 10px;
+		background: var(--color-gray-5);
+		border-radius: 10px;
+		text-align: center;
+
+		h3 {
+			margin-bottom: 8px;
+			color: var(--color-text-primary);
+			font-size: 18px;
+		}
+
+		p {
+			margin: 0;
+			color: var(--color-text-secondary);
+			font-size: 14px;
+		}
+	}
+
+	&__tooltip {
+		position: absolute;
+		z-index: 10;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		padding: 6px 10px;
+		background: rgb(var(--color-text-primary-rgb) / 88%);
+		border-radius: 6px;
+		color: var(--color-white);
+		font-size: 12px;
+		pointer-events: none;
+		white-space: nowrap;
+	}
+
+	&__tooltip-name {
+		font-weight: var(--weight-semi-bold);
+	}
+
+	&__tooltip-status {
+		color: var(--color-sentiment-negative);
+
+		&--completed {
+			color: var(--color-sentiment-positive);
+		}
+	}
+
+	&__tooltip-neutral {
+		color: var(--color-text-secondary);
+		font-size: 11px;
+	}
+
+	&__legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 18px;
+	}
+
+	&__legend-item {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+	}
+
+	&__legend-color {
+		width: 14px;
+		height: 14px;
+		border-radius: 4px;
+
+		&--completed {
+			background: linear-gradient(135deg, var(--color-education), var(--color-health-and-sport), var(--color-travel));
+		}
+
+		&--unvisited {
+			background: linear-gradient(
+				135deg,
+				color-mix(in srgb, var(--color-education) 10%, var(--color-gray-12)),
+				color-mix(in srgb, var(--color-travel) 10%, var(--color-gray-12))
+			);
+		}
+
+		&--neutral {
+			background: color-mix(in srgb, var(--color-white) 22%, var(--color-primary));
+		}
+	}
+
+	&__card {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	&__card-image {
+		width: 100%;
+		height: 180px;
+		background-position: center;
+		background-size: cover;
+		border-radius: 10px;
+
+		&--placeholder {
+			background: linear-gradient(
+				135deg,
+				color-mix(in srgb, var(--color-travel) 55%, var(--color-primary)),
+				color-mix(in srgb, var(--color-education) 45%, var(--color-primary))
+			);
+		}
+	}
+
+	&__card-body {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	&__card-head {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		margin-top: 20px;
+	}
+
+	&__card-title {
+		flex: 1;
+		min-width: 0;
+		margin: 0;
+		color: var(--color-text-primary);
+		font-size: 20px;
+		font-weight: var(--weight-bold);
+		line-height: 1.3;
+	}
+
+	&__card-tag {
+		flex-shrink: 0;
+		margin-left: auto;
+	}
+
+	&__card-description {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 14px;
+		line-height: 1.5;
+	}
+
+	&__card-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+		margin-top: 6px;
+	}
+
+	&--showcase {
+		gap: 8px;
+
+		.countries-scratch-map__map {
+			max-width: 100%;
+		}
+
+		.countries-scratch-map__loading {
+			height: 280px;
+		}
+	}
+}

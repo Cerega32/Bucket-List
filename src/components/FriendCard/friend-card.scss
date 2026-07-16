@@ -1,16 +1,28 @@
-.friend-card {
+.friends-card {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: 16px;
 	padding: 16px;
 	background: var(--color-white);
-	border: 1px solid var(--color-border-light);
 	border-radius: 12px;
 	transition: all 0.2s ease;
 
 	&:hover {
-		border-color: var(--color-border-medium);
-		box-shadow: 0 2px 8px rgb(var(--color-black-rbg) / 8%);
+		background-color: var(--color-secondary-hover);
+	}
+
+	@include xs {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	&__content {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		flex: 1;
+		min-width: 0;
 	}
 
 	&__avatar {
@@ -42,19 +54,25 @@
 
 	&__info {
 		flex: 1;
-		min-width: 0;
+		min-width: 140px;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
 	}
 
 	&__name {
-		margin: 0 0 4px;
 		color: var(--color-text-primary);
 		font-size: 16px;
 		font-weight: var(--weight-medium);
 		line-height: var(--line-height-16);
+		width: fit-content;
+
+		&:hover {
+			color: var(--color-primary);
+		}
 	}
 
 	&__username {
-		margin: 0 0 8px;
 		color: var(--color-text-secondary);
 		font-size: 14px;
 		line-height: var(--line-height-14);
@@ -69,45 +87,36 @@
 
 	&__actions {
 		display: flex;
-		flex-shrink: 0;
+		flex-wrap: wrap;
 		gap: 8px;
+		justify-content: flex-end;
+		align-items: center;
 
-		.button {
-			white-space: nowrap;
+		@include xs {
+			align-items: center;
 		}
 	}
 
-	// Responsive design
-	@media (width <= 768px) {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 12px;
-
-		&__actions {
-			justify-content: space-between;
-			width: 100%;
-
-			.button {
-				flex: 1;
-			}
-		}
+	&__compare-btn {
+		width: auto;
 	}
 
-	@media (width <= 480px) {
-		padding: 12px;
+	&__compare-btn-content {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
 
-		&__avatar {
-			width: 48px;
-			height: 48px;
-		}
+	&__compare-tag {
+		padding: 0 5px;
+		border-radius: 4px;
+		font-size: 10px;
+		font-weight: var(--weight-regular);
+		line-height: 12px;
 
-		&__avatar-placeholder {
-			font-size: 18px;
-		}
-
-		&__actions {
-			flex-direction: column;
-			gap: 8px;
+		.tag__text {
+			font-size: 10px;
+			line-height: 12px;
 		}
 	}
 }

@@ -1,14 +1,16 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useRef, useState} from 'react';
+import {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
+import {Card} from '@/components/Card/Card';
+import {CatalogItemsSkeleton} from '@/components/CatalogItems/CatalogItemsSkeleton';
 import {ContentGoal} from '@/components/ContentGoal/ContentGoal';
 import {EditGoal} from '@/components/EditGoal/EditGoal';
 import {HeaderGoal} from '@/components/HeaderGoal/HeaderGoal';
-import {Loader} from '@/components/Loader/Loader';
 import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
 import {SEO} from '@/components/SEO/SEO';
+import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {useOGImage} from '@/hooks/useOGImage';
 import useScreenSize from '@/hooks/useScreenSize';
@@ -18,97 +20,126 @@ import {ThemeStore} from '@/store/ThemeStore';
 import {UserStore} from '@/store/UserStore';
 import {IGoal} from '@/typings/goal';
 import {IPage} from '@/typings/page';
-import {canEditGoal} from '@/utils/api/get/canEditGoal';
 import {getGoal} from '@/utils/api/get/getGoal';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 
+import {GoalSkeleton} from './GoalSkeleton';
+import {useSimilarGoalsByCategory} from './hooks/useSimilarGoalsByCategory';
+
 import './goal.scss';
+
+/** GET goals/:code отдаёт addedFromList; при отсутствии — camelCase из рендерера */
+const normalizeGoalFromApi = (raw: IGoal & {added_from_list?: string[]}): IGoal => {
+	const addedFromList = Array.isArray(raw.addedFromList)
+		? raw.addedFromList
+		: Array.isArray(raw.added_from_list)
+		? raw.added_from_list
+		: [];
+	return {...raw, addedFromList};
+};
 
 export const Goal: FC<IPage> = observer(({page}) => {
 	const [block, element] = useBem('goal');
-	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
+	const {isScreenMobile, isScreenSmallTablet, isScreenSmallMobile} = useScreenSize();
 	const headerRef = useRef<HTMLElement | null>(null);
 	const {isAuth} = UserStore;
 
-	const {setId} = GoalStore;
+	const {setId, setGoalListId} = GoalStore;
 	const params = useParams();
 	const listId = params?.['id'];
 	const [goal, setGoal] = useState<IGoal | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
 	const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0); // Триггер для обновления истории
-	const [canEditCheck, setCanEditCheck] = useState<{can_edit: boolean; checked: boolean}>({
-		can_edit: false,
-		checked: false,
-	});
 
 	const {setIsOpen, setWindow} = ModalStore;
-	const {setHeader} = ThemeStore;
+	const {setHeader, setPageCategory} = ThemeStore;
 
 	useEffect(() => {
+		if (!goal?.category?.nameEn) {
+			setPageCategory(null);
+			return undefined;
+		}
+		setPageCategory(goal.category.nameEn);
+		return () => setPageCategory(null);
+	}, [goal?.category?.nameEn, setPageCategory]);
+
+	useEffect(() => {
+		if (!listId) return undefined;
+		let cancelled = false;
+		setGoal(null);
 		(async () => {
-			if (listId) {
-				setIsLoading(true);
-				const res = await getGoal(listId);
-				if (res.success) {
-					setGoal(res.data.goal);
-					setId(res.data.goal.id);
-				}
-				setIsLoading(false);
+			const res = await getGoal(listId);
+			if (cancelled) return;
+			if (res.success) {
+				setGoal(normalizeGoalFromApi(res.data.goal));
+				setId(res.data.goal.id);
+				setGoalListId(null);
 			}
 		})();
-	}, [listId]);
-
-	useEffect(() => {
-		const checkEditPermission = async () => {
-			if (goal && goal.createdBy && !canEditCheck.checked) {
-				try {
-					const response = await canEditGoal(listId || '');
-					if (response.success && response.data) {
-						setCanEditCheck({
-							can_edit: response.data.can_edit,
-							checked: true,
-						});
-					}
-				} catch (error) {
-					console.error('Ошибка при проверке возможности редактирования:', error);
-				}
-			}
+		return () => {
+			cancelled = true;
 		};
+	}, [listId, isAuth]);
 
-		checkEditPermission();
-	}, [goal, listId, canEditCheck.checked]);
+	// Счётчик записей для вкладки «История прогресса» — из userProgress (не из recentEntries: может не приходить)
+	useEffect(() => {
+		if (!goal?.addedByUser || goal.regularConfig) return;
+		const count = goal.userProgress?.progressEntriesCount ?? goal.userProgress?.recentEntries?.length ?? 0;
+		setGoal((prev) => {
+			if (!prev || prev.progressEntriesCount === count) return prev;
+			return {...prev, progressEntriesCount: count};
+		});
+	}, [goal?.id, goal?.addedByUser, goal?.regularConfig, goal?.userProgress]);
+
+	// После действий на странице истории — перезагрузить цель (обновится user_progress)
+	useEffect(() => {
+		if (historyRefreshTrigger === 0 || !listId) return;
+		let cancelled = false;
+		(async () => {
+			const res = await getGoal(listId);
+			if (!cancelled && res.success && res.data.goal) {
+				setGoal(normalizeGoalFromApi(res.data.goal));
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [historyRefreshTrigger, listId]);
 
 	const openAddReview = () => {
 		setWindow('add-review');
 		setIsOpen(true);
 	};
 
-	const updateGoal = async (code: string, operation: 'add' | 'delete' | 'mark' | 'partial' | 'start', done?: boolean): Promise<void> => {
+	const updateGoal = async (
+		code: string,
+		operation: 'add' | 'delete' | 'mark' | 'partial' | 'start',
+		done?: boolean
+	): Promise<boolean> => {
 		if (!goal) {
-			return;
+			return false;
 		}
 
 		// Специальная обработка для начала выполнения
 		if (operation === 'start') {
 			// Логика начала выполнения обрабатывается в AsideGoal
 			// Здесь можем добавить дополнительную логику если нужно
-			return;
+			return false;
 		}
 
 		// Специальная обработка для частичного выполнения
 		if (operation === 'partial') {
 			// Логика частичного выполнения обрабатывается в AsideGoal
 			// Здесь можем добавить дополнительную логику если нужно
-			return;
+			return false;
 		}
 
 		if (!isAuth) {
 			setWindow('login');
 			setIsOpen(true);
-			return;
+			return false;
 		}
 
 		const res = await (operation === 'add'
@@ -123,33 +154,65 @@ export const Goal: FC<IPage> = observer(({page}) => {
 								title: 'Цель успешно выполнена!',
 								type: 'success',
 								id: Math.random().toString(36).substring(2, 15),
-								message: 'Добавьте отзыв чтобы заработать больше очков',
-								actionText: 'Добавить отзыв',
+								message: 'Оставьте впечатление чтобы заработать больше очков',
+								actionText: 'Добавить впечатление',
 								action: openAddReview,
 						  }
 						: undefined
 			  ));
 
-		if (res.success) {
-			const updatedGoal = {
-				addedByUser: operation !== 'delete',
-				completedByUser: operation === 'mark' ? !done : false,
-				totalAdded: res.data.totalAdded,
-				totalCompleted: res.data.totalCompleted,
-			};
+		if (!res.success) {
+			return false;
+		}
 
-			setGoal({...goal, ...updatedGoal});
+		const updatedGoal: Partial<IGoal> = {
+			addedByUser: operation !== 'delete',
+			completedByUser: operation === 'mark' ? !done : false,
+			totalAdded: res.data.totalAdded,
+			totalCompleted: res.data.totalCompleted,
+			...(operation === 'delete' ? {userFolders: []} : {}),
+		};
 
-			// Если удалена или добавлена регулярная цель, перезагружаем данные цели, чтобы обновить regularConfig.statistics
-			if ((operation === 'delete' || operation === 'add') && goal.regularConfig && listId) {
-				const reloadRes = await getGoal(listId);
-				if (reloadRes.success && reloadRes.data.goal) {
-					setGoal(reloadRes.data.goal);
+		// Функциональное обновление: иначе после patchParentUserProgress(null) из AsideGoal
+		// следующий setGoal({...goal, ...}) с устаревшим goal снова подставляет старый userProgress.
+		setGoal((prev) => {
+			if (!prev) {
+				return null;
+			}
+			// POST add/remove возвращают полную цель (GoalSerializer) — подмешиваем, чтобы не тянуть старый userProgress
+			const fromApi = res.data as Partial<IGoal> & {id?: number};
+			if ((operation === 'delete' || operation === 'add') && typeof fromApi.id === 'number' && fromApi.id === prev.id) {
+				const merged = {...prev, ...fromApi} as IGoal;
+				if (operation === 'delete') {
+					merged.userFolders = [];
+				}
+				return merged;
+			}
+			const next = {...prev, ...updatedGoal} as IGoal;
+			if (operation === 'mark') {
+				const data = res.data as Partial<IGoal> & {userProgress?: IGoal['userProgress']};
+				if (Object.prototype.hasOwnProperty.call(data, 'userProgress')) {
+					next.userProgress = data.userProgress ?? null;
+					if (next.userProgress == null) {
+						next.progressEntriesCount = 0;
+					} else if (data.progressEntriesCount !== undefined) {
+						next.progressEntriesCount = data.progressEntriesCount;
+					}
 				}
 			}
+			return next;
+		});
 
-			// Прогресс заданий обновляется автоматически на бэкенде
+		// Если удалена или добавлена регулярная цель, перезагружаем данные цели, чтобы обновить regularConfig.statistics
+		if ((operation === 'delete' || operation === 'add') && goal.regularConfig && listId) {
+			const reloadRes = await getGoal(listId);
+			if (reloadRes.success && reloadRes.data.goal) {
+				setGoal(normalizeGoalFromApi(reloadRes.data.goal));
+			}
 		}
+
+		// Прогресс заданий обновляется автоматически на бэкенде
+		return true;
 	};
 
 	const handleGoalUpdated = (updatedGoal: IGoal) => {
@@ -158,18 +221,18 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		setIsEditing(false);
 	};
 
-	const handleGoalUpdate = async (updatedGoal?: IGoal) => {
-		// Если передан обновленный goal из API, используем его
-		if (updatedGoal) {
-			setGoal(updatedGoal);
-		} else if (goal && listId) {
+	const handleGoalUpdate = async (updatedGoal?: IGoal | Partial<IGoal>) => {
+		// Патч или полная цель с API
+		if (updatedGoal !== undefined && Object.keys(updatedGoal).length > 0) {
+			setGoal((prev) => (prev ? ({...prev, ...updatedGoal} as IGoal) : null));
+			return;
+		}
+		if (goal && listId) {
 			// Иначе перезагружаем цель из API
-			setIsLoading(true);
 			const res = await getGoal(listId);
 			if (res.success && res.data.goal) {
-				setGoal(res.data.goal);
+				setGoal(normalizeGoalFromApi(res.data.goal));
 			}
-			setIsLoading(false);
 		}
 	};
 
@@ -184,8 +247,9 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			try {
 				const res = await getGoal(listId || '');
 				if (res.success && res.data?.goal) {
-					setGoal(res.data.goal);
+					setGoal(normalizeGoalFromApi(res.data.goal));
 					setId(res.data.goal.id);
+					setGoalListId(null);
 				}
 			} catch (error) {
 				console.error('Ошибка при перезагрузке цели:', error);
@@ -204,8 +268,55 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		setHistoryRefreshTrigger((prev) => prev + 1);
 	};
 
-	const [shrink, setShrink] = useState(false);
-	const [headerHeight, setHeaderHeight] = useState<number>(340);
+	// Перезагрузка цели после изменения списка (цель могла быть добавлена/удалена у пользователя)
+	const handleListChanged = async () => {
+		if (listId) {
+			const res = await getGoal(listId);
+			if (res.success && res.data.goal) {
+				const updatedGoal = res.data.goal;
+				setGoal(updatedGoal);
+
+				// Если цель удалена у пользователя — сбросить закешированный отзыв
+				if (!updatedGoal.addedByUser && !updatedGoal.hasMyComment) {
+					GoalStore.setMyComment(null);
+				}
+			}
+		}
+	};
+
+	const [compact, setCompact] = useState(false);
+	const [layoutHeaderOffset, setLayoutHeaderOffset] = useState(396);
+	const headerHeightRef = useRef(396);
+	const compactRef = useRef(false);
+	const expandedHeaderHeightRef = useRef<number | null>(null);
+
+	useEffect(() => {
+		expandedHeaderHeightRef.current = null;
+		headerHeightRef.current = 396;
+		setLayoutHeaderOffset(396);
+		setCompact(false);
+		compactRef.current = false;
+	}, [listId]);
+
+	useEffect(() => {
+		compactRef.current = compact;
+		ThemeStore.setPreHeaderHiddenOverride(compact);
+		// Сбрасываем инлайн-стили после того, как compact-класс применён к DOM
+		if (compact && headerRef.current) {
+			headerRef.current.style.clipPath = '';
+			headerRef.current.style.transform = '';
+		}
+	}, [compact]);
+
+	// Сбрасываем override при размонтировании
+	useEffect(() => {
+		ThemeStore.setPreHeaderHiddenOverride(false);
+		return () => {
+			ThemeStore.setPreHeaderHiddenOverride(null);
+		};
+	}, []);
+
+	const {similarGoals, isLoading: isSimilarLoading} = useSimilarGoalsByCategory(goal?.code || null, !!goal);
 
 	// Генерируем динамическое OG изображение
 	const {imageUrl: ogImageUrl} = useOGImage({
@@ -214,48 +325,128 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		height: 630,
 	});
 
-	const updateHeaderHeight = () => {
-		if (headerRef.current) {
-			setHeaderHeight(headerRef.current.offsetHeight);
-		} else {
-			setHeaderHeight(isScreenMobile || isScreenSmallTablet ? 340 : 340);
+	const updateHeaderHeight = useCallback(() => {
+		const el = headerRef.current;
+		if (!el) return;
+
+		// Временно сбрасываем clip-path/transform, чтобы измерить натуральную высоту
+		const savedClip = el.style.clipPath;
+		const savedTransform = el.style.transform;
+		el.style.clipPath = '';
+		el.style.transform = '';
+		const h = el.offsetHeight;
+		el.style.clipPath = savedClip;
+		el.style.transform = savedTransform;
+
+		headerHeightRef.current = h;
+
+		if (!compactRef.current) {
+			expandedHeaderHeightRef.current = h;
+			setLayoutHeaderOffset(h);
 		}
-	};
+
+		window.dispatchEvent(new Event('scroll'));
+	}, []);
 
 	useEffect(() => {
-		if ((headerRef?.current?.offsetHeight || 0) > headerHeight) {
+		if (!goal) return;
+
+		const el = headerRef.current;
+		if (!el) return;
+
+		updateHeaderHeight();
+
+		const resizeObserver = new ResizeObserver(() => {
 			updateHeaderHeight();
-		}
-	}, [shrink, isScreenMobile, isScreenSmallTablet]);
+		});
+		resizeObserver.observe(el);
+		window.addEventListener('resize', updateHeaderHeight);
+
+		return () => {
+			resizeObserver.disconnect();
+			window.removeEventListener('resize', updateHeaderHeight);
+		};
+	}, [goal?.code, compact, isScreenMobile, isScreenSmallTablet, updateHeaderHeight]);
 
 	useEffect(() => {
-		const handleScroll = () => {
-			const isMobile = isScreenMobile;
-			const headerH = headerRef.current?.offsetHeight || (isMobile ? 480 : 340);
-			const threshold = isMobile ? headerH * 0.8 : 160;
+		let rafId: number | null = null;
+		let ticking = false;
 
-			if (isMobile) {
-				if (shrink) {
-					if (window.scrollY < headerHeight - (headerRef.current?.offsetHeight || 0)) {
-						setShrink(false);
+		const onScroll = () => {
+			if (ticking) return;
+			ticking = true;
+
+			rafId = window.requestAnimationFrame(() => {
+				ticking = false;
+
+				const scrollY = window.scrollY || 0;
+				const currentCompact = compactRef.current;
+				const expandedH = expandedHeaderHeightRef.current ?? headerHeightRef.current;
+				const minHeight = isScreenSmallMobile ? 168 : 136;
+
+				if (expandedH <= 0) return;
+
+				if (isScreenSmallMobile) {
+					// Мобильные (sm/xs): шапка прокручивается вместе с контентом через translateY
+					const threshold = expandedH - minHeight;
+
+					if (scrollY >= threshold && !currentCompact) {
+						setCompact(true);
+					} else if (scrollY < threshold && currentCompact) {
+						setCompact(false);
 					}
-				} else if (window.scrollY > headerHeight - 168) {
-					setShrink(true);
+
+					// translateY только когда НЕ compact
+					if (!currentCompact && scrollY < threshold) {
+						if (headerRef.current) {
+							headerRef.current.style.transform = `translateY(${-scrollY}px)`;
+							headerRef.current.style.clipPath = '';
+						}
+					}
+				} else {
+					// Десктоп/планшет: clip-path
+					const newHeight = Math.max(minHeight, expandedH - scrollY);
+
+					if (newHeight <= minHeight && !currentCompact) {
+						setCompact(true);
+					} else if (newHeight > minHeight && currentCompact) {
+						setCompact(false);
+					}
+
+					if (!currentCompact && !(newHeight <= minHeight)) {
+						const clipBottom = expandedH - newHeight;
+						if (headerRef.current) {
+							headerRef.current.style.clipPath = clipBottom > 0 ? `inset(0 0 ${clipBottom}px 0)` : '';
+						}
+					}
 				}
-			} else if (window.scrollY > threshold) {
-				setShrink(true);
-			} else {
-				setShrink(false);
-			}
+
+				// Плавное затемнение прозрачной шапки навигации при скролле (1 → 0.7 за 150px),
+				// но только пока шапка цели не свернулась в compact — после этого затемнение убираем
+				const isNowCompact =
+					currentCompact || (isScreenSmallMobile ? scrollY >= expandedH - minHeight : expandedH - scrollY <= minHeight);
+				const brightness = isNowCompact ? 1 : Math.max(0.6, 1 - (scrollY / 150) * 0.3);
+				const blur = isNowCompact ? 0 : Math.min(5, (scrollY / 150) * 5);
+				document.documentElement.style.setProperty('--header-backdrop-brightness', brightness.toFixed(3));
+				document.documentElement.style.setProperty('--header-backdrop-blur', `${blur.toFixed(1)}px`);
+			});
 		};
 
-		setTimeout(() => {
-			handleScroll();
-		}, 100);
+		onScroll();
 
-		window.addEventListener('scroll', handleScroll);
-		return () => window.removeEventListener('scroll', handleScroll);
-	}, [isScreenMobile, shrink]);
+		window.addEventListener('scroll', onScroll, {passive: true});
+		return () => {
+			window.removeEventListener('scroll', onScroll);
+			if (rafId != null) window.cancelAnimationFrame(rafId);
+			// Очищаем инлайн-стили при смене экрана
+			if (headerRef.current) {
+				headerRef.current.style.transform = '';
+				headerRef.current.style.clipPath = '';
+			}
+			document.documentElement.style.removeProperty('--header-backdrop-brightness');
+			document.documentElement.style.removeProperty('--header-backdrop-blur');
+		};
+	}, [isScreenMobile, isScreenSmallMobile]);
 
 	if (isEditing && goal) {
 		return (
@@ -265,8 +456,8 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		);
 	}
 
-	if (!goal) {
-		return <Loader isLoading={isLoading} isPageLoader />;
+	if (!goal || goal.code !== listId) {
+		return <GoalSkeleton />;
 	}
 
 	return (
@@ -277,7 +468,10 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				dynamicImage={ogImageUrl}
 				type="article"
 			/>
-			<main className={block()}>
+			<main
+				className={block({category: goal.category.nameEn})}
+				style={{'--height-header-goal': `${layoutHeaderOffset}px`} as React.CSSProperties}
+			>
 				<HeaderGoal
 					ref={headerRef}
 					title={goal.title}
@@ -285,20 +479,15 @@ export const Goal: FC<IPage> = observer(({page}) => {
 					image={goal.image}
 					background={goal.image}
 					goal={goal}
-					shrink={shrink}
+					compact={compact}
 					onImageLoad={updateHeaderHeight}
 				/>
-				<section
-					className={element('wrapper')}
-					style={{
-						paddingTop: isScreenMobile ? headerHeight : 0,
-					}}
-				>
+				<section className={element('wrapper')}>
 					<AsideGoal
 						key={`aside-${goal.id}-${goal.regularConfig?.statistics?.updatedAt || ''}-${goal.regularConfig?.frequency || ''}-${
 							goal.regularConfig?.durationValue || 0
 						}-${goal.regularConfig?.allowSkipDays || 0}`}
-						className={element('aside', {shrink})}
+						className={element('aside', {compact})}
 						title={goal.title}
 						image={goal.image || ''}
 						added={goal.addedByUser}
@@ -307,8 +496,9 @@ export const Goal: FC<IPage> = observer(({page}) => {
 						goalId={goal.id}
 						done={goal.completedByUser}
 						openAddReview={openAddReview}
-						editGoal={goal.createdByUser && goal.isCanEdit ? () => setIsEditing(true) : undefined}
-						canEdit={goal?.isCanEdit}
+						hasMyComment={goal.hasMyComment}
+						editGoal={goal.isCanEdit ? () => setIsEditing(true) : undefined}
+						canEdit={goal.isCanEdit}
 						location={goal?.location}
 						onGoalCompleted={handleGoalCompleted}
 						onHistoryRefresh={handleHistoryRefresh}
@@ -316,11 +506,42 @@ export const Goal: FC<IPage> = observer(({page}) => {
 						page={page}
 						userFolders={goal.userFolders}
 						regularConfig={goal.regularConfig}
+						userProgress={goal.userProgress}
 					/>
 					<div className={element('content-wrapper')}>
-						<ContentGoal page={page} goal={goal} className={element('content')} historyRefreshTrigger={historyRefreshTrigger} />
+						<ContentGoal
+							page={page}
+							goal={goal}
+							className={element('content')}
+							historyRefreshTrigger={historyRefreshTrigger}
+							onListChanged={handleListChanged}
+							onEditClick={() => setIsEditing(true)}
+						/>
 					</div>
 				</section>
+				{(isSimilarLoading || similarGoals.length > 0) && (
+					<section className={element('similar-wrapper')}>
+						<Title tag="h2" className={element('similar-title')}>
+							Похожие цели
+						</Title>
+						{isSimilarLoading ? (
+							<CatalogItemsSkeleton count={8} />
+						) : (
+							<div className="catalog-items__goals">
+								{similarGoals.map((similarGoal) => (
+									<Card
+										key={similarGoal.id}
+										className="catalog-items__goal"
+										goal={similarGoal}
+										onClickAdd={async () => Promise.resolve()}
+										onClickDelete={async () => Promise.resolve()}
+										onClickMark={async () => Promise.resolve()}
+									/>
+								))}
+							</div>
+						)}
+					</section>
+				)}
 				<ScrollToTop />
 			</main>
 		</>

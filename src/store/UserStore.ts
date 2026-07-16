@@ -1,9 +1,15 @@
 import Cookies from 'js-cookie';
 import {makeAutoObservable} from 'mobx';
 
+import {IAchievement} from '@/typings/achievements';
+import {IComment} from '@/typings/comments';
 import {IGoal, IShortGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import {IUserInfo} from '@/typings/user';
+import {SUBSCRIPTION_SHOW_EXPIRED_KEY} from '@/utils/subscription/getSubscriptionExpiryState';
+import {clearSubscriptionExpiryTimersOnLogout, scheduleSubscriptionExpiryTimers} from '@/utils/subscription/subscriptionExpirySchedule';
+
+import type {UserCommentsSortBy} from '@/utils/api/get/getComments';
 
 interface IAddedGoals {
 	goals: Array<IShortGoal>;
@@ -36,7 +42,9 @@ interface IUserStore {
 }
 
 class Store implements IUserStore {
-	isAuth = !!Cookies.get('token');
+	// Токен живёт в httpOnly cookie и JS его не видит.
+	// Маркер 'is_authenticated' ставит сервер как НЕ-httpOnly — только для отображения состояния.
+	isAuth = !!Cookies.get('is_authenticated');
 
 	name = Cookies.get('name') || '';
 
@@ -94,16 +102,168 @@ class Store implements IUserStore {
 		hardGoals: {data: [], countCompleted: 0},
 	};
 
+	/** id пользователя (из URL), для которого уже загружен userInfo — чтобы не повторять запрос при повторном mount */
+	userInfoLoadedForId: string | null = null;
+
+	/** id пользователя, для которого уже загружены mainGoals (100 целей) — общий кэш для UserShowcase и User100Goals */
+	mainGoalsLoadedForId: string | null = null;
+
+	/** id пользователя, для которого уже загружены achievements */
+	achievementsLoadedForId: string | null = null;
+
+	achievements: Array<IAchievement> = [];
+
+	selfAchievements: Array<IAchievement> = [];
+
+	selfAchievementsLoaded = false;
+
+	selfAchievementsStale = false;
+
+	subscriptionExpiredBanner = !!Cookies.get(SUBSCRIPTION_SHOW_EXPIRED_KEY);
+
+	subscriptionExpiryTick = 0;
+
+	/** id пользователя, для которого уже загружены showcase-комментарии и впечатления */
+	showcaseLoadedForId: string | null = null;
+
+	showcaseComments: Array<IComment> = [];
+
+	showcaseCommentPhotos: string[] = [];
+
+	showcaseHasMoreComments = false;
+
+	showcaseCommentsNextPage: number | null = null;
+
+	showcaseCommentsSort: UserCommentsSortBy = '-date_created';
+
+	showcaseAchievementsPreview: Array<IAchievement> = [];
+
 	constructor() {
 		makeAutoObservable(this);
 	}
 
 	setIsAuth = (isAuth: boolean) => {
 		this.isAuth = isAuth;
+		if (!isAuth) {
+			clearSubscriptionExpiryTimersOnLogout();
+		}
 	};
 
 	setName = (name: string) => {
 		this.name = name;
+	};
+
+	resetUserInfo = () => {
+		this.userInfo = {
+			avatar: '',
+			email: '',
+			name: '',
+			id: 0,
+			username: '',
+			firstName: '',
+			lastName: '',
+			country: '',
+			coverImage: '',
+			aboutMe: '',
+			totalAddedGoals: 0,
+			totalCompletedGoals: 0,
+			totalCompletedLists: 0,
+			totalAddedLists: 0,
+			totalAchievements: 0,
+		};
+		this.mainGoals = {
+			easyGoals: {data: [], countCompleted: 0},
+			mediumGoals: {data: [], countCompleted: 0},
+			hardGoals: {data: [], countCompleted: 0},
+		};
+		this.userInfoLoadedForId = null;
+		this.mainGoalsLoadedForId = null;
+		this.achievementsLoadedForId = null;
+		this.achievements = [];
+		this.selfAchievements = [];
+		this.selfAchievementsLoaded = false;
+		this.selfAchievementsStale = false;
+		this.showcaseLoadedForId = null;
+		this.showcaseComments = [];
+		this.showcaseCommentPhotos = [];
+		this.showcaseHasMoreComments = false;
+		this.showcaseCommentsNextPage = null;
+		this.showcaseCommentsSort = '-date_created';
+		this.showcaseAchievementsPreview = [];
+	};
+
+	setUserInfoLoadedForId = (id: string | null) => {
+		this.userInfoLoadedForId = id;
+	};
+
+	setMainGoalsLoadedForId = (id: string | null) => {
+		this.mainGoalsLoadedForId = id;
+	};
+
+	setAchievementsLoadedForId = (id: string | null) => {
+		this.achievementsLoadedForId = id;
+	};
+
+	setAchievements = (achievements: Array<IAchievement>) => {
+		this.achievements = achievements;
+	};
+
+	setSelfAchievements = (achievements: Array<IAchievement>) => {
+		this.selfAchievements = achievements;
+		this.selfAchievementsLoaded = true;
+		this.selfAchievementsStale = false;
+	};
+
+	markSelfAchievementsStale = () => {
+		this.selfAchievementsStale = true;
+		this.selfAchievementsLoaded = false;
+	};
+
+	mergeSelfAchievements = (incoming: Array<IAchievement>) => {
+		if (!incoming.length) {
+			return;
+		}
+
+		const byId = new Map(this.selfAchievements.map((achievement) => [achievement.id, achievement]));
+		incoming.forEach((achievement) => {
+			const existing = byId.get(achievement.id);
+			byId.set(achievement.id, existing ? {...existing, ...achievement, isAchieved: true} : {...achievement, isAchieved: true});
+		});
+		this.selfAchievements = Array.from(byId.values());
+		this.selfAchievementsLoaded = true;
+		this.selfAchievementsStale = false;
+	};
+
+	setShowcaseLoadedForId = (id: string | null) => {
+		this.showcaseLoadedForId = id;
+	};
+
+	setShowcaseComments = (comments: Array<IComment>) => {
+		this.showcaseComments = comments;
+	};
+
+	appendShowcaseComments = (comments: Array<IComment>) => {
+		this.showcaseComments = [...this.showcaseComments, ...comments];
+	};
+
+	setShowcaseCommentPhotos = (photos: string[]) => {
+		this.showcaseCommentPhotos = photos;
+	};
+
+	setShowcaseHasMoreComments = (value: boolean) => {
+		this.showcaseHasMoreComments = value;
+	};
+
+	setShowcaseCommentsNextPage = (page: number | null) => {
+		this.showcaseCommentsNextPage = page;
+	};
+
+	setShowcaseCommentsSort = (sort: UserCommentsSortBy) => {
+		this.showcaseCommentsSort = sort;
+	};
+
+	setShowcaseAchievementsPreview = (achievements: Array<IAchievement>) => {
+		this.showcaseAchievementsPreview = achievements;
 	};
 
 	setUserInfo = (userInfo: IUserInfo) => {
@@ -121,12 +281,22 @@ class Store implements IUserStore {
 	};
 
 	setUserSelf = (userSelf: IUserInfo) => {
+		const prevSubscriptionType = this.userSelf.subscriptionType;
 		this.userSelf = userSelf;
 		if (userSelf.isEmailConfirmed !== undefined) {
 			this.setEmailConfirmed(userSelf.isEmailConfirmed);
 		}
 		if (userSelf.email) {
 			this.setEmail(userSelf.email);
+		}
+		if (prevSubscriptionType === 'premium' && userSelf.subscriptionType === 'free') {
+			this.setSubscriptionExpiredBanner(true);
+			Cookies.set(SUBSCRIPTION_SHOW_EXPIRED_KEY, '1', {expires: 7});
+		}
+		if (userSelf.subscriptionType === 'premium') {
+			this.setSubscriptionExpiredBanner(false);
+			Cookies.remove(SUBSCRIPTION_SHOW_EXPIRED_KEY);
+			Cookies.remove('subscription_expired_banner_dismissed');
 		}
 		// Сохраняем в куки для отображения до следующей загрузки профиля
 		if (userSelf.subscriptionType) {
@@ -141,6 +311,14 @@ class Store implements IUserStore {
 		} else {
 			Cookies.remove('user_level');
 		}
+
+		scheduleSubscriptionExpiryTimers({
+			isAuth: this.isAuth,
+			subscriptionType: userSelf.subscriptionType,
+			subscriptionExpiresAt: userSelf.subscriptionExpiresAt,
+			subscriptionAutoRenew: userSelf.subscriptionAutoRenew,
+			showExpiredBanner: this.subscriptionExpiredBanner,
+		});
 	};
 
 	setAddedGoals = (addedGoals: IAddedGoals) => {
@@ -175,6 +353,14 @@ class Store implements IUserStore {
 		} else {
 			Cookies.remove('email');
 		}
+	};
+
+	setSubscriptionExpiredBanner = (value: boolean) => {
+		this.subscriptionExpiredBanner = value;
+	};
+
+	bumpSubscriptionExpiryTick = () => {
+		this.subscriptionExpiryTick += 1;
 	};
 }
 

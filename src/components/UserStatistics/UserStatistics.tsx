@@ -42,7 +42,7 @@ export const UserStatistics: FC<UserStatisticsProps> = (props) => {
 				<span>{statistics.currentStats.nextLevelExperience - statistics.currentStats.currentExperience}</span>
 			</p>
 			<p className={element('text')}>
-				<span>Заработано за отзывы</span>
+				<span>Заработано за впечатления</span>
 				<span>{statistics.totalStats.reviewsCount}</span>
 			</p>
 			<p className={element('text')}>
@@ -53,14 +53,15 @@ export const UserStatistics: FC<UserStatisticsProps> = (props) => {
 				<span>Достижения</span>
 				<span>{statistics.totalStats.achievementsCount}</span>
 			</p>
-			{statistics.totalStats.weeklyCompletedChallenges !== undefined && (
+			{/* TODO: пока не работают еженедельные задания */}
+			{/* {statistics.totalStats.weeklyCompletedChallenges !== undefined && (
 				<p className={element('text')}>
 					<span>Еженедельные задания</span>
 					<span>
 						{statistics.totalStats.weeklyCompletedChallenges}/{statistics.totalStats.totalWeeklyChallenges}
 					</span>
 				</p>
-			)}
+			)} */}
 		</section>
 	);
 };

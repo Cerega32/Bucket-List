@@ -1,14 +1,18 @@
 import {makeAutoObservable} from 'mobx';
+import {ReactNode} from 'react';
 
 type NotificationType = 'success' | 'error' | 'warning';
+
+export const NOTIFICATION_DISPLAY_DURATION_MS = 5000;
 
 export interface INotification {
 	id: string;
 	type: NotificationType;
 	title: string;
-	message?: string | {[key: string]: Array<string>};
+	message?: string | ReactNode | {[key: string]: Array<string>};
 	actionText?: string;
 	action?: () => void;
+	duration?: number;
 }
 
 class Store {
@@ -33,7 +37,10 @@ class Store {
 			if (nextNotification) {
 				this.visibleNotifications.push(nextNotification);
 
-				setTimeout(() => this.removeNotification(nextNotification.id), 7000);
+				setTimeout(
+					() => this.removeNotification(nextNotification.id),
+					nextNotification.duration ?? NOTIFICATION_DISPLAY_DURATION_MS
+				);
 			}
 		}
 	}

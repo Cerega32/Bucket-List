@@ -4,20 +4,38 @@ import {FileDrop} from 'react-file-drop';
 import {useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
+import {CatalogModerationBanner} from '@/components/CatalogModerationBanner/CatalogModerationBanner';
 import {DatePicker} from '@/components/DatePicker/DatePicker';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
+import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
 import {ThemeStore} from '@/store/ThemeStore';
-import {ICategory, IGoal} from '@/typings/goal';
+import {UserStore} from '@/store/UserStore';
+import {ICategory, IGoal, ILocation} from '@/typings/goal';
 import {deleteGoal} from '@/utils/api/delete/deleteGoal';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {updateGoal} from '@/utils/api/put/updateGoal';
+import {mapApi} from '@/utils/mapApi';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {
+	canEditCustomSchedule,
+	getRegularFrequencyActiveOption,
+	getRegularFrequencySelectOptions,
+	handleRegularFrequencySelect,
+} from '@/utils/regularGoal/regularFrequencySelectOptions';
+import {pluralize} from '@/utils/text/pluralize';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {selectComplexity} from '@/utils/values/complexity';
-import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
+import {
+	getGoalTitleFieldErrors,
+	GOAL_DESCRIPTION_MAX_LENGTH,
+	GOAL_TITLE_MAX_LENGTH,
+	GOAL_TITLE_MIN_LENGTH,
+} from '@/utils/values/goalConstants';
 
 import {AllowCustomSettingsField} from '../AddGoal/components/AllowCustomSettingsField';
 import {Loader} from '../Loader/Loader';
@@ -40,6 +58,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	const navigate = useNavigate();
 
 	const [block, element] = useBem('add-goal', className); // Используем те же стили, что и для добавления
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
 	const [title, setTitle] = useState(goal.title ? goal.title.slice(0, GOAL_TITLE_MAX_LENGTH) : '');
 	const [description, setDescription] = useState(goal.description || '');
 	const [estimatedTime, setEstimatedTime] = useState(goal.estimatedTime || '');
@@ -54,7 +73,9 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	const [canEdit, setCanEdit] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [selectedGoalLocation, setSelectedGoalLocation] = useState<Partial<ILocation> | null>(goal.location || null);
 	const {setHeader} = ThemeStore;
+	const {setIsOpen, setWindow, setModalProps} = ModalStore;
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 	const [customSchedule, setCustomSchedule] = useState<WeekDaySchedule>({
 		monday: false,
@@ -76,6 +97,21 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 	const [regularEndDate, setRegularEndDate] = useState('');
 	const [allowSkipDays, setAllowSkipDays] = useState(0);
 	const [resetOnSkip, setResetOnSkip] = useState(false);
+	const [allowSkipDaysThrough, setAllowSkipDaysThrough] = useState(0);
+
+	// Состояние для подсветки обязательных полей
+	const [showErrors, setShowErrors] = useState(false);
+
+	const requireCustomRegularSettingsForOthers = isRegular && durationType === 'until_date';
+	const allowCustomSettingsLockNotice = `Для длительности «до даты» эта настройка обязательна и не отключается:
+		 дата окончания в каталоге со временем может оказаться в прошлом, поэтому при добавлении цели к себе
+		 каждый пользователь должен выставить актуальную дату окончания и при необходимости свою регулярность.`;
+
+	useEffect(() => {
+		if (isRegular && durationType === 'until_date') {
+			setAllowCustomSettings(true);
+		}
+	}, [isRegular, durationType]);
 
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
@@ -90,35 +126,47 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 				// Используем свойство canEdit из объекта цели вместо отдельного запроса
 				if (goal.isCanEdit) {
 					setCanEdit(true);
+				} else if (goal.catalogPermanentlyRejected) {
+					setErrorMessage(
+						`Цель окончательно отклонена после ${goal.catalogRejectionCount ?? 3} попыток и будет удалена ` +
+							'автоматически. Редактирование недоступно — создайте новую цель с другой формулировкой.'
+					);
+					setCanEdit(false);
 				} else {
-					setErrorMessage('Отредактировать цель невозможно. Возможно, прошло более 24 часов с момента создания.');
+					setErrorMessage(
+						goal.catalogReviewStatus === 'approved'
+							? 'Редактировать цель невозможно: она одобрена модератором и опубликована в общем каталоге.'
+							: 'Отредактировать цель невозможно. Возможно, прошло более 24 часов с момента создания.'
+					);
 					setCanEdit(false);
 				}
 
 				// Загружаем категории
 				const categoriesResponse = await getAllCategories();
 				if (categoriesResponse.success) {
-					setCategories(categoriesResponse.data);
+					const sortedCategories: ICategory[] = sortMainCategories(categoriesResponse.data);
+					setCategories(sortedCategories);
+
+					// Отсортированные родительские категории — тот же массив, что и parentCategories (useMemo)
+					const sortedParents = sortedCategories.filter((cat) => !cat.parentCategory);
 
 					// Устанавливаем активную категорию
 					if (goal.category) {
 						// Определяем, является ли категория цели подкатегорией
-						const goalCategory = categoriesResponse.data.find((cat: ICategory) => cat.id === goal.category.id);
+						const goalCategory = sortedCategories.find((cat) => cat.id === goal.category.id);
 
 						if (goalCategory) {
 							if (goalCategory.parentCategory) {
 								// Если это подкатегория, находим её родительскую категорию
-								const parentCategoryIndex = categoriesResponse.data
-									.filter((cat: ICategory) => !cat.parentCategory)
-									.findIndex((cat: ICategory) => cat.id === goalCategory.parentCategory?.id);
+								const parentCategoryIndex = sortedParents.findIndex(
+									(cat: ICategory) => cat.id === goalCategory.parentCategory?.id
+								);
 								if (parentCategoryIndex !== -1) {
 									setActiveCategory(parentCategoryIndex);
 								}
 							} else {
 								// Если это родительская категория
-								const categoryIndex = categoriesResponse.data
-									.filter((cat: ICategory) => !cat.parentCategory)
-									.findIndex((cat: ICategory) => cat.id === goal.category.id);
+								const categoryIndex = sortedParents.findIndex((cat: ICategory) => cat.id === goal.category.id);
 								if (categoryIndex !== -1) {
 									setActiveCategory(categoryIndex);
 								}
@@ -190,6 +238,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 						setRegularEndDate(endDate);
 						setAllowSkipDays(allowSkipDaysBase);
 						setResetOnSkip(resetOnSkipBase);
+						setAllowSkipDaysThrough((userSettings as any)?.daysForEarnedSkip ?? (baseSettings as any)?.daysForEarnedSkip ?? 0);
 						setAllowCustomSettings(baseSettings.allowCustomSettings ?? true);
 					}
 				}
@@ -310,14 +359,63 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 		return timeString; // Возвращаем исходную строку, если не удалось распознать формат
 	};
 
-	const handleUpdateGoal = async (e: FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
+	const validateRequiredFields = () => {
+		const hasError = !title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl);
 
-		if (!title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+		if (hasError) {
+			setShowErrors(true);
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
 				message: 'Заполните все обязательные поля',
+			});
+			return false;
+		}
+
+		return true;
+	};
+
+	const handleLocationFromPicker = (selectedLocation: Partial<ILocation>) => {
+		const fullLocation: Partial<ILocation> = {
+			name: selectedLocation.name || '',
+			longitude: selectedLocation.longitude || 0,
+			latitude: selectedLocation.latitude || 0,
+			country: selectedLocation.country || '',
+			city: selectedLocation.city || undefined,
+			description: selectedLocation.description || undefined,
+			place_type: 'other',
+			address: undefined,
+			created_at: new Date().toISOString(),
+		};
+		setSelectedGoalLocation(fullLocation);
+		setIsOpen(false);
+	};
+
+	const clearSelectedLocation = () => {
+		setSelectedGoalLocation(null);
+	};
+
+	const openLocationPicker = () => {
+		setIsOpen(true);
+		setWindow('goal-map-add');
+		setModalProps({
+			onLocationSelect: handleLocationFromPicker,
+			initialLocation: selectedGoalLocation || undefined,
+		});
+	};
+
+	const handleUpdateGoal = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+
+		if (!validateRequiredFields()) {
+			return;
+		}
+
+		if (isRegular && regularFrequency === 'custom' && !isPremium) {
+			NotificationStore.addNotification({
+				type: 'warning',
+				title: 'Premium',
+				message: 'Пользовательский график доступен только с Premium',
 			});
 			return;
 		}
@@ -328,6 +426,14 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 				title: 'Ошибка',
 				message: 'Выберите хотя бы один день недели для пользовательского графика',
 			});
+			return;
+		}
+
+		if (isRegular && regularFrequency === 'weekly' && weeklyFrequency < 1) {
+			return;
+		}
+
+		if (isRegular && (durationType === 'days' || durationType === 'weeks') && durationValue < 1) {
 			return;
 		}
 
@@ -366,6 +472,39 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 				formData.append('estimated_time', standardTime);
 			}
 
+			// Обрабатываем изменения места на карте
+			const initialLocationId = goal.location?.id;
+			const currentLocationId = selectedGoalLocation?.id;
+
+			if (selectedGoalLocation) {
+				if (!currentLocationId) {
+					try {
+						const newLocation = await mapApi.createLocation({
+							name: selectedGoalLocation.name! || title,
+							longitude: selectedGoalLocation.longitude!,
+							latitude: selectedGoalLocation.latitude!,
+							country: selectedGoalLocation.country!,
+							city: selectedGoalLocation.city,
+							description: selectedGoalLocation.description,
+							place_type: selectedGoalLocation.place_type || 'other',
+						});
+						formData.append('location_id', newLocation.id.toString());
+					} catch (error) {
+						NotificationStore.addNotification({
+							type: 'error',
+							title: 'Ошибка',
+							message: error instanceof Error ? error.message : 'Не удалось создать место',
+						});
+						setIsLoading(false);
+						return;
+					}
+				} else if (currentLocationId !== initialLocationId) {
+					formData.append('location_id', currentLocationId.toString());
+				}
+			} else if (initialLocationId) {
+				formData.append('location_id', '');
+			}
+
 			// Добавляем данные о регулярности, если это регулярная цель
 			if (isRegular) {
 				formData.append('is_regular', 'true');
@@ -389,8 +528,10 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 					formData.append('end_date', regularEndDate);
 				}
 
+				const finalDaysForEarnedSkip = resetOnSkip ? allowSkipDaysThrough : 0;
 				formData.append('allow_skip_days', allowSkipDays.toString());
 				formData.append('reset_on_skip', resetOnSkip.toString());
+				formData.append('days_for_earned_skip', finalDaysForEarnedSkip.toString());
 				formData.append('allow_custom_settings', allowCustomSettings.toString());
 			} else if (goal.regularConfig) {
 				formData.append('is_regular', 'false');
@@ -399,10 +540,11 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 			const response = await updateGoal(goal.code, formData);
 
 			if (response.success) {
+				const wasResubmitted = goal.catalogReviewStatus === 'rejected';
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успех',
-					message: 'Цель успешно обновлена',
+					message: wasResubmitted ? 'Цель обновлена и отправлена на повторную проверку модератором' : 'Цель успешно обновлена',
 				});
 
 				// Если передан обработчик обновления цели, вызываем его
@@ -475,17 +617,42 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 					<div className={element('error-message')}>
 						<Svg icon="error" className={element('error-icon')} />
 						<p>{errorMessage || 'Редактирование недоступно'}</p>
-						<Button theme="blue" onClick={() => navigate(-1)} type="button">
-							Вернуться назад
-						</Button>
+						<div className={element('btns-wrapper')}>
+							{goal.catalogPermanentlyRejected && (
+								<Button theme="red" onClick={() => setIsDeleteModalOpen(true)} type="button">
+									Удалить цель
+								</Button>
+							)}
+							<Button theme="blue" onClick={() => navigate(-1)} type="button">
+								Вернуться назад
+							</Button>
+						</div>
 					</div>
 				) : (
 					<div className={element('content')}>
-						<div className={element('image-section')}>
+						{goal.catalogReviewStatus === 'rejected' && (
+							<CatalogModerationBanner
+								className={element('rejection-banner')}
+								catalogReviewStatus={goal.catalogReviewStatus}
+								catalogPermanentlyRejected={goal.catalogPermanentlyRejected}
+								catalogRejectionCount={goal.catalogRejectionCount}
+								catalogRejectionLimit={goal.catalogRejectionLimit}
+								catalogRejectionReasons={goal.catalogRejectionReasons}
+								catalogRejectionComment={goal.catalogRejectionComment}
+								catalogDeleteAt={goal.catalogDeleteAt}
+							/>
+						)}
+						<div
+							className={element('image-section', {
+								error: showErrors && !image && !imageUrl,
+							})}
+						>
 							<p className={element('field-title')}>Изображение цели *</p>
 							{!image && !imageUrl ? (
 								<div
-									className={element('dropzone')}
+									className={element('dropzone', {
+										error: showErrors && !image && !imageUrl,
+									})}
 									onClick={handleFileInputClick}
 									role="button"
 									tabIndex={0}
@@ -544,6 +711,8 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								required
 								maxLength={GOAL_TITLE_MAX_LENGTH}
 								showCharCount
+								error={getGoalTitleFieldErrors(showErrors, title)}
+								minLength={GOAL_TITLE_MIN_LENGTH}
 							/>
 
 							<Select
@@ -553,6 +722,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								activeOption={activeCategory}
 								onSelect={setActiveCategory}
 								text="Категория *"
+								error={showErrors && activeCategory === null}
 							/>
 
 							{activeCategory !== null && subcategories.length > 0 && (
@@ -566,6 +736,51 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								/>
 							)}
 
+							{activeCategory !== null && parentCategories[activeCategory]?.nameEn === 'travel' && (
+								<div className={element('location-field-container')}>
+									<p className={element('field-title')}>Место на карте</p>
+
+									{selectedGoalLocation ? (
+										<div className={element('selected-location')}>
+											<div className={element('selected-location-info')}>
+												<Svg icon="map" className={element('location-icon')} />
+												<div>
+													<div className={element('selected-location-name')}>{selectedGoalLocation?.name}</div>
+													<div className={element('selected-location-details')}>
+														{selectedGoalLocation?.city && `${selectedGoalLocation.city}, `}
+														{selectedGoalLocation?.country}
+													</div>
+													{selectedGoalLocation?.description && (
+														<div className={element('selected-location-description')}>
+															{selectedGoalLocation.description}
+														</div>
+													)}
+												</div>
+											</div>
+											<div className={element('location-actions')}>
+												<Button theme="blue-light" size="small" onClick={openLocationPicker}>
+													Изменить место
+												</Button>
+												<Button theme="red" size="small" onClick={clearSelectedLocation}>
+													Удалить место
+												</Button>
+											</div>
+										</div>
+									) : (
+										<div className={element('location-empty')}>
+											<p>Выберите географическое место на карте</p>
+											<Button theme="blue" onClick={openLocationPicker}>
+												Выбрать место на карте
+											</Button>
+										</div>
+									)}
+
+									<small className={element('format-hint')}>
+										Выберите географическое место на карте. Это поможет отслеживать ваши путешествия на карте.
+									</small>
+								</div>
+							)}
+
 							<Select
 								className={element('field')}
 								placeholder="Выберите сложность"
@@ -573,6 +788,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								activeOption={activeComplexity}
 								onSelect={setActiveComplexity}
 								text="Сложность *"
+								error={showErrors && activeComplexity === null}
 							/>
 
 							<FieldInput
@@ -585,6 +801,9 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								type="textarea"
 								required
 								rows={4}
+								maxLength={GOAL_DESCRIPTION_MAX_LENGTH}
+								showCharCount
+								error={showErrors && !description}
 							/>
 
 							<div className={element('time-field-container')}>
@@ -605,7 +824,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 
 							{/* Секция регулярности выполнения */}
 							{/* Показываем секцию только если пользователь создатель или может редактировать параметры */}
-							{(goal.createdByUser || (goal.regularConfig && goal.regularConfig.allowCustomSettings)) && (
+							{(goal.isCanEdit || goal.createdByUser || (goal.regularConfig && goal.regularConfig.allowCustomSettings)) && (
 								<div className={element('regular-section')}>
 									<FieldCheckbox
 										id="is-regular"
@@ -621,15 +840,10 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 												<Select
 													className={element('field')}
 													placeholder="Выберите периодичность"
-													options={[
-														{name: 'Ежедневно', value: 'daily'},
-														{name: 'N раз в неделю', value: 'weekly'},
-														{name: 'Пользовательский график', value: 'custom'},
-													]}
-													activeOption={regularFrequency === 'daily' ? 0 : regularFrequency === 'weekly' ? 1 : 2}
+													options={getRegularFrequencySelectOptions(isPremium)}
+													activeOption={getRegularFrequencyActiveOption(regularFrequency)}
 													onSelect={(index) => {
-														const frequencies = ['daily', 'weekly', 'custom'] as const;
-														setRegularFrequency(frequencies[index]);
+														handleRegularFrequencySelect(index, isPremium, setRegularFrequency);
 													}}
 													text="Периодичность"
 												/>
@@ -641,15 +855,16 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 														text="Сколько раз в неделю"
 														value={weeklyFrequency.toString()}
 														setValue={(value) => {
-															const num = parseInt(value, 10) || 1;
-															setWeeklyFrequency(Math.min(7, Math.max(1, num)));
+															const num = parseInt(value, 10) || 0;
+															setWeeklyFrequency(Math.min(7, Math.max(0, num)));
 														}}
 														className={element('field')}
 														type="number"
+														error={weeklyFrequency < 1 ? ['Значение должно быть не менее 1'] : false}
 													/>
 												)}
 
-												{regularFrequency === 'custom' && (
+												{regularFrequency === 'custom' && canEditCustomSchedule(isPremium) && (
 													<div className={element('custom-schedule-selector')}>
 														<p className={element('field-title')}>
 															Выберите дни недели (обязательно хотя бы один)
@@ -680,7 +895,11 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 													}
 													onSelect={(index) => {
 														const types = ['days', 'weeks', 'until_date', 'indefinite'] as const;
-														setDurationType(types[index]);
+														const next = types[index];
+														setDurationType(next);
+														if (next === 'until_date') {
+															setAllowCustomSettings(true);
+														}
 													}}
 													text="Длительность"
 												/>
@@ -692,11 +911,12 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 														text={durationType === 'days' ? 'Количество дней' : 'Количество недель'}
 														value={durationValue.toString()}
 														setValue={(value) => {
-															const num = parseInt(value, 10) || 1;
-															setDurationValue(Math.max(1, num));
+															const num = parseInt(value, 10) || 0;
+															setDurationValue(Math.max(0, num));
 														}}
 														className={element('field')}
 														type="number"
+														error={durationValue < 1 ? ['Значение должно быть не менее 1'] : false}
 													/>
 												)}
 
@@ -721,26 +941,63 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 											</div>
 
 											<div className={element('regular-field-group')}>
-												<FieldInput
-													placeholder="0"
-													id="allow-skip-days"
-													text="Разрешенные пропуски"
-													value={allowSkipDays.toString()}
-													setValue={(value) => {
-														const num = parseInt(value, 10) || 0;
-														setAllowSkipDays(Math.max(0, num));
-													}}
-													className={element('field')}
-													type="number"
-												/>
-
 												<FieldCheckbox
 													id="reset-on-skip"
 													text="Сбрасывать прогресс при превышении лимита пропусков"
 													checked={resetOnSkip}
-													setChecked={setResetOnSkip}
+													setChecked={(checked) => {
+														setResetOnSkip(checked);
+														if (!checked) {
+															setAllowSkipDays(0);
+															setAllowSkipDaysThrough(0);
+														}
+													}}
 													className={element('field')}
 												/>
+
+												{resetOnSkip && (
+													<>
+														<FieldInput
+															placeholder="0"
+															id="allow-skip-days"
+															text="Разрешенные пропуски"
+															value={allowSkipDays.toString()}
+															setValue={(value) => {
+																const num = parseInt(value, 10) || 0;
+																setAllowSkipDays(Math.max(0, num));
+															}}
+															className={element('field')}
+															type="number"
+														/>
+
+														<div className={element('input-with-suffix')}>
+															<FieldInput
+																placeholder="0"
+																id="allow-skip-days-through"
+																text="Начисление разрешенного пропуска через"
+																value={allowSkipDaysThrough.toString()}
+																setValue={(value) => {
+																	const num = parseInt(value, 10);
+																	setAllowSkipDaysThrough(Math.max(0, num));
+																}}
+																className={element('field')}
+																type="number"
+															/>
+															<span className={element('input-suffix')}>
+																{regularFrequency === 'daily'
+																	? `${pluralize(allowSkipDaysThrough, ['день', 'дня', 'дней'], false)}`
+																	: `${pluralize(
+																			allowSkipDaysThrough,
+																			['неделю', 'недели', 'недель'],
+																			false
+																	  )}`}
+															</span>
+														</div>
+														<small className={element('format-hint')}>
+															Если установлено 0, то дополнительные пропуски не начисляются
+														</small>
+													</>
+												)}
 											</div>
 
 											{goal.createdByUser && (
@@ -748,6 +1005,10 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 													checked={allowCustomSettings}
 													setChecked={setAllowCustomSettings}
 													className={element('field')}
+													disabled={requireCustomRegularSettingsForOthers}
+													lockNotice={
+														requireCustomRegularSettingsForOthers ? allowCustomSettingsLockNotice : undefined
+													}
 												/>
 											)}
 										</div>
@@ -763,7 +1024,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 									Отмена
 								</Button>
 								<Button theme="blue" className={element('btn')} typeBtn="submit">
-									Сохранить изменения
+									{goal.catalogReviewStatus === 'rejected' ? 'Отправить снова на проверку' : 'Сохранить изменения'}
 								</Button>
 							</div>
 						</div>

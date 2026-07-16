@@ -1,4 +1,6 @@
 .goal-progress-history {
+	$block: &;
+
 	&__list {
 		display: flex;
 		flex-direction: column;
@@ -10,12 +12,30 @@
 
 	&__item {
 		display: flex;
-		align-items: flex-start;
+		align-items: center;
 		gap: 16px;
-		padding: 16px;
+		padding: 16px 24px;
 		background: var(--color-white);
 		border: 1px solid var(--color-border);
 		border-radius: 8px;
+
+		@include sm {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		&--multiline {
+			align-items: flex-start;
+		}
+
+		&:hover,
+		&:focus-within {
+			#{$block}__edit {
+				opacity: 1;
+				visibility: visible;
+				pointer-events: auto;
+			}
+		}
 	}
 
 	&__date {
@@ -34,11 +54,24 @@
 		color: var(--color-text);
 		line-height: 1.5;
 		word-break: break-word;
+
+		&--empty {
+			color: var(--color-text-secondary);
+		}
+	}
+
+	&__actions {
+		display: flex;
+		flex: 0 0 auto;
+		align-items: stretch;
+		gap: 16px;
 	}
 
 	&__badge {
+		display: inline-flex;
 		flex: 0 0 auto;
-		padding: 4px 10px;
+		align-items: center;
+		padding: 2px 8px;
 		border-radius: 6px;
 		color: var(--color-white);
 		white-space: nowrap;
@@ -56,6 +89,31 @@
 			background: var(--color-white);
 			border: 1px solid var(--color-border);
 			color: var(--color-text-primary);
+		}
+	}
+
+	&__edit {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		align-self: stretch;
+		width: auto;
+		min-height: 0;
+		padding: 0 6px;
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+		transition: opacity 0.2s ease, visibility 0.2s ease;
+
+		.button__icon {
+			width: 14px;
+			height: 14px;
+		}
+
+		@media (hover: none), (pointer: coarse) {
+			opacity: 1;
+			visibility: visible;
+			pointer-events: auto;
 		}
 	}
 }

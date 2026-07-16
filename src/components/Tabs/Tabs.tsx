@@ -1,9 +1,10 @@
 import {FC, useCallback, useEffect, useRef, useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
 
 import {Svg} from '../Svg/Svg';
+import {Tag} from '../Tag/Tag';
 
 import './tabs.scss';
 
@@ -13,6 +14,7 @@ export interface ITabs {
 	page: string;
 	count?: number;
 	icon?: string;
+	premiumTag?: boolean;
 }
 
 interface TabsProps {
@@ -21,15 +23,17 @@ interface TabsProps {
 	active: string;
 	base?: string;
 	vertical?: boolean;
+	preventScrollReset?: boolean;
 }
 
 export const Tabs: FC<TabsProps> = (props) => {
-	const {className, tabs, active, base = '', vertical} = props;
+	const {className, tabs, active, base = '', vertical, preventScrollReset} = props;
 
 	const [block, element] = useBem('tabs', className);
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const [isAtStart, setIsAtStart] = useState(true);
 	const [isAtEnd, setIsAtEnd] = useState(false);
+	const navigate = useNavigate();
 
 	const checkScrollPosition = useCallback(() => {
 		if (!scrollContainerRef.current || vertical) return;
@@ -82,13 +86,32 @@ export const Tabs: FC<TabsProps> = (props) => {
 		<section className={block({vertical, 'at-start': isAtStart, 'at-end': isAtEnd})}>
 			<div ref={scrollContainerRef} className={element('scroll-container')}>
 				<div className={element('wrapper')}>
-					{tabs.map((tab) => (
-						<Link key={tab.name} to={`${base}${tab.url}`} className={element('link', {active: active === tab.page})}>
-							{tab.icon && <Svg icon={tab.icon} />}
-							{tab.name}
-							{!!tab.count && <span className={element('count')}>{tab.count}</span>}
-						</Link>
-					))}
+					{tabs.map((tab) => {
+						const to = `${base}${tab.url}`;
+
+						const handleClick: React.MouseEventHandler<HTMLAnchorElement> | undefined = preventScrollReset
+							? (e) => {
+									e.preventDefault();
+									const currentY = window.scrollY;
+									navigate(to);
+									// Восстанавливаем позицию после смены роутера
+									requestAnimationFrame(() => {
+										window.scrollTo({top: currentY});
+									});
+							  }
+							: undefined;
+
+						return (
+							<Link key={tab.name} to={to} className={element('link', {active: active === tab.page})} onClick={handleClick}>
+								<span className={element('link-start')}>
+									{tab.name}
+									{tab.icon && <Svg icon={tab.icon} className={element('link-icon')} width="16px" height="16px" />}
+									{tab.premiumTag && <Tag text="Premium" theme="gold" className={element('premium-tag')} />}
+								</span>
+								{!!tab.count && <span className={element('count')}>{tab.count}</span>}
+							</Link>
+						);
+					})}
 				</div>
 			</div>
 		</section>

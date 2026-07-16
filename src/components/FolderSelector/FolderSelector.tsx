@@ -7,14 +7,14 @@ import {addGoalToFolder, getGoalFoldersLight, IGoalFolder} from '@/utils/api/goa
 import {Button} from '../Button/Button';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {Loader} from '../Loader/Loader';
-
 import './folder-selector.scss';
+import {Title} from '../Title/Title';
 
 interface FolderSelectorProps {
 	goalId: number;
 	goalTitle: string;
 	goalFolders?: Array<{id: number; name: string; color: string; icon: string}>;
-	onFolderSelected?: (folderId: number, folderName: string) => void;
+	onFolderSelected?: (folder: {id: number; name: string; color: string; icon: string}) => void;
 	showCreateButton?: boolean;
 }
 
@@ -52,7 +52,14 @@ export const FolderSelector: FC<FolderSelectorProps> = observer(
 				const response = await addGoalToFolder(selectedFolderId, goalId);
 				if (response.success) {
 					const selectedFolder = folders.find((f) => f.id === selectedFolderId);
-					onFolderSelected?.(selectedFolderId, selectedFolder?.name || '');
+					if (selectedFolder) {
+						onFolderSelected?.({
+							id: selectedFolder.id,
+							name: selectedFolder.name,
+							color: selectedFolder.color,
+							icon: selectedFolder.icon,
+						});
+					}
 				}
 			} catch (error) {
 				console.error('Ошибка добавления цели в папку:', error);
@@ -84,7 +91,9 @@ export const FolderSelector: FC<FolderSelectorProps> = observer(
 		return (
 			<div className={block()}>
 				<div className={element('header')}>
-					<h3 className={element('title')}>Добавить цель &quot;{goalTitle}&quot; в папку</h3>
+					<Title tag="h2" className={element('title')}>
+						Добавить цель &quot;{goalTitle}&quot; в папку
+					</Title>
 					<p className={element('description')}>Выберите папку, в которую хотите добавить эту цель</p>
 				</div>
 

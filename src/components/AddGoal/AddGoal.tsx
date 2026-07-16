@@ -3,7 +3,7 @@ import {FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState} from '
 import {FileDrop} from 'react-file-drop';
 import {useLocation, useNavigate} from 'react-router-dom';
 
-import {Alert} from '@/components/Alert/Alert';
+import {Banner} from '@/components/Banner/Banner';
 import {Button} from '@/components/Button/Button';
 import {DatePicker} from '@/components/DatePicker/DatePicker';
 import {ExternalGoalSearch} from '@/components/ExternalGoalSearch/ExternalGoalSearch';
@@ -14,15 +14,31 @@ import {WeekDaySchedule, WeekDaySelector} from '@/components/WeekDaySelector/Wee
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
 import {ICategory, IGoal, ILocation} from '@/typings/goal';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {postCreateGoal} from '@/utils/api/post/postCreateGoal';
 import {mapApi} from '@/utils/mapApi';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {
+	canEditCustomSchedule,
+	getRegularFrequencyActiveOption,
+	getRegularFrequencySelectOptions,
+	handleRegularFrequencySelect,
+} from '@/utils/regularGoal/regularFrequencySelectOptions';
+import {pluralize} from '@/utils/text/pluralize';
 import {debounce} from '@/utils/time/debounce';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {selectComplexity} from '@/utils/values/complexity';
-import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
+import {
+	getGoalTitleFieldErrors,
+	GOAL_DESCRIPTION_MAX_LENGTH,
+	GOAL_TITLE_MAX_LENGTH,
+	GOAL_TITLE_MIN_LENGTH,
+	isGoalTitleInvalid,
+} from '@/utils/values/goalConstants';
 
 import {AllowCustomSettingsField} from './components/AllowCustomSettingsField';
 import {Loader} from '../Loader/Loader';
@@ -60,6 +76,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const location = useLocation();
 
 	const [block, element] = useBem('add-goal', className);
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
 
 	// Основные поля
 	const [title, setTitle] = useState('');
@@ -100,7 +117,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		saturday: false,
 		sunday: false,
 	});
-	const [durationType, setDurationType] = useState<'days' | 'weeks' | 'indefinite'>('days');
+	const [durationType, setDurationType] = useState<'days' | 'weeks' | 'until_date' | 'indefinite'>('days');
+	const [regularEndDate, setRegularEndDate] = useState('');
 	const [durationValue, setDurationValue] = useState(30);
 	const [allowSkipDays, setAllowSkipDays] = useState(0);
 	const [allowSkipDaysThrough, setAllowSkipDaysThrough] = useState(0);
@@ -114,6 +132,20 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	const [subcategories, setSubcategories] = useState<ICategory[]>([]);
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 	const {setWindow, setModalProps, setIsOpen} = ModalStore;
+
+	// Состояние для подсветки обязательных полей при ошибке валидации
+	const [showErrors, setShowErrors] = useState(false);
+
+	const requireCustomRegularSettingsForOthers = isRegular && durationType === 'until_date';
+	const allowCustomSettingsLockNotice = `Для длительности «до даты» эта настройка обязательна и не отключается:
+		 дата окончания в каталоге со временем может оказаться в прошлом, поэтому при добавлении цели к себе
+		 каждый пользователь должен выставить актуальную дату окончания и при необходимости свою регулярность.`;
+
+	useEffect(() => {
+		if (isRegular && durationType === 'until_date') {
+			setAllowCustomSettings(true);
+		}
+	}, [isRegular, durationType]);
 
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat: ICategory) => !cat.parentCategory), [categories]);
@@ -144,6 +176,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			sunday: false,
 		});
 		setDurationType('days');
+		setRegularEndDate('');
 		setDurationValue(30);
 		setAllowSkipDays(0);
 		setAllowSkipDaysThrough(0);
@@ -335,14 +368,14 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 	useEffect(() => {
 		const loadCategories = async () => {
 			try {
-				// Если переданы готовые категории, используем их
+				// Если переданы готовые категории, используем их (с сортировкой)
 				if (preloadedCategories) {
-					setCategories(preloadedCategories);
+					setCategories(sortMainCategories(preloadedCategories));
 				} else {
 					// Иначе загружаем категории с сервера
 					const data = await getAllCategories();
 					if (data.success) {
-						setCategories(data.data);
+						setCategories(sortMainCategories(data.data));
 					}
 				}
 			} catch (error) {
@@ -506,6 +539,23 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 		}
 	};
 
+	const validateRequiredFields = () => {
+		const hasError =
+			isGoalTitleInvalid(title) || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl);
+
+		if (hasError) {
+			setShowErrors(true);
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Заполните все обязательные поля',
+			});
+			return false;
+		}
+
+		return true;
+	};
+
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
@@ -515,11 +565,15 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			return;
 		}
 
-		if (!title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+		if (!validateRequiredFields()) {
+			return;
+		}
+
+		if (isRegular && regularFrequency === 'custom' && !isPremium) {
 			NotificationStore.addNotification({
-				type: 'error',
-				title: 'Ошибка',
-				message: 'Заполните все обязательные поля',
+				type: 'warning',
+				title: 'Premium',
+				message: 'Пользовательский график доступен только с Premium',
 			});
 			return;
 		}
@@ -529,6 +583,23 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				type: 'error',
 				title: 'Ошибка',
 				message: 'Выберите хотя бы один день недели для пользовательского графика',
+			});
+			return;
+		}
+
+		if (isRegular && regularFrequency === 'weekly' && weeklyFrequency < 1) {
+			return;
+		}
+
+		if (isRegular && (durationType === 'days' || durationType === 'weeks') && durationValue < 1) {
+			return;
+		}
+
+		if (isRegular && durationType === 'until_date' && !regularEndDate) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Укажите дату окончания серии для типа «до даты»',
 			});
 			return;
 		}
@@ -565,7 +636,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			}
 
 			// Если задан дедлайн, добавляем его в formData
-			if (deadline) {
+			if (deadline && isPremium) {
 				formData.append('deadline', deadline);
 			}
 
@@ -628,6 +699,10 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					formData.append('duration_value', durationValue.toString());
 				}
 
+				if (durationType === 'until_date' && regularEndDate) {
+					formData.append('end_date', regularEndDate);
+				}
+
 				// Если reset_on_skip = false, то пропуски не имеют смысла, отправляем 0
 				const finalAllowSkipDays = resetOnSkip ? allowSkipDays : 0;
 				const finalDaysForEarnedSkip = resetOnSkip ? allowSkipDaysThrough : 0;
@@ -635,7 +710,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				formData.append('allow_skip_days', finalAllowSkipDays.toString());
 				formData.append('days_for_earned_skip', finalDaysForEarnedSkip.toString());
 				formData.append('reset_on_skip', resetOnSkip.toString());
-				formData.append('allow_custom_settings', allowCustomSettings.toString());
+				formData.append('allow_custom_settings', (durationType === 'until_date' || allowCustomSettings).toString());
 			}
 
 			// Добавляем дополнительные поля из внешних API, если они есть
@@ -685,11 +760,41 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 
 	// Метод для программного создания цели
 	const createGoal = async () => {
-		if (!title || activeComplexity === null || activeCategory === null || (!image && !imageUrl) || !description) {
+		if (!validateRequiredFields()) {
+			return;
+		}
+
+		if (isRegular && regularFrequency === 'custom' && !isPremium) {
+			NotificationStore.addNotification({
+				type: 'warning',
+				title: 'Premium',
+				message: 'Пользовательский график доступен только с Premium',
+			});
+			return;
+		}
+
+		if (isRegular && regularFrequency === 'custom' && !Object.values(customSchedule).some(Boolean)) {
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
-				message: 'Заполните все обязательные поля',
+				message: 'Выберите хотя бы один день недели для пользовательского графика',
+			});
+			return;
+		}
+
+		if (isRegular && regularFrequency === 'weekly' && weeklyFrequency < 1) {
+			return;
+		}
+
+		if (isRegular && (durationType === 'days' || durationType === 'weeks') && durationValue < 1) {
+			return;
+		}
+
+		if (isRegular && durationType === 'until_date' && !regularEndDate) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Укажите дату окончания серии для типа «до даты»',
 			});
 			return;
 		}
@@ -726,7 +831,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 			}
 
 			// Если задан дедлайн, добавляем его в formData
-			if (deadline) {
+			if (deadline && isPremium) {
 				formData.append('deadline', deadline);
 			}
 
@@ -789,6 +894,10 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					formData.append('duration_value', durationValue.toString());
 				}
 
+				if (durationType === 'until_date' && regularEndDate) {
+					formData.append('end_date', regularEndDate);
+				}
+
 				// Если reset_on_skip = false, то пропуски не имеют смысла, отправляем 0
 				const finalAllowSkipDays = resetOnSkip ? allowSkipDays : 0;
 				const finalDaysForEarnedSkip = resetOnSkip ? allowSkipDaysThrough : 0;
@@ -796,7 +905,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				formData.append('allow_skip_days', finalAllowSkipDays.toString());
 				formData.append('days_for_earned_skip', finalDaysForEarnedSkip.toString());
 				formData.append('reset_on_skip', resetOnSkip.toString());
-				formData.append('allow_custom_settings', allowCustomSettings.toString());
+				formData.append('allow_custom_settings', (durationType === 'until_date' || allowCustomSettings).toString());
 			}
 
 			// Добавляем дополнительные поля из внешних API, если они есть
@@ -970,9 +1079,10 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 				<div className={element('content')}>
 					{/* Добавляем информационное сообщение */}
 					<div className={element('edit-info-message')}>
-						<Alert
-							type="info"
-							message="Вы сможете отредактировать или удалить цель в течение 24ч после создания, затем действие будет недоступно"
+						<Banner
+							type="warning"
+							title="Цель сохранится у вас сразу. В течение 24 часов вы можете её редактировать или удалить.
+							В общий каталог она попадёт только после модерации."
 						/>
 					</div>
 
@@ -992,11 +1102,17 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					</div>
 
 					{/* Блок с изображением */}
-					<div className={element('image-section')}>
+					<div
+						className={element('image-section', {
+							error: showErrors && !image && !imageUrl,
+						})}
+					>
 						<p className={element('field-title')}>Изображение цели *</p>
 						{!image && !imageUrl ? (
 							<div
-								className={element('dropzone')}
+								className={element('dropzone', {
+									error: showErrors && !image && !imageUrl,
+								})}
 								onClick={handleFileInputClick}
 								role="button"
 								tabIndex={0}
@@ -1055,6 +1171,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 								onBlur={handleTitleBlur}
 								maxLength={GOAL_TITLE_MAX_LENGTH}
 								showCharCount
+								error={getGoalTitleFieldErrors(showErrors, title)}
+								minLength={GOAL_TITLE_MIN_LENGTH}
 							/>
 
 							{showSimilarGoals && (
@@ -1090,6 +1208,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							onSelect={setActiveCategory}
 							text="Категория *"
 							disabled={lockCategory}
+							error={showErrors && activeCategory === null}
 						/>
 
 						{activeCategory !== null && subcategories.length > 0 && (
@@ -1157,6 +1276,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							activeOption={activeComplexity}
 							onSelect={setActiveComplexity}
 							text="Сложность *"
+							error={showErrors && activeComplexity === null}
 						/>
 
 						{/* Секция регулярности выполнения */}
@@ -1175,16 +1295,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 										<Select
 											className={element('field')}
 											placeholder="Выберите периодичность"
-											options={[
-												{name: 'Ежедневно', value: 'daily'},
-												{name: 'N раз в неделю', value: 'weekly'},
-												{name: 'Пользовательский график', value: 'custom'},
-											]}
-											activeOption={regularFrequency === 'daily' ? 0 : regularFrequency === 'weekly' ? 1 : 2}
-											onSelect={(index) => {
-												const frequencies = ['daily', 'weekly', 'custom'] as const;
-												setRegularFrequency(frequencies[index]);
-											}}
+											options={getRegularFrequencySelectOptions(isPremium)}
+											activeOption={getRegularFrequencyActiveOption(regularFrequency)}
+											onSelect={(index) => handleRegularFrequencySelect(index, isPremium, setRegularFrequency)}
 											text="Периодичность"
 										/>
 
@@ -1195,15 +1308,16 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 												text="Сколько раз в неделю"
 												value={weeklyFrequency.toString()}
 												setValue={(value) => {
-													const num = parseInt(value, 10) || 1;
-													setWeeklyFrequency(Math.min(7, Math.max(1, num)));
+													const num = parseInt(value, 10) || 0;
+													setWeeklyFrequency(Math.min(7, Math.max(0, num)));
 												}}
 												className={element('field')}
 												type="number"
+												error={weeklyFrequency < 1 ? ['Значение должно быть не менее 1'] : false}
 											/>
 										)}
 
-										{regularFrequency === 'custom' && (
+										{regularFrequency === 'custom' && canEditCustomSchedule(isPremium) && (
 											<div className={element('custom-schedule-selector')}>
 												<p className={element('field-title')}>Выберите дни недели (обязательно хотя бы один)</p>
 												<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
@@ -1218,12 +1332,25 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 											options={[
 												{name: 'Дни', value: 'days'},
 												{name: 'Недели', value: 'weeks'},
+												{name: 'До даты', value: 'until_date'},
 												{name: 'Бессрочно', value: 'indefinite'},
 											]}
-											activeOption={durationType === 'days' ? 0 : durationType === 'weeks' ? 1 : 2}
+											activeOption={
+												durationType === 'days'
+													? 0
+													: durationType === 'weeks'
+													? 1
+													: durationType === 'until_date'
+													? 2
+													: 3
+											}
 											onSelect={(index) => {
-												const types = ['days', 'weeks', 'indefinite'] as const;
-												setDurationType(types[index]);
+												const types = ['days', 'weeks', 'until_date', 'indefinite'] as const;
+												const next = types[index];
+												setDurationType(next);
+												if (next === 'until_date') {
+													setAllowCustomSettings(true);
+												}
 											}}
 											text="Длительность"
 										/>
@@ -1235,12 +1362,33 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 												text={durationType === 'days' ? 'Количество дней' : 'Количество недель'}
 												value={durationValue.toString()}
 												setValue={(value) => {
-													const num = parseInt(value, 10) || 1;
-													setDurationValue(Math.max(1, num));
+													const num = parseInt(value, 10) || 0;
+													setDurationValue(Math.max(0, num));
 												}}
 												className={element('field')}
 												type="number"
+												error={durationValue < 1 ? ['Значение должно быть не менее 1'] : false}
 											/>
+										)}
+
+										{durationType === 'until_date' && (
+											<div className={element('date-field-container')}>
+												<p className={element('field-title')}>Дата окончания серии</p>
+												<DatePicker
+													selected={regularEndDate ? new Date(regularEndDate) : null}
+													onChange={(date) => {
+														if (date) {
+															setRegularEndDate(format(date, 'yyyy-MM-dd'));
+														} else {
+															setRegularEndDate('');
+														}
+													}}
+													className={element('date-input')}
+													placeholderText="ДД.ММ.ГГГГ"
+													minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
+												/>
+												<small className={element('format-hint')}>Не ранее завтрашнего дня</small>
+											</div>
 										)}
 									</div>
 
@@ -1289,7 +1437,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 														type="number"
 													/>
 													<span className={element('input-suffix')}>
-														{durationType === 'days' ? 'дней' : durationType === 'weeks' ? 'недель' : 'дней'}
+														{regularFrequency === 'daily'
+															? `${pluralize(allowSkipDaysThrough, ['день', 'дня', 'дней'], false)}`
+															: `${pluralize(allowSkipDaysThrough, ['неделю', 'недели', 'недель'], false)}`}
 													</span>
 												</div>
 												<small className={element('format-hint')}>
@@ -1303,6 +1453,8 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 										checked={allowCustomSettings}
 										setChecked={setAllowCustomSettings}
 										className={element('field')}
+										disabled={requireCustomRegularSettingsForOthers}
+										lockNotice={requireCustomRegularSettingsForOthers ? allowCustomSettingsLockNotice : undefined}
 									/>
 								</div>
 							)}
@@ -1318,6 +1470,9 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							type="textarea"
 							rows={4}
 							required
+							maxLength={GOAL_DESCRIPTION_MAX_LENGTH}
+							showCharCount
+							error={showErrors && !description}
 						/>
 
 						<div className={element('time-field-container')}>
@@ -1336,26 +1491,27 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 							</small>
 						</div>
 
-						<div className={element('date-field-container')}>
-							<p className={element('field-title')}>Планируемая дата реализации</p>
-							<DatePicker
-								selected={deadline ? new Date(deadline) : null}
-								onChange={(date) => {
-									if (date) {
-										// Форматируем дату в строку в формате YYYY-MM-DD
-										setDeadline(format(date, 'yyyy-MM-dd'));
-									} else {
-										setDeadline('');
-									}
-								}}
-								className={element('date-input')}
-								placeholderText="ДД.ММ.ГГГГ"
-								minDate={new Date(new Date().setDate(new Date().getDate() + 1))} // завтра
-							/>
-							<small id="date-format-hint" className={element('format-hint')}>
-								Укажите планируемую дату достижения цели (не ранее завтрашнего дня)
-							</small>
-						</div>
+						{isPremium && (
+							<div className={element('date-field-container')}>
+								<p className={element('field-title')}>Планируемая дата реализации</p>
+								<DatePicker
+									selected={deadline ? new Date(deadline) : null}
+									onChange={(date) => {
+										if (date) {
+											setDeadline(format(date, 'yyyy-MM-dd'));
+										} else {
+											setDeadline('');
+										}
+									}}
+									className={element('date-input')}
+									placeholderText="ДД.ММ.ГГГГ"
+									minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
+								/>
+								<small id="date-format-hint" className={element('format-hint')}>
+									Укажите планируемую дату достижения цели (не ранее завтрашнего дня)
+								</small>
+							</div>
+						)}
 
 						<div className={element('btns-wrapper')}>
 							{!hideNavigation && (

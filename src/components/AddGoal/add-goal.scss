@@ -1,6 +1,6 @@
 .add-goal {
 	max-width: 1200px;
-	padding: 20px;
+	padding: 56px 24px 96px;
 	margin: 0 auto;
 
 	@include md {
@@ -41,6 +41,9 @@
 
 	&__form {
 		flex: 1;
+		display: flex;
+		gap: 20px;
+		flex-direction: column;
 	}
 
 	&__image-section {
@@ -58,11 +61,11 @@
 
 	&__field-container {
 		position: relative;
-		margin-bottom: 20px;
 	}
 
-	&__field {
-		margin-bottom: 20px;
+	// Ошибки валидации обязательных полей
+	&__image-section--error &__dropzone {
+		border-color: var(--color-red-border);
 	}
 
 	&__searching {
@@ -86,7 +89,7 @@
 	&__similar-goals {
 		position: absolute;
 		z-index: 10;
-		top: 100%;
+		top: 70px;
 		right: 0;
 		left: 0;
 		max-height: 400px;
@@ -108,7 +111,7 @@
 		margin: 0;
 		color: var(--color-primary);
 		font-size: 16px;
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	&__close-similar {
@@ -137,9 +140,9 @@
 
 	&__field-title {
 		display: block;
-		margin-bottom: 8px;
+		margin-bottom: 4px;
 		font-size: 14px;
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	&__dropzone {
@@ -217,6 +220,10 @@
 		}
 	}
 
+	&__external-search-section:not(:has(div)) {
+		display: none;
+	}
+
 	&__external-search {
 		width: 100%;
 	}
@@ -264,14 +271,6 @@
 		}
 	}
 
-	&__date-field-container {
-		margin-bottom: 24px;
-	}
-
-	&__time-field-container {
-		margin-bottom: 24px;
-	}
-
 	&__date-input {
 		width: 100%;
 
@@ -288,7 +287,6 @@
 
 	&__format-hint {
 		display: block;
-		margin-top: -16px;
 		color: var(--color-text-secondary);
 		font-size: 12px;
 	}
@@ -442,39 +440,22 @@
 	}
 
 	&__regular-section {
-		margin-bottom: 20px;
-
-		.field-checkbox {
-			margin-bottom: 16px;
-		}
 	}
 
 	&__regular-config {
-		padding: 20px 0;
 		margin-top: 16px;
 		background: var(--background-light);
 		border: 1px solid var(--border-color);
 		border-radius: 8px;
-
-		.select {
-			margin-bottom: 16px;
-		}
-
-		.field-input {
-			margin-bottom: 16px;
-		}
-
-		.field-checkbox {
-			margin-bottom: 8px;
-		}
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
 	}
 
 	&__regular-field-group {
-		margin-bottom: 20px;
-
-		&:last-child {
-			margin-bottom: 0;
-		}
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
 	}
 
 	&__input-with-suffix {
@@ -485,7 +466,7 @@
 		position: absolute;
 		z-index: 1;
 		top: calc(100% - 32px);
-		right: 50px;
+		right: 10px;
 		color: var(--color-text-secondary);
 		font-size: 14px;
 		pointer-events: none;
@@ -594,6 +575,9 @@
 		@include lg {
 			transform: translateX(0) translateY(0);
 		}
+	}
+
+	&__allow-custom-lock-banner {
 	}
 
 	&__custom-schedule-info {

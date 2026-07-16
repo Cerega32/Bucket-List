@@ -9,6 +9,7 @@ import {PageAbout} from '@/pages/PageAbout/PageAbout';
 import {PageAgreement} from '@/pages/PageAgreement/PageAgreement';
 import {PageCategories} from '@/pages/PageCategories/PageCategories';
 import {PageCategory} from '@/pages/PageCategory/PageCategory';
+import {PageConsent} from '@/pages/PageConsent/PageConsent';
 import {PageContacts} from '@/pages/PageContacts/PageContacts';
 import {PageCookies} from '@/pages/PageCookies/PageCookies';
 import {PageCreateGoal} from '@/pages/PageCreateGoal/PageCreateGoal';
@@ -27,6 +28,8 @@ import {PagePremium} from '@/pages/PagePremium/PagePremium';
 import {PagePrivacy} from '@/pages/PagePrivacy/PagePrivacy';
 import {PageRegistration} from '@/pages/PageRegistration/PageRegistration';
 import {PageResetPassword} from '@/pages/PageResetPassword/PageResetPassword';
+import {PageSubscriptionOffer} from '@/pages/PageSubscriptionOffer/PageSubscriptionOffer';
+import {PageSubscriptionRefund} from '@/pages/PageSubscriptionRefund/PageSubscriptionRefund';
 import {PageTariffs} from '@/pages/PageTariffs/PageTariffs';
 import {PageTerms} from '@/pages/PageTerms/PageTerms';
 import {PageUser} from '@/pages/PageUser/PageUser';
@@ -52,21 +55,51 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({element}) => {
 
 /** Не прокручивать наверх при переключении маршрутов */
 const shouldScrollOnRouteChange = (prevPathname: string, pathname: string): boolean => {
+	// Не скроллить при переключении вкладок одной и той же цели
+	const getGoalId = (p: string) => {
+		const match = p.match(/^\/goals\/([^/]+)/);
+		return match ? match[1] : null;
+	};
+
+	const prevGoalId = getGoalId(prevPathname);
+	const nextGoalId = getGoalId(pathname);
+
+	if (prevGoalId && nextGoalId && prevGoalId === nextGoalId && prevPathname !== pathname) {
+		return false;
+	}
+
+	// Не скроллить при переключении вкладок одного и того же профиля пользователя
+	const getUserId = (p: string) => {
+		const match = p.match(/^\/user\/([^/]+)/);
+		return match ? match[1] : null;
+	};
+
+	const prevUserId = getUserId(prevPathname);
+	const nextUserId = getUserId(pathname);
+
+	if (prevUserId && nextUserId && prevUserId === nextUserId && prevPathname !== pathname) {
+		return false;
+	}
+
+	// Старое правило для /lists
 	const base = (p: string) => p.replace(/\/lists$/, '');
 	if (base(prevPathname) === base(pathname) && prevPathname !== pathname) {
 		return false;
 	}
+
 	return true;
 };
 
 export const RoutesAuth: FC = observer(() => {
+	const {isAuth} = UserStore;
+
 	return (
 		<main className="main">
 			<ScrollToTopOnRouteChange shouldScroll={shouldScrollOnRouteChange} />
 			<Routes>
 				{/* Новый маршрут для дашборда (главной страницы) */}
 				{/* <Route path="/" element={<PageDashboard page="isDashboard" />} /> */}
-				<Route path="/" element={<PageMain page="isMain" />} />
+				<Route path="/" element={isAuth ? <Navigate to="/categories/all" replace /> : <PageMain page="isMain" />} />
 
 				{/* Перемещаем старую главную страницу на новый путь */}
 				<Route path="/100-goals" element={<PageMainGoals page="isMainGoals" />} />
@@ -85,12 +118,16 @@ export const RoutesAuth: FC = observer(() => {
 
 				{/* Правовые документы */}
 				<Route path="/privacy" element={<PagePrivacy page="isPrivacy" />} />
+				<Route path="/consent" element={<PageConsent page="isConsent" />} />
 				<Route path="/terms" element={<PageTerms page="isTerms" />} />
 				<Route path="/premium" element={<PagePremium />} />
 				<Route path="/agreement" element={<PageAgreement page="isAgreement" />} />
+				<Route path="/subscription-offer" element={<PageSubscriptionOffer page="isSubscriptionOffer" />} />
+				<Route path="/subscription-refund" element={<PageSubscriptionRefund page="isSubscriptionRefund" />} />
 				<Route path="/cookies" element={<PageCookies page="isCookies" />} />
 
 				{/* Остальные маршруты остаются без изменений */}
+				<Route path="/list/:id/impressions" element={<PageDetailList page="isListImpressions" />} />
 				<Route path="/list/:id" element={<PageDetailList page="isList" />} />
 				<Route path="/edit-list/:id" element={<PageEditGoalList page="isEditList" />} />
 				<Route path="/list/100-goals" element={<PageMainGoals page="isMainGoals" />} />
@@ -149,6 +186,14 @@ export const RoutesAuth: FC = observer(() => {
 				<Route
 					path="/user/self/active-goals/lists"
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfActive" subPage="lists" />} />}
+				/>
+				<Route
+					path="/user/self/pending-review"
+					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfPending" subPage="goals" />} />}
+				/>
+				<Route
+					path="/user/self/pending-review/lists"
+					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfPending" subPage="lists" />} />}
 				/>
 				<Route
 					path="/user/self/done-goals/lists"

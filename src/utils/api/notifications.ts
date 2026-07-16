@@ -57,23 +57,21 @@ export const getNotifications = (page?: number, unreadOnly?: boolean) =>
 	});
 
 export const markNotificationRead = (id: number) =>
-	POST(`notifications/${id}/mark-read`, {
+	PUT(`notifications/${id}/read`, {
+		auth: true,
 		showSuccessNotification: false,
 	});
 
 export const markAllNotificationsRead = () =>
-	POST('notifications/mark-all-read', {
-		success: {
-			type: 'success',
-			title: 'Уведомления прочитаны',
-			message: 'Все уведомления отмечены как прочитанные',
-		},
+	PUT('notifications/read-all', {
+		auth: true,
+		showSuccessNotification: false,
 	});
 
 // Alias для совместимости
 export const markAllNotificationsAsRead = markAllNotificationsRead;
 
-export const getUnreadCount = () => GET('notifications/unread-count');
+export const getUnreadCount = () => GET('notifications/unread-count', {auth: true});
 
 export const deleteNotification = (id: number) =>
 	DELETE(`notifications/${id}`, {

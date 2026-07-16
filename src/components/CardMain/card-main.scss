@@ -36,7 +36,7 @@
 
 	&__img-tag-icon-done {
 		* {
-			fill: var(--color-sentiment-positive);
+			fill: var(--color-white);
 		}
 	}
 
@@ -46,16 +46,24 @@
 
 	&__title {
 		margin-bottom: 8px;
+		display: -webkit-box;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 4;
+		line-clamp: 4;
+		overflow-wrap: anywhere;
 	}
 
 	&__text {
 		display: -webkit-box;
 		overflow-wrap: anywhere;
 		overflow: hidden;
-		color: var(--color-white);
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2; /* number of lines to show */
 		line-clamp: 2;
+		line-height: var(--line-height-14);
+		font-weight: var(--weight-regular);
+		color: rgba(var(--color-white-rgb) / 70%);
 	}
 
 	&__line {
@@ -64,28 +72,58 @@
 		opacity: 0;
 	}
 
+	&__bottom {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+	}
+
 	&__btn {
 		display: none;
 		visibility: hidden;
 		opacity: 0;
+		flex-shrink: 0;
+		width: auto;
 	}
 
-	&--withBtn:hover {
-		#{$block} {
-			&__text {
-				display: none;
-			}
+	@media (hover: hover) and (pointer: fine) {
+		&--withBtn:hover {
+			#{$block} {
+				&__text {
+					display: none;
+				}
 
-			&__line {
-				display: block;
-				visibility: visible;
-				opacity: 1;
-			}
+				&__line {
+					display: block;
+					visibility: visible;
+					opacity: 1;
+				}
 
-			&__btn {
-				display: flex;
-				visibility: visible;
-				opacity: 1;
+				&__btn {
+					display: flex;
+					visibility: visible;
+					opacity: 1;
+					width: 100%;
+				}
+			}
+		}
+	}
+
+	@media (hover: none), (pointer: coarse) {
+		&--withBtn {
+			#{$block} {
+				&__line {
+					display: block;
+					visibility: visible;
+					opacity: 1;
+				}
+
+				&__btn {
+					display: flex;
+					visibility: visible;
+					opacity: 1;
+				}
 			}
 		}
 	}

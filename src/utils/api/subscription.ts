@@ -4,6 +4,7 @@ export interface ISubscription {
 	subscriptionType: 'free' | 'premium';
 	subscriptionExpiresAt: string | null;
 	subscriptionAutoRenew: boolean;
+	hasSavedPaymentMethod: boolean;
 }
 
 export interface IUpdateSubscriptionData {
@@ -33,6 +34,7 @@ export const getUserSubscription = async (): Promise<{
 					subscriptionType: response.data.subscriptionType || 'free',
 					subscriptionExpiresAt: response.data.subscriptionExpiresAt || null,
 					subscriptionAutoRenew: response.data.subscriptionAutoRenew || false,
+					hasSavedPaymentMethod: response.data.hasSavedPaymentMethod || false,
 				},
 			};
 		}
@@ -75,12 +77,54 @@ export const updateSubscription = async (
 	}
 };
 
+/**
+ * Отвязать сохранённую карту и отключить автопродление
+ */
+export const unlinkPaymentMethod = async (): Promise<{
+	success: boolean;
+	data?: {
+		subscriptionAutoRenew: boolean;
+		hasSavedPaymentMethod: boolean;
+		message?: string;
+	};
+	error?: string;
+}> => {
+	try {
+		const response = await POST('payment/unlink-card', {
+			auth: true,
+			showSuccessNotification: false,
+		});
+
+		if (response.success) {
+			return {
+				success: true,
+				data: {
+					subscriptionAutoRenew: response.data?.subscriptionAutoRenew ?? false,
+					hasSavedPaymentMethod: response.data?.hasSavedPaymentMethod ?? false,
+					message: response.data?.message,
+				},
+			};
+		}
+
+		return {
+			success: false,
+			error: response.error || response.errors || 'Не удалось отвязать карту',
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
 export interface IPayment {
 	paymentId: string;
 	amount: number;
 	periodMonths: number;
 	autoRenew?: boolean;
 	expiresAt: string | null;
+	confirmationUrl?: string;
 }
 
 export interface IPaymentStatus {
@@ -123,13 +167,14 @@ export const createPayment = async (
 					periodMonths: response.data.periodMonths,
 					autoRenew: response.data.autoRenew,
 					expiresAt: response.data.expiresAt,
+					confirmationUrl: response.data.confirmationUrl,
 				},
 			};
 		}
 
 		return {
 			success: false,
-			error: response.error || 'Не удалось создать платеж',
+			error: response.error || response.errors || 'Не удалось создать платеж',
 		};
 	} catch (error) {
 		return {

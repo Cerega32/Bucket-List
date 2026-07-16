@@ -1,0 +1,161 @@
+.header-goal {
+	$block: &;
+
+	position: fixed;
+	z-index: 12;
+	top: 0;
+	width: 100%;
+	padding: 248px 0 56px;
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+	background-size: cover;
+	overflow: hidden;
+
+	@include lg {
+		display: flex;
+		align-items: flex-end;
+		gap: 24px;
+		padding: 176px 0 56px;
+	}
+
+	@include md {
+		padding: 128px 0 56px;
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	&::after {
+		position: absolute;
+		z-index: 1;
+		top: 0;
+		left: 0;
+		display: block;
+		width: 100%;
+		height: 100%;
+		content: '';
+	}
+
+	&__wrapper {
+		position: relative;
+		z-index: 2;
+		max-width: 1440px;
+		padding-left: 360px;
+		margin: 0 auto;
+
+		@include xl {
+			padding-right: 24px;
+			padding-left: calc(24px + 336px + 24px);
+		}
+
+		@include lg {
+			width: calc(100% - 24px);
+			padding-left: 0;
+			margin: 0;
+		}
+
+		@include md {
+			margin: 0 24px;
+		}
+
+		// Стили для title-with-tags внутри wrapper
+		&.title-with-tags {
+			overflow: visible;
+		}
+	}
+
+	&__image {
+		position: relative;
+		z-index: 2;
+		display: block;
+		flex-shrink: 0;
+		width: 160px;
+		height: 160px;
+		padding: 0;
+		margin-left: 24px;
+		overflow: hidden;
+		font: inherit;
+		color: inherit;
+		text-align: inherit;
+		cursor: inherit;
+		background: transparent;
+		border: none;
+		border-radius: 8px;
+		appearance: none;
+
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			pointer-events: none;
+		}
+
+		@include md {
+			width: 192px;
+			height: 192px;
+		}
+
+		@include sm {
+			width: calc(100% - 48px);
+			height: calc(100% - 48px);
+			aspect-ratio: 1;
+			margin: 0 24px;
+		}
+	}
+
+	&__image--clickable {
+		cursor: pointer;
+
+		&:focus-visible {
+			outline: 1px solid var(--color-primary-hover);
+			outline-offset: -1px;
+		}
+	}
+
+	@each $category in $main-categories {
+		&--category-#{$category}::after {
+			@include category-header-gradient($category);
+		}
+	}
+
+	@include sm {
+		.title-with-tags__title {
+			margin-top: 8px;
+		}
+	}
+
+	&--collapsed {
+		height: 136px;
+		transition: height 0.3s linear;
+
+		@include sm {
+			height: 168px;
+		}
+	}
+
+	&--compact {
+		height: 136px;
+		padding: 88px 0 16px;
+
+		@include sm {
+			height: 168px;
+			padding: 120px 0 16px;
+		}
+
+		#{$block} {
+			&__wrapper {
+				padding-left: 0;
+				// stylelint-disable-next-line no-unknown-animations -- defined in scaffolding.scss
+				animation: rise-from-bottom 0.3s ease-out;
+
+				@include xl {
+					margin: 0 24px;
+				}
+			}
+
+			&__image {
+				display: none;
+			}
+		}
+	}
+}

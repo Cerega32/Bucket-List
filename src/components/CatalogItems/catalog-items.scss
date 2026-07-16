@@ -1,6 +1,10 @@
 .catalog-items {
 	$block: &;
 
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+
 	&__filters {
 		display: flex;
 		justify-content: flex-end;
@@ -10,6 +14,29 @@
 		@include lg {
 			flex-direction: column;
 			gap: 16px;
+			align-items: flex-start;
+		}
+	}
+
+	&__filters-wrapper {
+		display: flex;
+		gap: 16px;
+
+		@include md {
+			width: 100%;
+		}
+
+		@include xs {
+			flex-direction: column;
+		}
+	}
+
+	&__goal-type-select {
+		width: max-content;
+		max-height: 40px;
+
+		@include md {
+			width: 100%;
 		}
 	}
 
@@ -37,8 +64,8 @@
 
 	&__search-wrapper {
 		display: flex;
-		justify-content: end;
-		gap: 8px;
+		justify-content: flex-end;
+		gap: 16px;
 		width: 100%;
 
 		@include lg {
@@ -73,6 +100,11 @@
 		@include md {
 			justify-content: space-between;
 		}
+
+		@include xs {
+			flex-direction: column;
+			width: 100%;
+		}
 	}
 
 	&__goals {
@@ -80,10 +112,6 @@
 		flex-wrap: wrap;
 		gap: 24px;
 		margin-bottom: 24px;
-
-		@include lg {
-			gap: 16px;
-		}
 
 		&--columns-3 {
 			#{$block} {
@@ -124,5 +152,9 @@
 
 	&__list {
 		width: calc(100% / 2 - (24px * 1 / 2));
+
+		@include lg {
+			width: 100%;
+		}
 	}
 }

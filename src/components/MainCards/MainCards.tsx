@@ -1,8 +1,9 @@
 import {FC} from 'react';
 
+import {Banner, BannerType} from '@/components/Banner/Banner';
 import {useBem} from '@/hooks/useBem';
 import {IComplexity, IGoal} from '@/typings/goal';
-import {getComplexityCategory, getComplexityCategoryPlural} from '@/utils/values/complexity';
+import {getComplexityCategory, getComplexityCategoryCompletedHint, getComplexityCategoryPlural} from '@/utils/values/complexity';
 
 import {CardMain} from '../CardMain/CardMain';
 import {Svg} from '../Svg/Svg';
@@ -10,17 +11,25 @@ import {Title} from '../Title/Title';
 
 import './main-cards.scss';
 
+const complexityBannerType: Record<IComplexity, BannerType> = {
+	easy: 'success',
+	medium: 'warning',
+	hard: 'danger',
+};
+
 interface MainCardsProps {
 	className?: string;
 	goals: Array<IGoal>;
 	complexity: IComplexity;
 	withBtn?: boolean;
 	updateGoal?: (i: number, complexity: IComplexity, code: string, done: boolean) => void;
-	allGoalsCompleted?: boolean;
+	categoryCompleted?: boolean;
+	topInfoClassName?: string;
+	disableNavigation?: boolean;
 }
 
 export const MainCards: FC<MainCardsProps> = (props) => {
-	const {className, goals, complexity, withBtn, updateGoal, allGoalsCompleted} = props;
+	const {className, goals, complexity, withBtn, updateGoal, categoryCompleted, topInfoClassName, disableNavigation} = props;
 
 	const [block, element] = useBem('main-cards', className);
 
@@ -30,6 +39,16 @@ export const MainCards: FC<MainCardsProps> = (props) => {
 				<Svg icon={complexity} width="22px" height="22px" />
 				{getComplexityCategory[complexity]}
 			</Title>
+			{categoryCompleted && (
+				<Banner
+					variant="filled"
+					type={complexityBannerType[complexity]}
+					iconVariant="target"
+					className={element('banner')}
+					title={getComplexityCategoryPlural[complexity]}
+					message={getComplexityCategoryCompletedHint[complexity]}
+				/>
+			)}
 			<section className={element('cards')}>
 				{goals.length > 0 &&
 					goals?.map((goal, i) => (
@@ -38,10 +57,11 @@ export const MainCards: FC<MainCardsProps> = (props) => {
 							goal={goal}
 							className={element('card')}
 							withBtn={withBtn}
+							topInfoClassName={topInfoClassName}
+							disableNavigation={disableNavigation}
 							updateGoal={() => updateGoal && updateGoal(i, complexity, goal.code, goal.completedByUser)}
 						/>
 					))}
-				{allGoalsCompleted && <p className={element('empty')}>{getComplexityCategoryPlural[complexity]}</p>}
 			</section>
 		</section>
 	);

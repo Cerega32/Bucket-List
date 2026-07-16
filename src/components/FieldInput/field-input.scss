@@ -7,11 +7,12 @@
 	&__error {
 		color: var(--color-sentiment-negative);
 		font-weight: var(--weight-medium);
+		font-size: 12px;
 	}
 
 	&__label {
 		margin-bottom: 4px;
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	&__wrapper {
@@ -29,17 +30,29 @@
 		position: absolute;
 		top: 12px;
 		right: 16px;
+
+		&--clickable {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0;
+			margin: 0;
+			background: none;
+			border: none;
+			cursor: pointer;
+		}
 	}
 
 	&__input {
 		width: 100%;
-		min-width: 150px;
+		min-width: 100px;
 		height: 100%;
-		min-height: 42px;
+		min-height: 40px;
 		padding: 10px 16px;
 		border: 1px solid var(--color-gray-4);
 		border-radius: 8px;
-		transition: outline 0.15s ease-in-out, border 0.15s ease-in-out;
+		outline: none;
+		transition: border 0.15s ease-in-out;
 		resize: vertical;
 
 		&:hover {
@@ -60,11 +73,23 @@
 		&--iconEnd {
 			padding-right: 50px;
 		}
+
+		// Скрываем системные "стрелки" у `input type="number"`, не меняя тип инпута.
+		// Работает для Chromium/Safari и Firefox.
+		&[type='number'] {
+			-moz-appearance: textfield;
+		}
+
+		&[type='number']::-webkit-outer-spin-button,
+		&[type='number']::-webkit-inner-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+		}
 	}
 
 	&__show-password {
 		position: absolute;
-		top: 8px;
+		top: 13px;
 		right: 16px;
 
 		* {
@@ -115,11 +140,17 @@
 	&__suffix {
 		position: absolute;
 		top: 50%;
-		right: 50px;
+		right: 16px;
 		color: var(--color-text-secondary);
 		font-size: 14px;
 		white-space: nowrap;
 		pointer-events: none;
 		transform: translateY(-50%);
+	}
+
+	&__hint {
+		margin-top: 4px;
+		color: var(--color-text-secondary);
+		font-size: 12px;
 	}
 }

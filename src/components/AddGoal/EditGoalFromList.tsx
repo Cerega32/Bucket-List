@@ -9,12 +9,14 @@ import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
 import {ICategory, IGoal} from '@/typings/goal';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 import {debounce} from '@/utils/time/debounce';
 import {validateTimeInput} from '@/utils/time/formatEstimatedTime';
 import {selectComplexity} from '@/utils/values/complexity';
-import {GOAL_TITLE_MAX_LENGTH} from '@/utils/values/goalConstants';
+import {getGoalTitleFieldErrors, GOAL_TITLE_MAX_LENGTH, GOAL_TITLE_MIN_LENGTH, isGoalTitleInvalid} from '@/utils/values/goalConstants';
 
 import {Loader} from '../Loader/Loader';
 import Select from '../Select/Select';
@@ -46,6 +48,7 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 	} = props;
 
 	const [block, element] = useBem('add-goal', className);
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
 
 	// Инициализируем состояние один раз при монтировании
 	const [initialized, setInitialized] = useState(false);
@@ -71,6 +74,7 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 	const [, setIsSearching] = useState(false);
 	const [showSimilarGoals, setShowSimilarGoals] = useState(false);
 	const [isTitleFocused, setIsTitleFocused] = useState(false);
+	const [showErrors, setShowErrors] = useState(false);
 
 	useEffect(() => {
 		if (autoParserData) {
@@ -400,7 +404,8 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 	const onSubmit = async (e?: React.FormEvent | React.MouseEvent) => {
 		if (e && typeof e.preventDefault === 'function') e.preventDefault();
 
-		if (!title || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+		if (isGoalTitleInvalid(title) || !description || activeComplexity === null || activeCategory === null || (!image && !imageUrl)) {
+			setShowErrors(true);
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -420,7 +425,7 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 				category: activeSubcategory !== null ? subcategories[activeSubcategory] : categories[activeCategory],
 				estimatedTime: estimatedTime ? convertTimeToStandardFormat(estimatedTime) : '',
 				code,
-				deadline,
+				...(isPremium ? {deadline} : {}),
 				status: externalGoalFields.status,
 				shortDescription: description ? `${description.substring(0, 100)}...` : goal.shortDescription,
 				// Если есть файл изображения, сохраняем его для последующей обработки
@@ -548,7 +553,9 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 								onFocus={handleTitleFocus}
 								onBlur={handleTitleBlur}
 								maxLength={GOAL_TITLE_MAX_LENGTH}
+								minLength={GOAL_TITLE_MIN_LENGTH}
 								showCharCount
+								error={getGoalTitleFieldErrors(showErrors, title)}
 							/>
 
 							{showSimilarGoals && (
@@ -613,26 +620,27 @@ export const EditGoalFromList: FC<EditGoalFromListProps> = (props) => {
 							</small>
 						</div>
 
-						<div className={element('date-field-container')}>
-							<p className={element('field-title')}>Планируемая дата реализации</p>
-							<DatePicker
-								selected={deadline ? new Date(deadline) : null}
-								onChange={(date) => {
-									if (date) {
-										// Форматируем дату в строку в формате YYYY-MM-DD
-										setDeadline(format(date, 'yyyy-MM-dd'));
-									} else {
-										setDeadline('');
-									}
-								}}
-								className={element('date-input')}
-								placeholderText="ДД.ММ.ГГГГ"
-								minDate={new Date(new Date().setDate(new Date().getDate() + 1))} // завтра
-							/>
-							<small id="date-format-hint" className={element('format-hint')}>
-								Укажите планируемую дату достижения цели (не ранее завтрашнего дня)
-							</small>
-						</div>
+						{isPremium && (
+							<div className={element('date-field-container')}>
+								<p className={element('field-title')}>Планируемая дата реализации</p>
+								<DatePicker
+									selected={deadline ? new Date(deadline) : null}
+									onChange={(date) => {
+										if (date) {
+											setDeadline(format(date, 'yyyy-MM-dd'));
+										} else {
+											setDeadline('');
+										}
+									}}
+									className={element('date-input')}
+									placeholderText="ДД.ММ.ГГГГ"
+									minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
+								/>
+								<small id="date-format-hint" className={element('format-hint')}>
+									Укажите планируемую дату достижения цели (не ранее завтрашнего дня)
+								</small>
+							</div>
+						)}
 
 						<div className={element('btns-wrapper')}>
 							<Button theme="blue-light" className={element('btn')} onClick={onCancel} type="button">

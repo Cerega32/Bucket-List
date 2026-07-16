@@ -1,8 +1,10 @@
 .comment-goal {
+	$block: &;
+
 	padding: 16px;
 	background: var(--color-white);
 	border: 1px solid var(--color-gray-9);
-	border-radius: 16px;
+	border-radius: 8px;
 
 	&__info {
 		display: flex;
@@ -16,8 +18,13 @@
 	&__user-info {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
+		align-items: flex-start;
 		gap: 8px;
+
+		@include xs {
+			flex-direction: column;
+			align-items: flex-start;
+		}
 	}
 
 	&__goal-img {
@@ -25,13 +32,8 @@
 		height: 56px;
 		border-radius: 6px;
 		object-fit: cover;
-	}
-
-	&__user-img {
-		width: 48px;
-		height: 48px;
-		margin-right: 8px;
-		border-radius: 50%;
+		flex-shrink: 0;
+		margin-top: 5px;
 	}
 
 	&__user-level {
@@ -53,15 +55,27 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
+
+		@include lg {
+			flex-wrap: wrap;
+		}
 	}
 
 	&__comment-info {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 8px;
+		align-items: center;
+		justify-content: flex-end;
 
 		@include sm {
 			flex-direction: column;
+			align-items: flex-end;
 		}
+	}
+
+	&__moderation-tag {
+		flex-shrink: 0;
 	}
 
 	&__date {
@@ -69,10 +83,10 @@
 	}
 
 	&__vertical-line {
-		display: block;
-		width: 1px;
-		height: auto;
 		background: var(--color-gray-9);
+		height: 16px;
+		width: 1px;
+		margin: 0;
 
 		@include sm {
 			display: none;
@@ -88,28 +102,105 @@
 
 	&__text {
 		margin-bottom: 16px;
+		white-space: pre-wrap;
+		overflow-wrap: break-word;
+		word-wrap: break-word;
+		line-height: var(--line-height-14);
+		font-size: 14px;
+
+		&--blurred {
+			filter: blur(6px);
+			user-select: none;
+			pointer-events: none;
+			margin-bottom: 0;
+		}
+	}
+
+	&__moderation-content {
+		position: relative;
+		margin-bottom: 16px;
+	}
+
+	&__moderation-note {
+		position: absolute;
+		z-index: 1;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 8px;
+		color: var(--color-text-secondary);
+		font-size: 13px;
+		line-height: var(--line-height-14);
+		text-align: center;
+		pointer-events: none;
+	}
+
+	&--is-main {
+		#{$block}__text {
+			display: -webkit-box;
+			overflow: hidden;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 4;
+			line-clamp: 4;
+			white-space: pre-line;
+		}
 	}
 
 	&__comment-images-container {
 		position: relative;
 		overflow: hidden;
-		margin-bottom: 16px;
+		min-width: 0;
 	}
 
-	&__comment-images {
-		width: 100%;
-	}
-
-	&__comment-slide {
+	&__comment-images .swiper-slide {
 		width: auto;
+	}
+
+	&__comment-img-btn {
+		display: block;
+		padding: 0;
+		border: none;
+		background: none;
+		cursor: pointer;
+		line-height: 0;
+
+		&:focus-visible {
+			@include focus-outline;
+			border-radius: 8px;
+		}
+
+		&--blurred {
+			overflow: hidden;
+			border-radius: 8px;
+			cursor: default;
+			pointer-events: none;
+		}
 	}
 
 	&__comment-img {
 		width: 72px;
 		height: 72px;
 		border-radius: 8px;
-		cursor: pointer;
 		object-fit: cover;
+
+		&--big {
+			width: 76px;
+			height: 76px;
+		}
+
+		&--showcase {
+			width: 160px;
+			height: 160px;
+		}
+
+		&--blurred {
+			filter: blur(8px);
+			user-select: none;
+			pointer-events: none;
+			// blur рисуется за пределами img — скругление на обёртке
+			border-radius: 0;
+		}
 
 		&:focus {
 			@include focus-outline;
@@ -129,6 +220,10 @@
 		backdrop-filter: blur(4px);
 		transition: opacity 0.3s ease 0.5s, background 0.2s ease;
 		transform: translateY(-50%);
+
+		&:active {
+			transform: translateY(-50%);
+		}
 	}
 
 	&__prev {
@@ -154,8 +249,39 @@
 		pointer-events: none;
 	}
 
+	&__footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 24px;
+	}
+
 	&__score {
 		display: flex;
 		gap: 4px;
+	}
+
+	&__report {
+		margin-left: auto;
+		padding: 8px;
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+		transition: opacity 0.2s ease, visibility 0.2s ease;
+
+		@media (hover: none), (pointer: coarse) {
+			opacity: 1;
+			visibility: visible;
+			pointer-events: auto;
+		}
+	}
+
+	&:hover,
+	&:focus-within {
+		#{$block}__report {
+			opacity: 1;
+			visibility: visible;
+			pointer-events: auto;
+		}
 	}
 }

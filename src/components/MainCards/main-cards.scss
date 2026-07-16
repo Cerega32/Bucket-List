@@ -10,6 +10,14 @@
 		}
 	}
 
+	&__banner {
+		margin-bottom: 16px;
+
+		@include md {
+			margin-bottom: 12px;
+		}
+	}
+
 	&__cards {
 		display: flex;
 		flex-wrap: wrap;
@@ -22,24 +30,24 @@
 				margin-bottom: 16px;
 			}
 		}
-
-		@include lg {
-			gap: 16px;
-		}
 	}
 
 	&__card {
 		width: calc(25% - 24px * 3 / 4);
+		height: 216px;
 
 		&:nth-child(-n + 3) {
 			width: calc(33.33% - 24px * 2 / 3);
+			height: 268px;
 		}
 
 		@include lg {
 			width: calc(33.33% - 24px * 2 / 3);
+			max-height: 216px;
 
 			&:nth-child(-n + 2) {
 				width: calc(50% - 24px * 1 / 2);
+				max-height: 268px;
 			}
 		}
 
@@ -48,6 +56,10 @@
 
 			&:first-child {
 				width: 100%;
+			}
+
+			&:nth-child(2) {
+				max-height: 216px;
 			}
 
 			&:nth-child(3) {
@@ -60,13 +72,8 @@
 
 			&:nth-child(-n + 3) {
 				width: 100%;
+				max-height: 216px;
 			}
 		}
-	}
-
-	&__empty {
-		color: var(--color-text-secondary);
-		font-size: 16px;
-		line-height: var(--line-height-16);
 	}
 }

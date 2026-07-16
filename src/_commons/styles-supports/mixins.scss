@@ -3,7 +3,8 @@ $main-categories: (
 	'education',
 	'health-and-sport',
 	'relations',
-	'entertainment',
+	'arts-and-culture',
+	'entertainment-and-hobby',
 	'100-goals',
 	'career-success',
 	'intellectual-development',
@@ -16,10 +17,14 @@ $main-categories: (
 	'books',
 	'community-contribution',
 	'romantic-moments',
+	'friendship-and-communication',
+	'dating-and-openness',
 	'unique-places',
 	'culinary-explorations',
 	'cultural-immersion',
-	'wellness-and-health'
+	'wellness-and-health',
+	'friendship-and-communication',
+	'dating-and-openness'
 );
 
 @mixin max-width {
@@ -101,7 +106,7 @@ $main-categories: (
 }
 
 @mixin xl {
-	@media (width <= 1463px) {
+	@media (width <= 1464px) {
 		@content;
 	}
 }
@@ -125,7 +130,25 @@ $main-categories: (
 }
 
 @mixin xs {
-	@media (width <= 480px) {
+	@media (width <= 479px) {
 		@content;
+	}
+}
+
+// Выпадашки под фиксированным хедером: не уезжают за нижний край окна.
+// 100dvh — динамическая высота вьюпорта (моб. Safari / macOS, в отличие от 100vh).
+@mixin header-anchor-dropdown-max-height($cap, $header-height: var(--header-stack-height), $offset: 20px) {
+	max-height: min($cap, max(0px, calc(100vh - #{$header-height} - #{$offset} - env(safe-area-inset-bottom, 0px))));
+
+	@supports (height: 100dvh) {
+		max-height: min($cap, max(0px, calc(100dvh - #{$header-height} - #{$offset} - env(safe-area-inset-bottom, 0px))));
+	}
+}
+
+@mixin header-profile-menu-max-height($header-height: var(--header-stack-height), $offset: 24px) {
+	max-height: max(0px, calc(100vh - #{$header-height} - #{$offset} - env(safe-area-inset-bottom, 0px)));
+
+	@supports (height: 100dvh) {
+		max-height: max(0px, calc(100dvh - #{$header-height} - #{$offset} - env(safe-area-inset-bottom, 0px)));
 	}
 }

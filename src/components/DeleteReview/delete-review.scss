@@ -1,0 +1,11 @@
+.delete-review {
+	&__title {
+		margin-bottom: 24px;
+	}
+
+	&__btns-wrapper {
+		display: flex;
+		gap: 8px;
+		margin-top: 24px;
+	}
+}

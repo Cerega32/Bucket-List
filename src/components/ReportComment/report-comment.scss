@@ -1,0 +1,21 @@
+.report-comment {
+	&__title {
+		margin-bottom: 24px;
+	}
+
+	&__wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	&__btns-wrapper {
+		display: flex;
+		gap: 8px;
+		margin-top: 24px;
+
+		@include xs {
+			flex-direction: column;
+		}
+	}
+}

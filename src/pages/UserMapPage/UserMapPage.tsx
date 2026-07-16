@@ -1,20 +1,44 @@
 import {observer} from 'mobx-react-lite';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {useLocation} from 'react-router-dom';
 
+import {Banner} from '@/components/Banner/Banner';
+import {CountriesScratchMap} from '@/components/CountriesScratchMap/CountriesScratchMap';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {GoalMapMulti} from '@/components/GoalMap/GoalMapMulti';
-import {Loader} from '@/components/Loader/Loader';
+import {Switch} from '@/components/Switch/Switch';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ThemeStore} from '@/store/ThemeStore';
-import {MapData, mapApi} from '@/utils/mapApi';
-import './UserMapPage.scss';
+import {goalsToMapPoints, mapApi, MapData} from '@/utils/mapApi';
+import {YANDEX_MAP_LOAD_ERROR_MESSAGE} from '@/utils/maps/loadYandexMapsScript';
+
+import {UserMapPageSkeleton} from './UserMapPageSkeleton';
+import './user-map-page.scss';
 
 const UserMapPage: React.FC = observer(() => {
 	const [mapData, setMapData] = useState<MapData | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [activeTab] = useState<'locations' | 'countries'>('locations');
+	const [mapLoadError, setMapLoadError] = useState(false);
+	const location = useLocation();
+	const activeTab = (location.hash === '#countries' ? 'countries' : 'locations') as 'locations' | 'countries';
 	const [block, element] = useBem('user-map-page');
+
+	const mapSwitchButtons = useMemo(
+		() => [
+			{url: '#locations', name: 'Карта мест', page: 'locations'},
+			{url: '#countries', name: 'Скретч-карта', page: 'countries'},
+		],
+		[]
+	);
+
+	const handleMapLoadError = useCallback(() => {
+		setMapLoadError(true);
+	}, []);
+
+	const handleMapLoadSuccess = useCallback(() => {
+		setMapLoadError(false);
+	}, []);
 
 	const {setHeader, setFull} = ThemeStore;
 
@@ -28,8 +52,8 @@ const UserMapPage: React.FC = observer(() => {
 			setLoading(true);
 			const data = await mapApi.getUserMapData();
 			setMapData(data);
-		} catch (error) {
-			console.error('Error loading user map data:', error);
+		} catch {
+			setMapData(null);
 		} finally {
 			setLoading(false);
 		}
@@ -39,64 +63,38 @@ const UserMapPage: React.FC = observer(() => {
 		loadUserMapData();
 	}, []);
 
+	if (loading) {
+		return <UserMapPageSkeleton />;
+	}
+
 	return (
-		<Loader isLoading={loading} className={block()}>
+		<div className={block()}>
 			<div className={element('content')}>
 				<Title tag="h2" className={element('title')}>
 					Мои карты
 				</Title>
 
-				{/* <div className={element('map-tabs')}>
-					<button
-						type="button"
-						className={`${element('tab-button', {active: activeTab === 'locations'})}`}
-						onClick={() => setActiveTab('locations')}
-					>
-						Карта мест
-					</button>
-					<button
-						type="button"
-						className={`${element('tab-button', {active: activeTab === 'countries'})}`}
-						onClick={() => setActiveTab('countries')}
-					>
-						Скретч-карта стран
-					</button>
-				</div> */}
+				<Switch className={element('switch')} buttons={mapSwitchButtons} active={activeTab} />
 
 				<div className={element('map-content')}>
 					{activeTab === 'locations' && (
 						<div className={element('locations-tab')}>
 							<div className={element('map-section')}>
-								{/* <div className={element('section-header')}> */}
-								{/* <div className={element('map-legend')}>
-										<div className={element('legend-item')}>
-											<div className={element('legend-marker visited')} />
-											<span>Посещенные места</span>
-										</div>
-										<div className={element('legend-item')}>
-											<div className={element('legend-marker unvisited')} />
-											<span>Запланированные места</span>
-										</div>
-									</div> */}
-								{/* </div> */}
-
 								{mapData && mapData.goals?.length > 0 ? (
-									<GoalMapMulti
-										goals={mapData.goals
-											.filter(
-												(goal) =>
-													goal.location &&
-													typeof goal.location.latitude === 'number' &&
-													typeof goal.location.longitude === 'number'
-											)
-											.map((goal) => ({
-												location: goal.location!,
-												userVisitedLocation: goal.completedByUser,
-												name: goal.title,
-												address: goal.location!.address,
-												description: goal.description,
-											}))}
-									/>
+									<>
+										{mapLoadError && (
+											<Banner
+												type="warning"
+												className={element('map-load-banner')}
+												message={YANDEX_MAP_LOAD_ERROR_MESSAGE}
+											/>
+										)}
+										<GoalMapMulti
+											goals={goalsToMapPoints(mapData.goals)}
+											onLoadError={handleMapLoadError}
+											onLoadSuccess={handleMapLoadSuccess}
+										/>
+									</>
 								) : (
 									<EmptyState
 										title="У вас пока нет целей с местами"
@@ -112,16 +110,10 @@ const UserMapPage: React.FC = observer(() => {
 										{mapData.visited_locations.map((visitedLocation) => (
 											<div key={visitedLocation.id} className={element('location-card')}>
 												<h4>{visitedLocation.location.name}</h4>
-												<p className="location-country">{visitedLocation.location.country}</p>
-												{visitedLocation.location.city && (
-													<p className="location-city">{visitedLocation.location.city}</p>
-												)}
-												{visitedLocation.goal_title && (
-													<p className="related-goal">Цель: {visitedLocation.goal_title}</p>
-												)}
-												<p className="visit-date">
-													Посещено: {new Date(visitedLocation.visited_at).toLocaleDateString('ru-RU')}
-												</p>
+												<p>{visitedLocation.location.country}</p>
+												{visitedLocation.location.city && <p>{visitedLocation.location.city}</p>}
+												{visitedLocation.goal_title && <p>Цель: {visitedLocation.goal_title}</p>}
+												<p>Посещено: {new Date(visitedLocation.visited_at).toLocaleDateString('ru-RU')}</p>
 											</div>
 										))}
 									</div>
@@ -130,14 +122,14 @@ const UserMapPage: React.FC = observer(() => {
 						</div>
 					)}
 
-					{/* {activeTab === 'countries' && (
+					{activeTab === 'countries' && (
 						<div className={element('countries-tab')}>
-							<ScratchMap height="600px" />
+							<CountriesScratchMap />
 						</div>
-					)} */}
+					)}
 				</div>
 			</div>
-		</Loader>
+		</div>
 	);
 });
 

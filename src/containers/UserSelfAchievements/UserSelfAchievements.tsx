@@ -3,15 +3,14 @@ import {FC, useEffect, useMemo, useState} from 'react';
 
 import {Achievement} from '@/components/Achievement/Achievement';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
-import {Loader} from '@/components/Loader/Loader';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {UserStore} from '@/store/UserStore';
 import {AchievementCategory, IAchievement} from '@/typings/achievements';
-import {GET} from '@/utils/fetch/requests';
-import './user-self-achievements.scss';
+import {loadSelfAchievements} from '@/utils/loadSelfAchievements';
 
-// interface UserSelfAchievementsProps {
-// }
+import {UserSelfAchievementsSkeleton} from './UserSelfAchievementsSkeleton';
+import './user-self-achievements.scss';
 
 const CATEGORY_NAMES: Record<AchievementCategory, string> = {
 	first_steps: 'Первые шаги',
@@ -26,20 +25,43 @@ const CATEGORY_ORDER: AchievementCategory[] = ['first_steps', 'progress', 'activ
 
 export const UserSelfAchievements: FC = observer(() => {
 	const [block, element] = useBem('user-self-achievements');
-
-	const [achievements, setAchievements] = useState<Array<IAchievement>>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const {selfAchievements, selfAchievementsStale} = UserStore;
+
 	useEffect(() => {
+		let cancelled = false;
+
 		(async () => {
 			setIsLoading(true);
-			const res = await GET('achievements', {auth: true});
-			if (res.success) {
-				setAchievements(res.data.data);
+			await loadSelfAchievements({force: true});
+			if (!cancelled) {
+				setIsLoading(false);
 			}
-			setIsLoading(false);
 		})();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+
+		return () => {
+			cancelled = true;
+		};
 	}, []);
+
+	useEffect(() => {
+		if (!selfAchievementsStale) {
+			return undefined;
+		}
+
+		let cancelled = false;
+
+		(async () => {
+			await loadSelfAchievements({force: true});
+			if (!cancelled) {
+				setIsLoading(false);
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [selfAchievementsStale]);
 
 	const groupedAchievements = useMemo(() => {
 		const groups: Record<AchievementCategory, IAchievement[]> = {
@@ -51,7 +73,7 @@ export const UserSelfAchievements: FC = observer(() => {
 			other: [],
 		};
 
-		achievements.forEach((achievement) => {
+		selfAchievements.forEach((achievement) => {
 			const category = achievement.category || 'other';
 			if (groups[category]) {
 				groups[category].push(achievement);
@@ -60,11 +82,9 @@ export const UserSelfAchievements: FC = observer(() => {
 			}
 		});
 
-		// Сортируем достижения внутри каждой группы
 		Object.keys(groups).forEach((category) => {
 			const categoryKey = category as AchievementCategory;
 			groups[categoryKey].sort((a, b) => {
-				// Секретные достижения всегда идут последними
 				if (a.isSecret && !b.isSecret) {
 					return 1;
 				}
@@ -76,11 +96,15 @@ export const UserSelfAchievements: FC = observer(() => {
 		});
 
 		return groups;
-	}, [achievements]);
+	}, [selfAchievements]);
+
+	if (isLoading) {
+		return <UserSelfAchievementsSkeleton />;
+	}
 
 	return (
-		<Loader isLoading={isLoading} className={block({empty: achievements.length === 0})}>
-			{achievements.length === 0 ? (
+		<div className={block({empty: selfAchievements.length === 0})}>
+			{selfAchievements.length === 0 ? (
 				<EmptyState title="У вас пока нет достижений" description="Выполняйте цели и получайте достижения за свой прогресс" />
 			) : (
 				<div className={element('groups')}>
@@ -105,6 +129,6 @@ export const UserSelfAchievements: FC = observer(() => {
 					})}
 				</div>
 			)}
-		</Loader>
+		</div>
 	);
 });

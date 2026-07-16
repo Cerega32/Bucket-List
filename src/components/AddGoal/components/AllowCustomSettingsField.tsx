@@ -1,16 +1,26 @@
 import {FC} from 'react';
 
+import {Banner} from '@/components/Banner/Banner';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
-import {Svg} from '@/components/Svg/Svg';
+import {InfoTooltip} from '@/components/InfoTooltip/InfoTooltip';
 import {useBem} from '@/hooks/useBem';
 
 interface AllowCustomSettingsFieldProps {
 	className?: string;
 	checked: boolean;
 	setChecked: (value: boolean) => void;
+	disabled?: boolean;
+	/** Пояснение, почему галочку нельзя снять (показывается под полем) */
+	lockNotice?: string;
 }
 
-export const AllowCustomSettingsField: FC<AllowCustomSettingsFieldProps> = ({className, checked, setChecked}) => {
+export const AllowCustomSettingsField: FC<AllowCustomSettingsFieldProps> = ({
+	className,
+	checked,
+	setChecked,
+	disabled = false,
+	lockNotice,
+}) => {
 	const [, element] = useBem('add-goal', className);
 
 	return (
@@ -21,21 +31,17 @@ export const AllowCustomSettingsField: FC<AllowCustomSettingsFieldProps> = ({cla
 					text="Разрешить пользователям изменять настройки регулярности, при добавлении цели к себе"
 					checked={checked}
 					setChecked={setChecked}
+					disabled={disabled}
 					className={element('field')}
 				/>
-				<div className={element('tooltip-wrapper')}>
-					<Svg icon="info" className={element('tooltip-icon')} width="13" height="13" />
-					<div className={element('tooltip-content')}>
-						<p className={element('tooltip-text')}>
-							Если включено, пользователи смогут изменять настройки регулярности при добавлении цели к себе.
-						</p>
-						<p className={element('tooltip-text')}>
-							Если отключено, пользователи смогут использовать только те настройки, которые будут указаны в цели при ее
-							создании.
-						</p>
-					</div>
-				</div>
+				<InfoTooltip
+					paragraphs={[
+						'Если включено, пользователи смогут изменять настройки регулярности при добавлении цели к себе.',
+						'Если отключено, пользователи смогут использовать только те настройки, которые будут указаны в цели при ее создании.',
+					]}
+				/>
 			</div>
+			{disabled && lockNotice ? <Banner type="info" message={lockNotice} className={element('allow-custom-lock-banner')} /> : null}
 		</div>
 	);
 };

@@ -1,17 +1,20 @@
-import {FC, useEffect, useRef, useState} from 'react';
-import {useParams, useSearchParams} from 'react-router-dom';
+import {observer} from 'mobx-react-lite';
+import {FC, useCallback, useEffect, useRef, useState} from 'react';
+import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {scroller} from 'react-scroll';
 
 import {AllCategories} from '@/components/AllCategories/AllCategories';
-import {Button} from '@/components/Button/Button';
 import {Card} from '@/components/Card/Card';
 import {CatalogItems} from '@/components/CatalogItems/CatalogItems';
 import {HeaderCategory} from '@/components/HeaderCategory/HeaderCategory';
-import {Loader} from '@/components/Loader/Loader';
 import {RegularGoalSettingsModal} from '@/components/RegularGoalSettingsModal/RegularGoalSettingsModal';
 import {Title} from '@/components/Title/Title';
+import {CategoriesSkeleton} from '@/containers/Categories/CategoriesSkeleton';
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {NotificationStore} from '@/store/NotificationStore';
+import {ThemeStore} from '@/store/ThemeStore';
+import {UserStore} from '@/store/UserStore';
 import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/typings/goal';
 import {IList} from '@/typings/list';
 import {IPage} from '@/typings/page';
@@ -26,11 +29,17 @@ import {addRegularGoalToUser, RegularGoalSettings} from '@/utils/api/post/addReg
 import {markGoal} from '@/utils/api/post/markGoal';
 import {removeGoal} from '@/utils/api/post/removeGoal';
 import {removeListGoal} from '@/utils/api/post/removeListGoal';
+import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
+import {blockRegularGoalsAddIfLimitReached} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 
+import {CategorySkeleton} from './CategorySkeleton';
 import './category.scss';
 
-export const Category: FC<IPage> = ({subPage, page}) => {
+const CategoryComponent: FC<IPage> = ({subPage, page}) => {
 	const [block, element] = useBem('category');
+	const {isAuth} = UserStore;
+	const {isScreenSmallMobile} = useScreenSize();
 
 	const [category, setCategory] = useState<ICategoryWithSubcategories | null>(null);
 	const [popularGoals, setPopularGoals] = useState<Array<IGoal>>([]);
@@ -44,17 +53,79 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 	const [regularGoalData, setRegularGoalData] = useState<any>(null);
 	const [pendingGoalIndex, setPendingGoalIndex] = useState<number | null>(null);
 	const [isRegularLoading, setIsRegularLoading] = useState(false);
+	const navigate = useNavigate();
+
+	const blockRegularGoalAdd = () =>
+		blockRegularGoalsAddIfLimitReached({
+			onPremium: () => navigate('/user/self/subs'),
+		});
 
 	const {id} = useParams();
-	const [searchParams] = useSearchParams();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const searchQuery = searchParams.get('search') || '';
+	const urlUpdateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const handleCatalogSearchChange = useCallback(
+		(query: string) => {
+			if (urlUpdateTimerRef.current) {
+				clearTimeout(urlUpdateTimerRef.current);
+				urlUpdateTimerRef.current = null;
+			}
+			if (query.trim().length < 2) {
+				setSearchParams((prev) => {
+					const next = new URLSearchParams(prev);
+					next.delete('search');
+					return next;
+				});
+				return;
+			}
+			urlUpdateTimerRef.current = setTimeout(() => {
+				setSearchParams((prev) => {
+					const next = new URLSearchParams(prev);
+					next.set('search', query);
+					return next;
+				});
+				urlUpdateTimerRef.current = null;
+			}, 300);
+		},
+		[setSearchParams]
+	);
+
+	useEffect(
+		() => () => {
+			if (urlUpdateTimerRef.current) clearTimeout(urlUpdateTimerRef.current);
+		},
+		[]
+	);
+
+	// Сбрасываем override при размонтировании / отсутствии HeaderCategory
+	useEffect(() => {
+		const hasHeader = !!(id && id !== 'all');
+		if (!hasHeader) {
+			ThemeStore.setPreHeaderHiddenOverride(null);
+		} else {
+			ThemeStore.setPreHeaderHiddenOverride(false);
+		}
+		return () => {
+			ThemeStore.setPreHeaderHiddenOverride(null);
+		};
+	}, [id]);
+
+	const handleHeaderCompactChange = useCallback((compact: boolean) => {
+		ThemeStore.setPreHeaderHiddenOverride(compact);
+	}, []);
+
+	const [headerHeight, setHeaderHeight] = useState<number | null>(null);
+	const handleHeaderHeightChange = useCallback((h: number) => {
+		setHeaderHeight(h);
+	}, []);
 
 	useEffect(() => {
 		// Скроллим к каталогу при наличии поискового запроса
 		if (searchQuery && !id) {
 			// Добавляем небольшую задержку для загрузки страницы
 			setTimeout(() => {
-				scroller.scrollTo('catalog-items-goals', {
+				scroller.scrollTo('all-goals-and-lists', {
 					duration: 800,
 					delay: 100,
 					smooth: 'easeInOutQuart',
@@ -67,6 +138,10 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 	useEffect(() => {
 		(async () => {
 			setIsLoading(true);
+
+			if (!id) {
+				setCategory(null);
+			}
 
 			const promises = [];
 
@@ -82,7 +157,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 			const [categoriesRes, goalsRes, listsRes] = await Promise.all(promises);
 
 			if (!id && categoriesRes.success) {
-				setCategories(categoriesRes.data);
+				setCategories(sortMainCategories(categoriesRes.data));
 			} else if (id && categoriesRes.success) {
 				setCategory(categoriesRes.data);
 			}
@@ -97,7 +172,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 
 			setIsLoading(false);
 		})();
-	}, [id]);
+	}, [id, isAuth]);
 
 	const updateGoal = async (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
 		// Специальная обработка для добавления цели - проверяем на регулярность
@@ -107,6 +182,10 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 				const regularSettings = await getRegularGoalSettings(code);
 
 				if (regularSettings.success && regularSettings.data) {
+					if (blockRegularGoalAdd()) {
+						return;
+					}
+
 					// Если настройки можно изменить, показываем модалку
 					if (regularSettings.data.regular_settings?.allowCustomSettings) {
 						setRegularGoalData(regularSettings.data);
@@ -131,8 +210,8 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 							title: 'Успех',
 							message: 'Регулярная цель успешно добавлена!',
 						});
-						return;
 					}
+					return;
 				}
 			} catch (error) {
 				// Если API регулярности не отвечает или цель не регулярная, продолжаем обычное добавление
@@ -146,8 +225,8 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 			const updatedGoal = {
 				...popularGoals[i],
 				addedByUser: operation !== 'delete',
-				completedByUser: operation === 'mark' ? !done : popularGoals[i].completedByUser,
-				totalAdded: res.data.users_added_count,
+				completedByUser: operation === 'mark' ? !done : operation === 'delete' ? false : popularGoals[i].completedByUser,
+				totalAdded: res.data.totalAdded,
 			};
 
 			const newGoals = [...popularGoals];
@@ -164,7 +243,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 			const updatedList = {
 				...popularLists[i],
 				addedByUser: operation === 'add',
-				totalAdded: res.data.users_added_count,
+				totalAdded: res.data.totalAdded,
 			};
 
 			const newLists = [...popularLists];
@@ -219,6 +298,7 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 				const newGoals = [...popularGoals];
 				newGoals[pendingGoalIndex] = updatedGoal;
 				setPopularGoals(newGoals);
+				refreshHeaderGoalCounts();
 
 				NotificationStore.addNotification({
 					type: 'success',
@@ -243,71 +323,86 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 		}
 	};
 
+	const showSkeleton = isLoading;
+	const skeletonWithHeader = !!(id && id !== 'all' && !category);
+	const skeletonWithSubs = page === 'isSubCategories' || !!category?.category.parentCategory;
+
 	return (
-		<main className={block({sub: page === 'isSubCategories', empty: !category?.subcategories.length, all: !id})}>
+		<main
+			className={block({sub: page === 'isSubCategories', empty: !category?.subcategories.length, all: !id})}
+			style={headerHeight != null ? ({'--header-category-height': `${headerHeight}px`} as React.CSSProperties) : undefined}
+		>
 			{id && id !== 'all' && category && (
-				<HeaderCategory category={category} className={element('header')} isSub={page === 'isSubCategories'} refHeader={refTitle} />
+				<HeaderCategory
+					category={category}
+					className={element('header')}
+					isSub={page === 'isSubCategories' || !!category.category.parentCategory}
+					refHeader={refTitle}
+					onCompactChange={handleHeaderCompactChange}
+					onHeightChange={handleHeaderHeightChange}
+				/>
 			)}
-			<Loader isLoading={isLoading}>
-				{!!popularGoals.length && (
-					<>
-						<div className={element('wrapper-title')}>
-							<Title tag="h2">Популярные цели этой недели</Title>
-							<Button
-								type="Link"
-								theme="blue"
-								icon="plus"
-								href={`/goals/create${id && id !== 'all' ? `?category=${id}` : ''}`}
-								size="small"
-							>
-								Добавить цель
-							</Button>
-						</div>
+			{showSkeleton && <CategorySkeleton withHeader={skeletonWithHeader} withSubcategories={skeletonWithSubs} />}
+			{!!popularGoals.length && (
+				<>
+					<div className={element('wrapper-title')}>
+						<Title tag="h2">Популярные цели этой недели</Title>
+						{/* <Button
+							type="Link"
+							theme="blue"
+							icon="plus"
+							href={`/goals/create${id && id !== 'all' ? `?category=${id}` : ''}`}
+							size="small"
+						>
+							Добавить цель
+						</Button> */}
+					</div>
 
-						<section className={element('popular-goals')}>
-							{popularGoals.map((goal, i) => (
-								<Card
-									goal={goal}
-									className={element('popular-goal')}
-									key={goal.code}
-									onClickAdd={() => updateGoal(goal.code, i, 'add')}
-									onClickDelete={() => updateGoal(goal.code, i, 'delete')}
-									onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
-								/>
-							))}
-						</section>
-					</>
-				)}
-				{!!popularLists.length && (
-					<>
-						<div className={element('wrapper-title')}>
-							<Title tag="h2">Популярные списки этой недели</Title>
-							<Button
-								type="Link"
-								theme="blue"
-								icon="plus"
-								href={`/list/create${id && id !== 'all' ? `?category=${id}` : ''}`}
-								size="small"
-							>
-								Добавить список целей
-							</Button>
-						</div>
-						<section className={element('popular-lists')}>
-							{popularLists.map((list, i) => (
-								<Card
-									horizontal
-									isList
-									goal={list}
-									className={element('popular-list')}
-									key={list.code}
-									onClickAdd={() => updateList(list.code, i, 'add')}
-									onClickDelete={() => updateList(list.code, i, 'delete')}
-								/>
-							))}
-						</section>
-					</>
-				)}
+					<section className={element('popular-goals')}>
+						{popularGoals.map((goal, i) => (
+							<Card
+								goal={goal}
+								className={element('popular-goal')}
+								key={goal.code}
+								onClickAdd={() => updateGoal(goal.code, i, 'add')}
+								onClickDelete={() => updateGoal(goal.code, i, 'delete')}
+								onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
+							/>
+						))}
+					</section>
+				</>
+			)}
+			{!!popularLists.length && (
+				<>
+					<div className={element('wrapper-title')}>
+						<Title tag="h2">Популярные списки этой недели</Title>
+						{/* <Button
+							type="Link"
+							theme="blue"
+							icon="plus"
+							href={`/list/create${id && id !== 'all' ? `?category=${id}` : ''}`}
+							size="small"
+						>
+							Добавить список целей
+						</Button> */}
+					</div>
+					<section className={element('popular-lists')}>
+						{popularLists.map((list, i) => (
+							<Card
+								horizontal={!isScreenSmallMobile}
+								isList
+								goal={list}
+								className={element('popular-list')}
+								key={list.code}
+								onClickAdd={() => updateList(list.code, i, 'add')}
+								onClickDelete={() => updateList(list.code, i, 'delete')}
+							/>
+						))}
+					</section>
+				</>
+			)}
 
+			<div id="all-goals-and-lists">
 				<Title className={element('title')} tag="h2">
 					Все цели и списки
 				</Title>
@@ -319,9 +414,15 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 					beginUrl={id ? '/categories/' : '/categories/all'}
 					categories={categories}
 					initialSearch={searchQuery}
+					onSearchChange={!id ? handleCatalogSearchChange : undefined}
 				/>
-				{!id && <AllCategories categories={categories} tag="h2" title="Категории" variant="minimal" />}
-			</Loader>
+				{!id &&
+					(showSkeleton ? (
+						<CategoriesSkeleton />
+					) : (
+						<AllCategories categories={categories} tag="h2" title="Категории" variant="minimal" />
+					))}
+			</div>
 
 			{/* Модалка настройки регулярности */}
 			{showRegularModal && regularGoalData?.regular_settings && (
@@ -337,3 +438,5 @@ export const Category: FC<IPage> = ({subPage, page}) => {
 		</main>
 	);
 };
+
+export const Category = observer(CategoryComponent);

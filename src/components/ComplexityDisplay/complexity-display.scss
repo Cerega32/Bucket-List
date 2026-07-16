@@ -1,0 +1,10 @@
+.complexity-display {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+
+	&__icon {
+		width: 16px;
+		height: 16px;
+	}
+}

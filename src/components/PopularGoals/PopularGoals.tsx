@@ -30,6 +30,7 @@ export const PopularGoals: FC<PopularGoalsProps> = ({className, goals, onMarkCom
 					big={index < 2}
 					withBtn
 					updateGoal={() => handleUpdateGoal(goal.code, goal.completedByUser)}
+					topInfoClassName="gradient__top-info--main-goals"
 				/>
 			))}
 		</div>

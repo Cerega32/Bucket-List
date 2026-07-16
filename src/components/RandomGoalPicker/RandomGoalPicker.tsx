@@ -2,7 +2,9 @@ import {FC, useEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {IShortGoal} from '@/typings/goal';
+import {getRandomGoalFromList} from '@/utils/api/get/getRandomGoalFromList';
 
 import {Button} from '../Button/Button';
 import {Title} from '../Title/Title';
@@ -11,6 +13,7 @@ import './random-goal-picker.scss';
 
 interface RandomGoalPickerProps {
 	goals: IShortGoal[];
+	listCode?: string;
 	onClose: () => void;
 }
 
@@ -24,18 +27,18 @@ type Particle = {
 	delay: number; // ms
 };
 
-export const RandomGoalPicker: FC<RandomGoalPickerProps> = ({goals, onClose}) => {
+export const RandomGoalPicker: FC<RandomGoalPickerProps> = ({goals, listCode, onClose}) => {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const rafRef = useRef<number | null>(null);
 	const animatingRef = useRef(false);
 	const navigate = useNavigate();
-
+	const {isScreenSmallMobile} = useScreenSize();
 	const [isAnimating, setIsAnimating] = useState(false);
 	const [selectedGoal, setSelectedGoal] = useState<IShortGoal | null>(null);
 	const [block, element] = useBem('random-goal-picker');
 
 	// Константы настройки анимации — можно подстроить
-	const WIDTH = 400;
+	const WIDTH = isScreenSmallMobile ? 250 : 400;
 	const HEIGHT = 300;
 	const DURATION = 1200; // ms (длительность движения частиц)
 	const MAX_PARTICLES = 2000; // ограничение по количеству частиц
@@ -110,7 +113,7 @@ export const RandomGoalPicker: FC<RandomGoalPickerProps> = ({goals, onClose}) =>
 		// создаём простые частички одного цвета, если нет изображения
 		const particles: Particle[] = [];
 		const color = '#cbd5e1';
-		const approx = 800;
+		const approx = isScreenSmallMobile ? 250 : 800;
 		for (let i = 0; i < Math.min(approx, MAX_PARTICLES); i++) {
 			const tx = Math.random() * WIDTH;
 			const ty = Math.random() * HEIGHT;
@@ -258,12 +261,30 @@ export const RandomGoalPicker: FC<RandomGoalPickerProps> = ({goals, onClose}) =>
 	};
 
 	const spin = async () => {
-		if (!itemsCount || animatingRef.current) return;
-		animatingRef.current = true;
-		setIsAnimating(true);
+		if (animatingRef.current) return;
 
-		const randomIndex = Math.floor(Math.random() * itemsCount);
-		const target = items[randomIndex];
+		// Если есть listCode — запрашиваем случайную цель с сервера (среди ВСЕХ целей списка)
+		// Иначе выбираем из загруженных целей (fallback)
+		let target: IShortGoal | null = null;
+
+		if (listCode) {
+			animatingRef.current = true;
+			setIsAnimating(true);
+
+			const res = await getRandomGoalFromList(listCode);
+			if (res.success) {
+				target = res.data as IShortGoal;
+			}
+		}
+
+		if (!target) {
+			if (!itemsCount) return;
+			animatingRef.current = true;
+			setIsAnimating(true);
+
+			const randomIndex = Math.floor(Math.random() * itemsCount);
+			target = items[randomIndex];
+		}
 
 		const canvas = canvasRef.current;
 		if (!canvas) {
@@ -276,7 +297,6 @@ export const RandomGoalPicker: FC<RandomGoalPickerProps> = ({goals, onClose}) =>
 		try {
 			if (target.image) img = await loadImage(target.image);
 		} catch (e) {
-			// если не удалось загрузить изображение — оставляем img = null, particles будут из placeholder цвета
 			img = null;
 		}
 
@@ -285,15 +305,12 @@ export const RandomGoalPicker: FC<RandomGoalPickerProps> = ({goals, onClose}) =>
 			const ctx = canvas.getContext('2d');
 			if (!ctx) throw new Error('no-canvas');
 
-			// подготовка частиц
 			const particles = img ? createParticlesFromImage(img, ctx, dpr) : createFallbackParticles();
 
 			await animateParticles(particles, img, canvas);
 
-			// по завершении показываем выбранную цель
 			setSelectedGoal(target);
 		} catch (err) {
-			// при ошибке просто сразу показываем цель без анимации
 			setSelectedGoal(target);
 		}
 
@@ -327,7 +344,7 @@ export const RandomGoalPicker: FC<RandomGoalPickerProps> = ({goals, onClose}) =>
 
 			<div className={element('details')}>
 				<div className={element('selected-goal', {disabled: !selectedGoal && !!itemsCount})}>
-					<p>{itemsCount === 0 ? 'Вы уже выполнили все цели в этом списке' : 'Ваша цель:'}</p>
+					<p>{!listCode && itemsCount === 0 ? 'Вы уже выполнили все цели в этом списке' : 'Ваша цель:'}</p>
 					<p className={element('selected-goal-title')}>{isAnimating ? '...' : selectedGoal?.title}</p>
 				</div>
 				<div className={element('buttons')}>
@@ -341,7 +358,12 @@ export const RandomGoalPicker: FC<RandomGoalPickerProps> = ({goals, onClose}) =>
 							Перейти к цели
 						</Button>
 					)}
-					<Button className={element('button-select')} onClick={spin} disabled={isAnimating || itemsCount === 0} theme="blue">
+					<Button
+						className={element('button-select')}
+						onClick={spin}
+						disabled={isAnimating || (!listCode && itemsCount === 0)}
+						theme="blue"
+					>
 						{selectedGoal ? 'Выбрать другую' : 'Выбрать'}
 					</Button>
 				</div>

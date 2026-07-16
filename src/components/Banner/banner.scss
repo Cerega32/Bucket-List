@@ -1,0 +1,255 @@
+.banner {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	width: 100%;
+	padding: 16px;
+	background: var(--color-white);
+	border: 1px solid transparent;
+	border-radius: 8px;
+
+	&--with-end {
+		align-items: center;
+	}
+
+	&__icon {
+		flex-shrink: 0;
+		width: 24px;
+		height: 24px;
+
+		&--custom {
+			width: auto;
+			height: auto;
+		}
+	}
+
+	&__icon-target {
+		display: flex;
+		flex-shrink: 0;
+		justify-content: center;
+		align-items: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+	}
+
+	&__icon-target-image {
+		width: 32px;
+		height: 32px;
+		object-fit: contain;
+	}
+
+	&__content {
+		flex: 1;
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 8px;
+		min-width: 0;
+		min-height: 24px;
+
+		@include xs {
+			flex-direction: column;
+			gap: 4px;
+			align-items: flex-start;
+		}
+	}
+
+	&__text {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 4px;
+		min-width: 0;
+	}
+
+	&__end {
+		flex-shrink: 0;
+	}
+
+	&__title {
+		margin: 0;
+		color: var(--color-text-primary);
+		font-size: 14px;
+		font-weight: var(--weight-medium);
+		line-height: var(--line-height-14);
+	}
+
+	&__message {
+		margin: 0;
+		color: var(--color-gray-7);
+		font-size: 14px;
+		line-height: var(--line-height-14);
+		font-weight: var(--weight-regular);
+		align-self: center;
+
+		ol,
+		ul {
+			padding-left: 20px;
+			margin: 4px 0 0;
+		}
+	}
+
+	&--type-success {
+		border-color: var(--color-sentiment-positive);
+	}
+
+	&--type-success &__icon * {
+		fill: var(--color-sentiment-positive);
+	}
+
+	&--type-success &__title {
+		color: var(--color-sentiment-positive);
+	}
+
+	&--type-info {
+		border-color: var(--color-gray-9);
+	}
+
+	&--type-info &__icon * {
+		fill: var(--color-primary);
+	}
+
+	&--type-info &__title {
+		color: var(--color-gray-8);
+	}
+
+	&--type-warning {
+		border-color: var(--color-sentiment-warning);
+	}
+
+	&--type-warning &__icon * {
+		fill: var(--color-sentiment-warning);
+	}
+
+	&--type-warning &__title {
+		color: var(--color-sentiment-warning);
+	}
+
+	&--type-warning &__message {
+		color: var(--color-sentiment-warning);
+	}
+
+	&--type-danger {
+		border-color: var(--color-sentiment-negative);
+	}
+
+	&--type-danger &__icon * {
+		fill: var(--color-sentiment-negative);
+	}
+
+	&--type-danger &__title {
+		color: var(--color-sentiment-negative);
+	}
+
+	&--type-danger &__message {
+		color: var(--color-sentiment-negative);
+	}
+
+	&--type-gold {
+		border-color: rgb(var(--color-gold-rgb) / 55%);
+	}
+
+	&--type-gold &__icon * {
+		fill: var(--color-gold);
+	}
+
+	&__action {
+		flex-shrink: 0;
+		margin-top: 3px;
+		color: var(--color-primary);
+		font-size: 14px;
+		font-weight: var(--weight-medium);
+		line-height: var(--line-height-14);
+	}
+
+	&__close {
+		flex-shrink: 0;
+	}
+
+	// Новый тип: заголовок + описание столбиком, цветная заливка
+	&--variant-filled {
+		align-items: center;
+
+		.banner__content {
+			align-items: center;
+
+			@include xs {
+				flex-direction: row;
+			}
+		}
+
+		.banner__message {
+			align-self: stretch;
+			color: var(--color-gray-7);
+		}
+
+		.banner__end {
+			display: flex;
+			align-items: center;
+
+			img {
+				width: auto;
+				height: 120px;
+				object-fit: cover;
+				border-radius: 8px;
+
+				@include md {
+					height: 96px;
+				}
+			}
+		}
+
+		@include sm {
+			flex-wrap: wrap;
+
+			.banner__end {
+				width: 100%;
+				justify-content: flex-start;
+
+				img {
+					height: 140px;
+				}
+			}
+		}
+
+		&.banner--type-info {
+			background: rgb(var(--color-primary-rgb) / 8%);
+		}
+
+		&.banner--type-gold {
+			background: rgb(var(--color-gold-rgb) / 8%);
+		}
+	}
+
+	&--variant-filled.banner--size-large {
+		.banner__title {
+			font-size: 20px;
+			font-weight: var(--weight-bold);
+			line-height: var(--line-height-22);
+
+			@include md {
+				font-size: 18px;
+				line-height: var(--line-height-18);
+			}
+		}
+
+		.banner__message {
+			font-size: 14px;
+			line-height: var(--line-height-16);
+		}
+
+		.banner__end img {
+			height: 140px;
+
+			@include md {
+				height: 112px;
+			}
+
+			@include sm {
+				height: 160px;
+			}
+		}
+	}
+}

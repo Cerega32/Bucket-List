@@ -1,0 +1,41 @@
+.operator-requisites {
+	&__title {
+		margin: 0 0 8px;
+		color: var(--color-text-primary);
+		font-size: var(--font-size-14);
+		font-weight: var(--weight-semibold);
+	}
+
+	&__text {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: var(--font-size-12);
+		line-height: var(--line-height-18);
+	}
+
+	&__link {
+		color: var(--color-primary);
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	&--compact {
+		display: inline;
+		color: var(--color-text-secondary);
+		font-size: var(--font-size-11);
+		line-height: var(--line-height-16);
+	}
+
+	&__inline-part {
+		white-space: nowrap;
+	}
+
+	&__sep {
+		margin: 0 6px;
+		color: var(--color-text-tertiary);
+		white-space: nowrap;
+	}
+}

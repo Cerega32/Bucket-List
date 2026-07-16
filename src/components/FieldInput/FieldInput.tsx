@@ -18,12 +18,13 @@ interface FieldInputProps {
 	setValueTarget?: (value: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 	iconBegin?: string;
 	autoComplete?: string;
-	error?: Array<string>;
+	error?: boolean | Array<string>;
 	required?: boolean;
 	onFocus?: () => void;
 	onBlur?: () => void;
 	onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 	iconEnd?: string;
+	iconEndClick?: () => void;
 	theme?: 'transparent';
 	// focusBorder?: 'white';
 	maxLength?: number;
@@ -32,6 +33,11 @@ interface FieldInputProps {
 	rows?: number;
 	disabled?: boolean;
 	suffix?: string;
+	max?: number;
+	min?: number;
+	minLength?: number;
+	hint?: string;
+	inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement>;
 }
 
 export const FieldInput: FC<FieldInputProps> = (props) => {
@@ -46,6 +52,7 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		setValueTarget,
 		iconBegin,
 		iconEnd,
+		iconEndClick,
 		autoComplete = 'off',
 		error,
 		required,
@@ -60,6 +67,11 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		rows = 2,
 		disabled = false,
 		suffix,
+		max,
+		min,
+		minLength,
+		hint,
+		inputRef,
 	} = props;
 
 	const [block, element] = useBem('field-input', className);
@@ -81,15 +93,17 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 		}
 	};
 
+	const hasError = Array.isArray(error) ? error.length > 0 : !!error;
+
 	return (
-		<div className={block({error: !!error, theme})}>
+		<div className={block({error: hasError, theme})}>
 			{text && (
 				<label className={element('label')} htmlFor={id}>
 					{text}
 				</label>
 			)}
 			<div className={element('wrapper')}>
-				{iconBegin && <Svg icon={iconBegin} className={element('icon-begin')} />}
+				{iconBegin && <Svg icon={iconBegin} className={element('icon-begin')} width="16px" height="16px" />}
 				{typeState === 'textarea' ? (
 					<textarea
 						className={element('input', {iconBegin: !!iconBegin, textarea: true, iconEnd: !!iconEnd})}
@@ -102,7 +116,9 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onKeyDown={onKeyDown}
 						rows={rows}
 						maxLength={maxLength}
+						minLength={minLength}
 						disabled={disabled}
+						ref={inputRef as React.RefObject<HTMLTextAreaElement>}
 					/>
 				) : (
 					<input
@@ -123,23 +139,49 @@ export const FieldInput: FC<FieldInputProps> = (props) => {
 						onBlur={onBlur}
 						onKeyDown={onKeyDown}
 						maxLength={maxLength}
+						min={min}
+						minLength={minLength}
+						max={max}
 						disabled={disabled}
+						ref={inputRef as React.RefObject<HTMLInputElement>}
 					/>
 				)}
 				{suffix && <span className={element('suffix')}>{suffix}</span>}
 				{type === 'password' && (
 					<button type="button" className={element('show-password')} onClick={toggleTypePassword} aria-label="Показать пароль">
-						{typeState === 'password' ? <Svg icon="eye" /> : <Svg icon="eye-closed" />}
+						{typeState === 'password' ? (
+							<Svg width="16px" height="16px" icon="eye-closed" />
+						) : (
+							<Svg width="16px" height="16px" icon="eye" />
+						)}
 					</button>
 				)}
-				{iconEnd && <Svg icon={iconEnd} className={element('icon-end')} />}
+				{iconEnd &&
+					(iconEndClick ? (
+						<button
+							type="button"
+							className={element('icon-end', {clickable: true})}
+							onClick={iconEndClick}
+							aria-label="Выполнить поиск"
+						>
+							<Svg icon={iconEnd} />
+						</button>
+					) : (
+						<Svg icon={iconEnd} className={element('icon-end')} />
+					))}
 			</div>
+			{hint && (
+				<small id={`${id}-hint`} className={element('hint')}>
+					{hint}
+				</small>
+			)}
 			{showCharCount && maxLength !== undefined && <CharCount current={value.length} max={maxLength} />}
-			{error?.map((er) => (
-				<p key={er} className={element('error')}>
-					{er}
-				</p>
-			))}
+			{Array.isArray(error) &&
+				error.map((er) => (
+					<p key={er} className={element('error')}>
+						{er}
+					</p>
+				))}
 		</div>
 	);
 };

@@ -9,12 +9,13 @@
 		grid-template-columns: 1fr 1fr 1fr;
 
 		@include xl {
-			grid-template-columns: 1fr 1fr;
-			gap: 16px;
+			gap: 24px;
+			display: flex;
+			flex-wrap: wrap;
 		}
 
 		@include lg {
-			grid-template-columns: 1fr;
+			gap: 16px;
 		}
 
 		@include md {
@@ -25,16 +26,14 @@
 	&__info-group {
 		display: grid;
 		gap: 24px;
+		width: 100%;
 		grid-template-columns: 1fr 1fr 1fr;
 		grid-column: 1 / -1;
 
 		@include lg {
-			grid-template-columns: 1fr 1fr;
 			gap: 16px;
-		}
-
-		@include md {
-			grid-template-columns: 1fr;
+			display: flex;
+			flex-wrap: wrap;
 		}
 	}
 
@@ -42,6 +41,52 @@
 		@include block-radius;
 
 		color: var(--color-text);
+
+		@include lg {
+			min-width: 200px;
+			max-width: 100%;
+			flex: 1 1 auto;
+		}
+
+		@include sm {
+			min-width: 100%;
+		}
+	}
+
+	&__info-100-goals {
+		@include xl {
+			min-width: 280px;
+			max-width: 100%;
+			flex: 1 1 auto;
+		}
+
+		@include sm {
+			min-width: 100%;
+		}
+	}
+
+	&__weekly {
+		@include xl {
+			min-width: 300px;
+			max-width: 100%;
+			flex: 1 1 auto;
+		}
+
+		@include sm {
+			min-width: 100%;
+		}
+	}
+
+	&__user-statistics {
+		@include xl {
+			min-width: 300px;
+			max-width: 100%;
+			flex: 1 1 auto;
+		}
+
+		@include sm {
+			min-width: 100%;
+		}
 	}
 
 	&__info-title {

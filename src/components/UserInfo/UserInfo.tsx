@@ -21,6 +21,8 @@ interface UserInfoProps {
 	name: string;
 	firstName?: string;
 	lastName?: string;
+	country?: string;
+	about?: string;
 	totalAdded: number;
 	totalCompleted: number;
 	page: string;
@@ -29,6 +31,7 @@ interface UserInfoProps {
 	totalAddedLists: number;
 	totalAchievements: number;
 	subscriptionType?: 'free' | 'premium';
+	level?: number;
 }
 
 export const UserInfo: FC<UserInfoProps> = observer((props) => {
@@ -38,6 +41,8 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 		name,
 		firstName,
 		lastName,
+		country,
+		about,
 		totalAdded,
 		totalCompleted,
 		page,
@@ -46,6 +51,7 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 		totalCompletedLists,
 		totalAchievements,
 		subscriptionType,
+		level,
 	} = props;
 	const [block, element] = useBem('user-info');
 	const [isAddingFriend, setIsAddingFriend] = useState(false);
@@ -98,7 +104,7 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 				url: `/user/${id}/active-goals`,
 				name: 'Активные цели и списки',
 				page: 'isUserActiveGoals',
-				count: totalAddedLists + totalAdded - (totalCompletedLists + totalCompleted),
+				count: Math.max(0, totalAddedLists + totalAdded - (totalCompletedLists + totalCompleted)),
 			},
 			{
 				url: `/user/${id}/done-goals`,
@@ -115,6 +121,14 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 		];
 	}, [id, totalAchievements, totalAdded, totalAddedLists, totalCompleted, totalCompletedLists]);
 
+	const baseName = [firstName, lastName]
+		.map((v) => v?.trim())
+		.filter((v): v is string => Boolean(v))
+		.join(' ');
+
+	const safeCountry = country?.trim() || '';
+	const fullName = safeCountry ? (baseName ? `${baseName}, ${safeCountry}` : safeCountry) : baseName;
+
 	return (
 		<article className={block({noBackground: !background})}>
 			<div
@@ -125,16 +139,15 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 				<Avatar avatar={avatar} className={element('avatar')} size="large" isPremium={subscriptionType === 'premium'} />
 				<div className={element('wrapper')}>
 					<div className={element('name-block')}>
-						<Title tag="h2" className={element('name')}>
+						<Title tag="h1" className={element('name')}>
 							{name}
 						</Title>
-						{(firstName || lastName) && <p className={element('full-name')}>{`${firstName || ''} ${lastName || ''}`.trim()}</p>}
+						{fullName && <p className={element('full-name')}>{fullName}</p>}
+						{about && <p className={element('description')}>{about}</p>}
 					</div>
 					<div className={element('right')}>
 						{isOwnProfile ? (
-							<Button type="Link" theme="blue" icon="plus" href="/goals/create">
-								Добавить цель
-							</Button>
+							<div />
 						) : (
 							<div className={element('friend-actions')}>
 								{!isFriend && !hasPendingRequest && (
@@ -148,7 +161,7 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 									</Button>
 								)}
 								{isFriend && (
-									<Button theme="green" icon="check">
+									<Button theme="green" icon="done">
 										В друзьях
 									</Button>
 								)}
@@ -161,6 +174,9 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 						)}
 						<InfoGoal
 							items={[
+								...(level !== undefined
+									? [{title: 'Уровень', value: <span className={element('level')}>{level}</span>}]
+									: []),
 								{title: 'Всего целей', value: totalAdded},
 								{title: 'Выполнено', value: totalCompleted},
 							]}
@@ -169,7 +185,7 @@ export const UserInfo: FC<UserInfoProps> = observer((props) => {
 					</div>
 				</div>
 			</section>
-			<Tabs tabs={tabs} active={page} />
+			<Tabs tabs={tabs} active={page} preventScrollReset />
 		</article>
 	);
 });

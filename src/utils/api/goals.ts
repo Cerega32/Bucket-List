@@ -1,6 +1,8 @@
 import {IPaginationPage} from '@/typings/request';
 import {DELETE, GET, POST, PUT} from '@/utils/fetch/requests';
 
+import type {IRegularGoalStatistics} from '@/typings/goal';
+
 // ========== PROGRESS API ==========
 
 export interface IGoalProgress {
@@ -8,6 +10,7 @@ export interface IGoalProgress {
 	goal: number;
 	goalTitle: string;
 	goalCategory: string;
+	goalComplexity?: string;
 	goalCategoryNameEn: string;
 	goalImage: string;
 	goalCode: string;
@@ -17,6 +20,16 @@ export interface IGoalProgress {
 	lastUpdated: string;
 	createdAt: string;
 	recentEntries: IGoalProgressEntry[];
+	/** С сервера: число дней с отметкой «работал» (по всей истории, не по срезу recentEntries) */
+	workedDaysCount?: number;
+	/** С сервера: макс. серия подряд дней с «работал» */
+	maxConsecutiveWorkDays?: number;
+	/** С сервера: Пн–Вс текущей недели, был ли день с work_done */
+	weekWorkDone?: boolean[];
+	/** Всего записей в истории (COUNT), даже если recentEntries не отданы */
+	progressEntriesCount?: number;
+	/** Календарные недели (с понедельника) с недели начала прогресса по текущую, минимум 1 */
+	calendarWeeksCount?: number;
 	// Для обратной совместимости
 	user?: number;
 	userUsername?: string;
@@ -61,55 +74,7 @@ export interface IDailyProgress {
 	created_at: string;
 }
 
-// Получить прогресс цели
-export const getGoalProgress = async (
-	goalId: number
-): Promise<{
-	success: boolean;
-	data?: IGoalProgress;
-	error?: string;
-}> => {
-	try {
-		const response = await GET(`goals/${goalId}/progress`, {
-			auth: true,
-		});
-		return response;
-	} catch (error) {
-		return {
-			success: false,
-			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
-		};
-	}
-};
-
-// Создать или обновить прогресс цели (используется один endpoint для создания и обновления)
-export const createGoalProgress = async (
-	goalId: number,
-	data: {
-		progress_percentage: number;
-		daily_notes: string;
-		is_working_today: boolean;
-	}
-): Promise<{
-	success: boolean;
-	data?: IGoalProgress;
-	error?: string;
-}> => {
-	try {
-		const response = await POST(`goals/${goalId}/progress/update`, {
-			body: data,
-			auth: true,
-		});
-		return response;
-	} catch (error) {
-		return {
-			success: false,
-			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
-		};
-	}
-};
-
-// Обновить прогресс цели
+// Создать или обновить прогресс цели (один POST: первое сохранение создаёт запись)
 export const updateGoalProgress = async (
 	goalId: number,
 	data: {
@@ -229,6 +194,36 @@ export const createProgressEntry = async (
 			auth: true,
 		});
 		return response;
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
+// Редактировать только текст заметки в записи истории прогресса
+export const updateGoalProgressEntryNotes = async (
+	goalId: number,
+	entryId: number,
+	notes: string
+): Promise<{
+	success: boolean;
+	data?: IGoalProgressEntry;
+	error?: string;
+}> => {
+	try {
+		const response = await PUT(`goals/${goalId}/progress/entries/${entryId}`, {
+			body: {notes},
+			auth: true,
+		});
+		if (!response.success || !response.data) {
+			return {
+				success: false,
+				error: response.error || response.errors || 'Не удалось сохранить заметку',
+			};
+		}
+		return {success: true, data: mapProgressEntry(response.data as IGoalProgressEntryRaw)};
 	} catch (error) {
 		return {
 			success: false,
@@ -455,9 +450,10 @@ export const deleteGoalFolder = async (
 	}
 };
 
-export const getFolderGoals = (folderId: number) =>
+export const getFolderGoals = (folderId: number, page = 1, pageSize: number | 'all' = 30) =>
 	GET(`goals/folders/${folderId}/goals`, {
 		auth: true,
+		get: {page, page_size: pageSize},
 	});
 
 export const addGoalToFolder = (folderId: number, goalId: number, order?: number) =>
@@ -540,7 +536,7 @@ export const getGoalsInProgress = async (params?: {
 	error?: string;
 }> => {
 	try {
-		const response = await GET('goals/progress', {
+		const response = await GET('self/goals-in-progress', {
 			auth: true,
 			...(params ? {get: params} : {}),
 		});
@@ -612,39 +608,7 @@ export interface IRegularProgress {
 	updatedAt: string;
 }
 
-export interface IRegularGoalStatistics {
-	id: number;
-	user: number;
-	userUsername: string;
-	regularGoal: number;
-	regularGoalData: IRegularGoal;
-	totalCompletions: number;
-	totalDays: number;
-	completionPercentage: number;
-	currentStreak: number;
-	maxStreak: number;
-	startDate?: string;
-	lastCompletionDate?: string;
-	totalWeeks: number;
-	completedWeeks: number;
-	currentWeekCompletions: number;
-	isActive: boolean;
-	isPaused: boolean;
-	resetCount: number;
-	currentPeriodProgress?: {
-		type: 'daily' | 'weekly';
-		completedToday?: boolean;
-		streak?: number;
-		currentWeekCompletions?: number;
-		requiredPerWeek?: number;
-		weekProgress?: number;
-		weekStart?: string;
-	};
-	nextTargetDate?: string;
-	canCompleteToday: boolean;
-	createdAt: string;
-	updatedAt: string;
-}
+export type {IRegularGoalStatistics} from '@/typings/goal';
 
 export interface IRegularProgressCalendar {
 	regularGoal: IRegularGoal;
@@ -734,26 +698,20 @@ export const markRegularProgress = async (data: {
 	}
 };
 
-// Получить статистику регулярных целей
-// Поддерживает как обычный ответ (массив),
-// так и пагинированный ({ pagination, data }) — на случай,
-// если на бэкенде включена пагинация.
-export const getRegularGoalStatistics = async (params?: {
-	page?: number;
-}): Promise<{
+// Получить статистику регулярных целей (все активные цели пользователя)
+export const getRegularGoalStatistics = async (): Promise<{
 	success: boolean;
 	data?:
 		| IRegularGoalStatistics[]
 		| {
-				pagination: IPaginationPage;
 				data: IRegularGoalStatistics[];
+				todayCount?: number;
 		  };
 	error?: string;
 }> => {
 	try {
 		const response = await GET('goals/regular/statistics', {
 			auth: true,
-			...(params ? {get: params} : {}),
 		});
 		return response;
 	} catch (error) {
@@ -1049,6 +1007,29 @@ export const updateFolderRule = async (
 			body,
 			auth: true,
 		});
+		return response;
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
+// Применить все правила пользователя ко всем его целям
+export const applyAllFolderRules = async (): Promise<{
+	success: boolean;
+	data?: {
+		message: string;
+		added: number;
+		removed: number;
+		goalsProcessed: number;
+		rulesApplied: number;
+	};
+	error?: string;
+}> => {
+	try {
+		const response = await POST('goals/folders/rules/apply-all', {auth: true});
 		return response;
 	} catch (error) {
 		return {

@@ -7,6 +7,14 @@ import {FieldInput} from '@/components/FieldInput/FieldInput';
 import Select from '@/components/Select/Select';
 import {WeekDaySchedule, WeekDaySelector} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
+import {UserStore} from '@/store/UserStore';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {
+	canEditCustomSchedule,
+	getRegularFrequencyActiveOption,
+	getRegularFrequencySelectOptions,
+	handleRegularFrequencySelect,
+} from '@/utils/regularGoal/regularFrequencySelectOptions';
 
 interface RegularGoalSettingsProps {
 	className?: string;
@@ -54,6 +62,7 @@ export const RegularGoalSettings: FC<RegularGoalSettingsProps> = (props) => {
 	} = props;
 
 	const [, element] = useBem('add-goal', className);
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
 
 	return (
 		<div className={element('regular-section')}>
@@ -71,16 +80,9 @@ export const RegularGoalSettings: FC<RegularGoalSettingsProps> = (props) => {
 						<Select
 							className={element('field')}
 							placeholder="Выберите периодичность"
-							options={[
-								{name: 'Ежедневно', value: 'daily'},
-								{name: 'N раз в неделю', value: 'weekly'},
-								{name: 'Пользовательский график', value: 'custom'},
-							]}
-							activeOption={regularFrequency === 'daily' ? 0 : regularFrequency === 'weekly' ? 1 : 2}
-							onSelect={(index) => {
-								const frequencies = ['daily', 'weekly', 'custom'] as const;
-								setRegularFrequency(frequencies[index]);
-							}}
+							options={getRegularFrequencySelectOptions(isPremium)}
+							activeOption={getRegularFrequencyActiveOption(regularFrequency)}
+							onSelect={(index) => handleRegularFrequencySelect(index, isPremium, setRegularFrequency)}
 							text="Периодичность"
 						/>
 
@@ -91,15 +93,16 @@ export const RegularGoalSettings: FC<RegularGoalSettingsProps> = (props) => {
 								text="Сколько раз в неделю"
 								value={weeklyFrequency.toString()}
 								setValue={(value) => {
-									const num = parseInt(value, 10) || 1;
-									setWeeklyFrequency(Math.min(7, Math.max(1, num)));
+									const num = parseInt(value, 10) || 0;
+									setWeeklyFrequency(Math.min(7, Math.max(0, num)));
 								}}
 								className={element('field')}
 								type="number"
+								error={weeklyFrequency < 1 ? ['Значение должно быть не менее 1'] : false}
 							/>
 						)}
 
-						{regularFrequency === 'custom' && (
+						{regularFrequency === 'custom' && canEditCustomSchedule(isPremium) && (
 							<div className={element('custom-schedule-selector')}>
 								<p className={element('field-title')}>Выберите дни недели (обязательно хотя бы один)</p>
 								<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
@@ -134,11 +137,12 @@ export const RegularGoalSettings: FC<RegularGoalSettingsProps> = (props) => {
 								text={durationType === 'days' ? 'Количество дней' : 'Количество недель'}
 								value={durationValue.toString()}
 								setValue={(value) => {
-									const num = parseInt(value, 10) || 1;
-									setDurationValue(Math.max(1, num));
+									const num = parseInt(value, 10) || 0;
+									setDurationValue(Math.max(0, num));
 								}}
 								className={element('field')}
 								type="number"
+								error={durationValue < 1 ? ['Значение должно быть не менее 1'] : false}
 							/>
 						)}
 

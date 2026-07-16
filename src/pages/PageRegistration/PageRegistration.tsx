@@ -6,6 +6,7 @@ import {Registration} from '@/components/Registration/Registration';
 import {ThemeStore} from '@/store/ThemeStore';
 import {UserStore} from '@/store/UserStore';
 import {IPage} from '@/typings/page';
+import {getUser} from '@/utils/api/get/getUser';
 
 export const PageRegistration: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;
@@ -32,6 +33,7 @@ export const PageRegistration: FC<IPage> = ({page}) => {
 			name: data.name || userInfo.name,
 			...(data.email_confirmed !== undefined && {isEmailConfirmed: data.email_confirmed}),
 		});
+		getUser();
 		navigate('/list/100-goals');
 	};
 
@@ -42,5 +44,5 @@ export const PageRegistration: FC<IPage> = ({page}) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	return <Registration isPage openLogin={() => navigate('/sign-in')} successRegistration={successRegistration} />;
+	return <Registration isPage successRegistration={successRegistration} />;
 };

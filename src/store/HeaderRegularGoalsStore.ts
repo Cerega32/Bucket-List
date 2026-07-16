@@ -1,19 +1,30 @@
 import {makeAutoObservable} from 'mobx';
 
+import {UserStore} from '@/store/UserStore';
+import {IRegularGoalStatistics} from '@/typings/goal';
 import {getRegularGoalStatistics} from '@/utils/api/goals';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/isPremiumSubscriptionActive';
+import {computeRegularGoalsHeaderStats} from '@/utils/regularGoal/regularGoalTodayVisibility';
 
-function isForToday(stat: {canCompleteToday: boolean; isActive: boolean; currentPeriodProgress?: {completedToday?: boolean}}) {
-	return stat.isActive && (stat.canCompleteToday || stat.currentPeriodProgress?.completedToday === true);
-}
+const parseRegularGoalStatisticsList = (payload: unknown): IRegularGoalStatistics[] => {
+	if (!payload || typeof payload !== 'object') {
+		return [];
+	}
 
-function isCompletedToday(stat: {currentPeriodProgress?: {completedToday?: boolean}}) {
-	return stat.currentPeriodProgress?.completedToday === true;
-}
+	if (Array.isArray(payload)) {
+		return payload;
+	}
+
+	const {data} = payload as {data?: IRegularGoalStatistics[]};
+	return Array.isArray(data) ? data : [];
+};
 
 class Store {
-	todayCount = 0;
+	totalCount = 0;
 
 	completedTodayCount = 0;
+
+	needsAttention = false;
 
 	isLoading = false;
 
@@ -21,46 +32,52 @@ class Store {
 		makeAutoObservable(this);
 	}
 
-	setTodayStats(count: number, completedCount: number) {
-		this.todayCount = count;
-		this.completedTodayCount = completedCount;
+	setStats(total: number, completedToday: number, needsAttention = false) {
+		this.totalCount = total;
+		this.completedTodayCount = completedToday;
+		this.needsAttention = needsAttention;
 	}
 
 	setLoading(loading: boolean) {
 		this.isLoading = loading;
 	}
 
-	get hasRegularGoalsToday() {
-		return this.todayCount > 0;
+	get hasRegularGoals() {
+		return this.totalCount > 0;
 	}
 
 	get allCompletedToday() {
-		return this.todayCount > 0 && this.completedTodayCount === this.todayCount;
+		return this.totalCount > 0 && this.completedTodayCount === this.totalCount;
 	}
 
-	async loadTodayCount() {
+	async loadTodayCount(selectionPending = false) {
 		this.setLoading(true);
 		try {
 			const response = await getRegularGoalStatistics();
 			if (response.success && response.data) {
-				const statistics = Array.isArray(response.data) ? response.data : response.data.data;
-				const forToday = statistics.filter(isForToday);
-				const completed = forToday.filter(isCompletedToday);
-				this.setTodayStats(forToday.length, completed.length);
+				const statistics = parseRegularGoalStatisticsList(response.data);
+				const stats = computeRegularGoalsHeaderStats(
+					statistics,
+					selectionPending,
+					UserStore.userSelf.regularGoalsSlotsLocked ?? false,
+					isPremiumSubscriptionActive(UserStore.userSelf)
+				);
+				this.setStats(stats.totalCount, stats.completedTodayCount, stats.needsAttention);
 			} else {
-				this.setTodayStats(0, 0);
+				this.setStats(0, 0, false);
 			}
 		} catch (error) {
 			console.error('Ошибка загрузки количества регулярных целей:', error);
-			this.setTodayStats(0, 0);
+			this.setStats(0, 0, false);
 		} finally {
 			this.setLoading(false);
 		}
 	}
 
 	clear() {
-		this.todayCount = 0;
+		this.totalCount = 0;
 		this.completedTodayCount = 0;
+		this.needsAttention = false;
 	}
 }
 

@@ -1,12 +1,15 @@
 import {motion} from 'framer-motion';
 import {observer} from 'mobx-react-lite';
-import {FC} from 'react';
+import {FC, useState} from 'react';
 import {Link} from 'react-router-dom';
 
+import {FeedbackModal} from '@/components/FeedbackModal/FeedbackModal';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
 import {ThemeStore} from '@/store/ThemeStore';
 import {UserStore} from '@/store/UserStore';
+import {resetCookieConsent} from '@/utils/legal/cookieConsent';
+import {CONTACTS_REQUISITES_URL} from '@/utils/legal/operatorInfo';
 
 import {Svg} from '../Svg/Svg';
 
@@ -24,6 +27,7 @@ export const Footer: FC<FooterProps> = observer((props) => {
 	const {isScreenMobile} = useScreenSize();
 
 	const [block, element] = useBem('footer', className);
+	const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
 
 	const currentYear = new Date().getFullYear();
 
@@ -44,14 +48,9 @@ export const Footer: FC<FooterProps> = observer((props) => {
 						title: 'Мой профиль',
 						links: [
 							{to: '/user/self', label: 'Дашборд'},
-							{to: '/user/self/active-goals', label: 'Активные цели и списки'},
-							{to: '/user/self/done-goals', label: 'Выполненные'},
+							{to: '/user/self/active-goals', label: 'Активные цели'},
 							{to: '/user/self/achievements', label: 'Достижения'},
 							{to: '/user/self/friends', label: 'Друзья'},
-							{to: '/user/self/maps', label: 'Мои карты'},
-							{to: '/user/self/folders', label: 'Папки целей'},
-							{to: '/user/self/progress', label: 'Прогресс целей'},
-							{to: '/user/self/regular', label: 'Регулярные цели'},
 							{to: '/user/self/subs', label: 'Подписка'},
 							{to: '/user/self/settings', label: 'Настройки'},
 						],
@@ -64,15 +63,18 @@ export const Footer: FC<FooterProps> = observer((props) => {
 				{to: '/about', label: 'О проекте'},
 				{to: '/help', label: 'Помощь'},
 				{to: '/contacts', label: 'Контакты'},
+				{to: '', label: 'Оставить отзыв', feedbackModal: true},
 			],
 		},
 		{
 			title: 'Правовая информация',
 			links: [
-				{to: '/privacy', label: 'Политика конфиденциальности'},
-				{to: '/agreement', label: 'Пользовательское соглашение'},
-				{to: '/terms', label: 'Условия использования'},
+				{to: '/privacy', label: 'Конфиденциальность'},
+				{to: '/agreement', label: 'Соглашение'},
+				{to: '/subscription-offer', label: 'Оферта Premium'},
+				{to: '/subscription-refund', label: 'Возврат подписки'},
 				{to: '/cookies', label: 'Cookie'},
+				{to: '', label: 'Настройки cookie', cookieSettings: true},
 			],
 		},
 	];
@@ -110,10 +112,24 @@ export const Footer: FC<FooterProps> = observer((props) => {
 								<h3 className={element('nav-title')}>{section.title}</h3>
 								<ul className={element('nav-list')}>
 									{section.links.map((link) => (
-										<li key={link.to} className={element('nav-item')}>
-											<Link to={link.to} className={element('nav-link')}>
-												{link.label}
-											</Link>
+										<li key={link.to || link.label}>
+											{'feedbackModal' in link && link.feedbackModal ? (
+												<button
+													type="button"
+													className={element('nav-link')}
+													onClick={() => setIsFeedbackModalOpen(true)}
+												>
+													{link.label}
+												</button>
+											) : 'cookieSettings' in link && link.cookieSettings ? (
+												<button type="button" className={element('nav-link')} onClick={resetCookieConsent}>
+													{link.label}
+												</button>
+											) : (
+												<Link to={link.to} className={element('nav-link')}>
+													{link.label}
+												</Link>
+											)}
 										</li>
 									))}
 								</ul>
@@ -131,10 +147,15 @@ export const Footer: FC<FooterProps> = observer((props) => {
 				>
 					<div className={element('divider')} />
 					<div className={element('bottom-content')}>
-						<div className={element('copyright')}>
-							<span>©</span>
-							<span>{currentYear} Delting. Все права защищены.</span>
-						</div>
+						<p className={element('copyright')}>
+							<span className={element('copyright-line')}>
+								© {currentYear} Delting. Все права защищены
+								<span className={element('sep')}>|</span>
+								<Link to={CONTACTS_REQUISITES_URL} className={element('requisites-link')}>
+									Реквизиты
+								</Link>
+							</span>
+						</p>
 						{!isScreenMobile && (
 							<div className={element('additional-info')}>
 								<span>Сделано с ❤️ для вашего развития</span>
@@ -143,6 +164,8 @@ export const Footer: FC<FooterProps> = observer((props) => {
 					</div>
 				</motion.div>
 			</div>
+
+			<FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
 		</footer>
 	);
 });

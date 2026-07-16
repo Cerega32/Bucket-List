@@ -1,35 +1,39 @@
 .legal-document {
-	max-width: 900px;
-	padding: 56px 24px 102px;
+	max-width: var(--max-width);
+	padding: 56px 0 96px;
 	margin: 0 auto;
-	background: var(--color-gray-3);
 
 	@include xl {
-		padding: 56px 30px 102px;
+		padding: 56px 24px 96px;
 	}
 
 	@include md {
-		padding: 24px 20px 102px;
+		padding: 0 24px 96px;
+	}
+
+	@include sm {
+		padding: 24px 24px 96px;
 	}
 
 	&__content {
 		@include block-radius(40px);
 
 		background: var(--color-white);
+
+		@include sm {
+			padding: 24px;
+		}
 	}
 
 	&__header {
-		padding: 40px 40px 24px;
+		padding-bottom: 24px;
 		text-align: center;
 		border-bottom: 1px solid var(--color-border);
-
-		@include md {
-			padding: 24px 24px 20px;
-		}
 	}
 
 	&__title {
 		margin: 0 0 16px;
+		overflow-wrap: break-word;
 	}
 
 	&__date {
@@ -39,11 +43,7 @@
 	}
 
 	&__document {
-		padding: 40px;
-
-		@include md {
-			padding: 24px;
-		}
+		padding-top: 24px;
 
 		section {
 			margin-bottom: 32px;
@@ -142,5 +142,11 @@
 		strong {
 			font-weight: var(--weight-semi-bold);
 		}
+	}
+
+	&__related {
+		padding-top: 24px;
+		margin-top: 32px;
+		border-top: 1px solid var(--color-border);
 	}
 }

@@ -13,9 +13,19 @@
 		margin-bottom: 40px;
 	}
 
+	&__comment {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+	}
+
 	&__sidebar {
 		flex-shrink: 0;
 		width: 336px;
+
+		@include md {
+			width: 100%;
+		}
 
 		@include xs {
 			width: 100%;

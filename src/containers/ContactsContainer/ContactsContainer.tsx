@@ -1,14 +1,27 @@
 import {motion} from 'framer-motion';
-import {FC} from 'react';
+import {FC, useEffect} from 'react';
+import {useLocation} from 'react-router-dom';
 
+import {OperatorRequisites} from '@/components/OperatorRequisites/OperatorRequisites';
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {CONTACTS_REQUISITES_ANCHOR, OPERATOR_EMAIL} from '@/utils/legal/operatorInfo';
 
 import './contacts-container.scss';
 
 export const ContactsContainer: FC = () => {
 	const [block, element] = useBem('contacts-container');
+	const location = useLocation();
+
+	useEffect(() => {
+		if (location.hash !== `#${CONTACTS_REQUISITES_ANCHOR}`) {
+			return;
+		}
+
+		const requisitesSection = document.getElementById(CONTACTS_REQUISITES_ANCHOR);
+		requisitesSection?.scrollIntoView({behavior: 'smooth', block: 'start'});
+	}, [location.hash, location.pathname]);
 
 	const supportMethods = [
 		{
@@ -22,8 +35,8 @@ export const ContactsContainer: FC = () => {
 			icon: 'email',
 			title: 'Email',
 			description: 'Напишите нам на почту',
-			href: 'mailto:delting-help@yandex.com',
-			label: 'delting-help@yandex.com',
+			href: `mailto:${OPERATOR_EMAIL}`,
+			label: OPERATOR_EMAIL,
 		},
 	];
 
@@ -116,6 +129,18 @@ export const ContactsContainer: FC = () => {
 								<p className={element('contact-description')}>{contact.description}</p>
 							</motion.a>
 						))}
+					</div>
+				</section>
+
+				<section id={CONTACTS_REQUISITES_ANCHOR} className={element('section', {requisites: true})}>
+					<Title tag="h2" className={element('section-title')}>
+						Реквизиты исполнителя
+					</Title>
+					<p className={element('section-description')}>
+						По вопросам оплаты подписки Premium, возврата средств и обработки персональных данных.
+					</p>
+					<div className={element('requisites-card')}>
+						<OperatorRequisites />
 					</div>
 				</section>
 

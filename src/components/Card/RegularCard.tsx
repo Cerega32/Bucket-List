@@ -15,7 +15,7 @@ import {Title} from '../Title/Title';
 
 import './card.scss';
 
-type RegularDayState = 'completed' | 'active' | 'inactive' | 'blocked';
+type RegularDayState = 'completed' | 'completedBg' | 'allowedSkip' | 'active' | 'inactive' | 'blocked';
 
 interface RegularCardPropsBase {
 	className?: string;
@@ -28,6 +28,7 @@ interface RegularCardPropsRegular extends RegularCardPropsBase {
 	statistics: IRegularGoalStatistics;
 	onMarkRegular: () => Promise<void> | void;
 	onRestart?: () => Promise<void> | void;
+	isPrimaryActionLoading?: boolean;
 	progressGoal?: never;
 	onOpenProgressModal?: never;
 	// onMarkCompleted?: never;
@@ -36,9 +37,11 @@ interface RegularCardPropsRegular extends RegularCardPropsBase {
 interface RegularCardPropsProgress extends RegularCardPropsBase {
 	variant: 'progress';
 	progressGoal: IGoalProgress;
-	onOpenProgressModal: () => void;
-	onMarkToday: () => void;
+	onOpenProgressModal?: () => void;
+	onMarkToday?: () => void;
 	onMarkCompleted?: () => void | Promise<void>;
+	canEditProgress?: boolean;
+	demoMode?: boolean;
 	regularGoal?: never;
 	statistics?: never;
 	onMarkRegular?: never;
@@ -47,6 +50,7 @@ interface RegularCardPropsProgress extends RegularCardPropsBase {
 type RegularCardProps = RegularCardPropsRegular | RegularCardPropsProgress;
 
 const WEEK_DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+const REGULAR_CUSTOM_DAY_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
 const getCurrentDayOfWeek = (): number => {
 	const today = new Date();
@@ -55,14 +59,27 @@ const getCurrentDayOfWeek = (): number => {
 };
 
 const getSeriesText = (statistics: IRegularGoalStatistics): string => {
-	const value = statistics.currentStreak || 0;
-	const isWeekly = statistics.currentPeriodProgress?.type === 'weekly';
+	const frequency = statistics.regularGoalData?.frequency;
+	const isWeeklyUnit = frequency !== 'daily';
+	let current = statistics.currentStreak || 0;
 
-	if (isWeekly) {
-		return pluralize(value, ['неделя', 'недели', 'недель']);
+	if (statistics.isInterrupted && statistics.interruptedStreak !== null && statistics.interruptedStreak !== undefined) {
+		current = statistics.interruptedStreak;
+	} else if (statistics.isSeriesCompleted) {
+		if (isWeeklyUnit) {
+			current = statistics.completedWeeks > 0 ? statistics.completedWeeks : current;
+		} else {
+			current = statistics.totalCompletions > 0 ? statistics.totalCompletions : current;
+		}
+	} else if (isWeeklyUnit) {
+		current = statistics.completedWeeks > 0 ? statistics.completedWeeks : current;
 	}
 
-	return pluralize(value, ['день', 'дня', 'дней']);
+	if (isWeeklyUnit) {
+		return pluralize(current, ['неделя', 'недели', 'недель']);
+	}
+
+	return pluralize(current, ['день', 'дня', 'дней']);
 };
 
 const getSeriesTitle = (statistics: IRegularGoalStatistics): string => {
@@ -77,9 +94,7 @@ const getSeriesTitle = (statistics: IRegularGoalStatistics): string => {
 	return 'Текущая серия';
 };
 
-const getSeriesIcon = (statistics: IRegularGoalStatistics): string => {
-	const hasValue = (statistics.currentStreak || 0) > 0;
-
+const getSeriesIcon = (statistics: IRegularGoalStatistics, isCurrentPeriodCompleted: boolean): string => {
 	if (statistics.isSeriesCompleted) {
 		return 'regular-checked';
 	}
@@ -88,11 +103,24 @@ const getSeriesIcon = (statistics: IRegularGoalStatistics): string => {
 		return 'regular-cancel';
 	}
 
-	if (hasValue) {
+	if (isCurrentPeriodCompleted) {
 		return 'regular';
 	}
 
 	return 'regular-empty';
+};
+
+const getIsCurrentPeriodCompleted = (statistics: IRegularGoalStatistics): boolean => {
+	const frequency = statistics.regularGoalData?.frequency;
+	const progress = statistics.currentPeriodProgress;
+
+	if (frequency === 'daily') {
+		return progress?.type === 'daily' ? !!progress.completedToday : false;
+	}
+
+	const totalWeeks = statistics.totalWeeks ?? 0;
+	const completedWeeks = statistics.completedWeeks ?? 0;
+	return totalWeeks > 0 && completedWeeks >= totalWeeks;
 };
 
 const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): RegularDayState => {
@@ -108,6 +136,7 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 			(d: {
 				dayIndex: number;
 				isCompleted?: boolean;
+				isCompletedDay?: boolean;
 				isBlocked?: boolean;
 				isBlockedByStartDate?: boolean;
 				isSkipped?: boolean;
@@ -119,17 +148,32 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 
 		const isBlockedByStartDate = dayData.isBlockedByStartDate || false;
 		const isBlocked = dayData.isBlocked || false;
-		const isCompleted = !isBlockedByStartDate && (dayData.isCompleted || false);
+		const cs = statistics.regularGoalData?.customSchedule;
+		let blockedCross = isBlocked && !isBlockedByStartDate;
+		if (progress.type === 'custom' && cs && typeof cs === 'object') {
+			const inSchedule = cs[REGULAR_CUSTOM_DAY_KEYS[index]] === true;
+			blockedCross = !inSchedule || !!isBlocked;
+		}
+		const isCompletedBg = !isBlockedByStartDate && (dayData.isCompleted || false);
+		const isCompletedActual = !isBlockedByStartDate && (dayData.isCompletedDay ?? dayData.isCompleted ?? false);
 		const isSkipped = !isBlockedByStartDate && (dayData.isSkipped || false);
 		const isCurrent = index === currentDayIndex;
 
-		if (isCompleted || isSkipped) {
+		if (isSkipped) {
+			return 'allowedSkip';
+		}
+
+		if (isCompletedActual) {
 			return 'completed';
 		}
 
-		// Заблокированные по расписанию дни показываем как blocked (для крестика),
-		// но подсветку текущего дня будем решать в JSX.
-		if (isBlocked && !isBlockedByStartDate) {
+		// День закрашен зелёным по норме недели, но фактически не выполнен — без галочки
+		if (isCompletedBg) {
+			return 'completedBg';
+		}
+
+		// custom: крестик для дня вне графика всегда (даже до start_date, где API даёт isBlocked=false)
+		if (blockedCross) {
 			return 'blocked';
 		}
 
@@ -159,34 +203,21 @@ const getWeekDayState = (statistics: IRegularGoalStatistics, index: number): Reg
 	return 'inactive';
 };
 
-const getCurrentProgress = (statistics: IRegularGoalStatistics) => {
-	if (!statistics.currentPeriodProgress) return null;
-
-	const progress = statistics.currentPeriodProgress;
-
-	if (progress.type === 'daily') {
-		return {
-			completed: progress.completedToday || false,
-			text: progress.completedToday ? 'Выполнено сегодня' : 'Не выполнено сегодня',
-			streak: progress.streak || 0,
-		};
-	}
-
-	if (progress.type === 'weekly') {
-		return {
-			completed: (progress.currentWeekCompletions || 0) >= (progress.requiredPerWeek || 1),
-			text: `${progress.currentWeekCompletions || 0} из ${progress.requiredPerWeek || 1} на этой неделе`,
-			progress: progress.weekProgress || 0,
-		};
-	}
-
-	return null;
-};
-
 // --- Progress variant helpers ---
 const getProgressSeriesText = (progress: IGoalProgress): string => {
+	if (typeof progress.workedDaysCount === 'number') {
+		if (progress.workedDaysCount === 0) return '—';
+		return pluralize(progress.workedDaysCount, ['день', 'дня', 'дней']);
+	}
 	const entries = progress.recentEntries || progress.entries || [];
-	const markedCount = new Set(entries.map((e) => e.date.split('T')[0])).size;
+	const byDate = new Map<string, boolean>();
+	entries.forEach((e) => {
+		const key = e.date.split('T')[0];
+		if (!key) return;
+		const wd = e.workDone ?? false;
+		byDate.set(key, (byDate.get(key) ?? false) || wd);
+	});
+	const markedCount = [...byDate.values()].filter(Boolean).length;
 	if (markedCount === 0) return '—';
 	return pluralize(markedCount, ['день', 'дня', 'дней']);
 };
@@ -200,8 +231,15 @@ const formatLocalDate = (d: Date): string => {
 
 const getProgressWeekDayState = (progress: IGoalProgress, index: number): RegularDayState => {
 	const currentDayIndex = getCurrentDayOfWeek();
+	if (progress.weekWorkDone && progress.weekWorkDone.length === 7) {
+		const hasWorked = progress.weekWorkDone[index] ?? false;
+		const isToday = index === currentDayIndex;
+		if (hasWorked) return 'completed';
+		if (isToday && progress.isWorkingToday) return 'active';
+		if (isToday) return 'active';
+		return 'inactive';
+	}
 	const entries = progress.recentEntries || progress.entries || [];
-	const entryDates = new Set(entries.map((e) => e.date.split('T')[0]));
 
 	const now = new Date();
 	const startOfWeek = new Date(now);
@@ -210,10 +248,10 @@ const getProgressWeekDayState = (progress: IGoalProgress, index: number): Regula
 	dayDate.setDate(startOfWeek.getDate() + index);
 	const dateStr = formatLocalDate(dayDate);
 
-	const hasEntry = entryDates.has(dateStr);
+	const hasWorked = entries.some((e) => e.date.split('T')[0] === dateStr && (e.workDone ?? false));
 	const isToday = index === currentDayIndex;
 
-	if (hasEntry) return 'completed';
+	if (hasWorked) return 'completed';
 	if (isToday && progress.isWorkingToday) return 'active';
 	if (isToday) return 'active';
 	return 'inactive';
@@ -225,12 +263,22 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 	const isProgress = variant === 'progress';
 
 	if (isProgress) {
-		const {progressGoal: goal, onOpenProgressModal, onMarkToday} = props;
+		const {progressGoal: goal, onOpenProgressModal, onMarkToday, onMarkCompleted, canEditProgress = true, demoMode = false} = props;
 		const currentDayIndex = getCurrentDayOfWeek();
 		const percent = Math.round(goal.progressPercentage);
+		const canEdit = canEditProgress && !demoMode;
+
+		const renderPremiumProgressButton = (label: string) => (
+			<Button type="Link" href="/premium" theme="blue-light" icon="lock" className={element('premium-progress-btn')}>
+				<span className={element('premium-progress-btn-content')} title="Доступно с Premium">
+					{label}
+					<Tag text="Premium" theme="gold" className={element('premium-progress-tag')} />
+				</span>
+			</Button>
+		);
 
 		return (
-			<section className={block({horizontal, regular: true})}>
+			<section className={block({horizontal, regular: true, demo: demoMode})}>
 				<Link to={`/goals/${goal.goalCode}`} className={element('image-wrapper')}>
 					<img src={goal.goalImage} alt={goal.goalTitle} className={element('image')} />
 					<Tag text={goal.goalCategory} category={goal.goalCategoryNameEn} className={element('category-badge')} />
@@ -288,35 +336,70 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 					</div>
 					<Line />
 					<div className={element('actions')}>
-						<Button
-							theme={goal.isWorkingToday ? 'green' : 'blue'}
-							onClick={onMarkToday}
-							icon={goal.isWorkingToday ? 'regular' : 'regular-empty'}
-							className={element('primary-button')}
-							hoverContent={goal.isWorkingToday ? 'Снять отметку' : undefined}
-							hoverIcon={goal.isWorkingToday ? 'cross' : undefined}
-						>
-							{goal.isWorkingToday ? 'Отмечено сегодня' : 'Отметить сегодня'}
-						</Button>
-						<Button theme="blue-light" onClick={onOpenProgressModal} icon="signal">
-							Изменить прогресс
-						</Button>
+						{canEdit ? (
+							<>
+								<Button
+									theme={goal.isWorkingToday ? 'green' : 'blue'}
+									onClick={onMarkToday}
+									icon={goal.isWorkingToday ? 'regular' : 'regular-empty'}
+									className={element('primary-button')}
+									hoverContent={goal.isWorkingToday ? 'Снять отметку' : undefined}
+									hoverIcon={goal.isWorkingToday ? 'cross' : undefined}
+								>
+									{goal.isWorkingToday ? 'Отмечено сегодня' : 'Отметить сегодня'}
+								</Button>
+								<Button theme="blue-light" onClick={onOpenProgressModal} icon="signal">
+									Изменить прогресс
+								</Button>
+							</>
+						) : (
+							<>
+								{onMarkCompleted && (
+									<Button theme="green" onClick={onMarkCompleted} icon="done" className={element('primary-button')}>
+										Выполнить
+									</Button>
+								)}
+								{renderPremiumProgressButton('Изменить прогресс')}
+							</>
+						)}
 					</div>
 				</div>
 			</section>
 		);
 	}
 
-	const {regularGoal: goal, statistics, onMarkRegular, onRestart} = props;
+	const {regularGoal: goal, statistics, onMarkRegular, onRestart, isPrimaryActionLoading} = props;
 	const isInterrupted = !!statistics.isInterrupted;
-	const currentProgress = getCurrentProgress(statistics);
-	const isCompletedToday = !!currentProgress?.completed;
 	const completionPercent = Math.round(statistics.completionPercentage || 0);
 	const currentDayIndex = getCurrentDayOfWeek();
-	const isBlockedOrUnavailableToday = !statistics.canCompleteToday && !isCompletedToday;
+
+	// Логика как в AsideGoal:
+	// 1. Заблокировано по расписанию (custom, isAllowed === false) → "Сегодня нельзя"
+	// 2. daily → completedToday, weekly/custom → !canCompleteToday → "Выполнено"
+	const progress = statistics.currentPeriodProgress;
+	const isBlockedBySchedule = (() => {
+		if (progress?.type !== 'custom') return false;
+		const weekDays = Array.isArray(progress.weekDays) ? progress.weekDays : null;
+		if (!weekDays) return false;
+		const todayData = weekDays.find((d: {dayIndex: number}) => d.dayIndex === currentDayIndex);
+		return todayData?.isAllowed === false;
+	})();
+	const isExecutionBlocked = statistics.isExecutionEnabled === false;
+	const isActionBlocked = isBlockedBySchedule || isExecutionBlocked;
+	const isCompletedToday = isActionBlocked
+		? false
+		: progress?.type === 'daily'
+		? !!progress.completedToday
+		: !statistics.canCompleteToday;
+	const isCurrentPeriodCompleted = getIsCurrentPeriodCompleted(statistics);
+	const isSeriesActiveState =
+		statistics.isSeriesCompleted ||
+		isInterrupted ||
+		((statistics.currentStreak || 0) > 0 && isCurrentPeriodCompleted) ||
+		((statistics.completedWeeks || 0) > 0 && isCurrentPeriodCompleted);
 
 	return (
-		<section className={block({horizontal, regular: true})}>
+		<section className={block({horizontal, regular: true, interrupted: isInterrupted})}>
 			<Link to={`/goals/${goal.code}`} className={element('image-wrapper')}>
 				<img src={goal.image} alt={goal.title} className={element('image')} />
 				<Tag text={goal.category.name} category={goal.category.nameEn} className={element('category-badge')} />
@@ -327,34 +410,42 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 						{goal.title}
 					</Title>
 				</Link>
-				<Line />
+				<Line margin="calc(auto+16px) 0 16px" />
 				<div className={element('series')}>
 					<div className={element('series-header')}>
 						<div className={element('series-title')}>
-							<Svg icon={getSeriesIcon(statistics)} className={element('series-icon')} />
+							<Svg icon={getSeriesIcon(statistics, isCurrentPeriodCompleted)} className={element('series-icon')} />
 							<span>{getSeriesTitle(statistics)}</span>
 						</div>
-						<span className={element('series-value')}>{getSeriesText(statistics)}</span>
+						<span className={element('series-value', {active: isSeriesActiveState})}>{getSeriesText(statistics)}</span>
 					</div>
 					<div className={element('series-days')}>
 						{WEEK_DAYS.map((day, index) => {
 							const state = getWeekDayState(statistics, index);
 							const isToday = index === currentDayIndex;
-							const isCompleted = state === 'completed';
+							const isActuallyCompleted = state === 'completed';
+							const isCompletedBg = state === 'completedBg';
+							const isAllowedSkip = state === 'allowedSkip';
 							const isBlocked = state === 'blocked';
+							const showCompleted = isActuallyCompleted || isCompletedBg;
 							const isSelected = state === 'active' || (isBlocked && isToday);
 
 							return (
 								<div key={day} className={element('series-day-wrapper')}>
 									<div
 										className={element('series-day', {
-											selected: isSelected && !isCompleted,
+											selected: isSelected && !showCompleted,
 											blocked: isBlocked,
-											completed: isCompleted,
+											completed: showCompleted,
+											skipped: isAllowedSkip,
 										})}
 									>
-										{isCompleted && <Svg icon="done" className={element('series-day-icon-selected')} />}
-										{!isCompleted && isBlocked && <Svg icon="cross" className={element('series-day-icon')} />}
+										{(isActuallyCompleted || isAllowedSkip) && (
+											<Svg icon="done" className={element('series-day-icon-selected')} />
+										)}
+										{!isActuallyCompleted && !isAllowedSkip && isBlocked && (
+											<Svg icon="cross" className={element('series-day-icon')} />
+										)}
 									</div>
 									<span
 										className={element('series-day-name', {
@@ -378,11 +469,13 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 				<Line />
 				<div className={element('actions')}>
 					<Button
-						theme={isInterrupted ? 'blue' : isCompletedToday ? 'green' : isBlockedOrUnavailableToday ? 'blue-light' : 'blue'}
-						onClick={isInterrupted && onRestart ? onRestart : isBlockedOrUnavailableToday ? undefined : onMarkRegular}
-						icon={isInterrupted && onRestart ? 'regular-empty' : isBlockedOrUnavailableToday ? undefined : 'regular'}
+						theme={isInterrupted ? 'blue' : isCompletedToday ? 'green' : isActionBlocked ? 'blue-light' : 'blue'}
+						onClick={isInterrupted && onRestart ? onRestart : isActionBlocked ? undefined : onMarkRegular}
+						icon={isInterrupted && onRestart ? 'regular-empty' : isActionBlocked ? undefined : 'regular'}
 						className={element('primary-button')}
-						disabled={!isInterrupted && isBlockedOrUnavailableToday}
+						disabled={(!isInterrupted && isActionBlocked) || isPrimaryActionLoading}
+						loading={isPrimaryActionLoading}
+						loadingText={isInterrupted ? 'Запуск...' : 'Сохранение...'}
 						hoverContent={isCompletedToday && !isInterrupted ? 'Отменить выполнение' : undefined}
 						hoverIcon={isCompletedToday && !isInterrupted ? 'cross' : undefined}
 					>
@@ -390,8 +483,10 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 							? 'Начать заново'
 							: isCompletedToday
 							? 'Выполнено сегодня'
-							: isBlockedOrUnavailableToday
-							? 'Сегодня выполнить цель нельзя'
+							: isExecutionBlocked
+							? 'На паузе'
+							: isBlockedBySchedule
+							? 'Сегодня нельзя выполнить'
 							: 'Выполнить сегодня'}
 					</Button>
 				</div>

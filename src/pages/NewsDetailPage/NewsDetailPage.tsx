@@ -5,14 +5,14 @@ import {Link, useParams} from 'react-router-dom';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import remarkGfm from 'remark-gfm';
-import Lightbox from 'yet-another-react-lightbox';
 
+import {LightboxWithScrollLock} from '@/components/LightboxWithScrollLock/LightboxWithScrollLock';
 import {NewsComments} from '@/components/NewsComments/NewsComments';
 import {useBem} from '@/hooks/useBem';
 import {newsStore} from '@/store/NewsStore';
 import {ThemeStore} from '@/store/ThemeStore';
 import {pluralize} from '@/utils/text/pluralize';
-import './NewsDetailPage.scss';
+import './news-detail-page.scss';
 
 export const NewsDetailPage = observer(() => {
 	const {id} = useParams<{id: string}>();
@@ -221,7 +221,7 @@ export const NewsDetailPage = observer(() => {
 				{id && <NewsComments newsId={Number(id)} />}
 
 				{/* Лайтбокс для просмотра изображений */}
-				<Lightbox
+				<LightboxWithScrollLock
 					open={isLightboxOpen}
 					close={() => setIsLightboxOpen(false)}
 					slides={lightboxSlides}
@@ -229,6 +229,7 @@ export const NewsDetailPage = observer(() => {
 					carousel={{finite: true, padding: '16px'}}
 					controller={{closeOnBackdropClick: true}}
 					animation={{fade: 300}}
+					render={{buttonPrev: () => null, buttonNext: () => null}}
 					styles={{container: {backgroundColor: 'rgba(0, 0, 0, .8)'}}}
 				/>
 			</div>

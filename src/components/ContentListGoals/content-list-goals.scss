@@ -1,4 +1,8 @@
 .content-list-goals {
+	&__moderation-banner {
+		margin-bottom: 24px;
+	}
+
 	&__title {
 		margin-bottom: 24px;
 
@@ -18,9 +22,36 @@
 	&__info {
 		margin-bottom: 24px;
 
+		@include lg {
+			margin-bottom: 16px;
+			flex-direction: column;
+		}
+	}
+
+	&__filters {
+		margin-bottom: 24px;
+
 		@include md {
 			margin-bottom: 16px;
 		}
+	}
+
+	&__impressions {
+		display: flex;
+		gap: 8px;
+		margin-top: 24px;
+
+		@include xs {
+			flex-direction: column;
+		}
+	}
+
+	&__comments {
+		margin-top: 24px;
+	}
+
+	&__my-review-wrap {
+		margin-bottom: 16px;
 	}
 
 	&__view-toggle {

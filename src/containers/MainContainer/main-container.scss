@@ -3,10 +3,10 @@
 
 	display: flex;
 	flex-direction: column;
-	gap: 96px;
+	gap: 56px;
 	padding: 56px 0 96px;
 
 	@include xl {
-		padding: 24px;
+		padding: 24px 24px 96px;
 	}
 }

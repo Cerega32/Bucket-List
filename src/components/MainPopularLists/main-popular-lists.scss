@@ -1,0 +1,45 @@
+.main-popular-lists {
+	&__title {
+		margin-bottom: 24px;
+	}
+
+	&__lists {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+	}
+
+	&__horizontal-grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 24px;
+	}
+
+	&__list {
+		&--horizontal {
+			width: calc(100% / 2 - (24px * 1 / 2));
+
+			@include lg {
+				width: 100%;
+			}
+		}
+
+		&--grid {
+			width: calc(100% / 2 - (24px * 1 / 2));
+
+			@include lg {
+				width: 100%;
+			}
+		}
+	}
+
+	&__grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 24px;
+
+		@include lg {
+			flex-direction: column;
+		}
+	}
+}

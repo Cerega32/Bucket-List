@@ -3,11 +3,11 @@
 	align-items: flex-start;
 	gap: 24px;
 	max-width: var(--max-width);
-	margin: 56px auto 102px;
+	margin: 56px auto 96px;
 	background: var(--color-gray-3);
 
 	@include xl {
-		margin: 56px 30px 102px;
+		margin: 56px 24px 96px;
 	}
 
 	@include lg {
@@ -16,11 +16,7 @@
 
 	@include md {
 		flex-direction: column;
-		margin: 24px 30px 102px;
-	}
-
-	@include xs {
-		margin: 0 20px 24px;
+		margin: 24px 24px 96px;
 	}
 
 	&__sidebar {
@@ -28,7 +24,7 @@
 		width: 336px;
 
 		@include lg {
-			width: 250px;
+			width: 300px;
 		}
 
 		@include md {
@@ -42,6 +38,7 @@
 		background: var(--color-white);
 		border: 1px solid var(--color-border);
 		border-radius: 8px;
+		padding-top: 8px;
 	}
 
 	&__profile {
@@ -103,14 +100,18 @@
 		white-space: nowrap;
 	}
 
-	&__profile-subscription-badge {
+	&__profile-subscription-badge-link {
 		flex-shrink: 0;
+		text-decoration: none;
+		cursor: pointer;
+	}
 
+	&__profile-subscription-badge {
 		&--premium {
 			position: relative;
 			overflow: hidden;
-			border: 2px solid var(--color-gold);
-			color: var(--color-orange-3);
+			background-color: var(--color-orange);
+			color: var(--color-white);
 
 			&::before {
 				content: '';

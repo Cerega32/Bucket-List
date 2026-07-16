@@ -1,10 +1,10 @@
 .user {
 	max-width: var(--max-width);
-	padding-bottom: 102px;
+	padding-bottom: 96px;
 	margin: 56px auto 0;
 	background: var(--color-gray-3);
 
 	@include xl {
-		margin: 56px 30px 0;
+		margin: 56px 24px 0;
 	}
 }

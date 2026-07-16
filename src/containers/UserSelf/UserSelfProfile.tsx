@@ -42,11 +42,13 @@ export const UserSelfProfile: FC<UserSelfProfileProps> = observer(({hideSubscrip
 						выполнено
 					</div>
 				</div>
-				<Tag
-					text={isPremium ? 'Premium' : 'Free'}
-					theme={isPremium ? undefined : 'light'}
-					className={element('profile-subscription-badge', {premium: isPremium})}
-				/>
+				<Link to="/user/self/subs" className={element('profile-subscription-badge-link')} aria-label="Подписка">
+					<Tag
+						text={isPremium ? 'Premium' : 'Free'}
+						theme={isPremium ? undefined : 'light'}
+						className={element('profile-subscription-badge', {premium: isPremium})}
+					/>
+				</Link>
 			</div>
 			<Line className={element('profile-line')} />
 			{!hideSubscriptionButton && (

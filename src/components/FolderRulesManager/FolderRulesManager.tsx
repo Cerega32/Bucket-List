@@ -1,8 +1,11 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
+import {NotificationStore} from '@/store/NotificationStore';
 import {
+	applyAllFolderRules,
 	createFolderRule,
 	deleteFolderRule,
 	getFolderRuleOptions,
@@ -12,15 +15,16 @@ import {
 	updateFolderRule,
 } from '@/utils/api/goals';
 
+import {FolderRulesManagerSkeleton} from './FolderRulesManagerSkeleton';
+import {Banner} from '../Banner/Banner';
 import {Button} from '../Button/Button';
 import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldCheckbox} from '../FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '../FieldInput/FieldInput';
-import {FieldSelect} from '../FieldSelect/FieldSelect';
-import {Loader} from '../Loader/Loader';
 import {Modal} from '../Modal/Modal';
 import {ModalConfirm} from '../ModalConfirm/ModalConfirm';
-
+import Select from '../Select/Select';
+import {Title} from '../Title/Title';
 import './folder-rules-manager.scss';
 
 interface FolderRulesManagerProps {
@@ -28,6 +32,9 @@ interface FolderRulesManagerProps {
 	folder: IGoalFolder;
 	rules: IGoalFolderRule[];
 	onRulesUpdate: () => void;
+	totalRulesCount: number;
+	maxRules: number;
+	isPremium: boolean;
 }
 
 const RULE_FIELD_MAPPING = {
@@ -68,15 +75,22 @@ const getRelevantDisplayFields = (rule: IGoalFolderRule) => {
 	return fields;
 };
 
-export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({className, folder, rules, onRulesUpdate}) => {
+export const FolderRulesManager: FC<FolderRulesManagerProps> = observer((props) => {
+	const {className, folder, rules, onRulesUpdate, totalRulesCount, maxRules, isPremium} = props;
 	const [block, element] = useBem('folder-rules-manager', className);
+	const navigate = useNavigate();
+
+	const rulesLimitReached = totalRulesCount >= maxRules;
 
 	const [ruleOptions, setRuleOptions] = useState<IRuleOptions | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isSaving, setIsSaving] = useState(false);
 	const [isCreating, setIsCreating] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editingRule, setEditingRule] = useState<IGoalFolderRule | null>(null);
 	const [deleteRuleId, setDeleteRuleId] = useState<number | null>(null);
+	const [isApplyingAll, setIsApplyingAll] = useState(false);
+	const [isConfirmApplyOpen, setIsConfirmApplyOpen] = useState(false);
 
 	const [formData, setFormData] = useState<Partial<IGoalFolderRule>>({
 		folder: folder.id,
@@ -86,6 +100,12 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 		progressThreshold: 80,
 		daysWithoutProgress: 7,
 	});
+	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+	const getRequiredFields = () => {
+		if (!formData.ruleType) return [];
+		return RULE_FIELD_MAPPING[formData.ruleType as keyof typeof RULE_FIELD_MAPPING] || [];
+	};
 
 	const loadRuleOptions = useCallback(async () => {
 		setIsLoading(true);
@@ -113,10 +133,31 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 			progressThreshold: 80,
 			daysWithoutProgress: 7,
 		});
+		setFormErrors({});
+	};
+
+	const validateForm = (): boolean => {
+		const errors: Record<string, string> = {};
+		const requiredFields = getRequiredFields();
+
+		if (requiredFields.includes('category') && !formData.category) {
+			errors['category'] = 'Выберите категорию';
+		}
+		if (requiredFields.includes('complexity') && !formData.complexity) {
+			errors['complexity'] = 'Выберите сложность';
+		}
+		if (requiredFields.includes('keywords') && !formData.keywords?.trim()) {
+			errors['keywords'] = 'Введите ключевые слова';
+		}
+
+		setFormErrors(errors);
+		return Object.keys(errors).length === 0;
 	};
 
 	const handleCreateRule = async () => {
 		if (!formData.ruleType) return;
+		if (!validateForm()) return;
+		setIsSaving(true);
 
 		try {
 			const response = await createFolderRule(folder.id, formData);
@@ -128,10 +169,13 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 		} catch (error) {
 			console.error('Ошибка создания правила:', error);
 		}
+		setIsSaving(false);
 	};
 
 	const handleUpdateRule = async () => {
 		if (!editingRule?.id || !formData.ruleType) return;
+		if (!validateForm()) return;
+		setIsSaving(true);
 
 		try {
 			const response = await updateFolderRule(folder.id, editingRule.id, formData);
@@ -144,6 +188,27 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 		} catch (error) {
 			console.error('Ошибка обновления правила:', error);
 		}
+		setIsSaving(false);
+	};
+
+	const handleApplyAllRules = async () => {
+		setIsApplyingAll(true);
+		try {
+			const response = await applyAllFolderRules();
+			if (response.success && response.data) {
+				const {added, removed, goalsProcessed} = response.data;
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Правила применены',
+					message: `Обработано целей: ${goalsProcessed}. Добавлено: ${added}, удалено: ${removed}.`,
+				});
+				onRulesUpdate();
+			}
+		} catch (error) {
+			console.error('Ошибка применения правил:', error);
+		}
+		setIsApplyingAll(false);
+		setIsConfirmApplyOpen(false);
 	};
 
 	const handleDeleteRule = async (ruleId: number) => {
@@ -175,24 +240,23 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 		setIsEditing(true);
 	};
 
-	const getRequiredFields = () => {
-		if (!formData.ruleType) return [];
-		return RULE_FIELD_MAPPING[formData.ruleType as keyof typeof RULE_FIELD_MAPPING] || [];
-	};
-
 	const renderRuleForm = () => {
 		const requiredFields = getRequiredFields();
 
 		return (
 			<div className={element('form')}>
-				<FieldSelect
-					id="rule-type"
+				<Select
 					text="Тип правила"
-					value={formData.ruleType || ''}
-					setValue={(value: string) => setFormData({...formData, ruleType: value})}
-					options={ruleOptions?.ruleTypes.map((type) => ({value: type.value, text: type.label})) || []}
+					options={ruleOptions?.ruleTypes.map((type) => ({name: type.label, value: type.value})) || []}
+					activeOption={formData.ruleType ? ruleOptions?.ruleTypes.findIndex((t) => t.value === formData.ruleType) ?? null : null}
+					onSelect={(active) => {
+						const value = ruleOptions?.ruleTypes[active]?.value;
+						if (value) {
+							setFormData({...formData, ruleType: value});
+							setFormErrors({});
+						}
+					}}
 					placeholder="Выберите тип правила"
-					required
 				/>
 
 				{formData.ruleType && (
@@ -202,26 +266,45 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 				)}
 
 				{requiredFields.includes('category') && (
-					<FieldSelect
-						id="rule-category"
+					<Select
 						text="Категория"
-						value={formData.category?.toString() || ''}
-						setValue={(value: string) => setFormData({...formData, category: Number(value)})}
-						options={ruleOptions?.categories.map((cat) => ({value: cat.id.toString(), text: cat.name})) || []}
+						options={ruleOptions?.categories.map((cat) => ({name: cat.name, value: cat.id.toString()})) || []}
+						activeOption={
+							formData.category ? ruleOptions?.categories.findIndex((cat) => cat.id === formData.category) ?? null : null
+						}
+						onSelect={(active) => {
+							const cat = ruleOptions?.categories[active];
+							if (cat) {
+								setFormData({...formData, category: cat.id});
+								setFormErrors((prev) => ({...prev, category: ''}));
+							}
+						}}
 						placeholder="Выберите категорию"
-						required
+						searchInControl
+						error={!!formErrors['category']}
+						errorText={formErrors['category']}
 					/>
 				)}
 
 				{requiredFields.includes('complexity') && (
-					<FieldSelect
-						id="rule-complexity"
+					<Select
 						text="Сложность"
-						value={formData.complexity || ''}
-						setValue={(value: string) => setFormData({...formData, complexity: value})}
-						options={ruleOptions?.complexities.map((comp) => ({value: comp.value, text: comp.label})) || []}
+						options={ruleOptions?.complexities.map((comp) => ({name: comp.label, value: comp.value})) || []}
+						activeOption={
+							formData.complexity
+								? ruleOptions?.complexities.findIndex((comp) => comp.value === formData.complexity) ?? null
+								: null
+						}
+						onSelect={(active) => {
+							const comp = ruleOptions?.complexities[active];
+							if (comp) {
+								setFormData({...formData, complexity: comp.value});
+								setFormErrors((prev) => ({...prev, complexity: ''}));
+							}
+						}}
 						placeholder="Выберите сложность"
-						required
+						error={!!formErrors['complexity']}
+						errorText={formErrors['complexity']}
 					/>
 				)}
 
@@ -230,9 +313,13 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 						id="rule-keywords"
 						text="Ключевые слова"
 						value={formData.keywords || ''}
-						setValue={(value: string) => setFormData({...formData, keywords: value})}
+						setValue={(value: string) => {
+							setFormData({...formData, keywords: value});
+							if (value.trim()) setFormErrors((prev) => ({...prev, keywords: ''}));
+						}}
 						placeholder="Введите слова через запятую"
 						required
+						error={formErrors['keywords'] ? [formErrors['keywords']] : undefined}
 					/>
 				)}
 
@@ -282,7 +369,13 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 				<div className={element('form-actions')}>
 					{isEditing ? (
 						<>
-							<Button theme="blue" onClick={handleUpdateRule} disabled={!formData.ruleType}>
+							<Button
+								theme="blue"
+								onClick={handleUpdateRule}
+								disabled={!formData.ruleType || isSaving}
+								loading={isSaving}
+								loadingText="Сохранение..."
+							>
 								Сохранить изменения
 							</Button>
 							<Button
@@ -298,7 +391,13 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 						</>
 					) : (
 						<>
-							<Button theme="blue" onClick={handleCreateRule} disabled={!formData.ruleType}>
+							<Button
+								theme="blue"
+								onClick={handleCreateRule}
+								disabled={!formData.ruleType || isSaving}
+								loading={isSaving}
+								loadingText="Создание..."
+							>
 								Создать правило
 							</Button>
 							<Button
@@ -318,17 +417,58 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 	};
 
 	if (isLoading) {
-		return <Loader isLoading />;
+		return <FolderRulesManagerSkeleton className={className} />;
 	}
+
+	const handleCreateButtonClick = () => {
+		if (rulesLimitReached) return;
+		setIsCreating(true);
+	};
 
 	return (
 		<div className={block()}>
 			<div className={element('header')}>
-				<h3>Правила папки &quot;{folder.name}&quot;</h3>
-				<Button theme="blue" icon="plus" width="auto" onClick={() => setIsCreating(true)} size="medium">
-					Добавить правило
-				</Button>
+				<Title tag="h3">Правила папки &quot;{folder.name}&quot;</Title>
+				<div className={element('header-actions')}>
+					{isPremium && rules.length > 0 && (
+						<Button
+							className={element('btn')}
+							theme="blue-light"
+							icon="magic"
+							width="auto"
+							onClick={() => setIsConfirmApplyOpen(true)}
+							size="small"
+							disabled={isApplyingAll}
+							loading={isApplyingAll}
+							loadingText="Применение..."
+						>
+							Применить правила
+						</Button>
+					)}
+					<Button
+						className={element('btn')}
+						theme="blue"
+						icon={rulesLimitReached ? 'lock' : 'plus'}
+						width="auto"
+						onClick={handleCreateButtonClick}
+						size="small"
+						disabled={rulesLimitReached}
+					>
+						{rulesLimitReached ? `Лимит ${maxRules} правил` : 'Добавить правило'}
+					</Button>
+				</div>
 			</div>
+
+			{!isPremium && (
+				<Banner
+					type="warning"
+					className={element('banner')}
+					message={`Автоматические правила сохранены, но пока подписка неактивна — они не срабатывают.
+						Оформите Premium, чтобы автоматика снова заработала.`}
+					actionText="Оформить Premium"
+					onAction={() => navigate('/user/self/subs')}
+				/>
+			)}
 
 			<div className={element('rules-list')}>
 				{rules.length === 0 ? (
@@ -341,10 +481,14 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 						{rules.map((rule) => (
 							<div key={rule.id} className={element('rule', {inactive: !rule.isActive})}>
 								<div className={element('rule-info')}>
-									<h4 className={element('rule-title')}>{rule.ruleTypeDisplay}</h4>
+									<Title tag="h4" className={element('rule-title')}>
+										{rule.ruleTypeDisplay}
+									</Title>
 									<div className={element('rule-details')}>
 										{getRelevantDisplayFields(rule).map((field, index) => (
-											<span key={index}>{field}</span>
+											<span className={element('rule-item')} key={index}>
+												{field}
+											</span>
 										))}
 									</div>
 									{!rule.isActive && <span className={element('inactive-badge')}>Неактивно</span>}
@@ -365,6 +509,8 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 
 			{/* Модальное окно создания правила */}
 			<Modal
+				className="folder-rules-modal"
+				size="medium"
 				isOpen={isCreating}
 				onClose={() => {
 					setIsCreating(false);
@@ -377,6 +523,8 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 
 			{/* Модальное окно редактирования правила */}
 			<Modal
+				className="folder-rules-modal"
+				size="medium"
 				isOpen={isEditing}
 				onClose={() => {
 					setIsEditing(false);
@@ -397,6 +545,17 @@ export const FolderRulesManager: FC<FolderRulesManagerProps> = observer(({classN
 				textBtn="Удалить"
 				text="Вы уверены, что хотите удалить это правило? Действие нельзя отменить."
 				themeBtn="red"
+			/>
+
+			{/* Подтверждение массового применения правил */}
+			<ModalConfirm
+				title="Применить все правила?"
+				isOpen={isConfirmApplyOpen}
+				onClose={() => setIsConfirmApplyOpen(false)}
+				handleBtn={handleApplyAllRules}
+				textBtn="Применить"
+				text="Все ваши активные правила будут применены ко всем вашим целям. Цели могут быть добавлены или удалены из папок согласно правилам."
+				themeBtn="blue"
 			/>
 		</div>
 	);

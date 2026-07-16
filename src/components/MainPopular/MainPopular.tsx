@@ -52,6 +52,7 @@ export const MainPopular: FC<MainPopularProps> = (props) => {
 							className={element('card', {big: i < bigCardsCount})}
 							big={i < bigCardsCount}
 							colored
+							topInfoClassName="gradient__top-info--main-goals"
 						/>
 					))}
 				{active === 'today' &&
@@ -62,6 +63,7 @@ export const MainPopular: FC<MainPopularProps> = (props) => {
 							className={element('card', {big: i < bigCardsCount})}
 							big={i < bigCardsCount}
 							colored
+							topInfoClassName="gradient__top-info--main-goals"
 						/>
 					))}
 			</div>

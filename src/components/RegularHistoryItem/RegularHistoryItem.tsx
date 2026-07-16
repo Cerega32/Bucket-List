@@ -25,10 +25,10 @@ export const RegularHistoryItem: FC<RegularHistoryItemProps> = (props) => {
 	const iconName = history.status === 'completed' ? 'regular-checked' : 'regular-cancel';
 	const statusText = history.status === 'completed' ? 'Серия выполнена' : 'Серия прервана';
 
-	// Определяем единицу измерения (дни или недели) в зависимости от частоты
-	const isWeekly = history.regularGoalData.frequency === 'weekly' || history.regularGoalData.frequency === 'custom';
+	// Определяем единицу измерения (дни или недели) в зависимости от frequency
+	const isWeeklyUnit = history.regularGoalData.frequency !== 'daily';
 	const streakValue = history.streak;
-	const unit = isWeekly ? pluralize(streakValue, ['неделя', 'недели', 'недель']) : pluralize(streakValue, ['день', 'дня', 'дней']);
+	const unit = isWeeklyUnit ? pluralize(streakValue, ['неделя', 'недели', 'недель']) : pluralize(streakValue, ['день', 'дня', 'дней']);
 
 	// Форматирование периодичности
 	const getFrequencyText = () => {
@@ -96,15 +96,10 @@ export const RegularHistoryItem: FC<RegularHistoryItemProps> = (props) => {
 							<span className={element('setting-label')}>Сброс прогресса:</span>
 							<span className={element('setting-value')}>{history.regularGoalData.resetOnSkip ? 'Да' : 'Нет'}</span>
 						</div>
-						{history.regularGoalData.resetOnSkip && (
+						{history.regularGoalData.allowSkipDays > 0 && (
 							<div className={element('setting-item')}>
-								<span className={element('setting-label')}>Разрешенные пропуски:</span>
-								<span className={element('setting-value')}>
-									{history.regularGoalData.allowSkipDays || 0}
-									{history.regularGoalData.daysForEarnedSkip && history.regularGoalData.daysForEarnedSkip > 0
-										? ` (начисление через ${history.regularGoalData.daysForEarnedSkip} ${isWeekly ? 'недель' : 'дней'})`
-										: ''}
-								</span>
+								<span className={element('setting-label')}>Использовано пропусков:</span>
+								<span className={element('setting-value')}>{history.usedSkipDays ?? 0}</span>
 							</div>
 						)}
 					</div>

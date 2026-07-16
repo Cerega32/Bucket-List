@@ -78,10 +78,29 @@
 		width: max-content;
 	}
 
+	&__safety-wrapper {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: 1fr min-content;
+		gap: 24px;
+
+		@include xs {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	&__btn-change {
+		grid-column: 1 / 2;
+		grid-row: 2 / 3;
+		justify-content: flex-start;
+	}
+
 	&__email-field {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+		grid-column: 1 / 2;
+		grid-row: 1 / 2;
 	}
 
 	&__email-status {
@@ -106,7 +125,7 @@
 
 	&__email-not-confirmed-row {
 		display: flex;
-		justify-content: end;
+		justify-content: flex-end;
 		align-items: center;
 		gap: 4px;
 		flex-wrap: wrap;
@@ -119,5 +138,30 @@
 
 	&__resend-btn {
 		flex-shrink: 0;
+	}
+
+	&__privacy {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+	}
+
+	&__privacy-text {
+		margin: 0;
+		color: var(--color-text);
+		font-size: 14px;
+		line-height: var(--line-height-24);
+	}
+
+	&__privacy-link {
+		color: var(--color-primary);
+		text-decoration: none;
+		transition: color 0.2s ease;
+
+		&:hover {
+			color: var(--color-primary-hover);
+			text-decoration: underline;
+		}
 	}
 }

@@ -1,0 +1,40 @@
+/** Умеренное увеличение полигонов микрогосударств (не маркеры), чтобы их было видно на карте. */
+export const MICRO_STATE_VISUAL_SCALE: Record<string, number> = {
+	va: 3.5,
+	mc: 3,
+	sm: 3,
+	li: 2.5,
+	ad: 2.5,
+	mt: 2,
+	sg: 2,
+	bh: 2,
+	mv: 2,
+	nr: 3,
+	tv: 3,
+	pw: 2.5,
+	fm: 2,
+	mh: 2,
+	ki: 2.5,
+	ws: 2,
+	to: 2.5,
+	st: 3,
+	sc: 2.5,
+	km: 2.5,
+	lu: 2,
+	me: 2,
+	bb: 2.5,
+	ag: 2.5,
+	kn: 2.5,
+	lc: 2.5,
+	vc: 2.5,
+	gd: 2.5,
+	dm: 2.5,
+	xs: 2.5,
+	xn: 2.5,
+	gi: 3,
+};
+
+export const getMicroStateVisualScale = (iso: string, boost = 1): number | undefined => {
+	const scale = MICRO_STATE_VISUAL_SCALE[iso];
+	return scale ? scale * boost : undefined;
+};

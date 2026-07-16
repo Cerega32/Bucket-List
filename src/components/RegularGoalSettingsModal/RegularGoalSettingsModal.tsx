@@ -1,7 +1,7 @@
 import {format} from 'date-fns';
 import {FC, useEffect, useState} from 'react';
 
-import {Alert} from '@/components/Alert/Alert';
+import {Banner} from '@/components/Banner/Banner';
 import {Button} from '@/components/Button/Button';
 import {DatePicker} from '@/components/DatePicker/DatePicker';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
@@ -13,6 +13,14 @@ import {Title} from '@/components/Title/Title';
 import {WeekDaySchedule, WeekDaySelector} from '@/components/WeekDaySelector/WeekDaySelector';
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
+import {UserStore} from '@/store/UserStore';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {
+	canEditCustomSchedule,
+	getRegularFrequencyActiveOption,
+	getRegularFrequencySelectOptions,
+	handleRegularFrequencySelect,
+} from '@/utils/regularGoal/regularFrequencySelectOptions';
 
 import './regular-goal-settings-modal.scss';
 
@@ -47,6 +55,16 @@ interface RegularGoalSettingsModalProps {
 	isLoading?: boolean;
 }
 
+// Проверяет, что дата в будущем (позже сегодня)
+// const isDateInFuture = (dateStr: string): boolean => {
+// 	if (!dateStr) return false;
+// 	const today = new Date();
+// 	today.setHours(0, 0, 0, 0);
+// 	const date = new Date(dateStr);
+// 	date.setHours(0, 0, 0, 0);
+// 	return date > today;
+// };
+
 export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 	isOpen,
 	onClose,
@@ -56,6 +74,7 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 	isLoading = false,
 }) => {
 	const [block, element] = useBem('regular-goal-settings-modal');
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
 
 	// Состояния формы
 	const [frequency, setFrequency] = useState<'daily' | 'weekly' | 'custom'>(originalSettings.frequency);
@@ -77,6 +96,16 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 	const [allowSkipDays, setAllowSkipDays] = useState(originalSettings.allowSkipDays || 0);
 	const [resetOnSkip, setResetOnSkip] = useState(originalSettings.resetOnSkip);
 
+	// Проверяет, что дата в будущем (позже сегодня)
+	const isDateInFuture = (dateStr: string): boolean => {
+		if (!dateStr) return false;
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const date = new Date(dateStr);
+		date.setHours(0, 0, 0, 0);
+		return date > today;
+	};
+
 	// Обновляем состояния при изменении originalSettings
 	useEffect(() => {
 		setFrequency(originalSettings.frequency);
@@ -94,12 +123,23 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 		);
 		setDurationType(originalSettings.durationType);
 		setDurationValue(originalSettings.durationValue || 30);
-		setEndDate(originalSettings.endDate || '');
+		// Если дата окончания в прошлом — сбрасываем
+		const originalEndDate = originalSettings.endDate || '';
+		setEndDate(isDateInFuture(originalEndDate) ? originalEndDate : '');
 		setAllowSkipDays(originalSettings.allowSkipDays || 0);
 		setResetOnSkip(originalSettings.resetOnSkip);
 	}, [originalSettings]);
 
 	const handleSave = () => {
+		if (frequency === 'custom' && !isPremium) {
+			NotificationStore.addNotification({
+				type: 'warning',
+				title: 'Premium',
+				message: 'Пользовательский график доступен только с Premium',
+			});
+			return;
+		}
+
 		// Валидация
 		if (frequency === 'weekly' && (!weeklyFrequency || weeklyFrequency < 1 || weeklyFrequency > 7)) {
 			NotificationStore.addNotification({
@@ -117,6 +157,21 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 				message: 'Для типа "до даты" необходимо указать дату окончания',
 			});
 			return;
+		}
+
+		if (durationType === 'until_date' && endDate) {
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+			const selectedDate = new Date(endDate);
+			selectedDate.setHours(0, 0, 0, 0);
+			if (selectedDate <= today) {
+				NotificationStore.addNotification({
+					type: 'error',
+					title: 'Ошибка',
+					message: 'Дата окончания должна быть позже сегодняшнего дня',
+				});
+				return;
+			}
 		}
 
 		if ((durationType === 'days' || durationType === 'weeks') && (!durationValue || durationValue < 1)) {
@@ -185,7 +240,7 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 
 			<div className={element('content')}>
 				<div className={element('info-message')}>
-					<Alert
+					<Banner
 						type="info"
 						message={
 							'Эта цель была создана как регулярная. Вы можете настроить параметры регулярности ' +
@@ -229,16 +284,9 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 						<Select
 							className={element('field')}
 							placeholder="Выберите периодичность"
-							options={[
-								{name: 'Ежедневно', value: 'daily'},
-								{name: 'N раз в неделю', value: 'weekly'},
-								{name: 'Пользовательский график', value: 'custom'},
-							]}
-							activeOption={frequency === 'daily' ? 0 : frequency === 'weekly' ? 1 : 2}
-							onSelect={(index) => {
-								const frequencies = ['daily', 'weekly', 'custom'] as const;
-								setFrequency(frequencies[index]);
-							}}
+							options={getRegularFrequencySelectOptions(isPremium)}
+							activeOption={getRegularFrequencyActiveOption(frequency)}
+							onSelect={(index) => handleRegularFrequencySelect(index, isPremium, setFrequency)}
 							text="Периодичность"
 						/>
 
@@ -249,15 +297,16 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 								text="Сколько раз в неделю"
 								value={weeklyFrequency.toString()}
 								setValue={(value) => {
-									const num = parseInt(value, 10) || 1;
-									setWeeklyFrequency(Math.min(7, Math.max(1, num)));
+									const num = parseInt(value, 10) || 0;
+									setWeeklyFrequency(Math.min(7, Math.max(0, num)));
 								}}
 								className={element('field')}
 								type="number"
+								error={weeklyFrequency < 1 ? ['Значение должно быть не менее 1'] : false}
 							/>
 						)}
 
-						{frequency === 'custom' && (
+						{frequency === 'custom' && canEditCustomSchedule(isPremium) && (
 							<div className={element('custom-schedule-selector')}>
 								<p className={element('field-title')}>Выберите дни для выполнения цели</p>
 								<WeekDaySelector schedule={customSchedule} onChange={setCustomSchedule} />
@@ -292,11 +341,12 @@ export const RegularGoalSettingsModal: FC<RegularGoalSettingsModalProps> = ({
 								text={durationType === 'days' ? 'Количество дней' : 'Количество недель'}
 								value={durationValue.toString()}
 								setValue={(value) => {
-									const num = parseInt(value, 10) || 1;
-									setDurationValue(Math.max(1, num));
+									const num = parseInt(value, 10) || 0;
+									setDurationValue(Math.max(0, num));
 								}}
 								className={element('field')}
 								type="number"
+								error={durationValue < 1 ? ['Значение должно быть не менее 1'] : false}
 							/>
 						)}
 

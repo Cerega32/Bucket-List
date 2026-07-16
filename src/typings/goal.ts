@@ -1,4 +1,37 @@
+import type {IGoalProgress} from '@/utils/api/goals';
+
 export type IComplexity = 'hard' | 'medium' | 'easy';
+
+export type ICatalogReviewStatus = 'pending' | 'approved' | 'rejected';
+
+/** Коды причин отказа модератора — см. backend/utils/catalog_rejection_reasons.py */
+export type ICatalogRejectionReason =
+	| 'duplicate'
+	| 'unclear_text'
+	| 'off_topic'
+	| 'inappropriate_text'
+	| 'inappropriate_image'
+	| 'low_quality_image'
+	| 'spam'
+	| 'other';
+
+export interface ICatalogRejectionInfo {
+	/** false — ждёт одобрения для общего каталога */
+	catalogApproved?: boolean;
+	catalogReviewStatus?: ICatalogReviewStatus;
+	/** Причины последнего отказа модератора (мультивыбор) */
+	catalogRejectionReasons?: ICatalogRejectionReason[];
+	/** Комментарий модератора (обязателен для причины «Другое») */
+	catalogRejectionComment?: string;
+	/** Сколько раз уже отклонено */
+	catalogRejectionCount?: number;
+	/** Лимит попыток (по умолчанию 3) */
+	catalogRejectionLimit?: number;
+	/** Лимит попыток исчерпан — повторная отправка недоступна, запись будет удалена */
+	catalogPermanentlyRejected?: boolean;
+	/** Дата автоудаления (заполняется при catalogPermanentlyRejected) */
+	catalogDeleteAt?: string | null;
+}
 
 export interface ICategory {
 	id: number;
@@ -26,7 +59,7 @@ export interface ICategoryTree extends ICategoryDetailed {
 	children: ICategoryTree[];
 }
 
-export interface IShortList {
+export interface IShortList extends ICatalogRejectionInfo {
 	code: string;
 	image: string;
 	shortDescription: string;
@@ -40,9 +73,10 @@ export interface IShortList {
 	userCompletedGoals: number;
 	goalsCount: number;
 	estimatedTime?: never;
+	hasScratchMap?: boolean;
 }
 
-export interface IGoal {
+export interface IGoal extends ICatalogRejectionInfo {
 	category: ICategory;
 	code: string;
 	complexity: IComplexity;
@@ -70,6 +104,7 @@ export interface IGoal {
 	};
 	createdByUser: boolean;
 	isCanEdit: boolean;
+	hasMyComment: boolean;
 	totalAdditions?: number;
 	estimatedTime?: string;
 	location?: ILocation;
@@ -105,9 +140,15 @@ export interface IGoal {
 
 	// Поля для регулярных целей
 	regularConfig?: IRegularGoalConfig;
+
+	/** Вложенный прогресс текущего пользователя (приходит с GET цели по коду) */
+	userProgress?: IGoalProgress | null;
+
+	// Количество записей в истории прогресса (для нерегулярных целей)
+	progressEntriesCount?: number;
 }
 
-export interface IShortGoal {
+export interface IShortGoal extends ICatalogRejectionInfo {
 	id: number;
 	category: ICategory;
 	code: string;
@@ -247,7 +288,10 @@ export interface IRegularGoalStatistics {
 	consecutiveCompletionsForSkip?: number;
 	usedSkipDays?: number;
 	remainingSkipDays?: number; // Количество использованных разрешенных пропусков
+	daysUntilEarnedSkip?: number | null;
 	isActive: boolean;
+	isExecutionEnabled?: boolean;
+	slotExecutionLocked?: boolean;
 	isPaused: boolean;
 	resetCount: number;
 	isInterrupted?: boolean;
@@ -317,5 +361,6 @@ export interface IRegularGoalHistory {
 	endDate: string;
 	totalCompletions: number;
 	totalDays: number;
+	usedSkipDays?: number;
 	createdAt: string;
 }

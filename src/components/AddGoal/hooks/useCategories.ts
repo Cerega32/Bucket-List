@@ -4,6 +4,7 @@ import {useLocation} from 'react-router-dom';
 import {NotificationStore} from '@/store/NotificationStore';
 import {ICategory} from '@/typings/goal';
 import {getAllCategories} from '@/utils/api/get/getCategories';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 
 interface UseCategoriesProps {
 	initialCategory?: ICategory;
@@ -42,12 +43,12 @@ export const useCategories = ({
 			try {
 				// Если переданы готовые категории, используем их
 				if (preloadedCategories) {
-					setCategories(preloadedCategories);
+					setCategories(sortMainCategories(preloadedCategories));
 				} else {
 					// Иначе загружаем категории с сервера
 					const data = await getAllCategories();
 					if (data.success) {
-						setCategories(data.data);
+						setCategories(sortMainCategories(data.data));
 					}
 				}
 			} catch (error) {

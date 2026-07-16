@@ -7,9 +7,26 @@
 }
 
 // Добавляем минимальную ширину для всего приложения
-html,
+html {
+	min-width: 320px;
+	background: var(--color-gray-3);
+}
+
 body {
 	min-width: 320px;
+	min-height: 100vh;
+
+	@supports (height: 100dvh) {
+		min-height: 100dvh;
+	}
+
+	font-family: 'Inter', sans-serif;
+	font-size: 14px;
+	line-height: 1.42;
+	scroll-behavior: smooth;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
 }
 
 /* Box-sizing rules */
@@ -35,16 +52,7 @@ blockquote,
 dl,
 dd {
 	margin: 0;
-}
-
-/* Set core body defaults */
-body {
-	min-height: 100vh;
-	font-family: 'Inter', sans-serif;
-	font-size: 14px;
-	line-height: 1.42;
-	scroll-behavior: smooth;
-	text-rendering: optimizespeed;
+	letter-spacing: 1%;
 }
 
 /* Remove list styles ul ol elements */
@@ -94,5 +102,17 @@ button {
 .date-picker {
 	.react-datepicker-wrapper {
 		width: 100%;
+	}
+}
+
+@keyframes rise-from-bottom {
+	from {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateY(0);
+		opacity: 1;
 	}
 }

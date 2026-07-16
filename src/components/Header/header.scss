@@ -1,27 +1,35 @@
+@property --header-gradient-angle {
+	syntax: '<angle>';
+	inherits: false;
+	initial-value: 0deg;
+}
+
 .header {
 	$block: &;
 
 	position: fixed;
 	z-index: 1100;
-	top: 0;
+	top: var(--safari-viewport-offset, 0px);
 	width: 100%;
-	height: var(--height-header);
+	height: var(--header-stack-height);
 	padding: 16px 0;
+	padding-top: calc(16px + var(--safe-area-top));
 	border-bottom: 1px solid rgb(var(--color-white-rgb) / 16%);
 	transition: height 0.25s ease-in-out, padding 0.25s ease-in-out;
 
 	@include md {
-		height: var(--height-header-compact);
+		height: var(--header-stack-height-compact);
 	}
 
 	@include xl {
 		padding: 16px 24px;
+		padding-top: calc(16px + var(--safe-area-top));
 	}
 
 	@include sm {
 		height: auto;
-		min-height: var(--height-header-compact);
-		padding-top: 12px;
+		min-height: var(--header-stack-height-compact);
+		padding-top: calc(12px + var(--safe-area-top));
 		padding-bottom: 12px;
 	}
 
@@ -30,11 +38,12 @@
 
 		display: flex;
 		align-items: center;
+		font-weight: var(--weight-medium);
 		justify-content: space-between;
 		gap: 32px;
 		margin-bottom: 16px;
 		max-height: 40px; // примерная высота pre-header
-		overflow: hidden;
+		overflow: visible;
 		transition: max-height 0.25s ease-in-out, margin-bottom 0.25s ease-in-out, opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
 
 		@include md {
@@ -47,6 +56,7 @@
 			opacity: 0;
 			transform: translateY(-8px);
 			pointer-events: none;
+			overflow: hidden;
 		}
 	}
 
@@ -107,10 +117,6 @@
 		padding: 0;
 		list-style: none;
 		gap: 8px;
-
-		.header__search-item {
-			flex-grow: 1;
-		}
 	}
 
 	&__logo {
@@ -195,10 +201,8 @@
 	&__item-link {
 		display: inline-block;
 		padding: 6px 8px;
-		border-radius: 6px;
+		border-radius: 8px;
 		color: var(--color-white);
-
-		// font-weight: var(--weight-medium);
 		transition: all 0.15s ease-in-out;
 		word-wrap: nowrap;
 
@@ -226,6 +230,37 @@
 			border-radius: 6px;
 			color: var(--color-text-primary);
 			font-weight: var(--weight-regular);
+		}
+
+		&--is100Goals {
+			position: relative;
+			isolation: isolate;
+			overflow: visible;
+			z-index: 0;
+			background: conic-gradient(
+				from var(--header-gradient-angle),
+				rgb(192 132 252 / 17%) 0deg,
+				rgb(244 114 182 / 17%) 120deg,
+				rgb(56 189 248 / 17%) 240deg,
+				rgb(192 132 252 / 17%) 360deg
+			);
+			animation: header-gradient-rotate 6s linear infinite;
+
+			&::before,
+			&::after {
+				content: '';
+				position: absolute;
+				inset: -1px;
+				border-radius: inherit;
+				pointer-events: none;
+				transition: opacity 0.25s ease;
+			}
+		}
+	}
+
+	@keyframes header-gradient-rotate {
+		to {
+			--header-gradient-angle: 360deg;
 		}
 	}
 
@@ -264,12 +299,29 @@
 		min-width: auto;
 	}
 
+	&__search-trigger {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 4px;
+		height: 40px;
+		padding: 10px 16px;
+		background: rgb(var(--color-black-rgb) / 16%);
+		border-radius: 8px;
+		color: var(--color-white);
+		font-weight: var(--font-weight-medium);
+		width: 100%;
+
+		svg * {
+			fill: var(--color-white);
+		}
+	}
+
 	&__categories-item-parent {
 		position: relative;
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-		padding: 8px;
 		color: var(--color-primary);
 		font-weight: var(--weight-regular);
 	}
@@ -319,7 +371,13 @@
 		gap: 8px;
 		width: 100%;
 		min-width: max-content;
+		padding: 8px;
+		border-radius: 6px;
 		color: var(--color-text-primary);
+
+		&:hover {
+			background: var(--color-secondary-hover);
+		}
 
 		&--child {
 			padding: 10px 8px;
@@ -346,7 +404,18 @@
 		padding: 4px 0;
 		transition: all 0.15s ease-in-out;
 
-		&:hover {
+		&::after {
+			content: '';
+			position: absolute;
+			bottom: -4px;
+			left: 0;
+			width: 100%;
+			height: 4px;
+			opacity: 0;
+		}
+
+		&:hover,
+		&--open {
 			#{$block} {
 				&__profile-menu {
 					opacity: 1;
@@ -395,10 +464,22 @@
 		justify-content: center;
 		align-items: center;
 		width: min-content;
+		padding: 4px;
+		border-radius: 8px;
 		background: transparent;
 		border: none;
-		border-radius: 50%;
 		cursor: pointer;
+
+		&:hover,
+		&:active {
+			background: rgb(var(--color-white-rgb) / 8%);
+			backdrop-filter: blur(8px);
+		}
+
+		&--active {
+			background: rgb(var(--color-white-rgb) / 8%);
+			backdrop-filter: blur(8px);
+		}
 	}
 
 	&__notifications-icon {
@@ -432,20 +513,25 @@
 	}
 
 	&__regular-goals-badge {
+		position: relative;
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		gap: 2px;
-		min-width: 36px;
-		height: 28px;
-		padding: 4px;
 		border: none;
 		border-radius: 6px;
 		color: var(--color-white);
 
-		&:hover {
-			background: rgb(var(--color-white-rgb) / 8%);
-			backdrop-filter: blur(8px);
+		&--attention::after {
+			position: absolute;
+			top: -2px;
+			left: -2px;
+			width: 8px;
+			height: 8px;
+			background: var(--color-orange);
+			border: 2px solid var(--color-white);
+			border-radius: 50%;
+			content: '';
 		}
 	}
 
@@ -459,9 +545,18 @@
 			fill: var(--color-gray-1);
 		}
 
-		&--theme-transparent {
+		&--theme-transparent:not(&--completed) {
 			svg * {
 				fill: var(--color-white);
+			}
+		}
+
+		&--completed {
+			fill: var(--color-orange);
+
+			svg *,
+			path {
+				fill: var(--color-orange);
 			}
 		}
 	}
@@ -477,9 +572,6 @@
 	}
 
 	&__regular-goals-icon {
-		width: 20px;
-		height: 20px;
-
 		svg *,
 		path {
 			fill: var(--color-text-secondary);
@@ -531,23 +623,28 @@
 		display: flex;
 		flex-direction: column;
 		width: 336px;
+		max-height: calc(100vh - 120px);
 		padding: 8px;
 		background: var(--color-white);
 		border-radius: 8px;
 		opacity: 0;
+		overflow-y: auto;
 		transition: all 0.2s ease;
 		transform: translateY(-10px);
 		visibility: hidden;
 		box-shadow: 0 0 20px -2px rgb(var(--color-gray-rgb-8) / 8%);
+		z-index: 10000;
 
 		@include md {
 			position: relative;
 			top: auto;
 			right: auto;
 			width: 100%;
+			max-height: none;
 			padding: 0;
 			border-radius: 0;
 			opacity: 1;
+			overflow: visible;
 			transform: translateY(0);
 			visibility: visible;
 			box-shadow: none;
@@ -572,6 +669,7 @@
 
 	&__menu-item {
 		display: flex;
+		align-items: center;
 		padding: 8px;
 		border-radius: 6px;
 		color: var(--color-text-primary);
@@ -592,16 +690,38 @@
 		}
 	}
 
+	&__menu-item-text {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	&__menu-item-premium-tag {
+		padding: 0 5px;
+		border-radius: 4px;
+		font-size: 10px;
+		font-weight: var(--weight-regular);
+		line-height: 12px;
+
+		.tag__text {
+			font-size: 10px;
+			line-height: 12px;
+		}
+	}
+
 	&__menu-item-red {
-		justify-content: start;
+		justify-content: flex-start;
 		padding: 8px;
 		color: var(--color-red-1);
+		flex-shrink: 0;
 	}
 
 	&__menu-wrapper {
 		display: flex;
 		flex-direction: column;
 		gap: 24px;
+		max-height: none;
+		overflow: visible;
 
 		@include md {
 			gap: 8px;
@@ -656,6 +776,18 @@
 		background: var(--color-white);
 		border: 1px solid var(--color-border);
 
+		&::before {
+			position: absolute;
+			z-index: -1;
+			top: calc(-1 * var(--header-extra-top));
+			right: 0;
+			bottom: 0;
+			left: 0;
+			background: var(--color-white);
+			content: '';
+			pointer-events: none;
+		}
+
 		#{$block} {
 			&__categories-icon {
 				path {
@@ -663,7 +795,8 @@
 				}
 			}
 
-			&__categories-link {
+			&__categories-link,
+			&__search-trigger {
 				background: var(--color-secondary);
 				color: var(--color-text);
 
@@ -693,8 +826,15 @@
 			}
 
 			&__notifications-button {
-				&:hover {
-					// background: var(--color-secondary-hover);
+				&:hover,
+				&:active {
+					background: var(--color-secondary-hover);
+					backdrop-filter: none;
+				}
+
+				&--active {
+					background: var(--color-secondary-hover);
+					backdrop-filter: none;
 				}
 			}
 
@@ -702,9 +842,29 @@
 				color: var(--color-text-secondary);
 			}
 		}
+
+		.button--theme-light {
+			&:hover,
+			&:active {
+				background: var(--color-secondary-hover);
+				backdrop-filter: none;
+			}
+		}
 	}
 
 	&--theme-transparent {
+		&::before {
+			position: absolute;
+			z-index: -1;
+			top: calc(-1 * var(--header-extra-top));
+			right: 0;
+			bottom: 0;
+			left: 0;
+			backdrop-filter: brightness(var(--header-backdrop-brightness, 1)) blur(var(--header-backdrop-blur, 0px));
+			content: '';
+			pointer-events: none;
+		}
+
 		#{$block} {
 			&__logo {
 				path {
@@ -715,6 +875,22 @@
 			&__profile-arrow {
 				svg * {
 					fill: var(--color-white);
+				}
+			}
+
+			&__profile-icon {
+				background: rgb(var(--color-white-rgb) / 10%);
+
+				svg *,
+				path {
+					fill: var(--color-white);
+				}
+
+				@each $category in $main-categories {
+					&--category-#{$category} {
+						background: rgb(var(--color-#{$category}-rgb) / 16%);
+						border: 1px solid rgb(var(--color-#{$category}-rgb) / 22%);
+					}
 				}
 			}
 		}
@@ -743,10 +919,10 @@
 
 	// Компактный режим (когда скрыт pre-header при прокрутке)
 	&--compact {
-		height: var(--height-header-compact);
+		height: var(--header-stack-height-compact);
 
 		@include sm {
-			height: var(--height-header);
+			height: var(--header-stack-height);
 		}
 	}
 }

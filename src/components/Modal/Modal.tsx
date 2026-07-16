@@ -9,6 +9,7 @@ import {Registration} from '@/components/Registration/Registration';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
+import {getUser} from '@/utils/api/get/getUser';
 
 import {AddReview} from '../AddReview/AddReview';
 import {ChangePassword} from '../ChangePassword/ChangePassword';
@@ -17,6 +18,8 @@ import {ConfirmExecutionAllGoal} from '../ConfirmExecutionAllGoal/ConfirmExecuti
 import {CreateTodoListForm} from '../CreateTodoListForm/CreateTodoListForm';
 import {CreateTodoTaskForm} from '../CreateTodoTaskForm/CreateTodoTaskForm';
 import {DeleteGoal} from '../DeleteGoal/DeleteGoal';
+import {DeleteList} from '../DeleteList/DeleteList';
+import {DeleteReview} from '../DeleteReview/DeleteReview';
 import {FolderSelector} from '../FolderSelector/FolderSelector';
 import {ForgotPassword} from '../ForgotPassword/ForgotPassword';
 import {GoalMap} from '../GoalMap/GoalMap';
@@ -24,6 +27,7 @@ import {GoalMapMulti} from '../GoalMap/GoalMapMulti';
 import LocationPicker from '../LocationPicker/LocationPicker';
 import {ProgressUpdateModal} from '../ProgressUpdateModal/ProgressUpdateModal';
 import {RandomGoalPicker} from '../RandomGoalPicker/RandomGoalPicker';
+import {ReportComment} from '../ReportComment/ReportComment';
 import {SetRegularGoalModal} from '../SetRegularGoalModal/SetRegularGoalModal';
 import {Svg} from '../Svg/Svg';
 
@@ -88,6 +92,8 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			name: data.name || userInfo.name,
 			...(data.email_confirmed !== undefined && {isEmailConfirmed: data.email_confirmed}),
 		});
+		// Загружаем полный профиль и триггерим обновление данных на страницах
+		getUser();
 	};
 
 	const handleKeyUp = (e: KeyboardEvent) => {
@@ -145,6 +151,13 @@ export const Modal: FC<ModalProps> = observer((props) => {
 
 		const preventBackgroundScroll = (e: WheelEvent | TouchEvent) => {
 			const target = e.target as Node;
+			// Не мешаем нативным взаимодействиям со слайдерами (input[type="range"]) на тач-устройствах.
+			if (e instanceof TouchEvent) {
+				const targetElement = target instanceof HTMLElement ? target : null;
+				if (targetElement?.closest('input[type="range"], [role="slider"]')) {
+					return;
+				}
+			}
 			// Вне модалки — всегда блокируем
 			if (!modal?.contains(target)) {
 				e.preventDefault();
@@ -211,12 +224,13 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			{window === 'login' && (
 				<Login openRegistration={openRegistration} openForgotPassword={openForgotPassword} successLogin={successAuth} />
 			)}
-			{window === 'registration' && <Registration openLogin={openLogin} successRegistration={successAuth} />}
+			{window === 'registration' && <Registration successRegistration={successAuth} />}
 			{window === 'forgot-password' && <ForgotPassword onBack={openLogin} initialEmail={modalProps?.initialEmail} />}
 			{window === 'change-password' && <ChangePassword closeModal={closeWindow} />}
 			{window === 'add-review' && <AddReview closeModal={closeWindow} />}
 			{window === 'delete-goal' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
-			{window === 'delete-list' && <DeleteGoal closeModal={closeWindow} funcModal={funcModal} />}
+			{window === 'delete-list' && <DeleteList closeModal={closeWindow} funcModal={funcModal} />}
+			{window === 'delete-review' && <DeleteReview closeModal={closeWindow} funcModal={funcModal} />}
 			{window === 'confirm-execution-all-goal' && <ConfirmExecutionAllGoal closeModal={closeWindow} funcModal={funcModal} />}
 			{window === 'goal-map' && <GoalMap {...modalProps} />}
 			{window === 'goal-map-multi' && <GoalMapMulti {...modalProps} />}
@@ -225,8 +239,9 @@ export const Modal: FC<ModalProps> = observer((props) => {
 				<FolderSelector
 					goalId={modalProps?.goalId}
 					goalTitle={modalProps?.goalTitle}
-					onFolderSelected={(folderId, folderName) => {
-						modalProps?.onFolderSelected?.(folderId, folderName);
+					goalFolders={modalProps?.goalFolders}
+					onFolderSelected={(folder) => {
+						modalProps?.onFolderSelected?.(folder);
 						closeWindow();
 					}}
 					showCreateButton
@@ -253,14 +268,18 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			)}
 			{window === 'progress-update' && (
 				<ProgressUpdateModal
+					key={`${modalProps?.goalId}-${modalProps?.currentProgress?.id ?? 'new'}`}
 					goalId={modalProps?.goalId}
 					goalTitle={modalProps?.goalTitle}
 					currentProgress={modalProps?.currentProgress}
 					onProgressUpdate={modalProps?.onProgressUpdate}
+					onGoalCompleted={modalProps?.onGoalCompleted}
 					onClose={closeWindow}
 				/>
 			)}
-			{window === 'random-goal-picker' && <RandomGoalPicker goals={modalProps?.goals || []} onClose={closeWindow} />}
+			{window === 'random-goal-picker' && (
+				<RandomGoalPicker goals={modalProps?.goals || []} listCode={modalProps?.listCode} onClose={closeWindow} />
+			)}
 			{window === 'set-regular-goal' && (
 				<SetRegularGoalModal
 					onSave={async (settings) => {
@@ -273,6 +292,9 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			{window === 'compare-friend' && modalProps?.comparisonData && (
 				<CompareFriendModal data={modalProps.comparisonData as CompareFriendData} />
 			)}
+			{window === 'report-comment' && modalProps?.commentId && (
+				<ReportComment commentId={modalProps.commentId} closeModal={closeWindow} />
+			)}
 		</>
 	);
 
@@ -281,13 +303,14 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		return createPortal(
 			<Modal isOpen={isOpen} onClose={closeWindow} className="progress-update-modal" size="medium">
 				<ProgressUpdateModal
+					key={`${modalProps?.goalId}-${modalProps?.currentProgress?.id ?? 'new'}`}
 					goalId={modalProps?.goalId ?? 0}
 					goalTitle={modalProps?.goalTitle ?? ''}
 					currentProgress={
 						modalProps?.currentProgress ?? {
 							progressPercentage: 0,
 							dailyNotes: '',
-							isWorkingToday: false,
+							isWorkingToday: true,
 							id: 0,
 							goal: 0,
 							goalTitle: '',
@@ -309,7 +332,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 		);
 	}
 
-	const effectiveSize = size || (window === 'compare-friend' ? 'medium' : undefined);
+	const effectiveSize = size || (window === 'compare-friend' ? 'large' : undefined);
 	const windowModifiers: Record<string, boolean | string | undefined> = {
 		fullscreen: window === 'goal-map' || window === 'goal-map-multi' || window === 'goal-map-add',
 		...(effectiveSize ? {[effectiveSize]: true} : {}),

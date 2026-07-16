@@ -20,10 +20,24 @@ interface TitleWithTagsProps {
 	categoryRank?: number;
 	userFolders?: IGoalFolderTag[];
 	estimatedTime?: string;
+	listTotal?: number;
 }
 
 export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
-	const {className, title, theme, category, complexity, totalCompleted, isList, short, categoryRank, userFolders, estimatedTime} = props;
+	const {
+		className,
+		title,
+		theme,
+		category,
+		complexity,
+		totalCompleted,
+		isList,
+		short,
+		categoryRank,
+		userFolders,
+		estimatedTime,
+		listTotal,
+	} = props;
 
 	const [block, element] = useBem('title-with-tags', className);
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -44,132 +58,38 @@ export const TitleWithTags: FC<TitleWithTagsProps> = (props) => {
 			});
 		}
 	}, [title]);
-	// TODO: пересчёт размера текста в зависимости от количества строк
-	// const baseStylesRef = useRef<{fontSize: number; lineHeight: number} | null>(null);
-	// const rafIdRef = useRef<number | null>(null);
-	// const lastValuesRef = useRef<{
-	// 	fontSize: string;
-	// 	lineHeight: string;
-	// 	transform: string;
-	// 	scrollHeight: number;
-	// } | null>(null);
-	// const {isScreenMobile} = useScreenSize();
-	// const MAX_HEIGHT = useMemo(() => (isScreenMobile ? 160 : 128), [isScreenMobile]);
-	// useLayoutEffect выполняется синхронно после DOM-мутаций, но до отрисовки
-	// useLayoutEffect(() => {
-	// 	const container = containerRef.current;
-	// 	if (!container) return;
-	// 	const hasHeaderWrapperClass = container.classList.contains('header-goal__wrapper');
-	// 	if (!hasHeaderWrapperClass) return;
-	// 	const titleElement = container.querySelector('h1, h2, h3, h4') as HTMLElement;
-	// 	if (!titleElement) return;
-	// 	if (!baseStylesRef.current) {
-	// 		const savedFontSize = titleElement.style.fontSize;
-	// 		const savedLineHeight = titleElement.style.lineHeight;
-	// 		titleElement.style.fontSize = '';
-	// 		titleElement.style.lineHeight = '';
-	// 		const computedStyle = window.getComputedStyle(titleElement);
-	// 		baseStylesRef.current = {
-	// 			fontSize: parseFloat(computedStyle.fontSize),
-	// 			lineHeight: parseFloat(computedStyle.lineHeight),
-	// 		};
-	// 		titleElement.style.fontSize = savedFontSize;
-	// 		titleElement.style.lineHeight = savedLineHeight;
-	// 	}
-	// 	const updateTransform = () => {
-	// 		if (rafIdRef.current !== null) {
-	// 			cancelAnimationFrame(rafIdRef.current);
-	// 		}
-	// 		rafIdRef.current = requestAnimationFrame(() => {
-	// 			const baseStyles = baseStylesRef.current!;
-	// 			const currentScrollHeight = container.scrollHeight;
-	// 			const currentFontSize = titleElement.style.fontSize;
-	// 			const currentLineHeight = titleElement.style.lineHeight;
-	// 			const currentTransform = container.style.transform;
-	// 			if (
-	// 				lastValuesRef.current &&
-	// 				lastValuesRef.current.scrollHeight === currentScrollHeight &&
-	// 				lastValuesRef.current.fontSize === currentFontSize &&
-	// 				lastValuesRef.current.lineHeight === currentLineHeight &&
-	// 				lastValuesRef.current.transform === currentTransform
-	// 			) {
-	// 				rafIdRef.current = null;
-	// 				return;
-	// 			}
-	// 			if (currentScrollHeight > MAX_HEIGHT) {
-	// 				const initialOverflow = currentScrollHeight - MAX_HEIGHT;
-	// 				const overflowRatio = Math.min(initialOverflow / MAX_HEIGHT, 1);
-	// 				const fontSizeReduction = Math.min(overflowRatio * 0.3, 0.3);
-	// 				const newFontSize = baseStyles.fontSize * (1 - fontSizeReduction);
-	// 				const newLineHeight = baseStyles.lineHeight * (1 - fontSizeReduction);
-	// 				titleElement.style.fontSize = `${newFontSize}px`;
-	// 				titleElement.style.lineHeight = `${newLineHeight}px`;
-	// 				rafIdRef.current = requestAnimationFrame(() => {
-	// 					const newScrollHeight = container.scrollHeight;
-	// 					if (newScrollHeight > MAX_HEIGHT) {
-	// 						const remainingOverflow = newScrollHeight - MAX_HEIGHT;
-	// 						const maxShift = isScreenMobile ? 24 : 40;
-	// 						const shift = Math.min(remainingOverflow, maxShift);
-	// 						container.style.transform = `translateY(-${shift}px)`;
-	// 					} else {
-	// 						container.style.transform = '';
-	// 					}
-	// 					lastValuesRef.current = {
-	// 						fontSize: titleElement.style.fontSize,
-	// 						lineHeight: titleElement.style.lineHeight,
-	// 						transform: container.style.transform,
-	// 						scrollHeight: newScrollHeight,
-	// 					};
-	// 					rafIdRef.current = null;
-	// 				});
-	// 			} else {
-	// 				if (currentFontSize || currentLineHeight || currentTransform) {
-	// 					container.style.transform = '';
-	// 					titleElement.style.fontSize = '';
-	// 					titleElement.style.lineHeight = '';
-	// 					lastValuesRef.current = {
-	// 						fontSize: '',
-	// 						lineHeight: '',
-	// 						transform: '',
-	// 						scrollHeight: currentScrollHeight,
-	// 					};
-	// 				}
-	// 				rafIdRef.current = null;
-	// 			}
-	// 		});
-	// 	};
-	// 	updateTransform();
-	// 	const resizeObserver = new ResizeObserver(() => {
-	// 		updateTransform();
-	// 	});
-	// 	resizeObserver.observe(container);
-	// 	return () => {
-	// 		resizeObserver.disconnect();
-	// 		if (rafIdRef.current !== null) {
-	// 			cancelAnimationFrame(rafIdRef.current);
-	// 			rafIdRef.current = null;
-	// 		}
-	// 		baseStylesRef.current = null;
-	// 		lastValuesRef.current = null;
-	// 	};
-	// }, [title, category, complexity, totalCompleted, categoryRank, userFolders, estimatedTime, short, MAX_HEIGHT, isScreenMobile]);
+
+	/** Клик по названию копирует целиком; если пользователь выделяет текст — не перехватываем буфер */
+	const handleTitleButtonClick = useCallback(() => {
+		const sel = typeof window !== 'undefined' ? window.getSelection()?.toString() ?? '' : '';
+		if (sel.length > 0) {
+			return;
+		}
+		handleCopyTitle().catch(() => {});
+	}, [handleCopyTitle]);
 
 	return (
-		<div ref={containerRef} className={block({theme})}>
-			<button
-				type="button"
-				className={element('title-copyable')}
-				title="Нажмите на название, чтобы скопировать его"
-				onClick={handleCopyTitle}
-				aria-label="Нажмите, чтобы скопировать название"
-			>
-				<Title className={element('title', {short})} tag="h1" theme={isList ? 'black' : 'white'}>
-					{title}
-				</Title>
-			</button>
+		<div ref={containerRef} className={block({theme, list: isList})}>
+			<div className={element('header')}>
+				<button
+					type="button"
+					className={element('title-copyable')}
+					title="Нажмите на название без выделения, чтобы скопировать целиком; иначе выделите текст мышью"
+					onClick={handleTitleButtonClick}
+					aria-label="Нажмите на название без выделения, чтобы скопировать целиком; иначе выделите текст мышью"
+				>
+					<Title className={element('title', {short})} tag="h1" theme={isList ? 'black' : 'white'}>
+						{title}
+					</Title>
+				</button>
+				<button type="button" className={element('copy-button')} onClick={handleCopyTitle} aria-label="Скопировать название">
+					<span className={element('copy-icon')} aria-hidden="true" />
+				</button>
+			</div>
 			{!short && (
 				<Tags
 					category={category}
+					listTotal={listTotal}
 					medal={categoryRank ? `Топ ${categoryRank} в категории` : undefined}
 					complexity={complexity}
 					done={totalCompleted}

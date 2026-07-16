@@ -9,6 +9,7 @@ import UserMapPage from '@/pages/UserMapPage/UserMapPage';
 import {FriendsStore} from '@/store/FriendsStore';
 import {UserStore} from '@/store/UserStore';
 import {IPage} from '@/typings/page';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 
 import {UserSelfProfile} from './UserSelfProfile';
 import {UserSelfAchievements} from '../UserSelfAchievements/UserSelfAchievements';
@@ -34,6 +35,8 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			// 	return <User100Goals id={id} />;
 			case 'isUserSelfActive':
 				return <UserSelfGoals subPage={subPage as string} completed={false} />;
+			case 'isUserSelfPending':
+				return <UserSelfGoals subPage={subPage as string} completed={false} pendingCatalogReview />;
 			case 'isUserSelfDone':
 				return <UserSelfGoals subPage={subPage as string} completed />;
 			case 'isUserSelfSettings':
@@ -58,6 +61,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 	};
 
 	const {userSelf} = UserStore;
+	const isPremiumActive = isPremiumSubscriptionActive(userSelf);
 
 	const activeGoalsAndListsCount =
 		userSelf.totalAddedGoals + userSelf.totalAddedLists - userSelf.totalCompletedGoals - userSelf.totalCompletedLists;
@@ -91,6 +95,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			name: 'Прогресс целей',
 			page: 'isUserSelfProgress',
 			count: progressGoalsCount,
+			...(!isPremiumActive ? {premiumTag: true} : {}),
 		},
 		{
 			url: '/user/self/regular',
@@ -129,6 +134,20 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 			count: friendsCount,
 		},
 		{
+			url: '/user/self/pending-review',
+			name: 'Публикации в каталог',
+			page: 'isUserSelfPending',
+		},
+		...(isPremiumActive
+			? []
+			: [
+					{
+						url: '/user/self/subs',
+						name: 'Больше функционала',
+						page: 'isUserSelfSubs',
+					},
+			  ]),
+		{
 			url: '/user/self/settings',
 			name: 'Настройки',
 			page: 'isUserSelfSettings',
@@ -151,7 +170,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 						type="Link"
 						href="/goals/create"
 						theme="blue-light"
-						size="medium"
+						size="small"
 						icon="plus"
 						className={element('add-goal-btn')}
 					>

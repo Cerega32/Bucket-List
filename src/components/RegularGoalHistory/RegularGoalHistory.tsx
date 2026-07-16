@@ -2,12 +2,12 @@ import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
 
 import {EmptyState} from '@/components/EmptyState/EmptyState';
-import {Loader} from '@/components/Loader/Loader';
 import {RegularHistoryItem} from '@/components/RegularHistoryItem/RegularHistoryItem';
 import {useBem} from '@/hooks/useBem';
 import {IRegularGoalHistory} from '@/typings/goal';
 import {getRegularGoalHistory} from '@/utils/api/goals';
 
+import {RegularGoalHistorySkeleton} from './RegularGoalHistorySkeleton';
 import './regular-goal-history.scss';
 
 interface RegularGoalHistoryProps {
@@ -69,7 +69,7 @@ export const RegularGoalHistory: FC<RegularGoalHistoryProps> = observer(
 		if (isLoading) {
 			return (
 				<div className={block()}>
-					<Loader isLoading={isLoading} />
+					<RegularGoalHistorySkeleton withSettings={allowCustomSettings} />
 				</div>
 			);
 		}

@@ -1,51 +1,137 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useMemo, useState} from 'react';
-import {useLocation} from 'react-router-dom';
-import {scroller} from 'react-scroll';
+import {FC, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
 
+import {Banner} from '@/components/Banner/Banner';
+import {Button} from '@/components/Button/Button';
 import {RegularCard} from '@/components/Card/RegularCard';
+import {CatalogItemsSkeleton} from '@/components/CatalogItems/CatalogItemsSkeleton';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
+import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
-import {FiltersCheckbox} from '@/components/FiltersCheckbox/FiltersCheckbox';
+import {FilterGroup, FiltersDrawer} from '@/components/FiltersDrawer/FiltersDrawer';
 import {Line} from '@/components/Line/Line';
-import {BlurLoader} from '@/components/Loader/BlurLoader';
-import {Loader} from '@/components/Loader/Loader';
-import {Pagination} from '@/components/Pagination/Pagination';
+import {RegularGoalsPremiumLimitModal} from '@/components/RegularGoalsPremiumLimitModal/RegularGoalsPremiumLimitModal';
 import Select, {OptionSelect} from '@/components/Select/Select';
 import {Switch} from '@/components/Switch/Switch';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {useTodayTabDisplayList} from '@/hooks/useTodayTabDisplayList';
 import {CategoriesStore} from '@/store/CategoriesStore';
+import {HeaderRegularGoalsStore} from '@/store/HeaderRegularGoalsStore';
 import {NotificationStore} from '@/store/NotificationStore';
-import {IPaginationPage} from '@/typings/request';
-import {getRegularGoalStatistics, IRegularGoalStatistics, markRegularProgress, restartRegularGoal} from '@/utils/api/goals';
+import {UserStore} from '@/store/UserStore';
+import {ICategoryTree, IGoal, IRegularGoalStatistics} from '@/typings/goal';
+import {getUser} from '@/utils/api/get/getUser';
+import {getRegularGoalStatistics, markRegularProgress, restartRegularGoal} from '@/utils/api/goals';
+import {selectRegularGoalSlots} from '@/utils/api/post/selectRegularGoalSlots';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {
+	compareRegularGoalsActiveFirst,
+	extractRegularGoalStatistics,
+	isRegularGoalCompletedToday,
+	isRegularGoalPendingForToday,
+	isRegularGoalShownInTodayViews,
+} from '@/utils/regularGoal/regularGoalTodayVisibility';
 import './user-self-regular.scss';
 
 interface UserSelfRegularProps {
 	className?: string;
 }
 
+const extractMarkProgressStatistics = (
+	responseData: {data?: {statistics?: IRegularGoalStatistics}; statistics?: IRegularGoalStatistics} | undefined
+): IRegularGoalStatistics | undefined => responseData?.data?.statistics ?? responseData?.statistics;
+
+const buildCompletedSnapshot = (stats: IRegularGoalStatistics): IRegularGoalStatistics => {
+	const progress = stats.currentPeriodProgress;
+
+	if (progress?.type === 'daily') {
+		return {
+			...stats,
+			canCompleteToday: false,
+			currentPeriodProgress: {
+				...progress,
+				completedToday: true,
+			},
+		};
+	}
+
+	return {
+		...stats,
+		canCompleteToday: false,
+	};
+};
+
 export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) => {
 	const [block, element] = useBem('user-self-regular', className);
 	const location = useLocation();
+	const navigate = useNavigate();
+	const {userSelf} = UserStore;
 	const activeTab = (location.hash === '#all' ? 'all' : 'today') as 'today' | 'all';
 
 	const [statisticsData, setStatisticsData] = useState<IRegularGoalStatistics[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [search, setSearch] = useState('');
 	const [activeSort, setActiveSort] = useState(0);
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-	const [pagination, setPagination] = useState<IPaginationPage | null>(null);
-	const [currentPage, setCurrentPage] = useState(1);
+	const [filterValues, setFilterValues] = useState<Record<string, string[]>>({categories: [], complexity: [], hundredGoals: []});
+	const statisticsLoadGenerationRef = useRef(0);
+	const refreshTodayTabAfterSlotsRef = useRef(false);
+	const prevSubscriptionStateKeyRef = useRef<string | null>(null);
+	const [todayCountFromApi, setTodayCountFromApi] = useState<number | null>(null);
+	const [isBulkTodayUpdating, setIsBulkTodayUpdating] = useState(false);
+	const [selectedSlotIds, setSelectedSlotIds] = useState<number[]>([]);
+	const [isSavingSlots, setIsSavingSlots] = useState(false);
+	const [isChangingSlots, setIsChangingSlots] = useState(false);
+	const [isPremiumLimitModalOpen, setIsPremiumLimitModalOpen] = useState(false);
+	const [restartingGoalId, setRestartingGoalId] = useState<number | null>(null);
+
+	const maxRegularGoals = userSelf.limits?.maxRegularGoals ?? 3;
+	const isPremium = isPremiumSubscriptionActive(userSelf);
+	const selectionPending = userSelf.regularGoalsSelectionPending ?? false;
+	const showSlotSelection = selectionPending || isChangingSlots;
+	const regularGoalsCount = userSelf.counts?.regularGoals ?? statisticsData.length;
+	const regularGoalsLimitReached = regularGoalsCount >= maxRegularGoals;
+	const hasPausedGoals = statisticsData.some((stats) => stats.isExecutionEnabled === false);
+	const slotsLocked = userSelf.regularGoalsSlotsLocked ?? false;
+	const lockedSlotIds = useMemo(
+		() => statisticsData.filter((stats) => stats.slotExecutionLocked).map((stats) => stats.regularGoal),
+		[statisticsData]
+	);
+	const canChangeSlots = !isPremium && hasPausedGoals && !selectionPending && !slotsLocked;
+	const selectionPendingBannerMessage =
+		'Premium закончился, а регулярных целей больше, чем позволяет бесплатный тариф. ' +
+		'Выберите, какие цели продолжить — до выбора выполнение всех целей заблокировано.';
+	const slotsChangeBannerMessage =
+		lockedSlotIds.length > 0
+			? `На бесплатном тарифе одновременно доступно ${maxRegularGoals} регулярных цели. ` +
+			  `Цели с отметкой выполнения зафиксированы (${lockedSlotIds.length}/${maxRegularGoals}), ` +
+			  'остальные слоты можно поменять.'
+			: `На бесплатном тарифе одновременно доступно ${maxRegularGoals} регулярных цели. ` +
+			  'Цели на паузе можно снова включить, выбрав другой набор.';
+	const subscriptionStateKey = `${userSelf.subscriptionType ?? 'free'}|${userSelf.subscriptionExpiresAt ?? ''}|${
+		userSelf.regularGoalsSelectionPending ?? false
+	}|${userSelf.limits?.maxRegularGoals ?? 3}`;
+
+	useEffect(() => {
+		if (!selectionPending && !isChangingSlots) {
+			return;
+		}
+
+		const enabledIds = statisticsData.filter((stats) => stats.isExecutionEnabled !== false).map((stats) => stats.regularGoal);
+		const lockedIds = statisticsData.filter((stats) => stats.slotExecutionLocked).map((stats) => stats.regularGoal);
+		const nextSelected = [...new Set([...lockedIds, ...enabledIds])].slice(0, maxRegularGoals);
+		setSelectedSlotIds(nextSelected);
+	}, [selectionPending, isChangingSlots, statisticsData, maxRegularGoals]);
 
 	const sortOptions: OptionSelect[] = [
 		{
 			name: 'Новые',
-			value: 'created_at_desc',
+			value: 'added_at_desc',
 		},
 		{
 			name: 'Старые',
-			value: 'created_at_asc',
+			value: 'added_at_asc',
 		},
 		{
 			name: 'Лучший прогресс',
@@ -53,46 +139,86 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		},
 	];
 
-	const loadRegularGoalStatistics = async (page = 1) => {
-		setIsLoading(true);
+	const loadRegularGoalStatistics = async (options?: {silent?: boolean}) => {
+		const generation = ++statisticsLoadGenerationRef.current;
+
+		if (!options?.silent) {
+			setIsLoading(statisticsData.length === 0);
+		}
 		try {
-			const response = await getRegularGoalStatistics({page});
+			const response = await getRegularGoalStatistics();
+			if (generation !== statisticsLoadGenerationRef.current) {
+				return;
+			}
 			if (response.success && response.data) {
 				const data = response.data as
 					| IRegularGoalStatistics[]
 					| {
-							pagination: IPaginationPage;
 							data: IRegularGoalStatistics[];
+							todayCount?: number;
 					  };
 
 				if (Array.isArray(data)) {
 					setStatisticsData(data);
-					setPagination({
-						itemsPerPage: data.length,
-						page: 1,
-						totalPages: 1,
-						totalItems: data.length,
-					});
+					setTodayCountFromApi(null);
 				} else {
 					setStatisticsData(data.data);
-					setPagination(data.pagination);
-					setCurrentPage(data.pagination.page);
+					if (data.todayCount !== undefined) {
+						setTodayCountFromApi(data.todayCount);
+					}
 				}
 			}
 		} catch (error) {
+			if (generation !== statisticsLoadGenerationRef.current) {
+				return;
+			}
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
 				message: 'Не удалось загрузить регулярные цели',
 			});
 		} finally {
-			setIsLoading(false);
+			if (generation === statisticsLoadGenerationRef.current && !options?.silent) {
+				setIsLoading(false);
+			}
 		}
 	};
 
 	useEffect(() => {
 		loadRegularGoalStatistics();
 	}, []);
+
+	useEffect(() => {
+		getUser();
+	}, []);
+
+	useEffect(() => {
+		if (!selectionPending && !isChangingSlots) {
+			return;
+		}
+
+		loadRegularGoalStatistics();
+	}, [selectionPending, isChangingSlots]);
+
+	useEffect(() => {
+		if (prevSubscriptionStateKeyRef.current === null) {
+			prevSubscriptionStateKeyRef.current = subscriptionStateKey;
+			return;
+		}
+
+		if (prevSubscriptionStateKeyRef.current === subscriptionStateKey) {
+			return;
+		}
+
+		prevSubscriptionStateKeyRef.current = subscriptionStateKey;
+
+		if (isPremiumSubscriptionActive(userSelf)) {
+			setIsChangingSlots(false);
+		}
+
+		refreshTodayTabAfterSlotsRef.current = true;
+		loadRegularGoalStatistics();
+	}, [subscriptionStateKey]);
 
 	const categoryFilters = useMemo(() => {
 		const categoriesMap = new Map<string, string>();
@@ -120,22 +246,105 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 			result = result.filter((stats) => stats?.regularGoalData.goalTitle.toLowerCase().includes(query));
 		}
 
-		if (selectedCategories.length > 0) {
-			result = result.filter((stats) => selectedCategories.includes(stats.regularGoalData.goalCategory));
+		if (filterValues['categories'].length > 0) {
+			result = result.filter((stats) => filterValues['categories'].includes(stats.regularGoalData.goalCategory));
 		}
 
 		const sortKey = sortOptions[activeSort]?.value;
 
-		if (sortKey === 'created_at_desc') {
-			result.sort((a, b) => (b.regularGoalData.createdAt || '').localeCompare(a.regularGoalData.createdAt || ''));
-		} else if (sortKey === 'created_at_asc') {
-			result.sort((a, b) => (a.regularGoalData.createdAt || '').localeCompare(b.regularGoalData.createdAt || ''));
-		} else if (sortKey === 'progress_desc') {
-			result.sort((a, b) => (b.completionPercentage || 0) - (a.completionPercentage || 0));
-		}
+		result.sort((a, b) => {
+			const activeOrder = compareRegularGoalsActiveFirst(a, b);
+			if (activeOrder !== 0) {
+				return activeOrder;
+			}
+
+			if (sortKey === 'added_at_desc') {
+				return (b.regularGoalData.createdAt || '').localeCompare(a.regularGoalData.createdAt || '');
+			}
+			if (sortKey === 'added_at_asc') {
+				return (a.regularGoalData.createdAt || '').localeCompare(b.regularGoalData.createdAt || '');
+			}
+			if (sortKey === 'progress_desc') {
+				return (b.completionPercentage || 0) - (a.completionPercentage || 0);
+			}
+
+			return 0;
+		});
 
 		return result;
 	};
+
+	const isStatsCompletedToday = isRegularGoalCompletedToday;
+
+	const isStatsRelevantForTodayTab = isRegularGoalShownInTodayViews;
+
+	const getTodayRelevantGoals = () => {
+		return filteredStatistics().filter((stats) => {
+			if (!stats) return false;
+			if (stats.isExecutionEnabled === false) return false;
+			return isStatsRelevantForTodayTab(stats);
+		});
+	};
+
+	const buildPendingTodayGoals = useCallback(() => {
+		return getTodayRelevantGoals()
+			.filter((stats) => isRegularGoalPendingForToday(stats))
+			.sort((a, b) => {
+				const activeOrder = compareRegularGoalsActiveFirst(a, b);
+				if (activeOrder !== 0) {
+					return activeOrder;
+				}
+				if (a.isInterrupted !== b.isInterrupted) return a.isInterrupted ? 1 : -1;
+				return 0;
+			});
+	}, [statisticsData, search, filterValues, activeSort]);
+
+	const mergeStatisticsUpdate = useCallback((updated: IRegularGoalStatistics) => {
+		setStatisticsData((prev) => {
+			const index = prev.findIndex((item) => item.regularGoal === updated.regularGoal);
+			if (index === -1) {
+				return [...prev, updated];
+			}
+
+			const next = [...prev];
+			next[index] = updated;
+			return next;
+		});
+	}, []);
+
+	const {
+		displayItems: todayDisplayGoals,
+		todayTabCount,
+		resetDisplayItems,
+		applyMarkedItem,
+		applyUnmarkedItem,
+		revertMarkedItem,
+		applyRestartedItem,
+		markAllItems,
+		unmarkAllItems,
+	} = useTodayTabDisplayList({
+		activeTab,
+		isSourceReady: !isLoading && statisticsData.length > 0,
+		buildPendingItems: buildPendingTodayGoals,
+		getItemId: (stats) => stats.regularGoal,
+	});
+
+	useEffect(() => {
+		if (!refreshTodayTabAfterSlotsRef.current || showSlotSelection) {
+			return;
+		}
+
+		resetDisplayItems();
+	}, [statisticsData, showSlotSelection, resetDisplayItems]);
+
+	useEffect(() => {
+		if (activeTab !== 'today') {
+			return;
+		}
+
+		setSearch('');
+		setFilterValues({categories: [], complexity: [], hundredGoals: []});
+	}, [activeTab]);
 
 	const handleSortSelect = async (active: number): Promise<void> => {
 		setActiveSort(active);
@@ -145,14 +354,57 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		setSearch(value);
 	};
 
-	const handleCategoryFilter = async (selected: string[]) => {
-		setSelectedCategories(selected);
+	const handleFilterChange = (key: string, selected: string[]) => {
+		setFilterValues((prev) => ({...prev, [key]: selected}));
 	};
 
+	const handleFilterReset = () => {
+		setFilterValues({categories: [], complexity: [], hundredGoals: []});
+	};
+
+	const drawerFilters = useMemo((): FilterGroup[] => {
+		const groups: FilterGroup[] = [];
+		if (categoryFilters.length > 0) {
+			groups.push({
+				key: 'categories',
+				label: 'Категории',
+				options: categoryFilters,
+				multiple: true,
+				allLabel: 'Все категории',
+			});
+		}
+		groups.push({
+			key: 'complexity',
+			label: 'Сложность',
+			options: [
+				{name: 'Легко', code: 'easy'},
+				{name: 'Средне', code: 'medium'},
+				{name: 'Тяжело', code: 'hard'},
+			],
+			allLabel: 'Все цели',
+		});
+		groups.push({
+			key: 'hundredGoals',
+			label: '100 целей',
+			options: [
+				{name: 'Только из 100 целей', code: 'only'},
+				{name: 'Исключить 100 целей', code: 'exclude'},
+			],
+			allLabel: 'Все цели',
+		});
+		return groups;
+	}, [categoryFilters]);
+
 	const handleProgressUpdate = async (stats: IRegularGoalStatistics) => {
+		if (selectionPending || isChangingSlots || stats.isExecutionEnabled === false) {
+			return;
+		}
+
+		let newCompletedState = false;
+
 		try {
 			// Определяем текущее состояние выполнения по статистике
-			const progress = stats.currentPeriodProgress as any;
+			const progress = stats.currentPeriodProgress;
 			let currentlyCompleted = false;
 
 			if (progress?.type === 'daily') {
@@ -162,7 +414,13 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				currentlyCompleted = !stats.canCompleteToday || false;
 			}
 
-			const newCompletedState = !currentlyCompleted;
+			newCompletedState = !currentlyCompleted;
+
+			if (newCompletedState) {
+				applyMarkedItem(stats, buildCompletedSnapshot(stats));
+			} else {
+				applyUnmarkedItem(stats);
+			}
 
 			const response = await markRegularProgress({
 				regular_goal_id: stats.regularGoal,
@@ -170,18 +428,39 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				notes: '',
 			});
 
-			if (response.success && response.data) {
-				// Полностью перезагружаем данные вместо частичного обновления
-				// чтобы избежать проблем с неполными объектами
-				await loadRegularGoalStatistics(currentPage);
+			if (response.success) {
+				const updatedStats = extractMarkProgressStatistics(response.data);
+				const snapshot = updatedStats ?? (newCompletedState ? buildCompletedSnapshot(stats) : stats);
+
+				if (updatedStats) {
+					mergeStatisticsUpdate(updatedStats);
+				} else if (newCompletedState) {
+					mergeStatisticsUpdate(buildCompletedSnapshot(stats));
+				}
+
+				if (newCompletedState) {
+					applyMarkedItem(stats, snapshot);
+				} else {
+					applyUnmarkedItem(snapshot);
+				}
+
+				loadRegularGoalStatistics({silent: true}).catch(() => {});
+				await getUser();
+				HeaderRegularGoalsStore.loadTodayCount();
 
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успешно!',
-					message: 'Прогресс отмечен',
+					message: newCompletedState ? 'Цель отмечена как выполненная' : 'Отметка о выполнении снята',
 				});
+			} else if (newCompletedState) {
+				revertMarkedItem(stats);
 			}
 		} catch (error) {
+			if (newCompletedState) {
+				revertMarkedItem(stats);
+			}
+
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
@@ -191,15 +470,44 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	};
 
 	const handleRestart = async (stats: IRegularGoalStatistics) => {
+		if (selectionPending || isChangingSlots || stats.isExecutionEnabled === false || restartingGoalId !== null) {
+			return;
+		}
+
+		setRestartingGoalId(stats.regularGoal);
+
 		try {
 			const response = await restartRegularGoal(stats.regularGoal);
 
 			if (response.success) {
-				await loadRegularGoalStatistics();
+				const updatedStats =
+					extractRegularGoalStatistics(response.data) ??
+					({
+						...stats,
+						isInterrupted: false,
+						interruptedStreak: null,
+						interruptedCompletionPercentage: null,
+						currentStreak: 0,
+						completionPercentage: 0,
+						isSeriesCompleted: false,
+					} as IRegularGoalStatistics);
+
+				mergeStatisticsUpdate(updatedStats);
+				applyRestartedItem(updatedStats, isStatsRelevantForTodayTab(updatedStats));
+
+				loadRegularGoalStatistics({silent: true}).catch(() => {});
+				HeaderRegularGoalsStore.loadTodayCount();
+
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успешно!',
 					message: 'Серия начата заново',
+				});
+			} else {
+				NotificationStore.addNotification({
+					type: 'error',
+					title: 'Ошибка',
+					message: response.error || 'Не удалось начать серию заново',
 				});
 			}
 		} catch (error) {
@@ -208,53 +516,193 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				title: 'Ошибка',
 				message: 'Не удалось начать серию заново',
 			});
+		} finally {
+			setRestartingGoalId(null);
 		}
-	};
-
-	const getTodayGoals = () => {
-		// "На сегодня" — цели, которые можно выполнить сегодня (canCompleteToday) или уже выполнены сегодня (completedToday).
-		// сортируем - сначала шли НЕ выполненные сегодня, затем выполненные.
-		return filteredStatistics()
-			.filter((stats) => {
-				if (!stats) return false;
-
-				const completedToday = stats.currentPeriodProgress?.completedToday || false;
-
-				return stats.canCompleteToday || completedToday;
-			})
-			.sort((a, b) => {
-				const aCompleted = a.currentPeriodProgress?.completedToday || false;
-				const bCompleted = b.currentPeriodProgress?.completedToday || false;
-
-				if (aCompleted === bCompleted) return 0;
-				return aCompleted ? 1 : -1;
-			});
 	};
 
 	const getAllGoals = () => {
 		return filteredStatistics();
 	};
 
-	const todayGoals = getTodayGoals();
+	const todayRelevantGoals = getTodayRelevantGoals();
 	const allGoals = getAllGoals();
+	const todayGoalsToRender = useMemo(() => [...todayDisplayGoals].sort(compareRegularGoalsActiveFirst), [todayDisplayGoals]);
+
+	const completableTodayGoals = todayRelevantGoals.filter(
+		(s) => !s.isInterrupted && s.isExecutionEnabled !== false && !selectionPending && !isChangingSlots
+	);
+	const areAllTodayCompleted = completableTodayGoals.length > 0 && completableTodayGoals.every((stats) => isStatsCompletedToday(stats));
 
 	const buttonsSwitch = [
 		{
 			url: '#today',
 			name: 'На сегодня',
 			page: 'today',
-			count: todayGoals.length,
+			count: todayCountFromApi ?? todayTabCount,
 		},
 		{
 			url: '#all',
 			name: 'Все цели',
 			page: 'all',
-			count: pagination?.totalItems ?? allGoals.length,
+			count: allGoals.length,
 		},
 	];
 
+	const toggleSlotSelection = (regularGoalId: number) => {
+		if (lockedSlotIds.includes(regularGoalId)) {
+			return;
+		}
+
+		setSelectedSlotIds((prev) => {
+			if (prev.includes(regularGoalId)) {
+				return prev.filter((id) => id !== regularGoalId);
+			}
+			if (prev.length >= maxRegularGoals) {
+				return prev;
+			}
+			return [...prev, regularGoalId];
+		});
+	};
+
+	const handleSaveSlotSelection = async () => {
+		if (selectedSlotIds.length === 0) {
+			NotificationStore.addNotification({
+				type: 'warning',
+				title: 'Выберите цели',
+				message: `Отметьте до ${maxRegularGoals} регулярных целей, которые хотите продолжить выполнять.`,
+			});
+			return;
+		}
+
+		setIsSavingSlots(true);
+		try {
+			const selectedIds = [...selectedSlotIds];
+			const response = await selectRegularGoalSlots(selectedIds);
+			if (response.success) {
+				refreshTodayTabAfterSlotsRef.current = true;
+				setIsChangingSlots(false);
+				setStatisticsData((prev) =>
+					prev.map((stats) => ({
+						...stats,
+						isExecutionEnabled: selectedIds.includes(stats.regularGoal),
+					}))
+				);
+				if (response.data?.regularGoalsSelectionPending === false) {
+					UserStore.setUserSelf({
+						...UserStore.userSelf,
+						regularGoalsSelectionPending: false,
+					});
+				}
+				await loadRegularGoalStatistics();
+				await getUser();
+				refreshTodayTabAfterSlotsRef.current = false;
+				HeaderRegularGoalsStore.loadTodayCount();
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Готово',
+					message: 'Активные регулярные цели обновлены',
+				});
+			} else {
+				NotificationStore.addNotification({
+					type: 'error',
+					title: 'Ошибка',
+					message: typeof response.error === 'string' ? response.error : 'Не удалось сохранить выбор',
+				});
+			}
+		} catch (error) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Не удалось сохранить выбор',
+			});
+		} finally {
+			setIsSavingSlots(false);
+		}
+	};
+
+	const renderSlotSelection = () => (
+		<div className={element('slot-selection')}>
+			<p className={element('slot-selection-text')}>
+				Выберите до {maxRegularGoals} регулярных целей, которые останутся активными на бесплатном тарифе. Остальные сохранятся, но
+				выполнение будет на паузе.
+			</p>
+			<div className={element('slot-selection-list')}>
+				{statisticsData.map((stats) => {
+					const isSelected = selectedSlotIds.includes(stats.regularGoal);
+					const isExecutionLocked = stats.slotExecutionLocked === true;
+					const isDisabled = (isExecutionLocked && isSelected) || (!isSelected && selectedSlotIds.length >= maxRegularGoals);
+
+					return (
+						<div
+							key={stats.regularGoal}
+							className={element('slot-selection-item', {
+								selected: isSelected,
+								disabled: isDisabled,
+								locked: isExecutionLocked && isSelected,
+							})}
+						>
+							<FieldCheckbox
+								className={element('slot-selection-checkbox')}
+								id={`regular-slot-${stats.regularGoal}`}
+								checked={isSelected}
+								disabled={isDisabled}
+								setChecked={(checked) => {
+									if (isDisabled) {
+										return;
+									}
+
+									const isCurrentlySelected = selectedSlotIds.includes(stats.regularGoal);
+									if (checked !== isCurrentlySelected) {
+										toggleSlotSelection(stats.regularGoal);
+									}
+								}}
+								text={
+									<span className={element('slot-selection-content')}>
+										<img
+											src={stats.regularGoalData.goalImage}
+											alt={stats.regularGoalData.goalTitle}
+											className={element('slot-selection-image')}
+										/>
+										<span className={element('slot-selection-title')}>{stats.regularGoalData.goalTitle}</span>
+									</span>
+								}
+							/>
+						</div>
+					);
+				})}
+			</div>
+			<div className={element('slot-selection-actions')}>
+				<Button
+					theme="blue"
+					size="small"
+					width="auto"
+					onClick={handleSaveSlotSelection}
+					loading={isSavingSlots}
+					loadingText="Сохранение..."
+					disabled={selectedSlotIds.length === 0}
+				>
+					{`Сохранить выбор (${selectedSlotIds.length}/${maxRegularGoals})`}
+				</Button>
+				{isChangingSlots && !selectionPending && (
+					<Button
+						theme="blue-light"
+						size="small"
+						width="auto"
+						onClick={() => {
+							setIsChangingSlots(false);
+							loadRegularGoalStatistics();
+						}}
+					>
+						Отмена
+					</Button>
+				)}
+			</div>
+		</div>
+	);
+
 	// Функция для поиска категории по имени в дереве категорий
-	const findCategoryByName = (name: string, categories: any[]): any => {
+	const findCategoryByName = (name: string, categories: ICategoryTree[]): ICategoryTree | null => {
 		const found = categories.find((category) => category.name === name);
 		if (found) {
 			return found;
@@ -269,7 +717,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	};
 
 	// Конвертируем статистику в формат IGoal для совместимости с RegularGoalCard
-	const convertStatsToGoal = (stats: IRegularGoalStatistics): any => {
+	const convertStatsToGoal = (stats: IRegularGoalStatistics): IGoal => {
 		const categoryName = stats.regularGoalData.goalCategory;
 		const foundCategory = findCategoryByName(categoryName, CategoriesStore.categoriesTree);
 		const categoryNameEn = foundCategory?.nameEn || categoryName;
@@ -285,6 +733,15 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				nameEn: categoryNameEn,
 				parentCategory: foundCategory?.parentCategory || null,
 			},
+			subcategory: {
+				id: foundCategory?.id || 0,
+				name: categoryName,
+				nameEn: categoryNameEn,
+				parentCategory: foundCategory?.parentCategory || null,
+			},
+			lists: [],
+			listsCount: 0,
+			hasMyComment: false,
 			complexity: 'medium' as const,
 			image: stats.regularGoalData.goalImage,
 			code: stats.regularGoalData.goalCode,
@@ -303,10 +760,6 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 			addedFromList: [],
 			timer: null,
 			userVisitedLocation: false,
-
-			progressPercentage: 0,
-			isCompletedByUser: false,
-			isDailyGoal: false,
 			userFolders: [],
 			regularConfig: {
 				id: stats.regularGoal,
@@ -318,6 +771,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				endDate: stats.regularGoalData.endDate,
 				allowSkipDays: stats.regularGoalData.allowSkipDays,
 				resetOnSkip: stats.regularGoalData.resetOnSkip,
+				allowCustomSettings: false,
 				isActive: stats.regularGoalData.isActive,
 				createdAt: stats.regularGoalData.createdAt,
 				statistics: stats,
@@ -331,9 +785,9 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		};
 	};
 
-	const renderGoalsList = (statsArray: IRegularGoalStatistics[], emptyMessage: string) => {
+	const renderGoalsList = (statsArray: IRegularGoalStatistics[], emptyMessage: string, emptyDescription: string) => {
 		if (statsArray.length === 0) {
-			return <EmptyState title={emptyMessage} className={element('empty-section')} />;
+			return <EmptyState title={emptyMessage} description={emptyDescription} className={element('empty-section')} />;
 		}
 
 		return (
@@ -348,6 +802,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 							statistics={stats}
 							onMarkRegular={() => handleProgressUpdate(stats)}
 							onRestart={() => handleRestart(stats)}
+							isPrimaryActionLoading={restartingGoalId === stats.regularGoal}
 							className="catalog-items__goal catalog-items__goal--full"
 						/>
 					);
@@ -356,20 +811,68 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		);
 	};
 
-	const goToPage = async (page: number): Promise<boolean> => {
-		await loadRegularGoalStatistics(page);
-		scroller.scrollTo('user-self-regular-goals', {
-			duration: 800,
-			delay: 0,
-			smooth: 'easeInOutQuart',
-			offset: -150,
-		});
-		return true;
+	const handleToggleCompleteAllToday = async () => {
+		if (completableTodayGoals.length === 0 || isBulkTodayUpdating) {
+			return;
+		}
+
+		setIsBulkTodayUpdating(true);
+		const targetCompleted = !areAllTodayCompleted;
+
+		try {
+			const responses = await Promise.all(
+				completableTodayGoals.map((stats) =>
+					markRegularProgress({
+						regular_goal_id: stats.regularGoal,
+						completed: targetCompleted,
+						notes: '',
+					})
+				)
+			);
+
+			if (targetCompleted) {
+				markAllItems(completableTodayGoals, buildCompletedSnapshot);
+			} else {
+				unmarkAllItems(completableTodayGoals);
+			}
+
+			responses.forEach((response, index) => {
+				const stats = completableTodayGoals[index];
+				const updatedStats = extractMarkProgressStatistics(response.data);
+				const snapshot = updatedStats ?? (targetCompleted ? buildCompletedSnapshot(stats) : stats);
+
+				if (updatedStats) {
+					mergeStatisticsUpdate(updatedStats);
+				}
+
+				if (targetCompleted) {
+					applyMarkedItem(stats, snapshot);
+				} else {
+					applyUnmarkedItem(snapshot);
+				}
+			});
+
+			loadRegularGoalStatistics({silent: true}).catch(() => {});
+			await getUser();
+			HeaderRegularGoalsStore.loadTodayCount();
+
+			NotificationStore.addNotification({
+				type: 'success',
+				title: 'Успешно!',
+				message: targetCompleted ? 'Все цели на сегодня отмечены' : 'Отметка о выполнении снята со всех целей',
+			});
+		} catch (error) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Не удалось обновить цели на сегодня',
+			});
+		} finally {
+			setIsBulkTodayUpdating(false);
+		}
 	};
 
-	if (isLoading && statisticsData.length === 0) {
-		return <Loader isLoading isPageLoader />;
-	}
+	const isInitialLoading = isLoading && statisticsData.length === 0;
 
 	if (!isLoading && statisticsData.length === 0) {
 		return (
@@ -391,46 +894,134 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 				<Title tag="h2" className={element('title')}>
 					Регулярные цели
 				</Title>
-			</div>
-			<div className={element('content')}>
-				<div className="catalog-items__filters">
-					<Switch className="catalog-items__switch" buttons={buttonsSwitch} active={activeTab} />
-					<Line className="catalog-items__line" />
-					<div className="catalog-items__search-wrapper catalog-items__search-wrapper--wrap-on-lg">
-						<FieldInput
-							className="catalog-items__search"
-							placeholder="Поиск по названию цели"
-							id="user-self-regular-search"
-							value={search}
-							setValue={handleSearchChange}
-							iconBegin="search"
-						/>
-						<div className="catalog-items__categories-wrapper">
-							{categoryFilters.length > 0 && (
-								<FiltersCheckbox
-									head={{name: 'Все категории', code: 'all'}}
-									items={categoryFilters}
-									onFinish={handleCategoryFilter}
-									multipleSelectedText={['категория', 'категории', 'категорий']}
-									multipleThreshold={1}
-								/>
-							)}
-							<Select options={sortOptions} activeOption={activeSort} onSelect={handleSortSelect} filter />
-						</div>
-					</div>
-				</div>
-				<BlurLoader active={isLoading}>
-					<div id="user-self-regular-goals">
-						{activeTab === 'today'
-							? renderGoalsList(todayGoals, 'На сегодня нет регулярных целей')
-							: renderGoalsList(allGoals, 'Нет регулярных целей')}
-					</div>
-				</BlurLoader>
-
-				{pagination && pagination.totalPages > 1 && (
-					<Pagination currentPage={currentPage} totalPages={pagination.totalPages} goToPage={goToPage} />
+				{!showSlotSelection && regularGoalsLimitReached && (
+					<Button
+						theme="blue"
+						icon="rocket"
+						onClick={() => {
+							if (isPremium) {
+								setIsPremiumLimitModalOpen(true);
+								return;
+							}
+							navigate('/user/self/subs');
+						}}
+						size="small"
+					>
+						{isPremium ? 'Нужно больше?' : 'Больше с Premium'}
+					</Button>
 				)}
 			</div>
+
+			{selectionPending && (
+				<Banner
+					type="warning"
+					className={element('banner')}
+					message={selectionPendingBannerMessage}
+					actionText="Оформить Premium"
+					onAction={() => navigate('/user/self/subs')}
+				/>
+			)}
+
+			{canChangeSlots && (
+				<Banner
+					type="info"
+					className={element('banner')}
+					message={slotsChangeBannerMessage}
+					actionText="Выбрать цели"
+					onAction={() => setIsChangingSlots(true)}
+				/>
+			)}
+
+			{slotsLocked && hasPausedGoals && !isPremium && !selectionPending && (
+				<Banner
+					type="info"
+					className={element('banner')}
+					message="Вы отметили выполнение всех активных целей. Набор зафиксирован до подключения Premium."
+					actionText="Оформить Premium"
+					onAction={() => navigate('/user/self/subs')}
+				/>
+			)}
+
+			{isChangingSlots && !selectionPending && (
+				<Banner
+					type="info"
+					className={element('banner')}
+					message={
+						lockedSlotIds.length > 0
+							? `Выберите до ${maxRegularGoals} регулярных целей. ${lockedSlotIds.length} уже отмечены выполнением и не могут быть сняты.`
+							: `Выберите до ${maxRegularGoals} регулярных целей, которые останутся активными.`
+					}
+				/>
+			)}
+
+			<div className={element('content')}>
+				{showSlotSelection ? (
+					renderSlotSelection()
+				) : (
+					<>
+						<div className="catalog-items__filters">
+							<Switch className="catalog-items__switch" buttons={buttonsSwitch} active={activeTab} />
+							<Line className="catalog-items__line" />
+							{activeTab === 'today' ? (
+								<div className={element('bulk-today-wrapper')}>
+									<Button
+										theme="blue-light"
+										size="medium"
+										icon={areAllTodayCompleted ? 'regular' : 'regular-empty'}
+										hoverIcon={areAllTodayCompleted ? 'cross' : undefined}
+										onClick={handleToggleCompleteAllToday}
+										disabled={isBulkTodayUpdating || completableTodayGoals.length === 0}
+										hoverContent={areAllTodayCompleted ? 'Снять выполнение всех' : undefined}
+									>
+										{areAllTodayCompleted ? 'Выполнено все сегодня' : 'Выполнить все сегодня'}
+									</Button>
+								</div>
+							) : (
+								<div className="catalog-items__search-wrapper catalog-items__search-wrapper--wrap-on-lg">
+									<FieldInput
+										className="catalog-items__search"
+										placeholder="Поиск по названию цели"
+										id="user-self-regular-search"
+										value={search}
+										setValue={handleSearchChange}
+										iconBegin="search"
+									/>
+									<div className="catalog-items__categories-wrapper">
+										<FiltersDrawer
+											filters={drawerFilters}
+											values={filterValues}
+											onChange={handleFilterChange}
+											onReset={handleFilterReset}
+											totalCount={allGoals.length}
+										/>
+										<Select options={sortOptions} activeOption={activeSort} onSelect={handleSortSelect} filter />
+									</div>
+								</div>
+							)}
+						</div>
+						{isInitialLoading ? (
+							<CatalogItemsSkeleton columns="3" />
+						) : (
+							<div id="user-self-regular-goals">
+								{activeTab === 'today'
+									? renderGoalsList(
+											todayGoalsToRender,
+											areAllTodayCompleted ? 'Все цели на сегодня выполнены!' : 'На сегодня нет регулярных целей',
+											areAllTodayCompleted
+												? 'Отличная работа! Возвращайтесь завтра, чтобы продолжить серию.'
+												: 'Отметьте регулярные цели, которые хотите выполнить сегодня.'
+									  )
+									: renderGoalsList(
+											allGoals,
+											'Нет регулярных целей',
+											'Добавьте регулярные цели из каталога, чтобы отслеживать привычки и прогресс.'
+									  )}
+							</div>
+						)}
+					</>
+				)}
+			</div>
+			<RegularGoalsPremiumLimitModal isOpen={isPremiumLimitModalOpen} onClose={() => setIsPremiumLimitModalOpen(false)} />
 		</div>
 	);
 });

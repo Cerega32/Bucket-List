@@ -1,0 +1,15 @@
+.regular-goals-premium-limit {
+	&__message {
+		display: block;
+	}
+
+	&__link {
+		color: var(--color-primary);
+		font-weight: var(--weight-medium);
+		text-decoration: underline;
+
+		&:hover {
+			color: var(--color-primary-hover);
+		}
+	}
+}

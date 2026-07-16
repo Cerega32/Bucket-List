@@ -19,6 +19,13 @@ export interface IUserInfo {
 	subscriptionExpiresAt?: string | null;
 	subscriptionAutoRenew?: boolean;
 	level?: number;
+	limits?: {
+		maxFolders: number | null;
+		maxFolderRules: number;
+		maxRegularGoals: number;
+	};
+	regularGoalsSelectionPending?: boolean;
+	regularGoalsSlotsLocked?: boolean;
 	counts?: {
 		regularGoals: number;
 		progressGoals: number;
@@ -30,6 +37,7 @@ export interface IUserInfo {
 
 export interface IWeeklyLeader {
 	avatar: string;
+	activityExperienceWeek: number;
 	experienceEarnedWeek: number;
 	totalCompletedGoals: number;
 	weekCompletedGoals: number;
@@ -44,6 +52,19 @@ export interface IInfoStats {
 	experienceEarned: number;
 	goalsCompleted: number;
 	reviewsAdded: number;
+	activityEarned?: number;
+	participantsCount?: number;
+}
+
+export interface IWeekPeriod {
+	start: string;
+	end: string;
+}
+
+export interface IPreviousWeekLeaders extends IWeekPeriod {
+	leaders: Array<IWeeklyLeader>;
+	currentUserPlace?: number;
+	currentUser?: IWeeklyLeader;
 }
 
 export interface ICurrentStats {
@@ -119,7 +140,6 @@ export interface IFriendSearchResult {
 	firstName: string;
 	lastName: string;
 	avatar?: string;
-	email: string;
 	isFriend: boolean;
 	hasPendingRequest: boolean;
 	isRequestFromMe: boolean;
@@ -158,44 +178,73 @@ export interface IFriendComparison {
 	};
 }
 
+/** Подкатегория в статистике сравнения */
+export interface ICompareSubcategory {
+	id: number;
+	name: string;
+	count: number;
+}
+
+/** Категория в статистике сравнения */
+export interface ICompareCategory {
+	id: number;
+	name: string;
+	count: number;
+	subcategories: ICompareSubcategory[];
+}
+
+/** Статистика 100 целей по сложности */
+export interface IHundredGoalsStats {
+	easy: number;
+	medium: number;
+	hard: number;
+}
+
+/** Активность на сайте */
+export interface ISiteActivity {
+	activeDays: number;
+	activityPercentage: number;
+}
+
+/** Активность пользователя для сравнения */
+export interface ICompareActivity {
+	goalsCompleted: number;
+	goalsByCategory: ICompareCategory[];
+	listsCompleted: number;
+	commentsCount: number;
+	totalLikes: number;
+	locationsVisited: number;
+	achievementIds: number[];
+	regularCompleted: number;
+	bestWeeklyRank: number | null;
+	hundredGoals: IHundredGoalsStats;
+	siteActivity: ISiteActivity;
+}
+
+/** Достижение в сравнении */
+export interface ICompareAchievement {
+	id: number;
+	title: string | null;
+	image: string | null;
+	isSecret: boolean;
+	userHas: boolean;
+	friendHas: boolean;
+}
+
+/** Пользователь в ответе сравнения */
+export interface ICompareUser {
+	id: number;
+	username: string;
+	firstName: string;
+	lastName: string;
+	avatar: string | null;
+	level: number;
+	activity: ICompareActivity;
+}
+
 /** Ответ API сравнения с другом: GET /api/friends/compare/:id/ */
 export interface IFriendCompareResponse {
-	user: {
-		id: number;
-		username: string;
-		firstName?: string;
-		lastName?: string;
-		first_name?: string;
-		last_name?: string;
-		activity: {
-			goalsCompleted?: number;
-			listsCompleted?: number;
-			totalCompleted?: number;
-			latestCompletion?: string | null;
-			goals_completed?: number;
-			lists_completed?: number;
-			total_completed?: number;
-			latest_completion?: string | null;
-		};
-		avatar?: string | null;
-	};
-	friend: {
-		id: number;
-		username: string;
-		firstName?: string;
-		lastName?: string;
-		first_name?: string;
-		last_name?: string;
-		activity: {
-			goalsCompleted?: number;
-			listsCompleted?: number;
-			totalCompleted?: number;
-			latestCompletion?: string | null;
-			goals_completed?: number;
-			lists_completed?: number;
-			total_completed?: number;
-			latest_completion?: string | null;
-		};
-		avatar?: string | null;
-	};
+	user: ICompareUser;
+	friend: ICompareUser;
+	achievements: ICompareAchievement[];
 }

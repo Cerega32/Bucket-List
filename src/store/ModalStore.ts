@@ -18,7 +18,9 @@ type IWindow =
 	| 'progress-update'
 	| 'random-goal-picker'
 	| 'set-regular-goal'
-	| 'compare-friend';
+	| 'compare-friend'
+	| 'delete-review'
+	| 'report-comment';
 
 export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 

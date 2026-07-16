@@ -1,10 +1,15 @@
-import {FC} from 'react';
+import {type MouseEvent, FC} from 'react';
 import {Link} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
+import useScreenSize from '@/hooks/useScreenSize';
 import {ModalStore} from '@/store/ModalStore';
+import {NotificationStore} from '@/store/NotificationStore';
 import {UserStore} from '@/store/UserStore';
-import {IShortGoal, IShortList} from '@/typings/goal';
+import {ICatalogReviewStatus, IShortGoal, IShortList} from '@/typings/goal';
+import {isScratchMapList, SCRATCH_MAP_PAGE_URL} from '@/utils/scratchMapList';
+import {emitConfettiFromElement} from '@/utils/ui/emitConfetti';
+import {getCatalogDeleteHint} from '@/utils/values/catalogRejectionReasons';
 
 import {Button} from '../Button/Button';
 import {Gradient} from '../Gradient/Gradient';
@@ -20,6 +25,13 @@ import './card.scss';
 interface BaseCardProps {
 	className?: string;
 	horizontal?: boolean;
+	disableNavigation?: boolean;
+	disableMark?: boolean;
+	allowAddWithoutAuth?: boolean;
+	skipDeleteConfirm?: boolean;
+	hideActions?: boolean;
+	/** Показывать тег «В каталоге» для одобренных (раздел модерации) */
+	showCatalogReviewApproved?: boolean;
 }
 
 interface CardListProps extends BaseCardProps {
@@ -40,81 +52,351 @@ interface CardGoalProps extends BaseCardProps {
 
 type CardProps = CardListProps | CardGoalProps;
 
+const isListFullyCompleted = (goal: IShortList): boolean => goal.goalsCount > 0 && goal.userCompletedGoals >= goal.goalsCount;
+
+const isCardCompleted = (goal: IShortGoal | IShortList, isList: boolean | undefined): boolean =>
+	goal.completedByUser || (!!isList && isListFullyCompleted(goal as IShortList));
+
+const getCatalogModerationTag = (
+	goal: {
+		catalogReviewStatus?: ICatalogReviewStatus;
+		catalogPermanentlyRejected?: boolean;
+		catalogRejectionCount?: number;
+		catalogRejectionLimit?: number;
+		catalogDeleteAt?: string | null;
+	},
+	showApproved: boolean
+): {text: string; theme: 'gray' | 'green' | 'red' | 'gold'; title: string} | null => {
+	const {
+		catalogReviewStatus: status,
+		catalogPermanentlyRejected,
+		catalogRejectionCount,
+		catalogRejectionLimit = 3,
+		catalogDeleteAt,
+	} = goal;
+	const attempt = Math.max(1, catalogRejectionCount ?? 1);
+	if (status === 'pending') {
+		return {
+			text: 'На проверке',
+			theme: 'gray',
+			title: 'Ожидает публикации в каталоге',
+		};
+	}
+	if (status === 'rejected' && catalogPermanentlyRejected) {
+		return {
+			text: 'Отклонено',
+			theme: 'red',
+			title: `Лимит попыток (${catalogRejectionLimit}) исчерпан. ${getCatalogDeleteHint(
+				catalogDeleteAt
+			)} Создайте новую версию с другой формулировкой`,
+		};
+	}
+	if (status === 'rejected') {
+		return {
+			text: 'Требует правки',
+			theme: 'gold',
+			title: `Не прошло модерацию (попытка ${attempt} из ${catalogRejectionLimit}). Отредактируйте и отправьте на повторную проверку`,
+		};
+	}
+	if (status === 'approved' && showApproved) {
+		return {
+			text: 'В каталоге',
+			theme: 'green',
+			title: 'Одобрено модератором и опубликовано в общем каталоге',
+		};
+	}
+	return null;
+};
+
 export const Card: FC<CardProps> = (props) => {
-	const {className, horizontal, ...restProps} = props;
+	const {
+		className,
+		horizontal,
+		disableNavigation,
+		disableMark,
+		allowAddWithoutAuth,
+		skipDeleteConfirm,
+		hideActions,
+		showCatalogReviewApproved = false,
+		...restProps
+	} = props;
 
 	const [block, element] = useBem('card', className);
+	const {isScreenXs} = useScreenSize();
 
 	const {goal, isList, onClickAdd, onClickDelete, onClickMark} = restProps as CardListProps | CardGoalProps;
 
-	const {isAuth} = UserStore;
-	const {setIsOpen, setWindow} = ModalStore;
+	const isCompleted = isCardCompleted(goal, isList);
+	const showScratchMap = Boolean(isList && isScratchMapList(goal as IShortList));
+	const catalogModerationTag = getCatalogModerationTag(goal, showCatalogReviewApproved);
 
-	const onClickAddHandler = () => {
-		if (!isAuth) {
+	const {isAuth} = UserStore;
+	const {setIsOpen, setWindow, setFuncModal, setModalProps} = ModalStore;
+
+	const onClickAddHandler = async () => {
+		if (!isAuth && !allowAddWithoutAuth) {
 			setIsOpen(true);
 			setWindow('login');
 			return;
 		}
-		onClickAdd();
+		await onClickAdd();
+
+		if (!isAuth) {
+			NotificationStore.addNotification({
+				type: 'success',
+				title: 'Цель добавлена',
+				message: 'Мы сохранили её, вы увидите цель в личном кабинете после завершения регистрации.',
+			});
+		}
+	};
+
+	const onClickDeleteHandler = async () => {
+		if (!isAuth) {
+			await onClickDelete();
+			NotificationStore.addNotification({
+				type: 'warning',
+				title: 'Цель удалена',
+				message: 'Мы убрали её из вашего списка.',
+			});
+			return;
+		}
+
+		if (skipDeleteConfirm) {
+			await onClickDelete();
+			return;
+		}
+
+		setModalProps({});
+		setWindow(isList ? 'delete-list' : 'delete-goal');
+		setIsOpen(true);
+		setFuncModal(() => onClickDelete());
+	};
+
+	const onClickMarkHandler = async (e: MouseEvent<HTMLButtonElement>) => {
+		const buttonEl = e.currentTarget;
+		const shouldCelebrate = !isCompleted;
+		await onClickMark?.();
+		if (shouldCelebrate) {
+			emitConfettiFromElement(buttonEl);
+		}
+	};
+
+	const getProgress = () => {
+		if (!isList) return null;
+		if ('userCompletedGoals' in goal && 'goalsCount' in goal) {
+			if (goal.goalsCount === 0 || goal.userCompletedGoals >= goal.goalsCount) {
+				return null;
+			}
+			return `${Math.round((goal.userCompletedGoals / goal.goalsCount) * 100)}%`;
+		}
+		return null;
 	};
 
 	return (
-		<section className={block({horizontal})}>
-			<Link to={`/${isList ? 'list' : 'goals'}/${goal.code}`} className={element('gradient')}>
-				<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} show={goal.completedByUser}>
-					<div className={element('img-tags')}>
-						{((goal.addedByUser && !goal.completedByUser) || (!isList && goal.regularConfig)) && (
-							<div className={element('img-tag-wrapper')}>
-								{goal.addedByUser && !goal.completedByUser && <Tag icon="watch" theme="light" title="В процессе" />}
-								{!isList && goal.regularConfig && <Tag icon="regular-empty" theme="light" title="Регулярная цель" />}
-							</div>
-						)}
-						{goal.completedByUser && (
-							<Tag icon="done" theme="light" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
-						)}
-						<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
-					</div>
-				</Gradient>
-			</Link>
-			<div className={element('info')}>
-				<Link to={`/${isList ? 'list' : 'goals'}/${goal.code}`} className={element('info-link')}>
-					<Title tag="h3" className={element('title')}>
-						{goal.title}
-					</Title>
-					<p className={element('text')}>{goal.shortDescription}</p>
-				</Link>
-				<Line />
-				<div className={element('tags-wrapper')}>
-					<Tags
-						complexity={goal.complexity}
-						added={goal.totalAdded}
-						estimatedTime={goal.estimatedTime}
-						theme="integrate"
-						className={element('tags', {
-							added: goal.addedByUser,
-						})}
-						showSeparator
-					/>
-					<div className={element('buttons-wrapper')}>
-						{isList && 'userCompletedGoals' in goal && 'goalsCount' in goal && (
-							<Progress done={goal.userCompletedGoals} all={goal.goalsCount} />
-						)}
-						<div className={element('buttons')}>
-							{!goal.addedByUser && <Button theme="blue" icon="plus" size="small" onClick={onClickAddHandler} />}
-							{goal.addedByUser && <Button theme="blue-light" icon="trash" size="small" onClick={onClickDelete} />}
-							{(goal.addedByUser || goal.completedByUser) && !isList && onClickMark && (
-								<Button theme={goal.completedByUser ? 'green' : 'blue-light'} size="small" onClick={onClickMark}>
-									<Svg
-										icon="done"
-										width="16px"
-										height="16px"
-										className={element('btn-done', {
-											active: goal.completedByUser,
-										})}
+		<section className={block({horizontal, list: isList})}>
+			{disableNavigation ? (
+				<div className={element('gradient')}>
+					<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} show={isCompleted}>
+						<div className={element('img-tags-wrapper')}>
+							<div className={element('img-tags')}>
+								{goal.addedByUser &&
+									!isCompleted &&
+									(() => {
+										const progress = getProgress();
+										return (
+											<Tag
+												icon="watch"
+												theme="blue"
+												classNameIcon={element('img-tag-icon-done')}
+												title={progress ? `В процессе ${progress}` : 'В процессе'}
+												text={progress ?? undefined}
+											/>
+										);
+									})()}
+								{isCompleted && (
+									<Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
+								)}
+								{!isList && goal.regularConfig && (
+									<Tag
+										icon={goal.completedByUser ? 'regular' : 'regular-empty'}
+										theme="gold"
+										classNameIcon={element('img-tag-icon-done')}
+										title="Регулярная цель"
 									/>
-								</Button>
+								)}
+								{showScratchMap && (
+									<Tag
+										icon="map"
+										theme="green"
+										classNameIcon={element('img-tag-icon-done')}
+										title="Интерактивная скретч-карта в профиле"
+									/>
+								)}
+								<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
+							</div>
+							{catalogModerationTag && (
+								<Tag
+									text={catalogModerationTag.text}
+									theme={catalogModerationTag.theme}
+									className={element('img-tag-pending')}
+									title={catalogModerationTag.title}
+								/>
 							)}
+						</div>
+					</Gradient>
+				</div>
+			) : (
+				<Link to={`/${isList ? 'list' : 'goals'}/${goal.code}`} className={element('gradient')}>
+					<Gradient img={{src: goal.image, alt: goal.title}} category={goal.category.nameEn} show={isCompleted}>
+						<div className={element('img-tags-wrapper')}>
+							<div className={element('img-tags')}>
+								{goal.addedByUser &&
+									!isCompleted &&
+									(() => {
+										const progress = getProgress();
+										return (
+											<Tag
+												icon="watch"
+												theme="blue"
+												classNameIcon={element('img-tag-icon-done')}
+												title={progress ? `В процессе ${progress}` : 'В процессе'}
+												text={progress ?? undefined}
+											/>
+										);
+									})()}
+								{isCompleted && (
+									<Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} title="Выполнено" />
+								)}
+								{!isList && goal.regularConfig && (
+									<Tag
+										icon={goal.completedByUser ? 'regular' : 'regular-empty'}
+										theme="gold"
+										classNameIcon={element('img-tag-icon-done')}
+										title="Регулярная цель"
+									/>
+								)}
+								{showScratchMap && (
+									<Tag
+										icon="map"
+										theme="green"
+										classNameIcon={element('img-tag-icon-done')}
+										title="Интерактивная скретч-карта в профиле"
+									/>
+								)}
+								<Tag text={goal.category.name} category={goal.category.nameEn} className={element('img-tag-category')} />
+							</div>
+							{catalogModerationTag && (
+								<Tag
+									text={catalogModerationTag.text}
+									theme={catalogModerationTag.theme}
+									className={element('img-tag-pending')}
+									title={catalogModerationTag.title}
+								/>
+							)}
+						</div>
+					</Gradient>
+				</Link>
+			)}
+			<div className={element('info')}>
+				{disableNavigation ? (
+					<div className={element('info-link')}>
+						<Title tag="h3" className={element('title')}>
+							{goal.title}
+						</Title>
+						<p className={element('text')}>{goal.shortDescription}</p>
+					</div>
+				) : (
+					<Link to={`/${isList ? 'list' : 'goals'}/${goal.code}`} className={element('info-link')}>
+						<Title tag="h3" className={element('title')}>
+							{goal.title}
+						</Title>
+						<p className={element('text')}>{goal.shortDescription}</p>
+					</Link>
+				)}
+				<div className={element('down-wrapper')}>
+					<Line />
+					<div className={element('tags-wrapper')}>
+						<Tags
+							complexity={goal.complexity}
+							added={goal.totalAdded}
+							estimatedTime={goal.estimatedTime}
+							listTotal={isList && 'goalsCount' in goal ? goal.goalsCount : undefined}
+							onlyCount
+							theme="integrate"
+							className={element('tags', {
+								added: goal.addedByUser,
+							})}
+							showSeparator
+						/>
+						<div className={element('buttons-wrapper')}>
+							{isList && goal.addedByUser && 'userCompletedGoals' in goal && 'goalsCount' in goal && (
+								<Progress done={goal.userCompletedGoals} all={goal.goalsCount} />
+							)}
+							{(() => {
+								const showAddButton = !hideActions && !goal.addedByUser;
+								const showDeleteButton = !hideActions && goal.addedByUser && !(isList && goal.code === '100-goals');
+								const isRegularGoal = !isList && 'regularConfig' in goal && !!goal.regularConfig;
+								const showMarkButton =
+									!hideActions &&
+									!disableMark &&
+									!isRegularGoal &&
+									(goal.addedByUser || goal.completedByUser) &&
+									!isList &&
+									typeof onClickMark === 'function';
+
+								if (!showAddButton && !showDeleteButton && !showMarkButton && !showScratchMap) {
+									return null;
+								}
+
+								return (
+									<div className={element('buttons')}>
+										{showScratchMap && (
+											<Button theme="blue-light" icon="map" size="small" type="Link" href={SCRATCH_MAP_PAGE_URL} />
+										)}
+										{showAddButton &&
+											(isScreenXs ? (
+												<Button theme="blue" size="small" onClick={onClickAddHandler}>
+													Добавить
+												</Button>
+											) : (
+												<Button theme="blue" icon="plus" size="small" onClick={onClickAddHandler} />
+											))}
+										{showDeleteButton &&
+											(isScreenXs ? (
+												<Button theme="blue-light" size="small" onClick={onClickDeleteHandler}>
+													Удалить
+												</Button>
+											) : (
+												<Button theme="blue-light" icon="trash" size="small" onClick={onClickDeleteHandler} />
+											))}
+										{showMarkButton &&
+											(isScreenXs ? (
+												<Button
+													theme={goal.completedByUser ? 'green' : 'blue'}
+													size="small"
+													onClick={onClickMarkHandler}
+												>
+													{goal.completedByUser ? 'Выполнено' : 'Выполнить'}
+												</Button>
+											) : (
+												<Button
+													theme={goal.completedByUser ? 'green' : 'blue-light'}
+													size="small"
+													onClick={onClickMarkHandler}
+												>
+													<Svg
+														icon="done"
+														width="16px"
+														height="16px"
+														className={element('btn-done', {
+															active: goal.completedByUser,
+														})}
+													/>
+												</Button>
+											))}
+									</div>
+								);
+							})()}
 						</div>
 					</div>
 				</div>

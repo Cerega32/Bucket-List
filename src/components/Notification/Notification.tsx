@@ -1,6 +1,6 @@
 import {motion} from 'framer-motion';
 import {observer} from 'mobx-react-lite';
-import React from 'react';
+import React, {ReactNode} from 'react';
 
 import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
@@ -13,7 +13,7 @@ interface NotificationProps {
 	id: string;
 	type: 'success' | 'error' | 'warning';
 	title: string;
-	message?: string | {[key: string]: Array<string>};
+	message?: string | ReactNode | {[key: string]: Array<string>};
 	actionText?: string;
 	action?: () => void;
 }
@@ -22,6 +22,8 @@ const mapType = (t: NotificationProps['type']): AlertType => (t === 'error' ? 'd
 
 const Notification: React.FC<NotificationProps> = observer(({id, type, title, message, actionText, action}) => {
 	const [block] = useBem('notification');
+
+	const alertMessage = typeof message === 'string' || React.isValidElement(message) ? message : undefined;
 
 	return (
 		<motion.div
@@ -34,7 +36,7 @@ const Notification: React.FC<NotificationProps> = observer(({id, type, title, me
 			<Alert
 				type={mapType(type)}
 				title={title}
-				message={typeof message === 'string' ? message : undefined}
+				message={alertMessage}
 				actionText={actionText}
 				onAction={action}
 				onClose={() => NotificationStore.removeNotification(id)}

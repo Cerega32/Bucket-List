@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite';
 import React, {useCallback, useState} from 'react';
 
 import {Button} from '@/components/Button/Button';
+import {FriendsContentSkeleton} from '@/containers/FriendsContent/FriendsContentSkeleton';
 import {useBem} from '@/hooks/useBem';
 import {FriendsStore} from '@/store/FriendsStore';
 import {NotificationStore} from '@/store/NotificationStore';
@@ -9,9 +10,11 @@ import {IFriendSearchResult} from '@/typings/user';
 import {searchUsers, sendFriendRequest} from '@/utils/api/friends';
 import {debounce} from '@/utils/time/debounce';
 
+import {EmptyState} from '../EmptyState/EmptyState';
 import {FieldInput} from '../FieldInput/FieldInput';
-import {Loader} from '../Loader/Loader';
+import {FriendCard} from '../FriendCard/FriendCard';
 import './user-search.scss';
+import {Title} from '../Title/Title';
 
 interface UserSearchProps {
 	placeholder?: string;
@@ -25,14 +28,15 @@ export const UserSearch: React.FC<UserSearchProps> = observer(({placeholder = '�
 	// Debounced search function
 	const debouncedSearch = useCallback(
 		debounce(async (searchQuery: string) => {
-			if (searchQuery.trim().length < 3) {
+			const normalizedQuery = searchQuery.trim().toLowerCase();
+			if (normalizedQuery.length < 3) {
 				FriendsStore.clearSearchResults();
 				return;
 			}
 
 			try {
 				FriendsStore.setIsSearching(true);
-				const response = await searchUsers(searchQuery);
+				const response = await searchUsers(normalizedQuery);
 				FriendsStore.setSearchResults(response.results);
 			} catch (error) {
 				NotificationStore.addNotification({
@@ -74,53 +78,38 @@ export const UserSearch: React.FC<UserSearchProps> = observer(({placeholder = '�
 	};
 
 	const renderUserCard = (user: IFriendSearchResult) => {
-		const displayName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username;
+		const friend = {
+			id: user.id,
+			username: user.username,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			avatar: user.avatar,
+			status: 'pending' as const,
+			createdAt: new Date().toISOString(),
+		};
 
-		const isButtonDisabled = isProcessing[user.id] || user.isFriend || user.hasPendingRequest;
+		const friendFromStore = FriendsStore.friends.find((f) => f.id === user.id);
+		const pendingRequestFromStore = FriendsStore.friendRequests.find((r) => r.id === user.id);
 
-		let buttonText = 'Добавить в друзья';
-		let buttonTheme = 'blue-light';
+		const isFriend = !!friendFromStore || !!user.isFriend;
+		const hasPendingRequest = !!pendingRequestFromStore || !!user.hasPendingRequest;
+		const isRequestFromMe = pendingRequestFromStore?.type === 'outgoing' || user.isRequestFromMe;
 
-		if (user.isFriend) {
-			buttonText = 'Уже друзья';
-			buttonTheme = 'secondary';
-		} else if (user.hasPendingRequest) {
-			buttonText = user.isRequestFromMe ? 'Запрос отправлен' : 'Ответить на запрос';
-			buttonTheme = 'secondary';
-		}
-
-		return (
-			<div key={user.id} className={element('result-card')}>
-				<div className={element('result-avatar')}>
-					{user.avatar ? (
-						<img src={user.avatar} alt={displayName} />
-					) : (
-						<div className={element('result-avatar-placeholder')}>{displayName.charAt(0).toUpperCase()}</div>
-					)}
-				</div>
-
-				<div className={element('result-info')}>
-					<h4 className={element('result-name')}>{displayName}</h4>
-					<p className={element('result-username')}>@{user.username}</p>
-					<p className={element('result-email')}>{user.email}</p>
-				</div>
-
-				<div className={element('result-actions')}>
-					<Button theme="blue-light" size="small" type="Link" href={`/user/${user.id}/showcase`}>
-						Профиль
-					</Button>
-
-					<Button
-						theme={buttonTheme as any}
-						size="small"
-						onClick={() => handleSendFriendRequest(user.id)}
-						disabled={isButtonDisabled}
-					>
-						{buttonText}
-					</Button>
-				</div>
-			</div>
+		const actions = isFriend ? (
+			<Button type="Link" href={`/user/${user.id}/showcase`} theme="green" size="small">
+				Уже в друзьях
+			</Button>
+		) : hasPendingRequest ? (
+			<Button theme={'secondary' as any} size="small" disabled>
+				{isRequestFromMe ? 'Запрос отправлен' : 'Ответить на запрос'}
+			</Button>
+		) : (
+			<Button theme="blue" size="small" onClick={() => handleSendFriendRequest(user.id)} disabled={isProcessing[user.id]}>
+				Добавить в друзья
+			</Button>
 		);
+
+		return <FriendCard key={user.id} friend={friend} variant="search" showActions={false} actions={actions} />;
 	};
 
 	return (
@@ -128,18 +117,18 @@ export const UserSearch: React.FC<UserSearchProps> = observer(({placeholder = '�
 			<div className={element('input-container')}>
 				<FieldInput value={query} setValue={handleInputChange} placeholder={placeholder} id="user-search-input" />
 			</div>
-			<Loader isLoading={FriendsStore.isSearching} />
-			{FriendsStore.hasSearchResults && (
+			{FriendsStore.isSearching && <FriendsContentSkeleton count={4} />}
+			{!FriendsStore.isSearching && FriendsStore.hasSearchResults && (
 				<div className={element('results')}>
-					<h3 className={element('results-title')}>Найдено пользователей: {FriendsStore.searchResults.length}</h3>
+					<Title className={element('results-title')} tag="h4">
+						Найдено пользователей: {FriendsStore.searchResults.length}
+					</Title>
 					<div className={element('results-list')}>{FriendsStore.searchResults.map(renderUserCard)}</div>
 				</div>
 			)}
 
 			{query.trim().length >= 2 && !FriendsStore.isSearching && !FriendsStore.hasSearchResults && (
-				<div className={element('no-results')}>
-					<p>Пользователи не найдены</p>
-				</div>
+				<EmptyState title="Пользователи не найдены" description="Попробуйте изменить параметры поиска" size="small" />
 			)}
 		</div>
 	);

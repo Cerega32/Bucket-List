@@ -20,7 +20,10 @@ const COMPARISON_DATA = [
 			{feature: '100 Целей', free: true, premium: true},
 			{feature: 'Создание списков целей', free: true, premium: true},
 			{feature: 'Добавление готовых списков', free: true, premium: true},
+			{feature: 'Добавление целей себе и в списки', free: true, premium: true},
 			{feature: 'Посещенные места и страны', free: true, premium: true},
+			{feature: 'Прогресс по целям', free: false, premium: true},
+			{feature: 'Срок выполнения целей', free: false, premium: true},
 		],
 	},
 	{
@@ -28,27 +31,27 @@ const COMPARISON_DATA = [
 		items: [
 			{feature: 'Цвета и иконки папок', free: true, premium: true},
 			{feature: 'Количество папок', free: 'До 3', premium: 'Без ограничений'},
-			{feature: 'Приватные папки', free: true, premium: true},
-			{feature: 'Публичные папки', free: false, premium: true},
-			{feature: 'Шаблоны папок', free: false, premium: true},
+			// {feature: 'Приватные папки', free: true, premium: true},
+			// {feature: 'Публичные папки', free: false, premium: true},
+			// {feature: 'Шаблоны папок', free: false, premium: true},
 			{feature: 'Автоматические правила для папок', free: false, premium: true},
-			{feature: 'Совместные папки', free: false, premium: true},
+			// {feature: 'Совместные папки', free: false, premium: true},
 		],
 	},
 	{
 		category: 'Регулярные цели',
 		items: [
 			{feature: 'Базовые настройки', free: true, premium: true},
-			{feature: 'Количество активных', free: 'До 3', premium: 'До 20'},
+			{feature: 'Количество активных', free: 'До 3', premium: 'До 24'},
 			{feature: 'Кастомные расписания', free: false, premium: true},
 		],
 	},
 	{
 		category: 'Социальные функции',
 		items: [
-			{feature: 'Лайки, дизлайки, комментарии', free: true, premium: true},
-			{feature: 'Фото в комментариях', free: 'До 3 на 1 комментарий', premium: 'Без ограничений'},
-			{feature: 'Друзья', free: 'До 20', premium: 'Без ограничений'},
+			{feature: 'Лайки и комментарии', free: true, premium: true},
+			{feature: 'Фото в комментариях', free: 'До 10 на 1 комментарий', premium: 'До 10 на 1 комментарий'},
+			{feature: 'Друзья', free: 'Без ограничений', premium: 'Без ограничений'},
 			{feature: 'Сравнение с друзьями', free: false, premium: true},
 		],
 	},
@@ -57,7 +60,7 @@ const COMPARISON_DATA = [
 		items: [
 			{feature: 'Уровни, опыт, достижения', free: true, premium: true},
 			{feature: 'Premium достижения', free: false, premium: true},
-			{feature: 'Задания для получения опыта', free: '1 задание', premium: '3 задания'},
+			// {feature: 'Задания для получения опыта', free: '1 задание', premium: '3 задания'},
 		],
 	},
 	{
@@ -65,7 +68,7 @@ const COMPARISON_DATA = [
 		items: [
 			{feature: 'Базовая статистика', free: true, premium: true},
 			{feature: 'Активность выполнения целей и списков', free: '1 год', premium: 'Без ограничений'},
-			{feature: 'Уведомления в мессенджерах', free: false, premium: true},
+			// {feature: 'Уведомления в мессенджерах', free: false, premium: true},
 			{feature: 'Отсутствие рекламы', free: false, premium: true},
 		],
 	},

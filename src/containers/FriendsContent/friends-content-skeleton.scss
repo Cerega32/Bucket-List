@@ -1,0 +1,43 @@
+.friends-content-skeleton {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	width: 100%;
+
+	&__card {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		padding: 16px;
+		background: var(--color-white);
+		border-radius: 8px;
+		box-shadow: 0 2px 8px rgb(var(--color-black-rgb) / 8%);
+
+		@include xs {
+			flex-direction: column;
+		}
+	}
+
+	&__info {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		min-width: 0;
+		gap: 8px;
+
+		@include xs {
+			width: 100%;
+			align-items: center;
+		}
+	}
+
+	&__actions {
+		display: flex;
+		gap: 8px;
+		flex-shrink: 0;
+	}
+
+	&__action {
+		flex-shrink: 0;
+	}
+}

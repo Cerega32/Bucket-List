@@ -2,6 +2,18 @@ import {makeAutoObservable} from 'mobx';
 
 import {getGoalsInProgress, IGoalProgress} from '@/utils/api/goals';
 
+/** Массив из ответа GET self/goals-in-progress (корень или { data }) */
+function goalsInProgressListFromResponse(body: unknown): IGoalProgress[] {
+	if (!body || typeof body !== 'object') {
+		return [];
+	}
+	if (Array.isArray(body)) {
+		return body as IGoalProgress[];
+	}
+	const raw = (body as Record<string, unknown>)['data'];
+	return Array.isArray(raw) ? (raw as IGoalProgress[]) : [];
+}
+
 class Store {
 	goalsInProgress: IGoalProgress[] = [];
 
@@ -20,10 +32,10 @@ class Store {
 	}
 
 	get hasRegularGoalsToday() {
-		return this.goalsInProgress.length > 0;
+		return this.goalsCount > 0;
 	}
 
-	/** Количество целей в процессе (для бейджа в хедере) */
+	/** Длина загруженной страницы (для фолбэка, если ещё нет counts в профиле) */
 	get goalsCount(): number {
 		return this.goalsInProgress.length;
 	}
@@ -33,7 +45,7 @@ class Store {
 		try {
 			const response = await getGoalsInProgress();
 			if (response.success && response.data) {
-				this.setGoalsInProgress(Array.isArray(response.data) ? response.data : []);
+				this.setGoalsInProgress(goalsInProgressListFromResponse(response.data));
 			} else {
 				this.setGoalsInProgress([]);
 			}

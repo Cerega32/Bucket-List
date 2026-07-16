@@ -2,10 +2,6 @@
 	width: 100%;
 	border-radius: 16px;
 
-	@include md {
-		padding: 16px;
-	}
-
 	&__content {
 		display: flex;
 		flex-direction: column;
@@ -64,5 +60,20 @@
 		@include md {
 			grid-template-columns: 1fr;
 		}
+
+		&--demo {
+			opacity: 0.92;
+		}
+	}
+
+	&__premium-banner {
+		margin-bottom: 8px;
+	}
+
+	&__demo-caption {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 16px;
+		line-height: 1.5;
 	}
 }

@@ -46,10 +46,11 @@
 	}
 
 	&--close {
-		width: 24px;
-		height: 24px;
-		padding: 2px;
+		width: 32px;
+		height: 32px;
 		border: none;
+		border-radius: 6px;
+		background: var(--color-secondary);
 
 		&:hover {
 			background: var(--color-secondary-hover);
@@ -57,7 +58,7 @@
 
 		&:focus {
 			@include focus-outline;
-
+			outline: none;
 			background: var(--color-secondary-hover);
 		}
 
@@ -129,6 +130,7 @@
 
 		&:focus {
 			@include focus-outline;
+			outline: none;
 		}
 
 		path {
@@ -141,7 +143,7 @@
 	}
 
 	&--theme-light {
-		color: var(--color-text-primary);
+		color: var(--color-text);
 
 		&:hover,
 		&:active {
@@ -154,7 +156,7 @@
 		}
 
 		path {
-			fill: var(--color-text-primary);
+			fill: var(--color-gray-1);
 		}
 
 		#{$block}__ripple {
@@ -323,6 +325,30 @@
 		padding: 10px 16px;
 	}
 
+	&--theme-blue-edit {
+		color: var(--color-primary);
+		border: none;
+		font-weight: var(--weight-medium);
+		padding: 0;
+		height: min-content;
+
+		path {
+			fill: var(--color-primary);
+		}
+	}
+
+	&--theme-red-delete {
+		color: var(--color-sentiment-negative);
+		border: none;
+		font-weight: var(--weight-medium);
+		padding: 0;
+		height: min-content;
+
+		path {
+			fill: var(--color-sentiment-negative);
+		}
+	}
+
 	&--width-auto {
 		width: auto;
 	}
@@ -330,14 +356,8 @@
 	&--disabled {
 		cursor: not-allowed;
 		pointer-events: none;
-		opacity: 0.6;
-
-		&:hover,
-		&:active {
-			background: var(--color-white);
-			cursor: initial;
-			opacity: 0.6;
-		}
+		border: 1px solid var(--color-gray-9);
+		opacity: 0.8;
 	}
 
 	@keyframes rotate {

@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import {Alert} from '@/components/Alert/Alert';
+import {Banner} from '@/components/Banner/Banner';
 import {Progress} from '@/components/Progress/Progress';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
@@ -68,7 +68,7 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 			visit_profiles: 'users',
 			login_streak: 'calendar',
 			update_progress: 'trending-up',
-			create_folder: 'folder',
+			create_folder: 'folder-open',
 			share_goal: 'share',
 			like_comments: 'heart',
 			daily_goal_complete: 'target',
@@ -80,7 +80,7 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 		return (
 			<div className={block({compact})}>
 				<div className={element('loading')}>
-					<Svg icon="loader" className={element('loading-icon')} />
+					<Svg icon="icon-loader" className={element('loading-icon')} />
 					<span>Загрузка заданий...</span>
 				</div>
 			</div>
@@ -111,7 +111,7 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 
 					<div className={element('week-stats')}>
 						<div className={element('experience')}>
-							<Svg icon="zap" className={element('experience-icon')} />
+							<Svg icon="signal" className={element('experience-icon')} />
 							<span className={element('experience-value')}>{weeklyChallenge.totalExperience} XP</span>
 						</div>
 
@@ -167,7 +167,7 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 										</span>
 										{item.isCompleted && (
 											<span className={element('completed-badge')}>
-												<Svg icon="check" />
+												<Svg icon="done" />
 												Выполнено
 											</span>
 										)}
@@ -193,7 +193,7 @@ export const DailyChallenges: React.FC<IDailyChallengesProps> = ({compact = fals
 
 			{!compact && challengeItems.length > 0 && (
 				<div className={element('footer')}>
-					<Alert type="info" message="Выполните все задания, чтобы получить бонусный опыт!" />
+					<Banner type="info" message="Выполните все задания, чтобы получить бонусный опыт!" />
 				</div>
 			)}
 		</div>

@@ -2,10 +2,12 @@
 	$block: &;
 
 	display: flex;
+	justify-content: space-between;
 
 	&__slider {
 		flex-shrink: 0;
 		width: 216px;
+		min-height: 400px;
 		max-height: 600px;
 	}
 
@@ -26,10 +28,12 @@
 
 		@include lg {
 			padding: 0 80px 0 50px;
+			align-items: flex-start;
 		}
 
 		@include md {
 			padding: 0 30px;
+			align-items: center;
 		}
 
 		@include sm {
@@ -40,6 +44,14 @@
 	&__title {
 		margin-bottom: 24px;
 		text-align: center;
+
+		@include lg {
+			text-align: start;
+		}
+
+		@include md {
+			text-align: center;
+		}
 	}
 
 	&__gradient {
@@ -79,6 +91,10 @@
 		font-weight: var(--weight-medium);
 		line-height: var(--line-height-18);
 		text-align: center;
+
+		@include lg {
+			text-align: start;
+		}
 	}
 
 	&__button {
@@ -92,6 +108,11 @@
 
 	&__completed-number {
 		color: var(--color-text);
+
+		&--blurred {
+			filter: blur(2px);
+			user-select: none;
+		}
 	}
 }
 

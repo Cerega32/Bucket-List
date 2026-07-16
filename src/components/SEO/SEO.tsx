@@ -18,6 +18,14 @@ export const SEO: FC<SEOProps> = ({
 	type = 'website',
 	dynamicImage,
 }) => {
+	const fullTitle = `${title} | Delting`;
+
+	// `react-helmet-async` обновляет title через сайд-эффект (может троттлиться в фоне).
+	// Ставим `document.title` синхронно при рендере, чтобы заголовок появлялся сразу.
+	if (typeof document !== 'undefined' && document.title !== fullTitle) {
+		document.title = fullTitle;
+	}
+
 	// Приоритет: динамическое изображение > обычное изображение > изображение по умолчанию
 	const finalImage = dynamicImage || image;
 
@@ -28,7 +36,7 @@ export const SEO: FC<SEOProps> = ({
 	return (
 		<Helmet>
 			{/* Стандартные мета-теги */}
-			<title>{title} | Delting</title>
+			<title>{fullTitle}</title>
 			<meta name="description" content={description} />
 
 			{/* Open Graph метатеги для Facebook и VK */}

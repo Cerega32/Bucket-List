@@ -1,8 +1,8 @@
 .category {
-	padding: calc(380px + 56px) 0 0;
+	padding: calc(var(--header-category-height, 430px) + 56px) 0 0;
 
 	@include xl {
-		padding: calc(380px + 56px) 24px 0;
+		padding: calc(var(--header-category-height, 430px) + 56px) 24px 0;
 	}
 
 	&__wrapper-title {
@@ -68,27 +68,26 @@
 
 	&__all-goals {
 		max-width: var(--max-width);
-		padding-bottom: 24px;
+		padding-bottom: 72px;
 		margin: 0 auto;
-	}
-
-	&--sub {
-		padding: calc(230px + 56px) 0 0;
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
 	}
 
 	&--empty {
-		padding: calc(230px + 56px) 0 0;
+		padding: calc(var(--header-category-height, 284px) + 56px) 0 0;
 
 		@include xl {
-			padding: calc(230px + 56px) 24px 0;
+			padding: calc(var(--header-category-height, 284px) + 56px) 24px 0;
+		}
+
+		@include md {
+			padding: calc(var(--header-category-height, 284px) + 24px) 24px 0;
 		}
 	}
 
 	&--all {
-		padding: 56px;
-
-		@include lg {
-			padding: 56px 32px;
-		}
+		padding: 56px 24px 96px;
 	}
 }

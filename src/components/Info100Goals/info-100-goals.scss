@@ -27,6 +27,10 @@
 	&__score {
 		display: flex;
 		gap: 16px;
+
+		@include xs {
+			flex-wrap: wrap;
+		}
 	}
 
 	&__text {

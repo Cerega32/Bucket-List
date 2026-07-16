@@ -12,6 +12,8 @@ interface ProgressGoalCompactCardProps {
 	progress: IGoalProgress;
 	onMarkToday: () => void;
 	onChangeProgress: () => void;
+	onNavigate?: () => void;
+	canEditProgress?: boolean;
 }
 
 const WEEK_DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -33,8 +35,15 @@ const formatLocalDate = (d: Date): string => {
 
 const getProgressWeekDayState = (progress: IGoalProgress, index: number): DayState => {
 	const currentDayIndex = getCurrentDayOfWeek();
+	if (progress.weekWorkDone && progress.weekWorkDone.length === 7) {
+		const hasWorked = progress.weekWorkDone[index] ?? false;
+		const isToday = index === currentDayIndex;
+		if (hasWorked) return 'completed';
+		if (isToday && progress.isWorkingToday) return 'active';
+		if (isToday) return 'active';
+		return 'inactive';
+	}
 	const entries = progress.recentEntries || progress.entries || [];
-	const entryDates = new Set(entries.map((e) => e.date.split('T')[0]));
 
 	const now = new Date();
 	const startOfWeek = new Date(now);
@@ -43,16 +52,22 @@ const getProgressWeekDayState = (progress: IGoalProgress, index: number): DaySta
 	dayDate.setDate(startOfWeek.getDate() + index);
 	const dateStr = formatLocalDate(dayDate);
 
-	const hasEntry = entryDates.has(dateStr);
+	const hasWorked = entries.some((e) => e.date.split('T')[0] === dateStr && (e.workDone ?? false));
 	const isToday = index === currentDayIndex;
 
-	if (hasEntry) return 'completed';
+	if (hasWorked) return 'completed';
 	if (isToday && progress.isWorkingToday) return 'active';
 	if (isToday) return 'active';
 	return 'inactive';
 };
 
-export const ProgressGoalCompactCard: FC<ProgressGoalCompactCardProps> = ({progress, onMarkToday, onChangeProgress}) => {
+export const ProgressGoalCompactCard: FC<ProgressGoalCompactCardProps> = ({
+	progress,
+	onMarkToday,
+	onChangeProgress,
+	onNavigate,
+	canEditProgress = true,
+}) => {
 	const [block, element] = useBem('progress-goal-compact-card');
 	const currentDayIndex = getCurrentDayOfWeek();
 
@@ -70,7 +85,7 @@ export const ProgressGoalCompactCard: FC<ProgressGoalCompactCardProps> = ({progr
 
 	return (
 		<div className={block()}>
-			<Link to={`/goals/${progress.goalCode}`} className={element('link-area')}>
+			<Link to={`/goals/${progress.goalCode}`} className={element('link-area')} onClick={onNavigate}>
 				<div className={element('image-wrapper')}>
 					<img src={progress.goalImage} alt={progress.goalTitle} className={element('image')} />
 				</div>
@@ -112,24 +127,37 @@ export const ProgressGoalCompactCard: FC<ProgressGoalCompactCardProps> = ({progr
 				</div>
 			</Link>
 			<div className={element('action-buttons')}>
-				<button
-					type="button"
-					className={element('action-button', {change: true})}
-					onClick={handleChangeClick}
-					aria-label="Изменить прогресс"
-					title="Изменить прогресс"
-				>
-					<Svg icon="signal" className={element('action-icon')} />
-				</button>
-				<button
-					type="button"
-					className={element('action-button', {completed: progress.isWorkingToday})}
-					onClick={handleMarkClick}
-					aria-label={progress.isWorkingToday ? 'Снять отметку' : 'Отметить сегодня'}
-					title={progress.isWorkingToday ? 'Снять отметку' : 'Отметить сегодня'}
-				>
-					<Svg icon={progress.isWorkingToday ? 'regular' : 'regular-empty'} className={element('action-icon')} />
-				</button>
+				{canEditProgress ? (
+					<>
+						<button
+							type="button"
+							className={element('action-button', {change: true})}
+							onClick={handleChangeClick}
+							aria-label="Изменить прогресс"
+							title="Изменить прогресс"
+						>
+							<Svg icon="signal" className={element('action-icon')} />
+						</button>
+						<button
+							type="button"
+							className={element('action-button', {completed: progress.isWorkingToday})}
+							onClick={handleMarkClick}
+							aria-label={progress.isWorkingToday ? 'Снять отметку' : 'Отметить сегодня'}
+							title={progress.isWorkingToday ? 'Снять отметку' : 'Отметить сегодня'}
+						>
+							<Svg icon={progress.isWorkingToday ? 'regular' : 'regular-empty'} className={element('action-icon')} />
+						</button>
+					</>
+				) : (
+					<Link
+						to="/premium"
+						className={element('action-button', {premium: true})}
+						title="Доступно с Premium"
+						onClick={onNavigate}
+					>
+						<Svg icon="lock" className={element('action-icon')} />
+					</Link>
+				)}
 			</div>
 		</div>
 	);

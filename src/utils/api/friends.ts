@@ -1,17 +1,10 @@
 import {HeaderNotificationsStore} from '@/store/HeaderNotificationsStore';
 import {IFriendCompareResponse, IFriendRequestsResponse, IFriendSearchResponse, IFriendsResponse} from '@/typings/user';
-import {getNotifications} from '@/utils/api/notifications';
 import {DELETE, GET, POST} from '@/utils/fetch/requests';
 
 // Функция для обновления уведомлений
 const refreshNotifications = async () => {
-	try {
-		const notificationsData = await getNotifications();
-		HeaderNotificationsStore.setNotifications(notificationsData.results);
-		HeaderNotificationsStore.setUnreadCount(notificationsData.unreadCount);
-	} catch (error) {
-		console.error('Ошибка обновления уведомлений:', error);
-	}
+	await HeaderNotificationsStore.fetchNotifications();
 };
 
 // Получение списка друзей
@@ -128,7 +121,8 @@ export const removeFriend = async (friendId: number): Promise<{message: string}>
 
 // Поиск пользователей
 export const searchUsers = async (query: string): Promise<IFriendSearchResponse> => {
-	const response = await GET(`friends/search?query=${encodeURIComponent(query)}`, {
+	const response = await GET('friends/search', {
+		get: {query},
 		showSuccessNotification: false,
 		showErrorNotification: false,
 		auth: true,

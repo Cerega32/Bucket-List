@@ -16,6 +16,11 @@
 
 	@include md {
 		flex-direction: column;
+		gap: 0;
+	}
+
+	&__progress-bar {
+		width: 100%;
 	}
 
 	&__image {
@@ -24,6 +29,14 @@
 		margin-bottom: 16px;
 		object-fit: cover;
 		border-radius: 8px;
+
+		&--clickable {
+			cursor: pointer;
+		}
+
+		&--clickable:focus {
+			@include focus-outline;
+		}
 
 		@include lg {
 			display: none;
@@ -90,7 +103,10 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-		margin-top: 16px;
+
+		&--tight {
+			margin-top: 0;
+		}
 	}
 
 	&__regular-info-row {
@@ -108,8 +124,23 @@
 	&__regular-info-value {
 		color: var(--color-text-primary);
 		font-size: 14px;
-		font-weight: var(--weight-medium);
+		font-weight: var(--weight-regular);
 		text-align: right;
+	}
+
+	&__regular-info-hint {
+		margin-top: 8px;
+		padding-top: 8px;
+		border-top: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+		color: var(--color-text-secondary);
+		font-size: 13px;
+		line-height: 1.45;
+		text-align: left;
+	}
+
+	&__regular-info-hint strong {
+		color: var(--color-text-primary);
+		font-weight: var(--weight-medium);
 	}
 
 	&__line {
@@ -142,14 +173,36 @@
 		border-radius: 8px;
 
 		@include lg {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 8px;
 			flex: 1;
 			width: 100%;
+			max-width: 100%;
 			min-width: 336px;
 			height: min-content;
+
+			#{$block}__btn {
+				flex: 1 1 auto;
+				width: auto;
+				margin-bottom: 0;
+				max-width: 300px;
+			}
 		}
 
 		@include md {
-			max-width: 100%;
+			display: block;
+
+			#{$block}__btn {
+				width: 100%;
+				margin-bottom: 8px;
+				max-width: 100%;
+
+				&:last-child {
+					margin-bottom: 0;
+				}
+			}
 		}
 
 		@include xs {
@@ -161,7 +214,7 @@
 		display: flex;
 		justify-content: space-between;
 		gap: 8px;
-		margin: 16px 0;
+		margin-top: 16px;
 	}
 
 	&__regular-series-day-wrapper {
@@ -269,6 +322,10 @@
 		gap: 12px;
 		margin-top: 16px;
 		margin-bottom: 16px;
+
+		&--tight {
+			margin-bottom: 8px;
+		}
 	}
 
 	&__regular-series-progress-label {
@@ -297,19 +354,6 @@
 		margin-bottom: 16px;
 	}
 
-	&__regular-series-completed-count-label {
-		color: var(--color-text-secondary);
-		font-size: 14px;
-		font-weight: var(--weight-medium);
-	}
-
-	&__regular-series-completed-count-value {
-		color: var(--color-text-primary);
-		font-size: 14px;
-		font-weight: var(--weight-semi-bold);
-		white-space: nowrap;
-	}
-
 	&__regular-series-actions {
 		@include lg {
 			width: 100%;
@@ -321,5 +365,49 @@
 		align-items: center;
 		gap: 16px;
 		margin-bottom: 16px;
+	}
+
+	&--isList {
+		#{$block} {
+			&__image {
+				@include lg {
+					display: block;
+					height: 160px;
+					flex: 1;
+					margin-bottom: 0;
+				}
+
+				@include md {
+					flex: none;
+					height: 336px;
+				}
+			}
+
+			&__info {
+				@include lg {
+					border: none;
+					padding: 8px;
+				}
+			}
+		}
+	}
+
+	&__progress-premium-btn-content {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	&__progress-premium-tag {
+		padding: 0 5px;
+		border-radius: 4px;
+		font-size: 10px;
+		font-weight: var(--weight-regular);
+		line-height: 12px;
+
+		.tag__text {
+			font-size: 10px;
+			line-height: 12px;
+		}
 	}
 }

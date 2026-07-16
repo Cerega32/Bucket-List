@@ -1,17 +1,28 @@
 .title-with-tags {
 	$block: &;
+	min-width: 0;
+
+	&__header {
+		display: flex;
+		gap: 8px;
+		min-width: 0;
+	}
 
 	&__title-copyable {
 		display: block;
+		flex: 1 1 auto;
+		min-width: 0;
 		width: 100%;
 		padding: 0;
 		margin: 0;
 		text-align: left;
 		background: none;
 		border: none;
-		cursor: pointer;
+		cursor: text;
 		font: inherit;
 		color: inherit;
+		user-select: text;
+		-webkit-user-select: text;
 
 		&:hover {
 			opacity: 0.9;
@@ -20,6 +31,9 @@
 
 	&__title {
 		margin-bottom: 16px;
+		cursor: pointer;
+		width: 100%;
+		min-width: 0;
 
 		&--short {
 			margin-bottom: 0;
@@ -29,9 +43,22 @@
 			overflow: hidden;
 			white-space: nowrap;
 			text-overflow: ellipsis;
-			overflow-wrap: anywhere;
+			overflow-wrap: break-word;
 			-webkit-box-orient: vertical;
 			-webkit-line-clamp: 1;
+		}
+	}
+
+	&--list {
+		#{$block}__title {
+			display: block;
+			overflow: visible;
+			white-space: normal;
+			overflow-wrap: break-word;
+		}
+
+		#{$block}__copy-icon {
+			background-color: var(--color-text-secondary);
 		}
 	}
 
@@ -40,6 +67,39 @@
 			&__title {
 				color: var(--color-text-primary);
 			}
+		}
+	}
+
+	&__copy-button {
+		display: none;
+		flex-shrink: 0;
+		padding: 0;
+		margin-top: 4px;
+		border: none;
+		background: none;
+		cursor: pointer;
+		width: 32px;
+		height: 32px;
+		color: inherit;
+	}
+
+	&__copy-icon {
+		display: block;
+		width: 18px;
+		height: 18px;
+		background-color: var(--color-secondary);
+		mask-image: url('/public/svg/copy.svg');
+		mask-repeat: no-repeat;
+		mask-position: center;
+		mask-size: contain;
+	}
+
+	// Показываем отдельную кнопку копирования только на тач-устройствах
+	@media (hover: none) and (pointer: coarse) {
+		&__copy-button {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
 		}
 	}
 }

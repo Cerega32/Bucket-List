@@ -1,12 +1,16 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
+import {FC, useEffect, useRef, useState} from 'react';
 
+import {Button} from '@/components/Button/Button';
+import {EditProgressEntryNotesModal} from '@/components/EditProgressEntryNotesModal/EditProgressEntryNotesModal';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
-import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
+import {UserStore} from '@/store/UserStore';
 import {IGoalProgressEntry, getGoalProgressEntries} from '@/utils/api/goals';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 import {formatDateString} from '@/utils/time/formatDate';
 
+import {GoalProgressHistorySkeleton} from './GoalProgressHistorySkeleton';
 import './goal-progress-history.scss';
 
 interface GoalProgressHistoryProps {
@@ -19,6 +23,10 @@ export const GoalProgressHistory: FC<GoalProgressHistoryProps> = observer(({clas
 	const [block, element] = useBem('goal-progress-history', className);
 	const [entries, setEntries] = useState<IGoalProgressEntry[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [multilineMap, setMultilineMap] = useState<Record<number, boolean>>({});
+	const [editingEntry, setEditingEntry] = useState<IGoalProgressEntry | null>(null);
+	const noteRefs = useRef<Record<number, HTMLDivElement | null>>({});
+	const canEditNotes = isPremiumSubscriptionActive(UserStore.userSelf);
 
 	useEffect(() => {
 		const load = async () => {
@@ -42,10 +50,40 @@ export const GoalProgressHistory: FC<GoalProgressHistoryProps> = observer(({clas
 		}
 	}, [goalId, refreshTrigger]);
 
+	const recalcMultiline = () => {
+		const newMap: Record<number, boolean> = {};
+
+		entries.forEach((entry) => {
+			const el = noteRefs.current[entry.id];
+			if (el) {
+				const style = window.getComputedStyle(el);
+				const lineHeight = parseFloat(style.lineHeight);
+				const height = el.clientHeight;
+
+				if (!Number.isNaN(lineHeight) && lineHeight > 0) {
+					newMap[entry.id] = height > lineHeight * 1.2;
+				} else {
+					newMap[entry.id] = false;
+				}
+			}
+		});
+
+		setMultilineMap(newMap);
+	};
+
+	useEffect(() => {
+		recalcMultiline();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [entries]);
+
+	const handleEntrySaved = (updated: IGoalProgressEntry) => {
+		setEntries((prev) => prev.map((item) => (item.id === updated.id ? {...item, notes: updated.notes} : item)));
+	};
+
 	if (isLoading) {
 		return (
 			<div className={block()}>
-				<Loader isLoading={isLoading} />
+				<GoalProgressHistorySkeleton />
 			</div>
 		);
 	}
@@ -70,23 +108,56 @@ export const GoalProgressHistory: FC<GoalProgressHistoryProps> = observer(({clas
 					const dateStr = entry.date ? formatDateString(entry.date) : '';
 
 					return (
-						<li key={entry.id} className={element('item')}>
+						<li
+							key={entry.id}
+							className={element('item', {
+								multiline: multilineMap[entry.id],
+							})}
+						>
 							<span className={element('date')}>{dateStr}</span>
-							<div className={element('note')}>{note || 'Заметка отсутствует'}</div>
-							<span
-								className={element('badge', {
-									positive: change > 0,
-									negative: change < 0,
-									zero: change === 0,
+							<div
+								className={element('note', {
+									empty: !note,
 								})}
+								ref={(el) => {
+									noteRefs.current[entry.id] = el;
+								}}
 							>
-								{change > 0 ? '+' : ''}
-								{change}%
-							</span>
+								{note || 'Заметка отсутствует'}
+							</div>
+							<div className={element('actions')}>
+								{canEditNotes && (
+									<Button
+										icon="edit"
+										theme="blue-light"
+										width="auto"
+										onClick={() => setEditingEntry(entry)}
+										className={element('edit')}
+									/>
+								)}
+								<span
+									className={element('badge', {
+										positive: change > 0,
+										negative: change < 0,
+										zero: change === 0,
+									})}
+								>
+									{change > 0 ? '+' : ''}
+									{change}%
+								</span>
+							</div>
 						</li>
 					);
 				})}
 			</ul>
+
+			<EditProgressEntryNotesModal
+				isOpen={Boolean(editingEntry)}
+				goalId={goalId}
+				entry={editingEntry}
+				onClose={() => setEditingEntry(null)}
+				onSaved={handleEntrySaved}
+			/>
 		</div>
 	);
 });

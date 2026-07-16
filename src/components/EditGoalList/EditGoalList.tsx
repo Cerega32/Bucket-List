@@ -3,7 +3,9 @@ import {FileDrop} from 'react-file-drop';
 import {useNavigate} from 'react-router-dom';
 
 import {AddGoal} from '@/components/AddGoal/AddGoal';
+import {Banner} from '@/components/Banner/Banner';
 import {Button} from '@/components/Button/Button';
+import {CatalogModerationBanner} from '@/components/CatalogModerationBanner/CatalogModerationBanner';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
@@ -15,7 +17,9 @@ import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {updateGoalList} from '@/utils/api/put/updateGoalList';
 import {debounce} from '@/utils/time/debounce';
+import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {getComplexity, selectComplexity} from '@/utils/values/complexity';
+import {getGoalListTitleFieldErrors, GOAL_LIST_TITLE_MIN_LENGTH, isGoalListTitleInvalid} from '@/utils/values/goalConstants';
 
 import {GoalSearchItem} from '../GoalSearchItem/GoalSearchItem';
 import {ScrollToTop} from '../ScrollToTop/ScrollToTop';
@@ -54,10 +58,27 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 	const [, setIsSearching] = useState(false);
 
 	// Добавляем состояние для перехода к созданию цели
-	const [canCreateGoal, setCanCreateGoal] = useState(false);
+	const [canCreateGoal, setCanCreateGoal] = useState(Boolean(listData.category?.id));
+
+	// Состояние для подсветки обязательных полей
+	const [showErrors, setShowErrors] = useState(false);
 
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
+
+	const limitedEditHint = listData.catalogPermanentlyRejected
+		? `Список окончательно отклонён после ${
+				listData.catalogRejectionCount ?? 3
+		  } попыток и будет удалён автоматически. Редактирование недоступно.`
+		: listData.catalogReviewStatus === 'approved'
+		? 'Список опубликован в каталоге после модерации — изменить название, описание и параметры нельзя.'
+		: 'Прошло более 24 часов с создания — изменить название, описание и параметры нельзя.';
+
+	const isBeingResubmitted = listData.catalogReviewStatus === 'rejected' && !listData.catalogPermanentlyRejected;
+
+	const categoryLabel = listData.category?.parentCategory
+		? `${listData.category.parentCategory.name} / ${listData.category.name}`
+		: listData.category?.name || '';
 
 	// Инициализация данных списка при загрузке компонента
 	useEffect(() => {
@@ -78,25 +99,27 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 			try {
 				const data = await getAllCategories();
 				if (data.success) {
-					setCategories(data.data);
+					const sortedCategories: ICategory[] = sortMainCategories(data.data);
+					setCategories(sortedCategories);
+
+					// Отсортированные родительские категории — тот же массив, что и parentCategories (useMemo)
+					const sortedParents = sortedCategories.filter((cat) => !cat.parentCategory);
 
 					// Определяем, является ли категория списка подкатегорией
-					const listCategory = data.data.find((cat: ICategory) => cat.id === listData.category.id);
+					const listCategory = sortedCategories.find((cat) => cat.id === listData.category.id);
 
 					if (listCategory) {
 						if (listCategory.parentCategory) {
 							// Если это подкатегория, находим её родительскую категорию
-							const parentCategoryIndex = data.data
-								.filter((cat: ICategory) => !cat.parentCategory)
-								.findIndex((cat: ICategory) => cat.id === listCategory.parentCategory?.id);
+							const parentCategoryIndex = sortedParents.findIndex(
+								(cat: ICategory) => cat.id === listCategory.parentCategory?.id
+							);
 							if (parentCategoryIndex !== -1) {
 								setActiveCategory(parentCategoryIndex);
 							}
 						} else {
 							// Если это родительская категория
-							const categoryIndex = data.data
-								.filter((cat: ICategory) => !cat.parentCategory)
-								.findIndex((cat: ICategory) => cat.id === listData.category.id);
+							const categoryIndex = sortedParents.findIndex((cat: ICategory) => cat.id === listData.category.id);
 							if (categoryIndex !== -1) {
 								setActiveCategory(categoryIndex);
 							}
@@ -209,9 +232,16 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 	};
 
 	const removeImage = () => {
-		if (canEditAll) {
-			setImage(null);
-			setImagePreview(listData.image); // Возвращаем оригинальное изображение
+		if (!canEditAll) return;
+		// Освобождаем blob URL предпросмотра, если пользователь загружал файл
+		if (imagePreview.startsWith('blob:')) {
+			URL.revokeObjectURL(imagePreview);
+		}
+		setImage(null);
+		// Пустой превью — показываем зону загрузки, чтобы можно было выбрать новое изображение
+		setImagePreview('');
+		if (fileInputRef.current) {
+			fileInputRef.current.value = '';
 		}
 	};
 
@@ -222,8 +252,9 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 		setSearchQuery('');
 	};
 
-	// Удаление выбранной цели
+	// Удаление целей из списка — только при полном редактировании
 	const removeSelectedGoal = (goalId: number) => {
+		if (!canEditAll) return;
 		setSelectedGoals((prev) => prev.filter((goal) => goal.id !== goalId));
 	};
 
@@ -246,20 +277,31 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 		// Обработка будет происходить внутри компонента AddGoal
 	};
 
+	const validateRequiredFields = () => {
+		if (!canEditAll) return true;
+
+		const hasError = isGoalListTitleInvalid(title) || !description || activeComplexity === null || activeCategory === null;
+
+		if (hasError) {
+			setShowErrors(true);
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: 'Заполните все обязательные поля',
+			});
+			return false;
+		}
+
+		return true;
+	};
+
 	// Отправка формы обновления списка целей
 	const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		// Проверка полей только если редактирование полное
-		if (canEditAll) {
-			if (!title || !description || activeComplexity === null || activeCategory === null) {
-				NotificationStore.addNotification({
-					type: 'error',
-					title: 'Ошибка',
-					message: 'Заполните все обязательные поля',
-				});
-				return;
-			}
+		if (!validateRequiredFields()) {
+			return;
 		}
 
 		if (selectedGoals.length === 0) {
@@ -308,7 +350,9 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успех',
-					message: 'Список целей успешно обновлен',
+					message: isBeingResubmitted
+						? 'Список обновлён и отправлен на повторную проверку модератором'
+						: 'Список целей успешно обновлен',
 				});
 				navigate(`/list/${response?.data?.code}`);
 			} else {
@@ -330,6 +374,28 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 			<Title tag="h1" className={element('title')}>
 				{canEditAll ? 'Редактирование списка целей' : 'Добавление целей в список'}
 			</Title>
+
+			{!canEditAll && (
+				<Banner
+					type={listData.catalogPermanentlyRejected ? 'danger' : 'info'}
+					className={element('limited-edit-banner')}
+					title={listData.catalogPermanentlyRejected ? 'Редактирование недоступно' : 'Ограниченное редактирование'}
+					message={limitedEditHint}
+				/>
+			)}
+
+			{isBeingResubmitted && (
+				<CatalogModerationBanner
+					className={element('limited-edit-banner')}
+					catalogReviewStatus={listData.catalogReviewStatus}
+					catalogPermanentlyRejected={listData.catalogPermanentlyRejected}
+					catalogRejectionCount={listData.catalogRejectionCount}
+					catalogRejectionLimit={listData.catalogRejectionLimit}
+					catalogRejectionReasons={listData.catalogRejectionReasons}
+					catalogRejectionComment={listData.catalogRejectionComment}
+					catalogDeleteAt={listData.catalogDeleteAt}
+				/>
+			)}
 
 			<div className={element('content')}>
 				<div className={element('image-section')}>
@@ -360,9 +426,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 									/>
 									<Svg icon="mount" className={element('upload-icon')} />
 									<p>
-										{canEditAll
-											? 'Перетащите изображение сюда или кликните для выбора'
-											: 'Изображение нельзя изменить (прошло более 24 часов после создания)'}
+										{canEditAll ? 'Перетащите изображение сюда или кликните для выбора' : 'Изображение нельзя изменить'}
 									</p>
 								</div>
 							</FileDrop>
@@ -378,7 +442,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 				</div>
 
 				<div className={element('form')}>
-					{canEditAll && (
+					{canEditAll ? (
 						<>
 							<div className={element('field-wrapper')}>
 								<FieldInput
@@ -389,6 +453,8 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 									setValue={handleTitleChange}
 									className={element('field')}
 									required
+									minLength={GOAL_LIST_TITLE_MIN_LENGTH}
+									error={getGoalListTitleFieldErrors(showErrors, title)}
 								/>
 							</div>
 
@@ -399,6 +465,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 								activeOption={activeCategory}
 								onSelect={setActiveCategory}
 								text="Категория *"
+								error={showErrors && activeCategory === null}
 							/>
 
 							{activeCategory !== null && subcategories.length > 0 && (
@@ -419,6 +486,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 								activeOption={activeComplexity}
 								onSelect={setActiveComplexity}
 								text="Сложность *"
+								error={showErrors && activeComplexity === null}
 							/>
 
 							<FieldInput
@@ -431,8 +499,18 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 								type="textarea"
 								required
 								rows={4}
+								error={showErrors && !description}
 							/>
 						</>
+					) : (
+						<div className={element('readonly-meta')}>
+							<p className={element('readonly-meta-title')}>{listData.title}</p>
+							<p>
+								{categoryLabel}
+								{listData.complexity ? ` · ${getComplexity[listData.complexity]}` : ''}
+							</p>
+							{listData.description ? <p className={element('readonly-meta-description')}>{listData.description}</p> : null}
+						</div>
 					)}
 
 					<div className={element('goals-section')}>
@@ -449,6 +527,9 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 								setValue={setSearchQuery}
 								className={element('search-field')}
 								iconBegin="search"
+								onKeyDown={(e) => {
+									if (e.key === 'Enter') e.preventDefault();
+								}}
 							/>
 
 							{searchResults.length > 0 && (
@@ -483,19 +564,13 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 													<p className={element('goal-description')}>{goal.shortDescription}</p>
 												</div>
 											</div>
-											<button
-												type="button"
-												className={element('goal-remove-btn')}
-												onClick={() => removeSelectedGoal(goal.id)}
-												aria-label="Удалить цель"
-												onKeyDown={(e) => {
-													if (e.key === 'Enter' || e.key === ' ') {
-														removeSelectedGoal(goal.id);
-													}
-												}}
-											>
-												<Svg icon="cross" />
-											</button>
+											{canEditAll ? (
+												<Button
+													type="button-close"
+													className={element('goal-remove-btn')}
+													onClick={() => removeSelectedGoal(goal.id)}
+												/>
+											) : null}
 										</div>
 									))}
 								</div>
@@ -570,7 +645,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 							Отмена
 						</Button>
 						<Button theme="blue" className={element('btn')} typeBtn="submit">
-							{isLoading ? 'Сохранение...' : 'Сохранить изменения'}
+							{isLoading ? 'Сохранение...' : isBeingResubmitted ? 'Отправить снова на проверку' : 'Сохранить изменения'}
 						</Button>
 					</div>
 				</div>

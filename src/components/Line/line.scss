@@ -15,6 +15,15 @@
 		}
 	}
 
+	&__vertical-wrap {
+		display: flex;
+		align-items: center;
+
+		@include sm {
+			display: none;
+		}
+	}
+
 	&--withoutMargin {
 		margin: 0;
 	}

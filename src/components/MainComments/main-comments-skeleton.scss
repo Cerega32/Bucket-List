@@ -1,0 +1,59 @@
+.main-comments-skeleton {
+	width: 100%;
+	overflow: hidden;
+
+	&__title {
+		margin-bottom: 24px;
+	}
+
+	&__row {
+		display: flex;
+		gap: 24px;
+
+		@include md {
+			gap: 12px;
+		}
+	}
+
+	&__card {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		flex: 1;
+		min-width: 0;
+		padding: 16px;
+		background: var(--color-white);
+		border: 1px solid var(--color-gray-9);
+		border-radius: 8px;
+
+		&:last-child {
+			@include md {
+				display: none;
+			}
+		}
+
+		&:nth-child(2) {
+			@include sm {
+				display: none;
+			}
+		}
+	}
+
+	&__head {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 4px;
+	}
+
+	&__circle {
+		flex-shrink: 0;
+	}
+
+	&__head-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		flex: 1;
+	}
+}

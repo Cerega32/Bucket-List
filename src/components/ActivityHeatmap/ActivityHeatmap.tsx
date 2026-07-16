@@ -1,11 +1,27 @@
+import {observer} from 'mobx-react-lite';
 import React, {FC, useEffect, useMemo, useState} from 'react';
 
-import {Loader} from '@/components/Loader/Loader';
+import Select from '@/components/Select/Select';
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
+import {UserStore} from '@/store/UserStore';
+import {
+	ActivityPeriodSelection,
+	buildActivityPeriodSelectOptions,
+	getActivityPeriodActiveOption,
+	parseActivityPeriodSelectIndex,
+} from '@/utils/activity/activityHeatmapPeriods';
 import {getGoalActivity} from '@/utils/api/get/getGoalActivity';
+import {applyNewAchievements} from '@/utils/applyNewAchievements';
+import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 import {pluralize} from '@/utils/text/pluralize';
+
+import {ActivityHeatmapSkeleton} from './ActivityHeatmapSkeleton';
+import {EmptyState} from '../EmptyState/EmptyState';
+
+import type {IAchievement} from '@/typings/achievements';
+
 import './activity-heatmap.scss';
 
 interface ICompletedItem {
@@ -91,6 +107,10 @@ type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
 
 const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period = 'year'}) => {
 	const [block, element] = useBem('activity-heatmap', className);
+	const isPremium = isPremiumSubscriptionActive(UserStore.userSelf);
+
+	const [periodSelection, setPeriodSelection] = useState<ActivityPeriodSelection>({mode: 'rolling'});
+	const periodOptions = useMemo(() => buildActivityPeriodSelectOptions(isPremium), [isPremium]);
 
 	const [activityData, setActivityData] = useState<{
 		dates: IActivityDay[];
@@ -105,9 +125,13 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 	useEffect(() => {
 		const fetchActivityData = async () => {
 			setFetchStatus('loading');
+			setSelectedDay(null);
 
 			try {
-				const response = await getGoalActivity(period);
+				const response = await getGoalActivity({
+					period,
+					calendarYear: periodSelection.mode === 'calendar' ? periodSelection.calendarYear : undefined,
+				});
 
 				if (response.success && response.data) {
 					// Преобразуем snake_case в camelCase для совместимости с интерфейсами
@@ -116,6 +140,7 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 					}
 					setActivityData(response.data);
 					setFetchStatus('success');
+					await applyNewAchievements(response.data.newAchievements as IAchievement[] | undefined);
 				} else {
 					setFetchStatus('error');
 				}
@@ -125,7 +150,15 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 		};
 
 		fetchActivityData();
-	}, [period]);
+	}, [period, periodSelection]);
+
+	const handlePeriodSelect = (index: number) => {
+		const nextSelection = parseActivityPeriodSelectIndex(index, periodOptions);
+		if (!nextSelection) {
+			return;
+		}
+		setPeriodSelection(nextSelection);
+	};
 
 	// Преобразуем линейный массив дат в матрицу для отображения сетки
 	const prepareGridData = (): IWeekData[] => {
@@ -308,7 +341,7 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 		[activityData]
 	);
 
-	// Ширина недели в пикселях (соответствует CSS)
+	// Ширина недели в пикселях для горизонтальной прокрутки
 	const weekWidth = 19;
 
 	// Функция рендеринга ячейки для дня
@@ -490,187 +523,197 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 
 	return (
 		<div className={block()}>
-			<Title className={element('title')} tag="h2">
-				Активность выполнения целей и списков
-			</Title>
+			<div className={element('header')}>
+				<Title className={element('title')} tag="h2">
+					Активность выполнения целей и списков
+				</Title>
 
-			<Loader isLoading={fetchStatus === 'loading'}>
-				{fetchStatus === 'error' ? (
-					<div className={element('error')}>
-						<p>Не удалось загрузить данные активности</p>
+				<div className={element('period-toolbar')}>
+					<Select
+						className={element('period-select')}
+						placeholder="Выберите период"
+						options={periodOptions}
+						activeOption={getActivityPeriodActiveOption(periodSelection, periodOptions)}
+						onSelect={handlePeriodSelect}
+					/>
+				</div>
+			</div>
+
+			{fetchStatus === 'loading' ? (
+				<ActivityHeatmapSkeleton />
+			) : fetchStatus === 'error' ? (
+				<EmptyState title="Не удалось загрузить данные активности" />
+			) : activityData ? (
+				<>
+					<div className={element('stats')}>
+						<div className={element('stat-item')}>
+							<span className={element('stat-value')}>{activityData.stats.totalGoalsCompleted}</span>
+							<span className={element('stat-label')}>
+								{pluralize(
+									activityData.stats.totalGoalsCompleted,
+									['цель выполнена', 'цели выполнено', 'целей выполнено'],
+									false
+								)}
+							</span>
+						</div>
+						<div className={element('stat-item')}>
+							<span className={element('stat-value')}>{activityData.stats.totalListsCompleted}</span>
+							<span className={element('stat-label')}>
+								{pluralize(
+									activityData.stats.totalListsCompleted,
+									['список выполнен', 'списка выполнено', 'списков выполнено'],
+									false
+								)}
+							</span>
+						</div>
+						<div className={element('stat-item')}>
+							<span className={element('stat-value')}>{activityData.stats.totalProgressUpdates}</span>
+							<span className={element('stat-label')}>
+								{pluralize(
+									activityData.stats.totalProgressUpdates,
+									['прогресс обновлен', 'прогресса обновлено', 'прогрессов обновлено'],
+									false
+								)}
+							</span>
+						</div>
+						<div className={element('stat-item')}>
+							<span className={element('stat-value')}>{activityData.stats.totalDailyCompleted}</span>
+							<span className={element('stat-label')}>
+								{pluralize(
+									activityData.stats.totalDailyCompleted,
+									['ежедневная цель', 'ежедневных цели', 'ежедневных целей'],
+									false
+								)}
+							</span>
+						</div>
+						<div className={element('stat-item')}>
+							<span className={element('stat-value')}>{activityData.stats.totalRegularCompleted}</span>
+							<span className={element('stat-label')}>
+								{pluralize(
+									activityData.stats.totalRegularCompleted,
+									['регулярная цель', 'регулярных цели', 'регулярных целей'],
+									false
+								)}
+							</span>
+						</div>
+						<div className={element('stat-item')}>
+							<span className={element('stat-value')}>{activityData.stats.currentStreak}</span>
+							<span className={element('stat-label')}>текущая серия</span>
+						</div>
+						<div className={element('stat-item')}>
+							<span className={element('stat-value')}>{activityData.stats.maxStreak}</span>
+							<span className={element('stat-label')}>макс. серия</span>
+						</div>
+						<div className={element('stat-item')}>
+							<span className={element('stat-value')}>{activityData.stats.activityPercentage}%</span>
+							<span className={element('stat-label')}>активность</span>
+						</div>
+						<div className={element('stat-item')}>
+							<span
+								className={element('stat-value', {
+									active: activityData.stats.isActiveToday,
+									inactive: !activityData.stats.isActiveToday,
+								})}
+							>
+								{activityData.stats.isActiveToday ? 'Да' : 'Нет'}
+							</span>
+							<span className={element('stat-label')}>сегодня</span>
+						</div>
 					</div>
-				) : activityData ? (
-					<>
-						<div className={element('stats')}>
-							<div className={element('stat-item')}>
-								<span className={element('stat-value')}>{activityData.stats.totalGoalsCompleted}</span>
-								<span className={element('stat-label')}>
-									{pluralize(
-										activityData.stats.totalGoalsCompleted,
-										['цель выполнена', 'цели выполнено', 'целей выполнено'],
-										false
-									)}
-								</span>
-							</div>
-							<div className={element('stat-item')}>
-								<span className={element('stat-value')}>{activityData.stats.totalListsCompleted}</span>
-								<span className={element('stat-label')}>
-									{pluralize(
-										activityData.stats.totalListsCompleted,
-										['список выполнен', 'списка выполнено', 'списков выполнено'],
-										false
-									)}
-								</span>
-							</div>
-							<div className={element('stat-item')}>
-								<span className={element('stat-value')}>{activityData.stats.totalProgressUpdates}</span>
-								<span className={element('stat-label')}>
-									{pluralize(
-										activityData.stats.totalProgressUpdates,
-										['прогресс обновлен', 'прогресса обновлено', 'прогрессов обновлено'],
-										false
-									)}
-								</span>
-							</div>
-							<div className={element('stat-item')}>
-								<span className={element('stat-value')}>{activityData.stats.totalDailyCompleted}</span>
-								<span className={element('stat-label')}>
-									{pluralize(
-										activityData.stats.totalDailyCompleted,
-										['ежедневная цель', 'ежедневных цели', 'ежедневных целей'],
-										false
-									)}
-								</span>
-							</div>
-							<div className={element('stat-item')}>
-								<span className={element('stat-value')}>{activityData.stats.totalRegularCompleted}</span>
-								<span className={element('stat-label')}>
-									{pluralize(
-										activityData.stats.totalRegularCompleted,
-										['регулярная цель', 'регулярных цели', 'регулярных целей'],
-										false
-									)}
-								</span>
-							</div>
-							<div className={element('stat-item')}>
-								<span className={element('stat-value')}>{activityData.stats.currentStreak}</span>
-								<span className={element('stat-label')}>текущая серия</span>
-							</div>
-							<div className={element('stat-item')}>
-								<span className={element('stat-value')}>{activityData.stats.maxStreak}</span>
-								<span className={element('stat-label')}>макс. серия</span>
-							</div>
-							<div className={element('stat-item')}>
-								<span className={element('stat-value')}>{activityData.stats.activityPercentage}%</span>
-								<span className={element('stat-label')}>активность</span>
-							</div>
-							<div className={element('stat-item')}>
-								<span
-									className={element('stat-value', {
-										active: activityData.stats.isActiveToday,
-										inactive: !activityData.stats.isActiveToday,
-									})}
-								>
-									{activityData.stats.isActiveToday ? 'Да' : 'Нет'}
-								</span>
-								<span className={element('stat-label')}>сегодня</span>
-							</div>
-						</div>
 
-						<div className={element('container')}>
-							<div className={element('scrollable-wrapper')}>
-								<div className={element('months')}>
-									{monthPositions.map(
-										(mp) =>
-											mp.month && (
-												<div
-													key={`month-${mp.month.year}-${mp.month.month}`}
-													className={element('month-label')}
-													style={{
-														left: `${mp.startWeek * weekWidth}px`,
-														width: `${mp.weekSpan * weekWidth}px`,
-													}}
-												>
-													{mp.month.name}
-												</div>
-											)
-									)}
-								</div>
-
-								<div className={element('grid')}>
-									{/* Метки дней недели */}
-									<div className={element('weekdays')}>
-										{weekdayLabels.map((day) => (
-											<div key={`weekday-${day}`} className={element('weekday-label')}>
-												{day}
+					<div className={element('container')}>
+						<div className={element('scrollable-wrapper')}>
+							<div className={element('months')}>
+								{monthPositions.map(
+									(mp) =>
+										mp.month && (
+											<div
+												key={`month-${mp.month.year}-${mp.month.month}`}
+												className={element('month-label')}
+												style={{
+													left: `${mp.startWeek * weekWidth}px`,
+													width: `${mp.weekSpan * weekWidth}px`,
+												}}
+											>
+												{mp.month.name}
 											</div>
-										))}
-									</div>
-
-									{/* Сетка активности */}
-									<div className={element('cells')}>
-										{gridData.map((weekData) => (
-											<div key={weekData.id} className={element('week')} data-testid={`week-${weekData.id}`}>
-												{weekData.days.map((day, dayIndex) => renderDayCell(day, dayIndex, weekData.id))}
-											</div>
-										))}
-									</div>
-								</div>
+										)
+								)}
 							</div>
 
-							<div className={element('legend')}>
-								<div className={element('legend-section')}>
-									<div className={element('legend-label')}>Интенсивность:</div>
-									<div className={element('legend-scale')}>
-										<div className={element('legend-cell', {level: '0'})} />
-										<div className={element('legend-cell', {level: '1'})} />
-										<div className={element('legend-cell', {level: '2'})} />
-										<div className={element('legend-cell', {level: '3'})} />
-										<div className={element('legend-cell', {level: '4'})} />
-									</div>
-									<div className={element('legend-label')}>больше</div>
+							<div className={element('grid')}>
+								{/* Метки дней недели */}
+								<div className={element('weekdays')}>
+									{weekdayLabels.map((day) => (
+										<div key={`weekday-${day}`} className={element('weekday-label')}>
+											{day}
+										</div>
+									))}
 								</div>
 
-								<div className={element('legend-section')}>
-									<div className={element('legend-label')}>Тип активности:</div>
-									<div className={element('legend-types')}>
-										<div className={element('legend-type')}>
-											<div className={element('legend-cell', {type: 'goal'})} />
-											<span className={element('legend-type-label')}>Цели</span>
+								{/* Сетка активности */}
+								<div className={element('cells')}>
+									{gridData.map((weekData) => (
+										<div key={weekData.id} className={element('week')} data-testid={`week-${weekData.id}`}>
+											{weekData.days.map((day, dayIndex) => renderDayCell(day, dayIndex, weekData.id))}
 										</div>
-										<div className={element('legend-type')}>
-											<div className={element('legend-cell', {type: 'progress'})} />
-											<span className={element('legend-type-label')}>Прогресс</span>
-										</div>
-										<div className={element('legend-type')}>
-											<div className={element('legend-cell', {type: 'daily'})} />
-											<span className={element('legend-type-label')}>Ежедневные</span>
-										</div>
-										<div className={element('legend-type')}>
-											<div className={element('legend-cell', {type: 'regular'})} />
-											<span className={element('legend-type-label')}>Регулярные</span>
-										</div>
-										<div className={element('legend-type')}>
-											<div className={element('legend-cell', {type: 'mixed'})} />
-											<span className={element('legend-type-label')}>Смешанная</span>
-										</div>
-									</div>
+									))}
 								</div>
 							</div>
 						</div>
 
-						{selectedDay && (
-							<div className={element('day-details')}>
-								<h3>{formatDate(selectedDay.date)}</h3>
-								{selectedDay.totalCount === 0 ? <p>Нет активности в этот день</p> : renderActivities(selectedDay)}
+						<div className={element('legend')}>
+							<div className={element('legend-section')}>
+								<div className={element('legend-label')}>Интенсивность:</div>
+								<div className={element('legend-scale')}>
+									<div className={element('legend-cell', {level: '0'})} />
+									<div className={element('legend-cell', {level: '1'})} />
+									<div className={element('legend-cell', {level: '2'})} />
+									<div className={element('legend-cell', {level: '3'})} />
+									<div className={element('legend-cell', {level: '4'})} />
+								</div>
+								<div className={element('legend-label')}>больше</div>
 							</div>
-						)}
-					</>
-				) : null}
-			</Loader>
+
+							<div className={element('legend-section')}>
+								<div className={element('legend-label')}>Тип активности:</div>
+								<div className={element('legend-types')}>
+									<div className={element('legend-type')}>
+										<div className={element('legend-cell', {type: 'goal'})} />
+										<span className={element('legend-type-label')}>Цели</span>
+									</div>
+									<div className={element('legend-type')}>
+										<div className={element('legend-cell', {type: 'progress'})} />
+										<span className={element('legend-type-label')}>Прогресс</span>
+									</div>
+									<div className={element('legend-type')}>
+										<div className={element('legend-cell', {type: 'daily'})} />
+										<span className={element('legend-type-label')}>Ежедневные</span>
+									</div>
+									<div className={element('legend-type')}>
+										<div className={element('legend-cell', {type: 'regular'})} />
+										<span className={element('legend-type-label')}>Регулярные</span>
+									</div>
+									<div className={element('legend-type')}>
+										<div className={element('legend-cell', {type: 'mixed'})} />
+										<span className={element('legend-type-label')}>Смешанная</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{selectedDay && (
+						<div className={element('day-details')}>
+							<h3>{formatDate(selectedDay.date)}</h3>
+							{selectedDay.totalCount === 0 ? <p>Нет активности в этот день</p> : renderActivities(selectedDay)}
+						</div>
+					)}
+				</>
+			) : null}
 		</div>
 	);
 };
 
 // Оборачиваем компонент в React.memo для предотвращения лишних рендеров
-export const ActivityHeatmap = React.memo(ActivityHeatmapComponent);
+export const ActivityHeatmap = React.memo(observer(ActivityHeatmapComponent));

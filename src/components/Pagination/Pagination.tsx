@@ -19,48 +19,77 @@ interface IPage {
 	symbol: string | number;
 }
 
+// Генерация пагинации без "..." между соседними номерами
 const generatePagination = (activePage: number, totalPages: number, visiblePages = 5): Array<IPage> => {
-	const pagination: Array<IPage> = [];
+	const pages: Array<IPage> = [];
+
+	const getMiddlePage = (start: number, end: number): number => {
+		return Math.ceil((start + end) / 2);
+	};
 
 	if (totalPages <= visiblePages) {
 		for (let i = 1; i <= totalPages; i += 1) {
-			pagination.push({number: i, symbol: i});
+			pages.push({number: i, symbol: i});
 		}
-	} else {
-		const halfVisible = Math.floor(visiblePages / 2);
-
-		// Add the first page
-		pagination.push({number: 1, symbol: 1});
-
-		const startRange = Math.max(2, activePage > totalPages - 2 ? totalPages - (visiblePages - 1) : activePage - halfVisible);
-		const endRange = Math.min(totalPages - 1, activePage < 3 ? visiblePages : activePage + halfVisible);
-
-		// Add the pages before the active page
-		if (activePage - halfVisible > 2) {
-			pagination.push({
-				symbol: '...',
-				number: Math.floor((startRange + 1) / 2),
-			});
-		}
-
-		// Add the visible pages around the active page
-		for (let i = startRange; i <= endRange; i += 1) {
-			pagination.push({number: i, symbol: i});
-		}
-
-		// Add the pages after the active page
-		if (activePage + halfVisible < totalPages - 1) {
-			pagination.push({
-				symbol: '...',
-				number: Math.floor((totalPages + endRange) / 2),
-			});
-		}
-
-		// Add the last page
-		pagination.push({number: totalPages, symbol: totalPages});
+		return pages;
 	}
 
-	return pagination;
+	const siblingCount = Math.max(1, Math.floor((visiblePages - 3) / 2)); // вокруг активной, без учета 1 и last
+	const leftSibling = Math.max(2, activePage - siblingCount);
+	const rightSibling = Math.min(totalPages - 1, activePage + siblingCount);
+
+	// первая страница
+	pages.push({number: 1, symbol: 1});
+
+	// блок слева от "окна" вокруг активной
+	if (leftSibling > 2) {
+		// если между 1 и leftSibling только одна страница — показываем её без "..."
+		if (leftSibling === 3) {
+			pages.push({number: 2, symbol: 2});
+		} else {
+			const startHidden = 3;
+			const endHidden = leftSibling - 1;
+			const jumpTo = getMiddlePage(startHidden, endHidden);
+			pages.push({number: jumpTo, symbol: '...'});
+		}
+	} else if (leftSibling === 2) {
+		pages.push({number: 2, symbol: 2});
+	}
+
+	// центральное "окно"
+	for (let i = leftSibling; i <= rightSibling; i += 1) {
+		// чтобы не дублировать страницы 1 и last
+		if (i !== 1 && i !== totalPages) {
+			// избегаем дублей (если leftSibling === 2, страница 2 уже добавлена)
+			if (!pages.some((p) => p.number === i)) {
+				pages.push({number: i, symbol: i});
+			}
+		}
+	}
+
+	// блок справа от "окна"
+	if (rightSibling < totalPages - 1) {
+		// если между rightSibling и last только одна страница — показываем её без "..."
+		if (rightSibling === totalPages - 2) {
+			if (!pages.some((p) => p.number === totalPages - 1)) {
+				pages.push({number: totalPages - 1, symbol: totalPages - 1});
+			}
+		} else {
+			const startHidden = rightSibling + 1;
+			const endHidden = totalPages - 2;
+			const jumpTo = getMiddlePage(startHidden, endHidden);
+			pages.push({number: jumpTo, symbol: '...'});
+		}
+	} else if (rightSibling === totalPages - 1 && !pages.some((p) => p.number === totalPages - 1)) {
+		pages.push({number: totalPages - 1, symbol: totalPages - 1});
+	}
+
+	// последняя страница
+	if (!pages.some((p) => p.number === totalPages)) {
+		pages.push({number: totalPages, symbol: totalPages});
+	}
+
+	return pages;
 };
 
 export const Pagination: FC<PaginationProps> = (props) => {
@@ -70,19 +99,16 @@ export const Pagination: FC<PaginationProps> = (props) => {
 	const {isScreenSmallMobile, isScreenMobile} = useScreenSize();
 
 	const [block, element] = useBem('pagination', className);
-	const [loading, setLoading] = useState(false);
-	const visiblePages = isScreenSmallMobile ? 1 : isScreenMobile ? 3 : 5;
-	const pagination = generatePagination(current, totalPages, visiblePages);
+	const visiblePages = isScreenMobile ? 3 : 5;
+	const pagination = !isScreenSmallMobile ? generatePagination(current, totalPages, visiblePages) : [];
 
 	const onPageClick = async (page: number): Promise<void> => {
 		const oldPage = current;
-		setLoading(true);
 		setCurrent(page);
-		const newCurrent = await goToPage(page);
-		if (!newCurrent) {
+		const success = await goToPage(page);
+		if (!success) {
 			setCurrent(oldPage);
 		}
-		setLoading(false);
 	};
 
 	useEffect(() => {
@@ -93,13 +119,49 @@ export const Pagination: FC<PaginationProps> = (props) => {
 		return null;
 	}
 
+	// Специальный компактный режим для очень маленьких экранов (xs)
+	if (isScreenSmallMobile) {
+		return (
+			<div className={block()}>
+				<Button
+					theme="blue-light"
+					icon="arrow--bottom"
+					className={element('arrow', {notShow: current <= 1})}
+					onClick={() => onPageClick(current - 1)}
+				/>
+				<div className={element('pages')}>
+					{current > 1 && (
+						<Button theme="blue-light" className={element('page')} disabled>
+							...
+						</Button>
+					)}
+					<Button theme="blue-light" onClick={() => onPageClick(current)} className={element('page', {active: true})} disabled>
+						{current}
+					</Button>
+					{current < totalPages && (
+						<Button theme="blue-light" className={element('page')} disabled>
+							...
+						</Button>
+					)}
+				</div>
+
+				<Button
+					theme="blue-light"
+					icon="arrow"
+					className={element('arrow', {notShow: current >= totalPages})}
+					onClick={() => onPageClick(current + 1)}
+				/>
+			</div>
+		);
+	}
+
 	return (
 		<div className={block()}>
 			<Button
 				theme="blue-light"
 				icon="arrow--bottom"
-				className={element('arrow', {notShow: !(currentPage > 1)})}
-				onClick={() => onPageClick(currentPage - 1)}
+				className={element('arrow', {notShow: current <= 1})}
+				onClick={() => onPageClick(current - 1)}
 			/>
 			<div className={element('pages')}>
 				{pagination.map((page) => (
@@ -107,9 +169,8 @@ export const Pagination: FC<PaginationProps> = (props) => {
 						theme="blue-light"
 						onClick={() => onPageClick(page.number)}
 						key={page.number}
-						className={element('page')}
+						className={element('page', {active: page.number === current})}
 						disabled={page.number === current}
-						loading={loading && current === page.number}
 					>
 						{page.symbol}
 					</Button>
@@ -119,8 +180,8 @@ export const Pagination: FC<PaginationProps> = (props) => {
 			<Button
 				theme="blue-light"
 				icon="arrow"
-				className={element('arrow', {notShow: !(currentPage < totalPages)})}
-				onClick={() => onPageClick(currentPage + 1)}
+				className={element('arrow', {notShow: current >= totalPages})}
+				onClick={() => onPageClick(current + 1)}
 			/>
 		</div>
 	);
