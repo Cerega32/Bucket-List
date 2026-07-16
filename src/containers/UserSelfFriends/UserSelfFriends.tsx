@@ -5,6 +5,7 @@ import {Banner} from '@/components/Banner/Banner';
 import {Switch} from '@/components/Switch/Switch';
 import {Title} from '@/components/Title/Title';
 import {UserSearch} from '@/components/UserSearch/UserSearch';
+import {FriendsNewsFeed} from '@/containers/FriendsNewsFeed/FriendsNewsFeed';
 import {useBem} from '@/hooks/useBem';
 
 import {FriendsContent} from '../FriendsContent/FriendsContent';
@@ -31,6 +32,8 @@ export const UserSelfFriends: FC<UserSelfFriendsProps> = observer(({subPage = 'f
 						</div>
 					</section>
 				);
+			case 'feed':
+				return <FriendsNewsFeed />;
 			default:
 				return <FriendsContent />;
 		}
@@ -52,6 +55,11 @@ export const UserSelfFriends: FC<UserSelfFriendsProps> = observer(({subPage = 'f
 				url: '/user/self/friends/search',
 				name: 'Поиск',
 				page: 'search',
+			},
+			{
+				url: '/user/self/friends/feed',
+				name: 'Лента друзей',
+				page: 'feed',
 			},
 		];
 	}, []);

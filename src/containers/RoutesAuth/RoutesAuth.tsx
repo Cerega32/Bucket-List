@@ -105,9 +105,9 @@ export const RoutesAuth: FC = observer(() => {
 				<Route path="/100-goals" element={<PageMainGoals page="isMainGoals" />} />
 
 				{/* Маршруты для новостей */}
-				<Route path="/news" element={<Navigate to="/news/friends" replace />} />
-				<Route path="/news/friends" element={<NewsPage />} />
-				<Route path="/news/project" element={<NewsPage />} />
+				<Route path="/news" element={<NewsPage />} />
+				<Route path="/news/project" element={<Navigate to="/news" replace />} />
+				<Route path="/news/friends" element={<Navigate to="/user/self/friends/feed" replace />} />
 				<Route path="/news/:id" element={<NewsDetailPage />} />
 
 				{/* Информационные страницы */}
@@ -216,11 +216,16 @@ export const RoutesAuth: FC = observer(() => {
 					path="/user/self/friends/search"
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfFriends" subPage="search" />} />}
 				/>
+				<Route
+					path="/user/self/friends/feed"
+					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfFriends" subPage="feed" />} />}
+				/>
 
 				{/* Редиректы старых маршрутов друзей на новые */}
 				<Route path="/friends" element={<Navigate to="/user/self/friends" replace />} />
 				<Route path="/friends/requests" element={<Navigate to="/user/self/friends/requests" replace />} />
 				<Route path="/friends/search" element={<Navigate to="/user/self/friends/search" replace />} />
+				<Route path="/friends/feed" element={<Navigate to="/user/self/friends/feed" replace />} />
 
 				<Route path="*" element={<PageNotFound page="NotFound" />} />
 			</Routes>
