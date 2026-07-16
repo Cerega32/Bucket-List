@@ -12,7 +12,7 @@ export const PageDetailList: FC<IPage> = ({page}) => {
 		setPage(page);
 		setFull(true);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [page]);
 
-	return <ListGoalsContainer />;
+	return <ListGoalsContainer page={page} />;
 };

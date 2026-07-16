@@ -202,6 +202,36 @@ export const createProgressEntry = async (
 	}
 };
 
+// Редактировать только текст заметки в записи истории прогресса
+export const updateGoalProgressEntryNotes = async (
+	goalId: number,
+	entryId: number,
+	notes: string
+): Promise<{
+	success: boolean;
+	data?: IGoalProgressEntry;
+	error?: string;
+}> => {
+	try {
+		const response = await PUT(`goals/${goalId}/progress/entries/${entryId}`, {
+			body: {notes},
+			auth: true,
+		});
+		if (!response.success || !response.data) {
+			return {
+				success: false,
+				error: response.error || response.errors || 'Не удалось сохранить заметку',
+			};
+		}
+		return {success: true, data: mapProgressEntry(response.data as IGoalProgressEntryRaw)};
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+		};
+	}
+};
+
 // Daily Goals API
 export const getDailyGoals = () => GET('goals/daily-goals', {auth: true});
 

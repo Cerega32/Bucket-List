@@ -8,7 +8,7 @@ import {Svg} from '../Svg/Svg';
 import './banner.scss';
 
 export type BannerType = 'success' | 'info' | 'warning' | 'danger' | 'gold';
-export type BannerVariant = 'default' | 'accent';
+export type BannerVariant = 'default' | 'filled';
 export type BannerSize = 'default' | 'large';
 export type BannerIconVariant = 'default' | 'target';
 
@@ -42,6 +42,9 @@ export const Banner: React.FC<BannerProps> = (props) => {
 	} = props;
 	const [block, element] = useBem('banner', className);
 
+	const isFilled = variant === 'filled';
+	const hasAction = actionText != null && onAction != null;
+
 	const renderIcon = () => {
 		if (icon === null) {
 			return null;
@@ -62,28 +65,52 @@ export const Banner: React.FC<BannerProps> = (props) => {
 		return <Svg icon="info" className={element('icon', {type})} />;
 	};
 
+	const renderTitle = () => (title != null ? <h3 className={element('title')}>{title}</h3> : null);
+
+	const renderMessage = () => {
+		if (message == null) {
+			return null;
+		}
+
+		return typeof message === 'string' ? (
+			<p className={element('message')}>{message}</p>
+		) : (
+			<div className={element('message')}>{message}</div>
+		);
+	};
+
+	const renderAction = () =>
+		hasAction ? (
+			<Button className={element('action')} theme="no-border" type="button" width="auto" onClick={onAction}>
+				{actionText}
+			</Button>
+		) : null;
+
 	return (
 		<div
 			className={block({
 				type,
-				variant: variant === 'accent' ? 'accent' : undefined,
+				variant: isFilled ? 'filled' : undefined,
 				size: size === 'large' ? 'large' : undefined,
 				'with-end': Boolean(endContent),
 			})}
 		>
 			{renderIcon()}
 			<div className={element('content')}>
-				{title != null && <h3 className={element('title')}>{title}</h3>}
-				{message != null &&
-					(typeof message === 'string' ? (
-						<p className={element('message')}>{message}</p>
-					) : (
-						<div className={element('message')}>{message}</div>
-					))}
-				{actionText != null && onAction != null && (
-					<Button className={element('action')} theme="no-border" type="button" width="auto" onClick={onAction}>
-						{actionText}
-					</Button>
+				{isFilled ? (
+					<>
+						<div className={element('text')}>
+							{renderTitle()}
+							{renderMessage()}
+						</div>
+						{renderAction()}
+					</>
+				) : (
+					<>
+						{renderTitle()}
+						{renderMessage()}
+						{renderAction()}
+					</>
 				)}
 			</div>
 			{endContent != null && <div className={element('end')}>{endContent}</div>}

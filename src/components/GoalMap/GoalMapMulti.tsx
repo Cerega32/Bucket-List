@@ -4,6 +4,14 @@ import {Banner} from '@/components/Banner/Banner';
 import {useBem} from '@/hooks/useBem';
 import {GoalWithLocation} from '@/utils/mapApi';
 import {loadYandexMapsScript, YANDEX_MAP_LOAD_ERROR_MESSAGE, YANDEX_MAPS_LOAD_TIMEOUT_MS} from '@/utils/maps/loadYandexMapsScript';
+import {
+	getYandexBalloonPanelMaxMapArea,
+	scrollMapBottomIntoViewport,
+	subscribeYandexBalloonPanelMode,
+	YANDEX_MARKER_PRESET_ACTIVE,
+	YANDEX_MARKER_PRESET_UNVISITED,
+	YANDEX_MARKER_PRESET_VISITED,
+} from '@/utils/maps/yandexMapBalloon';
 import './goal-map.scss';
 
 export interface GoalMapMultiProps {
@@ -23,11 +31,25 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
 	const mapContainer = useRef<HTMLDivElement>(null);
 	const mapInstance = useRef<any>(null);
 	const markersRef = useRef<any[]>([]);
+	const activeMarkerRef = useRef<any>(null);
 	const [mapLoadError, setMapLoadError] = useState(false);
 	const [mapReady, setMapReady] = useState(false);
 
 	const fitMapToContainer = () => {
 		mapInstance.current?.container?.fitToViewport?.();
+	};
+
+	const getBasePreset = (visited: boolean) => (visited ? YANDEX_MARKER_PRESET_VISITED : YANDEX_MARKER_PRESET_UNVISITED);
+
+	const setActiveMarker = (marker: any | null) => {
+		if (activeMarkerRef.current && activeMarkerRef.current !== marker) {
+			const previous = activeMarkerRef.current;
+			previous.options.set('preset', previous.properties.get('basePreset') || YANDEX_MARKER_PRESET_UNVISITED);
+		}
+		activeMarkerRef.current = marker;
+		if (marker) {
+			marker.options.set('preset', YANDEX_MARKER_PRESET_ACTIVE);
+		}
 	};
 
 	useEffect(() => {
@@ -49,6 +71,7 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
 		let cancelled = false;
 		let loadTimeoutId: number | undefined;
 		let resizeObserver: ResizeObserver | undefined;
+		let unsubscribeBalloonMode: (() => void) | undefined;
 
 		const reportError = () => {
 			if (!cancelled) {
@@ -89,19 +112,27 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
 				const avgLat = validGoals.reduce((sum, g) => sum + g.location.latitude, 0) / validGoals.length;
 				const avgLon = validGoals.reduce((sum, g) => sum + g.location.longitude, 0) / validGoals.length;
 
-				const map = new window.ymaps.Map(mapContainer.current, {
-					center: [avgLat, avgLon],
-					zoom: 4,
-					controls: ['zoomControl', 'typeSelector'],
-				});
+				const map = new window.ymaps.Map(
+					mapContainer.current,
+					{
+						center: [avgLat, avgLon],
+						zoom: 4,
+						controls: ['zoomControl', 'typeSelector'],
+					},
+					{
+						balloonPanelMaxMapArea: getYandexBalloonPanelMaxMapArea(),
+					}
+				);
 
 				mapInstance.current = map;
 				markersRef.current = [];
+				activeMarkerRef.current = null;
 
 				const points: number[][] = [];
 
 				validGoals.forEach((goal) => {
 					const {location, userVisitedLocation, name, address, description} = goal;
+					const basePreset = getBasePreset(!!userVisitedLocation);
 					const marker = new window.ymaps.Placemark(
 						[location.latitude, location.longitude],
 						{
@@ -118,9 +149,10 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
               </div>
             `,
 							hintContent: name || 'Место назначения',
+							basePreset,
 						},
 						{
-							preset: userVisitedLocation ? 'islands#greenDotIcon' : 'islands#redDotIcon',
+							preset: basePreset,
 							openBalloonOnHover: openBalloonAt === undefined,
 							balloonCloseButton: true,
 							hideIconOnBalloonOpen: false,
@@ -128,6 +160,18 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
 							balloonAutoPanMargin: [48, 48, 48, 48],
 						}
 					);
+
+					marker.events.add('balloonopen', () => {
+						setActiveMarker(marker);
+						scrollMapBottomIntoViewport(mapContainer.current);
+					});
+					marker.events.add('balloonclose', () => {
+						if (activeMarkerRef.current === marker) {
+							marker.options.set('preset', basePreset);
+							activeMarkerRef.current = null;
+						}
+					});
+
 					map.geoObjects.add(marker);
 					markersRef.current.push(marker);
 					points.push([location.latitude, location.longitude]);
@@ -140,7 +184,12 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
 				}
 
 				if (openBalloonAt !== undefined && markersRef.current[openBalloonAt]) {
-					window.setTimeout(() => markersRef.current[openBalloonAt].balloon.open(), 500);
+					window.setTimeout(() => {
+						const marker = markersRef.current[openBalloonAt];
+						if (!marker) return;
+						setActiveMarker(marker);
+						marker.balloon.open();
+					}, 500);
 				}
 
 				if (mapContainer.current) {
@@ -149,6 +198,18 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
 					});
 					resizeObserver.observe(mapContainer.current);
 				}
+
+				unsubscribeBalloonMode = subscribeYandexBalloonPanelMode(map, () => {
+					const marker = activeMarkerRef.current;
+					if (!marker?.balloon?.isOpen?.()) {
+						return;
+					}
+					marker.balloon.close();
+					window.setTimeout(() => {
+						setActiveMarker(marker);
+						marker.balloon.open();
+					}, 0);
+				});
 
 				window.requestAnimationFrame(fitMapToContainer);
 				setMapReady(true);
@@ -172,6 +233,7 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
 		return () => {
 			cancelled = true;
 			setMapReady(false);
+			unsubscribeBalloonMode?.();
 			resizeObserver?.disconnect();
 			if (loadTimeoutId) {
 				clearTimeout(loadTimeoutId);
@@ -181,6 +243,7 @@ export const GoalMapMulti: FC<GoalMapMultiProps> = (props) => {
 				mapInstance.current = null;
 			}
 			markersRef.current = [];
+			activeMarkerRef.current = null;
 		};
 	}, [goals, openBalloonAt, onLoadError, onLoadSuccess]);
 

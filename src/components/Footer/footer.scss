@@ -8,7 +8,7 @@
 	&__content {
 		@include max-width;
 
-		padding: 48px 24px 24px;
+		padding: 24px;
 
 		@include md {
 			padding: 24px;
@@ -19,11 +19,11 @@
 		display: grid;
 		grid-template-columns: 1fr 2fr;
 		gap: 48px;
-		margin-bottom: 32px;
+		margin-bottom: 24px;
 
 		@include lg {
 			grid-template-columns: 1fr;
-			gap: 32px;
+			gap: 24px;
 		}
 
 		@include md {
@@ -125,7 +125,6 @@
 	}
 
 	&__nav-title {
-		margin-bottom: 8px;
 		color: var(--color-text-primary);
 		font-weight: var(--weight-semibold);
 	}
@@ -133,7 +132,7 @@
 	&__nav-list {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: 5px;
 	}
 
 	&__nav-item {
@@ -154,7 +153,7 @@
 	&__bottom-section {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 24px;
 	}
 
 	&__divider {

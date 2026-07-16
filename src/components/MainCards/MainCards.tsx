@@ -41,7 +41,7 @@ export const MainCards: FC<MainCardsProps> = (props) => {
 			</Title>
 			{categoryCompleted && (
 				<Banner
-					variant="accent"
+					variant="filled"
 					type={complexityBannerType[complexity]}
 					iconVariant="target"
 					className={element('banner')}

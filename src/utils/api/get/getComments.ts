@@ -38,6 +38,12 @@ export const getInitialComments = async (codeGoal: string): Promise<ICommentsIni
 	return response as ICommentsInitialResponse;
 };
 
+/** Первая загрузка комментариев к списку */
+export const getInitialListComments = async (codeList: string): Promise<ICommentsInitialResponse> => {
+	const response = await GET(`goal-lists/${codeList}/comments`, {auth: true});
+	return response as ICommentsInitialResponse;
+};
+
 /** Дозагрузка: 10 чужих комментариев, page >= 2 */
 export const getMoreComments = async (codeGoal: string, page: number): Promise<ICommentsPageResponse> => {
 	const response = await GET(`goals/${codeGoal}/comments`, {
@@ -47,9 +53,24 @@ export const getMoreComments = async (codeGoal: string, page: number): Promise<I
 	return response as ICommentsPageResponse;
 };
 
+/** Дозагрузка комментариев к списку */
+export const getMoreListComments = async (codeList: string, page: number): Promise<ICommentsPageResponse> => {
+	const response = await GET(`goal-lists/${codeList}/comments`, {
+		auth: true,
+		get: {page: String(page)},
+	});
+	return response as ICommentsPageResponse;
+};
+
 /** Случайные изображения из отзывов для секции впечатлений */
 export const getGoalImpressionImages = async (codeGoal: string): Promise<IImpressionImagesResponse> => {
 	const response = await GET(`goals/${codeGoal}/impression-images`, {auth: false});
+	return response as IImpressionImagesResponse;
+};
+
+/** Случайные изображения из отзывов к списку */
+export const getListImpressionImages = async (codeList: string): Promise<IImpressionImagesResponse> => {
+	const response = await GET(`goal-lists/${codeList}/impression-images`, {auth: false});
 	return response as IImpressionImagesResponse;
 };
 

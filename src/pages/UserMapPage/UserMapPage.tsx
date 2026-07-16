@@ -10,7 +10,7 @@ import {Switch} from '@/components/Switch/Switch';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ThemeStore} from '@/store/ThemeStore';
-import {goalsToMapPoints, MapData, mapApi} from '@/utils/mapApi';
+import {goalsToMapPoints, mapApi, MapData} from '@/utils/mapApi';
 import {YANDEX_MAP_LOAD_ERROR_MESSAGE} from '@/utils/maps/loadYandexMapsScript';
 
 import {UserMapPageSkeleton} from './UserMapPageSkeleton';
@@ -80,19 +80,6 @@ const UserMapPage: React.FC = observer(() => {
 					{activeTab === 'locations' && (
 						<div className={element('locations-tab')}>
 							<div className={element('map-section')}>
-								{/* <div className={element('section-header')}> */}
-								{/* <div className={element('map-legend')}>
-										<div className={element('legend-item')}>
-											<div className={element('legend-marker visited')} />
-											<span>Посещенные места</span>
-										</div>
-										<div className={element('legend-item')}>
-											<div className={element('legend-marker unvisited')} />
-											<span>Запланированные места</span>
-										</div>
-									</div> */}
-								{/* </div> */}
-
 								{mapData && mapData.goals?.length > 0 ? (
 									<>
 										{mapLoadError && (
@@ -123,16 +110,10 @@ const UserMapPage: React.FC = observer(() => {
 										{mapData.visited_locations.map((visitedLocation) => (
 											<div key={visitedLocation.id} className={element('location-card')}>
 												<h4>{visitedLocation.location.name}</h4>
-												<p className="location-country">{visitedLocation.location.country}</p>
-												{visitedLocation.location.city && (
-													<p className="location-city">{visitedLocation.location.city}</p>
-												)}
-												{visitedLocation.goal_title && (
-													<p className="related-goal">Цель: {visitedLocation.goal_title}</p>
-												)}
-												<p className="visit-date">
-													Посещено: {new Date(visitedLocation.visited_at).toLocaleDateString('ru-RU')}
-												</p>
+												<p>{visitedLocation.location.country}</p>
+												{visitedLocation.location.city && <p>{visitedLocation.location.city}</p>}
+												{visitedLocation.goal_title && <p>Цель: {visitedLocation.goal_title}</p>}
+												<p>Посещено: {new Date(visitedLocation.visited_at).toLocaleDateString('ru-RU')}</p>
 											</div>
 										))}
 									</div>

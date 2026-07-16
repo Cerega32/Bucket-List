@@ -32,6 +32,24 @@
 		}
 	}
 
+	&__impressions {
+		display: flex;
+		gap: 8px;
+		margin-top: 24px;
+
+		@include xs {
+			flex-direction: column;
+		}
+	}
+
+	&__comments {
+		margin-top: 24px;
+	}
+
+	&__my-review-wrap {
+		margin-bottom: 16px;
+	}
+
 	&__view-toggle {
 		display: flex;
 		gap: 4px;

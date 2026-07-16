@@ -16,7 +16,7 @@ interface DescriptionWithLinksProps {
 interface DescriptionListProps extends DescriptionWithLinksProps {
 	isList: true;
 	goal: IList;
-	page?: never;
+	page: string;
 }
 
 interface DescriptionGoalProps extends DescriptionWithLinksProps {
@@ -146,7 +146,20 @@ export const DescriptionWithLinks: FC<DescriptionWithLinksPropsUnion> = (props) 
 
 	const tabs: Array<ITabs> = useMemo(() => {
 		if (isList) {
-			return [];
+			return [
+				{
+					url: '/',
+					name: 'Список целей',
+					page: 'isList',
+					count: goal.goalsCount,
+				},
+				{
+					url: '/impressions',
+					name: 'Впечатления',
+					page: 'isListImpressions',
+					count: goal.totalComments,
+				},
+			];
 		}
 
 		const baseTabs: Array<ITabs> = [
@@ -224,12 +237,8 @@ export const DescriptionWithLinks: FC<DescriptionWithLinksPropsUnion> = (props) 
 					]}
 				/>
 			</div>
-			{!isList && (
-				<>
-					<Line margin="16px 0 0" />
-					<Tabs base={`/goals/${goal.code}`} tabs={tabs} active={page} preventScrollReset />
-				</>
-			)}
+			<Line margin="16px 0 0" />
+			<Tabs base={isList ? `/list/${goal.code}` : `/goals/${goal.code}`} tabs={tabs} active={page} preventScrollReset />
 		</div>
 	);
 };
