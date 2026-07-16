@@ -21,7 +21,6 @@ export const NewsPage = observer(() => {
 		ThemeStore.setHeader('white');
 		ThemeStore.setFull(false);
 
-		// Загружаем новости при первом рендере
 		if (newsStore.news.length === 0) {
 			newsStore.loadNews();
 		}
@@ -65,8 +64,8 @@ export const NewsPage = observer(() => {
 			<div className={element('container')}>
 				{/* Заголовок */}
 				<header className={element('header')}>
-					<h1>Новости проекта</h1>
-					<p>Последние обновления и важные события</p>
+					<h1>Новости</h1>
+					<p>Следите за обновлениями проекта</p>
 				</header>
 
 				{/* Поиск */}
@@ -100,7 +99,7 @@ export const NewsPage = observer(() => {
 					</div>
 				)}
 
-				{/* Список новостей */}
+				{/* Список новостей проекта */}
 				<div className={element('content')}>
 					{newsStore.loading && displayedNews.length === 0 ? (
 						<NewsPageSkeleton />
