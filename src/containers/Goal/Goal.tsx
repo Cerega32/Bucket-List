@@ -515,6 +515,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 							className={element('content')}
 							historyRefreshTrigger={historyRefreshTrigger}
 							onListChanged={handleListChanged}
+							onEditClick={() => setIsEditing(true)}
 						/>
 					</div>
 				</section>

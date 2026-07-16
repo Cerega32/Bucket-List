@@ -361,9 +361,10 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 				key: 'catalogReviewStatus',
 				label: 'Статус модерации',
 				options: [
-					{name: 'Ожидает проверки', code: 'pending'},
+					{name: 'На проверке', code: 'pending'},
 					{name: 'В каталоге', code: 'approved'},
-					{name: 'Не прошло модерацию', code: 'rejected'},
+					{name: 'Требует правки', code: 'rejected'},
+					{name: 'Отклонено окончательно', code: 'permanently_rejected'},
 				],
 				allLabel: 'Все статусы',
 			});

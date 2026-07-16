@@ -4,6 +4,35 @@ export type IComplexity = 'hard' | 'medium' | 'easy';
 
 export type ICatalogReviewStatus = 'pending' | 'approved' | 'rejected';
 
+/** Коды причин отказа модератора — см. backend/utils/catalog_rejection_reasons.py */
+export type ICatalogRejectionReason =
+	| 'duplicate'
+	| 'unclear_text'
+	| 'off_topic'
+	| 'inappropriate_text'
+	| 'inappropriate_image'
+	| 'low_quality_image'
+	| 'spam'
+	| 'other';
+
+export interface ICatalogRejectionInfo {
+	/** false — ждёт одобрения для общего каталога */
+	catalogApproved?: boolean;
+	catalogReviewStatus?: ICatalogReviewStatus;
+	/** Причины последнего отказа модератора (мультивыбор) */
+	catalogRejectionReasons?: ICatalogRejectionReason[];
+	/** Комментарий модератора (обязателен для причины «Другое») */
+	catalogRejectionComment?: string;
+	/** Сколько раз уже отклонено */
+	catalogRejectionCount?: number;
+	/** Лимит попыток (по умолчанию 3) */
+	catalogRejectionLimit?: number;
+	/** Лимит попыток исчерпан — повторная отправка недоступна, запись будет удалена */
+	catalogPermanentlyRejected?: boolean;
+	/** Дата автоудаления (заполняется при catalogPermanentlyRejected) */
+	catalogDeleteAt?: string | null;
+}
+
 export interface ICategory {
 	id: number;
 	name: string;
@@ -30,7 +59,7 @@ export interface ICategoryTree extends ICategoryDetailed {
 	children: ICategoryTree[];
 }
 
-export interface IShortList {
+export interface IShortList extends ICatalogRejectionInfo {
 	code: string;
 	image: string;
 	shortDescription: string;
@@ -44,13 +73,10 @@ export interface IShortList {
 	userCompletedGoals: number;
 	goalsCount: number;
 	estimatedTime?: never;
-	/** false — ждёт одобрения для общего каталога */
-	catalogApproved?: boolean;
-	catalogReviewStatus?: ICatalogReviewStatus;
 	hasScratchMap?: boolean;
 }
 
-export interface IGoal {
+export interface IGoal extends ICatalogRejectionInfo {
 	category: ICategory;
 	code: string;
 	complexity: IComplexity;
@@ -120,11 +146,9 @@ export interface IGoal {
 
 	// Количество записей в истории прогресса (для нерегулярных целей)
 	progressEntriesCount?: number;
-	catalogApproved?: boolean;
-	catalogReviewStatus?: ICatalogReviewStatus;
 }
 
-export interface IShortGoal {
+export interface IShortGoal extends ICatalogRejectionInfo {
 	id: number;
 	category: ICategory;
 	code: string;
@@ -141,8 +165,6 @@ export interface IShortGoal {
 	location?: ILocation;
 	estimatedTime?: string;
 	regularConfig?: IRegularGoalConfig;
-	catalogApproved?: boolean;
-	catalogReviewStatus?: ICatalogReviewStatus;
 }
 
 // Типы для работы с картами

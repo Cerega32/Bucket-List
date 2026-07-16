@@ -1,4 +1,4 @@
-import {ICatalogReviewStatus, ICategory, IComplexity, IShortGoal} from '@/typings/goal';
+import {ICatalogRejectionInfo, ICategory, IComplexity, IShortGoal} from '@/typings/goal';
 
 export interface IGoalsPagination {
 	page: number;
@@ -7,7 +7,7 @@ export interface IGoalsPagination {
 	hasMore: boolean;
 }
 
-export interface IList {
+export interface IList extends ICatalogRejectionInfo {
 	id: number;
 	code: string;
 	title: string;
@@ -27,8 +27,6 @@ export interface IList {
 	createdByUser: boolean;
 	isCanEdit: boolean;
 	isCanAddGoals: boolean;
-	catalogApproved?: boolean;
-	catalogReviewStatus?: ICatalogReviewStatus;
 	goalsPagination?: IGoalsPagination;
 	hasScratchMap?: boolean;
 	hasMyComment?: boolean;

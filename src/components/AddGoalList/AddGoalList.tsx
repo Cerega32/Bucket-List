@@ -64,6 +64,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 	const [activeCategory, setActiveCategory] = useState<number | null>(null);
 	const [activeSubcategory, setActiveSubcategory] = useState<number | null>(null);
 	const [image, setImage] = useState<File | null>(null);
+	const [imagePreview, setImagePreview] = useState<string | null>(null);
 	const [categories, setCategories] = useState<ICategory[]>([]);
 	const [subcategories, setSubcategories] = useState<ICategory[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
@@ -72,6 +73,20 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 	const formRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (!image) {
+			setImagePreview(null);
+			return undefined;
+		}
+
+		const previewUrl = URL.createObjectURL(image);
+		setImagePreview(previewUrl);
+
+		return () => {
+			URL.revokeObjectURL(previewUrl);
+		};
+	}, [image]);
 
 	// Состояния для работы с целями
 	const [selectedGoals, setSelectedGoals] = useState<IGoalExtended[]>([]);
@@ -864,7 +879,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 									</div>
 								) : (
 									<div className={element('image-preview')}>
-										<img src={URL.createObjectURL(image)} alt="Предпросмотр" className={element('preview')} />
+										{imagePreview && <img src={imagePreview} alt="Предпросмотр" className={element('preview')} />}
 										<Button withBorder className={element('remove-image')} type="button-close" onClick={removeImage} />
 									</div>
 								)}
@@ -962,9 +977,9 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 									{/* Поиск существующих целей */}
 									<div className={element('search-container')}>
 										<FieldInput
-											placeholder="Поиск существующих целей"
+											placeholder="Введите не менее 3 символов"
 											id="goal-search"
-											text="Поиск целей"
+											text="Поиск существующих целей"
 											value={searchQuery}
 											setValue={setSearchQuery}
 											className={element('search-field')}

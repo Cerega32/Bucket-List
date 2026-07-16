@@ -4,6 +4,7 @@ import {FileDrop} from 'react-file-drop';
 import {useNavigate} from 'react-router-dom';
 
 import {Button} from '@/components/Button/Button';
+import {CatalogModerationBanner} from '@/components/CatalogModerationBanner/CatalogModerationBanner';
 import {DatePicker} from '@/components/DatePicker/DatePicker';
 import {FieldCheckbox} from '@/components/FieldCheckbox/FieldCheckbox';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
@@ -125,6 +126,12 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 				// Используем свойство canEdit из объекта цели вместо отдельного запроса
 				if (goal.isCanEdit) {
 					setCanEdit(true);
+				} else if (goal.catalogPermanentlyRejected) {
+					setErrorMessage(
+						`Цель окончательно отклонена после ${goal.catalogRejectionCount ?? 3} попыток и будет удалена ` +
+							'автоматически. Редактирование недоступно — создайте новую цель с другой формулировкой.'
+					);
+					setCanEdit(false);
 				} else {
 					setErrorMessage(
 						goal.catalogReviewStatus === 'approved'
@@ -533,10 +540,11 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 			const response = await updateGoal(goal.code, formData);
 
 			if (response.success) {
+				const wasResubmitted = goal.catalogReviewStatus === 'rejected';
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успех',
-					message: 'Цель успешно обновлена',
+					message: wasResubmitted ? 'Цель обновлена и отправлена на повторную проверку модератором' : 'Цель успешно обновлена',
 				});
 
 				// Если передан обработчик обновления цели, вызываем его
@@ -609,12 +617,31 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 					<div className={element('error-message')}>
 						<Svg icon="error" className={element('error-icon')} />
 						<p>{errorMessage || 'Редактирование недоступно'}</p>
-						<Button theme="blue" onClick={() => navigate(-1)} type="button">
-							Вернуться назад
-						</Button>
+						<div className={element('btns-wrapper')}>
+							{goal.catalogPermanentlyRejected && (
+								<Button theme="red" onClick={() => setIsDeleteModalOpen(true)} type="button">
+									Удалить цель
+								</Button>
+							)}
+							<Button theme="blue" onClick={() => navigate(-1)} type="button">
+								Вернуться назад
+							</Button>
+						</div>
 					</div>
 				) : (
 					<div className={element('content')}>
+						{goal.catalogReviewStatus === 'rejected' && (
+							<CatalogModerationBanner
+								className={element('rejection-banner')}
+								catalogReviewStatus={goal.catalogReviewStatus}
+								catalogPermanentlyRejected={goal.catalogPermanentlyRejected}
+								catalogRejectionCount={goal.catalogRejectionCount}
+								catalogRejectionLimit={goal.catalogRejectionLimit}
+								catalogRejectionReasons={goal.catalogRejectionReasons}
+								catalogRejectionComment={goal.catalogRejectionComment}
+								catalogDeleteAt={goal.catalogDeleteAt}
+							/>
+						)}
 						<div
 							className={element('image-section', {
 								error: showErrors && !image && !imageUrl,
@@ -997,7 +1024,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 									Отмена
 								</Button>
 								<Button theme="blue" className={element('btn')} typeBtn="submit">
-									Сохранить изменения
+									{goal.catalogReviewStatus === 'rejected' ? 'Отправить снова на проверку' : 'Сохранить изменения'}
 								</Button>
 							</div>
 						</div>

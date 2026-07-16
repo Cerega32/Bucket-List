@@ -9,6 +9,7 @@ import {UserStore} from '@/store/UserStore';
 import {ICatalogReviewStatus, IShortGoal, IShortList} from '@/typings/goal';
 import {isScratchMapList, SCRATCH_MAP_PAGE_URL} from '@/utils/scratchMapList';
 import {emitConfettiFromElement} from '@/utils/ui/emitConfetti';
+import {getCatalogDeleteHint} from '@/utils/values/catalogRejectionReasons';
 
 import {Button} from '../Button/Button';
 import {Gradient} from '../Gradient/Gradient';
@@ -57,21 +58,44 @@ const isCardCompleted = (goal: IShortGoal | IShortList, isList: boolean | undefi
 	goal.completedByUser || (!!isList && isListFullyCompleted(goal as IShortList));
 
 const getCatalogModerationTag = (
-	status: ICatalogReviewStatus | undefined,
+	goal: {
+		catalogReviewStatus?: ICatalogReviewStatus;
+		catalogPermanentlyRejected?: boolean;
+		catalogRejectionCount?: number;
+		catalogRejectionLimit?: number;
+		catalogDeleteAt?: string | null;
+	},
 	showApproved: boolean
-): {text: string; theme: 'gray' | 'green' | 'red'; title: string} | null => {
+): {text: string; theme: 'gray' | 'green' | 'red' | 'gold'; title: string} | null => {
+	const {
+		catalogReviewStatus: status,
+		catalogPermanentlyRejected,
+		catalogRejectionCount,
+		catalogRejectionLimit = 3,
+		catalogDeleteAt,
+	} = goal;
+	const attempt = Math.max(1, catalogRejectionCount ?? 1);
 	if (status === 'pending') {
 		return {
-			text: 'Ожидает проверки',
+			text: 'На проверке',
 			theme: 'gray',
 			title: 'Ожидает публикации в каталоге',
 		};
 	}
+	if (status === 'rejected' && catalogPermanentlyRejected) {
+		return {
+			text: 'Отклонено',
+			theme: 'red',
+			title: `Лимит попыток (${catalogRejectionLimit}) исчерпан. ${getCatalogDeleteHint(
+				catalogDeleteAt
+			)} Создайте новую версию с другой формулировкой`,
+		};
+	}
 	if (status === 'rejected') {
 		return {
-			text: 'Не прошло модерацию',
-			theme: 'red',
-			title: 'Не может быть добавлено в общий каталог. Создайте новую версию с другой формулировкой',
+			text: 'Требует правки',
+			theme: 'gold',
+			title: `Не прошло модерацию (попытка ${attempt} из ${catalogRejectionLimit}). Отредактируйте и отправьте на повторную проверку`,
 		};
 	}
 	if (status === 'approved' && showApproved) {
@@ -104,7 +128,7 @@ export const Card: FC<CardProps> = (props) => {
 
 	const isCompleted = isCardCompleted(goal, isList);
 	const showScratchMap = Boolean(isList && isScratchMapList(goal as IShortList));
-	const catalogModerationTag = getCatalogModerationTag(goal.catalogReviewStatus, showCatalogReviewApproved);
+	const catalogModerationTag = getCatalogModerationTag(goal, showCatalogReviewApproved);
 
 	const {isAuth} = UserStore;
 	const {setIsOpen, setWindow, setFuncModal, setModalProps} = ModalStore;

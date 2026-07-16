@@ -16,7 +16,7 @@ import {IComplexity, IGoal} from '@/typings/goal';
 import {checkEmail} from '@/utils/api/get/checkEmail';
 import {checkUsername} from '@/utils/api/get/checkUsername';
 import {get100Goals} from '@/utils/api/get/get100Goals';
-import {getPopularGoalsForAllTime} from '@/utils/api/get/getPopularGoalsForAllTime';
+import {getRegistrationCatalogGoals} from '@/utils/api/get/getRegistrationCatalogGoals';
 import {postRegistration} from '@/utils/api/post/postRegistration';
 import {registrationGoalsSync} from '@/utils/api/post/registrationGoalsSync';
 import {normalizeEmail} from '@/utils/text/normalizeEmail';
@@ -83,7 +83,7 @@ export const Registration: FC<RegistrationProps> = (props) => {
 		if (step === 2 && !catalogLoaded && !catalogLoading) {
 			setCatalogLoading(true);
 			(async () => {
-				const res = await getPopularGoalsForAllTime(16);
+				const res = await getRegistrationCatalogGoals(16);
 				if (res.success) setCatalogGoals(res.data ?? []);
 				setCatalogLoaded(true);
 				setCatalogLoading(false);
