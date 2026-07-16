@@ -377,11 +377,11 @@ export const Registration: FC<RegistrationProps> = (props) => {
 						Добавьте цели из каталога
 					</Title>
 					<p className={element('step-desc')}>В каталоге есть сотни идей по категориям — от путешествий до саморазвития</p>
-					{catalogLoading ? (
-						<CatalogItemsSkeleton />
-					) : (
-						<section className={element('catalog-goals')}>
-							{catalogGoals.map((goal, i) => (
+					<section className={element('catalog-goals')}>
+						{catalogLoading ? (
+							<CatalogItemsSkeleton className={element('catalog-skeleton')} count={16} />
+						) : (
+							catalogGoals.map((goal, i) => (
 								<Card
 									key={goal.code}
 									className={element('catalog-goal')}
@@ -393,9 +393,9 @@ export const Registration: FC<RegistrationProps> = (props) => {
 									disableMark
 									allowAddWithoutAuth
 								/>
-							))}
-						</section>
-					)}
+							))
+						)}
+					</section>
 				</div>
 
 				{/* Step 3: Registration form */}
