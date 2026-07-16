@@ -14,6 +14,7 @@ import {getGoalImpressionImages, getInitialComments, getMoreComments} from '@/ut
 import {postLikeComment} from '@/utils/api/post/postLikeComment';
 
 import {Banner} from '../Banner/Banner';
+import {CatalogModerationBanner} from '../CatalogModerationBanner/CatalogModerationBanner';
 import {CommentImagesGallery} from '../CommentImagesGallery/CommentImagesGallery';
 import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
 import {CommentsGoalSkeleton} from '../CommentsGoal/CommentsGoalSkeleton';
@@ -32,10 +33,11 @@ interface ContentGoalProps {
 	page: string;
 	historyRefreshTrigger?: number;
 	onListChanged?: () => void;
+	onEditClick?: () => void;
 }
 
 export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
-	const {className, goal, page, historyRefreshTrigger, onListChanged} = props;
+	const {className, goal, page, historyRefreshTrigger, onListChanged, onEditClick} = props;
 
 	const [block, element] = useBem('content-goal', className);
 	const navigate = useNavigate();
@@ -207,6 +209,21 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 
 	return (
 		<article className={block()}>
+			{goal.createdByUser && goal.catalogReviewStatus && goal.catalogReviewStatus !== 'approved' && (
+				<div className={element('moderation-banner')}>
+					<CatalogModerationBanner
+						catalogReviewStatus={goal.catalogReviewStatus}
+						catalogPermanentlyRejected={goal.catalogPermanentlyRejected}
+						catalogRejectionCount={goal.catalogRejectionCount}
+						catalogRejectionLimit={goal.catalogRejectionLimit}
+						catalogRejectionReasons={goal.catalogRejectionReasons}
+						catalogRejectionComment={goal.catalogRejectionComment}
+						catalogDeleteAt={goal.catalogDeleteAt}
+						actionText={goal.isCanEdit && onEditClick ? 'Редактировать' : undefined}
+						onAction={goal.isCanEdit ? onEditClick : undefined}
+					/>
+				</div>
+			)}
 			{addedViaLists && addedViaLists.length > 0 && (
 				<div className={element('goal-in-list')}>
 					<Banner

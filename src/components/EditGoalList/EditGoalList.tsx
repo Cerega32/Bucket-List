@@ -5,6 +5,7 @@ import {useNavigate} from 'react-router-dom';
 import {AddGoal} from '@/components/AddGoal/AddGoal';
 import {Banner} from '@/components/Banner/Banner';
 import {Button} from '@/components/Button/Button';
+import {CatalogModerationBanner} from '@/components/CatalogModerationBanner/CatalogModerationBanner';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
 import {Svg} from '@/components/Svg/Svg';
 import {Title} from '@/components/Title/Title';
@@ -65,10 +66,15 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 	// Получаем только родительские категории для основного dropdown используя useMemo для оптимизации
 	const parentCategories = useMemo(() => categories.filter((cat) => !cat.parentCategory), [categories]);
 
-	const limitedEditHint =
-		listData.catalogReviewStatus === 'approved'
-			? 'Список опубликован в каталоге после модерации — изменить название, описание и параметры нельзя.'
-			: 'Прошло более 24 часов с создания — изменить название, описание и параметры нельзя.';
+	const limitedEditHint = listData.catalogPermanentlyRejected
+		? `Список окончательно отклонён после ${
+				listData.catalogRejectionCount ?? 3
+		  } попыток и будет удалён автоматически. Редактирование недоступно.`
+		: listData.catalogReviewStatus === 'approved'
+		? 'Список опубликован в каталоге после модерации — изменить название, описание и параметры нельзя.'
+		: 'Прошло более 24 часов с создания — изменить название, описание и параметры нельзя.';
+
+	const isBeingResubmitted = listData.catalogReviewStatus === 'rejected' && !listData.catalogPermanentlyRejected;
 
 	const categoryLabel = listData.category?.parentCategory
 		? `${listData.category.parentCategory.name} / ${listData.category.name}`
@@ -344,7 +350,9 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успех',
-					message: 'Список целей успешно обновлен',
+					message: isBeingResubmitted
+						? 'Список обновлён и отправлен на повторную проверку модератором'
+						: 'Список целей успешно обновлен',
 				});
 				navigate(`/list/${response?.data?.code}`);
 			} else {
@@ -369,10 +377,23 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 
 			{!canEditAll && (
 				<Banner
-					type="info"
+					type={listData.catalogPermanentlyRejected ? 'danger' : 'info'}
 					className={element('limited-edit-banner')}
-					title="Ограниченное редактирование"
+					title={listData.catalogPermanentlyRejected ? 'Редактирование недоступно' : 'Ограниченное редактирование'}
 					message={limitedEditHint}
+				/>
+			)}
+
+			{isBeingResubmitted && (
+				<CatalogModerationBanner
+					className={element('limited-edit-banner')}
+					catalogReviewStatus={listData.catalogReviewStatus}
+					catalogPermanentlyRejected={listData.catalogPermanentlyRejected}
+					catalogRejectionCount={listData.catalogRejectionCount}
+					catalogRejectionLimit={listData.catalogRejectionLimit}
+					catalogRejectionReasons={listData.catalogRejectionReasons}
+					catalogRejectionComment={listData.catalogRejectionComment}
+					catalogDeleteAt={listData.catalogDeleteAt}
 				/>
 			)}
 
@@ -624,7 +645,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 							Отмена
 						</Button>
 						<Button theme="blue" className={element('btn')} typeBtn="submit">
-							{isLoading ? 'Сохранение...' : 'Сохранить изменения'}
+							{isLoading ? 'Сохранение...' : isBeingResubmitted ? 'Отправить снова на проверку' : 'Сохранить изменения'}
 						</Button>
 					</div>
 				</div>

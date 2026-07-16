@@ -1,5 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
@@ -13,6 +14,7 @@ import {postLikeComment} from '@/utils/api/post/postLikeComment';
 
 import './content-list-goals.scss';
 
+import {CatalogModerationBanner} from '../CatalogModerationBanner/CatalogModerationBanner';
 import {CommentImagesGallery} from '../CommentImagesGallery/CommentImagesGallery';
 import {CommentsGoal} from '../CommentsGoal/CommentsGoal';
 import {CommentsGoalSkeleton} from '../CommentsGoal/CommentsGoalSkeleton';
@@ -39,6 +41,7 @@ export const ContentListGoals: FC<ContentListGoalsProps> = observer((props) => {
 
 	const {isScreenTablet, isScreenDesktop, isScreenSmallTablet} = useScreenSize();
 	const [block, element] = useBem('content-list-goals', className);
+	const navigate = useNavigate();
 	const {setIsOpen, setWindow, setModalProps, setFuncModal} = ModalStore;
 	const {
 		comments,
@@ -154,6 +157,21 @@ export const ContentListGoals: FC<ContentListGoalsProps> = observer((props) => {
 
 	return (
 		<article className={block()}>
+			{list.createdByUser && list.catalogReviewStatus && list.catalogReviewStatus !== 'approved' && (
+				<div className={element('moderation-banner')}>
+					<CatalogModerationBanner
+						catalogReviewStatus={list.catalogReviewStatus}
+						catalogPermanentlyRejected={list.catalogPermanentlyRejected}
+						catalogRejectionCount={list.catalogRejectionCount}
+						catalogRejectionLimit={list.catalogRejectionLimit}
+						catalogRejectionReasons={list.catalogRejectionReasons}
+						catalogRejectionComment={list.catalogRejectionComment}
+						catalogDeleteAt={list.catalogDeleteAt}
+						actionText={list.isCanEdit ? 'Редактировать' : undefined}
+						onAction={list.isCanEdit ? () => navigate(`/edit-list/${list.code}`) : undefined}
+					/>
+				</div>
+			)}
 			{(isScreenDesktop || (isScreenTablet && !isScreenSmallTablet)) && (
 				<TitleWithTags
 					title={list.title}
