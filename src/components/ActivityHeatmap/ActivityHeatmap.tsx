@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import React, {FC, useEffect, useMemo, useState} from 'react';
+import React, {FC, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 
 import Select from '@/components/Select/Select';
 import {Svg} from '@/components/Svg/Svg';
@@ -33,7 +33,7 @@ interface ICompletedItem {
 interface IActivityItem {
 	id: number;
 	title: string;
-	type: 'goal_completion' | 'list_completion' | 'goal_progress' | 'daily_goal' | 'regular_goal';
+	type: 'goal_completion' | 'list_completion' | 'goal_progress' | 'regular_goal' | 'extra';
 	completedAt?: string;
 	createdAt?: string;
 	percentageChange?: number;
@@ -41,6 +41,7 @@ interface IActivityItem {
 	workDone?: boolean;
 	currentStreak?: number;
 	maxStreak?: number;
+	actionType?: string;
 }
 
 interface IActivityDay {
@@ -50,8 +51,9 @@ interface IActivityDay {
 	progressCount: number;
 	dailyCount: number;
 	regularCount: number;
+	extraCount: number;
 	totalCount: number;
-	activityType: 'none' | 'goal' | 'list' | 'progress' | 'daily' | 'regular' | 'mixed';
+	activityType: 'none' | 'goal' | 'progress' | 'regular' | 'extra' | 'mixed';
 	activityTypes: string[];
 	level: number;
 	weekday: number;
@@ -74,6 +76,7 @@ interface IActivityStats {
 	totalProgressUpdates: number;
 	totalDailyCompleted: number;
 	totalRegularCompleted: number;
+	totalExtraActivity: number;
 	totalCompleted: number;
 	activeDays: number;
 	totalDays: number;
@@ -120,6 +123,15 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 
 	const [fetchStatus, setFetchStatus] = useState<FetchStatus>('loading');
 	const [selectedDay, setSelectedDay] = useState<IActivityDay | null>(null);
+	const scrollableRef = useRef<HTMLDivElement>(null);
+
+	// После загрузки данных прокручиваем карту вправо — к текущим датам
+	useLayoutEffect(() => {
+		const wrapper = scrollableRef.current;
+		if (fetchStatus === 'success' && wrapper) {
+			wrapper.scrollLeft = wrapper.scrollWidth;
+		}
+	}, [fetchStatus, activityData]);
 
 	// Получение данных активности
 	useEffect(() => {
@@ -231,18 +243,20 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 		if (day.progressCount > 0) {
 			activities.push(pluralize(day.progressCount, ['прогресс обновлен', 'прогресса обновлено', 'прогрессов обновлено']));
 		}
-		if (day.dailyCount > 0) {
-			activities.push(pluralize(day.dailyCount, ['ежедневная цель', 'ежедневные цели', 'ежедневных целей']));
-		}
 		if (day.regularCount > 0) {
 			activities.push(pluralize(day.regularCount, ['регулярная цель', 'регулярные цели', 'регулярных целей']));
+		}
+		if (day.extraCount > 0) {
+			activities.push(
+				pluralize(day.extraCount, ['дополнительная активность', 'дополнительные активности', 'дополнительных активностей'])
+			);
 		}
 		return activities.join(', ');
 	};
 
-	// Функция для обработки клика по ячейке
+	// Функция для обработки клика по ячейке: повторный клик сворачивает детали
 	const handleDayClick = (day: IActivityDay) => {
-		setSelectedDay(day);
+		setSelectedDay((prev) => (prev?.date === day.date ? null : day));
 	};
 
 	// Функция для форматирования даты
@@ -465,25 +479,22 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 					</div>
 				)}
 
-				{activitiesByType['daily_goal'] && (
+				{activitiesByType['extra'] && (
 					<div className={element('activity-section')}>
 						<div className={element('activity-header')}>
-							<Svg icon="calendar" width="16px" height="16px" className={element('activity-icon')} />
+							<Svg icon="plus" width="16px" height="16px" className={element('activity-icon', {primary: true})} />
 							<span>
-								{pluralize(activitiesByType['daily_goal'].length, [
-									'ежедневная цель',
-									'ежедневные цели',
-									'ежедневных целей',
+								{pluralize(activitiesByType['extra'].length, [
+									'дополнительная активность',
+									'дополнительные активности',
+									'дополнительных активностей',
 								])}
 							</span>
 						</div>
 						<ul className={element('activity-list')}>
-							{activitiesByType['daily_goal'].map((activity) => (
-								<li key={`daily-${activity.id}`} className={element('activity-item')}>
-									<div className={element('daily-info')}>
-										<span className={element('daily-title')}>{activity.title}</span>
-									</div>
-									{activity.notes && <div className={element('daily-notes')}>{activity.notes}</div>}
+							{activitiesByType['extra'].map((activity) => (
+								<li key={`extra-${activity.id}`} className={element('activity-item')}>
+									{activity.title}
 								</li>
 							))}
 						</ul>
@@ -577,21 +588,21 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 							</span>
 						</div>
 						<div className={element('stat-item')}>
-							<span className={element('stat-value')}>{activityData.stats.totalDailyCompleted}</span>
-							<span className={element('stat-label')}>
-								{pluralize(
-									activityData.stats.totalDailyCompleted,
-									['ежедневная цель', 'ежедневных цели', 'ежедневных целей'],
-									false
-								)}
-							</span>
-						</div>
-						<div className={element('stat-item')}>
 							<span className={element('stat-value')}>{activityData.stats.totalRegularCompleted}</span>
 							<span className={element('stat-label')}>
 								{pluralize(
 									activityData.stats.totalRegularCompleted,
 									['регулярная цель', 'регулярных цели', 'регулярных целей'],
+									false
+								)}
+							</span>
+						</div>
+						<div className={element('stat-item')}>
+							<span className={element('stat-value')}>{activityData.stats.totalExtraActivity ?? 0}</span>
+							<span className={element('stat-label')}>
+								{pluralize(
+									activityData.stats.totalExtraActivity ?? 0,
+									['доп. активность', 'доп. активности', 'доп. активностей'],
 									false
 								)}
 							</span>
@@ -622,7 +633,7 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 					</div>
 
 					<div className={element('container')}>
-						<div className={element('scrollable-wrapper')}>
+						<div className={element('scrollable-wrapper')} ref={scrollableRef}>
 							<div className={element('months')}>
 								{monthPositions.map(
 									(mp) =>
@@ -680,19 +691,19 @@ const ActivityHeatmapComponent: FC<ActivityHeatmapProps> = ({className, period =
 								<div className={element('legend-types')}>
 									<div className={element('legend-type')}>
 										<div className={element('legend-cell', {type: 'goal'})} />
-										<span className={element('legend-type-label')}>Цели</span>
+										<span className={element('legend-type-label')}>Цели и списки</span>
 									</div>
 									<div className={element('legend-type')}>
 										<div className={element('legend-cell', {type: 'progress'})} />
 										<span className={element('legend-type-label')}>Прогресс</span>
 									</div>
 									<div className={element('legend-type')}>
-										<div className={element('legend-cell', {type: 'daily'})} />
-										<span className={element('legend-type-label')}>Ежедневные</span>
-									</div>
-									<div className={element('legend-type')}>
 										<div className={element('legend-cell', {type: 'regular'})} />
 										<span className={element('legend-type-label')}>Регулярные</span>
+									</div>
+									<div className={element('legend-type')}>
+										<div className={element('legend-cell', {type: 'extra'})} />
+										<span className={element('legend-type-label')}>Дополнительно</span>
 									</div>
 									<div className={element('legend-type')}>
 										<div className={element('legend-cell', {type: 'mixed'})} />

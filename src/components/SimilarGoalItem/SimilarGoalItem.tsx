@@ -3,8 +3,10 @@ import {FC, KeyboardEvent} from 'react';
 import {Svg} from '@/components/Svg/Svg';
 import {useBem} from '@/hooks/useBem';
 import {IGoal} from '@/typings/goal';
+import {getComplexity} from '@/utils/values/complexity';
 
 import './similar-goal-item.scss';
+import {Tag} from '../Tag/Tag';
 import {Title} from '../Title/Title';
 
 interface SimilarGoalItemProps {
@@ -23,26 +25,21 @@ export const SimilarGoalItem: FC<SimilarGoalItemProps> = ({goal, onSelect}) => {
 
 	return (
 		<div className={block()} onClick={() => onSelect(goal)} onKeyDown={handleKeyDown} role="button" tabIndex={0}>
-			<div className={element('content')}>
-				<div className={element('image-container')}>
-					{goal.image ? (
-						<img src={goal.image} alt={goal.title} className={element('image')} />
-					) : (
-						<div className={element('no-image')}>
-							<Svg icon="mount" />
-						</div>
-					)}
-				</div>
-				<div className={element('info')}>
-					<Title tag="h4" className={element('title')}>
-						{goal.title}
-					</Title>
-					<p className={element('complexity')}>{goal.complexity}</p>
-					<p className={element('description')}>{goal.shortDescription}</p>
-				</div>
+			<div className={element('image-container')}>
+				{goal.image ? (
+					<img src={goal.image} alt={goal.title} className={element('image')} />
+				) : (
+					<div className={element('no-image')}>
+						<Svg icon="mount" />
+					</div>
+				)}
 			</div>
-			<div className={element('select-icon')}>
-				<Svg icon="arrow--right" />
+			<div className={element('info')}>
+				<Title tag="h4" className={element('title')}>
+					{goal.title}
+				</Title>
+				<Tag className={element('complexity')} text={getComplexity[goal.complexity]} icon={goal.complexity} theme="light" />
+				<p className={element('description')}>{goal.shortDescription}</p>
 			</div>
 		</div>
 	);

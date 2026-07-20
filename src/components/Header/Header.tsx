@@ -401,7 +401,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				to="/user/self/pending-review"
 				end
 			>
-				Публикации в каталог
+				Модерация
 			</NavLink>
 			{!isPremium && (
 				<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/user/self/subs" end>

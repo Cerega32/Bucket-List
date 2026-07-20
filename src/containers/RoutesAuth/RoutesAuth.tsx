@@ -194,6 +194,10 @@ export const RoutesAuth: FC = observer(() => {
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfPending" subPage="lists" />} />}
 				/>
 				<Route
+					path="/user/self/pending-review/merges"
+					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfPending" subPage="merges" />} />}
+				/>
+				<Route
 					path="/user/self/done-goals/lists"
 					element={<ProtectedRoute element={<PageUserSelf page="isUserSelfDone" subPage="lists" />} />}
 				/>

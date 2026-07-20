@@ -123,6 +123,12 @@
 		background: var(--color-secondary);
 		color: var(--color-text-primary);
 
+		// Кнопка может рендериться как <a> (type="Link") — не даём браузеру
+		// красить текст посещённой ссылки в фиолетовый
+		&:visited {
+			color: var(--color-text-primary);
+		}
+
 		&:hover,
 		&:active {
 			background: var(--color-secondary-hover);
@@ -137,8 +143,10 @@
 			fill: var(--color-text-primary);
 		}
 
+		// Тёмная волна (40% цвета текста) на светлом фоне выглядела как
+		// фиолетовое окрашивание текста при клике — используем лёгкий тон primary
 		#{$block}__ripple {
-			background-color: rgba(var(--color-text-primary-rgb) / 40%);
+			background-color: rgba(var(--color-primary-rgb) / 15%);
 		}
 	}
 

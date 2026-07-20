@@ -14,6 +14,8 @@ export type NotificationType =
 	| 'daily_goal_streak_broken'
 	| 'goal_merged'
 	| 'merge_request'
+	| 'merge_request_approved'
+	| 'merge_request_rejected'
 	| 'daily_challenge'
 	| 'weekly_challenge'
 	| 'weekly_leaderboard'
@@ -43,7 +45,7 @@ export interface IHeaderNotification {
 		avatar?: string;
 	};
 	relatedObjectId?: number;
-	relatedObjectType?: 'goal' | 'achievement' | 'user' | 'list' | 'friendship' | 'subscription' | 'comment';
+	relatedObjectType?: 'goal' | 'achievement' | 'user' | 'list' | 'friendship' | 'subscription' | 'comment' | 'merge_request';
 	relatedObjectImage?: string;
 	relatedObjectCode?: string;
 }

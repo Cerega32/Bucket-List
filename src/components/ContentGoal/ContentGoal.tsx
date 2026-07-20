@@ -219,6 +219,8 @@ export const ContentGoal: FC<ContentGoalProps> = observer((props) => {
 						catalogRejectionReasons={goal.catalogRejectionReasons}
 						catalogRejectionComment={goal.catalogRejectionComment}
 						catalogDeleteAt={goal.catalogDeleteAt}
+						catalogDuplicateGoalCode={goal.catalogDuplicateGoalCode}
+						catalogDuplicateGoalTitle={goal.catalogDuplicateGoalTitle}
 						actionText={goal.isCanEdit && onEditClick ? 'Редактировать' : undefined}
 						onAction={goal.isCanEdit ? onEditClick : undefined}
 					/>

@@ -492,24 +492,51 @@ export const reorderFolderGoals = (folderId: number, goalIds: number[]) =>
 
 export interface IGoalMergeRequest {
 	id: number;
-	requester: number;
-	requester_username: string;
-	source_goal: number;
-	source_goal_title: string;
-	target_goal: number;
-	target_goal_title: string;
+	sourceGoal: number | null;
+	sourceGoalTitle: string;
+	sourceGoalCode: string;
+	sourceGoalImage: string | null;
+	sourceGoalDescription: string;
+	targetGoal: number | null;
+	targetGoalTitle: string;
+	targetGoalCode: string;
+	targetGoalImage: string | null;
+	targetGoalDescription: string;
+	requestedBy: number;
+	requestedByUsername: string;
+	status: 'pending' | 'approved' | 'rejected' | 'auto_merged';
 	reason: string;
-	status: 'pending' | 'approved' | 'rejected';
-	admin_comment: string;
-	created_at: string;
-	updated_at: string;
+	rejectionReasons: string[];
+	rejectionReasonMessages: string[];
+	adminNotes: string;
+	regularityMismatch: boolean;
+	mergedGoal: number | null;
+	mergedGoalCode: string;
+	mergedGoalTitle: string;
+	mergedGoalImage: string | null;
+	mergedGoalDescription: string;
+	resolvedTitle: string;
+	createdAt: string;
+	processedAt: string | null;
 }
 
-// Merge Requests API functions
-export const getMergeRequests = () => GET('goals/merge-requests', {auth: true});
+// Список запросов на объединение текущего пользователя
+export const getMergeRequests = async (params?: {
+	status?: 'pending' | 'approved' | 'rejected';
+}): Promise<{
+	success: boolean;
+	data?: {results: IGoalMergeRequest[]} | IGoalMergeRequest[];
+	error?: string;
+}> => {
+	return GET('goals/merge-requests', {
+		auth: true,
+		...(params?.status ? {get: {status: params.status}} : {}),
+	});
+};
 
-export const createMergeRequest = (data: {source_goal: number; target_goal: number; reason: string}) =>
-	POST('goals/merge-requests', {
+// Создать запрос на объединение целей (source — цель со страницы, target — выбранный дубль)
+export const createMergeRequest = (data: {source_goal_code: string; target_goal_code: string; reason?: string}) =>
+	POST('goals/merge-requests/create', {
 		body: data,
 		auth: true,
 		success: {

@@ -640,6 +640,8 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								catalogRejectionReasons={goal.catalogRejectionReasons}
 								catalogRejectionComment={goal.catalogRejectionComment}
 								catalogDeleteAt={goal.catalogDeleteAt}
+								catalogDuplicateGoalCode={goal.catalogDuplicateGoalCode}
+								catalogDuplicateGoalTitle={goal.catalogDuplicateGoalTitle}
 							/>
 						)}
 						<div

@@ -39,6 +39,7 @@ import {pluralize} from '@/utils/text/pluralize';
 
 import {Button} from '../Button/Button';
 import '../CommentImagesGallery/comment-images-gallery.scss';
+import {GoalMergeRequestModal} from '../GoalMergeRequestModal/GoalMergeRequestModal';
 import {GoalTimer} from '../GoalTimer/GoalTimer';
 import {GRADIENT_DEFAULT_IMAGE} from '../Gradient/Gradient';
 import {Line} from '../Line/Line';
@@ -183,6 +184,7 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 	const [isUncompleteWithProgressModalOpen, setIsUncompleteWithProgressModalOpen] = useState(false);
 	const [isGoalImageLightboxOpen, setIsGoalImageLightboxOpen] = useState(false);
 	const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+	const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
 	const [isMapLoading, setIsMapLoading] = useState(false);
 
 	const [block, element] = useBem('aside-goal', className);
@@ -2551,6 +2553,17 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 						>
 							Поделиться
 						</Button>
+						{isAuth && (
+							<Button
+								theme="blue-light"
+								icon="dice-five"
+								onClick={() => setIsMergeModalOpen(true)}
+								className={element('btn')}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								Нашли дубль цели?
+							</Button>
+						)}
 					</>
 				)}
 
@@ -2757,10 +2770,31 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 						>
 							Поделиться
 						</Button>
+						{isAuth && (
+							<Button
+								theme="blue-light"
+								icon="dice-five"
+								onClick={() => setIsMergeModalOpen(true)}
+								className={element('btn')}
+								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
+							>
+								Нашли дубль цели?
+							</Button>
+						)}
 					</>
 				)}
 			</div>
 			<ShareGoalModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} />
+			{!isList && (
+				<GoalMergeRequestModal
+					isOpen={isMergeModalOpen}
+					onClose={() => setIsMergeModalOpen(false)}
+					sourceGoalCode={code}
+					sourceGoalTitle={title}
+					sourceGoalImage={image}
+					sourceGoalIsRegular={!!regularConfig}
+				/>
+			)}
 			{/* Модалка подтверждения завершения серии */}
 			{regularConfig && isAdded && (
 				<ModalConfirm

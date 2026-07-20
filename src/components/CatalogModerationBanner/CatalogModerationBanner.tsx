@@ -1,4 +1,5 @@
 import {FC} from 'react';
+import {Link} from 'react-router-dom';
 
 import {Banner} from '@/components/Banner/Banner';
 import {ICatalogRejectionInfo} from '@/typings/goal';
@@ -14,6 +15,8 @@ interface CatalogModerationBannerProps
 		| 'catalogRejectionReasons'
 		| 'catalogRejectionComment'
 		| 'catalogDeleteAt'
+		| 'catalogDuplicateGoalCode'
+		| 'catalogDuplicateGoalTitle'
 	> {
 	className?: string;
 	actionText?: string;
@@ -31,9 +34,22 @@ export const CatalogModerationBanner: FC<CatalogModerationBannerProps> = (props)
 		catalogRejectionReasons,
 		catalogRejectionComment,
 		catalogDeleteAt,
+		catalogDuplicateGoalCode,
+		catalogDuplicateGoalTitle,
 		actionText,
 		onAction,
 	} = props;
+
+	const hasLinkedDuplicate = Boolean(catalogDuplicateGoalCode && catalogDuplicateGoalTitle);
+	const hints = getCatalogRejectionHints(
+		hasLinkedDuplicate ? catalogRejectionReasons?.filter((reason) => reason !== 'duplicate') : catalogRejectionReasons
+	);
+
+	const duplicateBlock = hasLinkedDuplicate ? (
+		<p>
+			Похожая запись уже есть в каталоге. Вот она: <Link to={`/goals/${catalogDuplicateGoalCode}`}>{catalogDuplicateGoalTitle}</Link>.
+		</p>
+	) : null;
 
 	if (status === 'pending') {
 		return (
@@ -53,8 +69,17 @@ export const CatalogModerationBanner: FC<CatalogModerationBannerProps> = (props)
 				className={className}
 				title="Отклонено окончательно"
 				message={
-					`Лимит попыток (${catalogRejectionLimit}) исчерпан. ${getCatalogDeleteHint(catalogDeleteAt)} ` +
-					'Создайте новую версию с другой формулировкой.'
+					<>
+						<p>
+							{`Лимит попыток (${catalogRejectionLimit}) исчерпан. ${getCatalogDeleteHint(catalogDeleteAt)} ` +
+								'Создайте новую версию с другой формулировкой.'}
+						</p>
+						{duplicateBlock}
+						{hints.map((hint) => (
+							<p key={hint}>{hint}</p>
+						))}
+						{catalogRejectionComment && <p>Комментарий модератора: {catalogRejectionComment}</p>}
+					</>
 				}
 			/>
 		);
@@ -62,7 +87,6 @@ export const CatalogModerationBanner: FC<CatalogModerationBannerProps> = (props)
 
 	if (status === 'rejected') {
 		const attempt = Math.max(1, catalogRejectionCount ?? 1);
-		const hints = getCatalogRejectionHints(catalogRejectionReasons);
 		return (
 			<Banner
 				type="warning"
@@ -70,6 +94,7 @@ export const CatalogModerationBanner: FC<CatalogModerationBannerProps> = (props)
 				title={`Попытка ${attempt} из ${catalogRejectionLimit} отклонена`}
 				message={
 					<>
+						{duplicateBlock}
 						{hints.map((hint) => (
 							<p key={hint}>{hint}</p>
 						))}

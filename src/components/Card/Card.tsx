@@ -79,7 +79,7 @@ const getCatalogModerationTag = (
 		return {
 			text: 'На проверке',
 			theme: 'gray',
-			title: 'Ожидает публикации в каталоге',
+			title: 'Ожидает модерации',
 		};
 	}
 	if (status === 'rejected' && catalogPermanentlyRejected) {
