@@ -36,7 +36,7 @@ import {FilterGroup, FiltersDrawer} from '../FiltersDrawer/FiltersDrawer';
 import {Line} from '../Line/Line';
 import {Pagination} from '../Pagination/Pagination';
 import Select, {OptionSelect} from '../Select/Select';
-import {Switch} from '../Switch/Switch';
+import {ISwitch, Switch} from '../Switch/Switch';
 
 import './catalog-items.scss';
 
@@ -48,9 +48,8 @@ interface CatalogItemsProps {
 	initialSearch?: string;
 	searchWrapperWrap?: boolean;
 	onSearchChange?: (query: string) => void;
-	/** Личный кабинет: раздел «На рассмотрении» (неодобренные для каталога) */
 	pendingCatalogReview?: boolean;
-	/** Если передан — родитель берёт на себя показ лоадера начальной загрузки. */
+	extraSwitchButtons?: Array<ISwitch>;
 	onInitialLoadingChange?: (loading: boolean) => void;
 }
 
@@ -70,7 +69,7 @@ interface CatalogItemsUsersProps extends CatalogItemsProps {
 	categories?: Array<ICategoryDetailed>;
 }
 
-/** Варианты сортировки зависят от контекста: каталог / активные / выполненные / публикации в каталог */
+/** Варианты сортировки зависят от контекста: каталог / активные / выполненные / модерация */
 function getSortOptions(isUser: boolean, isCompleted: boolean, page?: string, isPendingCatalogReview?: boolean): Array<OptionSelect> {
 	if (isPendingCatalogReview) {
 		if (page === 'lists') {
@@ -235,6 +234,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		searchWrapperWrap = false,
 		onSearchChange,
 		pendingCatalogReview = false,
+		extraSwitchButtons,
 		onInitialLoadingChange,
 	} = props;
 
@@ -317,8 +317,9 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 				page: 'lists',
 				count: lists.pagination.totalItems,
 			},
+			...(extraSwitchButtons ?? []),
 		];
-	}, [goals, lists, category, beginUrl]);
+	}, [goals, lists, category, beginUrl, extraSwitchButtons]);
 
 	// Преобразуем категории в формат для FiltersDrawer (с подкатегориями)
 	const categoryFilters = useMemo(() => {

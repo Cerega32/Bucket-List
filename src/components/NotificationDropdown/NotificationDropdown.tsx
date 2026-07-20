@@ -64,8 +64,40 @@ const getNotificationIcon = (type: string) => {
 			return 'exclamation-triangle';
 		case 'comment_restored':
 			return 'done';
+		case 'goal_merged':
+			return 'refresh';
+		case 'merge_request_approved':
+			return 'done';
+		case 'merge_request_rejected':
+			return 'cross';
 		default:
 			return 'bell';
+	}
+};
+
+/** Цвет иконки: галочка — зелёная, крестик — красный */
+const getNotificationIconTheme = (type: string): 'green' | 'red' | 'blue' | undefined => {
+	switch (type) {
+		case 'merge_request_approved':
+		case 'goal_approved':
+		case 'list_approved':
+		case 'friend_accepted':
+		case 'comment_restored':
+		case 'goal_completed':
+		case 'list_completed':
+			return 'green';
+		case 'merge_request_rejected':
+		case 'goal_rejected':
+		case 'list_rejected':
+		case 'friend_rejected':
+		case 'comment_complaint':
+		case 'comment_complaint_staff':
+		case 'comment_removed':
+			return 'red';
+		case 'weekly_leaderboard':
+			return 'blue';
+		default:
+			return undefined;
 	}
 };
 
@@ -105,6 +137,10 @@ const getNotificationLink = (notification: IHeaderNotification): string | null =
 
 	if (type === 'goal_approved' || type === 'goal_rejected' || type === 'list_approved' || type === 'list_rejected') {
 		return '/user/self/pending-review';
+	}
+
+	if (type === 'merge_request_rejected') {
+		return '/user/self/pending-review/merges';
 	}
 
 	if (type === 'comment_complaint' || type === 'comment_complaint_staff' || type === 'comment_restored' || type === 'comment_removed') {
@@ -266,6 +302,17 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 							const showObjectImage = hasObjectImage(notification);
 							const isFriendRequest = notification.type === 'friend_request' && !notification.isRead;
 							const showModerationIcon = isCommentModerationNotification(notification.type);
+							const iconTheme = getNotificationIconTheme(notification.type);
+							// Для approve/reject и модерации всегда иконка (не аватар отправителя)
+							const showStatusIcon =
+								showModerationIcon ||
+								notification.type === 'merge_request_approved' ||
+								notification.type === 'merge_request_rejected' ||
+								notification.type === 'goal_approved' ||
+								notification.type === 'goal_rejected' ||
+								notification.type === 'list_approved' ||
+								notification.type === 'list_rejected' ||
+								!userName;
 
 							return (
 								<div key={notification.id}>
@@ -292,25 +339,18 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 												</div>
 											) : showObjectImage ? (
 												<img src={notification.relatedObjectImage} alt="" className={element('item-image')} />
-											) : showModerationIcon ? (
+											) : showStatusIcon ? (
 												<div
 													className={element('item-icon', {
-														red: notification.type !== 'comment_restored',
-														green: notification.type === 'comment_restored',
+														green: iconTheme === 'green',
+														red: iconTheme === 'red',
+														blue: iconTheme === 'blue',
 													})}
 												>
 													<Svg width="24px" height="24px" icon={getNotificationIcon(notification.type)} />
 												</div>
-											) : userName ? (
-												<Avatar avatar={userAvatar} size="medium" noBorder />
 											) : (
-												<div
-													className={element('item-icon', {
-														blue: notification.type === 'weekly_leaderboard',
-													})}
-												>
-													<Svg width="24px" height="24px" icon={getNotificationIcon(notification.type)} />
-												</div>
+												<Avatar avatar={userAvatar} size="medium" noBorder />
 											)}
 										</div>
 										<div className={element('item-content')}>

@@ -33,6 +33,7 @@ export const UserStatistics: FC<UserStatisticsProps> = (props) => {
 				/>
 			</div>
 			<Line height={-16} margin="16px 0" />
+			{/* TODO: удалить, после добавления еженедельных заданий */}
 			<p className={element('text')}>
 				<span>Заработано очков</span>
 				<span>{statistics.currentStats.currentExperience}</span>
@@ -42,11 +43,11 @@ export const UserStatistics: FC<UserStatisticsProps> = (props) => {
 				<span>{statistics.currentStats.nextLevelExperience - statistics.currentStats.currentExperience}</span>
 			</p>
 			<p className={element('text')}>
-				<span>Заработано за впечатления</span>
+				<span>Впечатлений оставлено</span>
 				<span>{statistics.totalStats.reviewsCount}</span>
 			</p>
 			<p className={element('text')}>
-				<span>Выполнение целей</span>
+				<span>Целей выполнено</span>
 				<span>{statistics.totalStats.completedGoals}</span>
 			</p>
 			<p className={element('text')}>

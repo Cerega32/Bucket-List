@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useRef, useState} from 'react';
-import {useParams} from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {Card} from '@/components/Card/Card';
@@ -48,6 +48,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 
 	const {setId, setGoalListId} = GoalStore;
 	const params = useParams();
+	const navigate = useNavigate();
 	const listId = params?.['id'];
 	const [goal, setGoal] = useState<IGoal | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
@@ -73,6 +74,10 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			const res = await getGoal(listId);
 			if (cancelled) return;
 			if (res.success) {
+				// Старый code объединённой (удалённой) цели: бэкенд вернул актуальную цель по алиасу — заменяем URL
+				if (res.data.goal.code !== listId) {
+					navigate(`/goals/${res.data.goal.code}`, {replace: true});
+				}
 				setGoal(normalizeGoalFromApi(res.data.goal));
 				setId(res.data.goal.id);
 				setGoalListId(null);
@@ -81,6 +86,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		return () => {
 			cancelled = true;
 		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [listId, isAuth]);
 
 	// Счётчик записей для вкладки «История прогресса» — из userProgress (не из recentEntries: может не приходить)

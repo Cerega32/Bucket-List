@@ -1,20 +1,22 @@
 import Cookies from 'js-cookie';
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
+import {FC, useEffect, useMemo, useState} from 'react';
 
 import {Banner} from '@/components/Banner/Banner';
 import {CatalogItems} from '@/components/CatalogItems/CatalogItems';
+import {MergeRequestsList} from '@/components/MergeRequestsList/MergeRequestsList';
+import {ISwitch} from '@/components/Switch/Switch';
 import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ICategoryDetailed} from '@/typings/goal';
 import {getCategories} from '@/utils/api/get/getCategories';
+import {getMergeRequests, IGoalMergeRequest} from '@/utils/api/goals';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import './user-self-goals.scss';
 
 interface UserSelfGoalsProps {
 	subPage: string;
 	completed: boolean;
-	/** Раздел «Публикации в каталог» (модерация и история) */
 	pendingCatalogReview?: boolean;
 }
 
@@ -23,6 +25,7 @@ export const UserSelfGoals: FC<UserSelfGoalsProps> = observer((props) => {
 
 	const [block, element] = useBem('user-self-goals');
 	const [categories, setCategories] = useState<Array<ICategoryDetailed>>([]);
+	const [mergeRequests, setMergeRequests] = useState<Array<IGoalMergeRequest>>([]);
 
 	useEffect(() => {
 		(async () => {
@@ -33,12 +36,37 @@ export const UserSelfGoals: FC<UserSelfGoalsProps> = observer((props) => {
 		})();
 	}, []);
 
+	useEffect(() => {
+		if (!pendingCatalogReview) return;
+		(async () => {
+			const res = await getMergeRequests();
+			if (res.success && res.data) {
+				setMergeRequests(Array.isArray(res.data) ? res.data : res.data.results ?? []);
+			}
+		})();
+	}, [pendingCatalogReview]);
+
+	// Вкладка «Объединения» показывается только если есть запросы (обработанные хранятся 30 дней)
+	const mergeSwitchButtons = useMemo((): Array<ISwitch> => {
+		if (!pendingCatalogReview || mergeRequests.length === 0) return [];
+		return [
+			{
+				url: '/user/self/pending-review/merges',
+				name: 'Объединения',
+				page: 'merges',
+				count: mergeRequests.length,
+			},
+		];
+	}, [pendingCatalogReview, mergeRequests.length]);
+
+	const isMergesPage = pendingCatalogReview && subPage === 'merges';
+
 	return (
 		<div className={block()}>
 			<Title tag="h2" className={element('title')}>
-				{pendingCatalogReview ? 'Публикации в каталог' : completed ? 'Выполненные цели и списки' : 'Все активные цели и списки'}
+				{pendingCatalogReview ? 'Модерация' : completed ? 'Выполненные цели и списки' : 'Все активные цели и списки'}
 			</Title>
-			{pendingCatalogReview && (
+			{pendingCatalogReview && !isMergesPage && (
 				<Banner
 					type="info"
 					className={element('moderation-info')}
@@ -63,16 +91,49 @@ export const UserSelfGoals: FC<UserSelfGoalsProps> = observer((props) => {
 					}
 				/>
 			)}
-			<CatalogItems
-				userId={Cookies.get('user-id') as string}
-				beginUrl={pendingCatalogReview ? '/user/self/pending-review' : `/user/self/${completed ? 'done' : 'active'}-goals`}
-				completed={completed}
-				subPage={subPage}
-				columns="3"
-				categories={categories}
-				searchWrapperWrap
-				pendingCatalogReview={pendingCatalogReview}
-			/>
+			{isMergesPage && (
+				<Banner
+					type="info"
+					className={element('moderation-info')}
+					title="Запросы на объединение дублей"
+					message={
+						<ul>
+							<li>
+								<strong>На рассмотрении</strong> — модераторы ещё не обработали запрос.
+							</li>
+							<li>
+								<strong>Одобрено</strong> — цели объединены, прогресс всех участников сохранён, вам начислен опыт.
+							</li>
+							<li>
+								<strong>Отклонено</strong> — модератор посчитал цели разными, см. комментарий.
+							</li>
+							<li>Обработанные запросы автоматически удаляются из списка через 30 дней.</li>
+						</ul>
+					}
+				/>
+			)}
+			{isMergesPage ? (
+				<MergeRequestsList
+					requests={mergeRequests}
+					switchButtons={[
+						{url: '/user/self/pending-review', name: 'Цели', page: 'goals'},
+						{url: '/user/self/pending-review/lists', name: 'Списки', page: 'lists'},
+						...mergeSwitchButtons,
+					]}
+				/>
+			) : (
+				<CatalogItems
+					userId={Cookies.get('user-id') as string}
+					beginUrl={pendingCatalogReview ? '/user/self/pending-review' : `/user/self/${completed ? 'done' : 'active'}-goals`}
+					completed={completed}
+					subPage={subPage}
+					columns="3"
+					categories={categories}
+					searchWrapperWrap
+					pendingCatalogReview={pendingCatalogReview}
+					extraSwitchButtons={mergeSwitchButtons}
+				/>
+			)}
 		</div>
 	);
 });
