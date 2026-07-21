@@ -27,6 +27,7 @@ import {removeListGoal} from '@/utils/api/post/removeListGoal';
 import {defaultPagination} from '@/utils/data/default';
 import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
 import {blockRegularGoalsAddIfLimitReached} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {getPageParam} from '@/utils/urlListState';
 
 import {CatalogItemsSkeleton} from './CatalogItemsSkeleton';
 import {Card} from '../Card/Card';
@@ -193,6 +194,9 @@ function syncCatalogParamsToUrl(
 ): URLSearchParams {
 	const next = new URLSearchParams(prev);
 
+	// Смена фильтра/сортировки всегда возвращает к первой странице
+	next.delete('page');
+
 	if (sortValue && sortValue !== defaultSortValue) {
 		next.set('sort', sortValue);
 	} else {
@@ -285,6 +289,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 	const [isRegularLoading, setIsRegularLoading] = useState(false);
 	const navigate = useNavigate();
 	const skipUrlFetchRef = useRef(true);
+	const skipPageUrlEffectRef = useRef(false);
 
 	const blockRegularGoalAdd = () =>
 		blockRegularGoalsAddIfLimitReached({
@@ -303,6 +308,26 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			setSearchParams((prev) => syncCatalogParamsToUrl(prev, sortValue, filters, sortOptions[0].value), {replace: true});
 		},
 		[setSearchParams, sortOptions]
+	);
+
+	// Обновляем номер страницы в URL без повторного запроса данных (он уже выполнен в goToPage)
+	const updateCatalogPage = useCallback(
+		(page: number) => {
+			skipPageUrlEffectRef.current = true;
+			setSearchParams(
+				(prev) => {
+					const next = new URLSearchParams(prev);
+					if (page > 1) {
+						next.set('page', String(page));
+					} else {
+						next.delete('page');
+					}
+					return next;
+				},
+				{replace: true}
+			);
+		},
+		[setSearchParams]
 	);
 
 	// Активен ли сейчас режим поиска
@@ -519,7 +544,8 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 				subPage === 'goals'
 					? sortOptions[activeSort].value
 					: getSortOptions(!!userId, !!completed, 'goals', pendingCatalogReview, isAuth)[0].value;
-			await fetchData(goalsSort, undefined, filterValues, tempGet, {dataType: 'goals', silent: true});
+			const initialPage = subPage === 'goals' ? getPageParam(searchParams) : undefined;
+			await fetchData(goalsSort, initialPage, filterValues, tempGet, {dataType: 'goals', silent: true});
 			setGoalsLoaded(true);
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -534,7 +560,8 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 				subPage === 'lists'
 					? sortOptions[activeSort].value
 					: getSortOptions(!!userId, !!completed, 'lists', pendingCatalogReview, isAuth)[0].value;
-			await fetchData(listsSort, undefined, filterValues, tempGet, {dataType: 'lists', silent: true});
+			const initialPage = subPage === 'lists' ? getPageParam(searchParams) : undefined;
+			await fetchData(listsSort, initialPage, filterValues, tempGet, {dataType: 'lists', silent: true});
 			setListsLoaded(true);
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -545,8 +572,12 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			skipUrlFetchRef.current = false;
 			return;
 		}
+		if (skipPageUrlEffectRef.current) {
+			skipPageUrlEffectRef.current = false;
+			return;
+		}
 		const dataType = subPage === 'goals' ? 'goals' : 'lists';
-		fetchData(sortOptions[activeSort].value, undefined, filterValues, userListQueryBase, {dataType});
+		fetchData(sortOptions[activeSort].value, getPageParam(searchParams), filterValues, userListQueryBase, {dataType});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [searchParamsKey]);
 
@@ -576,12 +607,18 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 
 	const goToPage = async (active: number): Promise<boolean> => {
 		const success = await fetchData(sortOptions[activeSort].value, active, filterValues);
-		scroller.scrollTo('catalog-items-goals', {
-			duration: 800,
-			delay: 0,
-			smooth: 'easeInOutQuart',
-			offset: -150,
-		});
+		if (success) {
+			updateCatalogPage(active);
+		}
+		const scrollTarget = subPage === 'lists' ? 'catalog-items-lists' : 'catalog-items-goals';
+		if (document.getElementById(scrollTarget)) {
+			scroller.scrollTo(scrollTarget, {
+				duration: 800,
+				delay: 0,
+				smooth: 'easeInOutQuart',
+				offset: -150,
+			});
+		}
 		return success;
 	};
 

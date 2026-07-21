@@ -4,7 +4,11 @@ import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 
 import {AsideGoal} from '@/components/AsideGoal/AsideGoal';
 import {ContentListGoals} from '@/components/ContentListGoals/ContentListGoals';
-import {buildListGoalsApiQuery, parseListGoalsFilterValues} from '@/components/ListGoalsFilters/listGoalsFiltersUtils';
+import {
+	buildListGoalsApiQuery,
+	getListGoalsSearchParam,
+	parseListGoalsFilterValues,
+} from '@/components/ListGoalsFilters/listGoalsFiltersUtils';
 import {Loader} from '@/components/Loader/Loader';
 import {ScrollToTop} from '@/components/ScrollToTop/ScrollToTop';
 import {SEO} from '@/components/SEO/SEO';
@@ -45,9 +49,10 @@ const ListGoalsContainerComponent: FC<ListGoalsContainerProps> = (props) => {
 	const navigate = useNavigate();
 	const loadMoreRef = useRef<HTMLDivElement>(null);
 	const loaderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const [searchParams] = useSearchParams();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const searchParamsKey = searchParams.toString();
 	const skipUrlFetchRef = useRef(true);
+	const skipSearchUrlEffectRef = useRef(false);
 	const lastRequestedPageRef = useRef(0);
 
 	const {imageUrl: ogImageUrl} = useOGImage({
@@ -90,14 +95,15 @@ const ListGoalsContainerComponent: FC<ListGoalsContainerProps> = (props) => {
 		let cancelled = false;
 		skipUrlFetchRef.current = true;
 		setList(null);
-		setSearch('');
+		const initialSearch = getListGoalsSearchParam(searchParams);
+		setSearch(initialSearch);
 
 		(async () => {
 			if (!listId) return;
 			const res = await getListGoalsPage(listId, {
 				page: 1,
 				pageSize: 30,
-				...buildListGoalsApiQuery(searchParams, ''),
+				...buildListGoalsApiQuery(searchParams, initialSearch),
 			});
 			if (cancelled) return;
 			if (res.success) {
@@ -119,10 +125,36 @@ const ListGoalsContainerComponent: FC<ListGoalsContainerProps> = (props) => {
 			skipUrlFetchRef.current = false;
 			return;
 		}
+		if (skipSearchUrlEffectRef.current) {
+			skipSearchUrlEffectRef.current = false;
+			return;
+		}
 		if (!listId || !list || list.code !== listId) return;
 		fetchList();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [searchParamsKey]);
+
+	// Пишем поиск в URL без повторного запроса (он уже выполнен в onSearchChange), чтобы кнопка
+	// "назад" в браузере восстанавливала строку поиска
+	const updateListGoalsSearchUrl = useCallback(
+		(searchValue: string) => {
+			skipSearchUrlEffectRef.current = true;
+			setSearchParams(
+				(prev) => {
+					const next = new URLSearchParams(prev);
+					const trimmed = searchValue.trim();
+					if (trimmed.length >= 2) {
+						next.set('search', trimmed);
+					} else {
+						next.delete('search');
+					}
+					return next;
+				},
+				{replace: true}
+			);
+		},
+		[setSearchParams]
+	);
 
 	const isLoadingMoreRef = useRef(false);
 	const listRef = useRef(list);
@@ -201,6 +233,7 @@ const ListGoalsContainerComponent: FC<ListGoalsContainerProps> = (props) => {
 		setSearchTimer(
 			setTimeout(() => {
 				if (!listId) return;
+				updateListGoalsSearchUrl(query);
 				setIsLoading(true);
 				getListGoalsPage(listId, {page: 1, pageSize: 30, ...buildListGoalsApiQuery(searchParams, query)})
 					.then((res) => {

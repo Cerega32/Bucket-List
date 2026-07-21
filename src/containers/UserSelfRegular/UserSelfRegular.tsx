@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {useLocation, useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate, useSearchParams} from 'react-router-dom';
 
 import {Banner} from '@/components/Banner/Banner';
 import {Button} from '@/components/Button/Button';
@@ -33,11 +33,27 @@ import {
 	isRegularGoalPendingForToday,
 	isRegularGoalShownInTodayViews,
 } from '@/utils/regularGoal/regularGoalTodayVisibility';
+import {getMultiValueParam, getSingleValueParam, getSortIndexParam} from '@/utils/urlListState';
 import './user-self-regular.scss';
 
 interface UserSelfRegularProps {
 	className?: string;
 }
+
+const SORT_OPTIONS: OptionSelect[] = [
+	{
+		name: 'Новые',
+		value: 'added_at_desc',
+	},
+	{
+		name: 'Старые',
+		value: 'added_at_asc',
+	},
+	{
+		name: 'Лучший прогресс',
+		value: 'progress_desc',
+	},
+];
 
 const extractMarkProgressStatistics = (
 	responseData: {data?: {statistics?: IRegularGoalStatistics}; statistics?: IRegularGoalStatistics} | undefined
@@ -67,14 +83,19 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 	const [block, element] = useBem('user-self-regular', className);
 	const location = useLocation();
 	const navigate = useNavigate();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const {userSelf} = UserStore;
 	const activeTab = (location.hash === '#all' ? 'all' : 'today') as 'today' | 'all';
 
 	const [statisticsData, setStatisticsData] = useState<IRegularGoalStatistics[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const [search, setSearch] = useState('');
-	const [activeSort, setActiveSort] = useState(0);
-	const [filterValues, setFilterValues] = useState<Record<string, string[]>>({categories: [], complexity: [], hundredGoals: []});
+	const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
+	const [activeSort, setActiveSort] = useState(() => getSortIndexParam(searchParams, 'sort', SORT_OPTIONS));
+	const [filterValues, setFilterValues] = useState<Record<string, string[]>>(() => ({
+		categories: getMultiValueParam(searchParams, 'categories'),
+		complexity: getSingleValueParam(searchParams, 'complexity'),
+		hundredGoals: getSingleValueParam(searchParams, 'hundred_goals'),
+	}));
 	const statisticsLoadGenerationRef = useRef(0);
 	const refreshTodayTabAfterSlotsRef = useRef(false);
 	const prevSubscriptionStateKeyRef = useRef<string | null>(null);
@@ -123,21 +144,6 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		const nextSelected = [...new Set([...lockedIds, ...enabledIds])].slice(0, maxRegularGoals);
 		setSelectedSlotIds(nextSelected);
 	}, [selectionPending, isChangingSlots, statisticsData, maxRegularGoals]);
-
-	const sortOptions: OptionSelect[] = [
-		{
-			name: 'Новые',
-			value: 'added_at_desc',
-		},
-		{
-			name: 'Старые',
-			value: 'added_at_asc',
-		},
-		{
-			name: 'Лучший прогресс',
-			value: 'progress_desc',
-		},
-	];
 
 	const loadRegularGoalStatistics = async (options?: {silent?: boolean}) => {
 		const generation = ++statisticsLoadGenerationRef.current;
@@ -250,7 +256,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 			result = result.filter((stats) => filterValues['categories'].includes(stats.regularGoalData.goalCategory));
 		}
 
-		const sortKey = sortOptions[activeSort]?.value;
+		const sortKey = SORT_OPTIONS[activeSort]?.value;
 
 		result.sort((a, b) => {
 			const activeOrder = compareRegularGoalsActiveFirst(a, b);
@@ -337,6 +343,56 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 		resetDisplayItems();
 	}, [statisticsData, showSlotSelection, resetDisplayItems]);
 
+	// Синхронизируем поиск/фильтры/сортировку с URL, чтобы кнопка "назад" в браузере
+	// восстанавливала то же состояние списка
+	const syncRegularUrl = useCallback(
+		(overrides: {search?: string; sortIndex?: number; filters?: Record<string, string[]>}) => {
+			const nextSearch = overrides.search ?? search;
+			const nextSortIndex = overrides.sortIndex ?? activeSort;
+			const nextFilters = overrides.filters ?? filterValues;
+
+			setSearchParams(
+				(prev) => {
+					const next = new URLSearchParams(prev);
+
+					if (nextSearch.trim()) {
+						next.set('search', nextSearch.trim());
+					} else {
+						next.delete('search');
+					}
+
+					if (nextFilters['categories']?.length > 0) {
+						next.set('categories', nextFilters['categories'].join(','));
+					} else {
+						next.delete('categories');
+					}
+
+					if (nextFilters['complexity']?.length > 0) {
+						next.set('complexity', nextFilters['complexity'][0]);
+					} else {
+						next.delete('complexity');
+					}
+
+					if (nextFilters['hundredGoals']?.length > 0) {
+						next.set('hundred_goals', nextFilters['hundredGoals'][0]);
+					} else {
+						next.delete('hundred_goals');
+					}
+
+					if (nextSortIndex > 0 && SORT_OPTIONS[nextSortIndex]) {
+						next.set('sort', SORT_OPTIONS[nextSortIndex].value);
+					} else {
+						next.delete('sort');
+					}
+
+					return next;
+				},
+				{replace: true}
+			);
+		},
+		[search, activeSort, filterValues, setSearchParams]
+	);
+
 	useEffect(() => {
 		if (activeTab !== 'today') {
 			return;
@@ -344,22 +400,30 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 
 		setSearch('');
 		setFilterValues({categories: [], complexity: [], hundredGoals: []});
+		syncRegularUrl({search: '', filters: {categories: [], complexity: [], hundredGoals: []}});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [activeTab]);
 
 	const handleSortSelect = async (active: number): Promise<void> => {
 		setActiveSort(active);
+		syncRegularUrl({sortIndex: active});
 	};
 
 	const handleSearchChange = (value: string) => {
 		setSearch(value);
+		syncRegularUrl({search: value});
 	};
 
 	const handleFilterChange = (key: string, selected: string[]) => {
-		setFilterValues((prev) => ({...prev, [key]: selected}));
+		const nextFilters = {...filterValues, [key]: selected};
+		setFilterValues(nextFilters);
+		syncRegularUrl({filters: nextFilters});
 	};
 
 	const handleFilterReset = () => {
-		setFilterValues({categories: [], complexity: [], hundredGoals: []});
+		const nextFilters = {categories: [], complexity: [], hundredGoals: []};
+		setFilterValues(nextFilters);
+		syncRegularUrl({filters: nextFilters});
 	};
 
 	const drawerFilters = useMemo((): FilterGroup[] => {
@@ -994,7 +1058,7 @@ export const UserSelfRegular: FC<UserSelfRegularProps> = observer(({className}) 
 											onReset={handleFilterReset}
 											totalCount={allGoals.length}
 										/>
-										<Select options={sortOptions} activeOption={activeSort} onSelect={handleSortSelect} filter />
+										<Select options={SORT_OPTIONS} activeOption={activeSort} onSelect={handleSortSelect} filter />
 									</div>
 								</div>
 							)}

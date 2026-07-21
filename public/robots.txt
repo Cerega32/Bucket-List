@@ -1,3 +1,34 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+
+# Технические и служебные разделы
+Disallow: /api/
+Disallow: /admin/
+Disallow: /ckeditor/
+Disallow: /static/
+
+# Личные страницы и разделы пользователей — не подлежат индексации
+Disallow: /user/
+Disallow: /friends
+
+# Аутентификация и формы, не содержащие уникального контента
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /reset-password
+Disallow: /email-confirmed
+Disallow: /goals/create
+Disallow: /list/create
+Disallow: /edit-list/
+
+# Дублирующиеся вкладки карточек целей и списков (каноничная страница — без суффикса)
+Disallow: /goals/*/history
+Disallow: /goals/*/progress-history
+Disallow: /goals/*/rating
+Disallow: /goals/*/lists
+Disallow: /list/*/impressions
+Disallow: /list/100-goals
+
+# Страницы с поисковым запросом дублируют контент каталога
+Disallow: /*?search=
+
+Sitemap: https://delting.ru/sitemap.xml
