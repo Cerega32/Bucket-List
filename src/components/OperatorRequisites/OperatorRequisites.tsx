@@ -46,7 +46,7 @@ export const OperatorRequisites: FC<OperatorRequisitesProps> = (props) => {
 
 	return (
 		<div className={block()}>
-			<p className={element('title')}>Исполнитель / правообладатель</p>
+			<p className={element('title')}>Сведения об администрации</p>
 			<p className={element('text')}>
 				{OPERATOR_FULL_NAME}
 				{OPERATOR_INN ? (
