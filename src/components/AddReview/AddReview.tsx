@@ -111,13 +111,8 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 					setComments(comments.map((c) => (c.id === updatedComment.id ? updatedComment : c)));
 					onReviewAdded?.();
 					closeModal();
-				} else {
-					NotificationStore.addNotification({
-						type: 'error',
-						title: 'Ошибка',
-						message: res.error || 'Не удалось отредактировать отзыв',
-					});
 				}
+				// Ошибка уже показана в fetchData
 			} else {
 				const formData = new FormData();
 				formData.append('complexity', selectComplexity[activeComplexity].value);
@@ -142,13 +137,8 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 					setMyComment(res.data);
 					onReviewAdded?.();
 					closeModal();
-				} else {
-					NotificationStore.addNotification({
-						type: 'error',
-						title: 'Ошибка',
-						message: (res as {error?: string}).error || 'Не удалось опубликовать отзыв',
-					});
 				}
+				// Ошибка уже показана в fetchData
 			}
 		} finally {
 			setIsSubmitting(false);

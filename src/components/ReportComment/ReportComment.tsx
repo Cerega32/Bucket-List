@@ -44,13 +44,8 @@ export const ReportComment: FC<ReportCommentProps> = ({commentId, closeModal}) =
 				message: 'Мы рассмотрим вашу жалобу в ближайшее время',
 			});
 			closeModal();
-		} else {
-			NotificationStore.addNotification({
-				type: 'error',
-				title: 'Ошибка',
-				message: res.error || 'Не удалось отправить жалобу',
-			});
 		}
+		// Ошибка уже показана в fetchData
 
 		setIsSubmitting(false);
 	};

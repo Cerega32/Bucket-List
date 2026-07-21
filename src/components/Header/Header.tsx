@@ -16,6 +16,8 @@ import {HeaderProgressGoalsStore} from '@/store/HeaderProgressGoalsStore';
 import {HeaderRegularGoalsStore} from '@/store/HeaderRegularGoalsStore';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
+import {trackProductEvent} from '@/utils/analytics/trackProductEvent';
+import {METRIKA_GOALS, reachGoal} from '@/utils/analytics/yandexMetrika';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getUser} from '@/utils/api/get/getUser';
 import {postLogout} from '@/utils/api/post/postLogout';
@@ -100,6 +102,8 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	};
 
 	const openRegistration = () => {
+		reachGoal(METRIKA_GOALS.headerRegisterClick);
+		trackProductEvent('reg_open', 'header');
 		setWindow('registration');
 		setIsOpen(true);
 	};

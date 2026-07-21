@@ -410,7 +410,7 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 						{goal.title}
 					</Title>
 				</Link>
-				<Line margin="calc(auto+16px) 0 16px" />
+				<Line />
 				<div className={element('series')}>
 					<div className={element('series-header')}>
 						<div className={element('series-title')}>

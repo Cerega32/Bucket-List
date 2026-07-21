@@ -502,10 +502,8 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					message: 'Список целей успешно создан',
 				});
 				navigate(`/list/${response.data.code}`);
-			} else {
-				// Упрощаем обработку ошибок, так как теперь бэкенд должен корректно обрабатывать любые названия
-				throw new Error(response.error || 'Неизвестная ошибка');
 			}
+			// Ошибка уже показана в fetchData
 		} catch (error: unknown) {
 			NotificationStore.addNotification({
 				type: 'error',

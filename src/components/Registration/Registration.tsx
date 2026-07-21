@@ -13,6 +13,8 @@ import {useBem} from '@/hooks/useBem';
 import {NotificationStore} from '@/store/NotificationStore';
 import {ICategoryGoals, IMainGoals} from '@/store/UserStore';
 import {IComplexity, IGoal} from '@/typings/goal';
+import {trackProductEvent} from '@/utils/analytics/trackProductEvent';
+import {METRIKA_GOALS, reachGoal} from '@/utils/analytics/yandexMetrika';
 import {checkEmail} from '@/utils/api/get/checkEmail';
 import {checkUsername} from '@/utils/api/get/checkUsername';
 import {get100Goals} from '@/utils/api/get/get100Goals';
@@ -78,6 +80,12 @@ export const Registration: FC<RegistrationProps> = (props) => {
 			})();
 		}
 	}, []);
+
+	useEffect(() => {
+		if (isPage) {
+			trackProductEvent('reg_open', 'page');
+		}
+	}, [isPage]);
 
 	useEffect(() => {
 		if (step === 2 && !catalogLoaded && !catalogLoading) {
@@ -254,6 +262,8 @@ export const Registration: FC<RegistrationProps> = (props) => {
 		setIsLoading(true);
 		const res = await postRegistration(normalizeEmail(normalizedEmail), password, normalizedUsername);
 		if (res.success) {
+			reachGoal(METRIKA_GOALS.registrationSuccess);
+			trackProductEvent('registration_success');
 			if (addedCatalogCodes.size > 0 || completedGoalCodes.size > 0) {
 				try {
 					await registrationGoalsSync({
