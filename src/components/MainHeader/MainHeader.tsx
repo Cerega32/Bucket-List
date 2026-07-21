@@ -4,6 +4,8 @@ import {FC} from 'react';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
+import {trackProductEvent} from '@/utils/analytics/trackProductEvent';
+import {METRIKA_GOALS, reachGoal} from '@/utils/analytics/yandexMetrika';
 import {pluralize} from '@/utils/text/pluralize';
 
 import {MainHeaderSlidersSkeleton} from './MainHeaderSlidersSkeleton';
@@ -35,6 +37,8 @@ export const MainHeader: FC<MainHeaderProps> = observer((props) => {
 
 	const handleButtonClick = () => {
 		if (!isAuth) {
+			reachGoal(METRIKA_GOALS.startPathClick);
+			trackProductEvent('reg_open', 'start_path');
 			setWindow('registration');
 			setIsOpen(true);
 		}

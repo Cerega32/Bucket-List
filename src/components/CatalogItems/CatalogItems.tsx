@@ -513,7 +513,13 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		(async () => {
 			const tempGet = {...userListQueryBase};
 			setGet(tempGet);
-			await fetchData(sortOptions[activeSort].value, undefined, filterValues, tempGet, {dataType: 'goals', silent: true});
+			// Для счётчика целей всегда дефолтная сортировка целей —
+			// на вкладке списков activeSort может быть list-only (например -goals_count)
+			const goalsSort =
+				subPage === 'goals'
+					? sortOptions[activeSort].value
+					: getSortOptions(!!userId, !!completed, 'goals', pendingCatalogReview, isAuth)[0].value;
+			await fetchData(goalsSort, undefined, filterValues, tempGet, {dataType: 'goals', silent: true});
 			setGoalsLoaded(true);
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -524,7 +530,11 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		(async () => {
 			const tempGet = {...userListQueryBase};
 			setGet(tempGet);
-			await fetchData(sortOptions[activeSort].value, undefined, filterValues, tempGet, {dataType: 'lists', silent: true});
+			const listsSort =
+				subPage === 'lists'
+					? sortOptions[activeSort].value
+					: getSortOptions(!!userId, !!completed, 'lists', pendingCatalogReview, isAuth)[0].value;
+			await fetchData(listsSort, undefined, filterValues, tempGet, {dataType: 'lists', silent: true});
 			setListsLoaded(true);
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps

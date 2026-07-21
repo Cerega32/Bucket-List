@@ -9,6 +9,7 @@ import {Registration} from '@/components/Registration/Registration';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
+import {trackProductEvent} from '@/utils/analytics/trackProductEvent';
 import {getUser} from '@/utils/api/get/getUser';
 
 import {AddReview} from '../AddReview/AddReview';
@@ -61,6 +62,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 	};
 
 	const openRegistration = () => {
+		trackProductEvent('reg_open', 'login_modal');
 		setWindow('registration');
 	};
 

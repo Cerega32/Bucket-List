@@ -183,9 +183,12 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 					}
 				}
 
+				const errorMessage = data?.detail || data?.error || data.error;
 				return {
 					success: false,
-					errors: data?.detail || data?.error || data.error,
+					error: errorMessage,
+					errors: errorMessage,
+					code: data?.code,
 				};
 			}
 

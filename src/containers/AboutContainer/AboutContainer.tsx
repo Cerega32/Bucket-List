@@ -8,6 +8,7 @@ import {Title} from '@/components/Title/Title';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
+import {trackProductEvent} from '@/utils/analytics/trackProductEvent';
 import {getTotalCompleted} from '@/utils/api/get/getTotalCompleted';
 import {pluralize} from '@/utils/text/pluralize';
 
@@ -21,6 +22,7 @@ export const AboutContainer: FC = () => {
 	const {isAuth} = UserStore;
 
 	const openRegistration = () => {
+		trackProductEvent('reg_open', 'about');
 		setIsOpen(true);
 		setWindow('registration');
 	};
