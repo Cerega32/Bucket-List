@@ -133,7 +133,7 @@
 		text-align: start;
 		text-transform: uppercase;
 		letter-spacing: 0.4px;
-		margin-left: 20px;
+		justify-self: center;
 	}
 
 	&__section {
@@ -187,8 +187,7 @@
 	}
 
 	&__val-inner {
-		display: inline-grid;
-		grid-template-columns: 14px auto;
+		display: inline-flex;
 		align-items: center;
 		gap: 6px;
 		width: auto;
@@ -201,12 +200,6 @@
 			color: var(--color-primary);
 			font-weight: var(--weight-bold);
 		}
-	}
-
-	&__trophy-spacer {
-		display: inline-block;
-		flex-shrink: 0;
-		width: 14px;
 	}
 
 	&__trophy {

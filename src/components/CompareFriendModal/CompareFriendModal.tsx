@@ -256,11 +256,7 @@ export const CompareFriendModal: FC<CompareFriendModalProps> = (props) => {
 	const renderValueCell = (val: number | string, win: boolean) => (
 		<span className={element('val')}>
 			<span className={element('val-inner', {win})}>
-				{win ? (
-					<Svg icon="trophy" width="14px" height="14px" className={element('trophy')} />
-				) : (
-					<span className={element('trophy-spacer')} />
-				)}
+				{win && <Svg icon="trophy" width="14px" height="14px" className={element('trophy')} />}
 				<span className={element('val-number')}>{typeof val === 'number' ? String(val) : val || '—'}</span>
 			</span>
 		</span>

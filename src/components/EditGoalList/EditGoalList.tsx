@@ -16,6 +16,7 @@ import {IList} from '@/typings/list';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {getSimilarGoals} from '@/utils/api/get/getSimilarGoals';
 import {updateGoalList} from '@/utils/api/put/updateGoalList';
+import {isCatalogResubmitOnCooldown} from '@/utils/catalog/resubmitCooldown';
 import {debounce} from '@/utils/time/debounce';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 import {getComplexity, selectComplexity} from '@/utils/values/complexity';
@@ -74,7 +75,10 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 		? 'Список опубликован в каталоге после модерации — изменить название, описание и параметры нельзя.'
 		: 'Прошло более 24 часов с создания — изменить название, описание и параметры нельзя.';
 
-	const isBeingResubmitted = listData.catalogReviewStatus === 'rejected' && !listData.catalogPermanentlyRejected;
+	const isBeingResubmitted =
+		listData.catalogReviewStatus === 'rejected' &&
+		!listData.catalogPermanentlyRejected &&
+		!isCatalogResubmitOnCooldown(listData.catalogResubmitAvailableAt);
 
 	const categoryLabel = listData.category?.parentCategory
 		? `${listData.category.parentCategory.name} / ${listData.category.name}`
@@ -347,11 +351,15 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 			const response = await updateGoalList(listData.code, formData);
 
 			if (response.success) {
+				const updated = response.data as IList | undefined;
+				const resubmitted = listData.catalogReviewStatus === 'rejected' && updated?.catalogReviewStatus === 'pending';
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успех',
-					message: isBeingResubmitted
+					message: resubmitted
 						? 'Список обновлён и отправлен на повторную проверку модератором'
+						: listData.catalogReviewStatus === 'rejected' && isCatalogResubmitOnCooldown(updated?.catalogResubmitAvailableAt)
+						? 'Изменения сохранены. Повторная отправка на проверку пока недоступна — подождите окончания паузы.'
 						: 'Список целей успешно обновлен',
 				});
 				navigate(`/list/${response?.data?.code}`);
@@ -384,7 +392,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 				/>
 			)}
 
-			{isBeingResubmitted && (
+			{listData.catalogReviewStatus === 'rejected' && !listData.catalogPermanentlyRejected && (
 				<CatalogModerationBanner
 					className={element('limited-edit-banner')}
 					catalogReviewStatus={listData.catalogReviewStatus}
@@ -394,6 +402,7 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 					catalogRejectionReasons={listData.catalogRejectionReasons}
 					catalogRejectionComment={listData.catalogRejectionComment}
 					catalogDeleteAt={listData.catalogDeleteAt}
+					catalogResubmitAvailableAt={listData.catalogResubmitAvailableAt}
 				/>
 			)}
 

@@ -140,9 +140,20 @@ const fetchData = async (url: string, method: string, params: IFetchParams = {})
 				}
 
 				if (response.status === 429) {
+					const message =
+						(typeof data?.error === 'string' && data.error) ||
+						(typeof data?.detail === 'string' && data.detail) ||
+						getUserFacingHttpStatusError(429);
+					if (showErrorNotification) {
+						NotificationStore.addNotification({
+							type: 'error',
+							title: 'Ошибка',
+							message,
+						});
+					}
 					return {
 						success: false,
-						errors: getUserFacingHttpStatusError(429),
+						errors: message,
 					};
 				}
 

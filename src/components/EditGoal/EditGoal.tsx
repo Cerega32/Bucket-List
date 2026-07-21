@@ -18,6 +18,7 @@ import {ICategory, IGoal, ILocation} from '@/typings/goal';
 import {deleteGoal} from '@/utils/api/delete/deleteGoal';
 import {getAllCategories} from '@/utils/api/get/getCategories';
 import {updateGoal} from '@/utils/api/put/updateGoal';
+import {isCatalogResubmitOnCooldown} from '@/utils/catalog/resubmitCooldown';
 import {mapApi} from '@/utils/mapApi';
 import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 import {
@@ -540,11 +541,16 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 			const response = await updateGoal(goal.code, formData);
 
 			if (response.success) {
-				const wasResubmitted = goal.catalogReviewStatus === 'rejected';
+				const updated = response.data as IGoal | undefined;
+				const resubmitted = goal.catalogReviewStatus === 'rejected' && updated?.catalogReviewStatus === 'pending';
 				NotificationStore.addNotification({
 					type: 'success',
 					title: 'Успех',
-					message: wasResubmitted ? 'Цель обновлена и отправлена на повторную проверку модератором' : 'Цель успешно обновлена',
+					message: resubmitted
+						? 'Цель обновлена и отправлена на повторную проверку модератором'
+						: goal.catalogReviewStatus === 'rejected' && isCatalogResubmitOnCooldown(updated?.catalogResubmitAvailableAt)
+						? 'Изменения сохранены. Повторная отправка на проверку пока недоступна — подождите окончания паузы.'
+						: 'Цель успешно обновлена',
 				});
 
 				// Если передан обработчик обновления цели, вызываем его
@@ -640,6 +646,7 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 								catalogRejectionReasons={goal.catalogRejectionReasons}
 								catalogRejectionComment={goal.catalogRejectionComment}
 								catalogDeleteAt={goal.catalogDeleteAt}
+								catalogResubmitAvailableAt={goal.catalogResubmitAvailableAt}
 								catalogDuplicateGoalCode={goal.catalogDuplicateGoalCode}
 								catalogDuplicateGoalTitle={goal.catalogDuplicateGoalTitle}
 							/>
@@ -1026,7 +1033,11 @@ export const EditGoal: FC<EditGoalProps> = (props) => {
 									Отмена
 								</Button>
 								<Button theme="blue" className={element('btn')} typeBtn="submit">
-									{goal.catalogReviewStatus === 'rejected' ? 'Отправить снова на проверку' : 'Сохранить изменения'}
+									{goal.catalogReviewStatus === 'rejected' &&
+									!goal.catalogPermanentlyRejected &&
+									!isCatalogResubmitOnCooldown(goal.catalogResubmitAvailableAt)
+										? 'Отправить снова на проверку'
+										: 'Сохранить изменения'}
 								</Button>
 							</div>
 						</div>

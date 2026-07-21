@@ -70,7 +70,13 @@ interface CatalogItemsUsersProps extends CatalogItemsProps {
 }
 
 /** Варианты сортировки зависят от контекста: каталог / активные / выполненные / модерация */
-function getSortOptions(isUser: boolean, isCompleted: boolean, page?: string, isPendingCatalogReview?: boolean): Array<OptionSelect> {
+function getSortOptions(
+	isUser: boolean,
+	isCompleted: boolean,
+	page?: string,
+	isPendingCatalogReview?: boolean,
+	isAuth?: boolean
+): Array<OptionSelect> {
 	if (isPendingCatalogReview) {
 		if (page === 'lists') {
 			return [
@@ -92,6 +98,19 @@ function getSortOptions(isUser: boolean, isCompleted: boolean, page?: string, is
 	}
 
 	if (!isUser) {
+		if (page === 'lists') {
+			const listCatalogSort: Array<OptionSelect> = [
+				{name: 'Новые', value: '-created_at'},
+				{name: 'Старые', value: 'created_at'},
+				{name: 'Легкие', value: 'complexity'},
+				{name: 'Сложные', value: '-complexity'},
+				{name: 'По кол-ву целей', value: '-goals_count'},
+			];
+			if (isAuth) {
+				listCatalogSort.push({name: 'По выполненным', value: '-completed_goals_count'});
+			}
+			return listCatalogSort;
+		}
 		return [
 			{name: 'Новые', value: '-created_at'},
 			{name: 'Популярные', value: '-added_by_users'},
@@ -273,8 +292,8 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		});
 
 	const sortOptions = useMemo(
-		() => getSortOptions(!!userId, !!completed, subPage, pendingCatalogReview),
-		[userId, completed, subPage, pendingCatalogReview]
+		() => getSortOptions(!!userId, !!completed, subPage, pendingCatalogReview, isAuth),
+		[userId, completed, subPage, pendingCatalogReview, isAuth]
 	);
 	const filterValues = useMemo(() => parseFilterValuesFromSearchParams(searchParams), [searchParamsKey]);
 	const activeSort = useMemo(() => getSortIndexFromSearchParams(searchParams, sortOptions), [searchParamsKey, sortOptions]);
@@ -382,7 +401,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 			allLabel: pendingCatalogReview ? 'Любая сложность' : 'Все цели',
 		});
 
-		if (code === 'all' && !userId && !pendingCatalogReview) {
+		if (code === 'all' && !userId && !pendingCatalogReview && isAuth) {
 			groups.push({
 				key: 'goalDisplaying',
 				label: 'Показ целей',
@@ -419,7 +438,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		}
 
 		return groups;
-	}, [categoryFilters, subPage, pendingCatalogReview, code, userId]);
+	}, [categoryFilters, subPage, pendingCatalogReview, code, userId, isAuth]);
 
 	const fetchData = useCallback(
 		async (

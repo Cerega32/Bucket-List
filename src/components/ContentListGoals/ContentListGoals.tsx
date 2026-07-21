@@ -167,6 +167,7 @@ export const ContentListGoals: FC<ContentListGoalsProps> = observer((props) => {
 						catalogRejectionReasons={list.catalogRejectionReasons}
 						catalogRejectionComment={list.catalogRejectionComment}
 						catalogDeleteAt={list.catalogDeleteAt}
+						catalogResubmitAvailableAt={list.catalogResubmitAvailableAt}
 						actionText={list.isCanEdit ? 'Редактировать' : undefined}
 						onAction={list.isCanEdit ? () => navigate(`/edit-list/${list.code}`) : undefined}
 					/>

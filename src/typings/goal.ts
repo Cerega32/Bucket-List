@@ -31,6 +31,8 @@ export interface ICatalogRejectionInfo {
 	catalogPermanentlyRejected?: boolean;
 	/** Дата автоудаления (заполняется при catalogPermanentlyRejected) */
 	catalogDeleteAt?: string | null;
+	/** С какого момента снова можно отправить на модерацию (null — уже можно / неактуально) */
+	catalogResubmitAvailableAt?: string | null;
 	/** Code существующей цели-дубликата (при отказе как duplicate) */
 	catalogDuplicateGoalCode?: string | null;
 	/** Название существующей цели-дубликата */

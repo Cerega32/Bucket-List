@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom';
 
 import {Banner} from '@/components/Banner/Banner';
 import {ICatalogRejectionInfo} from '@/typings/goal';
+import {formatCatalogResubmitAvailableAt, isCatalogResubmitOnCooldown} from '@/utils/catalog/resubmitCooldown';
 import {getCatalogDeleteHint, getCatalogRejectionHints} from '@/utils/values/catalogRejectionReasons';
 
 interface CatalogModerationBannerProps
@@ -15,6 +16,7 @@ interface CatalogModerationBannerProps
 		| 'catalogRejectionReasons'
 		| 'catalogRejectionComment'
 		| 'catalogDeleteAt'
+		| 'catalogResubmitAvailableAt'
 		| 'catalogDuplicateGoalCode'
 		| 'catalogDuplicateGoalTitle'
 	> {
@@ -34,6 +36,7 @@ export const CatalogModerationBanner: FC<CatalogModerationBannerProps> = (props)
 		catalogRejectionReasons,
 		catalogRejectionComment,
 		catalogDeleteAt,
+		catalogResubmitAvailableAt,
 		catalogDuplicateGoalCode,
 		catalogDuplicateGoalTitle,
 		actionText,
@@ -44,6 +47,7 @@ export const CatalogModerationBanner: FC<CatalogModerationBannerProps> = (props)
 	const hints = getCatalogRejectionHints(
 		hasLinkedDuplicate ? catalogRejectionReasons?.filter((reason) => reason !== 'duplicate') : catalogRejectionReasons
 	);
+	const onCooldown = isCatalogResubmitOnCooldown(catalogResubmitAvailableAt);
 
 	const duplicateBlock = hasLinkedDuplicate ? (
 		<p>
@@ -99,7 +103,15 @@ export const CatalogModerationBanner: FC<CatalogModerationBannerProps> = (props)
 							<p key={hint}>{hint}</p>
 						))}
 						{catalogRejectionComment && <p>Комментарий модератора: {catalogRejectionComment}</p>}
-						<p>Исправьте замечания и отправьте на повторную проверку.</p>
+						{onCooldown && catalogResubmitAvailableAt ? (
+							<p>
+								{`Сейчас можно править текст — изменения сохранятся. Повторная отправка на проверку будет доступна ${formatCatalogResubmitAvailableAt(
+									catalogResubmitAvailableAt
+								)}.`}
+							</p>
+						) : (
+							<p>Исправьте замечания и отправьте на повторную проверку.</p>
+						)}
 					</>
 				}
 				actionText={actionText}

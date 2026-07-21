@@ -313,12 +313,14 @@
 		flex-direction: column;
 		height: 100%;
 		padding: 16px 16px 12px;
-		justify-content: flex-end;
+
+		#{$block}__info-link {
+			margin-bottom: auto;
+		}
 	}
 
 	&__title-regular {
 		display: -webkit-box;
-		margin-bottom: auto;
 		overflow: hidden;
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;
