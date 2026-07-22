@@ -6,6 +6,8 @@ import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 import 'yet-another-react-lightbox/styles.css';
 import App from './containers/App/App';
+// Инициализация темы до первого рендера (синхронизация data-theme / localStorage)
+import './store/ThemeModeStore';
 import {initAnalyticsIfConsented} from './utils/legal/cookieConsent';
 
 (async () => {

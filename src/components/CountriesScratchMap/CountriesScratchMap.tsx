@@ -47,8 +47,10 @@ const MAP_HINT_MOBILE =
 	'Вращайте глобус перетаскиванием, масштабируйте щипком двумя пальцами. ' +
 	'Нажмите на страну или регион — откроется карточка цели. Карта — открытый атлас Natural Earth.';
 
-const COLOR_STROKE = 'var(--color-white)';
+const COLOR_STROKE = 'var(--color-scratch-map-stroke)';
 const COLOR_LOADING_FALLBACK = 'var(--color-gray-5)';
+const COLOR_SPHERE_STROKE = 'var(--color-scratch-map-stroke)';
+const COLOR_GRID = 'var(--color-scratch-map-grid)';
 
 interface CountriesScratchMapProps {
 	className?: string;
@@ -469,7 +471,7 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 		const visual = getCountryVisual(byMapIso, byMapName, isoColorIndex, {rawIso, mapName});
 		const colorIso = visual.country ? colorKeyForCountry(visual.country, rawIso) : rawIso;
 		const microTransform = visual.inList && colorIso ? getMicroStateTransform(geo, colorIso, projection, microStateBoost) : undefined;
-		const strokeWidth = microTransform ? 0.5 : 0.35;
+		const strokeWidth = microTransform ? 0.2 : 0.35;
 
 		return (
 			<g key={geo.rsmKey} transform={microTransform}>
@@ -565,13 +567,8 @@ export const CountriesScratchMap: FC<CountriesScratchMapProps> = observer((props
 					height={MAP_SIZE}
 					style={{width: '100%', height: 'auto', touchAction: 'none'}}
 				>
-					<Sphere
-						id="globe-sphere"
-						fill={SCRATCH_MAP_GLOBE_FILL}
-						stroke="color-mix(in srgb, var(--color-white) 25%, var(--color-primary))"
-						strokeWidth={0.5}
-					/>
-					<Graticule stroke="color-mix(in srgb, var(--color-white) 30%, var(--color-primary))" strokeWidth={0.3} />
+					<Sphere id="globe-sphere" fill={SCRATCH_MAP_GLOBE_FILL} stroke={COLOR_SPHERE_STROKE} strokeWidth={0.5} />
+					<Graticule stroke={COLOR_GRID} strokeWidth={0.3} />
 					<Geographies geography={GEO_URL}>
 						{({geographies}: {geographies: any[]}) => geographies.map(renderGeography)}
 					</Geographies>

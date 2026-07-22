@@ -18,7 +18,7 @@
 	&__content {
 		@include block-radius(40px);
 
-		background: var(--color-white);
+		background: var(--color-surface);
 
 		@include sm {
 			padding: 24px;

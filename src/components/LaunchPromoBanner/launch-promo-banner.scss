@@ -134,3 +134,19 @@
 		}
 	}
 }
+
+:root[data-theme='dark'] {
+	.launch-promo-banner {
+		background: conic-gradient(
+			from var(--launch-promo-gradient-angle),
+			rgb(192 132 252 / 40%) 0deg,
+			rgb(244 114 182 / 40%) 120deg,
+			rgb(56 189 248 / 40%) 240deg,
+			rgb(192 132 252 / 40%) 360deg
+		);
+
+		.launch-promo-banner__spots {
+			background: rgb(var(--color-surface-rgb) / 40%);
+		}
+	}
+}

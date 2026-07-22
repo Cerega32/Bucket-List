@@ -4,12 +4,39 @@
 :root {
 	box-sizing: border-box;
 	color: var(--color-text);
+	color-scheme: light;
+}
+
+// Нативные элементы форм (инпуты, скроллбары, чекбоксы) подстраиваются под
+// выбранную пользователем тему, а не только под системную (prefers-color-scheme).
+:root[data-theme='dark'] {
+	color-scheme: dark;
+}
+
+// Плейсхолдеры: единый цвет для всех инпутов/textarea/select
+::placeholder {
+	color: var(--color-placeholder);
+	opacity: 1;
+}
+
+::-webkit-input-placeholder {
+	color: var(--color-placeholder);
+}
+
+::-moz-placeholder {
+	color: var(--color-placeholder);
+	opacity: 1;
+}
+
+:-ms-input-placeholder {
+	color: var(--color-placeholder);
 }
 
 // Добавляем минимальную ширину для всего приложения
 html {
 	min-width: 320px;
 	background: var(--color-gray-3);
+	transition: background-color 0.2s ease-in-out;
 }
 
 body {
@@ -24,6 +51,9 @@ body {
 	font-size: 14px;
 	line-height: 1.42;
 	scroll-behavior: smooth;
+	color: var(--color-text);
+	background: var(--color-gray-3);
+	transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;

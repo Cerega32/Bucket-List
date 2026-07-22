@@ -1,0 +1,56 @@
+.folder-selector-skeleton {
+	width: 100%;
+
+	&__header {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		margin-bottom: 24px;
+		margin-right: 35px;
+
+		@include md {
+			margin-right: 50px;
+		}
+	}
+
+	&__folders {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 12px;
+		margin-bottom: 24px;
+		padding: 2px;
+
+		@include md {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	&__folder {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 16px;
+		padding: 16px;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+	}
+
+	&__folder-info {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		gap: 8px;
+		min-width: 0;
+	}
+
+	&__folder-radio {
+		flex-shrink: 0;
+		margin-top: 2px;
+	}
+
+	&__actions {
+		display: flex;
+		justify-content: center;
+	}
+}

@@ -87,7 +87,8 @@
 		display: block;
 		width: 18px;
 		height: 18px;
-		background-color: var(--color-secondary);
+		// Инвариантный белый: на цветном фоне категории не зависит от темы
+		background-color: var(--color-white);
 		mask-image: url('/public/svg/copy.svg');
 		mask-repeat: no-repeat;
 		mask-position: center;
