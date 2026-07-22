@@ -49,9 +49,14 @@
 		cursor: pointer;
 		transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 
+		svg *,
+		path {
+			stroke: currentColor;
+		}
+
 		&:hover {
 			color: var(--color-text-primary);
-			background: var(--color-white);
+			background: var(--color-surface);
 			border-color: var(--color-primary);
 		}
 

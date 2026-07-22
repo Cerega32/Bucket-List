@@ -6,6 +6,7 @@ import {Link} from 'react-router-dom';
 import {FeedbackModal} from '@/components/FeedbackModal/FeedbackModal';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
+import {ThemeModeStore} from '@/store/ThemeModeStore';
 import {ThemeStore} from '@/store/ThemeStore';
 import {UserStore} from '@/store/UserStore';
 import {resetCookieConsent} from '@/utils/legal/cookieConsent';
@@ -25,6 +26,7 @@ export const Footer: FC<FooterProps> = observer((props) => {
 	const {footer} = ThemeStore;
 	const {isAuth} = UserStore;
 	const {isScreenMobile} = useScreenSize();
+	const logoIcon = ThemeModeStore.mode === 'dark' ? 'delting-light' : 'delting';
 
 	const [block, element] = useBem('footer', className);
 	const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -91,7 +93,7 @@ export const Footer: FC<FooterProps> = observer((props) => {
 				>
 					<div className={element('brand')}>
 						<Link to="/" className={element('logo')}>
-							<Svg icon="delting" className={element('logo-icon')} />
+							<Svg icon={logoIcon} className={element('logo-icon')} />
 						</Link>
 						<p className={element('description')}>
 							Платформа для достижения целей и саморазвития. Ставьте цели, отслеживайте прогресс и вдохновляйтесь успехами

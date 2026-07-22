@@ -34,9 +34,9 @@ export const AddReview: FC<AddReviewProps> = (props) => {
 	const {modalProps, setFuncModal, setWindow, setIsOpen} = ModalStore;
 
 	const editingComment = modalProps?.editComment;
-	const goalListId = (modalProps?.goalListId as number | undefined) || GoalStore.goalListId || undefined;
-	const onReviewAdded = modalProps?.onReviewAdded as (() => void) | undefined;
-	const onReviewRemoved = modalProps?.onReviewRemoved as (() => void) | undefined;
+	const goalListId = modalProps?.goalListId || GoalStore.goalListId || undefined;
+	const onReviewAdded = modalProps?.onReviewAdded;
+	const onReviewRemoved = modalProps?.onReviewRemoved;
 	const isListReview = !!goalListId || !!editingComment?.goalInfo?.isList;
 	const {isScreenSmallMobile} = useScreenSize();
 	const initialComplexityIndex =

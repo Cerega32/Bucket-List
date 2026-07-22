@@ -140,7 +140,7 @@
 	&__auto-add-section {
 		padding: 20px;
 		margin: 20px 0;
-		background-color: var(--color-white);
+		background-color: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: 12px;
 	}
@@ -238,7 +238,7 @@
 		right: 0;
 		left: 0;
 		max-height: 300px;
-		background-color: var(--color-white);
+		background-color: var(--color-surface);
 		border-radius: 8px;
 		overflow-y: auto;
 		box-shadow: 0 4px 12px rgb(var(--color-black-rbg) / 10%);
@@ -295,7 +295,7 @@
 
 	&__empty-message {
 		padding: 24px;
-		background-color: var(--color-white);
+		background-color: var(--color-surface);
 		border-radius: 8px;
 		color: var(--color-text-secondary);
 		text-align: center;
@@ -315,7 +315,7 @@
 
 	&__new-goal-form {
 		padding: 24px;
-		background-color: var(--color-white);
+		background-color: var(--color-surface);
 		border-radius: 8px;
 		box-shadow: 0 2px 8px rgb(var(--color-black-rbg) / 5%);
 	}

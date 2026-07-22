@@ -25,7 +25,7 @@
 		display: inline-flex;
 		align-items: center;
 		padding: 8px 16px;
-		background: var(--color-white);
+		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: 8px;
 		color: var(--color-text-secondary);
@@ -44,7 +44,7 @@
 	&__article {
 		padding: 40px;
 		margin-bottom: 40px;
-		background: var(--color-white);
+		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: 12px;
 
@@ -172,7 +172,7 @@
 	&__loading,
 	&__not-found {
 		padding: 80px 40px;
-		background: var(--color-white);
+		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: 12px;
 		text-align: center;
@@ -198,7 +198,7 @@
 
 	&__error {
 		padding: 40px;
-		background: var(--color-white);
+		background: var(--color-surface);
 		border: 1px solid var(--color-sentiment-negative);
 		border-radius: 12px;
 		text-align: center;

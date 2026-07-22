@@ -46,7 +46,7 @@
 	&__regular-info-header {
 		padding: 16px 24px;
 		margin-bottom: 16px;
-		background: var(--color-white);
+		background: var(--color-surface);
 		border: 1px solid var(--color-gray-9);
 		border-radius: 8px;
 
@@ -168,7 +168,7 @@
 		width: 100%;
 		max-width: 400px;
 		padding: 16px 24px;
-		background: var(--color-white);
+		background: var(--color-surface);
 		border: 1px solid var(--color-gray-9);
 		border-radius: 8px;
 
@@ -265,7 +265,7 @@
 		}
 
 		&--blocked {
-			background: var(--color-white);
+			background: var(--color-surface);
 
 			#{$block}__regular-series-day-icon {
 				svg {

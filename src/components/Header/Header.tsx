@@ -7,6 +7,7 @@ import {Link, NavLink, useNavigate} from 'react-router-dom';
 import {Button} from '@/components/Button/Button';
 import {NotificationDropdown} from '@/components/NotificationDropdown/NotificationDropdown';
 import {RegularGoalsDropdown} from '@/components/RegularGoalsDropdown/RegularGoalsDropdown';
+import {ThemeToggle} from '@/components/ThemeToggle/ThemeToggle';
 import {UserSelfProfile} from '@/containers/UserSelf/UserSelfProfile';
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
@@ -26,6 +27,7 @@ import {refreshHeaderGoalCounts} from '@/utils/refreshHeaderGoalCounts';
 import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
 import {sortMainCategories} from '@/utils/values/categoriesOrder';
 
+import {ThemeModeStore} from '../../store/ThemeModeStore';
 import {ThemeStore} from '../../store/ThemeStore';
 import {Avatar} from '../Avatar/Avatar';
 import {FeedbackModal} from '../FeedbackModal/FeedbackModal';
@@ -45,6 +47,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 	const {className} = props;
 
 	const {header, page, preHeaderHiddenOverride, pageCategory} = ThemeStore;
+	const logoIcon = ThemeModeStore.mode === 'dark' ? 'delting-light' : 'delting';
 	const {setIsOpen, setWindow} = ModalStore;
 	const {categoriesTree, setCategories} = CategoriesStore;
 	const {isScreenDesktop, isScreenSmallTablet, isScreenMobile, isScreenSmallMobile, isScreenTablet} = useScreenSize();
@@ -508,14 +511,17 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				<nav className={element('nav')} ref={menuRef}>
 					{!isScreenMobile && menuList}
 				</nav>
-				{/* Оставить отзыв о платформе */}
-				<button
-					type="button"
-					className={element('item-link', {active: page === 'isReview'})}
-					onClick={() => setIsFeedbackModalOpen(true)}
-				>
-					{isScreenSmallTablet ? 'Отзыв' : 'Оставить отзыв'}
-				</button>
+				<div className={element('pre-header-actions')}>
+					<ThemeToggle theme={header} />
+					{/* Оставить отзыв о платформе */}
+					<button
+						type="button"
+						className={element('item-link', {active: page === 'isReview'})}
+						onClick={() => setIsFeedbackModalOpen(true)}
+					>
+						{isScreenSmallTablet ? 'Отзыв' : 'Оставить отзыв'}
+					</button>
+				</div>
 			</div>
 			<div className={element('wrapper')}>
 				{isScreenSmallMobile ? (
@@ -529,9 +535,10 @@ export const Header: FC<HeaderProps> = observer((props) => {
 							</div>
 							<div className={element('logo-wrap')}>
 								<Link className={element('logo')} to={homePath} aria-label="Главная">
-									<Svg icon="delting" />
+									<Svg icon={logoIcon} />
 								</Link>
 							</div>
+							<ThemeToggle className={element('row-1-theme-toggle')} theme={header} />
 							{isAuth ? (
 								<div className={element('row-1-avatar')}>
 									<div
@@ -591,7 +598,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				) : (
 					<>
 						<Link className={element('logo')} to={homePath} aria-label="Главная">
-							{isScreenMobile ? <Svg icon="icon-logo" className={element('logo-icon')} /> : <Svg icon="delting" />}
+							{isScreenMobile ? <Svg icon="icon-logo" className={element('logo-icon')} /> : <Svg icon={logoIcon} />}
 						</Link>
 						{isScreenMobile && !isScreenSmallMobile && (
 							<Button width="auto" className={element('categories-link-menu')} onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -721,6 +728,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 						{isAuth ? (
 							!isScreenSmallMobile && (
 								<div className={element('right-menu')}>
+									{isScreenMobile && <ThemeToggle theme={header} />}
 									{/* создать кнопка */}
 									{!isScreenMobile && (
 										<Button size="small" type="Link" theme="light" icon="plus" iconSize="24px" href="/goals/create">
@@ -909,6 +917,7 @@ export const Header: FC<HeaderProps> = observer((props) => {
 							)
 						) : isScreenMobile ? (
 							<div className={element('right-menu')}>
+								<ThemeToggle theme={header} />
 								<div className={element('profile-wrapper')}>
 									<button
 										type="button"

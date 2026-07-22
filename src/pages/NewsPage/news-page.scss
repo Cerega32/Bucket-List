@@ -42,7 +42,7 @@
 	&__search {
 		padding: 24px;
 		margin-bottom: 32px;
-		background: var(--color-white);
+		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: 12px;
 	}
@@ -61,21 +61,27 @@
 	&__search-input {
 		flex: 1;
 		padding: 12px 16px;
-		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		border: 1px solid var(--color-gray-4);
 		border-radius: 8px;
-		color: var(--color-text);
+		color: var(--color-text-primary);
 		font-size: 16px;
 		line-height: var(--line-height-16);
+		outline: none;
 		transition: border-color 0.2s ease;
 
-		&:focus {
-			outline: none;
+		&:hover {
+			border-color: var(--color-primary-hover);
+		}
+
+		&:focus,
+		&:focus-visible {
 			border-color: var(--color-primary);
-			box-shadow: 0 0 0 3px rgb(var(--color-primary-rgb) 0.1);
+			box-shadow: 0 0 0 3px rgb(var(--color-primary-rgb) / 10%);
 		}
 
 		&::placeholder {
-			color: var(--color-text-secondary);
+			color: var(--color-placeholder);
 		}
 	}
 
@@ -131,7 +137,7 @@
 	}
 
 	&__content {
-		background: var(--color-white);
+		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: 12px;
 	}
@@ -296,7 +302,7 @@
 
 	&__error {
 		padding: 32px;
-		background: var(--color-white);
+		background: var(--color-surface);
 		border: 1px solid var(--color-sentiment-negative);
 		border-radius: 12px;
 		text-align: center;

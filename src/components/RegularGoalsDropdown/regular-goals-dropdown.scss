@@ -7,7 +7,7 @@
 	flex-direction: column;
 	width: 456px;
 	margin-top: 4px;
-	background: var(--color-white);
+	background: var(--color-surface);
 	border: 1px solid var(--color-border-light);
 	border-radius: 8px;
 	box-shadow: 0 8px 32px rgb(0 0 0 / 15%);
@@ -224,7 +224,7 @@
 		}
 
 		&--blocked {
-			background: var(--color-white);
+			background: var(--color-surface);
 			border: 1px solid var(--color-secondary);
 
 			&#{$block}__day--selected {
@@ -400,7 +400,7 @@
 		transition: all 0.2s ease;
 
 		&--selected {
-			background: var(--color-white);
+			background: var(--color-surface);
 			border-color: var(--color-primary);
 		}
 

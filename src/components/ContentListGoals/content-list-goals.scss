@@ -81,7 +81,7 @@
 		}
 
 		&--active {
-			background: var(--color-white);
+			background: var(--color-surface);
 			color: var(--color-primary);
 			box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
 		}
@@ -164,7 +164,7 @@
 		}
 
 		&__button {
-			background: var(--color-white);
+			background: var(--color-surface);
 			border: 1px solid var(--color-primary);
 			color: var(--color-primary);
 

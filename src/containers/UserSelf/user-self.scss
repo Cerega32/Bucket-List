@@ -35,7 +35,7 @@
 	&__sidebar-inner {
 		display: flex;
 		flex-direction: column;
-		background: var(--color-white);
+		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: 8px;
 		padding-top: 8px;
@@ -47,7 +47,7 @@
 		gap: 8px;
 		padding: 16px 16px 8px;
 		margin-bottom: 20px;
-		background: var(--color-white);
+		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: 8px;
 
@@ -162,7 +162,7 @@
 .user-self-section {
 	padding: 24px;
 	margin-left: 24px;
-	background: var(--color-white);
+	background: var(--color-surface);
 	border: 1px solid var(--color-border);
 	border-radius: 16px;
 

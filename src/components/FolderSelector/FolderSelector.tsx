@@ -4,9 +4,9 @@ import {FC, useEffect, useState} from 'react';
 import {useBem} from '@/hooks/useBem';
 import {addGoalToFolder, getGoalFoldersLight, IGoalFolder} from '@/utils/api/goals';
 
+import {FolderSelectorSkeleton} from './FolderSelectorSkeleton';
 import {Button} from '../Button/Button';
 import {EmptyState} from '../EmptyState/EmptyState';
-import {Loader} from '../Loader/Loader';
 import './folder-selector.scss';
 import {Title} from '../Title/Title';
 
@@ -85,7 +85,7 @@ export const FolderSelector: FC<FolderSelectorProps> = observer(
 		};
 
 		if (isLoading) {
-			return <Loader isLoading />;
+			return <FolderSelectorSkeleton />;
 		}
 
 		return (
@@ -150,7 +150,13 @@ export const FolderSelector: FC<FolderSelectorProps> = observer(
 
 				{folders.length > 0 && (
 					<div className={element('actions')}>
-						<Button theme="blue" onClick={handleAddToFolder} disabled={!selectedFolderId || isAdding} loading={isAdding}>
+						<Button
+							theme="blue"
+							onClick={handleAddToFolder}
+							width="auto"
+							disabled={!selectedFolderId || isAdding}
+							loading={isAdding}
+						>
 							Добавить в папку
 						</Button>
 					</div>

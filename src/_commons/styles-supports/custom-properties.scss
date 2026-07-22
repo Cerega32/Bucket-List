@@ -124,15 +124,24 @@
 	--color-primary-hover: var(--color-blue-4); // #4798E8
 	--color-secondary: var(--color-gray-5); // #E8F0F8
 	--color-secondary-hover: var(--color-gray-6); // #F5FAFE
+	--color-background: var(--color-gray-3); // фон страницы для крупных секций (футер и т.п.)
+	--color-background-light: var(--color-gray-6); // лёгкая подсветка hover-состояний
 	--color-text: var(--color-gray-7); // #43576A
 	--color-text-primary: var(--color-gray-8); // #384149
 	--color-text-primary-rgb: var(--color-gray-rgb-8); // #384149
 	--color-text-secondary: var(--color-gray-1); // #718395
+	--color-placeholder-rgb: var(--color-gray-rgb-1); // цвет плейсхолдеров в инпутах
+	--color-placeholder: rgb(var(--color-placeholder-rgb));
 	--color-logo: var(--color-red-4); // #E05A4F
 	--color-text-disabled: var(--color-gray-12); // #96A5B3
 	--color-text-disabled-rgb: var(--color-gray-rgb-12); // #96A5B3
 	--color-border-stroke-primary: var(--color-gray-4);
 	--color-border-stroke-primary-rgb: var(--color-gray-rgb-4);
+	// Поверхность карточек/шапки/дропдаунов — в светлой теме равна белому,
+	// в тёмной теме переопределяется ниже. Не путать с --color-white,
+	// который остаётся инвариантным (текст/иконки на цветной подложке).
+	--color-surface-rgb: var(--color-white-rgb);
+	--color-surface: rgb(var(--color-surface-rgb));
 
 	//////
 	//////
@@ -201,6 +210,10 @@
 	//////
 	//////
 	--color-border: var(--color-gray-9); // #E7EEF4
+	// Скретч-карта (глобус): границы стран / сетка / контур сферы
+	--color-scratch-map-stroke: var(--color-white);
+	--color-scratch-map-sphere-stroke: color-mix(in srgb, var(--color-white) 25%, var(--color-primary));
+	--color-scratch-map-grid: color-mix(in srgb, var(--color-white) 30%, var(--color-primary));
 	--color-sentiment-positive: var(--color-green-3); // #039824
 	--color-sentiment-positive-hover: var(--color-green-4); // #04B12A
 	--color-sentiment-negative: var(--color-red-1); // #E34235
@@ -296,4 +309,70 @@
 	// Для #666
 	--color-gray-666-rgb: 102 102 102;
 	--color-gray-666: rgb(var(--color-gray-666-rgb));
+}
+
+// Тёмная тема: структурные/текстовые серые + soft-фоны (tint-поверхности).
+// UI-акценты (primary blue и т.п.) и --color-white/--color-black остаются инвариантными.
+// Категории — слегка приглушены (меньше neon на тёмном фоне); подкатегории — через алиасы.
+:root[data-theme='dark'] {
+	// Поверхности и фоны (от самого тёмного фона страницы к более светлым карточкам)
+	--color-gray-rgb-3: 13 18 26; // #0D121A — фон страницы (html)
+	--color-surface-rgb: 23 32 44; // #17202C — карточки/шапка/дропдауны/модалки
+	--color-gray-rgb-11: 26 35 46; // #1A232E
+	--color-gray-rgb-10: 30 40 53; // #1E2835
+	--color-gray-rgb-5: 28 38 50; // #1C2632 — secondary background
+	--color-gray-rgb-6: 35 47 61; // #232F3D — secondary hover background
+
+	// Границы и разделители
+	--color-gray-rgb-9: 42 54 69; // #2A3645 — border
+	--color-gray-rgb-4: 54 68 86; // #364456 — border/hover, чуть светлее
+
+	// Текст и иконки
+	--color-gray-rgb-1: 148 163 184; // #94A3B8 — text-secondary
+	--color-gray-rgb-2: 160 170 185; // #A0AAB9
+	--color-gray-rgb-7: 203 213 225; // #CBD5E1 — text
+	--color-gray-rgb-8: 236 240 245; // #ECF0F5 — text-primary
+	--color-gray-rgb-12: 100 116 139; // #64748B — text-disabled
+	// Плейсхолдеры заметно светлее secondary, чтобы читались на тёмных инпутах
+	--color-placeholder-rgb: 186 200 216; // #BAC8D8
+
+	// Категории: −~15% lightness, лёгкая desaturation (hue без изменений)
+	--color-education-rgb: 96 64 188; // #6040BC ← #7145DB
+	--color-education: rgb(var(--color-education-rgb));
+	--color-travel-rgb: 24 138 28; // #188A1C ← #19B116
+	--color-travel: rgb(var(--color-travel-rgb));
+	--color-health-and-sport-rgb: 26 138 148; // #1A8A94 ← #15A3AD
+	--color-health-and-sport: rgb(var(--color-health-and-sport-rgb));
+	--color-relations-rgb: 184 40 90; // #B8285A ← #D81B60
+	--color-relations: rgb(var(--color-relations-rgb));
+	--color-arts-and-culture-rgb: 168 40 160; // #A828A0 ← #C218B8
+	--color-arts-and-culture: rgb(var(--color-arts-and-culture-rgb));
+	--color-entertainment-and-hobby-rgb: 204 112 22; // #CC7016 ← #F57C00
+	--color-entertainment-and-hobby: rgb(var(--color-entertainment-and-hobby-rgb));
+
+	// Скретч-карта: тёмные границы на тёмном UI
+	--color-scratch-map-stroke: rgb(13 18 26); // #0D121A — как фон страницы
+	--color-scratch-map-sphere-stroke: color-mix(in srgb, var(--color-black) 50%, var(--color-primary));
+	--color-scratch-map-grid: color-mix(in srgb, var(--color-black) 45%, var(--color-primary));
+
+	// Soft / tint поверхности (в light — почти белые «пятна»)
+	--color-yellow-rgb-2: 58 52 28; // pedestal / highlight bg
+	--color-orange-light-rgb: 58 42 24;
+	--color-orange-bg-rgb: 58 42 24;
+	--color-red-light-rgb: 58 30 34;
+	--color-pink-light-rgb: 58 32 40;
+	--color-gray-light-rgb: 32 42 54;
+	--color-gray-bg-rgb: 32 42 54;
+	--color-green-bg-rgb: 28 48 34;
+	--color-green-match-bg-rgb: 28 48 34;
+	--color-blue-section-bg-rgb: 24 40 58;
+	--color-gray-divider-rgb: 54 68 86;
+
+	// Soft text / secondary labels на tint-фонах
+	--color-gray-666-rgb: 160 170 185;
+	--color-gray-text-rgb: 203 213 225;
+	--color-gray-divider-text-rgb: 148 163 184;
+	--color-orange-text-rgb: 255 183 77;
+	--color-blue-section-title-rgb: 100 181 246;
+	--color-green-match-text-rgb: 129 199 132;
 }

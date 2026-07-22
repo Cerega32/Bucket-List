@@ -65,7 +65,7 @@
 	&__section {
 		@include block-radius(40px);
 
-		background: var(--color-white);
+		background: var(--color-surface);
 
 		@include xs {
 			padding: 20px;

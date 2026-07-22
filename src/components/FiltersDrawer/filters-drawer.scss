@@ -18,7 +18,7 @@
 		flex-direction: column;
 		width: 456px;
 		max-width: calc(100vw - 16px);
-		background: var(--color-white);
+		background: var(--color-surface);
 		border-radius: 8px;
 		animation: filters-drawer-slide-in 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 	}

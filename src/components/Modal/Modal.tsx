@@ -9,12 +9,14 @@ import {Registration} from '@/components/Registration/Registration';
 import {useBem} from '@/hooks/useBem';
 import {ModalStore} from '@/store/ModalStore';
 import {UserStore} from '@/store/UserStore';
+import {IShortGoal} from '@/typings/goal';
 import {trackProductEvent} from '@/utils/analytics/trackProductEvent';
 import {getUser} from '@/utils/api/get/getUser';
+import {GoalWithLocation} from '@/utils/mapApi';
 
 import {AddReview} from '../AddReview/AddReview';
 import {ChangePassword} from '../ChangePassword/ChangePassword';
-import {CompareFriendModal, CompareFriendData} from '../CompareFriendModal/CompareFriendModal';
+import {CompareFriendModal} from '../CompareFriendModal/CompareFriendModal';
 import {ConfirmExecutionAllGoal} from '../ConfirmExecutionAllGoal/ConfirmExecutionAllGoal';
 import {CreateTodoListForm} from '../CreateTodoListForm/CreateTodoListForm';
 import {CreateTodoTaskForm} from '../CreateTodoTaskForm/CreateTodoTaskForm';
@@ -234,16 +236,26 @@ export const Modal: FC<ModalProps> = observer((props) => {
 			{window === 'delete-list' && <DeleteList closeModal={closeWindow} funcModal={funcModal} />}
 			{window === 'delete-review' && <DeleteReview closeModal={closeWindow} funcModal={funcModal} />}
 			{window === 'confirm-execution-all-goal' && <ConfirmExecutionAllGoal closeModal={closeWindow} funcModal={funcModal} />}
-			{window === 'goal-map' && <GoalMap {...modalProps} />}
-			{window === 'goal-map-multi' && <GoalMapMulti {...modalProps} />}
-			{window === 'goal-map-add' && <LocationPicker closeModal={closeWindow} {...modalProps} />}
-			{window === 'folder-selector' && (
+			{window === 'goal-map' && modalProps?.location && (
+				<GoalMap location={modalProps.location} userVisitedLocation={!!modalProps.userVisitedLocation} />
+			)}
+			{window === 'goal-map-multi' && Array.isArray(modalProps?.goals) && (
+				<GoalMapMulti goals={modalProps.goals as GoalWithLocation[]} />
+			)}
+			{window === 'goal-map-add' && modalProps?.onLocationSelect && (
+				<LocationPicker
+					closeModal={closeWindow}
+					onLocationSelect={modalProps.onLocationSelect}
+					initialLocation={modalProps.initialLocation}
+				/>
+			)}
+			{window === 'folder-selector' && modalProps?.goalId != null && modalProps.goalTitle != null && (
 				<FolderSelector
-					goalId={modalProps?.goalId}
-					goalTitle={modalProps?.goalTitle}
-					goalFolders={modalProps?.goalFolders}
+					goalId={modalProps.goalId}
+					goalTitle={modalProps.goalTitle}
+					goalFolders={modalProps.goalFolders}
 					onFolderSelected={(folder) => {
-						modalProps?.onFolderSelected?.(folder);
+						modalProps.onFolderSelected?.(folder);
 						closeWindow();
 					}}
 					showCreateButton
@@ -268,19 +280,19 @@ export const Modal: FC<ModalProps> = observer((props) => {
 					onCancel={closeWindow}
 				/>
 			)}
-			{window === 'progress-update' && (
+			{window === 'progress-update' && modalProps?.goalId != null && modalProps.goalTitle != null && modalProps.currentProgress && (
 				<ProgressUpdateModal
-					key={`${modalProps?.goalId}-${modalProps?.currentProgress?.id ?? 'new'}`}
-					goalId={modalProps?.goalId}
-					goalTitle={modalProps?.goalTitle}
-					currentProgress={modalProps?.currentProgress}
-					onProgressUpdate={modalProps?.onProgressUpdate}
-					onGoalCompleted={modalProps?.onGoalCompleted}
+					key={`${modalProps.goalId}-${modalProps.currentProgress.id ?? 'new'}`}
+					goalId={modalProps.goalId}
+					goalTitle={modalProps.goalTitle}
+					currentProgress={modalProps.currentProgress}
+					onProgressUpdate={modalProps.onProgressUpdate ?? (() => undefined)}
+					onGoalCompleted={modalProps.onGoalCompleted}
 					onClose={closeWindow}
 				/>
 			)}
 			{window === 'random-goal-picker' && (
-				<RandomGoalPicker goals={modalProps?.goals || []} listCode={modalProps?.listCode} onClose={closeWindow} />
+				<RandomGoalPicker goals={(modalProps?.goals as IShortGoal[]) || []} listCode={modalProps?.listCode} onClose={closeWindow} />
 			)}
 			{window === 'set-regular-goal' && (
 				<SetRegularGoalModal
@@ -291,9 +303,7 @@ export const Modal: FC<ModalProps> = observer((props) => {
 					initialSettings={modalProps?.initialSettings}
 				/>
 			)}
-			{window === 'compare-friend' && modalProps?.comparisonData && (
-				<CompareFriendModal data={modalProps.comparisonData as CompareFriendData} />
-			)}
+			{window === 'compare-friend' && <CompareFriendModal data={modalProps?.comparisonData} isLoading={!!modalProps?.isComparing} />}
 			{window === 'report-comment' && modalProps?.commentId && (
 				<ReportComment commentId={modalProps.commentId} closeModal={closeWindow} />
 			)}

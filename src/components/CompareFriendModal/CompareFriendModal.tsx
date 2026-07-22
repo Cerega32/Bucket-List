@@ -1,6 +1,7 @@
 import {FC, useCallback, useRef} from 'react';
 
 import {Avatar} from '@/components/Avatar/Avatar';
+import {Skeleton} from '@/components/Skeleton/Skeleton';
 import {useBem} from '@/hooks/useBem';
 import {ICompareAchievement, ICompareActivity, ICompareCategory, ICompareUser, IFriendCompareResponse} from '@/typings/user';
 
@@ -145,15 +146,15 @@ const ICON_SIZE = '20px';
 
 interface CompareFriendModalProps {
 	className?: string;
-	data: CompareFriendData;
+	data?: CompareFriendData | null;
+	isLoading?: boolean;
 	showcase?: boolean;
 	hideResult?: boolean;
 }
 
 export const CompareFriendModal: FC<CompareFriendModalProps> = (props) => {
-	const {className, data, showcase, hideResult} = props;
+	const {className, data, isLoading, showcase, hideResult} = props;
 	const [block, element] = useBem('compare-friend-modal', className);
-	const {user, friend, achievements} = data;
 
 	const headRef = useRef<HTMLDivElement>(null);
 	const handleGridScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
@@ -162,6 +163,41 @@ export const CompareFriendModal: FC<CompareFriendModalProps> = (props) => {
 		}
 	}, []);
 
+	if (isLoading) {
+		return (
+			<div className={block({showcase, loading: true})}>
+				<div className={element('header')}>
+					<div className={element('player')}>
+						<Skeleton circle width={56} height={56} />
+						<Skeleton width={88} height={16} borderRadius={4} />
+						<Skeleton width={72} height={20} borderRadius={6} />
+					</div>
+					<div className={element('vs')}>VS</div>
+					<div className={element('player')}>
+						<Skeleton circle width={56} height={56} />
+						<Skeleton width={88} height={16} borderRadius={4} />
+						<Skeleton width={72} height={20} borderRadius={6} />
+					</div>
+				</div>
+				<div className={element('skeleton-rows')}>
+					{Array.from({length: 8}).map((_, index) => (
+						// eslint-disable-next-line react/no-array-index-key
+						<div key={index} className={element('skeleton-row')}>
+							<Skeleton width="40%" height={16} borderRadius={4} />
+							<Skeleton width={40} height={16} borderRadius={4} />
+							<Skeleton width={40} height={16} borderRadius={4} />
+						</div>
+					))}
+				</div>
+			</div>
+		);
+	}
+
+	if (!data) {
+		return null;
+	}
+
+	const {user, friend, achievements} = data;
 	const uAct = user.activity;
 	const fAct = friend.activity;
 

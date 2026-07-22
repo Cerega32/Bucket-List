@@ -1,11 +1,10 @@
 import {observer} from 'mobx-react-lite';
-import {FC, useEffect, useState} from 'react';
+import {FC, useEffect, useRef} from 'react';
 
 import {Button} from '@/components/Button/Button';
 import {normalizeCompareResponse} from '@/components/CompareFriendModal/CompareFriendModal';
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {FriendCard} from '@/components/FriendCard/FriendCard';
-import {Loader} from '@/components/Loader/Loader';
 import {useBem} from '@/hooks/useBem';
 import {FriendsStore} from '@/store/FriendsStore';
 import {ModalStore} from '@/store/ModalStore';
@@ -17,7 +16,7 @@ import './friends-content.scss';
 
 export const FriendsContent: FC = observer(() => {
 	const [block, element] = useBem('friends-content');
-	const [isComparing, setIsComparing] = useState(false);
+	const compareRequestIdRef = useRef(0);
 
 	// Загрузка друзей при монтировании компонента
 	useEffect(() => {
@@ -54,21 +53,28 @@ export const FriendsContent: FC = observer(() => {
 	}, []);
 
 	const handleCompareWithFriend = async (friendId: number) => {
+		const requestId = ++compareRequestIdRef.current;
+
+		ModalStore.setWindow('compare-friend');
+		ModalStore.setModalProps({comparisonData: null, isComparing: true});
+		ModalStore.setIsOpen(true);
+
 		try {
-			setIsComparing(true);
 			const comparison = await compareWithFriend(friendId);
+			if (requestId !== compareRequestIdRef.current) return;
+
 			const normalized = normalizeCompareResponse(comparison);
-			ModalStore.setModalProps({comparisonData: normalized});
-			ModalStore.setWindow('compare-friend');
-			ModalStore.setIsOpen(true);
+			ModalStore.setModalProps({comparisonData: normalized, isComparing: false});
 		} catch (error) {
+			if (requestId !== compareRequestIdRef.current) return;
+
+			ModalStore.setIsOpen(false);
+			ModalStore.setModalProps({comparisonData: null, isComparing: false});
 			NotificationStore.addNotification({
 				type: 'error',
 				title: 'Ошибка',
 				message: error instanceof Error ? error.message : 'Не удалось получить данные для сравнения',
 			});
-		} finally {
-			setIsComparing(false);
 		}
 	};
 
@@ -82,29 +88,27 @@ export const FriendsContent: FC = observer(() => {
 
 	return (
 		<section className={block()}>
-			<Loader isLoading={isComparing}>
-				{FriendsStore.isEmptyFriends ? (
-					<EmptyState
-						title="У вас пока нет друзей"
-						description="Найдите единомышленников среди пользователей Bucket List и добавьте их в друзья"
-					>
-						<Button width="auto" theme="blue" type="Link" href="/user/self/friends/search">
-							Найти друзей
-						</Button>
-					</EmptyState>
-				) : (
-					<div className={element('friends-list')}>
-						{FriendsStore.friends.map((friend) => (
-							<FriendCard
-								className={element('friend-card')}
-								key={friend.id}
-								friend={friend}
-								onCompare={handleCompareWithFriend}
-							/>
-						))}
-					</div>
-				)}
-			</Loader>
+			{FriendsStore.isEmptyFriends ? (
+				<EmptyState
+					title="У вас пока нет друзей"
+					description="Найдите единомышленников среди пользователей Bucket List и добавьте их в друзья"
+				>
+					<Button width="auto" theme="blue" type="Link" href="/user/self/friends/search">
+						Найти друзей
+					</Button>
+				</EmptyState>
+			) : (
+				<div className={element('friends-list')}>
+					{FriendsStore.friends.map((friend) => (
+						<FriendCard
+							className={element('friend-card')}
+							key={friend.id}
+							friend={friend}
+							onCompare={handleCompareWithFriend}
+						/>
+					))}
+				</div>
+			)}
 		</section>
 	);
 });

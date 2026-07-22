@@ -7,7 +7,7 @@
 		align-items: center;
 		gap: 32px;
 		margin-top: 16px;
-		background: linear-gradient(90deg, var(--color-gray-4) 50%, var(--color-white) 100%);
+		background: linear-gradient(90deg, var(--color-gray-4) 50%, var(--color-surface) 100%);
 		border-radius: 8px;
 
 		@include sm {
@@ -83,7 +83,7 @@
 		gap: 4px;
 		padding: 10px 16px;
 		overflow: hidden;
-		background: var(--color-white);
+		background: var(--color-surface);
 		border-bottom: 1px solid var(--color-border);
 	}
 
@@ -313,6 +313,25 @@
 			margin-left: 0;
 			justify-self: center;
 			text-align: center;
+		}
+	}
+
+	&__skeleton-rows {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		padding: 16px 0;
+	}
+
+	&__skeleton-row {
+		display: grid;
+		grid-template-columns: minmax(280px, 1fr) 120px 120px;
+		gap: 4px;
+		align-items: center;
+		padding: 10px 16px;
+
+		@include sm {
+			grid-template-columns: minmax(96px, 1fr) minmax(56px, 0.3fr) minmax(56px, 0.3fr);
 		}
 	}
 }

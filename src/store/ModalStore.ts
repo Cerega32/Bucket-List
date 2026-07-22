@@ -1,5 +1,12 @@
 import {makeAutoObservable} from 'mobx';
 
+import type {CompareFriendData} from '@/components/CompareFriendModal/CompareFriendModal';
+import type {RegularGoalSettings} from '@/components/SetRegularGoalModal/SetRegularGoalModal';
+import type {IComment} from '@/typings/comments';
+import type {ILocation, IShortGoal} from '@/typings/goal';
+import type {IGoalProgress} from '@/utils/api/goals';
+import type {GoalWithLocation} from '@/utils/mapApi';
+
 type IWindow =
 	| 'login'
 	| 'registration'
@@ -24,10 +31,48 @@ type IWindow =
 
 export type IFuncModal = () => boolean | void | Promise<boolean | void>;
 
+export interface IModalFolder {
+	id: number;
+	name: string;
+	color: string;
+	icon: string;
+}
+
+/** Пропсы модалок через ModalStore — набор полей зависит от window. */
+export interface IModalProps {
+	title?: string;
+	initialEmail?: string;
+	goalId?: number;
+	goalTitle?: string;
+	goalFolders?: IModalFolder[];
+	onFolderSelected?: (folder: IModalFolder) => void;
+	onSuccess?: () => void;
+	defaultListId?: string | null;
+	currentProgress?: IGoalProgress;
+	onProgressUpdate?: (progress: IGoalProgress) => void | Promise<void>;
+	onGoalCompleted?: () => void;
+	goals?: IShortGoal[] | GoalWithLocation[];
+	listCode?: string;
+	onSave?: (settings: RegularGoalSettings) => void | Promise<void>;
+	initialSettings?: Partial<RegularGoalSettings>;
+	comparisonData?: CompareFriendData | null;
+	isComparing?: boolean;
+	commentId?: number;
+	editComment?: IComment;
+	goalListId?: number;
+	onReviewAdded?: () => void;
+	onReviewRemoved?: () => void;
+	location?: ILocation;
+	userVisitedLocation?: boolean;
+	onLocationSelect?: (location: Partial<ILocation>) => void;
+	initialLocation?: Partial<ILocation>;
+}
+
 interface IModalStore {
 	isOpen: boolean;
 	window: IWindow;
 	funcModal: IFuncModal;
+	modalProps: IModalProps | null;
 }
 
 class Store implements IModalStore {
@@ -35,7 +80,7 @@ class Store implements IModalStore {
 
 	window: IWindow = 'login';
 
-	modalProps: any;
+	modalProps: IModalProps | null = null;
 
 	// eslint-disable-next-line class-methods-use-this
 	funcModal: IFuncModal = () => undefined;
@@ -56,7 +101,7 @@ class Store implements IModalStore {
 		this.funcModal = func;
 	};
 
-	setModalProps = (props: any) => {
+	setModalProps = (props: IModalProps | null) => {
 		this.modalProps = props;
 	};
 }
