@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {useLocation, useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate, useSearchParams} from 'react-router-dom';
 import {scroller} from 'react-scroll';
 
 import {Banner} from '@/components/Banner/Banner';
@@ -26,6 +26,7 @@ import {getUser} from '@/utils/api/get/getUser';
 import {getGoalsInProgress, IGoalProgress, updateGoalProgress} from '@/utils/api/goals';
 import {DEMO_PROGRESS_GOALS} from '@/utils/goalProgress/progressDemoGoals';
 import {isPremiumSubscriptionActive} from '@/utils/regularGoal/checkRegularGoalsAddLimit';
+import {getMultiValueParam, getPageParam, getSingleValueParam, getSortIndexParam} from '@/utils/urlListState';
 
 import '@/components/CatalogItems/catalog-items.scss';
 import './user-self-progress.scss';
@@ -52,13 +53,18 @@ export const UserSelfProgress: FC = observer(() => {
 	const progressGoalsCount = UserStore.userSelf.counts?.progressGoals;
 	const skipProgressCountSyncRef = useRef(true);
 
+	const [searchParams, setSearchParams] = useSearchParams();
+
 	const [goals, setGoals] = useState<IGoalProgress[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const [search, setSearch] = useState('');
-	const [activeSort, setActiveSort] = useState(0);
-	const [filterValues, setFilterValues] = useState<Record<string, string[]>>({categories: [], complexity: []});
+	const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
+	const [activeSort, setActiveSort] = useState(() => getSortIndexParam(searchParams, 'sort', SORT_OPTIONS));
+	const [filterValues, setFilterValues] = useState<Record<string, string[]>>(() => ({
+		categories: getMultiValueParam(searchParams, 'categories'),
+		complexity: getSingleValueParam(searchParams, 'complexity'),
+	}));
 	const [pagination, setPagination] = useState<IPaginationPage | null>(null);
-	const [currentPage, setCurrentPage] = useState(1);
+	const [currentPage, setCurrentPage] = useState(() => getPageParam(searchParams));
 	const [isPageLoading, setIsPageLoading] = useState(false);
 	const [todayCount, setTodayCount] = useState<number>(0);
 	const [isBulkTodayUpdating, setIsBulkTodayUpdating] = useState(false);
@@ -136,11 +142,71 @@ export const UserSelfProgress: FC = observer(() => {
 
 	const filteredAllGoals = useMemo(() => applyFiltersAndSort(goals), [goals, applyFiltersAndSort]);
 
-	const handleSearchChange = (value: string) => setSearch(value);
-	const handleFilterChange = (key: string, selected: string[]) => {
-		setFilterValues((prev) => ({...prev, [key]: selected}));
+	// Синхронизируем поиск/фильтры/сортировку/страницу с URL, чтобы кнопка "назад" в браузере
+	// восстанавливала то же состояние списка
+	const syncProgressUrl = useCallback(
+		(overrides: {search?: string; sortIndex?: number; filters?: Record<string, string[]>; page?: number}) => {
+			const nextSearch = overrides.search ?? search;
+			const nextSortIndex = overrides.sortIndex ?? activeSort;
+			const nextFilters = overrides.filters ?? filterValues;
+			const nextPage = overrides.page ?? currentPage;
+
+			setSearchParams(
+				(prev) => {
+					const next = new URLSearchParams(prev);
+
+					if (nextSearch.trim()) {
+						next.set('search', nextSearch.trim());
+					} else {
+						next.delete('search');
+					}
+
+					if (nextFilters['categories']?.length > 0) {
+						next.set('categories', nextFilters['categories'].join(','));
+					} else {
+						next.delete('categories');
+					}
+
+					if (nextFilters['complexity']?.length > 0) {
+						next.set('complexity', nextFilters['complexity'][0]);
+					} else {
+						next.delete('complexity');
+					}
+
+					if (nextSortIndex > 0 && SORT_OPTIONS[nextSortIndex]) {
+						next.set('sort', SORT_OPTIONS[nextSortIndex].value);
+					} else {
+						next.delete('sort');
+					}
+
+					if (nextPage > 1) {
+						next.set('page', String(nextPage));
+					} else {
+						next.delete('page');
+					}
+
+					return next;
+				},
+				{replace: true}
+			);
+		},
+		[search, activeSort, filterValues, currentPage, setSearchParams]
+	);
+
+	const handleSearchChange = (value: string) => {
+		setSearch(value);
+		syncProgressUrl({search: value});
 	};
-	const handleFilterReset = () => setFilterValues({categories: [], complexity: []});
+	const handleFilterChange = (key: string, selected: string[]) => {
+		const nextFilters = {...filterValues, [key]: selected};
+		setFilterValues(nextFilters);
+		syncProgressUrl({filters: nextFilters});
+	};
+	const handleFilterReset = () => {
+		const nextFilters = {categories: [], complexity: []};
+		setFilterValues(nextFilters);
+		syncProgressUrl({filters: nextFilters});
+	};
 
 	const drawerFilters = useMemo((): FilterGroup[] => {
 		const groups: FilterGroup[] = [];
@@ -159,7 +225,10 @@ export const UserSelfProgress: FC = observer(() => {
 		});
 		return groups;
 	}, [categoryFilters]);
-	const handleSortSelect = (index: number) => setActiveSort(index);
+	const handleSortSelect = (index: number) => {
+		setActiveSort(index);
+		syncProgressUrl({sortIndex: index});
+	};
 
 	const {setIsOpen, setWindow, setModalProps} = ModalStore;
 
@@ -220,7 +289,8 @@ export const UserSelfProgress: FC = observer(() => {
 	};
 
 	useEffect(() => {
-		loadGoalsInProgress();
+		loadGoalsInProgress(currentPage);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useEffect(() => {
@@ -236,7 +306,9 @@ export const UserSelfProgress: FC = observer(() => {
 		if (activeTab === 'today') {
 			setSearch('');
 			setFilterValues({categories: [], complexity: []});
+			syncProgressUrl({search: '', filters: {categories: [], complexity: []}});
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [activeTab]);
 
 	const openProgressModal = (goal: IGoalProgress) => {
@@ -387,6 +459,7 @@ export const UserSelfProgress: FC = observer(() => {
 
 	const goToPage = async (page: number): Promise<boolean> => {
 		await loadGoalsInProgress(page);
+		syncProgressUrl({page});
 		scroller.scrollTo('user-self-progress-goals', {
 			duration: 800,
 			delay: 0,

@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import {FC, useCallback, useEffect, useRef, useState} from 'react';
-import {useLocation, useNavigate, useParams} from 'react-router-dom';
+import {useLocation, useNavigate, useParams, useSearchParams} from 'react-router-dom';
 
 import {useBem} from '@/hooks/useBem';
 import useScreenSize from '@/hooks/useScreenSize';
@@ -19,6 +19,7 @@ import {
 } from '@/utils/api/goals';
 import {addGoal} from '@/utils/api/post/addGoal';
 import {markGoal} from '@/utils/api/post/markGoal';
+import {getSortIndexParam} from '@/utils/urlListState';
 
 import {GoalFolderManagerSkeleton} from './GoalFolderManagerSkeleton';
 import {Banner} from '../Banner/Banner';
@@ -45,6 +46,21 @@ const FOLDER_GOALS_PAGE_SIZE = 30;
 interface GoalFolderManagerProps {
 	className?: string;
 }
+
+const SORT_OPTIONS: OptionSelect[] = [
+	{
+		name: 'Новые',
+		value: 'created_at_desc',
+	},
+	{
+		name: 'Старые',
+		value: 'created_at_asc',
+	},
+	{
+		name: 'Больше целей',
+		value: 'goals_count_desc',
+	},
+];
 
 // const FOLDER_ICONS = ['folder', 'bookmark', 'star', 'heart', 'fire', 'music', 'game', 'video', 'book', 'plane', 'map', 'camera'];
 
@@ -90,9 +106,10 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		is_private: false,
 	});
 	const [deletingFolder, setDeletingFolder] = useState<IGoalFolder | null>(null);
-	const [search, setSearch] = useState('');
+	const [searchParams, setSearchParams] = useSearchParams();
+	const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
 	const [selectedFilters] = useState<string[]>([]);
-	const [activeSort, setActiveSort] = useState(0);
+	const [activeSort, setActiveSort] = useState(() => getSortIndexParam(searchParams, 'sort', SORT_OPTIONS));
 
 	const loadMoreRef = useRef<HTMLDivElement>(null);
 	const loaderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -106,21 +123,6 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	const hasLoadedFoldersOnceRef = useRef(false);
 
 	const isSearchMode = search.trim().length > 0;
-
-	const sortOptions: OptionSelect[] = [
-		{
-			name: 'Новые',
-			value: 'created_at_desc',
-		},
-		{
-			name: 'Старые',
-			value: 'created_at_asc',
-		},
-		{
-			name: 'Больше целей',
-			value: 'goals_count_desc',
-		},
-	];
 
 	const loadFolders = useCallback(async () => {
 		const isFirstLoad = !hasLoadedFoldersOnceRef.current;
@@ -158,7 +160,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 			return true;
 		})
 		.sort((a, b) => {
-			const sortKey = sortOptions[activeSort]?.value;
+			const sortKey = SORT_OPTIONS[activeSort]?.value;
 
 			if (sortKey === 'created_at_desc') {
 				return (b.createdAt || '').localeCompare(a.createdAt || '');
@@ -173,8 +175,40 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 			return 0;
 		});
 
+	// Синхронизируем поиск/сортировку списка папок с URL, чтобы кнопка "назад" в браузере
+	// восстанавливала то же состояние списка
+	const syncFoldersUrl = useCallback(
+		(overrides: {search?: string; sortIndex?: number}) => {
+			const nextSearch = overrides.search ?? search;
+			const nextSortIndex = overrides.sortIndex ?? activeSort;
+
+			setSearchParams(
+				(prev) => {
+					const next = new URLSearchParams(prev);
+
+					if (nextSearch.trim()) {
+						next.set('search', nextSearch.trim());
+					} else {
+						next.delete('search');
+					}
+
+					if (nextSortIndex > 0 && SORT_OPTIONS[nextSortIndex]) {
+						next.set('sort', SORT_OPTIONS[nextSortIndex].value);
+					} else {
+						next.delete('sort');
+					}
+
+					return next;
+				},
+				{replace: true}
+			);
+		},
+		[search, activeSort, setSearchParams]
+	);
+
 	const handleSearchChange = (value: string) => {
 		setSearch(value);
+		syncFoldersUrl({search: value});
 	};
 
 	// Пока не используется
@@ -184,6 +218,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 
 	const handleSortSelect = async (active: number): Promise<void> => {
 		setActiveSort(active);
+		syncFoldersUrl({sortIndex: active});
 	};
 
 	const buttonsSwitch = [
@@ -484,7 +519,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 									multipleSelectedText={['тип', 'типа', 'типов']}
 									multipleThreshold={1}
 								/> */}
-								<Select options={sortOptions} activeOption={activeSort} onSelect={handleSortSelect} filter />
+								<Select options={SORT_OPTIONS} activeOption={activeSort} onSelect={handleSortSelect} filter />
 							</div>
 						</div>
 					</div>

@@ -22,6 +22,10 @@ export function parseListGoalsFilterValues(searchParams: URLSearchParams): Recor
 	};
 }
 
+export function getListGoalsSearchParam(searchParams: URLSearchParams): string {
+	return searchParams.get('search') ?? '';
+}
+
 export function getListGoalsSortIndex(searchParams: URLSearchParams): number {
 	const sortValue = searchParams.get('sort');
 	if (!sortValue) return 0;

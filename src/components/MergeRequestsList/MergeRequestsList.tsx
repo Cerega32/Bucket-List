@@ -1,5 +1,5 @@
-import {FC, useMemo, useState} from 'react';
-import {Link} from 'react-router-dom';
+import {FC, useCallback, useMemo, useState} from 'react';
+import {Link, useSearchParams} from 'react-router-dom';
 
 import {EmptyState} from '@/components/EmptyState/EmptyState';
 import {FieldInput} from '@/components/FieldInput/FieldInput';
@@ -12,6 +12,7 @@ import {Tag} from '@/components/Tag/Tag';
 import {useBem} from '@/hooks/useBem';
 import {IGoalMergeRequest} from '@/utils/api/goals';
 import {formatDateString} from '@/utils/time/formatDate';
+import {getSingleValueParam, getSortIndexParam} from '@/utils/urlListState';
 
 import './merge-requests-list.scss';
 
@@ -91,9 +92,72 @@ export const MergeRequestsList: FC<MergeRequestsListProps> = (props) => {
 	const {className, requests, switchButtons} = props;
 	const [block, element] = useBem('merge-requests-list', className);
 
-	const [search, setSearch] = useState('');
-	const [sortIndex, setSortIndex] = useState(0);
-	const [filterValues, setFilterValues] = useState<Record<string, string[]>>({status: []});
+	const [searchParams, setSearchParams] = useSearchParams();
+	const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
+	const [sortIndex, setSortIndex] = useState(() => getSortIndexParam(searchParams, 'sort', SORT_OPTIONS));
+	const [filterValues, setFilterValues] = useState<Record<string, string[]>>(() => ({
+		status: getSingleValueParam(searchParams, 'status'),
+	}));
+
+	// Синхронизируем поиск/фильтр/сортировку с URL, чтобы кнопка "назад" в браузере
+	// восстанавливала то же состояние списка
+	const syncMergeRequestsUrl = useCallback(
+		(overrides: {search?: string; sortIndex?: number; filters?: Record<string, string[]>}) => {
+			const nextSearch = overrides.search ?? search;
+			const nextSortIndex = overrides.sortIndex ?? sortIndex;
+			const nextFilters = overrides.filters ?? filterValues;
+
+			setSearchParams(
+				(prev) => {
+					const next = new URLSearchParams(prev);
+
+					if (nextSearch.trim()) {
+						next.set('search', nextSearch.trim());
+					} else {
+						next.delete('search');
+					}
+
+					if (nextFilters['status']?.length > 0) {
+						next.set('status', nextFilters['status'][0]);
+					} else {
+						next.delete('status');
+					}
+
+					if (nextSortIndex > 0 && SORT_OPTIONS[nextSortIndex]) {
+						next.set('sort', SORT_OPTIONS[nextSortIndex].value);
+					} else {
+						next.delete('sort');
+					}
+
+					return next;
+				},
+				{replace: true}
+			);
+		},
+		[search, sortIndex, filterValues, setSearchParams]
+	);
+
+	const handleSearchChange = (value: string) => {
+		setSearch(value);
+		syncMergeRequestsUrl({search: value});
+	};
+
+	const handleSortSelect = (index: number) => {
+		setSortIndex(index);
+		syncMergeRequestsUrl({sortIndex: index});
+	};
+
+	const handleFilterChange = (key: string, selected: string[]) => {
+		const nextFilters = {...filterValues, [key]: selected};
+		setFilterValues(nextFilters);
+		syncMergeRequestsUrl({filters: nextFilters});
+	};
+
+	const handleFilterReset = () => {
+		const nextFilters = {status: []};
+		setFilterValues(nextFilters);
+		syncMergeRequestsUrl({filters: nextFilters});
+	};
 
 	const visibleRequests = useMemo(() => {
 		const statusFilter = filterValues['status']?.[0];
@@ -129,20 +193,20 @@ export const MergeRequestsList: FC<MergeRequestsListProps> = (props) => {
 						placeholder="Поисковой запрос"
 						id="merge-requests-search"
 						value={search}
-						setValue={setSearch}
+						setValue={handleSearchChange}
 						iconBegin="search"
 						iconEnd={search.trim() ? 'cross' : undefined}
-						iconEndClick={search.trim() ? () => setSearch('') : undefined}
+						iconEndClick={search.trim() ? () => handleSearchChange('') : undefined}
 					/>
 					<div className={element('categories-wrapper')}>
 						<FiltersDrawer
 							filters={STATUS_FILTERS}
 							values={filterValues}
-							onChange={(key, selected) => setFilterValues((prev) => ({...prev, [key]: selected}))}
-							onReset={() => setFilterValues({status: []})}
+							onChange={handleFilterChange}
+							onReset={handleFilterReset}
 							totalCount={visibleRequests.length}
 						/>
-						<Select options={SORT_OPTIONS} activeOption={sortIndex} onSelect={setSortIndex} filter />
+						<Select options={SORT_OPTIONS} activeOption={sortIndex} onSelect={handleSortSelect} filter />
 					</div>
 				</div>
 			</div>
