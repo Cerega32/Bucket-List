@@ -6,12 +6,12 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import remarkGfm from 'remark-gfm';
 
-import {LightboxWithScrollLock} from '@/components/LightboxWithScrollLock/LightboxWithScrollLock';
-import {NewsComments} from '@/components/NewsComments/NewsComments';
-import {useBem} from '@/hooks/useBem';
-import {newsStore} from '@/store/NewsStore';
-import {ThemeStore} from '@/store/ThemeStore';
-import {pluralize} from '@/utils/text/pluralize';
+import {newsStore} from '@/entities/news/model/NewsStore';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import {pluralize} from '@/shared/lib/text/pluralize';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {LightboxWithScrollLock} from '@/shared/ui/LightboxWithScrollLock/LightboxWithScrollLock';
+import {NewsComments} from '@/widgets/news-comments/NewsComments';
 import './news-detail-page.scss';
 
 export const NewsDetailPage = observer(() => {

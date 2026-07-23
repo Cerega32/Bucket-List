@@ -1,0 +1,172 @@
+import {motion} from 'framer-motion';
+import {observer} from 'mobx-react-lite';
+import {FC, useState} from 'react';
+import {Link} from 'react-router-dom';
+
+import {UserStore} from '@/entities/user/model/UserStore';
+import {FeedbackModal} from '@/features/feedback/FeedbackModal';
+import {resetCookieConsent} from '@/shared/config/legal/cookieConsent';
+import {CONTACTS_REQUISITES_URL} from '@/shared/config/legal/operatorInfo';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import useScreenSize from '@/shared/lib/hooks/useScreenSize';
+import {ThemeModeStore} from '@/shared/model/ThemeModeStore';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {Svg} from '@/shared/ui/Svg/Svg';
+
+import '@/widgets/footer/footer.scss';
+
+interface FooterProps {
+	className?: string;
+}
+
+export const Footer: FC<FooterProps> = observer((props) => {
+	const {className} = props;
+
+	const {footer} = ThemeStore;
+	const {isAuth} = UserStore;
+	const {isScreenMobile} = useScreenSize();
+	const logoIcon = ThemeModeStore.mode === 'dark' ? 'delting-light' : 'delting';
+
+	const [block, element] = useBem('footer', className);
+	const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+
+	const currentYear = new Date().getFullYear();
+
+	const navigationSections = [
+		{
+			title: 'Платформа',
+			links: [
+				{to: '/list/100-goals', label: '100 целей'},
+				{to: '/categories/all', label: 'Каталог целей'},
+				{to: '/leaders', label: 'Лидеры'},
+				{to: '/news', label: 'Новости'},
+				...(isAuth ? [] : [{to: '/tariffs', label: 'Тарифы'}]),
+			],
+		},
+		...(isAuth
+			? [
+					{
+						title: 'Мой профиль',
+						links: [
+							{to: '/user/self', label: 'Дашборд'},
+							{to: '/user/self/active-goals', label: 'Активные цели'},
+							{to: '/user/self/achievements', label: 'Достижения'},
+							{to: '/user/self/friends', label: 'Друзья'},
+							{to: '/user/self/subs', label: 'Подписка'},
+							{to: '/user/self/settings', label: 'Настройки'},
+						],
+					},
+			  ]
+			: []),
+		{
+			title: 'Ресурсы',
+			links: [
+				{to: '/about', label: 'О проекте'},
+				{to: '/help', label: 'Помощь'},
+				{to: '/contacts', label: 'Контакты'},
+				{to: '', label: 'Оставить отзыв', feedbackModal: true},
+			],
+		},
+		{
+			title: 'Правовая информация',
+			links: [
+				{to: '/privacy', label: 'Конфиденциальность'},
+				{to: '/agreement', label: 'Соглашение'},
+				{to: '/subscription-offer', label: 'Оферта Premium'},
+				{to: '/subscription-refund', label: 'Возврат подписки'},
+				{to: '/cookies', label: 'Cookie'},
+				{to: '', label: 'Настройки cookie', cookieSettings: true},
+			],
+		},
+	];
+
+	return (
+		<footer className={block({theme: footer})}>
+			<div className={element('content')}>
+				<motion.div
+					className={element('main-section')}
+					initial={{opacity: 0, y: 20}}
+					whileInView={{opacity: 1, y: 0}}
+					transition={{duration: 0.5}}
+					viewport={{once: true}}
+				>
+					<div className={element('brand')}>
+						<Link to="/" className={element('logo')}>
+							<Svg icon={logoIcon} className={element('logo-icon')} />
+						</Link>
+						<p className={element('description')}>
+							Платформа для достижения целей и саморазвития. Ставьте цели, отслеживайте прогресс и вдохновляйтесь успехами
+							других пользователей.
+						</p>
+					</div>
+
+					<nav className={element('navigation')}>
+						{navigationSections.map((section, index) => (
+							<motion.div
+								key={section.title}
+								className={element('nav-section')}
+								initial={{opacity: 0, y: 20}}
+								whileInView={{opacity: 1, y: 0}}
+								transition={{duration: 0.5, delay: index * 0.1}}
+								viewport={{once: true}}
+							>
+								<h3 className={element('nav-title')}>{section.title}</h3>
+								<ul className={element('nav-list')}>
+									{section.links.map((link) => (
+										<li key={link.to || link.label}>
+											{'feedbackModal' in link && link.feedbackModal ? (
+												<button
+													type="button"
+													className={element('nav-link')}
+													onClick={() => setIsFeedbackModalOpen(true)}
+												>
+													{link.label}
+												</button>
+											) : 'cookieSettings' in link && link.cookieSettings ? (
+												<button type="button" className={element('nav-link')} onClick={resetCookieConsent}>
+													{link.label}
+												</button>
+											) : (
+												<Link to={link.to} className={element('nav-link')}>
+													{link.label}
+												</Link>
+											)}
+										</li>
+									))}
+								</ul>
+							</motion.div>
+						))}
+					</nav>
+				</motion.div>
+
+				<motion.div
+					className={element('bottom-section')}
+					initial={{opacity: 0}}
+					whileInView={{opacity: 1}}
+					transition={{duration: 0.5, delay: 0.3}}
+					viewport={{once: true}}
+				>
+					<div className={element('divider')} />
+					<div className={element('bottom-content')}>
+						<p className={element('copyright')}>
+							<span className={element('copyright-line')}>
+								© {currentYear} Delting. Все права защищены
+								<span className={element('sep')}>|</span>
+								<Link to={CONTACTS_REQUISITES_URL} className={element('requisites-link')}>
+									Реквизиты
+								</Link>
+							</span>
+						</p>
+						{!isScreenMobile && (
+							<div className={element('additional-info')}>
+								<span>Сделано с ❤️ для вашего развития</span>
+							</div>
+						)}
+					</div>
+				</motion.div>
+			</div>
+
+			<FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
+		</footer>
+	);
+});

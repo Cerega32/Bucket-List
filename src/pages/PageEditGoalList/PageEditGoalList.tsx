@@ -1,13 +1,13 @@
 import {FC, useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 
-import {EditGoalList} from '@/components/EditGoalList/EditGoalList';
-import {Loader} from '@/components/Loader/Loader';
-import {NotificationStore} from '@/store/NotificationStore';
-import {ThemeStore} from '@/store/ThemeStore';
-import {IList} from '@/typings/list';
-import {IPage} from '@/typings/page';
-import {getList} from '@/utils/api/get/getList';
+import {getList} from '@/entities/goal-list/api/getList';
+import {IList} from '@/entities/goal-list/model/types';
+import {EditGoalList} from '@/features/edit-goal-list/EditGoalList';
+import {NotificationStore} from '@/shared/model/NotificationStore';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {Loader} from '@/shared/ui/Loader/Loader';
 
 export const PageEditGoalList: FC<IPage> = ({page}) => {
 	const [isLoading, setIsLoading] = useState(true);

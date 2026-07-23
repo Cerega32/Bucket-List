@@ -1,8 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {UserSelf} from '@/containers/UserSelf/UserSelf';
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {UserSelf} from '@/widgets/user-self/UserSelf';
 
 export const PageUserSelf: FC<IPage> = ({page, subPage}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;

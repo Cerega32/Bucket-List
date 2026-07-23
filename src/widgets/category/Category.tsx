@@ -1,0 +1,442 @@
+import {observer} from 'mobx-react-lite';
+import {FC, useCallback, useEffect, useRef, useState} from 'react';
+import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
+import {scroller} from 'react-scroll';
+
+import {getCategories} from '@/entities/category/api/getCategories';
+import {getCategory} from '@/entities/category/api/getCategory';
+import {sortMainCategories} from '@/entities/category/lib/categoriesOrder';
+import {HeaderCategory} from '@/entities/category/ui/HeaderCategory/HeaderCategory';
+import {addGoal} from '@/entities/goal/api/addGoal';
+import {getPopularGoals} from '@/entities/goal/api/getPopularGoals';
+import {markGoal} from '@/entities/goal/api/markGoal';
+import {removeGoal} from '@/entities/goal/api/removeGoal';
+import {refreshHeaderGoalCounts} from '@/entities/goal/lib/refreshHeaderGoalCounts';
+import {ICategoryDetailed, ICategoryWithSubcategories, IGoal} from '@/entities/goal/model/types';
+import {Card} from '@/entities/goal/ui/Card/Card';
+import {addListGoal} from '@/entities/goal-list/api/addListGoal';
+import {getPopularLists} from '@/entities/goal-list/api/getPopularLists';
+import {removeListGoal} from '@/entities/goal-list/api/removeListGoal';
+import {IList} from '@/entities/goal-list/model/types';
+import {addRegularGoalToUser, RegularGoalSettings} from '@/entities/regular-goal/api/addRegularGoalToUser';
+import {getRegularGoalSettings} from '@/entities/regular-goal/api/getRegularGoalSettings';
+import {blockRegularGoalsAddIfLimitReached} from '@/entities/regular-goal/lib/checkRegularGoalsAddLimit';
+import {UserStore} from '@/entities/user/model/UserStore';
+import {CatalogItems} from '@/features/catalog-items/CatalogItems';
+import {RegularGoalSettingsModal} from '@/features/regular-goal-settings/RegularGoalSettingsModal';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import useScreenSize from '@/shared/lib/hooks/useScreenSize';
+import {NotificationStore} from '@/shared/model/NotificationStore';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {Title} from '@/shared/ui/Title/Title';
+import {AllCategories} from '@/widgets/all-categories/AllCategories';
+import {CategoriesSkeleton} from '@/widgets/categories/CategoriesSkeleton';
+import {CategorySkeleton} from '@/widgets/category/CategorySkeleton';
+import '@/widgets/category/category.scss';
+
+const CategoryComponent: FC<IPage> = ({subPage, page}) => {
+	const [block, element] = useBem('category');
+	const {isAuth} = UserStore;
+	const {isScreenSmallMobile} = useScreenSize();
+
+	const [category, setCategory] = useState<ICategoryWithSubcategories | null>(null);
+	const [popularGoals, setPopularGoals] = useState<Array<IGoal>>([]);
+	const [popularLists, setPopularLists] = useState<Array<IList>>([]);
+	const [categories, setCategories] = useState<Array<ICategoryDetailed>>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const refTitle = useRef<HTMLElement>(null);
+
+	// Состояния для модалки регулярных целей
+	const [showRegularModal, setShowRegularModal] = useState(false);
+	const [regularGoalData, setRegularGoalData] = useState<any>(null);
+	const [pendingGoalIndex, setPendingGoalIndex] = useState<number | null>(null);
+	const [isRegularLoading, setIsRegularLoading] = useState(false);
+	const navigate = useNavigate();
+
+	const blockRegularGoalAdd = () =>
+		blockRegularGoalsAddIfLimitReached({
+			onPremium: () => navigate('/user/self/subs'),
+		});
+
+	const {id} = useParams();
+	const [searchParams, setSearchParams] = useSearchParams();
+	const searchQuery = searchParams.get('search') || '';
+	const urlUpdateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const handleCatalogSearchChange = useCallback(
+		(query: string) => {
+			if (urlUpdateTimerRef.current) {
+				clearTimeout(urlUpdateTimerRef.current);
+				urlUpdateTimerRef.current = null;
+			}
+			if (query.trim().length < 2) {
+				setSearchParams((prev) => {
+					const next = new URLSearchParams(prev);
+					next.delete('search');
+					return next;
+				});
+				return;
+			}
+			urlUpdateTimerRef.current = setTimeout(() => {
+				setSearchParams((prev) => {
+					const next = new URLSearchParams(prev);
+					next.set('search', query);
+					return next;
+				});
+				urlUpdateTimerRef.current = null;
+			}, 300);
+		},
+		[setSearchParams]
+	);
+
+	useEffect(
+		() => () => {
+			if (urlUpdateTimerRef.current) clearTimeout(urlUpdateTimerRef.current);
+		},
+		[]
+	);
+
+	// Сбрасываем override при размонтировании / отсутствии HeaderCategory
+	useEffect(() => {
+		const hasHeader = !!(id && id !== 'all');
+		if (!hasHeader) {
+			ThemeStore.setPreHeaderHiddenOverride(null);
+		} else {
+			ThemeStore.setPreHeaderHiddenOverride(false);
+		}
+		return () => {
+			ThemeStore.setPreHeaderHiddenOverride(null);
+		};
+	}, [id]);
+
+	const handleHeaderCompactChange = useCallback((compact: boolean) => {
+		ThemeStore.setPreHeaderHiddenOverride(compact);
+	}, []);
+
+	const [headerHeight, setHeaderHeight] = useState<number | null>(null);
+	const handleHeaderHeightChange = useCallback((h: number) => {
+		setHeaderHeight(h);
+	}, []);
+
+	useEffect(() => {
+		// Скроллим к каталогу при наличии поискового запроса
+		if (searchQuery && !id) {
+			// Добавляем небольшую задержку для загрузки страницы
+			setTimeout(() => {
+				scroller.scrollTo('all-goals-and-lists', {
+					duration: 800,
+					delay: 100,
+					smooth: 'easeInOutQuart',
+					offset: -150,
+				});
+			}, 500);
+		}
+	}, [searchQuery, id]);
+
+	useEffect(() => {
+		(async () => {
+			setIsLoading(true);
+
+			if (!id) {
+				setCategory(null);
+			}
+
+			const promises = [];
+
+			if (!id) {
+				promises.push(getCategories());
+			} else {
+				promises.push(getCategory(id));
+			}
+
+			promises.push(getPopularGoals(id || 'all'));
+			promises.push(getPopularLists(id || 'all'));
+
+			const [categoriesRes, goalsRes, listsRes] = await Promise.all(promises);
+
+			if (!id && categoriesRes.success) {
+				setCategories(sortMainCategories(categoriesRes.data));
+			} else if (id && categoriesRes.success) {
+				setCategory(categoriesRes.data);
+			}
+
+			if (goalsRes.success) {
+				setPopularGoals(goalsRes.data);
+			}
+
+			if (listsRes.success) {
+				setPopularLists(listsRes.data);
+			}
+
+			setIsLoading(false);
+		})();
+	}, [id, isAuth]);
+
+	const updateGoal = async (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
+		// Специальная обработка для добавления цели - проверяем на регулярность
+		if (operation === 'add') {
+			try {
+				// Проверяем, является ли цель регулярной
+				const regularSettings = await getRegularGoalSettings(code);
+
+				if (regularSettings.success && regularSettings.data) {
+					if (blockRegularGoalAdd()) {
+						return;
+					}
+
+					// Если настройки можно изменить, показываем модалку
+					if (regularSettings.data.regular_settings?.allowCustomSettings) {
+						setRegularGoalData(regularSettings.data);
+						setPendingGoalIndex(i); // Запоминаем индекс цели для последующего обновления
+						setShowRegularModal(true);
+						return; // Выходим из функции, добавление будет происходить в модалке
+					}
+					// Если настройки нельзя изменить, используем обычный endpoint /add/ с базовыми настройками
+					const response = await addGoal(code);
+
+					if (response.success) {
+						const updatedGoal = {
+							...popularGoals[i],
+							addedByUser: true,
+							totalAdded: (popularGoals[i].totalAdded || 0) + 1,
+						};
+						const newGoals = [...popularGoals];
+						newGoals[i] = updatedGoal;
+						setPopularGoals(newGoals);
+						NotificationStore.addNotification({
+							type: 'success',
+							title: 'Успех',
+							message: 'Регулярная цель успешно добавлена!',
+						});
+					}
+					return;
+				}
+			} catch (error) {
+				// Если API регулярности не отвечает или цель не регулярная, продолжаем обычное добавление
+				console.log('Цель не является регулярной или ошибка API');
+			}
+		}
+
+		const res = await (operation === 'add' ? addGoal(code) : operation === 'delete' ? removeGoal(code) : markGoal(code, !done));
+
+		if (res.success && popularGoals) {
+			const updatedGoal = {
+				...popularGoals[i],
+				addedByUser: operation !== 'delete',
+				completedByUser: operation === 'mark' ? !done : operation === 'delete' ? false : popularGoals[i].completedByUser,
+				totalAdded: res.data.totalAdded,
+			};
+
+			const newGoals = [...popularGoals];
+			newGoals[i] = updatedGoal;
+
+			setPopularGoals(newGoals);
+		}
+	};
+
+	const updateList = async (code: string, i: number, operation: 'add' | 'delete'): Promise<void> => {
+		const res = await (operation === 'add' ? addListGoal(code) : removeListGoal(code));
+
+		if (res.success) {
+			const updatedList = {
+				...popularLists[i],
+				addedByUser: operation === 'add',
+				totalAdded: res.data.totalAdded,
+			};
+
+			const newLists = [...popularLists];
+			newLists[i] = updatedList;
+
+			setPopularLists(newLists);
+		}
+	};
+
+	// Обработчики для модалки регулярных целей
+	const handleRegularModalClose = () => {
+		setShowRegularModal(false);
+		setRegularGoalData(null);
+		setPendingGoalIndex(null);
+	};
+
+	const handleRegularGoalSave = async (settings: RegularGoalSettings) => {
+		if (!regularGoalData?.goal || pendingGoalIndex === null) return;
+
+		setIsRegularLoading(true);
+		try {
+			// Явно передаем все поля, включая customSchedule
+			const requestData: RegularGoalSettings = {
+				frequency: settings.frequency,
+				durationType: settings.durationType,
+				allowSkipDays: settings.allowSkipDays,
+				resetOnSkip: settings.resetOnSkip,
+				...(settings.frequency === 'weekly' && settings.weeklyFrequency !== undefined
+					? {weeklyFrequency: settings.weeklyFrequency}
+					: {}),
+				...(settings.frequency === 'custom' && settings.customSchedule !== undefined
+					? {customSchedule: settings.customSchedule}
+					: {}),
+				...(settings.durationType === 'days' || settings.durationType === 'weeks'
+					? settings.durationValue !== undefined
+						? {durationValue: settings.durationValue}
+						: {}
+					: {}),
+				...(settings.durationType === 'until_date' && settings.endDate !== undefined ? {endDate: settings.endDate} : {}),
+			};
+
+			const response = await addRegularGoalToUser(regularGoalData.goal.code, requestData);
+
+			if (response.success) {
+				// Обновляем состояние цели как добавленной
+				const updatedGoal = {
+					...popularGoals[pendingGoalIndex],
+					addedByUser: true,
+					totalAdded: (popularGoals[pendingGoalIndex].totalAdded || 0) + 1,
+				};
+
+				const newGoals = [...popularGoals];
+				newGoals[pendingGoalIndex] = updatedGoal;
+				setPopularGoals(newGoals);
+				refreshHeaderGoalCounts();
+
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Успех',
+					message: 'Регулярная цель успешно добавлена с вашими настройками!',
+				});
+
+				setShowRegularModal(false);
+				setRegularGoalData(null);
+				setPendingGoalIndex(null);
+			} else {
+				throw new Error(response.error || 'Ошибка при добавлении регулярной цели');
+			}
+		} catch (error) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: error instanceof Error ? error.message : 'Не удалось добавить регулярную цель',
+			});
+		} finally {
+			setIsRegularLoading(false);
+		}
+	};
+
+	const showSkeleton = isLoading;
+	const skeletonWithHeader = !!(id && id !== 'all' && !category);
+	const skeletonWithSubs = page === 'isSubCategories' || !!category?.category.parentCategory;
+
+	return (
+		<main
+			className={block({sub: page === 'isSubCategories', empty: !category?.subcategories.length, all: !id})}
+			style={headerHeight != null ? ({'--header-category-height': `${headerHeight}px`} as React.CSSProperties) : undefined}
+		>
+			{id && id !== 'all' && category && (
+				<HeaderCategory
+					category={category}
+					className={element('header')}
+					isSub={page === 'isSubCategories' || !!category.category.parentCategory}
+					refHeader={refTitle}
+					onCompactChange={handleHeaderCompactChange}
+					onHeightChange={handleHeaderHeightChange}
+				/>
+			)}
+			{showSkeleton && <CategorySkeleton withHeader={skeletonWithHeader} withSubcategories={skeletonWithSubs} />}
+			{!!popularGoals.length && (
+				<>
+					<div className={element('wrapper-title')}>
+						<Title tag="h2">Популярные цели этой недели</Title>
+						{/* <Button
+							type="Link"
+							theme="blue"
+							icon="plus"
+							href={`/goals/create${id && id !== 'all' ? `?category=${id}` : ''}`}
+							size="small"
+						>
+							Добавить цель
+						</Button> */}
+					</div>
+
+					<section className={element('popular-goals')}>
+						{popularGoals.map((goal, i) => (
+							<Card
+								goal={goal}
+								className={element('popular-goal')}
+								key={goal.code}
+								onClickAdd={() => updateGoal(goal.code, i, 'add')}
+								onClickDelete={() => updateGoal(goal.code, i, 'delete')}
+								onClickMark={() => updateGoal(goal.code, i, 'mark', goal.completedByUser)}
+							/>
+						))}
+					</section>
+				</>
+			)}
+			{!!popularLists.length && (
+				<>
+					<div className={element('wrapper-title')}>
+						<Title tag="h2">Популярные списки этой недели</Title>
+						{/* <Button
+							type="Link"
+							theme="blue"
+							icon="plus"
+							href={`/list/create${id && id !== 'all' ? `?category=${id}` : ''}`}
+							size="small"
+						>
+							Добавить список целей
+						</Button> */}
+					</div>
+					<section className={element('popular-lists')}>
+						{popularLists.map((list, i) => (
+							<Card
+								horizontal={!isScreenSmallMobile}
+								isList
+								goal={list}
+								className={element('popular-list')}
+								key={list.code}
+								onClickAdd={() => updateList(list.code, i, 'add')}
+								onClickDelete={() => updateList(list.code, i, 'delete')}
+							/>
+						))}
+					</section>
+				</>
+			)}
+
+			<div id="all-goals-and-lists">
+				<Title className={element('title')} tag="h2">
+					Все цели и списки
+				</Title>
+				<CatalogItems
+					code={id || 'all'}
+					className={element('all-goals')}
+					subPage={subPage}
+					category={category}
+					beginUrl={id ? '/categories/' : '/categories/all'}
+					categories={categories}
+					initialSearch={searchQuery}
+					onSearchChange={!id ? handleCatalogSearchChange : undefined}
+					scrollToId="all-goals-and-lists"
+				/>
+				{!id &&
+					(showSkeleton ? (
+						<CategoriesSkeleton />
+					) : (
+						<AllCategories categories={categories} tag="h2" title="Категории" variant="minimal" />
+					))}
+			</div>
+
+			{/* Модалка настройки регулярности */}
+			{showRegularModal && regularGoalData?.regular_settings && (
+				<RegularGoalSettingsModal
+					isOpen={showRegularModal}
+					onClose={handleRegularModalClose}
+					goalData={regularGoalData.goal}
+					originalSettings={regularGoalData.regular_settings}
+					onSave={handleRegularGoalSave}
+					isLoading={isRegularLoading}
+				/>
+			)}
+		</main>
+	);
+};
+
+export const Category = observer(CategoryComponent);

@@ -2,10 +2,10 @@ import {observer} from 'mobx-react-lite';
 import React, {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 
-import {useBem} from '@/hooks/useBem';
-import {newsStore} from '@/store/NewsStore';
-import {ThemeStore} from '@/store/ThemeStore';
-import {pluralize} from '@/utils/text/pluralize';
+import {newsStore} from '@/entities/news/model/NewsStore';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import {pluralize} from '@/shared/lib/text/pluralize';
+import {ThemeStore} from '@/shared/model/ThemeStore';
 
 import {NewsPageSkeleton} from './NewsPageSkeleton';
 import './news-page.scss';

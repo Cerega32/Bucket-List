@@ -1,0 +1,71 @@
+import {FC, useMemo, useState} from 'react';
+
+import {IGoal} from '@/entities/goal/model/types';
+import {CardMain} from '@/entities/goal/ui/CardMain/CardMain';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import useScreenSize from '@/shared/lib/hooks/useScreenSize';
+import {Button} from '@/shared/ui/Button/Button';
+import {SwitchButton} from '@/shared/ui/SwitchButton/SwitchButton';
+import '@/widgets/main-popular/main-popular.scss';
+
+interface MainPopularProps {
+	className?: string;
+	goalsForDay: IGoal[];
+	goalsForAllTime: IGoal[];
+}
+
+export const MainPopular: FC<MainPopularProps> = (props) => {
+	const {className, goalsForDay, goalsForAllTime} = props;
+
+	const [block, element] = useBem('main-popular', className);
+	const [active, setActive] = useState('top');
+	const {isScreenMobile, isScreenSmallTablet} = useScreenSize();
+
+	const bigCardsCount = useMemo(() => {
+		if (isScreenMobile) return 1;
+		if (isScreenSmallTablet) return 2;
+		return 3;
+	}, [isScreenMobile, isScreenSmallTablet]);
+
+	return (
+		<section className={block()}>
+			<div className={element('header')}>
+				<SwitchButton
+					buttons={[
+						{id: 'top', name: 'Топ целей'},
+						{id: 'today', name: 'Популярные сегодня'},
+					]}
+					active={active}
+					onChange={setActive}
+				/>
+				<Button icon="rocket" theme="no-border" type="Link" href="/categories/all">
+					Выбрать свою цель
+				</Button>
+			</div>
+			<div className={element('content')}>
+				{active === 'top' &&
+					goalsForAllTime?.map((goal, i) => (
+						<CardMain
+							key={goal.code}
+							goal={goal}
+							className={element('card', {big: i < bigCardsCount})}
+							big={i < bigCardsCount}
+							colored
+							topInfoClassName="gradient__top-info--main-goals"
+						/>
+					))}
+				{active === 'today' &&
+					goalsForDay?.map((goal, i) => (
+						<CardMain
+							key={goal.code}
+							goal={goal}
+							className={element('card', {big: i < bigCardsCount})}
+							big={i < bigCardsCount}
+							colored
+							topInfoClassName="gradient__top-info--main-goals"
+						/>
+					))}
+			</div>
+		</section>
+	);
+};

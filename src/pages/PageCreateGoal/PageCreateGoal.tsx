@@ -1,8 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {AddGoal} from '@/components/AddGoal/AddGoal';
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
+import {AddGoal} from '@/features/add-goal/AddGoal';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
 
 export const PageCreateGoal: FC<IPage> = ({page}) => {
 	const {setPage, setHeader, setFull} = ThemeStore;

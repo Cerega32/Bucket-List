@@ -1,9 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
-
-import {HelpContainer} from '../../containers/HelpContainer/HelpContainer';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {HelpContainer} from '@/widgets/help-container/HelpContainer';
 
 export const PageHelp: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;

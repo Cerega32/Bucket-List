@@ -1,9 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
-
-import {AgreementContainer} from '../../containers/AgreementContainer/AgreementContainer';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {AgreementContainer} from '@/widgets/agreement/AgreementContainer';
 
 export const PageAgreement: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;

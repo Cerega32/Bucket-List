@@ -1,0 +1,39 @@
+import {FC} from 'react';
+
+import {IGoal} from '@/entities/goal/model/types';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import {Svg} from '@/shared/ui/Svg/Svg';
+import '@/entities/goal/ui/GoalSearchItem/goal-search-item.scss';
+
+interface GoalSearchItemProps {
+	goal: IGoal;
+	onAdd: (goal: IGoal) => void;
+}
+
+export const GoalSearchItem: FC<GoalSearchItemProps> = ({goal, onAdd}) => {
+	const [block, element] = useBem('goal-search-item');
+
+	return (
+		<div className={block()}>
+			<div className={element('content')}>
+				<div className={element('image-container')}>
+					{goal.image ? (
+						<img src={goal.image} alt={goal.title} className={element('image')} />
+					) : (
+						<div className={element('no-image')}>
+							<Svg icon="mount" />
+						</div>
+					)}
+				</div>
+				<div className={element('info')}>
+					<h4 className={element('title')}>{goal.title}</h4>
+					<p className={element('complexity')}>{goal.complexity}</p>
+					<p className={element('description')}>{goal.shortDescription}</p>
+				</div>
+			</div>
+			<button type="button" className={element('add-btn')} onClick={() => onAdd(goal)} aria-label="Добавить цель">
+				<Svg icon="plus" />
+			</button>
+		</div>
+	);
+};

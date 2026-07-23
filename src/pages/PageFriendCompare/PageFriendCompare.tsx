@@ -2,11 +2,11 @@ import {observer} from 'mobx-react-lite';
 import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 
-import {Button} from '@/components/Button/Button';
-import {FriendCompareView} from '@/components/FriendCompareView/FriendCompareView';
-import {Loader} from '@/components/Loader/Loader';
-import {useBem} from '@/hooks/useBem';
-import {ComparisonData, compareWithFriend} from '@/utils/api/friends/friendsApi';
+import {ComparisonData, compareWithFriend} from '@/entities/friend/api/friendsApi';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import {Button} from '@/shared/ui/Button/Button';
+import {Loader} from '@/shared/ui/Loader/Loader';
+import {FriendCompareView} from '@/widgets/friend-compare-view/FriendCompareView';
 
 import './page-friend-compare.scss';
 

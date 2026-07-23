@@ -1,0 +1,147 @@
+import {FC, useEffect, useState} from 'react';
+import {Link} from 'react-router-dom';
+
+import {IShortGoal} from '@/entities/goal/model/types';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import {Button} from '@/shared/ui/Button/Button';
+import {Gradient} from '@/shared/ui/Gradient/Gradient';
+import {Line} from '@/shared/ui/Line/Line';
+import {Tag} from '@/shared/ui/Tag/Tag';
+import {Title} from '@/shared/ui/Title/Title';
+
+import '@/entities/goal/ui/CardMain/card-main.scss';
+
+interface CardMainProps {
+	className?: string;
+	goal: IShortGoal;
+	big?: boolean;
+	withBtn?: boolean;
+	updateGoal?: () => void;
+	colored?: boolean;
+	topInfoClassName?: string;
+	disableNavigation?: boolean;
+}
+export const CardMain: FC<CardMainProps> = (props) => {
+	const {className, goal, big, withBtn, updateGoal, colored, topInfoClassName, disableNavigation} = props;
+
+	const [block, element] = useBem('card-main', className);
+
+	const [isTouch, setIsTouch] = useState(false);
+
+	useEffect(() => {
+		if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+		const mql = window.matchMedia('(hover: none)');
+		const update = () => setIsTouch(mql.matches);
+		update();
+		if (mql.addEventListener) {
+			mql.addEventListener('change', update);
+			return () => mql.removeEventListener('change', update);
+		}
+		mql.addListener(update);
+		return () => mql.removeListener(update);
+	}, []);
+	const isColoredCard = colored || goal.completedByUser;
+
+	const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		event.preventDefault();
+		if (updateGoal) {
+			updateGoal();
+		}
+	};
+
+	return (
+		<section className={block({big, withBtn})}>
+			{disableNavigation ? (
+				<div className={element('gradient')}>
+					<Gradient
+						img={{src: goal.image, alt: goal.title}}
+						category={goal.category.nameEn}
+						blacked={!colored && !goal.completedByUser}
+						withBlack={goal.completedByUser}
+						topInfoClassName={topInfoClassName}
+					>
+						<div className={element('info')}>
+							<div className={element('img-tags')}>
+								{goal.completedByUser && <Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} />}
+								{isColoredCard ? (
+									<Tag
+										text={goal.category.name}
+										category={goal.category.nameEn}
+										className={element('img-tag-category')}
+									/>
+								) : (
+									<Tag text={goal.category.name} theme="gray" className={element('img-tag-category')} />
+								)}
+							</div>
+							<div>
+								<Title tag="h3" className={element('title')} theme="white">
+									{goal.title}
+								</Title>
+								{withBtn && <Line className={element('line')} />}
+								<div className={element('bottom')}>
+									<p className={element('text')}>{goal.shortDescription}</p>
+									{withBtn && (
+										<Button
+											className={element('btn')}
+											icon="done"
+											theme={goal.completedByUser ? 'green' : 'blue'}
+											size={isTouch ? 'small' : undefined}
+											onClick={handleButtonClick}
+										>
+											{isTouch ? undefined : goal.completedByUser ? 'Выполнено' : 'Выполнить'}
+										</Button>
+									)}
+								</div>
+							</div>
+						</div>
+					</Gradient>
+				</div>
+			) : (
+				<Link to={`/goals/${goal.code}`} className={element('gradient')}>
+					<Gradient
+						img={{src: goal.image, alt: goal.title}}
+						category={goal.category.nameEn}
+						blacked={!colored && !goal.completedByUser}
+						withBlack={goal.completedByUser}
+						topInfoClassName={topInfoClassName}
+					>
+						<div className={element('info')}>
+							<div className={element('img-tags')}>
+								{goal.completedByUser && <Tag icon="done" theme="green" classNameIcon={element('img-tag-icon-done')} />}
+								{isColoredCard ? (
+									<Tag
+										text={goal.category.name}
+										category={goal.category.nameEn}
+										className={element('img-tag-category')}
+									/>
+								) : (
+									<Tag text={goal.category.name} theme="gray" className={element('img-tag-category')} />
+								)}
+							</div>
+							<div>
+								<Title tag="h3" className={element('title')} theme="white">
+									{goal.title}
+								</Title>
+								{withBtn && <Line className={element('line')} />}
+								<div className={element('bottom')}>
+									<p className={element('text')}>{goal.shortDescription}</p>
+									{withBtn && (
+										<Button
+											className={element('btn')}
+											icon="done"
+											theme={goal.completedByUser ? 'green' : 'blue'}
+											size={isTouch ? 'small' : undefined}
+											onClick={handleButtonClick}
+										>
+											{isTouch ? undefined : goal.completedByUser ? 'Выполнено' : 'Выполнить'}
+										</Button>
+									)}
+								</div>
+							</div>
+						</div>
+					</Gradient>
+				</Link>
+			)}
+		</section>
+	);
+};

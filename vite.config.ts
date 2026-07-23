@@ -27,7 +27,7 @@ export default defineConfig(({mode}) => {
 					// Vite 4 не поддерживает api: 'modern' (только с 5.4+). Подавляем предупреждение до перехода на Vite 5.4+.
 					silenceDeprecations: ['legacy-js-api'],
 					additionalData: `
-					@use "@/_commons/styles-supports/mixins" as *;
+					@use "@/shared/styles/mixins" as *;
 				`,
 				},
 			},

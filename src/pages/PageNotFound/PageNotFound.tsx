@@ -1,8 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {NotFound} from '@/containers/NotFound/NotFound';
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {NotFound} from '@/widgets/not-found/NotFound';
 
 export const PageNotFound: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;

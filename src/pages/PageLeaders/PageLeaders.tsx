@@ -1,8 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {Leaders} from '@/containers/Leaders/Leaders';
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {Leaders} from '@/widgets/leaders/Leaders';
 
 export const PageLeaders: FC<IPage> = ({page}) => {
 	const {setPage, setHeader, setFull} = ThemeStore;

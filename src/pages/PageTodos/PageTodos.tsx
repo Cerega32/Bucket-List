@@ -1,19 +1,18 @@
 import {observer} from 'mobx-react-lite';
 import React, {useEffect, useState} from 'react';
 
-import {ModalStore} from '@/store/ModalStore';
-import {ThemeStore} from '@/store/ThemeStore';
-import {TodoStore} from '@/store/TodoStore';
-import {UserStore} from '@/store/UserStore';
-import {IPage} from '@/typings/page';
-
-import {Button} from '../../components/Button/Button';
-import {SEO} from '../../components/SEO/SEO';
-import {TodoCalendar} from '../../components/TodoCalendar/TodoCalendar';
-import {TodoFilters} from '../../components/TodoFilters/TodoFilters';
-import {TodoListsContainer} from '../../components/TodoListsContainer/TodoListsContainer';
-import {TodoStatsWidget} from '../../components/TodoStatsWidget/TodoStatsWidget';
-import {TodoTasksContainer} from '../../components/TodoTasksContainer/TodoTasksContainer';
+import {TodoStore} from '@/entities/todo/model/TodoStore';
+import {UserStore} from '@/entities/user/model/UserStore';
+import {ModalStore} from '@/shared/model/ModalStore';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {Button} from '@/shared/ui/Button/Button';
+import {SEO} from '@/shared/ui/SEO/SEO';
+import {TodoCalendar} from '@/widgets/todo-calendar/TodoCalendar';
+import {TodoFilters} from '@/widgets/todo-filters/TodoFilters';
+import {TodoListsContainer} from '@/widgets/todo-lists/TodoListsContainer';
+import {TodoStatsWidget} from '@/widgets/todo-stats/TodoStatsWidget';
+import {TodoTasksContainer} from '@/widgets/todo-tasks/TodoTasksContainer';
 import './page-todos.scss';
 
 const PageTodos: React.FC<IPage> = observer(({page}) => {

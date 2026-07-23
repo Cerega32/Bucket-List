@@ -1,0 +1,216 @@
+.header-category {
+	position: fixed;
+	z-index: 109;
+	top: var(--header-fixed-top);
+	left: 0;
+	width: 100vw;
+	padding: calc(var(--header-stack-height) + 56px) 0 56px;
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+	background-size: cover;
+
+	&::after {
+		position: absolute;
+		z-index: 1;
+		top: 0;
+		left: 0;
+		display: block;
+		width: 100%;
+		height: 100%;
+		content: '';
+	}
+
+	&__title-wrapper {
+		position: relative;
+		z-index: 2;
+		max-width: 1440px;
+		margin: 0 auto;
+		min-width: 0;
+
+		// Inline flow: parent title, separator and subcategory wrap like regular text
+		> * {
+			display: inline;
+		}
+
+		> * > * {
+			display: inline;
+		}
+
+		@include xl {
+			margin: 0 24px;
+		}
+	}
+
+	&--fixed &__title-wrapper {
+		display: flex;
+		align-items: baseline;
+		max-height: 52px;
+		overflow: hidden;
+		// stylelint-disable-next-line no-unknown-animations -- defined in scaffolding.scss
+		animation: rise-from-bottom 0.3s ease-out;
+
+		// Сбрасываем inline flow из базового стиля
+		> * {
+			display: revert;
+		}
+
+		> * > * {
+			display: revert;
+		}
+	}
+
+	&__title-separator {
+		flex-shrink: 0;
+		margin: 0 8px;
+		opacity: 0.72;
+	}
+
+	&__title-link {
+		flex: 0 2 auto;
+		min-width: 0;
+		color: rgb(var(--color-white-rgb) / 72%);
+
+		> * {
+			min-width: 0;
+		}
+	}
+
+	&__title {
+		flex: 0 1 auto;
+		min-width: 0;
+	}
+
+	&--fixed &__title-link {
+		max-width: 75%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		flex-shrink: 0;
+
+		> * {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		@include md {
+			max-width: none;
+			overflow: visible;
+			text-overflow: clip;
+
+			> * {
+				overflow: visible;
+				text-overflow: clip;
+			}
+		}
+	}
+
+	&--fixed &__title {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&--fixed &__title-group {
+		display: flex;
+		align-items: baseline;
+		flex: 1;
+		min-width: 0;
+	}
+
+	&--fixed &__title-group > &__title {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		min-width: 0;
+	}
+
+	&__title,
+	&__title-link,
+	&__title-separator {
+		font-size: 40px;
+		line-height: var(--line-height-40);
+	}
+
+	&__title-link-text {
+		color: rgb(var(--color-white-rgb) / 72%);
+	}
+
+	&__title:only-child {
+		flex: 0 1 auto;
+		max-width: 100%;
+	}
+
+	&__subcategories {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 24px;
+		max-width: 1440px;
+		margin: 56px auto 0;
+
+		@include xl {
+			margin: 56px 24px 0;
+		}
+
+		@include xs {
+			flex-direction: column;
+		}
+	}
+
+	&__subcategory {
+		position: relative;
+		z-index: 2;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		text-align: center;
+		gap: 12px;
+		width: 216px;
+		padding: 16px 24px;
+		background: rgb(var(--color-white-rgb) / 8%);
+		border: 1px solid rgb(var(--color-white-rgb) / 16%);
+		border-radius: 8px;
+		color: var(--color-white);
+		font-weight: var(--weight-semi-bold);
+		transition: all 0.15s ease-in-out;
+
+		@include xs {
+			width: 100%;
+		}
+
+		&:hover {
+			background: rgb(var(--color-primary-hover-rgb) / 8%);
+			border: 1px solid rgb(var(--color-primary-hover-rgb) / 16%);
+		}
+	}
+
+	&__subcategory-icon {
+		width: 30px;
+		height: 30px;
+		object-fit: contain;
+		filter: brightness(0) invert(1);
+	}
+
+	&--fixed {
+		padding: calc(var(--header-stack-height-compact) + 16px) 0 16px;
+
+		@include sm {
+			padding: calc(var(--header-stack-height-compact) + 60px) 0 12px;
+		}
+	}
+
+	&--fixed &__title,
+	&--fixed &__title-link,
+	&--fixed &__title-link-text,
+	&--fixed &__title-separator {
+		font-size: 22px;
+		line-height: var(--line-height-22);
+	}
+
+	@each $category in $main-categories {
+		&--category-#{$category}::after {
+			@include category-header-gradient($category);
+		}
+	}
+}

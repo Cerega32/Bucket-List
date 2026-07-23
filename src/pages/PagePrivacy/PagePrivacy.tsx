@@ -1,9 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
-
-import {PrivacyContainer} from '../../containers/PrivacyContainer/PrivacyContainer';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {PrivacyContainer} from '@/widgets/privacy/PrivacyContainer';
 
 export const PagePrivacy: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;

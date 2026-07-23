@@ -1,14 +1,14 @@
 import {FC, FormEvent, useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
-import {Button} from '@/components/Button/Button';
-import {FieldInput} from '@/components/FieldInput/FieldInput';
-import {Svg} from '@/components/Svg/Svg';
-import {Title} from '@/components/Title/Title';
-import {useBem} from '@/hooks/useBem';
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
-import {postResetPasswordConfirm} from '@/utils/api/post/postResetPasswordConfirm';
+import {postResetPasswordConfirm} from '@/entities/user/api/postResetPasswordConfirm';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {Button} from '@/shared/ui/Button/Button';
+import {FieldInput} from '@/shared/ui/FieldInput/FieldInput';
+import {Svg} from '@/shared/ui/Svg/Svg';
+import {Title} from '@/shared/ui/Title/Title';
 
 import './PageResetPassword.scss';
 

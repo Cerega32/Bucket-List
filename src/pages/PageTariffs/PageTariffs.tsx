@@ -1,9 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
-
-import {TariffsContainer} from '../../containers/TariffsContainer/TariffsContainer';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {TariffsContainer} from '@/widgets/tariffs/TariffsContainer';
 
 export const PageTariffs: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;
