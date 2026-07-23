@@ -1,9 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
-
-import {SubscriptionRefundContainer} from '../../containers/SubscriptionRefundContainer/SubscriptionRefundContainer';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {SubscriptionRefundContainer} from '@/widgets/subscription-refund/SubscriptionRefundContainer';
 
 export const PageSubscriptionRefund: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;

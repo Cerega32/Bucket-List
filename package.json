@@ -62,7 +62,9 @@
 		"commit": "cz",
 		"lint:css": "stylelint \"src/**/*.{css,scss}\" --fix --config ./stylelint.config.js",
 		"lint:js": "eslint \"src/**/*.{ts,tsx}\" --fix",
-		"lint:all": "npm run lint:js && npm run lint:css"
+		"lint:all": "npm run lint:js && npm run lint:css",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"lint-staged": {
 		"src/**/*.{ts,tsx}": [
@@ -91,6 +93,7 @@
 		"eslint-config-airbnb-typescript": "^17.0.0",
 		"eslint-config-prettier": "^8.10.0",
 		"eslint-import-resolver-typescript": "^3.6.1",
+		"eslint-plugin-boundaries": "^2.5.1",
 		"eslint-plugin-import": "^2.29.1",
 		"eslint-plugin-jsx-a11y": "^6.7.1",
 		"eslint-plugin-prettier": "^4.2.1",
@@ -114,7 +117,8 @@
 		"stylelint-order": "^6.0.4",
 		"stylelint-prettier": "^3.0.0",
 		"typescript": "^5.1.6",
-		"vite": "^4.2.1"
+		"vite": "^4.2.1",
+		"vitest": "^0.34.6"
 	},
 	"author": "Sergey Grivin",
 	"license": "ISC",

@@ -2,11 +2,11 @@ import Cookies from 'js-cookie';
 import {FC, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 
-import {Registration} from '@/components/Registration/Registration';
-import {ThemeStore} from '@/store/ThemeStore';
-import {UserStore} from '@/store/UserStore';
-import {IPage} from '@/typings/page';
-import {getUser} from '@/utils/api/get/getUser';
+import {getUser} from '@/entities/user/api/getUser';
+import {UserStore} from '@/entities/user/model/UserStore';
+import {Registration} from '@/features/registration/Registration';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
 
 export const PageRegistration: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;

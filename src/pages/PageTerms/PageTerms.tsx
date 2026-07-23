@@ -1,9 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
-
-import {TermsContainer} from '../../containers/TermsContainer/TermsContainer';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {TermsContainer} from '@/widgets/terms/TermsContainer';
 
 export const PageTerms: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;

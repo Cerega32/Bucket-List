@@ -1,9 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
-
-import {ConsentContainer} from '../../containers/ConsentContainer/ConsentContainer';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {ConsentContainer} from '@/widgets/consent/ConsentContainer';
 
 export const PageConsent: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;

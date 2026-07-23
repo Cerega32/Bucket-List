@@ -1,8 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {Dashboard} from '@/containers/Dashboard/Dashboard';
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {Dashboard} from '@/widgets/dashboard/Dashboard';
 
 export const PageDashboard: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;

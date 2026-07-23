@@ -1,7 +1,7 @@
 import {FC} from 'react';
 
-import {Skeleton} from '@/components/Skeleton/Skeleton';
-import {useBem} from '@/hooks/useBem';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import {Skeleton} from '@/shared/ui/Skeleton/Skeleton';
 
 import './news-page-skeleton.scss';
 

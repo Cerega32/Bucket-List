@@ -1,0 +1,109 @@
+import {FC} from 'react';
+
+import {IRegularGoalHistory} from '@/entities/goal/model/types';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import {pluralize} from '@/shared/lib/text/pluralize';
+import {formatDateString} from '@/shared/lib/time/formatDate';
+import {Line} from '@/shared/ui/Line/Line';
+import {Svg} from '@/shared/ui/Svg/Svg';
+
+import '@/entities/regular-goal/ui/RegularHistoryItem/regular-history-item.scss';
+
+interface RegularHistoryItemProps {
+	className?: string;
+	history: IRegularGoalHistory;
+	allowCustomSettings?: boolean; // Разрешены ли пользовательские настройки
+}
+
+export const RegularHistoryItem: FC<RegularHistoryItemProps> = (props) => {
+	const {className, history, allowCustomSettings = false} = props;
+
+	const [block, element] = useBem('regular-history-item', className);
+
+	// Определяем иконку и текст в зависимости от статуса
+	const iconName = history.status === 'completed' ? 'regular-checked' : 'regular-cancel';
+	const statusText = history.status === 'completed' ? 'Серия выполнена' : 'Серия прервана';
+
+	// Определяем единицу измерения (дни или недели) в зависимости от frequency
+	const isWeeklyUnit = history.regularGoalData.frequency !== 'daily';
+	const streakValue = history.streak;
+	const unit = isWeeklyUnit ? pluralize(streakValue, ['неделя', 'недели', 'недель']) : pluralize(streakValue, ['день', 'дня', 'дней']);
+
+	// Форматирование периодичности
+	const getFrequencyText = () => {
+		const {frequency, weeklyFrequency, customSchedule} = history.regularGoalData;
+		if (frequency === 'daily') return 'Ежедневно';
+		if (frequency === 'weekly') return `${weeklyFrequency || 0} раз в неделю`;
+		if (frequency === 'custom') {
+			const selectedDays = Object.entries(customSchedule || {})
+				.filter(([_, value]) => value)
+				.map(([day]) => {
+					const dayNames: Record<string, string> = {
+						monday: 'Пн',
+						tuesday: 'Вт',
+						wednesday: 'Ср',
+						thursday: 'Чт',
+						friday: 'Пт',
+						saturday: 'Сб',
+						sunday: 'Вс',
+					};
+					return dayNames[day] || day;
+				});
+			return selectedDays.length > 0 ? selectedDays.join(', ') : 'Пользовательский график';
+		}
+		return '';
+	};
+
+	// Форматирование длительности
+	const getDurationText = () => {
+		const {durationType, durationValue, endDate} = history.regularGoalData;
+		if (durationType === 'days') return pluralize(durationValue || 0, ['день', 'дня', 'дней']);
+		if (durationType === 'weeks') return pluralize(durationValue || 0, ['неделя', 'недели', 'недель']);
+		if (durationType === 'until_date') return endDate ? `До ${formatDateString(endDate)}` : 'До даты';
+		if (durationType === 'indefinite') return 'Бессрочно';
+		return '';
+	};
+
+	return (
+		<div className={block()}>
+			<div className={element('header')}>
+				<div className={element('icon-wrapper')}>
+					<Svg icon={iconName} />
+				</div>
+				<div className={element('content')}>
+					<p className={element('status')}>{statusText}</p>
+					<p className={element('date')}>{formatDateString(history.endDate)}</p>
+				</div>
+				<div className={element('stats')}>
+					<span className={element('streak')}>{unit}</span>
+				</div>
+			</div>
+			{/* Настройки серии - показываем только если разрешены пользовательские настройки */}
+			{allowCustomSettings && (
+				<>
+					<Line className={element('line')} />
+					<div className={element('settings')}>
+						<div className={element('setting-item')}>
+							<span className={element('setting-label')}>Периодичность:</span>
+							<span className={element('setting-value')}>{getFrequencyText()}</span>
+						</div>
+						<div className={element('setting-item')}>
+							<span className={element('setting-label')}>Длительность:</span>
+							<span className={element('setting-value')}>{getDurationText()}</span>
+						</div>
+						<div className={element('setting-item')}>
+							<span className={element('setting-label')}>Сброс прогресса:</span>
+							<span className={element('setting-value')}>{history.regularGoalData.resetOnSkip ? 'Да' : 'Нет'}</span>
+						</div>
+						{history.regularGoalData.allowSkipDays > 0 && (
+							<div className={element('setting-item')}>
+								<span className={element('setting-label')}>Использовано пропусков:</span>
+								<span className={element('setting-value')}>{history.usedSkipDays ?? 0}</span>
+							</div>
+						)}
+					</div>
+				</>
+			)}
+		</div>
+	);
+};

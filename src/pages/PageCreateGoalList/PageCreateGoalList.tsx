@@ -1,7 +1,7 @@
 import {FC, useEffect} from 'react';
 
-import {AddGoalList} from '@/components/AddGoalList/AddGoalList';
-import {ThemeStore} from '@/store/ThemeStore';
+import {AddGoalList} from '@/features/add-goal-list/AddGoalList';
+import {ThemeStore} from '@/shared/model/ThemeStore';
 
 interface PageCreateGoalListProps {
 	page: string;

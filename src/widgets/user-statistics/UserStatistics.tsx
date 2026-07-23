@@ -1,0 +1,67 @@
+import {FC} from 'react';
+
+import {IUserStatistics} from '@/entities/user/model/types';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import {Line} from '@/shared/ui/Line/Line';
+import {Progress} from '@/shared/ui/Progress/Progress';
+import {Svg} from '@/shared/ui/Svg/Svg';
+import '@/widgets/user-statistics/user-statistics.scss';
+
+interface UserStatisticsProps {
+	className?: string;
+	statistics: IUserStatistics;
+}
+
+export const UserStatistics: FC<UserStatisticsProps> = (props) => {
+	const {className, statistics} = props;
+
+	const [block, element] = useBem('user-statistics', className);
+
+	return (
+		<section className={block()}>
+			<div className={element('level')}>
+				<p className={element('level-text')}>Текущий уровень</p>
+				<p className={element('level-number')}>
+					<Svg icon="level" />
+					{statistics.currentStats.level}
+				</p>
+				<Progress
+					done={statistics.currentStats.currentExperience}
+					all={statistics.currentStats.nextLevelExperience}
+					text={`${statistics.currentStats.currentExperience}/${statistics.currentStats.nextLevelExperience}`}
+				/>
+			</div>
+			<Line height={-16} margin="16px 0" />
+			{/* TODO: удалить, после добавления еженедельных заданий */}
+			<p className={element('text')}>
+				<span>Заработано очков</span>
+				<span>{statistics.currentStats.currentExperience}</span>
+			</p>
+			<p className={element('text')}>
+				<span>Следующий уровень через</span>
+				<span>{statistics.currentStats.nextLevelExperience - statistics.currentStats.currentExperience}</span>
+			</p>
+			<p className={element('text')}>
+				<span>Впечатлений оставлено</span>
+				<span>{statistics.totalStats.reviewsCount}</span>
+			</p>
+			<p className={element('text')}>
+				<span>Целей выполнено</span>
+				<span>{statistics.totalStats.completedGoals}</span>
+			</p>
+			<p className={element('text')}>
+				<span>Достижения</span>
+				<span>{statistics.totalStats.achievementsCount}</span>
+			</p>
+			{/* TODO: пока не работают еженедельные задания */}
+			{/* {statistics.totalStats.weeklyCompletedChallenges !== undefined && (
+				<p className={element('text')}>
+					<span>Еженедельные задания</span>
+					<span>
+						{statistics.totalStats.weeklyCompletedChallenges}/{statistics.totalStats.totalWeeklyChallenges}
+					</span>
+				</p>
+			)} */}
+		</section>
+	);
+};

@@ -5,10 +5,12 @@ import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 import 'yet-another-react-lightbox/styles.css';
-import App from './containers/App/App';
+import App from '@/app/App/App';
+// Регистрация хендлеров HTTP-клиента (инверсия зависимостей shared → entities) до первого запроса
+import '@/app/model/httpInterceptors';
 // Инициализация темы до первого рендера (синхронизация data-theme / localStorage)
-import './store/ThemeModeStore';
-import {initAnalyticsIfConsented} from './utils/legal/cookieConsent';
+import '@/shared/model/ThemeModeStore';
+import {initAnalyticsIfConsented} from '@/shared/config/legal/cookieConsent';
 
 (async () => {
 	initAnalyticsIfConsented();

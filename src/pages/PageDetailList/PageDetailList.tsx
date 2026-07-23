@@ -1,8 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {ListGoalsContainer} from '@/containers/ListGoalsContainer/ListGoalsContainer';
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {ListGoalsContainer} from '@/widgets/list-goals/ListGoalsContainer';
 
 export const PageDetailList: FC<IPage> = ({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;

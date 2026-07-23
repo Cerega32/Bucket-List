@@ -1,8 +1,8 @@
 import {FC, useEffect} from 'react';
 
-import {Categories} from '@/containers/Categories/Categories';
-import {ThemeStore} from '@/store/ThemeStore';
-import {IPage} from '@/typings/page';
+import {ThemeStore} from '@/shared/model/ThemeStore';
+import {IPage} from '@/shared/types/page';
+import {Categories} from '@/widgets/categories/Categories';
 
 export const PageCategories: FC<IPage> = ({page}) => {
 	const {setPage, setHeader, setFull} = ThemeStore;

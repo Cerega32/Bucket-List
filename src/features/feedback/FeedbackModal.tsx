@@ -1,0 +1,142 @@
+import {FC, FormEvent, useState} from 'react';
+import {Link} from 'react-router-dom';
+
+import {applyNewAchievements} from '@/entities/achievement/model/applyNewAchievements';
+import {IAchievement} from '@/entities/achievement/model/types';
+import {postFeedback} from '@/shared/api/postFeedback';
+import {useBem} from '@/shared/lib/hooks/useBem';
+import {NotificationStore} from '@/shared/model/NotificationStore';
+import {Button} from '@/shared/ui/Button/Button';
+import {FieldCheckbox} from '@/shared/ui/FieldCheckbox/FieldCheckbox';
+import {Modal} from '@/shared/ui/Modal/Modal';
+import {Svg} from '@/shared/ui/Svg/Svg';
+import {Title} from '@/shared/ui/Title/Title';
+import '@/features/feedback/feedback-modal.scss';
+
+interface FeedbackModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+}
+
+export const FeedbackModal: FC<FeedbackModalProps> = ({isOpen, onClose}) => {
+	const [block, element] = useBem('feedback-modal');
+	const [rating, setRating] = useState<number>(0);
+	const [hoverRating, setHoverRating] = useState<number | null>(null);
+	const [message, setMessage] = useState<string>('');
+	const [privacyConsent, setPrivacyConsent] = useState(false);
+
+	const handleSubmit = async (e: FormEvent) => {
+		e.preventDefault();
+
+		if (!privacyConsent) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Требуется согласие',
+				message: 'Подтвердите согласие на обработку персональных данных.',
+			});
+			return;
+		}
+
+		if (!rating && !message.trim()) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Заполните отзыв',
+				message: 'Поставьте оценку или напишите текст отзыва.',
+			});
+			return;
+		}
+
+		const res = await postFeedback({rating, message});
+
+		if (res.success) {
+			NotificationStore.addNotification({
+				type: 'success',
+				title: 'Спасибо за отзыв',
+				message: 'Ваш отзыв отправлен команде Delting.',
+			});
+			await applyNewAchievements(res.data?.newAchievements as IAchievement[] | undefined);
+			onClose();
+			setRating(0);
+			setHoverRating(null);
+			setMessage('');
+			setPrivacyConsent(false);
+		}
+	};
+
+	const currentRating = hoverRating ?? rating;
+
+	return (
+		<Modal isOpen={isOpen} onClose={onClose} className={block()} size="small">
+			<form className={element('form')} onSubmit={handleSubmit}>
+				<div className={element('header')}>
+					<Title tag="h2" className={element('title')}>
+						Оставить отзыв
+					</Title>
+					<p className={element('subtitle')}>Нам важно ваше мнение, чтобы сделать Delting лучше.</p>
+				</div>
+
+				<div className={element('rating')}>
+					<span className={element('rating-label')}>Ваша оценка:</span>
+					<div className={element('stars')}>
+						{[1, 2, 3, 4, 5].map((value) => {
+							const isActive = value <= currentRating;
+							return (
+								<button
+									key={value}
+									type="button"
+									className={element('star', {active: isActive})}
+									onMouseEnter={() => setHoverRating(value)}
+									onMouseLeave={() => setHoverRating(null)}
+									onClick={() => setRating((prev) => (prev === value ? 0 : value))}
+									aria-label={`Оценка ${value}`}
+								>
+									<Svg icon={isActive ? 'star-full' : 'star'} />
+								</button>
+							);
+						})}
+					</div>
+				</div>
+
+				<label className={element('field')}>
+					<span className={element('field-label')}>Текст отзыва</span>
+					<textarea
+						className={element('textarea')}
+						placeholder="Напишите, что вам нравится в Delting и что можно улучшить..."
+						value={message}
+						onChange={(e) => setMessage(e.target.value)}
+						rows={5}
+					/>
+				</label>
+
+				<div className={element('consent')}>
+					<FieldCheckbox
+						id="feedback-privacy-consent"
+						text={
+							<div>
+								Даю согласие на обработку моих персональных данных в соответствии с{' '}
+								<Link to="/consent" target="_blank" rel="noopener noreferrer">
+									Согласием на обработку персональных данных
+								</Link>{' '}
+								и{' '}
+								<Link to="/privacy" target="_blank" rel="noopener noreferrer">
+									Политикой конфиденциальности
+								</Link>
+							</div>
+						}
+						checked={privacyConsent}
+						setChecked={setPrivacyConsent}
+					/>
+				</div>
+
+				<div className={element('footer')}>
+					<Button theme="blue-light" className={element('btn')} typeBtn="button" onClick={onClose}>
+						Отмена
+					</Button>
+					<Button theme="blue" className={element('btn')} typeBtn="submit" disabled={!privacyConsent}>
+						Отправить отзыв
+					</Button>
+				</div>
+			</form>
+		</Modal>
+	);
+};
