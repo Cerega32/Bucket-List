@@ -3,6 +3,7 @@ import {FC} from 'react';
 
 import {FriendsStore} from '@/entities/friend/model/FriendsStore';
 import {isPremiumSubscriptionActive} from '@/entities/regular-goal/lib/checkRegularGoalsAddLimit';
+import {handleEmailConfirmedNavigate} from '@/entities/user/lib/requireEmailConfirmed';
 import {UserStore} from '@/entities/user/model/UserStore';
 import {useBem} from '@/shared/lib/hooks/useBem';
 import {IPage} from '@/shared/types/page';
@@ -172,6 +173,7 @@ export const UserSelf: FC<IPage> = observer(({page, subPage}) => {
 						size="small"
 						icon="plus"
 						className={element('add-goal-btn')}
+						onClick={handleEmailConfirmedNavigate}
 					>
 						Добавить цель
 					</Button>

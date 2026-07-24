@@ -8,6 +8,7 @@ import {deleteGoalTimer} from '@/entities/goal/api/deleteGoalTimer';
 import {getGoalTimer, TimerInfo} from '@/entities/goal/api/getGoalTimer';
 import {setGoalTimer} from '@/entities/goal/api/setGoalTimer';
 import {isPremiumSubscriptionActive} from '@/entities/regular-goal/lib/checkRegularGoalsAddLimit';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {UserStore} from '@/entities/user/model/UserStore';
 import {useBem} from '@/shared/lib/hooks/useBem';
 import {pluralize} from '@/shared/lib/text/pluralize';
@@ -65,6 +66,9 @@ export const GoalTimer: React.FC<GoalTimerProps> = observer(({goalCode, timer: i
 		if (!canManageTimer) {
 			return;
 		}
+		if (!requireEmailConfirmed()) {
+			return;
+		}
 
 		if (!selectedDate) {
 			setDateError(['Пожалуйста, выберите дату']);
@@ -116,6 +120,9 @@ export const GoalTimer: React.FC<GoalTimerProps> = observer(({goalCode, timer: i
 
 	const handleDeleteTimer = async () => {
 		if (!canManageTimer) {
+			return;
+		}
+		if (!requireEmailConfirmed()) {
 			return;
 		}
 
@@ -188,6 +195,9 @@ export const GoalTimer: React.FC<GoalTimerProps> = observer(({goalCode, timer: i
 
 	const openTimerSetup = () => {
 		if (!canManageTimer) {
+			return;
+		}
+		if (!requireEmailConfirmed()) {
 			return;
 		}
 

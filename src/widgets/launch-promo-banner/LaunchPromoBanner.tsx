@@ -39,7 +39,8 @@ export const LaunchPromoBanner: FC = () => {
 				<div className={element('main')}>
 					<h2 className={element('title')}>Ура, мы запустились!</h2>
 					<p className={element('text')}>
-						Первым {promo.limit} пользователям — {promo.premiumDays} дней Premium в подарок при регистрации.
+						Первым {promo.limit} пользователям — {promo.premiumDays} дней Premium в подарок при регистрации и подтверждении
+						email.
 					</p>
 				</div>
 				<div className={element('spots')}>

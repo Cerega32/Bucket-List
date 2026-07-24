@@ -2,20 +2,11 @@ import {makeAutoObservable} from 'mobx';
 
 import {getGoalsInProgress, IGoalProgress} from '@/entities/goal/api/goals';
 
-/** Массив из ответа GET self/goals-in-progress (корень или { data }) */
-function goalsInProgressListFromResponse(body: unknown): IGoalProgress[] {
-	if (!body || typeof body !== 'object') {
-		return [];
-	}
-	if (Array.isArray(body)) {
-		return body as IGoalProgress[];
-	}
-	const raw = (body as Record<string, unknown>)['data'];
-	return Array.isArray(raw) ? (raw as IGoalProgress[]) : [];
-}
-
 class Store {
 	goalsInProgress: IGoalProgress[] = [];
+
+	/** Полное число целей в процессе с бэкенда (не длина текущей страницы) */
+	totalCount = 0;
 
 	isLoading = false;
 
@@ -23,8 +14,13 @@ class Store {
 		makeAutoObservable(this);
 	}
 
-	setGoalsInProgress(goals: IGoalProgress[]) {
+	setGoalsInProgress(goals: IGoalProgress[], totalCount?: number) {
 		this.goalsInProgress = goals;
+		if (typeof totalCount === 'number') {
+			this.totalCount = totalCount;
+		} else {
+			this.totalCount = goals.length;
+		}
 	}
 
 	setLoading(loading: boolean) {
@@ -35,9 +31,9 @@ class Store {
 		return this.goalsCount > 0;
 	}
 
-	/** Длина загруженной страницы (для фолбэка, если ещё нет counts в профиле) */
+	/** Полное количество целей в процессе (для фолбэка, если ещё нет counts в профиле) */
 	get goalsCount(): number {
-		return this.goalsInProgress.length;
+		return this.totalCount || this.goalsInProgress.length;
 	}
 
 	async loadGoalsInProgress() {
@@ -45,7 +41,14 @@ class Store {
 		try {
 			const response = await getGoalsInProgress();
 			if (response.success && response.data) {
-				this.setGoalsInProgress(goalsInProgressListFromResponse(response.data));
+				const body = response.data;
+				if (Array.isArray(body)) {
+					this.setGoalsInProgress(body);
+				} else {
+					const list = Array.isArray(body.data) ? body.data : [];
+					const total = body.totalCount ?? body.pagination?.totalItems ?? list.length;
+					this.setGoalsInProgress(list, total);
+				}
 			} else {
 				this.setGoalsInProgress([]);
 			}
@@ -59,6 +62,7 @@ class Store {
 
 	clear() {
 		this.goalsInProgress = [];
+		this.totalCount = 0;
 	}
 }
 

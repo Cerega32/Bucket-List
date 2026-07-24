@@ -6,17 +6,25 @@ import {addGoal} from '@/entities/goal/api/addGoal';
 import {getGoal} from '@/entities/goal/api/getGoal';
 import {markGoal} from '@/entities/goal/api/markGoal';
 import {removeGoal} from '@/entities/goal/api/removeGoal';
+import {refreshHeaderGoalCounts} from '@/entities/goal/lib/refreshHeaderGoalCounts';
 import {useOGImage} from '@/entities/goal/lib/useOGImage';
 import {GoalStore} from '@/entities/goal/model/GoalStore';
-import {IGoal} from '@/entities/goal/model/types';
+import {IGoal, IShortGoal} from '@/entities/goal/model/types';
 import {Card} from '@/entities/goal/ui/Card/Card';
 import {HeaderGoal} from '@/entities/goal/ui/HeaderGoal/HeaderGoal';
+import {addRegularGoalToUser, RegularGoalSettings} from '@/entities/regular-goal/api/addRegularGoalToUser';
+import {getRegularGoalSettings, RegularGoalSettingsResponse} from '@/entities/regular-goal/api/getRegularGoalSettings';
+import {blockRegularGoalsAddIfLimitReached} from '@/entities/regular-goal/lib/checkRegularGoalsAddLimit';
+import {HeaderRegularGoalsStore} from '@/entities/regular-goal/model/HeaderRegularGoalsStore';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {UserStore} from '@/entities/user/model/UserStore';
 import {CatalogItemsSkeleton} from '@/features/catalog-items/CatalogItemsSkeleton';
 import {EditGoal} from '@/features/edit-goal/EditGoal';
+import {RegularGoalSettingsModal} from '@/features/regular-goal-settings/RegularGoalSettingsModal';
 import {useBem} from '@/shared/lib/hooks/useBem';
 import useScreenSize from '@/shared/lib/hooks/useScreenSize';
 import {ModalStore} from '@/shared/model/ModalStore';
+import {NotificationStore} from '@/shared/model/NotificationStore';
 import {ThemeStore} from '@/shared/model/ThemeStore';
 import {IPage} from '@/shared/types/page';
 import {ScrollToTop} from '@/shared/ui/ScrollToTop/ScrollToTop';
@@ -28,6 +36,9 @@ import {GoalSkeleton} from '@/widgets/goal/GoalSkeleton';
 import {useSimilarGoalsByCategory} from '@/widgets/goal/hooks/useSimilarGoalsByCategory';
 
 import '@/widgets/goal/goal.scss';
+
+const SIMILAR_LEAVE_HOLD_MS = 2000;
+const SIMILAR_LEAVE_ANIM_MS = 350;
 
 /** GET goals/:code отдаёт addedFromList; при отсутствии — camelCase из рендерера */
 const normalizeGoalFromApi = (raw: IGoal & {added_from_list?: string[]}): IGoal => {
@@ -52,6 +63,65 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	const [goal, setGoal] = useState<IGoal | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0); // Триггер для обновления истории
+	const [showRegularModal, setShowRegularModal] = useState(false);
+	const [regularGoalData, setRegularGoalData] = useState<RegularGoalSettingsResponse | null>(null);
+	const [pendingSimilarGoalCode, setPendingSimilarGoalCode] = useState<string | null>(null);
+	const [isRegularLoading, setIsRegularLoading] = useState(false);
+	const [leavingSimilarCodes, setLeavingSimilarCodes] = useState<string[]>([]);
+	const similarLeaveTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+	const {
+		similarGoals,
+		setSimilarGoals,
+		isLoading: isSimilarLoading,
+		reloadSimilarGoals,
+		replaceSimilarGoalByCode,
+	} = useSimilarGoalsByCategory(goal?.code || null, !!goal);
+
+	const clearSimilarLeaveTimers = useCallback(() => {
+		similarLeaveTimersRef.current.forEach((timer) => clearTimeout(timer));
+		similarLeaveTimersRef.current.clear();
+		setLeavingSimilarCodes([]);
+	}, []);
+
+	const reloadSimilarGoalsSafe = useCallback(async () => {
+		clearSimilarLeaveTimers();
+		await reloadSimilarGoals();
+	}, [clearSimilarLeaveTimers, reloadSimilarGoals]);
+
+	const scheduleSimilarGoalLeave = useCallback(
+		(goalCode: string, holdMs = SIMILAR_LEAVE_HOLD_MS) => {
+			const existing = similarLeaveTimersRef.current.get(goalCode);
+			if (existing) {
+				clearTimeout(existing);
+			}
+
+			const holdTimer = setTimeout(() => {
+				setLeavingSimilarCodes((prev) => (prev.includes(goalCode) ? prev : [...prev, goalCode]));
+
+				const animTimer = setTimeout(() => {
+					replaceSimilarGoalByCode(goalCode)
+						.then(() => {
+							setLeavingSimilarCodes((prev) => prev.filter((code) => code !== goalCode));
+							similarLeaveTimersRef.current.delete(goalCode);
+						})
+						.catch(() => undefined);
+				}, SIMILAR_LEAVE_ANIM_MS);
+
+				similarLeaveTimersRef.current.set(goalCode, animTimer);
+			}, holdMs);
+
+			similarLeaveTimersRef.current.set(goalCode, holdTimer);
+		},
+		[replaceSimilarGoalByCode]
+	);
+
+	useEffect(() => {
+		return () => {
+			similarLeaveTimersRef.current.forEach((timer) => clearTimeout(timer));
+			similarLeaveTimersRef.current.clear();
+		};
+	}, []);
 
 	const {setIsOpen, setWindow} = ModalStore;
 	const {setHeader, setPageCategory} = ThemeStore;
@@ -114,6 +184,9 @@ export const Goal: FC<IPage> = observer(({page}) => {
 	}, [historyRefreshTrigger, listId]);
 
 	const openAddReview = () => {
+		if (!requireEmailConfirmed()) {
+			return;
+		}
 		setWindow('add-review');
 		setIsOpen(true);
 	};
@@ -216,6 +289,8 @@ export const Goal: FC<IPage> = observer(({page}) => {
 			}
 		}
 
+		reloadSimilarGoalsSafe().catch(() => undefined);
+
 		// Прогресс заданий обновляется автоматически на бэкенде
 		return true;
 	};
@@ -224,12 +299,14 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		setGoal({...goal, ...updatedGoal});
 		setHeader('transparent');
 		setIsEditing(false);
+		reloadSimilarGoalsSafe().catch(() => undefined);
 	};
 
 	const handleGoalUpdate = async (updatedGoal?: IGoal | Partial<IGoal>) => {
 		// Патч или полная цель с API
 		if (updatedGoal !== undefined && Object.keys(updatedGoal).length > 0) {
 			setGoal((prev) => (prev ? ({...prev, ...updatedGoal} as IGoal) : null));
+			reloadSimilarGoalsSafe().catch(() => undefined);
 			return;
 		}
 		if (goal && listId) {
@@ -239,6 +316,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				setGoal(normalizeGoalFromApi(res.data.goal));
 			}
 		}
+		reloadSimilarGoalsSafe().catch(() => undefined);
 	};
 
 	const handleCancelEdit = () => {
@@ -256,8 +334,8 @@ export const Goal: FC<IPage> = observer(({page}) => {
 					setId(res.data.goal.id);
 					setGoalListId(null);
 				}
-			} catch (error) {
-				console.error('Ошибка при перезагрузке цели:', error);
+			} catch {
+				// ignore reload errors
 			}
 		} else if (goal) {
 			// Для обычных целей обновляем состояние как выполненной
@@ -266,11 +344,13 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				completedByUser: true,
 			});
 		}
+		reloadSimilarGoalsSafe().catch(() => undefined);
 	};
 
 	// Функция для обновления истории выполнения регулярной цели
 	const handleHistoryRefresh = () => {
 		setHistoryRefreshTrigger((prev) => prev + 1);
+		reloadSimilarGoalsSafe().catch(() => undefined);
 	};
 
 	// Перезагрузка цели после изменения списка (цель могла быть добавлена/удалена у пользователя)
@@ -287,6 +367,7 @@ export const Goal: FC<IPage> = observer(({page}) => {
 				}
 			}
 		}
+		reloadSimilarGoalsSafe().catch(() => undefined);
 	};
 
 	const [compact, setCompact] = useState(false);
@@ -321,7 +402,169 @@ export const Goal: FC<IPage> = observer(({page}) => {
 		};
 	}, []);
 
-	const {similarGoals, isLoading: isSimilarLoading} = useSimilarGoalsByCategory(goal?.code || null, !!goal);
+	const blockRegularGoalAdd = () =>
+		blockRegularGoalsAddIfLimitReached({
+			onPremium: () => navigate('/user/self/subs'),
+		});
+
+	const updateSimilarGoalLocal = (goalCode: string, patch: Partial<IShortGoal>) => {
+		setSimilarGoals((prev) => prev.map((item) => (item.code === goalCode ? {...item, ...patch} : item)));
+	};
+
+	/** Убрать из блока «похожие» цели, которые уже добавили в этой сессии (кроме текущей). */
+	const flushOtherAddedSimilar = async (keepCode: string) => {
+		const hasOthers = similarGoals.some(
+			(item) => (item.addedByUser || item.completedByUser) && item.code !== keepCode && !leavingSimilarCodes.includes(item.code)
+		);
+		if (hasOthers) {
+			await reloadSimilarGoalsSafe();
+		}
+	};
+
+	const updateSimilarGoal = async (codeGoal: string, operation: 'add' | 'delete' | 'mark', done?: boolean): Promise<void> => {
+		if (!isAuth) {
+			setWindow('login');
+			setIsOpen(true);
+			return;
+		}
+
+		await flushOtherAddedSimilar(codeGoal);
+
+		if (operation === 'add') {
+			try {
+				const regularSettings = await getRegularGoalSettings(codeGoal);
+				if (regularSettings.success && regularSettings.data) {
+					if (blockRegularGoalAdd()) {
+						return;
+					}
+
+					if (regularSettings.data.regular_settings?.allowCustomSettings) {
+						setRegularGoalData(regularSettings.data);
+						setPendingSimilarGoalCode(codeGoal);
+						setShowRegularModal(true);
+						return;
+					}
+
+					const response = await addGoal(codeGoal);
+					if (response.success) {
+						updateSimilarGoalLocal(codeGoal, {
+							addedByUser: true,
+							...(typeof response.data?.totalAdded === 'number' ? {totalAdded: response.data.totalAdded} : {}),
+						});
+						HeaderRegularGoalsStore.loadTodayCount();
+						NotificationStore.addNotification({
+							type: 'success',
+							title: 'Успех',
+							message: 'Регулярная цель успешно добавлена!',
+						});
+					}
+					return;
+				}
+			} catch {
+				// Цель не регулярная — обычное добавление ниже
+			}
+		}
+
+		const res = await (operation === 'add'
+			? addGoal(codeGoal)
+			: operation === 'delete'
+			? removeGoal(codeGoal)
+			: markGoal(codeGoal, !done));
+
+		if (!res.success) {
+			return;
+		}
+
+		if (operation === 'add') {
+			updateSimilarGoalLocal(codeGoal, {
+				addedByUser: true,
+				completedByUser: false,
+				totalAdded: res.data.totalAdded,
+			});
+		} else if (operation === 'mark' && !done) {
+			updateSimilarGoalLocal(codeGoal, {
+				addedByUser: true,
+				completedByUser: true,
+				totalAdded: res.data.totalAdded,
+				totalCompleted: res.data.totalCompleted,
+			});
+			scheduleSimilarGoalLeave(codeGoal, SIMILAR_LEAVE_HOLD_MS);
+		} else if (operation === 'delete') {
+			scheduleSimilarGoalLeave(codeGoal, 0);
+		} else {
+			updateSimilarGoalLocal(codeGoal, {
+				addedByUser: true,
+				completedByUser: false,
+				totalAdded: res.data.totalAdded,
+			});
+		}
+
+		if (operation === 'add' || operation === 'delete') {
+			HeaderRegularGoalsStore.loadTodayCount();
+		}
+	};
+
+	const handleRegularModalClose = () => {
+		setShowRegularModal(false);
+		setRegularGoalData(null);
+		setPendingSimilarGoalCode(null);
+	};
+
+	const handleRegularGoalSave = async (settings: RegularGoalSettings) => {
+		if (!regularGoalData?.goal || !pendingSimilarGoalCode) {
+			return;
+		}
+
+		const goalCode = pendingSimilarGoalCode;
+
+		setIsRegularLoading(true);
+		try {
+			const requestData: RegularGoalSettings = {
+				frequency: settings.frequency,
+				durationType: settings.durationType,
+				allowSkipDays: settings.allowSkipDays,
+				resetOnSkip: settings.resetOnSkip,
+				...(settings.frequency === 'weekly' && settings.weeklyFrequency !== undefined
+					? {weeklyFrequency: settings.weeklyFrequency}
+					: {}),
+				...(settings.frequency === 'custom' && settings.customSchedule !== undefined
+					? {customSchedule: settings.customSchedule}
+					: {}),
+				...(settings.durationType === 'days' || settings.durationType === 'weeks'
+					? settings.durationValue !== undefined
+						? {durationValue: settings.durationValue}
+						: {}
+					: {}),
+				...(settings.durationType === 'until_date' && settings.endDate !== undefined ? {endDate: settings.endDate} : {}),
+			};
+
+			const response = await addRegularGoalToUser(goalCode, requestData);
+
+			if (response.success) {
+				updateSimilarGoalLocal(goalCode, {
+					addedByUser: true,
+					...(typeof response.data?.goal?.totalAdded === 'number' ? {totalAdded: response.data.goal.totalAdded} : {}),
+				});
+				refreshHeaderGoalCounts();
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Успех',
+					message: 'Регулярная цель успешно добавлена с вашими настройками!',
+				});
+				handleRegularModalClose();
+			} else {
+				throw new Error(response.error || 'Ошибка при добавлении регулярной цели');
+			}
+		} catch (error) {
+			NotificationStore.addNotification({
+				type: 'error',
+				title: 'Ошибка',
+				message: error instanceof Error ? error.message : 'Не удалось добавить регулярную цель',
+			});
+		} finally {
+			setIsRegularLoading(false);
+		}
+	};
 
 	// Генерируем динамическое OG изображение
 	const {imageUrl: ogImageUrl} = useOGImage({
@@ -536,16 +779,31 @@ export const Goal: FC<IPage> = observer(({page}) => {
 								{similarGoals.map((similarGoal) => (
 									<Card
 										key={similarGoal.id}
-										className="catalog-items__goal"
+										className={[
+											'catalog-items__goal',
+											leavingSimilarCodes.includes(similarGoal.code) ? 'catalog-items__goal--leaving' : '',
+										]
+											.filter(Boolean)
+											.join(' ')}
 										goal={similarGoal}
-										onClickAdd={async () => Promise.resolve()}
-										onClickDelete={async () => Promise.resolve()}
-										onClickMark={async () => Promise.resolve()}
+										onClickAdd={() => updateSimilarGoal(similarGoal.code, 'add')}
+										onClickDelete={() => updateSimilarGoal(similarGoal.code, 'delete')}
+										onClickMark={() => updateSimilarGoal(similarGoal.code, 'mark', similarGoal.completedByUser)}
 									/>
 								))}
 							</div>
 						)}
 					</section>
+				)}
+				{showRegularModal && regularGoalData?.regular_settings && (
+					<RegularGoalSettingsModal
+						isOpen={showRegularModal}
+						onClose={handleRegularModalClose}
+						goalData={regularGoalData.goal}
+						originalSettings={regularGoalData.regular_settings}
+						onSave={handleRegularGoalSave}
+						isLoading={isRegularLoading}
+					/>
 				)}
 				<ScrollToTop />
 			</main>

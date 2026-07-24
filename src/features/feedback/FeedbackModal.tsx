@@ -1,5 +1,4 @@
 import {FC, FormEvent, useState} from 'react';
-import {Link} from 'react-router-dom';
 
 import {applyNewAchievements} from '@/entities/achievement/model/applyNewAchievements';
 import {IAchievement} from '@/entities/achievement/model/types';
@@ -7,7 +6,6 @@ import {postFeedback} from '@/shared/api/postFeedback';
 import {useBem} from '@/shared/lib/hooks/useBem';
 import {NotificationStore} from '@/shared/model/NotificationStore';
 import {Button} from '@/shared/ui/Button/Button';
-import {FieldCheckbox} from '@/shared/ui/FieldCheckbox/FieldCheckbox';
 import {Modal} from '@/shared/ui/Modal/Modal';
 import {Svg} from '@/shared/ui/Svg/Svg';
 import {Title} from '@/shared/ui/Title/Title';
@@ -23,19 +21,9 @@ export const FeedbackModal: FC<FeedbackModalProps> = ({isOpen, onClose}) => {
 	const [rating, setRating] = useState<number>(0);
 	const [hoverRating, setHoverRating] = useState<number | null>(null);
 	const [message, setMessage] = useState<string>('');
-	const [privacyConsent, setPrivacyConsent] = useState(false);
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
-
-		if (!privacyConsent) {
-			NotificationStore.addNotification({
-				type: 'error',
-				title: 'Требуется согласие',
-				message: 'Подтвердите согласие на обработку персональных данных.',
-			});
-			return;
-		}
 
 		if (!rating && !message.trim()) {
 			NotificationStore.addNotification({
@@ -59,7 +47,6 @@ export const FeedbackModal: FC<FeedbackModalProps> = ({isOpen, onClose}) => {
 			setRating(0);
 			setHoverRating(null);
 			setMessage('');
-			setPrivacyConsent(false);
 		}
 	};
 
@@ -108,31 +95,11 @@ export const FeedbackModal: FC<FeedbackModalProps> = ({isOpen, onClose}) => {
 					/>
 				</label>
 
-				<div className={element('consent')}>
-					<FieldCheckbox
-						id="feedback-privacy-consent"
-						text={
-							<div>
-								Даю согласие на обработку моих персональных данных в соответствии с{' '}
-								<Link to="/consent" target="_blank" rel="noopener noreferrer">
-									Согласием на обработку персональных данных
-								</Link>{' '}
-								и{' '}
-								<Link to="/privacy" target="_blank" rel="noopener noreferrer">
-									Политикой конфиденциальности
-								</Link>
-							</div>
-						}
-						checked={privacyConsent}
-						setChecked={setPrivacyConsent}
-					/>
-				</div>
-
 				<div className={element('footer')}>
 					<Button theme="blue-light" className={element('btn')} typeBtn="button" onClick={onClose}>
 						Отмена
 					</Button>
-					<Button theme="blue" className={element('btn')} typeBtn="submit" disabled={!privacyConsent}>
+					<Button theme="blue" className={element('btn')} typeBtn="submit">
 						Отправить отзыв
 					</Button>
 				</div>

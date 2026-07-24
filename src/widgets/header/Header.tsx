@@ -16,6 +16,7 @@ import {isPremiumSubscriptionActive} from '@/entities/regular-goal/lib/checkRegu
 import {HeaderRegularGoalsStore} from '@/entities/regular-goal/model/HeaderRegularGoalsStore';
 import {getUser} from '@/entities/user/api/getUser';
 import {postLogout} from '@/entities/user/api/postLogout';
+import {handleEmailConfirmedNavigate} from '@/entities/user/lib/requireEmailConfirmed';
 import {UserStore} from '@/entities/user/model/UserStore';
 import {FeedbackModal} from '@/features/feedback/FeedbackModal';
 import {GlobalGoalsSearch} from '@/features/global-goals-search/GlobalGoalsSearch';
@@ -415,7 +416,12 @@ export const Header: FC<HeaderProps> = observer((props) => {
 				</NavLink>
 			)}
 			{isScreenMobile && (
-				<NavLink className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})} to="/goals/create" end>
+				<NavLink
+					className={({isActive}: {isActive: boolean}) => element('menu-item', {active: isActive})}
+					to="/goals/create"
+					end
+					onClick={handleEmailConfirmedNavigate}
+				>
 					Создать цель
 				</NavLink>
 			)}
@@ -730,7 +736,15 @@ export const Header: FC<HeaderProps> = observer((props) => {
 									{isScreenMobile && <ThemeToggle theme={header} />}
 									{/* создать кнопка */}
 									{!isScreenMobile && (
-										<Button size="small" type="Link" theme="light" icon="plus" iconSize="24px" href="/goals/create">
+										<Button
+											size="small"
+											type="Link"
+											theme="light"
+											icon="plus"
+											iconSize="24px"
+											href="/goals/create"
+											onClick={handleEmailConfirmedNavigate}
+										>
 											{isScreenSmallTablet ? '' : 'Создать'}
 										</Button>
 									)}

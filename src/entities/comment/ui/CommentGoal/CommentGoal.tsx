@@ -5,6 +5,7 @@ import {IComment} from '@/entities/comment/model/types';
 import {CommentImagesGallery} from '@/entities/comment/ui/CommentImagesGallery/CommentImagesGallery';
 import {getComplexity} from '@/entities/goal/lib/complexity';
 import {Tags} from '@/entities/goal/ui/Tags/Tags';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {UserStore} from '@/entities/user/model/UserStore';
 import {getDate} from '@/shared/lib/date/getDate';
 import {useBem} from '@/shared/lib/hooks/useBem';
@@ -37,6 +38,9 @@ export const CommentGoal: FC<CommentGoalProps> = (props) => {
 	const blurContent = isPending && !isOwnComment;
 
 	const openReport = () => {
+		if (!requireEmailConfirmed()) {
+			return;
+		}
 		ModalStore.setModalProps({commentId: comment.id});
 		ModalStore.setWindow('report-comment');
 		ModalStore.setIsOpen(true);

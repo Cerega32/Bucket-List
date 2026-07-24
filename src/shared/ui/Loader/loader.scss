@@ -22,6 +22,7 @@
 		// Полноэкранный лоадер (Goal/List/User до первой загрузки)
 		&--page {
 			position: fixed;
+			background-color: rgb(var(--color-gray-rgb-3) / 70%);
 		}
 
 		// Для BlurLoader: только блюр без подложки
@@ -39,6 +40,23 @@
 		}
 	}
 
+	&__aim-outer,
+	&__aim-inner {
+		fill: var(--color-red-4);
+	}
+
+	&__aim-middle {
+		fill: var(--color-white);
+	}
+
+	&__dart-shaft {
+		fill: var(--color-white);
+	}
+
+	&__dart-fletching {
+		fill: var(--color-primary);
+	}
+
 	&__dart {
 		transform-origin: center;
 		animation: dart-flight 2.5s linear infinite;
@@ -49,6 +67,26 @@
 		transform-origin: center;
 		animation: aim-shake 2.5s linear infinite;
 		transform-box: fill-box;
+	}
+}
+
+:root[data-theme='dark'] {
+	.loader {
+		&__overlay {
+			background-color: rgb(var(--color-surface-rgb) / 75%);
+
+			&--page {
+				background-color: rgb(var(--color-gray-rgb-3) / 80%);
+			}
+		}
+
+		&__aim-middle {
+			fill: var(--color-surface);
+		}
+
+		&__dart-shaft {
+			fill: var(--color-gray-8);
+		}
 	}
 }
 

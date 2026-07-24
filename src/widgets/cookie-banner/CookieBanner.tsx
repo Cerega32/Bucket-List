@@ -93,7 +93,7 @@ export const CookieBanner: FC = () => {
 				</div>
 				<div className={element('actions')}>
 					<Button theme="blue-light" className={element('btn')} onClick={handleReject} typeBtn="button">
-						Отклонить
+						Только необходимые
 					</Button>
 					<Button theme="blue" className={element('btn')} onClick={handleAccept} typeBtn="button">
 						Принять

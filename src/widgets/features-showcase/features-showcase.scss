@@ -31,6 +31,13 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+		overflow-y: auto;
+	}
+
+	&__item-wrap {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
 	}
 
 	&__item {
@@ -115,6 +122,25 @@
 
 		&:has(.features-showcase__preview-box--travel) {
 			min-height: 640px;
+		}
+
+		&--aside {
+			@include lg {
+				display: none;
+			}
+		}
+
+		&--inline {
+			display: none;
+
+			@include lg {
+				display: flex;
+				min-height: 280px;
+			}
+
+			@include sm {
+				padding: 12px;
+			}
 		}
 
 		@include sm {

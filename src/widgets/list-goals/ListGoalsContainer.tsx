@@ -13,6 +13,7 @@ import {getListGoalsPage} from '@/entities/goal-list/api/getListGoalsPage';
 import {markAllGoalsFromList} from '@/entities/goal-list/api/markAllGoalsFromList';
 import {removeListGoal} from '@/entities/goal-list/api/removeListGoal';
 import {IList} from '@/entities/goal-list/model/types';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {UserStore} from '@/entities/user/model/UserStore';
 import {useBem} from '@/shared/lib/hooks/useBem';
 import useScreenSize from '@/shared/lib/hooks/useScreenSize';
@@ -348,6 +349,9 @@ const ListGoalsContainerComponent: FC<ListGoalsContainerProps> = (props) => {
 	const goalsWithLocation = goalsToMapPoints(list.goals);
 
 	const openAddReview = () => {
+		if (!requireEmailConfirmed()) {
+			return;
+		}
 		if (page !== 'isListImpressions') {
 			navigate(`/list/${list.code}/impressions`);
 		}
@@ -426,6 +430,7 @@ const ListGoalsContainerComponent: FC<ListGoalsContainerProps> = (props) => {
 							list={list}
 							page={page}
 							search={search}
+							isGoalsLoading={isGoalsTab && isLoading}
 							onSearchChange={onSearchChange}
 							updateGoal={updateGoal}
 							onMyCommentChange={(hasComment) => {
@@ -442,12 +447,7 @@ const ListGoalsContainerComponent: FC<ListGoalsContainerProps> = (props) => {
 								});
 							}}
 						/>
-						{isGoalsTab && isLoading && (
-							<div className={element('loader')}>
-								<Loader isLoading />
-							</div>
-						)}
-						{isGoalsTab && list.goalsPagination?.hasMore && (
+						{isGoalsTab && list.goalsPagination?.hasMore && !isLoading && (
 							<div ref={loadMoreRef}>
 								<Loader isLoading={isLoadingMore} />
 							</div>

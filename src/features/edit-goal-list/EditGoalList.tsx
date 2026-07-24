@@ -12,6 +12,7 @@ import {ICategory, IGoal, IShortGoal} from '@/entities/goal/model/types';
 import {GoalSearchItem} from '@/entities/goal/ui/GoalSearchItem/GoalSearchItem';
 import {updateGoalList} from '@/entities/goal-list/api/updateGoalList';
 import {IList} from '@/entities/goal-list/model/types';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {AddGoal} from '@/features/add-goal/AddGoal';
 import {CatalogModerationBanner} from '@/features/catalog-moderation-banner/CatalogModerationBanner';
 import {useBem} from '@/shared/lib/hooks/useBem';
@@ -595,6 +596,9 @@ export const EditGoalList: FC<EditGoalListProps> = (props) => {
 									theme="blue-light"
 									className={element('add-goal-btn')}
 									onClick={() => {
+										if (!requireEmailConfirmed()) {
+											return;
+										}
 										if (canCreateGoal) {
 											setShowAddGoalForm(true);
 										} else {

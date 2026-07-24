@@ -26,6 +26,7 @@ import {
 	handleRegularFrequencySelect,
 } from '@/entities/regular-goal/lib/regularFrequencySelectOptions';
 import {WeekDaySchedule, WeekDaySelector} from '@/entities/regular-goal/ui/WeekDaySelector/WeekDaySelector';
+import {handleEmailConfirmedNavigate} from '@/entities/user/lib/requireEmailConfirmed';
 import {UserStore} from '@/entities/user/model/UserStore';
 import {AllowCustomSettingsField} from '@/features/add-goal/ui/AllowCustomSettingsField/AllowCustomSettingsField';
 import {ExternalGoalSearch} from '@/features/external-goal-search/ExternalGoalSearch';
@@ -1065,7 +1066,7 @@ export const AddGoal: FC<AddGoalProps> = (props) => {
 					<Title tag="h1" className={element('title')}>
 						Создание новой цели
 					</Title>
-					<Button size="small" type="Link" theme="blue" icon="plus" href="/list/create">
+					<Button size="small" type="Link" theme="blue" icon="plus" href="/list/create" onClick={handleEmailConfirmedNavigate}>
 						Добавить список целей
 					</Button>
 				</div>

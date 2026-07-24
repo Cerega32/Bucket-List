@@ -156,7 +156,7 @@ export const FiltersDrawer: FC<FiltersDrawerProps> = (props) => {
 			className={element('trigger', {active: activeFiltersCount > 0})}
 			onClick={handleOpen}
 		>
-			<span className={element('trigger-text')}>{activeFiltersCount > 0 ? `Фильтры: ${activeFiltersCount}` : 'Фильтры'}</span>
+			<span className={element('trigger-text')}>{activeFiltersCount > 0 ? `Фильтры:\u00A0${activeFiltersCount}` : 'Фильтры'}</span>
 		</Button>
 	);
 

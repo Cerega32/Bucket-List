@@ -21,6 +21,7 @@ import {
 } from '@/entities/regular-goal/lib/regularGoalTodayVisibility';
 import {HeaderRegularGoalsStore} from '@/entities/regular-goal/model/HeaderRegularGoalsStore';
 import {getUser} from '@/entities/user/api/getUser';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {UserStore} from '@/entities/user/model/UserStore';
 import {useBem} from '@/shared/lib/hooks/useBem';
 import {TODAY_TAB_HIDE_DELAY_MS} from '@/shared/lib/hooks/useTodayTabDisplayList';
@@ -167,6 +168,9 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(
 			if (!canEditProgress) {
 				return;
 			}
+			if (!requireEmailConfirmed()) {
+				return;
+			}
 			try {
 				const response = await updateGoalProgress(goal.goal, {
 					progress_percentage: goal.progressPercentage,
@@ -185,6 +189,9 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(
 		const handleProgressChange = (goal: IGoalProgress) => {
 			if (!canEditProgress) {
 				navigate('/premium');
+				return;
+			}
+			if (!requireEmailConfirmed()) {
 				return;
 			}
 			ModalStore.setWindow('progress-update');
@@ -278,15 +285,17 @@ export const RegularGoalsDropdown: FC<RegularGoalsDropdownProps> = observer(
 
 		if (!isOpen) return null;
 
-		const goals = isProgress
-			? [...progressGoals].sort((a, b) => {
-					const aDone = a.isWorkingToday;
-					const bDone = b.isWorkingToday;
-					if (aDone === bDone) return 0;
-					return aDone ? 1 : -1;
-			  })
-			: [];
 		const MAX_VISIBLE = 12;
+		const goals = isProgress
+			? [...progressGoals]
+					.sort((a, b) => {
+						const aDone = a.isWorkingToday;
+						const bDone = b.isWorkingToday;
+						if (aDone === bDone) return 0;
+						return aDone ? 1 : -1;
+					})
+					.slice(0, MAX_VISIBLE)
+			: [];
 		const regularList = regularGoals.slice(0, MAX_VISIBLE);
 
 		return (

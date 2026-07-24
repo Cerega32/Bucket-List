@@ -846,7 +846,7 @@ const CatalogItemsComponent: FC<CatalogItemsCategoriesProps | CatalogItemsUsersP
 		<section className={block()} key={code} id="catalog-items">
 			<div className={element('filters')}>
 				<div className={element('filters-wrapper')}>
-					<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage || ''} />
+					<Switch className={element('switch')} buttons={buttonsSwitch} active={subPage || ''} preserveQuery={false} />
 				</div>
 				<Line className={element('line')} />
 				<div className={element('search-wrapper', {'wrap-on-lg': searchWrapperWrap})}>

@@ -1,6 +1,7 @@
 import {FC} from 'react';
 import {Link} from 'react-router-dom';
 
+import {handleEmailConfirmedNavigate} from '@/entities/user/lib/requireEmailConfirmed';
 import {useBem} from '@/shared/lib/hooks/useBem';
 import {Svg} from '@/shared/ui/Svg/Svg';
 
@@ -50,7 +51,12 @@ export const QuickNavigation: FC<QuickNavigationProps> = ({className, goalsCount
 	return (
 		<div className={block()}>
 			{navigationItems.map((item) => (
-				<Link key={`nav-${item.title}`} to={item.link} className={element('item', {action: item.isAction})}>
+				<Link
+					key={`nav-${item.title}`}
+					to={item.link}
+					className={element('item', {action: item.isAction})}
+					onClick={item.isAction ? handleEmailConfirmedNavigate : undefined}
+				>
 					<div className={element('icon-container')} style={{backgroundColor: item.color}}>
 						<Svg icon={item.icon} width="24px" height="24px" className={element('icon')} />
 					</div>

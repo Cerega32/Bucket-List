@@ -5,6 +5,7 @@ import {postLikeComment} from '@/entities/comment/api/postLikeComment';
 import {IComment} from '@/entities/comment/model/types';
 import {CommentGoal} from '@/entities/comment/ui/CommentGoal/CommentGoal';
 import {CommentImagesGallery} from '@/entities/comment/ui/CommentImagesGallery/CommentImagesGallery';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {useBem} from '@/shared/lib/hooks/useBem';
 import {ModalStore} from '@/shared/model/ModalStore';
 import {Button} from '@/shared/ui/Button/Button';
@@ -55,6 +56,9 @@ export const CommentsGoal: FC<CommentsGoalProps> = observer((props) => {
 	const {setIsOpen, setWindow} = ModalStore;
 
 	const openAddReview = () => {
+		if (!requireEmailConfirmed()) {
+			return;
+		}
 		if (onAddReview) {
 			onAddReview();
 			return;

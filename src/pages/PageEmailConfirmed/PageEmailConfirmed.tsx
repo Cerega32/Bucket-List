@@ -2,8 +2,10 @@ import {observer} from 'mobx-react-lite';
 import {FC, useEffect} from 'react';
 import {Navigate, useSearchParams} from 'react-router-dom';
 
+import {getUser} from '@/entities/user/api/getUser';
 import {UserStore} from '@/entities/user/model/UserStore';
 import {useBem} from '@/shared/lib/hooks/useBem';
+import {NotificationStore} from '@/shared/model/NotificationStore';
 import {ThemeStore} from '@/shared/model/ThemeStore';
 import {IPage} from '@/shared/types/page';
 import {Button} from '@/shared/ui/Button/Button';
@@ -16,6 +18,7 @@ export const PageEmailConfirmed: FC<IPage> = observer(({page}) => {
 	const {setHeader, setPage, setFull} = ThemeStore;
 	const [searchParams] = useSearchParams();
 	const ok = searchParams.get('ok') === '1';
+	const premiumGranted = searchParams.get('premium') === '1';
 	const error = searchParams.get('error') || '';
 
 	const [block, element] = useBem('page-email-confirmed');
@@ -25,12 +28,19 @@ export const PageEmailConfirmed: FC<IPage> = observer(({page}) => {
 		setPage(page);
 		setFull(true);
 
-		// Если email успешно подтвержден, обновляем статус в UserStore
 		if (ok && UserStore.isAuth) {
 			UserStore.setEmailConfirmed(true);
+			if (premiumGranted) {
+				NotificationStore.addNotification({
+					type: 'success',
+					title: 'Premium на 60 дней — ваш!',
+					message: 'Мы дали вам премиум бесплатно. Пожалуйста, напишите, если что-то сломается или если у вас есть идеи.',
+				});
+				getUser();
+			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ok]);
+	}, [ok, premiumGranted]);
 
 	if (ok) {
 		if (UserStore.isAuth) {

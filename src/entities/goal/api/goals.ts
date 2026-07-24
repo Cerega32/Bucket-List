@@ -1,7 +1,7 @@
 import {DELETE, GET, POST, PUT} from '@/shared/api/http/requests';
-import {IPaginationPage} from '@/shared/types/request';
 
 import type {IRegularGoalStatistics} from '@/entities/goal/model/types';
+import type {IPaginationPage} from '@/shared/types/request';
 
 // ========== PROGRESS API ==========
 
@@ -548,11 +548,13 @@ export const createMergeRequest = (data: {source_goal_code: string; target_goal_
 
 export const getMergeRequestById = (id: number) => GET(`goals/merge-requests/${id}`, {auth: true});
 
-// Получить цели в процессе выполнения
-// Поддерживает как обычный ответ (массив), так и пагинированный ({ pagination, data })
 export const getGoalsInProgress = async (params?: {
 	page?: number;
 	for_today?: boolean;
+	search?: string;
+	categories?: string[];
+	complexity?: string;
+	sort?: string;
 }): Promise<{
 	success: boolean;
 	data?:
@@ -562,6 +564,7 @@ export const getGoalsInProgress = async (params?: {
 				data: IGoalProgress[];
 				todayCount?: number;
 				totalCount?: number;
+				filterCategories?: string[];
 		  };
 	error?: string;
 }> => {
@@ -572,6 +575,18 @@ export const getGoalsInProgress = async (params?: {
 		}
 		if (params?.for_today) {
 			get['for_today'] = true;
+		}
+		if (params?.search?.trim()) {
+			get['search'] = params.search.trim();
+		}
+		if (params?.categories && params.categories.length > 0) {
+			get['categories'] = params.categories.join(',');
+		}
+		if (params?.complexity) {
+			get['complexity'] = params.complexity;
+		}
+		if (params?.sort) {
+			get['sort'] = params.sort;
 		}
 
 		const response = await GET('self/goals-in-progress', {
