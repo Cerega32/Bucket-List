@@ -16,6 +16,7 @@ import {
 	weeklyProratedHintForFirstDayOnCalendar,
 } from '@/entities/regular-goal/lib/weeklyProratedHint';
 import {WeekDaySchedule} from '@/entities/regular-goal/ui/WeekDaySelector/WeekDaySelector';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {UserStore} from '@/entities/user/model/UserStore';
 import {useBem} from '@/shared/lib/hooks/useBem';
 import useScreenSize from '@/shared/lib/hooks/useScreenSize';
@@ -280,6 +281,9 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 	};
 
 	const openFolderSelector = () => {
+		if (!requireEmailConfirmed()) {
+			return;
+		}
 		if (!isList && isAdded && goalId) {
 			setWindow('folder-selector');
 			setIsOpen(true);
@@ -1187,7 +1191,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 							<Button
 								theme="blue-light"
 								icon="dice-five"
-								onClick={() => setIsMergeModalOpen(true)}
+								onClick={() => {
+									if (!requireEmailConfirmed()) {
+										return;
+									}
+									setIsMergeModalOpen(true);
+								}}
 								className={element('btn')}
 								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 							>
@@ -1404,7 +1413,12 @@ export const AsideGoal: FC<AsideGoalProps | AsideListsProps> = observer((props) 
 							<Button
 								theme="blue-light"
 								icon="dice-five"
-								onClick={() => setIsMergeModalOpen(true)}
+								onClick={() => {
+									if (!requireEmailConfirmed()) {
+										return;
+									}
+									setIsMergeModalOpen(true);
+								}}
 								className={element('btn')}
 								size={isScreenMobile || isScreenSmallTablet ? 'medium' : undefined}
 							>

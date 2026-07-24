@@ -116,9 +116,14 @@
 		margin: 0.3rem;
 		border-radius: 50%;
 		line-height: 2rem;
+		color: var(--color-text-primary);
 
 		&:hover {
 			background-color: rgb(var(--color-primary-rgb) / 10%);
+		}
+
+		&--outside-month {
+			color: var(--color-text-secondary);
 		}
 
 		&--selected,

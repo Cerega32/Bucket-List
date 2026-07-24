@@ -12,6 +12,7 @@ import useScreenSize from '@/shared/lib/hooks/useScreenSize';
 import {Avatar} from '@/shared/ui/Avatar/Avatar';
 import {Button} from '@/shared/ui/Button/Button';
 import {EmptyState} from '@/shared/ui/EmptyState/EmptyState';
+import {resolveGoalImageSrc} from '@/shared/ui/Gradient/Gradient';
 import {Line} from '@/shared/ui/Line/Line';
 import {Svg} from '@/shared/ui/Svg/Svg';
 
@@ -54,6 +55,7 @@ const getNotificationIcon = (type: string) => {
 		case 'subscription_expiring_5d':
 		case 'subscription_expiring_1d':
 		case 'subscription_expired':
+		case 'premium_trial_granted':
 			return 'award';
 		case 'daily_goal_streak_broken':
 			return 'signal';
@@ -103,18 +105,24 @@ const getNotificationIconTheme = (type: string): 'green' | 'red' | 'blue' | unde
 const isCommentModerationNotification = (type: string) =>
 	type === 'comment_complaint' || type === 'comment_complaint_staff' || type === 'comment_removed' || type === 'comment_restored';
 
+/** Типы уведомлений, где показываем картинку цели/списка (с заглушкой при отсутствии) */
+const RELATED_OBJECT_IMAGE_TYPES = [
+	'achievement',
+	'goal_approved',
+	'goal_rejected',
+	'list_approved',
+	'list_rejected',
+	'goal_completed',
+	'list_completed',
+];
+
 /** Определяет, нужно ли показывать картинку объекта вместо аватара/иконки */
 const hasObjectImage = (notification: IHeaderNotification) => {
-	return (
-		notification.relatedObjectImage &&
-		['achievement', 'goal_approved', 'goal_rejected', 'list_approved', 'list_rejected', 'goal_completed', 'list_completed'].includes(
-			notification.type
-		)
-	);
+	return RELATED_OBJECT_IMAGE_TYPES.includes(notification.type);
 };
 
 const isAchievementImage = (notification: IHeaderNotification) => {
-	return notification.type === 'achievement' && notification.relatedObjectImage;
+	return notification.type === 'achievement';
 };
 
 /** Возвращает ссылку для перехода по клику на уведомление */
@@ -331,13 +339,21 @@ export const NotificationDropdown: FC<NotificationDropdownProps> = observer(({is
 											{isAchievementImage(notification) ? (
 												<div className={element('item-icon')}>
 													<img
-														src={notification.relatedObjectImage}
+														src={
+															notification.relatedObjectImage?.trim()
+																? notification.relatedObjectImage
+																: '/assets/achievements/target-default.svg'
+														}
 														alt=""
 														className={element('item-image', {small: true})}
 													/>
 												</div>
 											) : showObjectImage ? (
-												<img src={notification.relatedObjectImage} alt="" className={element('item-image')} />
+												<img
+													src={resolveGoalImageSrc(notification.relatedObjectImage)}
+													alt=""
+													className={element('item-image')}
+												/>
 											) : showStatusIcon ? (
 												<div
 													className={element('item-icon', {

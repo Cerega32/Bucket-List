@@ -35,6 +35,8 @@ import {Line} from '@/shared/ui/Line/Line';
 import Select, {OptionSelect} from '@/shared/ui/Select/Select';
 import {Switch} from '@/shared/ui/Switch/Switch';
 import {Title} from '@/shared/ui/Title/Title';
+
+import '@/features/catalog-items/catalog-items.scss';
 import '@/widgets/user-self-regular/user-self-regular.scss';
 
 interface UserSelfRegularProps {

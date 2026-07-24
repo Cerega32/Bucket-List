@@ -4,6 +4,7 @@ import {Link} from 'react-router-dom';
 import {IRegularGoalStatistics} from '@/entities/goal/model/types';
 import {useBem} from '@/shared/lib/hooks/useBem';
 import {pluralize} from '@/shared/lib/text/pluralize';
+import {resolveGoalImageSrc} from '@/shared/ui/Gradient/Gradient';
 import {Line} from '@/shared/ui/Line/Line';
 import {Svg} from '@/shared/ui/Svg/Svg';
 
@@ -172,7 +173,7 @@ export const RegularGoalCompactCard: FC<RegularGoalCompactCardProps> = ({statist
 		<div className={block()}>
 			<Link to={`/goals/${goalData.goalCode}`} className={element('link-area')} onClick={onNavigate}>
 				<div className={element('image-wrapper')}>
-					<img src={goalData.goalImage} alt={goalData.goalTitle} className={element('image')} />
+					<img src={resolveGoalImageSrc(goalData.goalImage)} alt={goalData.goalTitle} className={element('image')} />
 				</div>
 				<div className={element('content')}>
 					<h4 className={element('title')}>{goalData.goalTitle}</h4>

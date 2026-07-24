@@ -29,7 +29,7 @@ const TOTAL_STEPS = 3;
 
 interface RegistrationProps {
 	className?: string;
-	successRegistration: (data: {name: string; email_confirmed?: boolean; email?: string; premiumTrialGranted?: boolean}) => void;
+	successRegistration: (data: {name: string; email_confirmed?: boolean; email?: string}) => void;
 	isPage?: boolean;
 }
 
@@ -274,19 +274,18 @@ export const Registration: FC<RegistrationProps> = (props) => {
 				}
 			}
 
-			const premiumTrialGranted = Boolean(res.data?.premiumTrialGranted ?? res.data?.premium_trial_granted);
+			const premiumTrialAvailable = Boolean(res.data?.premiumTrialAvailable ?? res.data?.premium_trial_available);
 			const premiumTrialDays = Number(res.data?.premiumTrialDays ?? res.data?.premium_trial_days) || 60;
 
 			successRegistration({
 				...(res.data ?? res),
-				premiumTrialGranted,
 			});
 
-			if (premiumTrialGranted) {
+			if (premiumTrialAvailable) {
 				NotificationStore.addNotification({
 					type: 'success',
-					title: `Premium на ${premiumTrialDays} дней — ваш!`,
-					message: 'Мы дали вам премиум бесплатно. Пожалуйста, напишите, если что-то сломается или если у вас есть идеи.',
+					title: `Premium на ${premiumTrialDays} дней ждёт вас`,
+					message: 'Подтвердите email — и премиум станет вашим. Письмо уже отправлено.',
 				});
 			}
 

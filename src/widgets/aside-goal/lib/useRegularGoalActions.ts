@@ -12,6 +12,7 @@ import {IGoal, IRegularGoalConfig, IRegularGoalStatistics} from '@/entities/goal
 import {addRegularGoalToUser} from '@/entities/regular-goal/api/addRegularGoalToUser';
 import {updateRegularGoalSettings} from '@/entities/regular-goal/api/updateRegularGoalSettings';
 import {weeklyProratedHintForFirstDayOnCalendar} from '@/entities/regular-goal/lib/weeklyProratedHint';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {RegularGoalSettings} from '@/features/set-regular-goal/SetRegularGoalModal';
 import {NotificationStore} from '@/shared/model/NotificationStore';
 import {
@@ -810,7 +811,12 @@ export const useRegularGoalActions = (params: UseRegularGoalActionsParams): UseR
 		isResetCompletedSeriesModalOpen,
 		closeResetCompletedSeriesModal: () => setIsResetCompletedSeriesModalOpen(false),
 		isEditSettingsModalOpen,
-		openEditSettingsModal: () => setIsEditSettingsModalOpen(true),
+		openEditSettingsModal: () => {
+			if (!requireEmailConfirmed()) {
+				return;
+			}
+			setIsEditSettingsModalOpen(true);
+		},
 		closeEditSettingsModal: () => setIsEditSettingsModalOpen(false),
 		isConfirmResetSeriesModalOpen,
 		closeConfirmResetSeriesModal: handleCloseConfirmResetSeriesModal,

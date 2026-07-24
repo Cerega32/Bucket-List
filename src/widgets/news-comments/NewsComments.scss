@@ -358,6 +358,7 @@
 		line-height: var(--line-height-16);
 		transition: border-color 0.2s ease;
 		resize: vertical;
+		background-color: var(--color-surface);
 
 		&:focus {
 			outline: none;

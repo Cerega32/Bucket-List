@@ -4,6 +4,7 @@ import {IGoalProgress, resetGoalProgress, updateGoalProgress} from '@/entities/g
 import {refreshHeaderGoalCounts} from '@/entities/goal/lib/refreshHeaderGoalCounts';
 import {HeaderProgressGoalsStore} from '@/entities/goal/model/HeaderProgressGoalsStore';
 import {IGoal, IRegularGoalConfig} from '@/entities/goal/model/types';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {ModalStore} from '@/shared/model/ModalStore';
 import {NotificationStore} from '@/shared/model/NotificationStore';
 import {buildDraftGoalProgress} from '@/widgets/aside-goal/lib/asideGoalCalculations';
@@ -99,6 +100,9 @@ export const useGoalProgressActions = (params: UseGoalProgressActionsParams): Us
 		if (!canEditProgress) {
 			return;
 		}
+		if (!requireEmailConfirmed()) {
+			return;
+		}
 		const current = progressOverride ?? progress;
 		if (!isList && goalId && current) {
 			setWindow('progress-update');
@@ -160,6 +164,9 @@ export const useGoalProgressActions = (params: UseGoalProgressActionsParams): Us
 
 	const handleMarkToday = async () => {
 		if (!goalId || !progress || !canEditProgress) return;
+		if (!requireEmailConfirmed()) {
+			return;
+		}
 		const newWorkingToday = !progress.isWorkingToday;
 		try {
 			const response = await updateGoalProgress(goalId, {

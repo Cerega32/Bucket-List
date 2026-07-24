@@ -7,6 +7,7 @@ import {DEMO_PROGRESS_GOALS} from '@/entities/goal/lib/progressDemoGoals';
 import {isPremiumSubscriptionActive} from '@/entities/regular-goal/lib/checkRegularGoalsAddLimit';
 import {RegularCard} from '@/entities/regular-goal/ui/RegularCard/RegularCard';
 import {getUser} from '@/entities/user/api/getUser';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {UserStore} from '@/entities/user/model/UserStore';
 import {CatalogItemsSkeleton} from '@/features/catalog-items/CatalogItemsSkeleton';
 import {useBem} from '@/shared/lib/hooks/useBem';
@@ -21,7 +22,6 @@ import {EmptyState} from '@/shared/ui/EmptyState/EmptyState';
 import {FieldInput} from '@/shared/ui/FieldInput/FieldInput';
 import {FiltersDrawer, FilterGroup} from '@/shared/ui/FiltersDrawer/FiltersDrawer';
 import {Line} from '@/shared/ui/Line/Line';
-import {BlurLoader} from '@/shared/ui/Loader/BlurLoader';
 import {Pagination} from '@/shared/ui/Pagination/Pagination';
 import Select, {OptionSelect} from '@/shared/ui/Select/Select';
 import {Switch} from '@/shared/ui/Switch/Switch';
@@ -36,6 +36,8 @@ const SORT_OPTIONS: OptionSelect[] = [
 	{name: 'По названию', value: 'title_asc'},
 	{name: 'По дате обновления', value: 'last_updated_desc'},
 ];
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 const buildMarkedProgressGoal = (goal: IGoalProgress, isWorkingToday: boolean): IGoalProgress => ({
 	...goal,
@@ -52,12 +54,15 @@ export const UserSelfProgress: FC = observer(() => {
 	const progressGoalsCount = UserStore.userSelf.counts?.progressGoals;
 	const skipProgressCountSyncRef = useRef(true);
 	const skipTabSyncRef = useRef(true);
+	const skipInitialFiltersLoadRef = useRef(true);
 	const loadGenerationRef = useRef(0);
+	const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const [searchParams] = useSearchParams();
 
 	const [goals, setGoals] = useState<IGoalProgress[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isPageLoading, setIsPageLoading] = useState(false);
 	const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
 	const [activeSort, setActiveSort] = useState(() => getSortIndexParam(searchParams, 'sort', SORT_OPTIONS));
 	const [filterValues, setFilterValues] = useState<Record<string, string[]>>(() => ({
@@ -66,9 +71,9 @@ export const UserSelfProgress: FC = observer(() => {
 	}));
 	const [pagination, setPagination] = useState<IPaginationPage | null>(null);
 	const [currentPage, setCurrentPage] = useState(() => getPageParam(searchParams));
-	const [isPageLoading, setIsPageLoading] = useState(false);
-	const [todayCount, setTodayCount] = useState<number>(0);
-	const [allTotalCount, setAllTotalCount] = useState<number>(0);
+	const [todayCount, setTodayCount] = useState(0);
+	const [allTotalCount, setAllTotalCount] = useState(0);
+	const [filterCategories, setFilterCategories] = useState<string[]>([]);
 	const [isBulkTodayUpdating, setIsBulkTodayUpdating] = useState(false);
 	const [listRevision, setListRevision] = useState(0);
 
@@ -84,6 +89,8 @@ export const UserSelfProgress: FC = observer(() => {
 			return next;
 		});
 	}, []);
+
+	const categoryFilters = useMemo(() => filterCategories.filter(Boolean).map((name) => ({name, code: name})), [filterCategories]);
 
 	const buildPendingTodayGoals = useCallback(() => goals.filter((goal) => !goal.isWorkingToday), [goals]);
 
@@ -101,49 +108,6 @@ export const UserSelfProgress: FC = observer(() => {
 		buildPendingItems: buildPendingTodayGoals,
 		getItemId: (goal) => goal.id,
 	});
-
-	const categoryFilters = useMemo(() => {
-		const map = new Map<string, string>();
-		goals.forEach((g) => {
-			if (g.goalCategory && !map.has(g.goalCategory)) map.set(g.goalCategory, g.goalCategory);
-		});
-		return Array.from(map.values()).map((name) => ({name, code: name}));
-	}, [goals]);
-
-	const applyFiltersAndSort = useCallback(
-		(source: IGoalProgress[]) => {
-			let result = [...source];
-
-			if (search.trim()) {
-				const q = search.trim().toLowerCase();
-				result = result.filter((g) => g.goalTitle.toLowerCase().includes(q));
-			}
-
-			if (filterValues['categories'].length > 0) {
-				result = result.filter((g) => filterValues['categories'].includes(g.goalCategory));
-			}
-
-			if (filterValues['complexity'].length > 0) {
-				result = result.filter((g) => g.goalComplexity && filterValues['complexity'].includes(g.goalComplexity));
-			}
-
-			const sortKey = SORT_OPTIONS[activeSort]?.value;
-			if (sortKey === 'progress_desc') {
-				result.sort((a, b) => b.progressPercentage - a.progressPercentage);
-			} else if (sortKey === 'progress_asc') {
-				result.sort((a, b) => a.progressPercentage - b.progressPercentage);
-			} else if (sortKey === 'title_asc') {
-				result.sort((a, b) => a.goalTitle.localeCompare(b.goalTitle));
-			} else if (sortKey === 'last_updated_desc') {
-				result.sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''));
-			}
-
-			return result;
-		},
-		[search, filterValues, activeSort]
-	);
-
-	const filteredAllGoals = useMemo(() => applyFiltersAndSort(goals), [goals, applyFiltersAndSort]);
 
 	// Синхронизируем поиск/фильтры/сортировку/страницу с URL, чтобы кнопка "назад" в браузере
 	// восстанавливала то же состояние списка.
@@ -199,48 +163,24 @@ export const UserSelfProgress: FC = observer(() => {
 		[search, activeSort, filterValues, currentPage, searchParams, navigate, location.pathname, location.hash]
 	);
 
-	const handleSearchChange = (value: string) => {
-		setSearch(value);
-		syncProgressUrl({search: value});
-	};
-	const handleFilterChange = (key: string, selected: string[]) => {
-		const nextFilters = {...filterValues, [key]: selected};
-		setFilterValues(nextFilters);
-		syncProgressUrl({filters: nextFilters});
-	};
-	const handleFilterReset = () => {
-		const nextFilters = {categories: [], complexity: []};
-		setFilterValues(nextFilters);
-		syncProgressUrl({filters: nextFilters});
-	};
-
-	const drawerFilters = useMemo((): FilterGroup[] => {
-		const groups: FilterGroup[] = [];
-		if (categoryFilters.length > 0) {
-			groups.push({key: 'categories', label: 'Категории', options: categoryFilters, multiple: true, allLabel: 'Все категории'});
-		}
-		groups.push({
-			key: 'complexity',
-			label: 'Сложность',
-			options: [
-				{name: 'Легко', code: 'easy'},
-				{name: 'Средне', code: 'medium'},
-				{name: 'Тяжело', code: 'hard'},
-			],
-			allLabel: 'Все цели',
-		});
-		return groups;
-	}, [categoryFilters]);
-	const handleSortSelect = (index: number) => {
-		setActiveSort(index);
-		syncProgressUrl({sortIndex: index});
-	};
-
 	const {setIsOpen, setWindow, setModalProps} = ModalStore;
 
 	const loadGoalsInProgress = useCallback(
-		async (page = 1, options?: {silent?: boolean; forToday?: boolean}) => {
+		async (
+			page = 1,
+			options?: {
+				silent?: boolean;
+				forToday?: boolean;
+				search?: string;
+				filters?: Record<string, string[]>;
+				sortIndex?: number;
+			}
+		) => {
 			const forToday = options?.forToday ?? activeTab === 'today';
+			const nextSearch = options?.search ?? search;
+			const nextFilters = options?.filters ?? filterValues;
+			const nextSortIndex = options?.sortIndex ?? activeSort;
+			const sortValue = SORT_OPTIONS[nextSortIndex]?.value;
 			const generation = ++loadGenerationRef.current;
 
 			if (!options?.silent) {
@@ -252,6 +192,10 @@ export const UserSelfProgress: FC = observer(() => {
 				const response = await getGoalsInProgress({
 					page,
 					...(forToday ? {for_today: true} : {}),
+					...(nextSearch.trim() ? {search: nextSearch.trim()} : {}),
+					...(nextFilters['categories']?.length > 0 ? {categories: nextFilters['categories']} : {}),
+					...(nextFilters['complexity']?.length > 0 ? {complexity: nextFilters['complexity'][0]} : {}),
+					...(sortValue ? {sort: sortValue} : {}),
 				});
 				if (generation !== loadGenerationRef.current) {
 					return;
@@ -265,6 +209,7 @@ export const UserSelfProgress: FC = observer(() => {
 								data: IGoalProgress[];
 								todayCount?: number;
 								totalCount?: number;
+								filterCategories?: string[];
 						  };
 
 					if (Array.isArray(data)) {
@@ -280,6 +225,10 @@ export const UserSelfProgress: FC = observer(() => {
 						if (!forToday) {
 							setAllTotalCount(data.length);
 						}
+						const categoriesFromPage = Array.from(new Set(data.map((g) => g.goalCategory).filter(Boolean) as string[])).sort(
+							(a, b) => a.localeCompare(b)
+						);
+						setFilterCategories(categoriesFromPage);
 						if (!options?.silent) {
 							setListRevision((value) => value + 1);
 						}
@@ -296,6 +245,9 @@ export const UserSelfProgress: FC = observer(() => {
 							setAllTotalCount(data.totalCount);
 						} else if (!forToday) {
 							setAllTotalCount(data.pagination.totalItems);
+						}
+						if (data.filterCategories) {
+							setFilterCategories(data.filterCategories);
 						}
 						if (!options?.silent) {
 							setListRevision((value) => value + 1);
@@ -318,7 +270,7 @@ export const UserSelfProgress: FC = observer(() => {
 				}
 			}
 		},
-		[activeTab]
+		[activeTab, search, filterValues, activeSort]
 	);
 
 	const refreshProgressAndProfile = async (page: number, options?: {silent?: boolean}) => {
@@ -342,6 +294,7 @@ export const UserSelfProgress: FC = observer(() => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [progressGoalsCount]);
 
+	// Переключение вкладок — сброс страницы; на «Сегодня» поиск/фильтры не нужны.
 	useEffect(() => {
 		if (skipTabSyncRef.current) {
 			skipTabSyncRef.current = false;
@@ -356,18 +309,93 @@ export const UserSelfProgress: FC = observer(() => {
 		} else {
 			syncProgressUrl({page: 1});
 		}
-		loadGoalsInProgress(1, {forToday: activeTab === 'today'}).catch(() => {});
+		loadGoalsInProgress(1, {
+			forToday: activeTab === 'today',
+			...(activeTab === 'today' ? {search: '', filters: {categories: [], complexity: []}} : {}),
+		}).catch(() => {});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [activeTab]);
 
+	// Поиск/фильтры/сортировка — только на вкладке «Все цели».
+	useEffect(() => {
+		if (skipInitialFiltersLoadRef.current) {
+			skipInitialFiltersLoadRef.current = false;
+			return;
+		}
+
+		if (activeTab !== 'all') {
+			return;
+		}
+
+		if (searchDebounceRef.current) {
+			clearTimeout(searchDebounceRef.current);
+		}
+
+		searchDebounceRef.current = setTimeout(() => {
+			setCurrentPage(1);
+			loadGoalsInProgress(1).catch(() => {});
+		}, SEARCH_DEBOUNCE_MS);
+
+		return () => {
+			if (searchDebounceRef.current) {
+				clearTimeout(searchDebounceRef.current);
+			}
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [search, filterValues, activeSort]);
+
+	// Пересобираем «Сегодня» только после явной перезагрузки списка (listRevision)
+	// или смены вкладки — не при точечном mergeGoalUpdate, иначе отмеченная карточка
+	// пропадает сразу вместо плавной задержки useTodayTabDisplayList.
 	useEffect(() => {
 		if (activeTab === 'today') {
 			resetDisplayItems();
 		}
-	}, [listRevision, activeTab, resetDisplayItems]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [listRevision, activeTab]);
+
+	const handleSearchChange = (value: string) => {
+		setSearch(value);
+		syncProgressUrl({search: value, page: 1});
+	};
+	const handleFilterChange = (key: string, selected: string[]) => {
+		const nextFilters = {...filterValues, [key]: selected};
+		setFilterValues(nextFilters);
+		syncProgressUrl({filters: nextFilters, page: 1});
+	};
+	const handleFilterReset = () => {
+		const nextFilters = {categories: [], complexity: []};
+		setFilterValues(nextFilters);
+		syncProgressUrl({filters: nextFilters, page: 1});
+	};
+	const handleSortSelect = (index: number) => {
+		setActiveSort(index);
+		syncProgressUrl({sortIndex: index, page: 1});
+	};
+
+	const drawerFilters = useMemo((): FilterGroup[] => {
+		const groups: FilterGroup[] = [];
+		if (categoryFilters.length > 0) {
+			groups.push({key: 'categories', label: 'Категории', options: categoryFilters, multiple: true, allLabel: 'Все категории'});
+		}
+		groups.push({
+			key: 'complexity',
+			label: 'Сложность',
+			options: [
+				{name: 'Легко', code: 'easy'},
+				{name: 'Средне', code: 'medium'},
+				{name: 'Тяжело', code: 'hard'},
+			],
+			allLabel: 'Все цели',
+		});
+		return groups;
+	}, [categoryFilters]);
 
 	const openProgressModal = (goal: IGoalProgress) => {
 		if (!canEditProgress) {
+			return;
+		}
+		if (!requireEmailConfirmed()) {
 			return;
 		}
 		const pageAtOpen = currentPage;
@@ -385,6 +413,9 @@ export const UserSelfProgress: FC = observer(() => {
 
 	const markToday = async (goal: IGoalProgress) => {
 		if (!canEditProgress) {
+			return;
+		}
+		if (!requireEmailConfirmed()) {
 			return;
 		}
 		const marking = !goal.isWorkingToday;
@@ -446,17 +477,17 @@ export const UserSelfProgress: FC = observer(() => {
 		}
 	};
 
-	const pendingTodayOnPage = goals.filter((g) => !g.isWorkingToday);
-	const markedTodayOnPage = goals.filter((g) => g.isWorkingToday);
-	const allMarkedOnPage = goals.length > 0 && pendingTodayOnPage.length === 0;
+	const pendingInToday = todayDisplayGoals.filter((g) => !g.isWorkingToday);
+	const markedInToday = todayDisplayGoals.filter((g) => g.isWorkingToday);
+	const allMarkedInToday = todayDisplayGoals.length > 0 && pendingInToday.length === 0;
 
 	const handleToggleCompleteAllToday = async () => {
-		if (!canEditProgress || activeTab !== 'today' || isBulkTodayUpdating || goals.length === 0) {
+		if (!canEditProgress || activeTab !== 'today' || isBulkTodayUpdating || todayDisplayGoals.length === 0) {
 			return;
 		}
 
-		const markingAll = pendingTodayOnPage.length > 0;
-		const targets = markingAll ? pendingTodayOnPage : markedTodayOnPage;
+		const markingAll = pendingInToday.length > 0;
+		const targets = markingAll ? pendingInToday : markedInToday;
 
 		if (targets.length === 0) {
 			return;
@@ -544,13 +575,71 @@ export const UserSelfProgress: FC = observer(() => {
 	};
 
 	const isInitialLoading = isLoading && goals.length === 0;
-	const goalsToRender = activeTab === 'today' ? todayDisplayGoals : filteredAllGoals;
-	const showPremiumDemo = !isPremium && !isInitialLoading && goals.length === 0;
+	const goalsToRender = activeTab === 'today' ? todayDisplayGoals : goals;
+	const showPremiumDemo = !isPremium && !isInitialLoading && allTotalCount === 0 && goals.length === 0;
+	const filteredTotal = pagination?.totalItems ?? goals.length;
+	const hasActiveFilters = !!search.trim() || filterValues['categories'].length > 0 || filterValues['complexity'].length > 0;
+	const isGloballyEmpty = allTotalCount === 0 && goals.length === 0 && !hasActiveFilters;
 
 	const buttonsSwitch = [
 		{url: '#today', name: 'На сегодня', page: 'today' as const, count: todayCount},
 		{url: '#all', name: 'Все цели', page: 'all' as const, count: allTotalCount || pagination?.totalItems || goals.length},
 	];
+
+	const renderGoalsContent = () => {
+		if (isInitialLoading || isPageLoading) {
+			return <CatalogItemsSkeleton columns="3" />;
+		}
+
+		if (isGloballyEmpty) {
+			return (
+				<EmptyState
+					title={activeTab === 'today' ? 'Нет целей на сегодня' : 'Прогресс для целей не установлен'}
+					description={
+						activeTab === 'today'
+							? 'Все цели уже отмечены на сегодня или прогресс ещё не начат.'
+							: 'Задайте отслеживание прогресса выполнения в любой активной цели'
+					}
+				>
+					{activeTab !== 'today' && (
+						<Button theme="blue" width="auto" type="Link" href="/user/self/active-goals">
+							Перейти к активным целям
+						</Button>
+					)}
+				</EmptyState>
+			);
+		}
+
+		if (goalsToRender.length === 0) {
+			return (
+				<EmptyState
+					title={activeTab === 'today' ? 'Нет целей на сегодня' : 'Нет целей'}
+					description={
+						activeTab === 'today'
+							? 'Список целей, по которым ещё не отмечено «работал сегодня», или ничего не найдено по заданным условиям.'
+							: 'Не найдено ни одной цели с заданным прогрессом'
+					}
+				/>
+			);
+		}
+
+		return (
+			<div className={element('goals-grid')} id="user-self-progress-goals">
+				{goalsToRender.map((goal) => (
+					<RegularCard
+						key={goal.id}
+						variant="progress"
+						progressGoal={goal}
+						canEditProgress={canEditProgress}
+						onOpenProgressModal={() => openProgressModal(goal)}
+						onMarkToday={() => markToday(goal)}
+						onMarkCompleted={() => markGoalCompleted(goal)}
+						className="catalog-items__goal catalog-items__goal--full"
+					/>
+				))}
+			</div>
+		);
+	};
 
 	return (
 		<section className={block()} id="user-self-progress">
@@ -598,18 +687,17 @@ export const UserSelfProgress: FC = observer(() => {
 							<Switch className="catalog-items__switch" buttons={buttonsSwitch} active={activeTab} />
 							<Line className="catalog-items__line" />
 							{activeTab === 'today' ? (
-								<div>
+								<div className={element('bulk-today-wrapper')}>
 									<Button
 										theme="blue-light"
 										size="medium"
-										width="full"
-										icon={allMarkedOnPage ? 'regular' : 'regular-empty'}
+										icon={allMarkedInToday ? 'regular' : 'regular-empty'}
 										onClick={handleToggleCompleteAllToday}
-										disabled={!canEditProgress || isBulkTodayUpdating || goals.length === 0}
-										hoverContent={allMarkedOnPage ? 'Снять отметку со всех на странице' : undefined}
-										hoverIcon={allMarkedOnPage ? 'cross' : undefined}
+										disabled={!canEditProgress || isBulkTodayUpdating || todayDisplayGoals.length === 0}
+										hoverContent={allMarkedInToday ? 'Снять отметку со всех в списке' : undefined}
+										hoverIcon={allMarkedInToday ? 'cross' : undefined}
 									>
-										{allMarkedOnPage ? 'Все отмечены на сегодня' : 'Отметить все сегодня'}
+										{allMarkedInToday ? 'Все отмечены на сегодня' : 'Отметить все сегодня'}
 									</Button>
 								</div>
 							) : (
@@ -628,7 +716,7 @@ export const UserSelfProgress: FC = observer(() => {
 											values={filterValues}
 											onChange={handleFilterChange}
 											onReset={handleFilterReset}
-											totalCount={filteredAllGoals.length}
+											totalCount={filteredTotal}
 										/>
 										<Select options={SORT_OPTIONS} activeOption={activeSort} onSelect={handleSortSelect} filter />
 									</div>
@@ -636,52 +724,7 @@ export const UserSelfProgress: FC = observer(() => {
 							)}
 						</div>
 
-						{isInitialLoading ? (
-							<CatalogItemsSkeleton columns="3" />
-						) : (
-							<BlurLoader active={isPageLoading}>
-								{goals.length === 0 ? (
-									<EmptyState
-										title={activeTab === 'today' ? 'Нет целей на сегодня' : 'Прогресс для целей не установлен'}
-										description={
-											activeTab === 'today'
-												? 'Все цели уже отмечены на сегодня или прогресс ещё не начат.'
-												: 'Задайте отслеживание прогресса выполнения в любой активной цели'
-										}
-									>
-										{activeTab !== 'today' && (
-											<Button theme="blue" width="auto" type="Link" href="/user/self/active-goals">
-												Перейти к активным целям
-											</Button>
-										)}
-									</EmptyState>
-								) : goalsToRender.length === 0 ? (
-									<EmptyState
-										title={activeTab === 'today' ? 'Нет целей на сегодня' : 'Нет целей'}
-										description={
-											activeTab === 'today'
-												? 'Список целей, по которым ещё не отмечено «работал сегодня».'
-												: 'Не найдено ни одной цели с заданным прогрессом'
-										}
-									/>
-								) : (
-									<div className={element('goals-grid')} id="user-self-progress-goals">
-										{goalsToRender.map((goal) => (
-											<RegularCard
-												key={goal.id}
-												variant="progress"
-												progressGoal={goal}
-												canEditProgress={canEditProgress}
-												onOpenProgressModal={() => openProgressModal(goal)}
-												onMarkToday={() => markToday(goal)}
-												onMarkCompleted={() => markGoalCompleted(goal)}
-												className="catalog-items__goal catalog-items__goal--full"
-											/>
-										))}
-									</div>
-								)}
-							</BlurLoader>
-						)}
+						{renderGoalsContent()}
 
 						{pagination && pagination.totalPages > 1 && (
 							<Pagination

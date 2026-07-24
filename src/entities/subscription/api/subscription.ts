@@ -156,6 +156,7 @@ export const createPayment = async (
 			},
 			auth: true,
 			showSuccessNotification: false,
+			showErrorNotification: false,
 		});
 
 		if (response.success && response.data) {

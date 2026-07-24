@@ -10,6 +10,7 @@ import {getGoalListTitleFieldErrors, GOAL_LIST_TITLE_MIN_LENGTH, isGoalListTitle
 import {ICategory, IGoal} from '@/entities/goal/model/types';
 import {GoalSearchItem} from '@/entities/goal/ui/GoalSearchItem/GoalSearchItem';
 import {postCreateGoalList} from '@/entities/goal-list/api/postCreateGoalList';
+import {handleEmailConfirmedNavigate, requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {AddGoal} from '@/features/add-goal/AddGoal';
 import {GoalListItem} from '@/features/add-goal-list/ui/GoalListItem/GoalListItem';
 import {POST_WITH_RETRY} from '@/shared/api/http/requests';
@@ -821,7 +822,7 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 					<Title tag="h1" className={element('title')}>
 						Создание списка целей
 					</Title>
-					<Button size="small" type="Link" theme="blue" icon="plus" href="/goals/create">
+					<Button size="small" type="Link" theme="blue" icon="plus" href="/goals/create" onClick={handleEmailConfirmedNavigate}>
 						Добавить цель
 					</Button>
 				</div>
@@ -1124,6 +1125,9 @@ export const AddGoalList: FC<AddGoalListProps> = (props) => {
 												theme="blue-light"
 												className={element('add-goal-btn')}
 												onClick={() => {
+													if (!requireEmailConfirmed()) {
+														return;
+													}
 													if (canCreateGoal) {
 														// Закрываем редактирование других целей
 														finishEditingGoal();

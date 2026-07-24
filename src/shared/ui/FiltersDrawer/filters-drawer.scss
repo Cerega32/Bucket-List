@@ -92,6 +92,10 @@
 			flex-direction: column;
 		}
 	}
+
+	&__trigger-text {
+		white-space: nowrap;
+	}
 }
 
 .filter-select {

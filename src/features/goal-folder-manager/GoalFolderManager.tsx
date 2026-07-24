@@ -16,6 +16,7 @@ import {markGoal} from '@/entities/goal/api/markGoal';
 import {ICreateFolderData, IShortGoal} from '@/entities/goal/model/types';
 import {Card} from '@/entities/goal/ui/Card/Card';
 import {IGoalsPagination} from '@/entities/goal-list/model/types';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
 import {UserStore} from '@/entities/user/model/UserStore';
 import {CatalogItemsSkeleton} from '@/features/catalog-items/CatalogItemsSkeleton';
 import {FolderRulesManager} from '@/features/folder-rules-manager/FolderRulesManager';
@@ -111,6 +112,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	const [activeSort, setActiveSort] = useState(() => getSortIndexParam(searchParams, 'sort', SORT_OPTIONS));
 
 	const loadMoreRef = useRef<HTMLDivElement>(null);
+	const folderContentRef = useRef<HTMLDivElement>(null);
 	const loaderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const isLoadingMoreRef = useRef(false);
 	const lastRequestedPageRef = useRef(0);
@@ -300,6 +302,11 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 					loadFolderGoals(found.id);
 				}
 			}
+		} else if (selectedFolderIdRef.current !== null) {
+			setSelectedFolder(null);
+			setFolderGoals([]);
+			setFolderGoalsPagination(null);
+			loadedFolderGoalsIdRef.current = null;
 		}
 	}, [folders, folderId]);
 
@@ -382,9 +389,27 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 		}
 	};
 
+	const handleCloseFolder = () => {
+		setSelectedFolder(null);
+		setFolderGoals([]);
+		setFolderGoalsPagination(null);
+		loadedFolderGoalsIdRef.current = null;
+		navigate('/user/self/folders', {replace: true});
+	};
+
 	const handleSelectFolder = async (folder: IGoalFolder) => {
+		if (selectedFolder?.id === folder.id) {
+			handleCloseFolder();
+			return;
+		}
+
 		setSelectedFolder(folder);
 		navigate(`/user/self/folders/${folder.id}`);
+
+		requestAnimationFrame(() => {
+			folderContentRef.current?.scrollIntoView({behavior: 'smooth', block: 'start'});
+		});
+
 		await loadFolderGoals(folder.id);
 	};
 
@@ -472,6 +497,9 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 	const isPremium = userSelf.subscriptionType === 'premium';
 
 	const handleCreateButtonClick = () => {
+		if (!requireEmailConfirmed()) {
+			return;
+		}
 		if (foldersLimitReached) {
 			navigate('/user/self/subs');
 			return;
@@ -599,7 +627,7 @@ export const GoalFolderManager: FC<GoalFolderManagerProps> = observer(({classNam
 				</div>
 
 				{selectedFolder && (
-					<div className={element('folder-content')}>
+					<div className={element('folder-content')} ref={folderContentRef}>
 						<div className={element('folder-header')}>
 							<Title tag="h3" className={element('folder-header-title')}>
 								<span

@@ -6,6 +6,7 @@ import {IGoal, IRegularGoalStatistics} from '@/entities/goal/model/types';
 import {useBem} from '@/shared/lib/hooks/useBem';
 import {pluralize} from '@/shared/lib/text/pluralize';
 import {Button} from '@/shared/ui/Button/Button';
+import {resolveGoalImageSrc} from '@/shared/ui/Gradient/Gradient';
 import {Line} from '@/shared/ui/Line/Line';
 import {Progress} from '@/shared/ui/Progress/Progress';
 import {Svg} from '@/shared/ui/Svg/Svg';
@@ -279,7 +280,7 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 		return (
 			<section className={block({horizontal, regular: true, demo: demoMode})}>
 				<Link to={`/goals/${goal.goalCode}`} className={element('image-wrapper')}>
-					<img src={goal.goalImage} alt={goal.goalTitle} className={element('image')} />
+					<img src={resolveGoalImageSrc(goal.goalImage)} alt={goal.goalTitle} className={element('image')} />
 					<Tag text={goal.goalCategory} category={goal.goalCategoryNameEn} className={element('category-badge')} />
 				</Link>
 				<div className={element('body')}>
@@ -400,7 +401,7 @@ export const RegularCard: FC<RegularCardProps> = (props) => {
 	return (
 		<section className={block({horizontal, regular: true, interrupted: isInterrupted})}>
 			<Link to={`/goals/${goal.code}`} className={element('image-wrapper')}>
-				<img src={goal.image} alt={goal.title} className={element('image')} />
+				<img src={resolveGoalImageSrc(goal.image)} alt={goal.title} className={element('image')} />
 				<Tag text={goal.category.name} category={goal.category.nameEn} className={element('category-badge')} />
 			</Link>
 			<div className={element('body')}>

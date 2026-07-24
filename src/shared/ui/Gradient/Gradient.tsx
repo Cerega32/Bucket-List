@@ -6,6 +6,13 @@ import '@/shared/ui/Gradient/gradient.scss';
 /** Заглушка, если с бэкенда `image: null` или пустая строка (файл в `public/assets/`) */
 export const GRADIENT_DEFAULT_IMAGE = '/assets/img-default.png';
 
+export const resolveGoalImageSrc = (src?: string | null): string => {
+	if (src != null && String(src).trim() !== '') {
+		return String(src).trim();
+	}
+	return GRADIENT_DEFAULT_IMAGE;
+};
+
 interface GradientProps {
 	className?: string;
 	img: {src: string | null | undefined; alt: string};
@@ -23,7 +30,7 @@ export const Gradient: FC<GradientProps> = (props) => {
 
 	const [block, element] = useBem('gradient', className);
 
-	const imageSrc = img.src != null && String(img.src).trim() !== '' ? String(img.src).trim() : GRADIENT_DEFAULT_IMAGE;
+	const imageSrc = resolveGoalImageSrc(img.src);
 
 	return (
 		<div className={block()}>

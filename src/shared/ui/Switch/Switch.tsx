@@ -17,6 +17,7 @@ interface SwitchProps {
 	buttons: Array<ISwitch>;
 	active: string;
 	base?: string;
+	preserveQuery?: boolean;
 }
 
 /** Собирает to для Link: query всегда до hash (`?page=2#all`), иначе hash ломается (`#all?page=2`). */
@@ -37,13 +38,13 @@ const buildSwitchTo = (path: string, searchString: string): string => {
 };
 
 export const Switch: FC<SwitchProps> = (props) => {
-	const {className, buttons, active, base = ''} = props;
+	const {className, buttons, active, base = '', preserveQuery = true} = props;
 	const [searchParams] = useSearchParams();
 
 	const [block, element] = useBem('switch', className);
 
-	// Сохраняем текущие query-параметры (например search) при переключении вкладок
-	const searchString = searchParams.toString();
+	// Сохраняем текущие query-параметры (например search) при переключении вкладок одного домена
+	const searchString = preserveQuery ? searchParams.toString() : '';
 
 	return (
 		<section className={block()}>

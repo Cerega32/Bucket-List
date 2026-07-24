@@ -206,6 +206,8 @@
 	}
 
 	&__folder-content {
+		scroll-margin-top: calc(var(--header-stack-height, 80px) + 16px);
+
 		h3 {
 			margin: 0 0 16px;
 			color: var(--color-text-primary);

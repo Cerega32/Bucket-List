@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom';
 
 import {IGoalProgress} from '@/entities/goal/api/goals';
 import {useBem} from '@/shared/lib/hooks/useBem';
+import {resolveGoalImageSrc} from '@/shared/ui/Gradient/Gradient';
 import {Line} from '@/shared/ui/Line/Line';
 import {Progress} from '@/shared/ui/Progress/Progress';
 import {Svg} from '@/shared/ui/Svg/Svg';
@@ -86,7 +87,7 @@ export const ProgressGoalCompactCard: FC<ProgressGoalCompactCardProps> = ({
 		<div className={block()}>
 			<Link to={`/goals/${progress.goalCode}`} className={element('link-area')} onClick={onNavigate}>
 				<div className={element('image-wrapper')}>
-					<img src={progress.goalImage} alt={progress.goalTitle} className={element('image')} />
+					<img src={resolveGoalImageSrc(progress.goalImage)} alt={progress.goalTitle} className={element('image')} />
 				</div>
 				<div className={element('content')}>
 					<h4 className={element('title')}>{progress.goalTitle}</h4>

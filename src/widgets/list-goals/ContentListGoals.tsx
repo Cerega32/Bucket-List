@@ -16,6 +16,8 @@ import {DescriptionWithLinks} from '@/entities/goal/ui/DescriptionWithLinks/Desc
 import {InfoGoal} from '@/entities/goal/ui/InfoGoal/InfoGoal';
 import {TitleWithTags} from '@/entities/goal/ui/TitleWithTags/TitleWithTags';
 import {IList} from '@/entities/goal-list/model/types';
+import {requireEmailConfirmed} from '@/entities/user/lib/requireEmailConfirmed';
+import {CatalogItemsSkeleton} from '@/features/catalog-items/CatalogItemsSkeleton';
 import {CatalogModerationBanner} from '@/features/catalog-moderation-banner/CatalogModerationBanner';
 import {useBem} from '@/shared/lib/hooks/useBem';
 import useScreenSize from '@/shared/lib/hooks/useScreenSize';
@@ -30,13 +32,14 @@ interface ContentListGoalsProps {
 	list: IList;
 	page: string;
 	search: string;
+	isGoalsLoading?: boolean;
 	onSearchChange: (query: string) => void;
 	updateGoal: (code: string, i: number, operation: 'add' | 'delete' | 'mark', done?: boolean) => Promise<void | boolean>;
 	onMyCommentChange?: (hasComment: boolean) => void;
 }
 
 export const ContentListGoals: FC<ContentListGoalsProps> = observer((props) => {
-	const {className, list, page, search, onSearchChange, updateGoal, onMyCommentChange} = props;
+	const {className, list, page, search, isGoalsLoading, onSearchChange, updateGoal, onMyCommentChange} = props;
 
 	const {isScreenTablet, isScreenDesktop, isScreenSmallTablet} = useScreenSize();
 	const [block, element] = useBem('content-list-goals', className);
@@ -111,6 +114,9 @@ export const ContentListGoals: FC<ContentListGoalsProps> = observer((props) => {
 	};
 
 	const openAddReview = () => {
+		if (!requireEmailConfirmed()) {
+			return;
+		}
 		setModalProps({
 			goalListId: list.id,
 			onReviewAdded: () => onMyCommentChange?.(true),
@@ -251,7 +257,11 @@ export const ContentListGoals: FC<ContentListGoalsProps> = observer((props) => {
 						onSearchChange={onSearchChange}
 						totalCount={filteredGoalsCount}
 					/>
-					<ListGoals list={list.goals} updateGoal={updateGoal} columns="three" searchQuery={search} />
+					{isGoalsLoading ? (
+						<CatalogItemsSkeleton count={6} columns="3" className={element('goals-skeleton')} />
+					) : (
+						<ListGoals list={list.goals} updateGoal={updateGoal} columns="three" searchQuery={search} />
+					)}
 				</>
 			)}
 		</article>
